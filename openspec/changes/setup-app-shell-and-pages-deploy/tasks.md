@@ -8,9 +8,9 @@
 
 ## 2. Base path, entry page and PWA configuration
 
-- [ ] 2.1 Add the `APP_BASE_PATH = "/time-zones/"` config module and use it for Vite `base`, manifest `start_url` and `scope` (FR1, D1); verify `pnpm --filter @time-zones/client build` emits asset URLs under `/time-zones/` in `dist/index.html`
-- [ ] 2.2 Create `packages/client/index.html` with viewport, `color-scheme` meta, default `lang="en"` and title, root element and `src/main.tsx` script (FR1, FR2, UX1); verify the build succeeds
-- [ ] 2.3 Add `pwa-assets.config.ts` (`minimal-2023` preset, maskable padding, white background) and enable `pwaAssets` in `vite.config.ts`; complete the manifest (name, short name, standalone, theme color `#2F5BD3`, background color from the light token) and add `woff2` to Workbox `globPatterns` (FR3, FR4, FR5, FR9, D2, D8); verify `dist/manifest.webmanifest` lists 192, 512 and maskable icons and `dist/` contains the favicon and Apple touch icon
+- [x] 2.1 Add the `APP_BASE_PATH = "/time-zones/"` config module and use it for Vite `base`, manifest `start_url` and `scope` (FR1, D1); verify `pnpm --filter @time-zones/client build` emits asset URLs under `/time-zones/` in `dist/index.html`
+- [x] 2.2 Create `packages/client/index.html` with viewport, `color-scheme` meta, default `lang="en"` and title, root element and `src/main.tsx` script (FR1, FR2, UX1); verify the build succeeds
+- [x] 2.3 Add `pwa-assets.config.ts` (`minimal-2023` preset, maskable padding, white background) and enable `pwaAssets` in `vite.config.ts`; complete the manifest (name, short name, standalone, theme color `#2F5BD3`, background color from the light token) and add `woff2` to Workbox `globPatterns` (FR3, FR4, FR5, FR9, D2, D8); verify `dist/manifest.webmanifest` lists 192, 512 and maskable icons and `dist/` contains the favicon and Apple touch icon
 
 ## 3. Controller: language and service worker status (TDD)
 
