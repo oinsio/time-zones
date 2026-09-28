@@ -72,6 +72,7 @@ Used by every view, implemented once in `views/shared/`:
 | Day-period colors | three bands: night, morning/evening, working hours — from design tokens, WCAG AA contrast |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
 | Now control | returns to `LIVE`; visible only when the moment is pinned |
+| Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 doesn't exist on this day — clocks moved forward. Showing 03:30" / "01:30 occurs twice — showing the first (GMT-4)"; stays until the next change; announced via `aria-live="polite"`; text comes from the presenter |
 | Date control | bottom bar `[<] Mon, 28 Sep [>]  [Now]`: arrows switch to the previous / next day, tapping the date opens a calendar for distant dates; placed at the bottom for thumb reach. Grid may reuse it or replace it with a day strip |
 
 ## Overlays
