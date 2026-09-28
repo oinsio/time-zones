@@ -9,6 +9,11 @@ IMPORTANT: Read existing code, tests, and patterns before generating new code.
 - No hardcoded values — .claude/rules/code-style.md
 - Descriptive naming — .claude/rules/naming.md
 
+## Architecture
+
+- Model / presenter / swappable views — .claude/rules/architecture.md, overview: docs/architecture/overview.md
+- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence)
+
 ## Domain Rules
 
 - **Time zones**: IANA identifiers (`"Europe/Moscow"`) are the source of truth — never store raw UTC offsets
@@ -84,6 +89,7 @@ Active changes: `openspec/changes/`. Archived: `openspec/changes/archive/`. Stab
 | `bdd-e2e.md`            | `**/*_e2e.feature`, `**/*_e2e.steps.ts` | playwright-bdd conventions, config, scripts               |
 | `temporal.md`           | `packages/client/src/**`                | Temporal API usage conventions                            |
 | `i18n.md`               | `**/*.tsx`, `**/locales/*.json`         | Internationalization conventions                          |
+| `architecture.md`       | `packages/client/src/**`                | Layer boundaries: model, presenter, controller, views     |
 | `ui-states.md`          | `**/components/**`, `**/pages/**`       | UI states, a11y, design system                            |
 | `adr.md`                | `docs/adr/**`                           | Global ADR format and lifecycle                           |
 | `ia.md`                 | `docs/ia/**`                            | Information Architecture document format                  |
