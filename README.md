@@ -6,11 +6,29 @@ Cross-device PWA for world clock, time zone conversion and meeting planning. Cli
 
 ## Contents
 
+- [Screenshots](#screenshots)
 - [MVP Features](#mvp-features)
 - [Localization](#localization)
 - [Tech Stack](#tech-stack)
 - [Development](#development)
 - [License](#license)
+
+## Screenshots
+
+Design mockups of the Cards view. Details: [docs/design](docs/design/README.md).
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/design/mockups/phone-light.png" alt="Phone, light theme" width="300"></td>
+    <td align="center"><img src="docs/design/mockups/phone-dark.png" alt="Phone, dark theme" width="300"></td>
+  </tr>
+  <tr>
+    <td align="center">Light theme</td>
+    <td align="center">Dark theme</td>
+  </tr>
+</table>
+
+<img src="docs/design/mockups/tablet-light.png" alt="Tablet, light theme" width="720">
 
 ## MVP Features
 
