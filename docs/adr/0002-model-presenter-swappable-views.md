@@ -2,6 +2,7 @@
 
 ## Status
 Accepted (2026-09-28)
+Refined by [ADR-0005](0005-view-registry.md) — view registry and `viewMode` values.
 
 ## Context
 
@@ -64,7 +65,7 @@ View state never goes into the model. Switching views keeps the domain state int
 
 ### Swappable views
 
-- `Preferences.viewMode` is an enum: `AUTO | GRID | CARDS` (extensible).
+- `Preferences.viewMode` is `AUTO` or the id of a registered view (see [ADR-0005](0005-view-registry.md)).
 - `AUTO` picks a view by the available container width, not by device type.
 - Views share building blocks (row header, time display, day-period colors) as shared components — no per-view duplicates.
 
@@ -103,4 +104,5 @@ Negative:
 
 - [ADR-0003](0003-reference-instant-time-model.md) — time model
 - [ADR-0004](0004-local-persistence-strategy.md) — persistence
+- [ADR-0005](0005-view-registry.md) — view registry
 - [Architecture overview](../architecture/overview.md)
