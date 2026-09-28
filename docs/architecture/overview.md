@@ -12,6 +12,8 @@ Time Zones is a client-only, offline-first PWA. The architecture separates a vie
 | [ADR-0002](../adr/0002-model-presenter-swappable-views.md) | Model, presenter, swappable views |
 | [ADR-0003](../adr/0003-reference-instant-time-model.md) | Reference instant, DST, hour cells, time zone IDs |
 | [ADR-0004](../adr/0004-local-persistence-strategy.md) | Persistence, migrations, cross-tab sync |
+| [ADR-0005](../adr/0005-view-registry.md) | View registry: adding a view without touching other layers |
+| [ADR-0006](../adr/0006-city-data-sources.md) | Pluggable city data sources for search |
 
 ## Layers
 
@@ -68,12 +70,14 @@ src/
     index.ts               public API of the model
   preferences/             preferences model (language, hour format, view mode)
   ports/                   repository and search interfaces
-  adapters/                localStorage, in-memory, city search implementations
+  adapters/                localStorage, in-memory implementations
+    city-search/           composite adapter + city sources (zone cities, abbreviations, ...)
   presenter/               formatting and i18n of selector output
   controller/              hooks: dispatch, clock tick, persistence, cross-tab sync
   views/
-    grid/                  GridView
-    cards/                 CardsView
+    index.ts               viewRegistry: every available view
+    cards/                 CardsView (first release)
+    grid/                  GridView (next)
     shared/                row header, time display, day-period colors
   components/ui/           shadcn/ui primitives
   locales/                 ru.json, en.json, dialects

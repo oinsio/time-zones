@@ -1,14 +1,16 @@
 # Views
 
-Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002-model-presenter-swappable-views.md)). The user picks one in settings or leaves `AUTO`.
+Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002-model-presenter-swappable-views.md)). The user picks one in settings or leaves `AUTO`. Views are plugged in through the view registry ([ADR-0005](../adr/0005-view-registry.md)).
+
+**Rollout:** Cards is the first view; Grid comes next. Everything else stays view-independent so that adding Grid is a registry entry plus its folder.
 
 ## Catalog
 
-| View | Best for | Screens |
-|---|---|---|
-| **Grid** | planning: see where working hours overlap | desktop, tablet, phone in landscape |
-| **Cards** | converting: large exact time per location | phone in portrait |
-| **Auto** (default) | picks Grid or Cards by container width | any |
+| View | Best for | Screens | Status |
+|---|---|---|---|
+| **Cards** | converting: large exact time per location | phone in portrait, any | first release |
+| **Grid** | planning: see where working hours overlap | desktop, tablet, phone in landscape | next |
+| **Auto** (default) | picks the registered view that fits the container width | any | first release (resolves to Cards) |
 
 Future views reuse the same model, e.g. a compact world-clock list or a "08:00 UTC -> ?" converter with a text field.
 
@@ -76,7 +78,7 @@ Used by every view, implemented once in `views/shared/`:
 
 | Overlay | Content |
 |---|---|
-| Search | full screen on phones, dialog on wide screens; input plus results as "City, Region, Country"; suggestions are shown before typing (never an empty screen) |
+| Search | full screen on phones, dialog on wide screens; input plus results as "City, Region, Country" (region once a richer source is added, [ADR-0006](../adr/0006-city-data-sources.md)); suggestions are shown before typing (never an empty screen) |
 | Settings | language (including dialects), hour format `12 / 24 / System`, view mode `Auto / Grid / Cards` |
 
 ## View contract

@@ -17,8 +17,8 @@ Cross-device PWA for world clock, time zone conversion and meeting planning. Cli
 1. **Locations** — add and remove locations via search by city, country or time zone abbreviation (`EST`, `IST`). Each location is stored by its IANA identifier (`"Europe/Moscow"`), never by a raw UTC offset.
 2. **Persistence** — the list of locations is saved on the device and restored on the next visit, fully offline.
 3. **Home location** — one location is the reference point; every other location shows its difference from it (`+3h`, `−5:30h`).
-4. **24-hour grid** — every location is a row of 24 hour cells aligned across time zones. Cells are colored by time of day (working hours / evening / night), and the midnight cell is labeled with the new date.
-5. **Time selection** — tap or click an hour cell, or type a time in any location; all other locations are recalculated.
+4. **Day-night comparison** — every location is a card with its time and a slider colored by time of day (working hours / evening / night), with the day boundary marked.
+5. **Time selection** — drag the slider or type a time in any location; all other locations are recalculated.
 6. **Date selection** — pick a date; UTC offsets and daylight saving time are resolved for the selected date, not for today.
 7. **12/24-hour format** — switch between 12-hour and 24-hour time.
 

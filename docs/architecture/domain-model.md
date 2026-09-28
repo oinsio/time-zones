@@ -24,7 +24,7 @@ classDiagram
     class Preferences {
         HourFormat hourFormat  "H12 | H24 | LOCALE"
         string language        "ru | en | dialect code"
-        ViewMode viewMode      "AUTO | GRID | CARDS"
+        ViewMode viewMode      "AUTO | registered ViewId"
     }
     WorldClockState "1" o-- "*" Location
     WorldClockState "1" *-- "1" ReferenceMoment
@@ -34,6 +34,7 @@ classDiagram
 - `reference` is not persisted; the app always starts in `LIVE`.
 - `Preferences` is a separate model with its own repository.
 - `HourFormat.LOCALE` follows the conventions of the active language.
+- `viewMode` holds `AUTO` or an id from the view registry ([ADR-0005](../adr/0005-view-registry.md)); an unknown id falls back to `AUTO` on load.
 
 ## Invariants
 
