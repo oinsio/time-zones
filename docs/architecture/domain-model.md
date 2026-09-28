@@ -85,6 +85,17 @@ Selectors take the state and the current instant from the `Clock` and return vie
 | `getDayProgress(location)` | position within the local day (0..1) and day-period boundaries | cards |
 | `getDayPeriod(zonedDateTime)` | `NIGHT / MORNING / WORK / EVENING` | colors in all views |
 
+### Day periods
+
+`getDayPeriod` receives a day-period schedule as a parameter instead of reading it internally. In the MVP the schedule is a set of constants (local time of each location):
+
+```
+00    07    09                18    22    24
+|NIGHT|MORN |      WORK       |EVEN |NIGHT|
+```
+
+Views use three colors: night; morning and evening; working hours. A user-defined schedule (global or per location) can later replace the constants without changing the selector. Weekends are not marked in the MVP.
+
 Hour cells are one-hour spans of absolute time starting at the home location's local midnight, so 23- and 25-hour days and :30 / :45 offsets stay aligned.
 
 ## Out of the model
