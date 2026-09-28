@@ -1,0 +1,70 @@
+schema: spec-driven
+
+context: |
+  # Time Zones — World Clock & Time Zone Converter PWA
+
+  ## Domain
+  Cross-device (desktop, tablet, smartphone) PWA for working with time zones:
+  world clock, time conversion between cities, meeting planning across zones,
+  DST awareness. Inspired by Savvy Time and World Time Buddy.
+
+  ## Tech Stack
+  - Monorepo (pnpm workspaces)
+  - TypeScript, React, Vite, TailwindCSS, shadcn/ui
+  - vite-plugin-pwa (Workbox) — offline-first, installable
+  - Temporal API (temporal-polyfill) for all date/time and time zone math
+  - i18next (ru, en)
+  - No backend — all state is local (localStorage / IndexedDB), shareable via URL
+
+  ## Packages
+  - `packages/client` — React PWA (main app)
+
+  ## Key Patterns
+  - Client-only: works fully offline after first load
+  - IANA time zone identifiers are the source of truth for zones
+  - Temporal API for date/time operations — never `Date` in production code
+  - TDD with mutation testing (Vitest, Stryker)
+  - BDD: vitest-cucumber (unit), playwright-bdd (e2e)
+  - No hardcoded values — constants/enums required
+  - Descriptive naming — no cryptic abbreviations
+
+rules:
+  proposal:
+    - Always include Goals, Non-Goals, Requirements (FR/NFR/UX with IDs), Success Metrics
+    - Include UI States Matrix for features with lists or complex state
+    - Reference behavior specs in features/*.feature
+    - |
+      Proposal structure:
+        # <Change name>
+        ## Why — problem, audience, urgency
+        ## What Changes — ADDED/MODIFIED/REMOVED capabilities
+        ## Goals — G1, G2... (measurable)
+        ## Non-Goals — NG1, NG2... (explicitly out of scope)
+        ## Users & Scenarios — U1, U2...
+        ## Requirements
+        ### Functional — FR1, FR2...
+        ### Non-Functional
+        #### Performance — NFR-P1...
+        #### Accessibility — NFR-A1...
+        #### Responsive — NFR-R1...
+        ## UX Acceptance Criteria — UX1, UX2...
+        ## UI States Matrix (if feature has lists/complex state)
+        | Network | Data | UI |
+        ## Behavior — reference to features/<name>.feature (@<change-name> tags)
+        ## Visual Reference — Figma link, design tokens are source of truth
+        ## Affected IA — "no changes" or "requires IA-XXXX update"
+        ## Success Metrics — M1, M2... (concrete numbers)
+        ## Open Questions — Q1, Q2...
+  design:
+    - Only for non-trivial local decisions within a change
+    - Global architectural decisions go to docs/adr/
+    - Reference FR/NFR from proposal.md
+  tasks:
+    - Follow domain → application → infrastructure → UI layer order
+    - Each task references FR/NFR it implements
+    - Include verification tasks (tests, a11y, visual regression)
+    - Break tasks into chunks of max 2 hours
+  specs:
+    - Use delta format: ADDED/MODIFIED/REMOVED
+    - Mark invariants with "# implements FR-X of <change-name>"
+    - Include use cases with inputs, effects, and errors
