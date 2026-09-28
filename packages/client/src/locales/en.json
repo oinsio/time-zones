@@ -1,1 +1,18 @@
-{}
+{
+  "_meta": {
+    "code": "en",
+    "name": "English",
+    "nativeName": "English",
+    "baseLanguage": "en",
+    "emoji": "🇬🇧"
+  },
+  "app": {
+    "title": "Time Zones",
+    "offlineReady": "The app is ready to work offline.",
+    "updateAvailable": "A new version is available.",
+    "reload": "Reload",
+    "dismiss": "Dismiss",
+    "errorTitle": "Something went wrong",
+    "errorMessage": "The app ran into a problem. Reload the page to continue."
+  }
+}

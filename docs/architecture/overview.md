@@ -61,26 +61,34 @@ All conversions are synchronous: the UI updates in the same frame, without loadi
 
 ## Where things live
 
-Target layout inside `packages/client/src/` (to be created by the first implementing changes):
+Target layout inside `packages/client/` (folders marked "exists" are in place; the rest are created by the implementing changes):
 
 ```
+assets/
+  app-icon-source.jpg      single source of every PWA icon (exists)
+app.config.ts              base path, app name, colors shared by Vite, manifest, E2E (exists)
 src/
+  main.tsx                 entry point: mounts AppShell inside AppErrorBoundary (exists)
+  app/                     shell, not a view: AppShell, notices, recovery screen (exists)
+    index.ts
   lib/temporal.ts          Temporal re-export, Clock port (exists)
+  styles/                  design tokens (light/dark) and globals (exists)
   model/                   pure TS: state, commands, reducer, selectors, invariants
-    index.ts               public API of the model
+    index.ts               public API of the model (exists, empty)
   preferences/             preferences model (language, hour format, view mode)
   ports/                   repository and search interfaces
   adapters/                localStorage, in-memory implementations
     city-search/           composite adapter + city sources (zone cities, abbreviations, ...)
-  presenter/               formatting and i18n of selector output
-  controller/              hooks: dispatch, clock tick, persistence, cross-tab sync
+  presenter/               formatting and i18n of selector output (exists, empty)
+  controller/              hooks: document language, PWA update status (exist);
+                           dispatch, clock tick, persistence, cross-tab sync
   views/
-    index.ts               viewRegistry: every available view
+    index.ts               viewRegistry: every available view (exists, empty)
     cards/                 CardsView (first release)
     grid/                  GridView (next)
     shared/                row header, time display, day-period colors
   components/ui/           shadcn/ui primitives
-  locales/                 ru.json, en.json, dialects
+  locales/                 ru.json, en.json (exist), dialects
 ```
 
 Each folder is a module with an `index.ts`; imports go only through it.

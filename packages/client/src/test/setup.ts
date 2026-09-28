@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { localeResources } from "@/i18n";
+import { languageResolutionOptions, localeResources } from "@/i18n";
 
 // Node.js 22+ has a built-in global `localStorage` that lacks Web Storage API methods.
 // Override it with a fully functional in-memory implementation for all tests.
@@ -51,6 +51,7 @@ Object.defineProperty(window, "matchMedia", {
 
 void i18n.use(initReactI18next).init({
   resources: localeResources,
+  ...languageResolutionOptions,
   lng: "ru",
   fallbackLng: "ru",
   interpolation: { escapeValue: false },

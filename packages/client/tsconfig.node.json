@@ -25,6 +25,9 @@
   },
   "include": [
     "vite.config.ts",
+    "app.config.ts",
+    "playwright.bdd.config.ts",
+    "pwa-assets.config.ts",
     "tailwind.config.ts",
     "postcss.config.js",
     "stryker.config.mjs",
