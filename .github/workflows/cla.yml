@@ -25,7 +25,7 @@ jobs:
           path-to-document: "https://github.com/oinsio/time-zones/blob/main/CLA.md"
           path-to-signatures: "signatures/cla.json"
           branch: "cla-signatures"
-          allowlist: "dependabot[bot],renovate[bot],github-actions[bot]"
+          allowlist: "dependabot[bot],renovate[bot],github-actions[bot],claude,Claude"
           custom-notsigned-prcomment: >
             Thank you for your contribution! Before we can merge this PR,
             you need to sign our [Contributor License Agreement](https://github.com/oinsio/time-zones/blob/main/CLA.md).
