@@ -18,3 +18,6 @@ export const APP_ICON_SOURCE_PATH = `${APP_ICON_SOURCE_DIR}/app-icon-source.jpg`
 export const APP_ICON_BACKGROUND_COLOR = "#FFFFFF";
 /** Share of the maskable icon kept free around the logo (safe zone). */
 export const MASKABLE_ICON_PADDING = 0.3;
+
+/** Port of the production preview server that the E2E tests run against. */
+export const E2E_PORT = 4173;

@@ -35,8 +35,8 @@
 
 ## 6. Smoke E2E against the production build
 
-- [ ] 6.1 Switch `playwright.bdd.config.ts` to `pnpm build && pnpm preview` on a fixed E2E port with `baseURL` from `APP_BASE_PATH` (FR1, D1, D3); verify `pnpm --filter @time-zones/client test:bdd:gen` succeeds
-- [ ] 6.2 Write `src/test/features/app_shell/app_shell_smoke_e2e.feature` and `steps/app_shell_smoke_e2e.steps.ts` (`// Verifies ... of setup-app-shell-and-pages-deploy`): opens under `/time-zones/` with no failed requests, service worker scope, title in en and ru (`locale` of the browser context), manifest completeness and reachable icons, offline reopen, axe-core with no violations in light and dark (`colorScheme`), no horizontal scroll at 320 px and 2560 px (FR1, FR2, FR3, FR5, NFR-A1, NFR-A3, NFR-R1, M2, M3); verify `pnpm --filter @time-zones/client test:bdd` passes on both projects
+- [x] 6.1 Switch `playwright.bdd.config.ts` to `pnpm build && pnpm preview` on a fixed E2E port with `baseURL` from `APP_BASE_PATH` (FR1, D1, D3); verify `pnpm --filter @time-zones/client test:bdd:gen` succeeds
+- [x] 6.2 Write `src/test/features/app_shell/app_shell_smoke_e2e.feature` and `steps/app_shell_smoke_e2e.steps.ts` (`// Verifies ... of setup-app-shell-and-pages-deploy`): opens under `/time-zones/` with no failed requests, service worker scope, title in en and ru (`locale` of the browser context), manifest completeness and reachable icons, offline reopen, axe-core with no violations in light and dark (`colorScheme`), no horizontal scroll at 320 px and 2560 px (FR1, FR2, FR3, FR5, NFR-A1, NFR-A3, NFR-R1, M2, M3); verify `pnpm --filter @time-zones/client test:bdd` passes on both projects
 
 ## 7. Bundle budget, CI and deploy
 
