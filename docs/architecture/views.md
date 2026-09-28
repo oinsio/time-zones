@@ -12,7 +12,7 @@ Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002
 | **Grid** | planning: see where working hours overlap | desktop, tablet, phone in landscape | next |
 | **Auto** (default) | picks the registered view that fits the container width | any | first release (resolves to Cards) |
 
-Future views reuse the same model, e.g. a compact world-clock list or a "08:00 UTC -> ?" converter with a text field.
+Future views reuse the same model, e.g. a compact world-clock list.
 
 ## Grid
 

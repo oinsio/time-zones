@@ -53,7 +53,7 @@ Commands are serializable objects with a `type` enum. The reducer returns either
 | `REMOVE_LOCATION(id)` | removes it; if it was home, the first remaining becomes home | `LOCATION_NOT_FOUND` |
 | `SET_HOME_LOCATION(id)` | changes the reference location | `LOCATION_NOT_FOUND` |
 | `SELECT_INSTANT(instant)` | pins the moment (grid cell, slider) | — |
-| `SET_WALL_TIME(timeZoneId, time, date?)` | pins the moment for a wall-clock time in a zone; the zone need not be in the list | `UNKNOWN_TIME_ZONE` |
+| `SET_WALL_TIME(locationId, time, date?)` | pins the moment for a wall-clock time in a location from the list | `LOCATION_NOT_FOUND` |
 | `SHIFT_TIME(duration)` | moves the moment by a duration (keyboard: ±1 h, ±15 min) | — |
 | `SET_DATE(date)` | changes the date, keeping the home wall-clock time | — |
 | `SHIFT_DATE(days)` | previous / next day | — |
