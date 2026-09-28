@@ -68,7 +68,7 @@ Used by every view, implemented once in `views/shared/`:
 | Block | Content |
 |---|---|
 | Row header | home icon or difference from home (`-2`, `-2:30`); city; country and zone abbreviation or `GMT+N`; date with a day-shift hint |
-| Time display | time of the reference moment (leaning, see [Q6](open-questions.md)); tap to type an exact time |
+| Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — the Now control signals a pinned moment |
 | Day-period colors | three bands: night, morning/evening, working hours — from design tokens, WCAG AA contrast |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
 | Now control | returns to `LIVE`; visible only when the moment is pinned |

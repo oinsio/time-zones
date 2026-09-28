@@ -4,7 +4,6 @@ Architecture decisions that are not made yet. When one is resolved, record the d
 
 | # | Question | Options | Current leaning |
 |---|---|---|---|
-| Q6 | What the time in the row header shows | a) reference moment; b) current time | a — "now" is shown by a marker and the Now control |
 | Q7 | How to show `GAP` / `AMBIGUOUS` results of wall-clock input | inline hint, toast, or choice of the second instant | — |
 
 ## Resolved
@@ -16,3 +15,4 @@ Architecture decisions that are not made yet. When one is resolved, record the d
 | Q3 | Working hours for day-period colors | Constants in the MVP: night 00-07 and 22-24, morning 07-09, work 09-18, evening 18-22 (local time of each location). Passed to `getDayPeriod` as a parameter, so a user setting can replace them later — [domain model](domain-model.md#day-periods) |
 | Q4 | How to enter a time for a zone that is not in the list ("08:00 UTC") | The user adds the zone as a regular location first. No temporary rows and no separate converter field; `SET_WALL_TIME` works only with locations from the list |
 | Q5 | Where the date control lives | MVP: bottom bar with previous / next day, a date button opening a calendar, and the Now control — a shared block in `views/shared/`. A day strip for wide screens is decided together with the Grid view |
+| Q6 | What the time in the row header shows | The reference moment: equals the current time in `LIVE`, the selected moment in `PINNED`; the Now control appears only when the moment is pinned |
