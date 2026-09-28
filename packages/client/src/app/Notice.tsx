@@ -26,7 +26,7 @@ export function Notice({ message, onDismiss, actions }: NoticeProps) {
   }, [onDismiss]);
 
   return (
-    <div className="pointer-events-auto flex w-full max-w-md flex-wrap items-center gap-2 rounded-lg bg-surface p-3 text-foreground shadow-lg">
+    <div className="pointer-events-auto flex w-full max-w-md flex-wrap items-center gap-2 rounded-lg bg-notice p-3 text-notice-foreground shadow-lg">
       <p className="flex-1">{message}</p>
       {actions}
       <NoticeButton onClick={onDismiss}>{t("app.dismiss")}</NoticeButton>

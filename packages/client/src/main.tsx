@@ -1,3 +1,4 @@
+import "@fontsource-variable/manrope";
 import "@/styles/globals.css";
 import "@/i18n";
 import { StrictMode } from "react";
