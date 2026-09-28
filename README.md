@@ -4,6 +4,8 @@
 
 Cross-device PWA for world clock, time zone conversion and meeting planning. Client-only and offline-first — no account, no server, your data stays on your device.
 
+**Live:** <https://oinsio.github.io/time-zones/> — installable to the home screen, works offline after the first visit.
+
 ## Contents
 
 - [Screenshots](#screenshots)
@@ -11,6 +13,7 @@ Cross-device PWA for world clock, time zone conversion and meeting planning. Cli
 - [Localization](#localization)
 - [Tech Stack](#tech-stack)
 - [Development](#development)
+- [Deployment](#deployment)
 - [License](#license)
 
 ## Screenshots
@@ -65,10 +68,22 @@ Requires Node.js >= 20 and pnpm >= 9.
 pnpm install
 pnpm dev          # start dev server
 pnpm build        # production build
+pnpm --filter @time-zones/client preview   # serve the production build (with the service worker)
 pnpm preflight    # lint + typecheck + tests
 ```
 
+The app is served under `/time-zones/` in every mode (dev, preview, production), so open `http://localhost:<port>/time-zones/`. The base path is defined once in [`packages/client/app.config.ts`](packages/client/app.config.ts).
+
+### Replacing the logo
+
+All icons (favicon, Apple touch icon, 192/512 px and maskable manifest icons) are generated during the build from one image. To change the logo, replace [`packages/client/assets/app-icon-source.jpg`](packages/client/assets/app-icon-source.jpg) with a square image (at least 512×512 px) and run `pnpm build` — no other edits are needed. Padding and background of the maskable icon are set in [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
+
 Features are developed with [OpenSpec](openspec/): `/opsx:propose` → `/opsx:apply` → `/opsx:archive`.
+
+## Deployment
+
+- Every pull request runs [CI](.github/workflows/ci.yml): lint, typecheck, unit tests, production build, initial JS budget (150 KB gzipped), a check that the build left sources untouched, and the smoke E2E.
+- Every push to `main` runs the same checks and, only if they pass, [deploys](.github/workflows/deploy.yml) the build to GitHub Pages. A failed check leaves the previous version live; rollback is a revert on `main`.
 
 ## License
 

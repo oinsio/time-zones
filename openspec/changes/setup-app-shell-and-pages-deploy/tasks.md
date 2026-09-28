@@ -40,12 +40,12 @@
 
 ## 7. Bundle budget, CI and deploy
 
-- [ ] 7.1 Add `packages/client/scripts/check-bundle-size.mjs` with `INITIAL_JS_BUDGET_KB = 150` and a `check:bundle-size` script (NFR-P1, M5, D11); verify it prints the gzipped size and exits non-zero when the budget constant is temporarily lowered below the actual size
+- [x] 7.1 Add `packages/client/scripts/check-bundle-size.mjs` with `INITIAL_JS_BUDGET_KB = 150` and a `check:bundle-size` script (NFR-P1, M5, D11); verify it prints the gzipped size and exits non-zero when the budget constant is temporarily lowered below the actual size
 - [ ] 7.2 Add `.github/workflows/ci.yml` (`pull_request` + `workflow_call` with `upload-pages-artifact` input): install, lint, typecheck, test, build, bundle budget, `git diff --exit-code`, Playwright Chromium, `test:bdd`, optional Pages artifact upload (FR12, FR14, D10); verify the workflow runs green on the pull request of this change
 - [ ] 7.3 Add `.github/workflows/deploy.yml` (`push` to `main` + `workflow_dispatch`; `ci` job reuses `ci.yml` with upload; `deploy` job with `actions/deploy-pages`, `pages: write`, `id-token: write`, `concurrency: pages`) (FR13, NFR-P2, D10); verify with a YAML lint (`actionlint` if available) and, after merge, a successful run
 
 ## 8. Documentation and integration checks
 
-- [ ] 8.1 Update `README.md` (live link, `pnpm preview`, how to replace the logo) and `docs/architecture/overview.md` "Where things live" with `app/` and `assets/` (FR1, FR4); verify links resolve and the layout matches the created folders
-- [ ] 8.2 Run `pnpm preflight` and `pnpm build` locally one at a time; verify both pass and `git status` shows no changes made by the build (FR12, FR14)
+- [x] 8.1 Update `README.md` (live link, `pnpm preview`, how to replace the logo) and `docs/architecture/overview.md` "Where things live" with `app/` and `assets/` (FR1, FR4); verify links resolve and the layout matches the created folders
+- [x] 8.2 Run `pnpm preflight` and `pnpm build` locally one at a time; verify both pass and `git status` shows no changes made by the build (FR12, FR14)
 - [ ] 8.3 After merge to `main`, confirm the deploy run succeeded and `https://oinsio.github.io/time-zones/` shows the shell within 10 minutes of the push (FR13, NFR-P2, M1, M6)
