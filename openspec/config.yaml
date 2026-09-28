@@ -6,7 +6,7 @@ context: |
   ## Domain
   Cross-device (desktop, tablet, smartphone) PWA for working with time zones:
   world clock, time conversion between cities, meeting planning across zones,
-  DST awareness. Inspired by Savvy Time and World Time Buddy.
+  DST awareness.
 
   ## Tech Stack
   - Monorepo (pnpm workspaces)
