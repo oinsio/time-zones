@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "webstorm": {
+      "url": "http://localhost:63342/api/mcp/sse"
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    }
+  }
+}

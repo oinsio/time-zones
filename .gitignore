@@ -1,0 +1,56 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+**/*.js
+**/*.d.ts
+**/*.map
+
+# Environment
+.env
+.env.local
+.env.*.local
+.environment
+
+# Testing & Coverage
+coverage/
+reports/
+.stryker-tmp
+playwright-report/
+test-results/
+.features-gen/
+cucumber-report/
+
+# TypeScript incremental compilation cache
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# pnpm
+.pnpm-store/
+.pnpm-debug.log
+
+# npm (old files)
+package-lock.json
+npm-debug.log
+
+# Tools
+.playwright-mcp
+.scannerwork
+
+# Claude Code local settings
+.claude/settings.local.json
+/uncommitted-files.md
+
+
+# Keep JS config files tracked despite the `**/*.js` rule above
+!postcss.config.js
+!**/postcss.config.js
+!**/vite-env.d.ts
