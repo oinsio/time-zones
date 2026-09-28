@@ -15,8 +15,6 @@ Cross-device PWA for world clock, time zone conversion and meeting planning. Cli
 
 ## MVP Features
 
-The MVP combines the best ideas of [World Time Buddy](https://www.worldtimebuddy.com/) (hour grid for meeting planning) and [Savvy Time](https://savvytime.com/converter) (typed time input, conversion for a chosen date).
-
 1. **Locations** — add and remove locations via search by city, country or time zone abbreviation (`EST`, `IST`). Each location is stored by its IANA identifier (`"Europe/Moscow"`), never by a raw UTC offset.
 2. **Persistence** — the list of locations is saved on the device and restored on the next visit, fully offline.
 3. **Home location** — one location is the reference point; every other location shows its difference from it (`+3h`, `−5:30h`).
@@ -31,7 +29,7 @@ Russian and English are supported from the start. The locale system is built to 
 
 - **Auto-discovered locale files** — every `src/locales/<code>.json` is picked up automatically. Each file carries a `_meta` block (`code`, `name`, `nativeName`, `baseLanguage`, `emoji`); `_meta.code` must match the file name.
 - **Adding a language** — drop a new locale file with a full set of keys; it appears in the language switcher.
-- **Easter-egg dialects** — themed locales (as in [clear-progress](https://github.com/oinsio/clear-progress), e.g. "Dr. House" 🏥, "Star Trek" 🖖) override only some keys of their `baseLanguage` and fall back to it for everything else, including plural rules.
+- **Easter-egg dialects** — themed locales (e.g. "Dr. House" 🏥, "Star Trek" 🖖) override only some keys of their `baseLanguage` and fall back to it for everything else, including plural rules.
 - **Language detection** — on first visit the browser language is used (`en-US` → `en`); the user's choice is then persisted locally.
 
 ## Out of Scope for MVP
