@@ -15,12 +15,12 @@ Cross-device PWA for world clock, time zone conversion and meeting planning. Cli
 
 ## Screenshots
 
-Design mockups of the Cards view. Details: [docs/design](docs/design/README.md).
+The Cards view on phone and tablet. Details: [docs/design](docs/design/README.md).
 
 <table>
   <tr>
-    <td align="center"><img src="docs/design/mockups/phone-light.png" alt="Phone, light theme" width="300"></td>
-    <td align="center"><img src="docs/design/mockups/phone-dark.png" alt="Phone, dark theme" width="300"></td>
+    <td align="center"><img src="docs/design/screens/phone-light.png" alt="Phone, light theme" width="300"></td>
+    <td align="center"><img src="docs/design/screens/phone-dark.png" alt="Phone, dark theme" width="300"></td>
   </tr>
   <tr>
     <td align="center">Light theme</td>
@@ -28,7 +28,7 @@ Design mockups of the Cards view. Details: [docs/design](docs/design/README.md).
   </tr>
 </table>
 
-<img src="docs/design/mockups/tablet-light.png" alt="Tablet, light theme" width="720">
+<img src="docs/design/screens/tablet-light.png" alt="Tablet, light theme" width="720">
 
 ## MVP Features
 

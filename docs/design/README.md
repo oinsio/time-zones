@@ -1,8 +1,8 @@
-# Design Mockups
+# Screen Design
 
-Reference mockups of the **Cards** view — the first view to build ([views](../architecture/views.md)).
+Approved screens of the **Cards** view — the first view to build ([views](../architecture/views.md)).
 
-Mockups are a visual reference, not the source of truth. When a mockup and a document disagree, the document wins:
+Screens are the visual target for development. Documents stay the source of truth: when a screen and a document disagree, the document wins and the screen gets fixed:
 
 - behavior and rules — [views.md](../architecture/views.md), [domain-model.md](../architecture/domain-model.md), ADRs;
 - colors, fonts, sizes — the "Visual style" section of [views.md](../architecture/views.md), implemented as design tokens.
@@ -23,11 +23,11 @@ This one moment covers a :30 offset, a DST jump inside the reference day and the
 
 | Screen | Files | Shows |
 |---|---|---|
-| Phone, light | [PNG](mockups/phone-light.png) · [HTML](mockups/phone-light.html) | home location (house icon), differences from home, day tracks on the shared reference day, wall-time hint, bottom date bar with Now |
-| Phone, dark | [PNG](mockups/phone-dark.png) · [HTML](mockups/phone-dark.html) | the same layout with dark theme tokens |
-| Tablet, light | [PNG](mockups/tablet-light.png) · [HTML](mockups/tablet-light.html) | one full-width row per location: city and zone, time and date, track with local hour labels |
-| No home | [PNG](mockups/phone-no-home.png) · [HTML](mockups/phone-no-home.html) | derived Here entry for the device zone (location arrow, "here", "Device time"); differences from the device zone ([ADR-0007](../adr/0007-reference-zone-and-device-time.md)) |
-| Travelling | [PNG](mockups/phone-travel.png) · [HTML](mockups/phone-travel.html) | home is Almaty, the device is in Moscow: Moscow gets the "here" mark, the reference day stays Almaty |
+| Phone, light | [PNG](screens/phone-light.png) · [HTML](screens/phone-light.html) | home location (house icon), differences from home, day tracks on the shared reference day, wall-time hint, bottom date bar with Now |
+| Phone, dark | [PNG](screens/phone-dark.png) · [HTML](screens/phone-dark.html) | the same layout with dark theme tokens |
+| Tablet, light | [PNG](screens/tablet-light.png) · [HTML](screens/tablet-light.html) | one full-width row per location: city and zone, time and date, track with local hour labels |
+| No home | [PNG](screens/phone-no-home.png) · [HTML](screens/phone-no-home.html) | derived Here entry for the device zone (location arrow, "here", "Device time"); differences from the device zone ([ADR-0007](../adr/0007-reference-zone-and-device-time.md)) |
+| Travelling | [PNG](screens/phone-travel.png) · [HTML](screens/phone-travel.html) | home is Almaty, the device is in Moscow: Moscow gets the "here" mark, the reference day stays Almaty |
 
 ## What to read from the tracks
 
@@ -37,4 +37,4 @@ This one moment covers a :30 offset, a DST jump inside the reference day and the
 
 ## Not covered yet
 
-Search, settings, empty, error and offline states have no mockups yet; build them from [views.md](../architecture/views.md) (Overlays, UI states).
+Search, settings, empty, error and offline states have no screens yet; build them from [views.md](../architecture/views.md) (Overlays, UI states).

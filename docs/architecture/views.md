@@ -87,7 +87,7 @@ Used by every view, implemented once in `views/shared/`:
 
 ## Visual style
 
-Chosen from mockups; values become design tokens.
+Screens: [docs/design](../design/README.md). Values become design tokens.
 
 - One layout for light and dark themes; only token values differ. The theme follows the system.
 - Font: Manrope; time uses tabular figures.

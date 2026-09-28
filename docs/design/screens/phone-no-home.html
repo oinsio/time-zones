@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Без домашнего города</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #d9d9d4;
+        font-family: "Manrope", system-ui, sans-serif;
+        display: flex;
+        justify-content: center;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        background: none;
+        border: 0;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      style="
+        width: 390px;
+        height: 844px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        background: #f7f7f5;
+        color: #18181b;
+        font-family: Manrope, system-ui, sans-serif;
+      "
+    >
+      <header
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 8px;
+          border-bottom: 1px solid #e4e4e0;
+        "
+      >
+        <button
+          aria-label="Добавить локацию"
+          style="
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2f5bd3;
+          "
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            style="fill: none; stroke: currentcolor; stroke-width: 2; stroke-linecap: round"
+          >
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+        </button>
+        <div style="font-size: 17px; font-weight: 700">Часовые пояса</div>
+        <button
+          aria-label="Настройки"
+          style="
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2f5bd3;
+          "
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            style="fill: none; stroke: currentcolor; stroke-width: 2; stroke-linecap: round"
+          >
+            <path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path>
+            <circle cx="16" cy="7" r="2"></circle>
+            <circle cx="10" cy="17" r="2"></circle>
+          </svg>
+        </button>
+      </header>
+      <main style="flex-grow: 1; display: flex; flex-direction: column">
+        <section
+          style="
+            padding: 16px 20px 18px;
+            border-bottom: 1px solid #e4e4e0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          "
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; gap: 12px"
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                aria-label="Вы здесь"
+                style="fill: #2f5bd3; stroke: #2f5bd3; stroke-width: 2; stroke-linejoin: round"
+              >
+                <path d="M3 11l18-8-8 18-2-8z"></path>
+              </svg>
+              <span style="font-size: 22px; font-weight: 700">Алматы</span>
+              <span style="font-size: 13px; font-weight: 700; color: #2f5bd3">здесь</span>
+            </div>
+            <button
+              aria-label="Ввести время"
+              style="
+                padding: 0px;
+                font-size: 40px;
+                font-weight: 700;
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.02em;
+              "
+            >
+              12:30
+            </button>
+          </div>
+          <div
+            style="display: flex; justify-content: space-between; font-size: 13px; color: #5b5b63"
+          >
+            <span>Время устройства · GMT+5</span>
+            <span>Вс, 8 мар</span>
+          </div>
+          <div style="position: relative; height: 30px; margin-top: 6px">
+            <div
+              aria-hidden="true"
+              style="
+                position: absolute;
+                left: 0px;
+                right: 0px;
+                top: 10px;
+                height: 10px;
+                border-radius: 5px;
+                background: linear-gradient(
+                  to right,
+                  #a3afd3 0%,
+                  #a3afd3 27.08%,
+                  #aab1d1 27.43%,
+                  #b1b4d0 27.78%,
+                  #b8b6ce 28.12%,
+                  #bfb8cc 28.47%,
+                  #c6bbca 28.82%,
+                  #cebdc8 29.17%,
+                  #d5bfc7 29.51%,
+                  #dcc2c5 29.86%,
+                  #e3c4c3 30.21%,
+                  #eac6c2 30.56%,
+                  #f1c9c0 30.9%,
+                  #f8cbbe 31.25%,
+                  #f8cbbe 36.81%,
+                  #f8cfba 37.15%,
+                  #f8d8b2 37.5%,
+                  #f8e1aa 37.85%,
+                  #f8e6a6 38.19%,
+                  #f8e6a6 74.31%,
+                  #f2e1b2 74.65%,
+                  #e6d6ca 75%,
+                  #dacbe2 75.35%,
+                  #d4c6ee 75.69%,
+                  #d4c6ee 89.58%,
+                  #d0c4ec 89.93%,
+                  #ccc2ea 90.28%,
+                  #c8c0e7 90.62%,
+                  #c4bee5 90.97%,
+                  #c0bce3 91.32%,
+                  #bcbae0 91.67%,
+                  #b7b9de 92.01%,
+                  #b3b7dc 92.36%,
+                  #afb5da 92.71%,
+                  #abb3d8 93.06%,
+                  #a7b1d5 93.4%,
+                  #a3afd3 93.75%,
+                  #a3afd3 100%
+                );
+              "
+            ></div>
+            <button
+              aria-label="Время в Алматы: 12:30"
+              style="
+                position: absolute;
+                top: 1px;
+                left: 52.1%;
+                width: 28px;
+                height: 28px;
+                margin-left: -14px;
+                border-radius: 14px;
+                background: #ffffff;
+                border: 2px solid #18181b;
+                box-sizing: border-box;
+              "
+            ></button>
+          </div>
+        </section>
+        <section
+          style="
+            padding: 16px 20px 18px;
+            border-bottom: 1px solid #e4e4e0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          "
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; gap: 12px"
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="font-size: 22px; font-weight: 700">Москва</span>
+              <span style="font-size: 13px; font-weight: 600; color: #5b5b63">−2 ч</span>
+            </div>
+            <button
+              aria-label="Ввести время"
+              style="
+                padding: 0px;
+                font-size: 40px;
+                font-weight: 700;
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.02em;
+              "
+            >
+              10:30
+            </button>
+          </div>
+          <div
+            style="display: flex; justify-content: space-between; font-size: 13px; color: #5b5b63"
+          >
+            <span>Россия · MSK</span>
+            <span>Вс, 8 мар</span>
+          </div>
+          <div style="position: relative; height: 30px; margin-top: 6px">
+            <div
+              aria-hidden="true"
+              style="
+                position: absolute;
+                left: 0px;
+                right: 0px;
+                top: 10px;
+                height: 10px;
+                border-radius: 5px;
+                background: linear-gradient(
+                  to right,
+                  #bcbae0 0%,
+                  #b7b9de 0.35%,
+                  #b3b7dc 0.69%,
+                  #afb5da 1.04%,
+                  #abb3d8 1.39%,
+                  #a7b1d5 1.74%,
+                  #a3afd3 2.08%,
+                  #a3afd3 35.42%,
+                  #aab1d1 35.76%,
+                  #b1b4d0 36.11%,
+                  #b8b6ce 36.46%,
+                  #bfb8cc 36.81%,
+                  #c6bbca 37.15%,
+                  #cebdc8 37.5%,
+                  #d5bfc7 37.85%,
+                  #dcc2c5 38.19%,
+                  #e3c4c3 38.54%,
+                  #eac6c2 38.89%,
+                  #f1c9c0 39.24%,
+                  #f8cbbe 39.58%,
+                  #f8cbbe 45.14%,
+                  #f8cfba 45.49%,
+                  #f8d8b2 45.83%,
+                  #f8e1aa 46.18%,
+                  #f8e6a6 46.53%,
+                  #f8e6a6 82.64%,
+                  #f2e1b2 82.99%,
+                  #e6d6ca 83.33%,
+                  #dacbe2 83.68%,
+                  #d4c6ee 84.03%,
+                  #d4c6ee 97.92%,
+                  #d0c4ec 98.26%,
+                  #ccc2ea 98.61%,
+                  #c8c0e7 98.96%,
+                  #c4bee5 99.31%,
+                  #c0bce3 99.65%,
+                  #bcbae0 100%
+                );
+              "
+            ></div>
+            <button
+              aria-label="Время в Москве: 10:30"
+              style="
+                position: absolute;
+                top: 1px;
+                left: 52.1%;
+                width: 28px;
+                height: 28px;
+                margin-left: -14px;
+                border-radius: 14px;
+                background: #ffffff;
+                border: 2px solid #18181b;
+                box-sizing: border-box;
+              "
+            ></button>
+          </div>
+        </section>
+        <section
+          style="
+            padding: 16px 20px 18px;
+            border-bottom: 1px solid #e4e4e0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          "
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; gap: 12px"
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="font-size: 22px; font-weight: 700">Калькутта</span>
+              <span style="font-size: 13px; font-weight: 600; color: #5b5b63">+0:30</span>
+            </div>
+            <button
+              aria-label="Ввести время"
+              style="
+                padding: 0px;
+                font-size: 40px;
+                font-weight: 700;
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.02em;
+              "
+            >
+              13:00
+            </button>
+          </div>
+          <div
+            style="display: flex; justify-content: space-between; font-size: 13px; color: #5b5b63"
+          >
+            <span>Индия · GMT+5:30</span>
+            <span>Вс, 8 мар</span>
+          </div>
+          <div style="position: relative; height: 30px; margin-top: 6px">
+            <div
+              aria-hidden="true"
+              style="
+                position: absolute;
+                left: 0px;
+                right: 0px;
+                top: 10px;
+                height: 10px;
+                border-radius: 5px;
+                background: linear-gradient(
+                  to right,
+                  #a3afd3 0%,
+                  #a3afd3 25%,
+                  #aab1d1 25.35%,
+                  #b1b4d0 25.69%,
+                  #b8b6ce 26.04%,
+                  #bfb8cc 26.39%,
+                  #c6bbca 26.74%,
+                  #cebdc8 27.08%,
+                  #d5bfc7 27.43%,
+                  #dcc2c5 27.78%,
+                  #e3c4c3 28.12%,
+                  #eac6c2 28.47%,
+                  #f1c9c0 28.82%,
+                  #f8cbbe 29.17%,
+                  #f8cbbe 34.72%,
+                  #f8cfba 35.07%,
+                  #f8d8b2 35.42%,
+                  #f8e1aa 35.76%,
+                  #f8e6a6 36.11%,
+                  #f8e6a6 72.22%,
+                  #f2e1b2 72.57%,
+                  #e6d6ca 72.92%,
+                  #dacbe2 73.26%,
+                  #d4c6ee 73.61%,
+                  #d4c6ee 87.5%,
+                  #d0c4ec 87.85%,
+                  #ccc2ea 88.19%,
+                  #c8c0e7 88.54%,
+                  #c4bee5 88.89%,
+                  #c0bce3 89.24%,
+                  #bcbae0 89.58%,
+                  #b7b9de 89.93%,
+                  #b3b7dc 90.28%,
+                  #afb5da 90.62%,
+                  #abb3d8 90.97%,
+                  #a7b1d5 91.32%,
+                  #a3afd3 91.67%,
+                  #a3afd3 100%
+                );
+              "
+            ></div>
+            <button
+              aria-label="Время в Калькутте: 13:00"
+              style="
+                position: absolute;
+                top: 1px;
+                left: 52.1%;
+                width: 28px;
+                height: 28px;
+                margin-left: -14px;
+                border-radius: 14px;
+                background: #ffffff;
+                border: 2px solid #18181b;
+                box-sizing: border-box;
+              "
+            ></button>
+          </div>
+        </section>
+        <section
+          style="
+            padding: 16px 20px 18px;
+            border-bottom: 1px solid #e4e4e0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          "
+        >
+          <div
+            style="display: flex; align-items: center; justify-content: space-between; gap: 12px"
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="font-size: 22px; font-weight: 700">Нью-Йорк</span>
+              <span style="font-size: 13px; font-weight: 600; color: #5b5b63">−9 ч</span>
+            </div>
+            <button
+              aria-label="Ввести время"
+              style="
+                padding: 0px;
+                font-size: 40px;
+                font-weight: 700;
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.02em;
+              "
+            >
+              03:30
+            </button>
+          </div>
+          <div
+            style="display: flex; justify-content: space-between; font-size: 13px; color: #5b5b63"
+          >
+            <span>США · EDT</span>
+            <span>Вс, 8 мар</span>
+          </div>
+          <div
+            role="status"
+            style="
+              display: flex;
+              gap: 8px;
+              align-items: flex-start;
+              margin-top: 4px;
+              padding: 8px 10px;
+              background: #fff4d6;
+              color: #5c4300;
+              border-radius: 8px;
+              font-size: 13px;
+              line-height: 1.35;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style="
+                flex-shrink: 0;
+                margin-top: 1px;
+                fill: none;
+                stroke: currentcolor;
+                stroke-width: 2;
+                stroke-linecap: round;
+              "
+            >
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 11v5M12 8h.01"></path>
+            </svg>
+            <span>02:30 не существует в этот день — часы переведены вперёд. Показано 03:30</span>
+          </div>
+          <div style="position: relative; height: 30px; margin-top: 6px">
+            <div
+              aria-hidden="true"
+              style="
+                position: absolute;
+                left: 0px;
+                right: 0px;
+                top: 10px;
+                height: 10px;
+                border-radius: 5px;
+                background: linear-gradient(
+                  to right,
+                  #f8e6a6 0%,
+                  #f8e6a6 15.97%,
+                  #f2e1b2 16.32%,
+                  #e6d6ca 16.67%,
+                  #dacbe2 17.01%,
+                  #d4c6ee 17.36%,
+                  #d4c6ee 31.25%,
+                  #d0c4ec 31.6%,
+                  #ccc2ea 31.94%,
+                  #c8c0e7 32.29%,
+                  #c4bee5 32.64%,
+                  #c0bce3 32.99%,
+                  #bcbae0 33.33%,
+                  #b7b9de 33.68%,
+                  #b3b7dc 34.03%,
+                  #afb5da 34.38%,
+                  #abb3d8 34.72%,
+                  #a7b1d5 35.07%,
+                  #a3afd3 35.42%,
+                  #a3afd3 64.58%,
+                  #aab1d1 64.93%,
+                  #b1b4d0 65.28%,
+                  #b8b6ce 65.62%,
+                  #bfb8cc 65.97%,
+                  #c6bbca 66.32%,
+                  #cebdc8 66.67%,
+                  #d5bfc7 67.01%,
+                  #dcc2c5 67.36%,
+                  #e3c4c3 67.71%,
+                  #eac6c2 68.06%,
+                  #f1c9c0 68.4%,
+                  #f8cbbe 68.75%,
+                  #f8cbbe 74.31%,
+                  #f8cfba 74.65%,
+                  #f8d8b2 75%,
+                  #f8e1aa 75.35%,
+                  #f8e6a6 75.69%,
+                  #f8e6a6 100%
+                );
+              "
+            ></div>
+            <button
+              aria-label="Время в Нью-Йорке: 03:30"
+              style="
+                position: absolute;
+                top: 1px;
+                left: 52.1%;
+                width: 28px;
+                height: 28px;
+                margin-left: -14px;
+                border-radius: 14px;
+                background: #ffffff;
+                border: 2px solid #18181b;
+                box-sizing: border-box;
+              "
+            ></button>
+          </div>
+        </section>
+      </main>
+      <footer
+        style="
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 10px 12px 26px;
+          background: #ffffff;
+          border-top: 1px solid #e4e4e0;
+        "
+      >
+        <button
+          aria-label="Предыдущий день"
+          style="
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            style="
+              fill: none;
+              stroke: currentcolor;
+              stroke-width: 2;
+              stroke-linecap: round;
+              stroke-linejoin: round;
+            "
+          >
+            <path d="M15 6l-6 6 6 6"></path>
+          </svg>
+        </button>
+        <button style="height: 44px; padding: 0px 8px; font-size: 16px; font-weight: 600">
+          Вс, 8 марта
+        </button>
+        <button
+          aria-label="Следующий день"
+          style="
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            style="
+              fill: none;
+              stroke: currentcolor;
+              stroke-width: 2;
+              stroke-linecap: round;
+              stroke-linejoin: round;
+            "
+          >
+            <path d="M9 6l6 6-6 6"></path>
+          </svg>
+        </button>
+        <div style="flex-grow: 1"></div>
+        <button
+          style="
+            height: 44px;
+            padding: 0px 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 22px;
+            background: #2f5bd3;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+          "
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            style="fill: none; stroke: currentcolor; stroke-width: 2; stroke-linecap: round"
+          >
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v5l3 2"></path>
+          </svg>
+          Сейчас
+        </button>
+      </footer>
+    </div>
+  </body>
+</html>
