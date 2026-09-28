@@ -72,7 +72,7 @@ Used by every view, implemented once in `views/shared/`:
 | Day-period colors | three bands: night, morning/evening, working hours — from design tokens, WCAG AA contrast |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
 | Now control | returns to `LIVE`; visible only when the moment is pinned |
-| Date control | previous / next day in one tap plus a calendar for distant dates |
+| Date control | bottom bar `[<] Mon, 28 Sep [>]  [Now]`: arrows switch to the previous / next day, tapping the date opens a calendar for distant dates; placed at the bottom for thumb reach. Grid may reuse it or replace it with a day strip |
 
 ## Overlays
 
