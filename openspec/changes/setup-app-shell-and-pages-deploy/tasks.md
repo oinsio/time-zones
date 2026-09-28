@@ -21,8 +21,8 @@
 
 ## 4. Design tokens and theme
 
-- [ ] 4.1 Create `src/styles/tokens.css` with light and dark values (accent, background, text, day-period colors from views.md and the screen HTML files), import it in `globals.css`, map Tailwind colors to the variables, switch `darkMode` to `"media"` (FR9, NFR-A3, UX1, D7); verify the build succeeds and the generated CSS contains the `prefers-color-scheme: dark` block
-- [ ] 4.2 Import Manrope in `src/main.tsx` and set it as the Tailwind sans font (FR9, D8); verify `dist/` contains Manrope `woff2` files listed in the service worker precache manifest
+- [x] 4.1 Create `src/styles/tokens.css` with light and dark values (accent, background, text, day-period colors from views.md and the screen HTML files), import it in `globals.css`, map Tailwind colors to the variables, switch `darkMode` to `"media"` (FR9, NFR-A3, UX1, D7); verify the build succeeds and the generated CSS contains the `prefers-color-scheme: dark` block
+- [x] 4.2 Import Manrope in `src/main.tsx` and set it as the Tailwind sans font (FR9, D8); verify `dist/` contains Manrope `woff2` files listed in the service worker precache manifest
 
 ## 5. App shell UI (TDD + unit BDD)
 

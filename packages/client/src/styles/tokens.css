@@ -1,0 +1,34 @@
+/*
+ * Design tokens. Values come from docs/architecture/views.md ("Visual style")
+ * and the approved screens in docs/design/screens.
+ * Implements FR9, NFR-A3, UX1 of setup-app-shell-and-pages-deploy.
+ */
+:root {
+  --color-background: #f7f7f5;
+  --color-foreground: #18181b;
+  --color-muted-foreground: #5b5b63;
+  --color-accent: #2f5bd3;
+  --color-accent-foreground: #ffffff;
+  --color-notice: #fff4d6;
+  --color-notice-foreground: #5c4300;
+  --color-day-night: #a3afd3;
+  --color-day-morning: #f8cbbe;
+  --color-day-working: #f8e6a6;
+  --color-day-evening: #d4c6ee;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0f1729;
+    --color-foreground: #eef2fa;
+    --color-muted-foreground: #9aa8c2;
+    --color-accent: #5ec2e8;
+    --color-accent-foreground: #0b1220;
+    --color-notice: #2a2f1a;
+    --color-notice-foreground: #f4d27a;
+    --color-day-night: #56679a;
+    --color-day-morning: #e0b1a4;
+    --color-day-working: #eedba3;
+    --color-day-evening: #b9aadb;
+  }
+}
