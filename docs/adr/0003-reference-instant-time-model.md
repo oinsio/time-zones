@@ -1,7 +1,7 @@
 # ADR-0003: Reference instant as the single source of time
 
 ## Status
-Accepted (2026-09-28)
+Accepted (2026-09-28). Refined by [ADR-0007](0007-reference-zone-and-device-time.md): "home location" below means the reference zone (home if set, otherwise the device time zone).
 
 ## Context
 
@@ -98,4 +98,5 @@ Negative:
 ## Related
 
 - [ADR-0002](0002-model-presenter-swappable-views.md) — architecture layers
+- [ADR-0007](0007-reference-zone-and-device-time.md) — reference zone, optional home, device time
 - [Domain model](../architecture/domain-model.md)

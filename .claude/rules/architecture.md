@@ -6,13 +6,14 @@ paths:
 
 # Rule: layered architecture — model, presenter, swappable views
 
-Source of truth: `docs/architecture/overview.md`, ADR-0002, ADR-0003, ADR-0004.
+Source of truth: `docs/architecture/overview.md`, ADR-0002, ADR-0003, ADR-0004, ADR-0007.
 
 **Model (`src/model/`, `src/preferences/`):**
 - Pure TypeScript — never import React, the DOM, i18next, the presenter or adapters
 - State changes only through command objects with a `type` enum and a pure reducer
 - Expected failures are returned as typed errors, not thrown
 - Read "now" only through the `Clock` port; never start timers
+- Never read the device time zone directly — it arrives as state via `SET_DEVICE_TIME_ZONE` (ADR-0007)
 - Selectors return Temporal values, enums and numbers — never human-readable strings
 - Memoize selectors so unchanged locations keep referential identity between clock ticks
 - Keep invariants from `docs/architecture/domain-model.md` true after every command
@@ -22,7 +23,7 @@ Source of truth: `docs/architecture/overview.md`, ADR-0002, ADR-0003, ADR-0004.
 
 **Controller (`src/controller/`):**
 - Maps UI events to commands; views never call the reducer or ports directly
-- Owns side effects: clock tick on minute boundaries, pause on `visibilitychange`, persistence, cross-tab sync
+- Owns side effects: clock tick on minute boundaries, pause on `visibilitychange`, re-reading the device time zone, persistence, cross-tab sync
 
 **Views (`src/views/`):**
 - Render presenter output and emit events only
