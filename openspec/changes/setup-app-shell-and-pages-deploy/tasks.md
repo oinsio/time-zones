@@ -14,10 +14,10 @@
 
 ## 3. Controller: language and service worker status (TDD)
 
-- [ ] 3.1 Configure i18next `supportedLngs: ["en", "ru"]` and `load: "languageOnly"`; add `_meta` blocks and shell keys (`app.*` from D9) to `en.json` and `ru.json` (FR2, FR10); verify with a Vitest test that each file's `_meta.code` equals its file name and both files have identical key sets
-- [ ] 3.2 TDD `useDocumentLanguage` in `src/controller/` — sets `document.title` and `<html lang>` on language change (FR2, D9); verify red then green with `npx vitest run src/controller`
-- [ ] 3.3 TDD `usePwaUpdateStatus` in `src/controller/` — exposes offline-ready, update-available, `applyUpdate`, `dismiss`, with `vi.mock("virtual:pwa-register/react")` per test (FR6, FR7, D5); verify red then green with `npx vitest run src/controller`
-- [ ] 3.4 Export both hooks from `src/controller/index.ts`; create empty `src/model/index.ts`, `src/presenter/index.ts` and `src/views/index.ts` with the `ViewDefinition` type and empty `viewRegistry` (FR11, D4); verify `pnpm typecheck` passes
+- [x] 3.1 Configure i18next `supportedLngs: ["en", "ru"]` and `load: "languageOnly"`; add `_meta` blocks and shell keys (`app.*` from D9) to `en.json` and `ru.json` (FR2, FR10); verify with a Vitest test that each file's `_meta.code` equals its file name and both files have identical key sets
+- [x] 3.2 TDD `useDocumentLanguage` in `src/controller/` — sets `document.title` and `<html lang>` on language change (FR2, D9); verify red then green with `npx vitest run src/controller`
+- [x] 3.3 TDD `usePwaUpdateStatus` in `src/controller/` — exposes offline-ready, update-available, `applyUpdate`, `dismiss`, with `vi.mock("virtual:pwa-register/react")` per test (FR6, FR7, D5); verify red then green with `npx vitest run src/controller`
+- [x] 3.4 Export both hooks from `src/controller/index.ts`; create empty `src/model/index.ts`, `src/presenter/index.ts` and `src/views/index.ts` with the `ViewDefinition` type and empty `viewRegistry` (FR11, D4); verify `pnpm typecheck` passes
 
 ## 4. Design tokens and theme
 
