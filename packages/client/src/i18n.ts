@@ -1,4 +1,4 @@
-import i18n from "i18next";
+import i18n, { type InitOptions } from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 import en from "@/locales/en.json";
@@ -22,19 +22,19 @@ export const languageResolutionOptions = {
   load: "languageOnly",
 } as const;
 
-void i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources: localeResources,
-    ...languageResolutionOptions,
-    fallbackLng: DEFAULT_LANGUAGE,
-    detection: {
-      order: ["localStorage", "navigator"],
-      lookupLocalStorage: LANGUAGE_STORAGE_KEY,
-      caches: ["localStorage"],
-    },
-    interpolation: { escapeValue: false },
-  });
+/** Production options: detect from storage, then the browser; remember the choice. */
+export const i18nInitOptions: InitOptions = {
+  resources: localeResources,
+  ...languageResolutionOptions,
+  fallbackLng: DEFAULT_LANGUAGE,
+  detection: {
+    order: ["localStorage", "navigator"],
+    lookupLocalStorage: LANGUAGE_STORAGE_KEY,
+    caches: ["localStorage"],
+  },
+  interpolation: { escapeValue: false },
+};
+
+void i18n.use(LanguageDetector).use(initReactI18next).init(i18nInitOptions);
 
 export default i18n;

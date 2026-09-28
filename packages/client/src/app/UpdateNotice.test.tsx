@@ -81,3 +81,15 @@ describe("UpdateNotice", () => {
     expect(document.activeElement).toBe(document.body);
   });
 });
+
+describe("UpdateNotice after re-render", () => {
+  it("should dismiss through the latest onDismiss on Escape", async () => {
+    const { rerender } = render(
+      <UpdateNotice onReload={vi.fn()} onDismiss={vi.fn()} />,
+    );
+    const latestOnDismiss = vi.fn();
+    rerender(<UpdateNotice onReload={vi.fn()} onDismiss={latestOnDismiss} />);
+    await userEvent.keyboard("{Escape}");
+    expect(latestOnDismiss).toHaveBeenCalledTimes(1);
+  });
+});

@@ -55,10 +55,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   const openApp = () => {
     render(
-      createElement(AppErrorBoundary, {
-        reloadPage,
-        children: createElement(AppShell),
-      }),
+      createElement(AppErrorBoundary, { reloadPage }, createElement(AppShell)),
     );
   };
 

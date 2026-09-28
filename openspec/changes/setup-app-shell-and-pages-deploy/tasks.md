@@ -31,7 +31,7 @@
 - [x] 5.3 Implement `OfflineReadyNotice` and `UpdateNotice` (`role="status"`, `aria-live="polite"`, no focus change, Esc dismisses, reserved space so the heading is not covered) with component tests (FR6, FR7, UX2, UX3, NFR-A2, D5); verify `npx vitest run src/app`
 - [x] 5.4 Implement `AppErrorBoundary` and `RecoveryScreen` with injected `reloadPage` and component tests (FR8, UX4, D6); verify `npx vitest run src/app`
 - [x] 5.5 Create `src/main.tsx` mounting `AppShell` inside `AppErrorBoundary` and export shell parts from `src/app/index.ts`; implement step definitions in `steps/app_shell_notices.steps.ts` (FR2, FR6, FR7, FR8, FR11); verify `npx vitest run src/test/features/app_shell` is green and `pnpm --filter @time-zones/client build` succeeds
-- [ ] 5.6 Add `src/app/**` and `src/controller/**` to Stryker scope if needed and run `cd packages/client && npx stryker run --mutate 'src/app/AppShell.tsx,src/app/UpdateNotice.tsx,src/app/OfflineReadyNotice.tsx,src/app/AppErrorBoundary.tsx,src/controller/usePwaUpdateStatus.ts'`, then a second run for the remaining files (<= 5 files per run) (M4); verify mutation score >= 95% (minimum >= 90%) in `reports/mutation/mutation-report.json`
+- [x] 5.6 Add `src/app/**` and `src/controller/**` to Stryker scope if needed and run `cd packages/client && npx stryker run --mutate 'src/app/AppShell.tsx,src/app/UpdateNotice.tsx,src/app/OfflineReadyNotice.tsx,src/app/AppErrorBoundary.tsx,src/controller/usePwaUpdateStatus.ts'`, then a second run for the remaining files (<= 5 files per run) (M4); verify mutation score >= 95% (minimum >= 90%) in `reports/mutation/mutation-report.json`
 
 ## 6. Smoke E2E against the production build
 

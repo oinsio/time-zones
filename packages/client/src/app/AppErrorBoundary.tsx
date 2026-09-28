@@ -2,7 +2,7 @@ import { Component, type ReactNode } from "react";
 import { RecoveryScreen } from "./RecoveryScreen";
 
 interface AppErrorBoundaryProps {
-  children: ReactNode;
+  children?: ReactNode;
   /** Injected so tests never touch the real location. */
   reloadPage?: () => void;
 }
@@ -22,6 +22,7 @@ export class AppErrorBoundary extends Component<
   AppErrorBoundaryProps,
   AppErrorBoundaryState
 > {
+  // Stryker disable next-line ObjectLiteral: equivalent — a missing flag is falsy too
   state: AppErrorBoundaryState = { hasRenderingError: false };
 
   static getDerivedStateFromError(): AppErrorBoundaryState {
