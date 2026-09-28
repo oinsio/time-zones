@@ -29,7 +29,7 @@ See proposal.md — Why. Current state of `packages/client`:
 Alternative: env variable only in CI — rejected, dev and prod would differ and the E2E would not test the real path.
 
 ### D2. Icons generated at build time from one committed source
-The source image moves from this change's `assets/app-icon-source.jpg` to `packages/client/assets/app-icon-source.jpg`. `vite-plugin-pwa`'s built-in `pwaAssets` integration with a `pwa-assets.config.ts` (`minimal-2023` preset: favicon, `apple-touch-icon-180x180`, `pwa-64/192/512`, `maskable-icon-512x512` with padding and white background) generates icons during the build, injects the head links and the manifest `icons`. Generated files are not committed. `sharp` (used by the generator) is added to `onlyBuiltDependencies`. Drives FR3, FR4.
+The source image moves from this change's `assets/app-icon-source.jpg` to `packages/client/assets/app-icon-source.jpg`. `vite-plugin-pwa`'s built-in `pwaAssets` integration with a `pwa-assets.config.ts` (`minimal-2023` preset: favicon, `apple-touch-icon-180x180`, `pwa-64/192/512`, `maskable-icon-512x512` with padding and white background) generates icons during the build, injects the head links and the manifest `icons`. Generated files are not committed. `sharp` (used by the generator) is added to `onlyBuiltDependencies`. `vite-plugin-pwa` is upgraded from 0.21 to 1.x together with `@vite-pwa/assets-generator` 1.x, because the plugin's `pwaAssets` integration pins the generator's major version through its peer dependency (2.x is not supported yet). Drives FR3, FR4.
 
 Alternative: run the generator CLI once and commit PNGs — rejected, replacing the logo would need a manual step that is easy to forget.
 

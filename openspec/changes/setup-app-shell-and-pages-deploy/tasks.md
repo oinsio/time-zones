@@ -2,9 +2,9 @@
 
 ## 1. Tooling and dependencies
 
-- [ ] 1.1 Pin pnpm via `packageManager` in root `package.json` and remove the root `prebuild` script (FR14, D10, D12); verify `pnpm build` no longer runs `lint:fix` by checking the script list with `pnpm run`
-- [ ] 1.2 Add `@fontsource-variable/manrope` and `@vite-pwa/assets-generator`, add `sharp` to `onlyBuiltDependencies` in `pnpm-workspace.yaml` (FR3, FR4, FR9, D2, D8); verify `pnpm install --frozen-lockfile` succeeds after the lockfile update
-- [ ] 1.3 Move `openspec/changes/setup-app-shell-and-pages-deploy/assets/app-icon-source.jpg` to `packages/client/assets/app-icon-source.jpg` (FR4, D2); verify the file exists and the change folder no longer holds it
+- [x] 1.1 Pin pnpm via `packageManager` in root `package.json` and remove the root `prebuild` script (FR14, D10, D12); verify `pnpm build` no longer runs `lint:fix` by checking the script list with `pnpm run`
+- [x] 1.2 Add `@fontsource-variable/manrope` and `@vite-pwa/assets-generator`, add `sharp` to `onlyBuiltDependencies` in `pnpm-workspace.yaml` (FR3, FR4, FR9, D2, D8); verify `pnpm install --frozen-lockfile` succeeds after the lockfile update
+- [x] 1.3 Move `openspec/changes/setup-app-shell-and-pages-deploy/assets/app-icon-source.jpg` to `packages/client/assets/app-icon-source.jpg` (FR4, D2); verify the file exists and the change folder no longer holds it
 
 ## 2. Base path, entry page and PWA configuration
 
