@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Wrapper around the locally built Gnomish Factory jar (gnomish.jar).
+# Wrapper around the locally built Gnomish Factory jar (.gnomish/gnomish.jar, git-ignored).
+# Lives in .gnomish/ with the rest of the factory setup; callable from any directory.
 #
 # Adds the defaults every invocation from this project needs, then passes the rest through:
 #   --dir=<this project, absolute>     (a relative --dir is not recognised as a git repo in git mode)
@@ -59,11 +60,13 @@
 # The log file is keyed by project the same way: ~/.gnomish/logs/<project>/gnomish.log.
 # GNOMISH_LOG_DIR still wins if you set it yourself.
 #
-#   ./gnomish run --task="..." --mode=in-place --interactive
-#   ./gnomish status --task=<id>
+#   .gnomish/gnomish run --task="..." --mode=in-place --interactive
+#   .gnomish/gnomish status <task-id>
 set -euo pipefail
 
-project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+gnomish_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# The project root is the parent of .gnomish/, wherever the script is called from.
+project_dir="$(dirname "$gnomish_dir")"
 
 # Keyed by the clone directory's own name, exactly as the factory keys its worktrees root
 # (operator-guide-run.md: ~/.gnomish/worktrees/<project-name>/...), so two clones served by
@@ -153,6 +156,6 @@ for default in "${defaults[@]}"; do
     (( overridden )) || applied+=("$default")
 done
 
-exec java -jar "$project_dir/gnomish.jar" \
+exec java -jar "$gnomish_dir/gnomish.jar" \
     ${applied[@]+"${applied[@]}"} \
     "$@"

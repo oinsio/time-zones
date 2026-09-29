@@ -54,8 +54,3 @@ npm-debug.log
 !postcss.config.js
 !**/postcss.config.js
 !**/vite-env.d.ts
-
-# Gnomish Factory
-gnomish.jar
-gnomish.bak-*.jar
-logs/
