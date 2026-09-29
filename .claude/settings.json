@@ -15,16 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pnpm --filter @time-zones/client test 2>&1 | tail -20"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "pnpm run prebuild"
+            "command": "bash scripts/test-on-client-change.sh"
           }
         ]
       }
