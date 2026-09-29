@@ -1,3 +1,12 @@
 {
-   "signedContributors": []
+  "signedContributors": [
+    {
+      "name": "oinsio",
+      "id": 8233537,
+      "comment_id": 5883960762,
+      "created_at": "2026-09-29T05:00:35Z",
+      "repoId": 1392252305,
+      "pullRequestNo": 7
+    }
+  ]
 }
