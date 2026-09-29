@@ -170,11 +170,30 @@ By default [`gnomish.env`](.gnomish/factory/gnomish.env) pins `FACTORY_BINDINGS_
 
 3. **`claude-oauth-token`** in the secrets directory (or `ANTHROPIC_API_KEY` in the shell) — a box has no keychain, so the host login does not carry over.
 
-Then switch one run, or put the line into `gnomish.local.env` to switch for good:
+### Switching between host and Docker
+
+The mode is `FACTORY_BINDINGS_DEFAULT`: `host` or `container`. It can be set in four places; each one outranks the ones above it:
+
+| Where                                   | Scope                    | Example                                                                  |
+|-----------------------------------------|--------------------------|--------------------------------------------------------------------------|
+| `gnomish.env`                           | everyone, committed      | `FACTORY_BINDINGS_DEFAULT=host` (the current default)                    |
+| `gnomish.local.env`                     | you, git-ignored         | `FACTORY_BINDINGS_DEFAULT=container`                                     |
+| shell variable                          | one run                  | `FACTORY_BINDINGS_DEFAULT=container .gnomish/factory/gnomish run ...`    |
+| `--factory.bindings.default=...` flag   | one run                  | `.gnomish/factory/gnomish run ... --factory.bindings.default=container`  |
 
 ```bash
+# Docker for good, just for you
+echo 'FACTORY_BINDINGS_DEFAULT=container' > .gnomish/factory/gnomish.local.env
+
+# back to the host: delete the file, or override it for one run
+rm .gnomish/factory/gnomish.local.env
+FACTORY_BINDINGS_DEFAULT=host .gnomish/factory/gnomish take 42
+
+# Docker for one run only
 FACTORY_BINDINGS_DEFAULT=container .gnomish/factory/gnomish run --task="..."
 ```
+
+Prefer the variable over the flag: the wrapper's warning about a missing Claude credential in a box reads the variable only. Every stage of the pipeline runs in the same mode — the factory refuses a per-stage mix of `host` and `container`.
 
 The Java 25 runtime and the jar stay on the host: the factory itself runs there and drives the boxes through Docker. A host a tool needs but the guard denies shows up as an `egress denial:` line in `gnomish status`; add it to `FACTORY_SANDBOX_EGRESSALLOWLIST` only once you know which tool asked for it.
 
