@@ -95,8 +95,16 @@ Features are developed with [OpenSpec](openspec/): `/opsx:propose` → `/opsx:ap
 | `config.yaml`    | tracker (GitHub issues of `oinsio/time-zones`), attempt limit, WIP limit, labels                            |
 | `pipeline.yaml`  | stage order                                                                                                 |
 | `stages/<name>/` | one stage: `stage.yaml` (executor, checks), `instructions.md` (the brief), `acceptance.md` (judge criteria) |
-| `gnomish`        | wrapper script — the only way to run the factory here                                                       |
-| `gnomish.jar`    | the factory build, git-ignored, you put it there yourself                                                   |
+| `factory/`       | everything that launches the factory, next to the pipeline rather than part of it — see below               |
+
+`factory/` holds:
+
+| Path                | What it is                                                                       |
+|---------------------|----------------------------------------------------------------------------------|
+| `gnomish`           | wrapper script — the only way to run the factory here                            |
+| `gnomish.env`       | this instance's settings: instance name, host binding, log and secrets locations |
+| `gnomish.local.env` | optional personal overrides of `gnomish.env`, git-ignored                        |
+| `gnomish.jar`       | the factory build, git-ignored, you put it there yourself                        |
 
 The pipeline currently has one stage, **`specify`**: it turns a task into exactly one OpenSpec change under `openspec/changes/` — the same procedure as `/opsx:propose` — and writes nothing else. It is accepted only if there is exactly one active change, `openspec validate --changes --strict` passes, the proposal has the sections and requirement ids from [`.claude/rules/`](.claude/rules/), and the judge approves it against [`acceptance.md`](.gnomish/stages/specify/acceptance.md). Implementation (`/opsx:apply`) is still done by hand.
 
@@ -107,7 +115,7 @@ The pipeline currently has one stage, **`specify`**: it turns a task into exactl
 
    ```bash
    ./gradlew :bootstrap:bootJar   # in the gnomish-factory clone
-   cp bootstrap/build/libs/bootstrap-*.jar <time-zones>/.gnomish/gnomish.jar
+   cp bootstrap/build/libs/bootstrap-*.jar <time-zones>/.gnomish/factory/gnomish.jar
    ```
 
 3. **The OpenSpec CLI, installed globally**, at the version pinned in `package.json` (`1.13.2`). The gnome works in a worktree outside this clone (`~/.gnomish/worktrees/time-zones/<task>`) where `node_modules` does not exist:
@@ -129,25 +137,25 @@ The pipeline currently has one stage, **`specify`**: it turns a task into exactl
 
 ### Running
 
-The wrapper adds `--dir` (this project), `--factory.instance-name=time-zones` and the host binding to every call; pass any of them yourself to override it.
+The wrapper adds `--dir` (this project) and loads [`gnomish.env`](.gnomish/factory/gnomish.env): the instance name (`time-zones`), the host binding, the log directory. Change a setting there, in `gnomish.local.env`, in your shell (`GNOMISH_LOG_LEVEL=DEBUG .gnomish/factory/gnomish ...`) or with a flag (`--factory.instance-name=...`) — each outranks the one before it.
 
 ```bash
 # One ad-hoc task, no tracker: branch gnomish/<task-id> in a worktree, the clone is not touched
-.gnomish/gnomish run --task="Add a meeting planner view"
+.gnomish/factory/gnomish run --task="Add a meeting planner view"
 
 # The same, but you play the gnome and the judge — a dry run of a stage you are editing
-.gnomish/gnomish run --task="..." --mode=in-place --interactive
+.gnomish/factory/gnomish run --task="..." --mode=in-place --interactive
 
 # Tasks from GitHub issues: label an issue gnomish:ready, then
-.gnomish/gnomish take 42          # work that issue
-.gnomish/gnomish serve --drain    # work the whole ready queue, then exit
+.gnomish/factory/gnomish take 42          # work that issue
+.gnomish/factory/gnomish serve --drain    # work the whole ready queue, then exit
 
-.gnomish/gnomish status <task-id> # where a task is and what happened to it
+.gnomish/factory/gnomish status <task-id> # where a task is and what happened to it
 ```
 
 Without `--base`, `run` reads `.gnomish/` from the working tree, so uncommitted edits to a stage take effect immediately. A finished task leaves a `gnomish/<task-id>` branch; squash-merge it so the round-by-round history stays on the branch. Logs: `~/.gnomish/logs/time-zones/gnomish.log`. Labels: `gnomish:ready` → `gnomish:working` → `gnomish:delivered`, or `gnomish:needs-human` when a task escalates.
 
-> **Host mode.** There is no sandbox image for this project yet, so the wrapper pins `--factory.bindings.default=host`: every gnome process runs on this machine as you, with access to your files and no network restrictions. The comments in [`.gnomish/gnomish`](.gnomish/gnomish) say what the switch to the container binding will need.
+> **Host mode.** There is no sandbox image for this project yet, so [`gnomish.env`](.gnomish/factory/gnomish.env) pins `FACTORY_BINDINGS_DEFAULT=host`: every gnome process runs on this machine as you, with access to your files and no network restrictions. Switching to the container binding needs a sandbox image with the OpenSpec CLI baked in, plus `FACTORY_SANDBOX_IMAGE` and `FACTORY_SANDBOX_EGRESSALLOWLIST`.
 
 Full reference: the factory's [operator guides](https://github.com/oinsio/gnomish-factory/tree/main/docs/guides) (`operator-guide.md` for the tracker, `-run.md` for `run`, `-serve.md` for `serve`).
 

@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# Wrapper around the locally built Gnomish Factory jar (gnomish.jar next to it, git-ignored).
+# Everything that launches the factory lives here in .gnomish/factory/; the rest of .gnomish/
+# (config.yaml, pipeline.yaml, stages/) is the project's pipeline, which the factory reads
+# itself. Callable from any directory.
+#
+# Settings live in gnomish.env beside this script, not in it: the instance name, the binding,
+# log and secrets locations, tuning. gnomish.local.env (git-ignored, optional) overrides it.
+#
+# Adds the one default every invocation needs, then passes the rest through:
+#   --dir=<this project, absolute>     (a relative --dir is not recognised as a git repo in git mode)
+# A --dir=... of your own REPLACES it rather than joining it: Spring joins a repeated
+# command-line option with a comma instead of letting the last one win. factory.* settings
+# need no such care — they arrive as environment variables, which any --factory.*=... flag
+# outranks.
+#
+# ---------------------------------------------------------------------------
+# Secrets
+#
+# Secrets use the factory's own file indirection (EnvFileSecretsProvider): for a secret N it
+# reads N_FILE as a path and takes the file's contents, so the token itself never enters this
+# process's environment table. All this script does is point N_FILE at the local file. The
+# files live OUTSIDE the clone — a token in the tree is one you can commit — and they are per
+# project: ~/.gnomish/secrets/<project>, keyed by this clone's directory name, the same way
+# the factory keys ~/.gnomish/worktrees/<project>. One token per project, revocable on its own.
+#
+#   mkdir -p ~/.gnomish/secrets/time-zones
+#   install -m 600 /dev/null ~/.gnomish/secrets/time-zones/github-token
+#   # paste the token in, no quotes and no KEY= prefix — the file IS the value
+#
+# GNOMISH_SECRETS_DIR (gnomish.env) moves the directory; GNOMISH_GITHUB_TOKEN_FILE names one
+# file directly; an already-exported GNOMISH_GITHUB_TOKEN still works and is left alone.
+#
+#   .gnomish/factory/gnomish run --task="..." --mode=in-place --interactive
+#   .gnomish/factory/gnomish status <task-id>
+set -euo pipefail
+
+factory_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# The project root holds .gnomish/factory/, wherever the script is called from.
+project_dir="$(cd "$factory_dir/../.." && pwd)"
+
+GNOMISH_PROJECT_NAME="$(basename "$project_dir")"
+export GNOMISH_PROJECT_NAME
+
+# Load gnomish.env, then gnomish.local.env, without letting either outrank the caller: every
+# GNOMISH_* and FACTORY_* variable already exported is snapshotted first and re-applied after. At top level
+# on purpose — the re-applying `declare` inside a function would make the variables local.
+caller_settings="$(while read -r name; do
+    [[ "$name" == GNOMISH_* || "$name" == FACTORY_* ]] && declare -p "$name"
+done < <(compgen -e))" || true
+set -a  # every assignment in the env files is exported, as a .env file implies
+for env_file in "$factory_dir/gnomish.env" "$factory_dir/gnomish.local.env"; do
+    if [[ -f "$env_file" ]]; then
+        # shellcheck source=/dev/null
+        source "$env_file"
+    fi
+done
+set +a
+eval "$caller_settings"
+unset caller_settings env_file
+
+secrets_dir="${GNOMISH_SECRETS_DIR:-$HOME/.gnomish/secrets/$GNOMISH_PROJECT_NAME}"
+
+warn_if_group_readable() {
+    local file="$1" perms
+    perms="$(stat -f %Lp "$file" 2>/dev/null || stat -c %a "$file" 2>/dev/null || echo "600")"
+    if [[ "${perms: -2}" != "00" ]]; then
+        echo "gnomish: $file is mode $perms — it holds a token, run: chmod 600 $file" >&2
+    fi
+}
+
+# Point <SECRET>_FILE at the local file, but only when that file is actually there: the
+# provider is fail-closed, so a _FILE naming a missing path resolves the secret as ABSENT
+# instead of falling back to the plain variable — pointing it at nothing would break an
+# operator who exports the token the old way.
+point_at_file() {
+    local var="$1" file="$2"
+    [[ -f "$file" ]] || return 0
+    if [[ -n "${!var:-}" ]]; then
+        return 0  # an explicit path from the caller wins over the convention
+    fi
+    warn_if_group_readable "$file"
+    export "$var=$file"
+}
+
+point_at_file GNOMISH_GITHUB_TOKEN_FILE "$secrets_dir/github-token"
+point_at_file GNOMISH_GITHUB_ACTIONS_TOKEN_FILE "$secrets_dir/github-actions-token"
+
+# The agent CLI's credential. On this host the CLI could log in from ~/.claude, but the
+# factory sets this token on agent rounds and judge votes from its own environment, so
+# storing it beside the others keeps the two bindings identical: nothing has to change here
+# when the gnomes move into a box that has no keychain to log in from.
+#
+#   claude setup-token
+#   install -m 600 /dev/null ~/.gnomish/secrets/time-zones/claude-oauth-token
+#   # paste the token in — the file IS the value
+#
+# Unlike the tracker token this one is exported as a VALUE, not through a _FILE indirection:
+# it is not a factory secret but an ordinary variable the factory reads live from its own
+# environment and sets on agent rounds and judge votes alone (its AI seam) — it needs no
+# passthrough entry and never reaches a command check.
+claude_token_file="$secrets_dir/claude-oauth-token"
+if [[ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" && -s "$claude_token_file" ]]; then
+    warn_if_group_readable "$claude_token_file"
+    token="$(tr -d '[:space:]' < "$claude_token_file")"
+    # Only a non-empty value is exported. An empty one would not read as "unset" to the CLI —
+    # it would override this host's keychain login with a credential that cannot authenticate.
+    if [[ -n "$token" ]]; then
+        CLAUDE_CODE_OAUTH_TOKEN="$token"
+        export CLAUDE_CODE_OAUTH_TOKEN
+    fi
+    unset token
+fi
+
+if [[ -z "${GNOMISH_GITHUB_TOKEN_FILE:-}" && -z "${GNOMISH_GITHUB_TOKEN:-}" \
+      && "${1:-}" != "--help" && "${1:-}" != "-h" ]]; then
+    echo "gnomish: no $secrets_dir/github-token and no GNOMISH_GITHUB_TOKEN — tracker calls will fail" >&2
+fi
+
+# --dir, unless the caller passed one — see the note at the top on why it is not simply outranked.
+dir_default=(--dir="$project_dir")
+for arg in "$@"; do
+    if [[ "$arg" == --dir=* || "$arg" == --dir ]]; then
+        dir_default=()
+        break
+    fi
+done
+
+exec "${GNOMISH_JAVA:-java}" -jar "$factory_dir/gnomish.jar" \
+    ${dir_default[@]+"${dir_default[@]}"} \
+    "$@"

@@ -43,7 +43,7 @@ tracker:
     repo: oinsio/time-zones
 
     # The token is NEVER written here. It is read at adapter construction from
-    # GNOMISH_GITHUB_TOKEN (the .gnomish/gnomish wrapper points GNOMISH_GITHUB_TOKEN_FILE
+    # GNOMISH_GITHUB_TOKEN (the .gnomish/factory/gnomish wrapper points GNOMISH_GITHUB_TOKEN_FILE
     # at ~/.gnomish/secrets/time-zones/github-token). Any credential-shaped key in
     # this subsection — token, secret, password — is refused as a load error
     # rather than read. This optional key renames only the VARIABLE to read, for
