@@ -105,6 +105,8 @@ Features are developed with [OpenSpec](openspec/): `/opsx:propose` → `/opsx:ap
 | `gnomish.env`       | this instance's settings: instance name, host binding, log and secrets locations |
 | `gnomish.local.env` | optional personal overrides of `gnomish.env`, git-ignored                        |
 | `gnomish.jar`       | the factory build, git-ignored, you put it there yourself                        |
+| `sandbox/`          | Dockerfile of the box gnomes run in under the `container` binding                |
+| `build-sandbox`     | builds that image with the tool versions this repository pins                    |
 
 The pipeline currently has one stage, **`specify`**: it turns a task into exactly one OpenSpec change under `openspec/changes/` — the same procedure as `/opsx:propose` — and writes nothing else. It is accepted only if there is exactly one active change, `openspec validate --changes --strict` passes, the proposal has the sections and requirement ids from [`.claude/rules/`](.claude/rules/), and the judge approves it against [`acceptance.md`](.gnomish/stages/specify/acceptance.md). Implementation (`/opsx:apply`) is still done by hand.
 
@@ -155,7 +157,26 @@ The wrapper adds `--dir` (this project) and loads [`gnomish.env`](.gnomish/facto
 
 Without `--base`, `run` reads `.gnomish/` from the working tree, so uncommitted edits to a stage take effect immediately. A finished task leaves a `gnomish/<task-id>` branch; squash-merge it so the round-by-round history stays on the branch. Logs: `~/.gnomish/logs/time-zones/gnomish.log`. Labels: `gnomish:ready` → `gnomish:working` → `gnomish:delivered`, or `gnomish:needs-human` when a task escalates.
 
-> **Host mode.** There is no sandbox image for this project yet, so [`gnomish.env`](.gnomish/factory/gnomish.env) pins `FACTORY_BINDINGS_DEFAULT=host`: every gnome process runs on this machine as you, with access to your files and no network restrictions. Switching to the container binding needs a sandbox image with the OpenSpec CLI baked in, plus `FACTORY_SANDBOX_IMAGE` and `FACTORY_SANDBOX_EGRESSALLOWLIST`.
+### Running in Docker
+
+By default [`gnomish.env`](.gnomish/factory/gnomish.env) pins `FACTORY_BINDINGS_DEFAULT=host`: every gnome process runs on this machine as you, with access to your files and no network restrictions. The `container` binding runs each task in an ephemeral Docker box instead, behind an egress guard that lets through only `api.anthropic.com`, `registry.npmjs.org` and `api.github.com`.
+
+1. **Docker** running on this machine.
+2. **The image**, built once and again whenever pnpm, openspec or Playwright change in the repository (bump the `FACTORY_SANDBOX_IMAGE` tag in `gnomish.env` then). It carries node 22, pnpm, openspec, the Claude Code CLI, `gh`, `jq` and Playwright Chromium at the versions `package.json` and `pnpm-lock.yaml` pin:
+
+   ```bash
+   .gnomish/factory/build-sandbox
+   ```
+
+3. **`claude-oauth-token`** in the secrets directory (or `ANTHROPIC_API_KEY` in the shell) — a box has no keychain, so the host login does not carry over.
+
+Then switch one run, or put the line into `gnomish.local.env` to switch for good:
+
+```bash
+FACTORY_BINDINGS_DEFAULT=container .gnomish/factory/gnomish run --task="..."
+```
+
+The Java 25 runtime and the jar stay on the host: the factory itself runs there and drives the boxes through Docker. A host a tool needs but the guard denies shows up as an `egress denial:` line in `gnomish status`; add it to `FACTORY_SANDBOX_EGRESSALLOWLIST` only once you know which tool asked for it.
 
 Full reference: the factory's [operator guides](https://github.com/oinsio/gnomish-factory/tree/main/docs/guides) (`operator-guide.md` for the tracker, `-run.md` for `run`, `-serve.md` for `serve`).
 

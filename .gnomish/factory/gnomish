@@ -138,6 +138,13 @@ if [[ -z "${GNOMISH_GITHUB_TOKEN_FILE:-}" && -z "${GNOMISH_GITHUB_TOKEN:-}" \
     echo "gnomish: no $secrets_dir/github-token and no GNOMISH_GITHUB_TOKEN — tracker calls will fail" >&2
 fi
 
+# In a box the agent CLI has no keychain to fall back on: without one of these every round and
+# every judge vote fails to authenticate.
+if [[ "${FACTORY_BINDINGS_DEFAULT:-}" == "container" && -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" \
+      && -z "${ANTHROPIC_API_KEY:-}" && "${1:-}" != "--help" && "${1:-}" != "-h" ]]; then
+    echo "gnomish: container binding without $claude_token_file or ANTHROPIC_API_KEY — the agent cannot log in inside the box" >&2
+fi
+
 # --dir, unless the caller passed one — see the note at the top on why it is not simply outranked.
 dir_default=(--dir="$project_dir")
 for arg in "$@"; do
