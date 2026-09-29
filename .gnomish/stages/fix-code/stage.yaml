@@ -1,0 +1,109 @@
+# Stage goal, shown to the gnome.
+purpose: triage every finding in the change's review-code.md, fix the ones worth fixing with TDD, reject the rest with evidence, and keep CI green
+# The checkout, plus the change, the implementation and the review of it.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+  - kind: internal
+    producerOutputId: implementation-diff
+  - kind: internal
+    producerOutputId: code-review-report
+# Name of what the stage produces.
+outputs:
+  - id: code-review-resolution
+# Who does the work: a Claude Code CLI agent.
+executor:
+  type: agent-cli
+  model: sonnet
+  # Only these four keys are accepted.
+  settings:
+    # Agent turns per round. TDD, hooks and scoped mutation runs are turn-hungry.
+    maxTurns: 80
+    # Round is killed after this; counts as infra failure, not an attempt.
+    roundTimeout: 3600s
+    # Cannot widen what .claude/settings.json denies.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+      - Skill
+    # No subagents, no web, no scheduling.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Prompt for the gnome.
+instructions: stages/fix-code/instructions.md
+# Run in order after each round (sh -c, POSIX), cheap to expensive, one at a time.
+# A failure is fed back and burns an attempt.
+verify:
+  # Every finding carries a final status, and every status a resolution.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-code.md"
+      [ -f "$review" ] || { echo "$review is missing - the review-code stage left it there; restore it from git"; exit 1; }
+      open=$(grep -nE '^- Status: open' "$review" || true)
+      [ -z "$open" ] || { echo "$open"; echo "these findings are still open - fix or reject each one, see stages/fix-code/instructions.md"; exit 1; }
+      bad=$(grep -nE '^- Status: ' "$review" | grep -vE '^[0-9]+:- Status: (fixed|rejected \((false-positive|contradicts-spec|harmful|out-of-scope|not-worth-it)\))$' || true)
+      [ -z "$bad" ] || { echo "$bad"; echo "a status reads 'fixed' or 'rejected (false-positive|contradicts-spec|harmful|out-of-scope|not-worth-it)'"; exit 1; }
+      findings=$(grep -cE '^### R[0-9]+ — ' "$review" || true)
+      resolutions=$(grep -cE '^- Resolution: .{20,}' "$review" || true)
+      [ "$resolutions" = "$findings" ] || { echo "$review has $findings findings but $resolutions '- Resolution:' lines of substance - every finding gets one, right after its Status"; exit 1; }
+  # The worktree starts without node_modules; idempotent and fast once installed.
+  - type: command
+    command: pnpm install --frozen-lockfile --prefer-offline
+  # The fix must not reopen tasks.
+  - type: command
+    command: >-
+      if grep -rn '^[[:space:]]*- \[ \]' openspec/changes --include=tasks.md --exclude-dir=archive;
+      then echo "the tasks listed above are open again - the fix-code stage must leave tasks.md as implement left it"; exit 1; fi
+  # Files this branch added or changed under packages/client/src stay under the 300-line hard cap.
+  - type: command
+    command: >-
+      base=$(git merge-base HEAD origin/main);
+      oversized=$({ git diff --name-only --diff-filter=AM "$base" -- packages/client/src;
+      git ls-files -o --exclude-standard packages/client/src; } | sort -u |
+      while read -r file; do [ -f "$file" ] && lines=$(wc -l < "$file") && [ "$lines" -gt 300 ] && echo "$file: $lines lines"; done);
+      [ -z "$oversized" ] || { echo "$oversized"; echo "these files exceed the 300-line hard cap - split them, see .claude/rules/process-invariants.md"; exit 1; }
+  - type: command
+    command: pnpm lint
+  - type: command
+    command: pnpm typecheck
+  - type: command
+    command: pnpm test
+  - type: command
+    command: pnpm build
+  - type: command
+    command: pnpm --filter @time-zones/client check:bundle-size
+  # BDD E2E via playwright-bdd; needs Chromium from `playwright install chromium` on this host.
+  - type: command
+    command: pnpm --filter @time-zones/client test:bdd
+  # LLM judge checks each fix and challenges each rejection; read-only. Opus, like the
+  # reviewer: it arbitrates between the reviewer and the fixer.
+  - type: judge
+    criteriaFile: stages/fix-code/acceptance.md
+    model: opus
+    settings:
+      maxTurns: 20
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Judge runs; must be odd, majority wins.
+    votes: 1
+# auto = go to next stage; manual = wait for a human.
+advancement: auto

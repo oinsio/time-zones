@@ -1,0 +1,99 @@
+# Stage goal, shown to the gnome.
+purpose: review the implementation of this task's OpenSpec change and record every finding worth acting on in the change's review-code.md, changing no code
+# The checkout, plus what the specify and implement stages produced.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+  - kind: internal
+    producerOutputId: implementation-diff
+# Name of what the stage produces.
+outputs:
+  - id: code-review-report
+# Who does the work: a Claude Code CLI agent. Opus: an independent, stronger reviewer
+# than the sonnet that wrote the code.
+executor:
+  type: agent-cli
+  model: opus
+  # Only these four keys are accepted.
+  settings:
+    # Agent turns per round. Per-item evidence, greps and scoped Stryker runs are turn-hungry.
+    maxTurns: 60
+    # Round is killed after this; counts as infra failure, not an attempt.
+    # pnpm install + scoped Stryker runs on the changed production files.
+    roundTimeout: 3600s
+    # Cannot widen what .claude/settings.json denies. Bash is for git, grep, pnpm install
+    # and scoped Stryker; the scope check below rejects any edit outside review-code.md.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+    # No subagents, no web, no scheduling.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Prompt for the gnome.
+instructions: stages/review-code/instructions.md
+# Run in order after each round (sh -c, POSIX); a failure is fed back and burns an attempt.
+verify:
+  # Exactly one active change, and it holds a review-code.md with the required sections and a
+  # well-formed finding list the fix-code stage can close item by item.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      [ "$(printf '%s\n' "$change" | grep -c .)" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found: $change"; exit 1; }
+      review="$change/review-code.md"
+      [ -f "$review" ] || { echo "$review is missing - write the review report there, see stages/review-code/instructions.md"; exit 1; }
+      for section in '## Summary' '## Tasks' '## Requirements' '## Mutation' '## Findings' '## Verdict'; do
+        grep -q "^$section" "$review" || { echo "$review has no '$section' section"; exit 1; }
+      done
+      bad=$(grep -n '^### ' "$review" | grep -vE '^[0-9]+:### R[0-9]+ — (CRITICAL|WARNING|SUGGESTION) — .+' || true)
+      [ -z "$bad" ] || { echo "$bad"; echo "level-3 headings are findings only and read '### R<n> — CRITICAL|WARNING|SUGGESTION — <title>'"; exit 1; }
+      duplicates=$(grep -oE '^### R[0-9]+ ' "$review" | sort | uniq -d)
+      [ -z "$duplicates" ] || { echo "$duplicates"; echo "finding ids must be unique"; exit 1; }
+      findings=$(grep -cE '^### R[0-9]+ — ' "$review" || true)
+      for field in Location Rule Problem Impact Fix 'Fix risk' Status; do
+        count=$(grep -cE "^- $field: " "$review" || true)
+        [ "$count" = "$findings" ] || { echo "$review has $findings findings but $count '- $field:' lines - every finding carries every field exactly once"; exit 1; }
+      done
+      open=$(grep -cE '^- Status: open$' "$review" || true)
+      [ "$open" = "$findings" ] || { echo "every finding must stay at '- Status: open' - only the fix-code stage sets a status"; exit 1; }
+  # The reviewer changes nothing but review-code.md. The stage's baseline is the parent of the
+  # commit that first added review-code.md (only this stage creates it); .gnomish-task/ is the
+  # factory's own bookkeeping.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-code.md"
+      added=$(git log --diff-filter=A --format=%H -- "$review" | tail -1)
+      base=HEAD
+      [ -z "$added" ] || base="$added^"
+      touched=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -vxF "$review" | grep -v '^\.gnomish-task/' || true)
+      [ -z "$touched" ] || { echo "$touched"; echo "the review-code stage writes nothing but $review - restore the files above with: git checkout $base -- <file>"; exit 1; }
+  # LLM judge challenges every finding against acceptance.md; read-only.
+  - type: judge
+    criteriaFile: stages/review-code/acceptance.md
+    model: opus
+    settings:
+      maxTurns: 20
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Judge runs; must be odd, majority wins.
+    votes: 1
+# auto = go to next stage; manual = wait for a human.
+advancement: auto

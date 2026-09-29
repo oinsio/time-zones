@@ -1,0 +1,59 @@
+# Reference: https://github.com/oinsio/gnomish-factory
+#   docs/guides/operator-guide.md         — tracker section, labels, tokens
+#   docs/guides/operator-guide-serve.md   — wip-limit, task-branch.base
+#   docs/guides/operator-guide-run.md     — the ad-hoc `run` entry point
+
+# REQUIRED. The schema version of the whole .gnomish/ tree.
+schemaVersion: "1"
+
+# Pipeline-wide autonomy defaults.
+autonomy:
+  # How many attempts one stage gets before the task escalates to a human.
+  # A stage may override this in its own stage.yaml `autonomy:` block.
+  attemptLimit: 2
+
+# The tracker the factory claims tasks from.
+tracker:
+  # REQUIRED. Names the task tracker adapter.
+  type: github
+
+  # Optional, default 3. How many failed pickups of one task.
+  abort-threshold: 3
+
+  # Optional, default 5m. How often a live instance re-beats each Working claim
+  # it holds, so other instances can tell its process is still alive.
+  heartbeat-interval: 5m
+
+  # Optional, default 3, minimum 3. How many beat intervals an unbeaten claim
+  # survives before it is considered dead and reaped.
+  # TTL = multiplier × interval, so the defaults give 15 minutes.
+  heartbeat-ttl-multiplier: 3
+
+  # Optional, default 10. The project-wide cap on open fronts (Working +
+  # AwaitingHuman) that `serve` respects. It is project-wide.
+  wip-limit: 10
+
+  # REQUIRED, and its key must equal `type` above.
+  github:
+    # REQUIRED, no code default. https://api.github.com for github.com; a GitHub
+    # Enterprise install names its own endpoint here.
+    api-url: https://api.github.com
+
+    # REQUIRED. owner/repo — the repository whose issues are the task queue.
+    repo: oinsio/time-zones
+
+    # The token is NEVER written here. It is read at adapter construction from
+    # GNOMISH_GITHUB_TOKEN (the .gnomish/factory/gnomish wrapper points GNOMISH_GITHUB_TOKEN_FILE
+    # at ~/.gnomish/secrets/time-zones/github-token). Any credential-shaped key in
+    # this subsection — token, secret, password — is refused as a load error
+    # rather than read. This optional key renames only the VARIABLE to read, for
+    # an operator whose connection profile calls it something else.
+    # credential: GNOMISH_GITHUB_TOKEN
+
+    # Optional in whole and per entry; unconfigured entries fall back to the
+    # adapter's defaults shown below.
+    labels:
+      ready: { name: "gnomish:ready", color: "2ea44f" }
+      working: { name: "gnomish:working", color: "1f6feb" }
+      needs-human: { name: "gnomish:needs-human", color: "d73a4a" }
+      delivered: { name: "gnomish:delivered", color: "8250df" }
