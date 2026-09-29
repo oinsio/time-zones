@@ -1,0 +1,60 @@
+purpose: turn the task into one complete, validated OpenSpec change under openspec/changes/
+inputs:
+  - kind: source
+outputs:
+  - id: openspec-change
+executor:
+  type: agent-cli
+  model: sonnet
+  settings:
+    maxTurns: 40
+    roundTimeout: 1200s
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+      - Skill
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+instructions: stages/specify/instructions.md
+verify:
+  - type: command
+    command: >-
+      count=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive | wc -l | tr -d ' ');
+      [ "$count" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found $count"; exit 1; }
+  - type: command
+    command: openspec validate --changes --strict --no-interactive
+  - type: command
+    command: >-
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive);
+      proposal="$change/proposal.md";
+      for section in '## Why' '## What Changes' '## Goals' '## Non-Goals' '## Requirements' '## Success Metrics'; do
+        grep -q "^$section" "$proposal" || { echo "$proposal has no '$section' section — see .claude/rules/proposal-format.md"; exit 1; };
+      done;
+      grep -qE '(^|[^A-Za-z])FR[0-9]+' "$proposal" || { echo "$proposal declares no FR<n> requirement id — every requirement needs one, see .claude/rules/traceability.md"; exit 1; };
+      grep -qE '(^|[^A-Za-z])M[0-9]+' "$proposal" || { echo "$proposal declares no M<n> success metric id — see .claude/rules/traceability.md"; exit 1; }
+  - type: judge
+    criteriaFile: stages/specify/acceptance.md
+    model: sonnet
+    settings:
+      maxTurns: 10
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    votes: 1
+advancement: auto

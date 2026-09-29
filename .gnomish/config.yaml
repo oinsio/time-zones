@@ -1,0 +1,11 @@
+schemaVersion: "1"
+autonomy:
+  attemptLimit: 2
+tracker:
+  type: github
+  abort-threshold: 3
+  heartbeat-interval: 5m
+  heartbeat-ttl-multiplier: 3
+  github:
+    api-url: https://api.github.com
+    repo: oinsio/time-zones
