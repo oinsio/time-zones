@@ -112,6 +112,27 @@ if [[ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" && -s "$claude_token_file" ]]; then
     unset token
 fi
 
+# The deliver stage runs `gh` — in the gnome's round and in that stage's own command checks —
+# and `gh` takes its credential from GH_TOKEN. The tracker's GNOMISH_GITHUB_TOKEN cannot serve
+# it: the factory declares that name a credential, so it is scrubbed from every child
+# environment and refused in the passthrough allowlist by construction. The same token is
+# therefore exported a second time under a name the factory has no reason to treat as one,
+# and gnomish.env allowlists it by name (FACTORY_SANDBOX_ENVPASSTHROUGH).
+#
+# What that costs, plainly: the gnome's process holds a token with the tracker's own rights —
+# it can write issues and labels as you, and the value sits in this process's environment
+# table, which the *_FILE indirection above exists to avoid. A fine-grained token scoped to
+# Contents + Pull requests in github-pr-token narrows both: it wins over the tracker token
+# here, and nothing else reads it.
+pr_token_file="$secrets_dir/github-pr-token"
+[[ -f "$pr_token_file" ]] || pr_token_file="$secrets_dir/github-token"
+if [[ -z "${GH_TOKEN:-}" && -s "$pr_token_file" ]]; then
+    warn_if_group_readable "$pr_token_file"
+    GH_TOKEN="$(tr -d '[:space:]' < "$pr_token_file")"
+    export GH_TOKEN
+fi
+unset pr_token_file
+
 if [[ -z "${GNOMISH_GITHUB_TOKEN_FILE:-}" && -z "${GNOMISH_GITHUB_TOKEN:-}" \
       && "${1:-}" != "--help" && "${1:-}" != "-h" ]]; then
     echo "gnomish: no $secrets_dir/github-token and no GNOMISH_GITHUB_TOKEN — tracker calls will fail" >&2

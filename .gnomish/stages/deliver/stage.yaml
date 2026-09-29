@@ -1,0 +1,119 @@
+# Stage goal, shown to the gnome.
+purpose: open (or update) the pull request that hands this task's branch to a human reviewer, and mirror its body into pr-body.md so the judge can read what was published
+# The checkout, plus what the implement and archive stages produced.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: implementation-diff
+  - kind: internal
+    producerOutputId: archived-change
+# Name of what the stage produces.
+outputs:
+  - id: pull-request
+# Who does the work: a Claude Code CLI agent.
+executor:
+  type: agent-cli
+  model: sonnet
+  # Only these four keys are accepted.
+  settings:
+    # Agent turns per round.
+    maxTurns: 15
+    # Round is killed after this; counts as infra failure, not an attempt.
+    roundTimeout: 600s
+    # Cannot widen what .claude/settings.json denies.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+    # No subagents, no web, no scheduling.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Prompt for the gnome.
+instructions: stages/deliver/instructions.md
+# Run in order after each round (sh -c, POSIX); a failure is fed back and burns an attempt.
+# `gh` authenticates with GH_TOKEN: .gnomish/factory/gnomish exports it and gnomish.env
+# allowlists it through FACTORY_SANDBOX_ENVPASSTHROUGH.
+verify:
+  # An open pull request exists for this branch and targets main. Cheapest check first:
+  # everything below is meaningless without it.
+  - type: command
+    command: |
+      set -e
+      if [ -z "${GH_TOKEN:-}" ]; then
+        echo "GH_TOKEN is absent from the check environment - .gnomish/factory/gnomish exports it from the secrets file and gnomish.env passes it through FACTORY_SANDBOX_ENVPASSTHROUGH; without it no gh call in this stage can work"
+        exit 1
+      fi
+      repo=$(sed -n 's/^[[:space:]]*repo:[[:space:]]*//p' .gnomish/config.yaml | head -1)
+      branch=$(git branch --show-current)
+      base=$(gh pr list --repo "$repo" --head "$branch" --state open --json baseRefName --jq '.[0].baseRefName // empty')
+      if [ -z "$base" ]; then
+        echo "no open pull request for branch $branch in $repo - open one with: gh pr create --repo $repo --base main --head $branch --title <title> --body-file pr-body.md"
+        exit 1
+      fi
+      if [ "$base" != "main" ]; then
+        echo "the pull request for $branch targets $base, not main - retarget it with: gh pr edit --repo $repo --base main"
+        exit 1
+      fi
+  # The published title and body carry review-worthy content, and pr-body.md is a faithful
+  # mirror of the body - the judge below reads the file, so the two must not drift.
+  - type: command
+    command: |
+      set -e
+      repo=$(sed -n 's/^[[:space:]]*repo:[[:space:]]*//p' .gnomish/config.yaml | head -1)
+      branch=$(git branch --show-current)
+      number=$(gh pr list --repo "$repo" --head "$branch" --state open --json number --jq '.[0].number // empty')
+      if [ ! -f pr-body.md ]; then
+        echo "pr-body.md is missing - the stage must leave the published body in that file, it is the only thing the judge can read"
+        exit 1
+      fi
+      title=$(gh pr view "$number" --repo "$repo" --json title --jq .title)
+      case "$title" in
+        gnomish:*|"") echo "the pull request title is '$title' - give it a real one describing the change, not a factory commit subject"; exit 1 ;;
+      esac
+      if [ ${#title} -lt 10 ]; then
+        echo "the pull request title '$title' is too short to describe the change"
+        exit 1
+      fi
+      local_body=$(tr -d '[:space:]' < pr-body.md)
+      remote_body=$(gh pr view "$number" --repo "$repo" --json body --jq .body | tr -d '[:space:]')
+      if [ ${#local_body} -lt 120 ]; then
+        echo "pr-body.md holds ${#local_body} non-whitespace characters - too thin for a reviewer; describe what changed, why, and how it was verified"
+        exit 1
+      fi
+      if [ "$local_body" != "$remote_body" ]; then
+        echo "the published body and pr-body.md differ - publish the file itself: gh pr edit $number --repo $repo --body-file pr-body.md"
+        exit 1
+      fi
+      issue=$(sed -n 's/.*"taskId":"[^"#]*#\([0-9][0-9]*\)".*/\1/p' .gnomish-task/task.json 2>/dev/null | head -1)
+      if [ -n "$issue" ] && ! grep -q "#$issue" pr-body.md; then
+        echo "the body never references the task issue - add a 'Refs #$issue' line so the reviewer can find it"
+        exit 1
+      fi
+  # LLM judge grades the pull request body against acceptance.md; read-only.
+  - type: judge
+    criteriaFile: stages/deliver/acceptance.md
+    model: sonnet
+    settings:
+      maxTurns: 10
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Judge runs; must be odd, majority wins.
+    votes: 1
+# auto = go to next stage; manual = wait for a human.
+advancement: auto

@@ -1,0 +1,83 @@
+# Stage goal, shown to the gnome.
+purpose: archive this task's completed OpenSpec change under openspec/changes/archive/YYYY/MM/ and fold its spec deltas into openspec/specs/
+# The checkout, plus what the specify and implement stages produced.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+  - kind: internal
+    producerOutputId: implementation-diff
+# Name of what the stage produces.
+outputs:
+  - id: archived-change
+# Who does the work: a Claude Code CLI agent.
+executor:
+  type: agent-cli
+  model: sonnet
+  # Only these four keys are accepted.
+  settings:
+    # Agent turns per round.
+    maxTurns: 15
+    # Round is killed after this; counts as infra failure, not an attempt.
+    roundTimeout: 600s
+    # Cannot widen what .claude/settings.json denies.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+    # No subagents, no web, no scheduling.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Prompt for the gnome.
+instructions: stages/archive/instructions.md
+# Run in order after each round (sh -c, POSIX); a failure is fed back and burns an attempt.
+verify:
+  # No active change is left.
+  - type: command
+    command: >-
+      if find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive | grep .;
+      then echo "the change directories listed above are still active - archive each one with:
+      openspec archive <name> --yes, then move it under openspec/changes/archive/YYYY/MM/"; exit 1; fi
+  # Archive layout from .claude/rules/archive-path.md: archive/YYYY/MM/YYYY-MM-DD-<name>.
+  - type: command
+    command: >-
+      misplaced=$(find openspec/changes/archive -mindepth 1 -maxdepth 1 -type d ! -name '[0-9][0-9][0-9][0-9]';
+      find openspec/changes/archive -mindepth 2 -maxdepth 2 -type d ! -name '[0-1][0-9]';
+      find openspec/changes/archive -mindepth 3 -maxdepth 3 -type d ! -name '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]-*');
+      [ -z "$misplaced" ] || { echo "$misplaced"; echo "these archive entries break the YYYY/MM/YYYY-MM-DD-<name> layout - see .claude/rules/archive-path.md"; exit 1; }
+  # Every archived change is complete. `openspec validate --archived` does not descend into
+  # the YYYY/MM grouping, so the checkboxes are checked directly.
+  - type: command
+    command: >-
+      if grep -rn '^[[:space:]]*- \[ \]' openspec/changes/archive --include=tasks.md;
+      then echo "the archived tasks listed above are still open - the change was archived unfinished"; exit 1; fi
+  - type: command
+    command: openspec validate --specs --strict --no-interactive
+  # LLM judge grades the archive against acceptance.md; read-only.
+  - type: judge
+    criteriaFile: stages/archive/acceptance.md
+    model: sonnet
+    settings:
+      maxTurns: 10
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Judge runs; must be odd, majority wins.
+    votes: 1
+# auto = go to next stage; manual = wait for a human.
+advancement: auto

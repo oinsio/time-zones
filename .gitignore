@@ -54,3 +54,6 @@ npm-debug.log
 !postcss.config.js
 !**/postcss.config.js
 !**/vite-env.d.ts
+
+# Gnomish Factory — the deliver stage mirrors the published PR body here
+pr-body.md

@@ -1,3 +1,6 @@
 # Order to launch stages
 stages:
   - specify
+  - implement
+  - archive
+  - deliver
