@@ -1,2 +1,3 @@
+# Order to launch stages
 stages:
   - specify

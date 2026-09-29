@@ -1,14 +1,22 @@
+# Stage goal, shown to the gnome.
 purpose: turn the task into one complete, validated OpenSpec change under openspec/changes/
+# Works on the repository checkout of the task.
 inputs:
   - kind: source
+# Name of what the stage produces.
 outputs:
   - id: openspec-change
+# Who does the work: a Claude Code CLI agent.
 executor:
   type: agent-cli
   model: sonnet
+  # Only these four keys are accepted.
   settings:
+    # Agent turns per round.
     maxTurns: 40
+    # Round is killed after this; counts as infra failure, not an attempt.
     roundTimeout: 1200s
+    # Cannot widen what .claude/settings.json denies.
     allowedTools:
       - Read
       - Glob
@@ -17,6 +25,7 @@ executor:
       - Write
       - Bash
       - Skill
+    # No subagents, no web, no scheduling.
     disallowedTools:
       - Agent
       - ScheduleWakeup
@@ -24,14 +33,19 @@ executor:
       - ToolSearch
       - WebFetch
       - WebSearch
+# Prompt for the gnome.
 instructions: stages/specify/instructions.md
+# Run in order after each round; a failure is fed back and burns an attempt.
 verify:
+  # Exactly one active change.
   - type: command
     command: >-
       count=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive | wc -l | tr -d ' ');
       [ "$count" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found $count"; exit 1; }
+  # OpenSpec's own strict validation.
   - type: command
     command: openspec validate --changes --strict --no-interactive
+  # proposal.md has required sections and FR/M ids.
   - type: command
     command: >-
       change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive);
@@ -41,6 +55,7 @@ verify:
       done;
       grep -qE '(^|[^A-Za-z])FR[0-9]+' "$proposal" || { echo "$proposal declares no FR<n> requirement id — every requirement needs one, see .claude/rules/traceability.md"; exit 1; };
       grep -qE '(^|[^A-Za-z])M[0-9]+' "$proposal" || { echo "$proposal declares no M<n> success metric id — see .claude/rules/traceability.md"; exit 1; }
+  # LLM judge grades the change against acceptance.md; read-only.
   - type: judge
     criteriaFile: stages/specify/acceptance.md
     model: sonnet
@@ -56,5 +71,10 @@ verify:
         - Write
         - WebFetch
         - WebSearch
+    # Judge runs; must be odd, majority wins.
     votes: 1
+# auto = go to next stage; manual = wait for a human.
+# manual parks the task as gnomish:needs-human (checkpoint). To continue:
+#   tracker: move the issue back to gnomish:ready (no reply needed);
+#   local: gnomish run --dir=<path-to-time-zones-clone> --resume=<task>, then confirm.
 advancement: auto
