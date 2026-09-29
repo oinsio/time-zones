@@ -16,6 +16,9 @@ against the change it describes.
   archived change's `proposal.md`.
 - It says how the change was verified and names the Vitest specs and `.feature`
   files that cover it, and those files exist under `packages/client/src/`.
+- It summarises both reviews from the archived change's `review-specs.md` and
+  `review-code.md`: fixed and rejected counts, and every rejected finding with
+  its reason, as those files record them.
 - It points at the archived OpenSpec change under
   `openspec/changes/archive/YYYY/MM/`, and that directory exists.
 - It references the task's issue with `Refs #<issue>`, not `Closes`/`Fixes` —

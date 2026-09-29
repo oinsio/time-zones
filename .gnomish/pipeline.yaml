@@ -1,6 +1,10 @@
 # Order to launch stages
 stages:
   - specify
+  - review-specs
+  - fix-specs
   - implement
+  - review-code
+  - fix-code
   - archive
   - deliver

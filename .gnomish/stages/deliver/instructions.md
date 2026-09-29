@@ -34,6 +34,10 @@ Steps:
      `pnpm build`, the bundle budget, the BDD E2E suite, and the Vitest specs
      and `.feature` files under `packages/client/src/` that cover the change;
      the mutation scores if the implement stage's commits or summary give them;
+   - the outcome of both reviews, from `review-specs.md` and `review-code.md`
+     in the archived change: for each, how many findings per severity were
+     fixed and rejected, and every rejected finding by id with its reason in
+     one line — the human decides whether they agree;
    - a pointer to the archived OpenSpec change;
    - a final `Refs #<issue>` line. Use `Refs`, not `Closes` — this project
      closes its issues itself.

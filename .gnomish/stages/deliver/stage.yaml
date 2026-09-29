@@ -1,10 +1,12 @@
 # Stage goal, shown to the gnome.
 purpose: open (or update) the pull request that hands this task's branch to a human reviewer, and mirror its body into pr-body.md so the judge can read what was published
-# The checkout, plus what the implement and archive stages produced.
+# The checkout, plus what the implement, fix-code and archive stages produced.
 inputs:
   - kind: source
   - kind: internal
     producerOutputId: implementation-diff
+  - kind: internal
+    producerOutputId: code-review-resolution
   - kind: internal
     producerOutputId: archived-change
 # Name of what the stage produces.
