@@ -8,8 +8,8 @@ inputs:
 # Name of what the stage produces.
 outputs:
   - id: spec-review-report
-# Who does the work: a Claude Code CLI agent. Opus: an independent, stronger reviewer
-# than the sonnet that wrote the change.
+# Who does the work: a Claude Code CLI agent. Opus, in a fresh context: an independent
+# reviewer of the change the specify stage wrote.
 executor:
   type: agent-cli
   model: opus
