@@ -149,7 +149,7 @@ The search data SHALL be loaded when the search is first opened. While it loads,
 - **THEN** Moscow is among the results
 
 ### Requirement: Search is fast and lazy
-Computing the results of one query over the full bundled data SHALL take at most 50 ms. The search data MUST NOT be part of the initial JavaScript; it MUST be a separate chunk of at most 30 KB gzipped, and the initial JavaScript MUST stay at most 150 KB gzipped. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search -->
+Computing the results of one query over the full bundled data SHALL take at most 50 ms. The search data MUST NOT be part of the initial JavaScript; it MUST be a separate chunk of at most 30 KB gzipped, and the initial JavaScript MUST stay at most 150 KB gzipped. The page MUST NOT request the search data before the search is first opened; the service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search -->
 
 #### Scenario: Query timing
 - **WHEN** each of 10 sample queries is run over the full data
@@ -157,12 +157,13 @@ Computing the results of one query over the full bundled data SHALL take at most
 
 #### Scenario: Data loads only when the search opens
 - **WHEN** the user opens the app and has not opened the search
-- **THEN** the search data has not been requested
-- **AND** it is requested when the user opens the search
+- **THEN** the page has not requested the search data
+- **AND** the page requests it when the user opens the search
 
 #### Scenario: Bundle budget
 - **WHEN** the app is built
 - **THEN** the search data is a separate chunk of at most 30 KB gzipped
+- **AND** that chunk is not part of the initial JavaScript
 - **AND** the initial JavaScript is at most 150 KB gzipped
 
 ### Requirement: Keyboard-operable search

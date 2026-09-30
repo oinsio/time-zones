@@ -135,10 +135,17 @@ When the stored list is not valid JSON, does not match the expected document, co
 - **AND** the stored list is cleared
 
 ### Requirement: Working without storage
-When storage cannot be written, adding and removing SHALL still work for the session, and the existing storage warning MUST be shown. <!-- implements FR13 of add-locations-via-search -->
+When storage cannot be written — unavailable from the start, or failing only when the list is saved — adding and removing SHALL still work for the session, and the existing storage warning MUST be shown. <!-- implements FR13 of add-locations-via-search -->
 
 #### Scenario: Private mode
 - **GIVEN** writing to storage fails
+- **WHEN** the user adds Moscow
+- **THEN** Moscow is shown in the list
+- **AND** the storage warning is shown
+
+#### Scenario: Saving the list fails later
+- **GIVEN** storage worked when the app was opened and no storage warning is shown
+- **AND** saving the list now fails
 - **WHEN** the user adds Moscow
 - **THEN** Moscow is shown in the list
 - **AND** the storage warning is shown

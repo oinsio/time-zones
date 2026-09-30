@@ -88,7 +88,7 @@ Audience: every user of the app; without this change the app shows no useful con
 #### Performance
 
 - NFR-P1: Computing the results for one query over the full bundled data takes at most 50 ms.
-- NFR-P2: Initial JavaScript stays at most 150 KB gzipped; the search data is loaded in a separate chunk of at most 30 KB gzipped, only when the search is opened.
+- NFR-P2: Initial JavaScript stays at most 150 KB gzipped. The search data is a separate chunk of at most 30 KB gzipped that is not part of the initial JavaScript, and the page first requests it when the search is opened. The service worker may download and cache that chunk in the background for offline use (FR16); that does not count as the page requesting it.
 
 #### Accessibility
 
@@ -147,7 +147,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M4: On the bundled data, `IST` returns Kolkata, Jerusalem and Dublin as its first 3 results in that order; `EST` returns New York first; `Moscow` and `Москва` return Moscow first; every result for `Kazakhstan` has country KZ and Almaty is among them.
 - M5: 0 raw offsets stored: a stored document with a legacy identifier (`Asia/Calcutta`) loads as `Asia/Kolkata`, and adding `+05:00` is rejected — both covered by tests.
 - M6: Each of 10 sample queries completes in at most 50 ms in the performance scenario.
-- M7: Initial JavaScript at most 150 KB gzipped; the search chunk exists separately and is at most 30 KB gzipped.
+- M7: Initial JavaScript at most 150 KB gzipped; the search chunk exists separately, is neither the entry script nor a modulepreload link of `index.html`, and is at most 30 KB gzipped; the page issues 0 requests for it before the search is opened and at least 1 after.
 
 ## Open Questions
 
