@@ -30,3 +30,12 @@ nothing else. You have no git: judge the files as they are now; what changed and
 not run the build, the tests or `gh`: the deterministic checks have already run
 before you, and their green result is a precondition of your review, not part
 of it.
+
+Start from `pr-body.md`: the ids, test files and archive path it names are
+what you need to check.
+
+Your turns are limited and each one counts, however many tools it calls. Read
+several files in one turn with parallel `Read` calls, check a pattern across
+the tree with one `Grep` instead of opening files one by one, and keep a few
+turns in reserve: a round that ends without the verdict JSON is lost,
+whatever you found.

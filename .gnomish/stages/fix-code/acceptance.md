@@ -35,6 +35,15 @@ You have no git: judge the files as they are now; what changed and what did not 
 the bundle budget and the BDD E2E suite have already run as separate checks
 before you, and their green result is a precondition of your review.
 
+Start from `review-code.md`: each finding's Location and Resolution name
+the files you need to open. Do not walk the whole tree.
+
+Your turns are limited and each one counts, however many tools it calls. Read
+several files in one turn with parallel `Read` calls, check a pattern across
+the tree with one `Grep` instead of opening files one by one, and keep a few
+turns in reserve: a round that ends without the verdict JSON is lost,
+whatever you found.
+
 Check every criterion above before you give a verdict, and report every
 violation you find — not the first few. A rejected round goes back for one
 more attempt, and a violation you saw but did not report costs a whole attempt

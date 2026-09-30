@@ -42,6 +42,15 @@ finding costs more than a missing one, because the next stage will act on it.
 Judge by reading `review-code.md`, the change's OpenSpec artifacts and the
 source only; each finding's Location tells you where to look. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do not run the build, the tests or Stryker.
 
+Start from `review-code.md`: its Tasks and Requirements evidence and each
+finding's Location name the files you need to open. Do not walk the whole tree.
+
+Your turns are limited and each one counts, however many tools it calls. Read
+several files in one turn with parallel `Read` calls, check a pattern across
+the tree with one `Grep` instead of opening files one by one, and keep a few
+turns in reserve: a round that ends without the verdict JSON is lost,
+whatever you found.
+
 Check every criterion above before you give a verdict, and report every
 violation you find — not the first few. A rejected round goes back for one
 more attempt, and a violation you saw but did not report costs a whole attempt

@@ -32,6 +32,15 @@ Judge by reading `review-specs.md`, the task, the change's artifacts,
 `openspec/specs/`, `docs/adr/`, `.claude/rules/` and the source only. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do not run the build, the
 tests or the OpenSpec CLI.
 
+Start from `review-specs.md`: each finding's Resolution names where the
+change was edited. Do not walk the whole tree.
+
+Your turns are limited and each one counts, however many tools it calls. Read
+several files in one turn with parallel `Read` calls, check a pattern across
+the tree with one `Grep` instead of opening files one by one, and keep a few
+turns in reserve: a round that ends without the verdict JSON is lost,
+whatever you found.
+
 Check every criterion above before you give a verdict, and report every
 violation you find — not the first few. A rejected round goes back for one
 more attempt, and a violation you saw but did not report costs a whole attempt
