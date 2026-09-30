@@ -13,8 +13,9 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 - ADDED: main page with regions — header (title, slot for future controls), content (active view), bottom bar (slot for the future date control), notices.
 - ADDED: view host that reads the view registry, resolves `AUTO` by container width and renders the resolved view lazily.
 - ADDED: `Cards` view registered in the registry as a skeleton that shows the empty state; no rows, no model.
-- ADDED: UI states of the page: loading (view chunk loading), error (view failed, retry), empty (no locations), offline note, storage-unavailable warning.
+- ADDED: UI states of the page: loading (view chunk loading), error (view failed, retry), empty (no locations), a note when an update check fails offline, storage-unavailable warning.
 - ADDED: `main-page` i18n strings in `en` and `ru`.
+- MODIFIED: `usePwaUpdateStatus` also reports a failed update check (`isUpdateCheckFailed`); the `app-shell` spec states the new note next to the existing notices.
 - MODIFIED: the shell requirement "empty view registry" — the registry now contains the Cards view and the shell renders the main page.
 
 ## Capabilities
@@ -45,7 +46,7 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 
 - U1: A user opens the app on a phone and sees the title and an explanation that no locations are added yet.
 - U2: A user opens the app on a wide screen; `AUTO` resolves to Cards, the only registered view.
-- U3: A user opens the app offline; the page works and shows a short offline note.
+- U3: A user opens the app offline; the page works as usual, and shows a short note only when the check for a new version could not reach the network.
 - U4: A user in private mode sees a warning that changes will not be saved.
 - U5: A view fails to load; the user sees an error with a retry action, and the title and notices stay usable.
 - U6: The developer registers a second view; the host can resolve to it without any page edit.
@@ -61,7 +62,7 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 - FR5: While the active view loads, the host shows a skeleton; the header and notices stay visible.
 - FR6: If the active view throws or fails to load, the host shows an error message with a retry action, and the rest of the page stays usable. Retry re-renders the view.
 - FR7: When there are no locations, the Cards view shows an empty state with an explanation. It has no action button until search exists (Q1).
-- FR8: While the browser is offline, the page shows a short non-blocking note that the app works offline; it disappears when the connection returns.
+- FR8: While the browser is offline, the page keeps working with the same content and shows no note because of the missing network alone. When a check for a new version fails because the network is unreachable, the notices region shows a short polite note that the latest version could not be fetched; the note disappears when the connection returns.
 - FR9: When local storage is unavailable, the page shows a warning that changes will not be saved; the app still works.
 - FR10: All page strings exist in `en` and `ru`; both files keep identical key sets.
 
@@ -74,7 +75,7 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 #### Accessibility
 
 - NFR-A1: axe-core reports no violations on the main page in each state, in light and dark themes.
-- NFR-A2: The offline note, the storage warning and the error message are announced politely or as an alert without taking focus; the retry action works with Tab and Enter.
+- NFR-A2: The update-check-failed note, the storage warning and the error message are announced politely or as an alert without taking focus; the retry action works with Tab and Enter.
 
 #### Responsive
 
@@ -84,7 +85,7 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 
 - UX1: The user never sees a blank content area: every state shows text.
 - UX2: The page uses design tokens only and follows the system theme.
-- UX3: Loading, empty, offline and storage messages do not shift the header.
+- UX3: Loading, empty, update-check-failed and storage messages do not shift the header.
 
 ## UI States Matrix
 
@@ -93,7 +94,7 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 | online | view chunk loading | skeleton in content |
 | online | view failed | error message with Retry |
 | online | no locations | empty state text |
-| offline | any | same content plus offline note |
+| offline | any | same content; note only when the update check failed |
 | any | storage unavailable | warning banner plus same content |
 
 ## Behavior

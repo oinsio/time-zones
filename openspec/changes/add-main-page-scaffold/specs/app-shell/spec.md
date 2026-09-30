@@ -10,3 +10,11 @@ The application SHALL contain the layer modules model, presenter, controller and
 #### Scenario: Shell with no registered views
 - **WHEN** the view registry contains no views
 - **THEN** the shell renders the app title and an error-free empty content region
+
+### Requirement: Update check failure note
+When the check for a new version fails because the network is unreachable, the shell SHALL show a short polite note in the notices region next to the existing notices, without replacing them and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
+
+#### Scenario: Update check fails offline
+- **WHEN** the app checks for a new version while the network is unreachable
+- **THEN** the note that the latest version could not be fetched is announced politely
+- **AND** a shown update or offline-ready notice stays visible

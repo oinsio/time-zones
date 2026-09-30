@@ -86,17 +86,21 @@ When there are no locations, the Cards view SHALL show an explanation that no lo
 - **WHEN** the user opens the app with no locations
 - **THEN** the explanation is shown in the current language
 
-### Requirement: Offline note
-While the browser is offline, the page SHALL show a short non-blocking note that the app works offline, announced politely and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
+### Requirement: Update check failed note
+While the browser is offline, the page MUST keep working with the same content and MUST NOT show a note because of the missing network alone. When a check for a new version fails because the network is unreachable, the page SHALL show a short non-blocking note that the latest version could not be fetched, announced politely and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
 
-#### Scenario: Connection lost
-- **WHEN** the browser goes offline
-- **THEN** the offline note is announced politely
+#### Scenario: Update cannot be fetched
+- **WHEN** the app checks for a new version while offline
+- **THEN** the note is announced politely
 - **AND** the view stays usable
+
+#### Scenario: Offline without a pending check
+- **WHEN** the browser goes offline
+- **THEN** no note is shown
 
 #### Scenario: Connection restored
 - **WHEN** the browser goes back online
-- **THEN** the offline note disappears
+- **THEN** the update-check-failed note disappears
 
 ### Requirement: Storage unavailable warning
 When local storage cannot be used, the page SHALL show a warning that changes will not be saved, and the app MUST keep working. <!-- implements FR9, NFR-A2 of add-main-page-scaffold -->
