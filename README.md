@@ -66,7 +66,7 @@ Russian and English are supported from the start. The locale system is built to 
 
 ## Development
 
-Requires Node.js >= 20 and pnpm >= 9.
+Requires Node.js >= 26 (the exact major is in `.nvmrc`) and pnpm >= 9.
 
 ```bash
 pnpm install
@@ -144,7 +144,7 @@ Every stage advances automatically (`advancement: auto`); after `autonomy.attemp
    openspec --version
    ```
 
-4. **The project toolchain on the host** (host binding only — the Docker image carries its own): Node.js >= 20, pnpm, `gh` and `jq`, plus Playwright Chromium for the BDD E2E check of `implement` and `fix-code`:
+4. **The project toolchain on the host** (host binding only — the Docker image carries its own): Node.js >= 26, pnpm, `gh` and `jq`, plus Playwright Chromium for the BDD E2E check of `implement` and `fix-code`:
 
    ```bash
    pnpm install
@@ -193,7 +193,7 @@ Without `--base`, `run` reads `.gnomish/` from the working tree, so uncommitted 
 By default [`gnomish.env`](.gnomish/factory/gnomish.env) pins `FACTORY_BINDINGS_DEFAULT=host`: every gnome process runs on this machine as you, with access to your files and no network restrictions. The `container` binding runs each task in an ephemeral Docker box instead, behind an egress guard that lets through only `api.anthropic.com`, `registry.npmjs.org` and `api.github.com`.
 
 1. **Docker** running on this machine.
-2. **The image**, built once and again whenever pnpm, openspec or Playwright change in the repository (bump the `FACTORY_SANDBOX_IMAGE` tag in `gnomish.env` then). It carries node 22, pnpm, openspec, the Claude Code CLI, `gh`, `jq` and Playwright Chromium at the versions `package.json` and `pnpm-lock.yaml` pin:
+2. **The image**, built once and again whenever pnpm, openspec or Playwright change in the repository (bump the `FACTORY_SANDBOX_IMAGE` tag in `gnomish.env` then). It carries node from `.nvmrc`, pnpm, openspec, the Claude Code CLI, `gh`, `jq` and Playwright Chromium at the versions `package.json` and `pnpm-lock.yaml` pin:
 
    ```bash
    .gnomish/factory/build-sandbox

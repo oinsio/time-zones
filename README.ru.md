@@ -66,7 +66,7 @@
 
 ## Разработка
 
-Нужны Node.js >= 20 и pnpm >= 9.
+Нужны Node.js >= 26 (точная мажорная версия — в `.nvmrc`) и pnpm >= 9.
 
 ```bash
 pnpm install
@@ -144,7 +144,7 @@ pnpm preflight    # lint + typecheck + тесты
    openspec --version
    ```
 
-4. **Инструменты проекта на хосте** (только для привязки `host` — в Docker-образе всё своё): Node.js >= 20, pnpm, `gh` и `jq`, а также Playwright Chromium для проверки BDD E2E в `implement` и `fix-code`:
+4. **Инструменты проекта на хосте** (только для привязки `host` — в Docker-образе всё своё): Node.js >= 26, pnpm, `gh` и `jq`, а также Playwright Chromium для проверки BDD E2E в `implement` и `fix-code`:
 
    ```bash
    pnpm install
@@ -193,7 +193,7 @@ pnpm preflight    # lint + typecheck + тесты
 По умолчанию [`gnomish.env`](.gnomish/factory/gnomish.env) фиксирует `FACTORY_BINDINGS_DEFAULT=host`: каждый процесс гнома работает на этой машине от вашего имени, с доступом к вашим файлам и без сетевых ограничений. Привязка `container` вместо этого запускает каждую задачу во временном Docker-контейнере за egress-фильтром, который пропускает только `api.anthropic.com`, `registry.npmjs.org` и `api.github.com`.
 
 1. **Docker**, запущенный на этой машине.
-2. **Образ** — собирается один раз и заново при каждой смене версий pnpm, openspec или Playwright в репозитории (тогда же поднимите тег `FACTORY_SANDBOX_IMAGE` в `gnomish.env`). В нём node 22, pnpm, openspec, Claude Code CLI, `gh`, `jq` и Playwright Chromium тех версий, что зафиксированы в `package.json` и `pnpm-lock.yaml`:
+2. **Образ** — собирается один раз и заново при каждой смене версий pnpm, openspec или Playwright в репозитории (тогда же поднимите тег `FACTORY_SANDBOX_IMAGE` в `gnomish.env`). В нём node из `.nvmrc`, pnpm, openspec, Claude Code CLI, `gh`, `jq` и Playwright Chromium тех версий, что зафиксированы в `package.json` и `pnpm-lock.yaml`:
 
    ```bash
    .gnomish/factory/build-sandbox
