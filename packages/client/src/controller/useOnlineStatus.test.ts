@@ -37,13 +37,17 @@ describe("useOnlineStatus", () => {
     expect(result.current).toBe(true);
   });
 
-  it("should stop listening when unmounted", () => {
-    setNavigatorOnLine(true);
-    const { result, unmount } = renderHook(() => useOnlineStatus());
-    unmount();
-    act(() => {
-      window.dispatchEvent(new Event("offline"));
-    });
-    expect(result.current).toBe(true);
-  });
+  it.each(["online", "offline"])(
+    "should remove its %s listener when unmounted",
+    (eventName) => {
+      setNavigatorOnLine(true);
+      const removeListener = vi.spyOn(window, "removeEventListener");
+      const { unmount } = renderHook(() => useOnlineStatus());
+      unmount();
+      expect(removeListener).toHaveBeenCalledWith(
+        eventName,
+        expect.any(Function),
+      );
+    },
+  );
 });
