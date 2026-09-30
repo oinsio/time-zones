@@ -19,7 +19,7 @@ The host measures its own content element with `ResizeObserver` in a controller 
 `ViewHost` wraps the lazy view in a dedicated boundary, separate from the global `AppErrorBoundary`, so a view failure keeps the header and notices (FR6). Retry bumps a `key` on the boundary; a rejected lazy import is re-imported because `React.lazy` caches rejection, so the registry component is wrapped in a small factory that drops a failed promise on retry.
 
 ### D5. Connectivity and storage as controller hooks
-`useOnlineStatus` reads `navigator.onLine` and listens to `online`/`offline` events. `useStorageAvailability` probes `localStorage` with a write/remove of a constant key from `constants/storage.ts` once on mount. Both are wrapped in hooks so the future persistence adapter can replace the probe without touching components.
+`useOnlineStatus` reads `navigator.onLine` and listens to `online`/`offline` events. Storage availability goes through a port: a `StorageAvailability` port (`isStorageAvailable(): boolean`) is declared in `src/ports/`; `src/adapters/` implements it with a localStorage adapter (write/remove probe using a key from `constants/storage.ts`) and an in-memory adapter with a configurable result, and both pass one shared contract test. `useStorageAvailability(storageAvailability = localStorageAvailability)` calls only the port, like the `clock: Clock = systemClock` default in `.claude/rules/temporal.md`; its tests pass the in-memory adapter. Later repository adapters reuse this probe (ADR-0004).
 
 ### D6. Empty state is the Cards skeleton
 `views/cards/CardsView.tsx` renders only the empty state text, because no model exists (NG1). It renders no action (Q1). Strings live under `mainPage.*` and `views.cards.*` keys.

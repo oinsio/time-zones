@@ -12,7 +12,8 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 
 - [ ] 2.1 TDD `useContainerWidth` with a `ResizeObserver` stub added to `test/setup.ts` (FR4, D2); verify `npx vitest run src/controller/useContainerWidth.test.ts`
 - [ ] 2.2 TDD `useOnlineStatus` — initial value, offline and online events (FR8, D5); verify `npx vitest run src/controller/useOnlineStatus.test.ts`
-- [ ] 2.3 TDD `useStorageAvailability` — available, write throws (FR9, D5); verify `npx vitest run src/controller/useStorageAvailability.test.ts`; export all three from `controller/index.ts`
+- [ ] 2.3 Declare the `StorageAvailability` port in `ports/` and implement the localStorage and in-memory adapters in `adapters/` (each folder with `index.ts`), with a shared contract test run against both (FR9, D5); verify `npx vitest run src/adapters`
+- [ ] 2.4 TDD `useStorageAvailability(storageAvailability = localStorageAvailability)` using the in-memory adapter — available, unavailable (FR9, D5); verify `npx vitest run src/controller/useStorageAvailability.test.ts`; export all three hooks from `controller/index.ts`
 
 ## 3. Locales
 
