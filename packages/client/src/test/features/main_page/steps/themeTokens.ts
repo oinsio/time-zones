@@ -8,6 +8,10 @@ export interface ThemeColours {
   foreground: string;
   notice: string;
   noticeForeground: string;
+  surface: string;
+  border: string;
+  overlay: string;
+  danger: string;
 }
 
 const TOKENS_FILE = join(process.cwd(), "src", "styles", "tokens.css");
@@ -53,5 +57,9 @@ export function readThemeColours(theme: Theme): ThemeColours {
     noticeForeground: toComputedRgb(
       readTokenHex(themeBlock, "notice-foreground"),
     ),
+    surface: toComputedRgb(readTokenHex(themeBlock, "surface")),
+    border: toComputedRgb(readTokenHex(themeBlock, "border")),
+    overlay: toComputedRgb(readTokenHex(themeBlock, "overlay")),
+    danger: toComputedRgb(readTokenHex(themeBlock, "danger")),
   };
 }

@@ -1,4 +1,5 @@
-// Verifies FR2, FR4, FR5, FR6, NFR-A2, M4 of add-main-page-scaffold.
+// Verifies FR2, FR4, FR5, FR6, NFR-A2, M4 of add-main-page-scaffold and
+// D12 of add-locations-via-search.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -66,6 +67,17 @@ describe("ViewHost", () => {
   it("should resolve a second registered view without a page edit", async () => {
     render(<ViewHost registry={[buildTextView("extra", 0, RESOLVED_TEXT)]} />);
     expect(await screen.findByText(RESOLVED_TEXT)).toBeInTheDocument();
+  });
+
+  it("should mark the content container with the active view id", async () => {
+    const { container } = render(
+      <ViewHost registry={[narrowView, wideView]} />,
+    );
+    await screen.findByText(NARROW_TEXT);
+    expect(container.querySelector("[data-view-id]")).toHaveAttribute(
+      "data-view-id",
+      narrowView.id,
+    );
   });
 
   it("should honour a requested view id", async () => {

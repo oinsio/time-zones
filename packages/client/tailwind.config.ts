@@ -22,6 +22,10 @@ const config: Config = {
           DEFAULT: "var(--color-notice)",
           foreground: "var(--color-notice-foreground)",
         },
+        surface: "var(--color-surface)",
+        border: "var(--color-border)",
+        overlay: "var(--color-overlay)",
+        danger: "var(--color-danger)",
         day: {
           night: "var(--color-day-night)",
           morning: "var(--color-day-morning)",

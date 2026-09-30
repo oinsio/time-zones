@@ -1,0 +1,70 @@
+// Verifies FR4 of add-locations-via-search (D7): every row of the table.
+import zoneCities from "virtual:zone-cities";
+import { describe, expect, it } from "vitest";
+import { createAbbreviationSource } from "./abbreviationSource";
+import { createZoneCitiesSource } from "./zoneCitiesSource";
+
+const EXPECTED_TABLE: readonly (readonly [string, readonly string[]])[] = [
+  ["UTC", ["UTC"]],
+  ["GMT", ["UTC", "Europe/London"]],
+  ["EST", ["America/New_York"]],
+  ["EDT", ["America/New_York"]],
+  ["ET", ["America/New_York"]],
+  ["CST", ["America/Chicago", "Asia/Shanghai", "America/Havana"]],
+  ["CDT", ["America/Chicago", "America/Havana"]],
+  ["MST", ["America/Denver", "America/Phoenix"]],
+  ["MDT", ["America/Denver"]],
+  ["PST", ["America/Los_Angeles"]],
+  ["PDT", ["America/Los_Angeles"]],
+  ["PT", ["America/Los_Angeles"]],
+  ["AKST", ["America/Anchorage"]],
+  ["AKDT", ["America/Anchorage"]],
+  ["HST", ["Pacific/Honolulu"]],
+  ["BST", ["Europe/London", "Asia/Dhaka"]],
+  ["WET", ["Europe/Lisbon"]],
+  ["WEST", ["Europe/Lisbon"]],
+  ["CET", ["Europe/Berlin", "Europe/Paris"]],
+  ["CEST", ["Europe/Berlin", "Europe/Paris"]],
+  ["EET", ["Europe/Athens", "Europe/Kyiv"]],
+  ["EEST", ["Europe/Athens", "Europe/Kyiv"]],
+  ["MSK", ["Europe/Moscow"]],
+  ["IST", ["Asia/Kolkata", "Asia/Jerusalem", "Europe/Dublin"]],
+  ["PKT", ["Asia/Karachi"]],
+  ["ALMT", ["Asia/Almaty"]],
+  ["ICT", ["Asia/Bangkok"]],
+  ["WIB", ["Asia/Jakarta"]],
+  ["SGT", ["Asia/Singapore"]],
+  ["HKT", ["Asia/Hong_Kong"]],
+  ["JST", ["Asia/Tokyo"]],
+  ["KST", ["Asia/Seoul"]],
+  ["AEST", ["Australia/Sydney"]],
+  ["AEDT", ["Australia/Sydney"]],
+  ["NZST", ["Pacific/Auckland"]],
+  ["NZDT", ["Pacific/Auckland"]],
+  ["GST", ["Asia/Dubai"]],
+  ["SAST", ["Africa/Johannesburg"]],
+  ["WAT", ["Africa/Lagos"]],
+  ["EAT", ["Africa/Nairobi"]],
+  ["CAT", ["Africa/Maputo"]],
+  ["BRT", ["America/Sao_Paulo"]],
+  ["ART", ["America/Argentina/Buenos_Aires"]],
+];
+
+const source = createAbbreviationSource(
+  createZoneCitiesSource(zoneCities).records,
+);
+
+describe("time zone abbreviation table over the real zone data", () => {
+  it.each(EXPECTED_TABLE)(
+    "should map %s to its zones in table order",
+    (abbreviation, expectedZoneIds) => {
+      const results = source.match(abbreviation.toLowerCase());
+      expect(results.map((result) => result.record.timeZoneId)).toEqual(
+        expectedZoneIds,
+      );
+      expect(results.map((result) => result.matchedAbbreviation)).toEqual(
+        expectedZoneIds.map(() => abbreviation),
+      );
+    },
+  );
+});

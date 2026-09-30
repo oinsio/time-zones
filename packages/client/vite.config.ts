@@ -11,12 +11,14 @@ import {
   APP_THEME_COLOR,
   BUILD_OUT_DIR,
 } from "./app.config";
+import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 
 export default defineConfig({
   base: APP_BASE_PATH,
   build: { outDir: BUILD_OUT_DIR },
   plugins: [
     react(),
+    zoneDataPlugin(),
     VitePWA({
       registerType: "prompt",
       pwaAssets: {

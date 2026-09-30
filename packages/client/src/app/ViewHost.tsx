@@ -21,7 +21,9 @@ interface ViewHostProps {
 /**
  * Content region: resolves the active view from the registry and the
  * container width, loads it lazily and isolates its failures.
- * Implements FR2, FR4, FR5, FR6 of add-main-page-scaffold (D1-D4).
+ * Implements FR2, FR4, FR5, FR6 of add-main-page-scaffold (D1-D4); exposes
+ * the active view id for add-locations-via-search (D12; view contract for
+ * FR8, FR10, NFR-A1, NFR-A2, NFR-A3).
  */
 export function ViewHost({
   registry = viewRegistry,
@@ -39,7 +41,7 @@ export function ViewHost({
 
   const ActiveViewComponent = activeView?.component;
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="w-full" data-view-id={activeView?.id}>
       {ActiveViewComponent && (
         <ViewErrorBoundary
           key={`${activeView?.id}-${retryCount}`}

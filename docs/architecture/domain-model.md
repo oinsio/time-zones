@@ -54,6 +54,7 @@ Commands are serializable objects with a `type` enum. The reducer returns either
 |---|---|---|
 | `ADD_LOCATION(timeZoneId, label, countryCode)` | appends a location; never sets home | `DUPLICATE_LOCATION`, `UNKNOWN_TIME_ZONE` |
 | `REMOVE_LOCATION(id)` | removes it; if it was home, home becomes empty | `LOCATION_NOT_FOUND` |
+| `REPLACE_LOCATIONS(locations)` | replaces the list with an already validated one (initial load, change from another tab) | — |
 | `SET_HOME_LOCATION(id \| null)` | marks a location as home or clears the mark | `LOCATION_NOT_FOUND` |
 | `SET_DEVICE_TIME_ZONE(timeZoneId)` | updates the device zone (controller only); an unknown ID becomes `UTC` | — |
 | `SELECT_INSTANT(instant)` | pins the moment (grid cell, slider) | — |

@@ -25,5 +25,28 @@
   "views": {
     "cardsTitle": "Cards",
     "cardsEmptyState": "No locations added yet."
+  },
+  "locations": {
+    "addLocation": "Add location",
+    "removeLocation": "Remove {{city}}",
+    "searchTitle": "Add a location",
+    "searchLabel": "Search by city, country or time zone abbreviation",
+    "searchPlaceholder": "City, country or abbreviation, e.g. EST",
+    "suggestionsHeading": "Popular locations",
+    "noResults": "Nothing found for this search.",
+    "noResultsHint": "Try a city, a country or an abbreviation such as IST.",
+    "searchLoading": "Loading the search…",
+    "searchLoadError": "The search could not be loaded.",
+    "retry": "Retry",
+    "added": "Added",
+    "close": "Close",
+    "addedAnnouncement": "{{city}} added",
+    "removedAnnouncement": "{{city}} removed",
+    "loadError": "The saved locations could not be read.",
+    "reset": "Reset the list",
+    "resultCount_one": "{{count}} result",
+    "resultCount_other": "{{count}} results",
+    "resultCount_few": "{{count}} results",
+    "resultCount_many": "{{count}} results"
   }
 }

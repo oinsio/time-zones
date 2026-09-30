@@ -25,5 +25,28 @@
   "views": {
     "cardsTitle": "Карточки",
     "cardsEmptyState": "Локации пока не добавлены."
+  },
+  "locations": {
+    "addLocation": "Добавить место",
+    "removeLocation": "Удалить: {{city}}",
+    "searchTitle": "Добавить место",
+    "searchLabel": "Поиск по городу, стране или аббревиатуре часового пояса",
+    "searchPlaceholder": "Город, страна или аббревиатура, например EST",
+    "suggestionsHeading": "Популярные места",
+    "noResults": "По этому запросу ничего не найдено.",
+    "noResultsHint": "Попробуйте город, страну или аббревиатуру, например IST.",
+    "searchLoading": "Загрузка поиска…",
+    "searchLoadError": "Не удалось загрузить поиск.",
+    "retry": "Повторить",
+    "added": "Добавлено",
+    "close": "Закрыть",
+    "addedAnnouncement": "Добавлено: {{city}}",
+    "removedAnnouncement": "Удалено: {{city}}",
+    "loadError": "Не удалось прочитать сохранённые места.",
+    "reset": "Сбросить список",
+    "resultCount_one": "{{count}} результат",
+    "resultCount_few": "{{count}} результата",
+    "resultCount_many": "{{count}} результатов",
+    "resultCount_other": "{{count}} результата"
   }
 }

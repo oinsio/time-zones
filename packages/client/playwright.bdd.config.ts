@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 import { cucumberReporter, defineBddConfig } from "playwright-bdd";
 import { APP_BASE_PATH, E2E_PORT } from "./app.config";
+import type { ContractViewOptions } from "./src/test/features/view_contract/steps/view_contract_e2e.fixtures";
+import { getContractViewportWidth } from "./src/test/viewContractViewport";
 
 /**
  * E2E runs against `vite preview` of the production build, because the
@@ -14,6 +16,17 @@ const testDir = defineBddConfig({
   outputDir: ".features-gen",
 });
 
+/**
+ * Loaded at run time: the annotation keeps `tsc` from following the import
+ * into `src/views/`, which the node project cannot type-check (D12).
+ */
+const VIEW_REGISTRY_MODULE_PATH: string = "./src/views/index.ts";
+const { viewRegistry } = await import(VIEW_REGISTRY_MODULE_PATH);
+const VIEW_CONTRACT_TAG_PATTERN = /@view-contract/;
+const SCREENSHOT_MAX_DIFF_PIXEL_RATIO = 0.01;
+const SCREENSHOT_PATH_TEMPLATE =
+  "src/test/features/__screenshots__/{projectName}/{arg}{ext}";
+
 const E2E_ORIGIN = `http://localhost:${E2E_PORT}`;
 const E2E_APP_URL = `${E2E_ORIGIN}${APP_BASE_PATH}`;
 const E2E_TEST_TIMEOUT_MS = 60_000;
@@ -25,7 +38,22 @@ const CI_WORKER_COUNT = 1;
 const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 const isCi = !!process.env.CI;
 
-export default defineConfig({
+/** One contract run per registered view; registering a view adds its run. */
+const viewContractProjects = viewRegistry.map(
+  (view: { id: string; autoMinWidth: number }) => ({
+    name: `view-contract-${view.id}`,
+    grep: VIEW_CONTRACT_TAG_PATTERN,
+    use: {
+      ...devices["Desktop Chrome"],
+      contractView: {
+        id: view.id,
+        viewportWidth: getContractViewportWidth(view, viewRegistry),
+      },
+    },
+  }),
+);
+
+export default defineConfig<ContractViewOptions>({
   testDir,
   fullyParallel: true,
   forbidOnly: isCi,
@@ -36,6 +64,10 @@ export default defineConfig({
     cucumberReporter("html", { outputFile: "cucumber-report/index.html" }),
   ],
   timeout: E2E_TEST_TIMEOUT_MS,
+  snapshotPathTemplate: SCREENSHOT_PATH_TEMPLATE,
+  expect: {
+    toHaveScreenshot: { maxDiffPixelRatio: SCREENSHOT_MAX_DIFF_PIXEL_RATIO },
+  },
   use: {
     baseURL: E2E_APP_URL,
     trace: "on-first-retry",
@@ -46,12 +78,15 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
+      grepInvert: VIEW_CONTRACT_TAG_PATTERN,
       use: { ...devices["Desktop Chrome"] },
     },
     {
       name: "mobile-chrome",
+      grepInvert: VIEW_CONTRACT_TAG_PATTERN,
       use: { ...devices["Pixel 5"] },
     },
+    ...viewContractProjects,
   ],
   webServer: {
     command: `pnpm build && pnpm preview --port ${E2E_PORT} --strictPort`,

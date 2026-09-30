@@ -1,9 +1,10 @@
 import * as path from "node:path";
 import react from "@vitejs/plugin-react";
 import { configDefaults, defineConfig } from "vitest/config";
+import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), zoneDataPlugin()],
   test: {
     globals: true,
     environment: "jsdom",
