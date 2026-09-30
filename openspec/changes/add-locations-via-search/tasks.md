@@ -53,7 +53,7 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
 
 ## 7. Strings
 
-- [ ] 7.1 Add the `locations.*` keys of D11 to `locales/en.json` and `locales/ru.json`, with `resultCount_one`, `_few`, `_many`, `_other` in both files so the existing identical-key-set test holds (FR18, D11); verify `npx vitest run src/locales` (identical key sets)
+- [x] 7.1 Add the `locations.*` keys of D11 to `locales/en.json` and `locales/ru.json`, with `resultCount_one`, `_few`, `_many`, `_other` in both files so the existing identical-key-set test holds (FR18, D11); verify `npx vitest run src/locales` (identical key sets)
 
 ## 8. Views (TDD, jsdom)
 
