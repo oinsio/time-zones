@@ -4,3 +4,7 @@ export { useOnlineStatus } from "./useOnlineStatus";
 export type { PwaUpdateStatus } from "./usePwaUpdateStatus";
 export { usePwaUpdateStatus } from "./usePwaUpdateStatus";
 export { useStorageAvailability } from "./useStorageAvailability";
+export { LocationsProvider } from "./LocationsProvider";
+export { CitySearchStatus, useCitySearch } from "./useCitySearch";
+export { LocationsStatus, useLocations } from "./useLocations";
+export type { WriteScheduler } from "./writeScheduler";
