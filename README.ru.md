@@ -105,6 +105,7 @@ pnpm preflight    # lint + typecheck + тесты
 | Путь                | Что это                                                                        |
 |---------------------|--------------------------------------------------------------------------------|
 | `gnomish`           | скрипт-обёртка — единственный способ запускать фабрику здесь                   |
+| `gnomish-up`        | `serve` вместе с живым дашбордом и INFO-логом в одном терминале, через обёртку |
 | `gnomish.env`       | настройки этого экземпляра: имя, привязка к хосту, каталоги логов и секретов   |
 | `gnomish.local.env` | необязательные личные переопределения `gnomish.env`, в git не попадает         |
 | `gnomish.jar`       | сборка фабрики, в git не попадает, кладётся вручную                            |
@@ -175,6 +176,10 @@ pnpm preflight    # lint + typecheck + тесты
 # Задачи из GitHub issues: повесьте на issue метку gnomish:ready, затем
 .gnomish/factory/gnomish take 42          # взять этот issue
 .gnomish/factory/gnomish serve --drain    # отработать всю очередь ready и выйти
+
+# Тот же демон, но с наблюдением: открывает дашборд в браузере и показывает INFO-лог
+.gnomish/factory/gnomish-up               # флаги serve передаются как есть: --drain, --slots=2
+.gnomish/factory/gnomish-up --no-open --no-logs
 
 .gnomish/factory/gnomish status <task-id> # где задача и что с ней происходило
 ```
