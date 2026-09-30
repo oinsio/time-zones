@@ -8,7 +8,9 @@ import {
 type ViewModule = { default: ComponentType };
 type LazyView = LazyExoticComponent<ComponentType>;
 
-const reloadBrowserPage = () => window.location.reload();
+const reloadBrowserPage = () => {
+  if (navigator.onLine) window.location.reload();
+};
 
 const resetActions = new WeakMap<LazyView, () => void>();
 
@@ -18,7 +20,9 @@ const resetActions = new WeakMap<LazyView, () => void>();
  * `LazyExoticComponent`) and renders an inner lazy view. `resetLazyView` swaps
  * that inner view for a fresh one, so the next mount loads the view again.
  * Browsers also remember a failed dynamic import of the same URL, so when the
- * retried load fails again the page is reloaded, which clears that memory.
+ * retried load fails again the page is reloaded, which clears that memory —
+ * but only online, so an offline retry shows the error again instead of the
+ * browser's offline page.
  * Implements FR6 of add-main-page-scaffold (D4).
  */
 export function createRetryableLazyView(

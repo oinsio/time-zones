@@ -95,6 +95,41 @@ describe("createRetryableLazyView", () => {
     expect(await screen.findByText("failed")).toBeInTheDocument();
   });
 
+  describe("default page reload after a failed retry", () => {
+    const reloadPage = vi.fn();
+    const mountFailedRetry = async () => {
+      const RetryableView = createRetryableLazyView(
+        vi.fn().mockRejectedValue(new Error("chunk failed")),
+      );
+      const firstMount = mountView(RetryableView);
+      await screen.findByText("failed");
+      firstMount.unmount();
+      resetLazyView(RetryableView);
+      mountView(RetryableView);
+      await screen.findByText("failed");
+    };
+    beforeEach(() => {
+      reloadPage.mockClear();
+      vi.stubGlobal("location", { reload: reloadPage });
+    });
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    });
+
+    it("should reload the page when the browser is online", async () => {
+      vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
+      await mountFailedRetry();
+      expect(reloadPage).toHaveBeenCalledTimes(1);
+    });
+
+    it("should keep the error and not reload the page when the browser is offline", async () => {
+      vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+      await mountFailedRetry();
+      expect(reloadPage).not.toHaveBeenCalled();
+    });
+  });
+
   it("should ignore a reset of a plain lazy component", () => {
     const plainView = lazy(async () => ({ default: LoadedView }));
     expect(() => resetLazyView(plainView)).not.toThrow();
