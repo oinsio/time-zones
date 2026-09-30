@@ -90,7 +90,8 @@
 - Impact: The new spec fails in CI and in every local `pnpm test` without a fresh build, and the budget ends up defined twice with two definitions of "initial JS".
 - Fix: Rewrite task 6.2 as: "Extend `scripts/check-bundle-size.mjs` to also fail when the build emits no separate chunk for the Cards view; the 150 KB budget stays enforced by the existing check (NFR-P1, M5); verify `pnpm build && pnpm --filter @time-zones/client check:bundle-size`."
 - Fix risk: Finding the Cards chunk depends on Vite's chunk naming (the dynamic import emits `assets/CardsView-<hash>.js`); the script must match the file-name prefix, not a hash, and breaks if the component file is renamed. Low.
-- Status: open
+- Status: fixed
+- Resolution: task 6.2 in tasks.md now extends scripts/check-bundle-size.mjs to require a CardsView- chunk; the 150 KB budget stays with the existing check.
 
 ### R2 — WARNING — E2E task names a script that does not exist
 - Location: `openspec/changes/add-main-page-scaffold/tasks.md:36`
@@ -99,7 +100,8 @@
 - Impact: The stated verification command fails, and the implementer has to guess how to run and scope the E2E check.
 - Fix: Replace the command in task 6.1 with "`pnpm --filter @time-zones/client test:bdd --grep @add-main-page-scaffold`". The Playwright `webServer` in `playwright.bdd.config.ts` already builds and previews the app, so no separate build step is needed.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: task 6.1 in tasks.md now verifies with `pnpm --filter @time-zones/client test:bdd --grep @add-main-page-scaffold`.
 
 ### R3 — WARNING — Empty-state scenario forbids storage writes the app already makes
 - Location: `openspec/changes/add-main-page-scaffold/specs/main-page/spec.md:78`
@@ -108,7 +110,8 @@
 - Impact: A step that checks this literally (a `setItem` spy, or storage contents after the app starts) fails in the real app because of the language cache and the probe. Or the implementer weakens the probe or the language cache to make it pass, which breaks FR9 or the language persistence of the setup change.
 - Fix: Delete the step "AND nothing is written to storage" from scenario "First launch". Keep "the explanation is shown in the current language".
 - Fix risk: The intent "nothing is stored until the user acts" (`docs/architecture/views.md:132`) is not checked by this change. Nothing is lost, because no location or preference writer exists here (NG1, NG3), and the locations change will own that check. Low.
-- Status: open
+- Status: fixed
+- Resolution: removed the 'nothing is written to storage' step from scenario First launch in specs/main-page/spec.md.
 
 ### R4 — WARNING — Storage probe reads localStorage directly instead of through a port
 - Location: `openspec/changes/add-main-page-scaffold/design.md:22`
@@ -117,7 +120,8 @@
 - Impact: The first storage access written in the app's own layers sits in a controller hook instead of behind a port. (The only existing access, the language cache in `packages/client/src/i18n.ts:30-34`, is i18next detector configuration outside the layers.) The hook cannot be tested without touching the global storage mock, and the persistence change's LocalStorage adapter, which ADR-0004 makes responsible for degraded mode, will either duplicate the probe or have to reach into a controller hook.
 - Fix: Rewrite D5's storage half and task 2.3 as follows. "A `StorageAvailability` port (`isStorageAvailable(): boolean`) is declared in `src/ports/`. `src/adapters/` implements it with a localStorage adapter (probe using the key from `constants/storage.ts`) and an in-memory adapter with a configurable result, and both pass one shared contract test. `useStorageAvailability(storageAvailability = localStorageAvailability)` calls only the port, like the `clock: Clock = systemClock` default in `.claude/rules/temporal.md`. Its tests pass the in-memory adapter." Task 2.3 lists the port, both adapters, the contract test (`npx vitest run src/adapters`) and the hook test.
 - Fix risk: Adds the `ports/` and `adapters/` modules (each with an `index.ts`) before the persistence change. They are already in the planned layout (`docs/architecture/overview.md`), so the layout does not change, but the later repository adapters must reuse this probe. About 4 extra small files. Low.
-- Status: open
+- Status: fixed
+- Resolution: design D5 now declares a StorageAvailability port with localStorage and in-memory adapters; tasks 2.3 and 2.4 build the port, adapters, contract test and hook.
 
 ### R5 — WARNING — Retry factory for a failed lazy view is described by a mechanism that does not retry, and no task builds it
 - Location: `openspec/changes/add-main-page-scaffold/design.md:19`
@@ -126,7 +130,8 @@
 - Impact: An implementer following D4 literally writes a loader that resets its promise, and scenario "User retries" (`specs/main-page/spec.md:67-70`) fails for a failed chunk load, the offline and deploy-skew case FR6 targets: Retry shows the same error again. Or the implementer changes the `ViewDefinition` contract of ADR-0005 during task 5.2 to reach the loader, an unplanned change to an accepted ADR.
 - Fix: In D4, replace the factory sentence with: "`createRetryableLazyView(loader)` in `views/` returns `lazy(() => Promise.resolve({ default: RetryableView }))`. `RetryableView` renders the current inner `lazy(loader)`; when that loader rejected, the next mount creates a fresh `lazy(loader)`. `ViewHost` retries by bumping the boundary key, which remounts `RetryableView`. `ViewDefinition` is unchanged: `component` stays a `LazyExoticComponent`, as ADR-0005 requires." In task 4.2, register Cards as `component: createRetryableLazyView(() => import("./cards/CardsView"))` and add a TDD step `npx vitest run src/views/createRetryableLazyView.test.tsx` with a loader that rejects once and then resolves: after a remount the view renders and the loader was called twice.
 - Fix risk: The inner lazy suspends after the outer one, so the skeleton comes from the same `Suspense` boundary; the Cards chunk stays separate because the dynamic import sits at the call site. The unit test covers only the React side; if Chromium keeps a failed module fetch in its module map, a real-browser retry of the same chunk URL can still fail, which R6's E2E step would expose. Low.
-- Status: open
+- Status: fixed
+- Resolution: design D4 now specifies createRetryableLazyView; task 4.2 tests it with a loader rejecting once, task 4.3 registers Cards with it.
 
 ### R6 — WARNING — NFR-A2 keyboard retry and error focus have no scenario and no test
 - Location: `openspec/changes/add-main-page-scaffold/tasks.md:29`
@@ -135,7 +140,8 @@
 - Impact: The Retry control can ship unreachable by keyboard, or the error can take focus or lack a live role, and no test fails. Half of NFR-A2 goes unverified, against M1.
 - Fix: Add to requirement "Error state with retry" the scenario "User retries from the keyboard: GIVEN the view failed and the failure cause is gone, WHEN the user reaches Retry with Tab and presses Enter, THEN the view is shown, AND focus was not moved when the error appeared". In task 6.1, add this scenario to `main_page_e2e.feature`. It runs on a first visit, before the service worker controls the page. The step aborts the Cards chunk request with `page.route` and then removes the route before Retry. Add NFR-A2 to task 5.2 for a jsdom check that the fallback has `role="alert"`.
 - Fix risk: The step matches the Cards chunk by its file-name prefix (`CardsView-`), which breaks if the component file is renamed. It depends on R5 being fixed, because retry cannot pass otherwise, and on Chromium re-fetching a module whose earlier fetch was aborted. Moderate.
-- Status: open
+- Status: fixed
+- Resolution: added scenario 'User retries from the keyboard' to specs/main-page/spec.md, the E2E step in task 6.1 and the role=alert check plus NFR-A2 in task 5.2.
 
 ### R7 — WARNING — Placement of the offline note and storage warning is undefined, and UX3 is untestable as planned
 - Location: `openspec/changes/add-main-page-scaffold/design.md:16`
@@ -144,7 +150,8 @@
 - Impact: The implementer must pick a placement. An in-flow banner above the header shifts it and breaks UX3. Adding the new notes to the existing ternary hides the update notice while offline. No test catches either outcome.
 - Fix: In D3, state that `OfflineNote` and `StorageWarning` render in the existing notices region, out of the document flow, stacked with the PWA notice instead of replacing it. Extend FR1 and requirement "Main page regions" to list them. Add a scenario to "Main page regions": "WHEN the page is offline or storage is unavailable THEN the header keeps its position". Implement it in task 6.1 as an E2E check that the `h1` bounding box is the same in the default, offline and storage-unavailable states (UX3). Remove UX3 from task 5.4.
 - Fix risk: Up to three stacked notices at 320 px may cover content. The 320 px no-horizontal-scroll check in 6.1 still applies, but overlap is not caught. Moderate.
-- Status: open
+- Status: fixed
+- Resolution: design D3, FR1 and the Main page regions requirement place the notes in the existing notices region; added the header-position scenario, the E2E h1 check in task 6.1, and removed UX3 from task 5.4.
 
 ### R8 — WARNING — Browser-only scenarios assigned to the jsdom feature file
 - Location: `openspec/changes/add-main-page-scaffold/tasks.md:28`
@@ -153,7 +160,8 @@
 - Impact: The implementer writes jsdom steps for axe and horizontal scrolling that cannot observe either. The steps pass vacuously or fail, and the same scenarios are implemented twice.
 - Fix: Change task 5.1 to "Write `test/features/main_page/main_page_unit.feature` and `steps/main_page_unit.steps.ts` for every main-page scenario except those of 'Accessible and responsive main page', which task 6.1 writes in `main_page_e2e.feature` and `steps/main_page_e2e.steps.ts`". Update task 5.5's path, and list both files in proposal "Behavior".
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: task 5.1 now writes main_page_unit.feature and steps/main_page_unit.steps.ts without the accessible/responsive scenarios, which task 6.1 covers in E2E; task 5.5 and proposal Behavior updated.
 
 ### R9 — WARNING — ResizeObserver stub claimed missing, but a no-op stub already exists
 - Location: `openspec/changes/add-main-page-scaffold/tasks.md:13`
@@ -162,7 +170,8 @@
 - Impact: The existing stub never reports a width, so it cannot drive the `useContainerWidth` tests (task 2.1) or the resize re-resolution tests (FR4, task 5.2). Adding another stub to `setup.ts` either duplicates the global or changes it for every existing test.
 - Fix: Change D2 and task 2.1 to "add a controllable fake in `test/resizeObserverFake.ts` that records observers and lets a test report a width. `useContainerWidth.test.ts` and `ViewHost.test.tsx` install it with `vi.stubGlobal("ResizeObserver", …)` and restore it with `vi.unstubAllGlobals()` in `afterEach`. The global no-op stub in `setup.ts` stays as it is."
 - Fix risk: none; other tests keep the global no-op stub.
-- Status: open
+- Status: fixed
+- Resolution: design D2 and task 2.1 now use a controllable test/resizeObserverFake.ts installed with vi.stubGlobal; the global stub in setup.ts stays.
 
 ### R10 — WARNING — UX2 has no task
 - Location: `openspec/changes/add-main-page-scaffold/tasks.md:36`
@@ -171,7 +180,8 @@
 - Impact: Nothing verifies that the new components use tokens and follow the system theme. A hard-coded colour in `ViewErrorFallback` or `StorageWarning` passes every planned test as long as its contrast is fine, and the coverage grep for UX2 finds no test.
 - Fix: Add UX2 to task 6.1's references and to its light/dark runs, with the assertion that the computed background and text colours of the content region and of each shown notice equal the `--color-background`/`--color-foreground` (or `--color-notice`/`--color-notice-foreground`) token values of the active theme (`packages/client/src/styles/tokens.css`).
 - Fix risk: The step must compare normalised colours (computed `rgb()` vs token hex). Low.
-- Status: open
+- Status: fixed
+- Resolution: task 6.1 now cites UX2 and asserts computed colours against the theme tokens in light and dark runs.
 
 ### R11 — WARNING — Cards strings planned under three-level `views.cards.*` keys
 - Location: `openspec/changes/add-main-page-scaffold/design.md:25`
@@ -180,7 +190,8 @@
 - Impact: The first view's keys set the pattern for every later view's `titleKey` (ADR-0005 step 3, "add the title key to every locale file"), so the rule violation spreads to each new view. The implementer also has to decide whether the empty text belongs under `mainPage` or `views.cards`.
 - Fix: In D6 and task 3.1, replace `views.cards.*` with two-level keys: `views.cardsTitle` (the registry `titleKey`; a later view adds `views.gridTitle`) and `views.cardsEmptyState` (the empty explanation). Keep the page strings under `mainPage.*` (loading label, error text, retry, offline note, storage warning).
 - Fix risk: none; the key-set parity test (`packages/client/src/locales/locales.test.ts:63-72`) collects key paths at any depth, so it still passes.
-- Status: open
+- Status: fixed
+- Resolution: design D6 and task 3.1 now use two-level keys views.cardsTitle, views.cardsEmptyState and mainPage.*.
 
 ### R12 — WARNING — Offline note shown whenever the browser is offline, against views.md
 - Location: `openspec/changes/add-main-page-scaffold/proposal.md:64`
@@ -189,7 +200,8 @@
 - Impact: The page builds an always-on offline banner that the design documents exclude. An offline-first app then shows a note on every offline use, in the same notices region as the offline-ready and update notices (R7). The case the documents do want, a note when a new version cannot be fetched, is never built, and the Offline state of M2 and NFR-A1 is checked against the wrong UI.
 - Fix: Rewrite FR8 as "While the browser is offline, the page keeps working with the same content and shows no note because of the missing network alone. When a check for a new version fails because the network is unreachable, the notices region shows a short polite note that the latest version could not be fetched; the note disappears when the connection returns." Rewrite requirement "Offline note" and its scenarios to match: "Update cannot be fetched" (WHEN the app checks for a new version while offline THEN the note is announced politely AND the view stays usable), "Offline without a pending check" (WHEN the browser goes offline THEN no note is shown), and "Connection restored" (unchanged). In D5, have `usePwaUpdateStatus` pass `onRegisteredSW(swUrl, registration)` to `useRegisterSW`, call `registration.update()` once, and expose `isUpdateCheckFailed` when that promise rejects. `useOnlineStatus` stays and clears the flag on `online`. Change U3 and the matrix row to "offline | any | same content; note only when the update check failed". Task 2.2 keeps `useOnlineStatus`. Add a task step that extends `src/controller/usePwaUpdateStatus.test.ts`, whose `useRegisterSW` mock (line 8) gets a registration whose `update` rejects (`npx vitest run src/controller/usePwaUpdateStatus.test.ts`). Add an `app-shell` delta that states the new failed-update note next to the existing notices.
 - Fix risk: It changes `usePwaUpdateStatus` from the archived setup change, so the change needs an `app-shell` delta and the hook's existing tests must keep passing. `registration.update()` makes one extra request on start while online; the browser makes a similar request on navigation anyway. The E2E offline state for NFR-A1 must install the service worker first and then use `context.setOffline(true)` before reloading. Moderate.
-- Status: open
+- Status: fixed
+- Resolution: FR8, U3, the matrix row, the Update check failed note requirement, D5, tasks 2.2b and 5.3 and a new app-shell ADDED requirement now show a note only when the update check fails.
 
 ### R13 — SUGGESTION — Empty-registry scenario allows a blank content area, contradicting UX1
 - Location: `openspec/changes/add-main-page-scaffold/specs/app-shell/spec.md:12`
@@ -198,7 +210,8 @@
 - Impact: The implementer cannot tell whether `ViewHost` should render nothing or a fallback text for an empty registry, and the updated unit scenario and a UX1 check would assert opposite things.
 - Fix: Scope UX1 to "every state of a registered view shows text", leaving the empty-registry scenario as written.
 - Fix risk: none; once Cards is registered, the empty registry is reachable only in tests.
-- Status: open
+- Status: fixed
+- Resolution: UX1 in proposal.md is scoped to every state of a registered view; the empty-registry scenario stays as written.
 
 ### R14 — SUGGESTION — design.md lacks the sections the design rule requires
 - Location: `openspec/changes/add-main-page-scaffold/design.md:1`
@@ -207,7 +220,8 @@
 - Impact: Later changes cannot see which alternatives were rejected, for example viewport media queries versus `ResizeObserver` (D2) or reusing `AppErrorBoundary` (D4), and the traceability grep misses three decisions.
 - Fix: Add a short "Consequences" section (positive/negative) and an "Alternatives Considered" section (viewport media query vs `ResizeObserver` for D2; reusing `AppErrorBoundary` for D4). Append "(FR4)" to D2, "(FR8, FR9)" to D5 and "(FR1)" to D7.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: design.md gained Consequences and Alternatives Considered sections and FR ids on D2, D5 and D7.
 
 ## Verdict
 
