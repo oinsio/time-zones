@@ -1,5 +1,6 @@
 Feature: App shell with offline and update notices
-  Implements change setup-app-shell-and-pages-deploy.
+  Implements change setup-app-shell-and-pages-deploy; the registry scenario is
+  updated by add-main-page-scaffold (FR1).
   The shell names the app in the user's language, tells the user when the app
   works offline or a new version is waiting, and recovers from unexpected errors.
 
@@ -20,7 +21,7 @@ Feature: App shell with offline and update notices
   Scenario: Shell with no registered views
     Given no views are registered
     When the user opens the app
-    Then only the app title is shown
+    Then the app title is shown with an empty content region
     And no error is reported
 
   @setup-app-shell-and-pages-deploy @FR6

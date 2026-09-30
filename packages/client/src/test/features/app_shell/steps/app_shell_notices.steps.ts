@@ -4,7 +4,7 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { cleanup, render, screen } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import { createElement, lazy } from "react";
+import { createElement } from "react";
 import { expect, type TestContext, vi } from "vitest";
 import { AppErrorBoundary, AppShell } from "@/app";
 import type { ViewDefinition } from "@/views";
@@ -28,25 +28,30 @@ vi.mock("virtual:pwa-register/react", async () => {
   };
 });
 
-vi.mock("@/views", () => ({
+vi.mock("@/views", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/views")>()),
   get viewRegistry() {
     return registeredViews;
   },
 }));
 
-const FAILURE_DETAILS = "view exploded: undefined is not a function";
+// A failure outside the view host, which isolates its own view's failures
+// (add-main-page-scaffold FR6) and so never reaches the recovery screen.
+const pageFailure = vi.hoisted(() => ({
+  shouldFail: false,
+  details: "page exploded: undefined is not a function",
+}));
 
-const FailingView = () => {
-  throw new Error(FAILURE_DETAILS);
-};
-
-const failingViewDefinition = {
-  id: "failing",
-  titleKey: "app.title",
-  icon: () => null,
-  component: lazy(async () => ({ default: FailingView })),
-  autoMinWidth: 0,
-} as unknown as ViewDefinition;
+vi.mock("@/controller", async (importOriginal) => {
+  const controller = await importOriginal<typeof import("@/controller")>();
+  return {
+    ...controller,
+    useStorageAvailability: () => {
+      if (pageFailure.shouldFail) throw new Error(pageFailure.details);
+      return controller.useStorageAvailability();
+    },
+  };
+});
 
 const feature = await loadFeature("../app_shell_notices.feature");
 
@@ -68,6 +73,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     fakeServiceWorker.updateServiceWorker.mockReset();
     reloadPage.mockReset();
     registeredViews.length = 0;
+    pageFailure.shouldFail = false;
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     await i18n.changeLanguage("en");
   });
@@ -108,10 +114,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(registeredViews).toHaveLength(0);
     });
     When("the user opens the app", () => openApp());
-    Then("only the app title is shown", () => {
-      const mainRegion = screen.getByRole("main");
-      expect(mainRegion.children).toHaveLength(1);
-      expect(mainRegion.textContent).toBe(i18n.t("app.title"));
+    Then("the app title is shown with an empty content region", () => {
+      expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
+        i18n.t("app.title"),
+      );
+      expect(screen.getByRole("main").textContent).toBe("");
     });
     And("no error is reported", () => {
       expect(console.error).not.toHaveBeenCalled();
@@ -226,7 +233,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "A part of the page fails to render",
     ({ Given, When, Then, And }) => {
       Given("a part of the page fails to render", () => {
-        registeredViews.push(failingViewDefinition);
+        pageFailure.shouldFail = true;
       });
       When("the user opens the app", () => openApp());
       Then(
@@ -237,7 +244,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           });
           expect(recoveryHeading).toBeInTheDocument();
           expect(screen.getByText(i18n.t("app.errorMessage"))).toBeVisible();
-          expect(document.body).not.toHaveTextContent(FAILURE_DETAILS);
+          expect(document.body).not.toHaveTextContent(pageFailure.details);
         },
       );
       And("it offers a reload action", () => {
@@ -251,7 +258,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   // @setup-app-shell-and-pages-deploy @FR8
   f.Scenario("User recovers by reloading", ({ Given, And, When, Then }) => {
     Given("a part of the page fails to render", () => {
-      registeredViews.push(failingViewDefinition);
+      pageFailure.shouldFail = true;
     });
     And("the user has opened the app", () => openApp());
     When("the user chooses to reload the app", async () => {

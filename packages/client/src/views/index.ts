@@ -2,7 +2,10 @@ import { LayoutGrid } from "lucide-react";
 import { createRetryableLazyView } from "./createRetryableLazyView";
 import { AutoViewMode, type ViewDefinition, ViewId } from "./viewDefinition";
 
-export { resetLazyView } from "./createRetryableLazyView";
+export {
+  createRetryableLazyView,
+  resetLazyView,
+} from "./createRetryableLazyView";
 export { resolveActiveView } from "./resolveActiveView";
 export type { ViewDefinition, ViewMode } from "./viewDefinition";
 export { AutoViewMode, ViewId } from "./viewDefinition";

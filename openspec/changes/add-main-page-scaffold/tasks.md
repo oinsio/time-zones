@@ -29,9 +29,9 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 ## 5. Page components (TDD)
 
 - [ ] 5.1 Write `test/features/main_page/main_page_unit.feature` and `steps/main_page_unit.steps.ts` tagged `@add-main-page-scaffold @FR-X` for every main-page scenario except those of "Accessible and responsive main page", which task 6.1 writes in `main_page_e2e.feature` and `steps/main_page_e2e.steps.ts`; verify red with `npx vitest run src/test/features/main_page`
-- [ ] 5.2 TDD `ViewHost` with `ViewSkeleton` and `ViewErrorFallback`: loading, error, retry after failed lazy import, resize re-resolution (installing the `resizeObserverFake`), second test view without page edit, fallback has `role="alert"` (FR2, FR4, FR5, FR6, NFR-A2, M4, D3, D4); verify `npx vitest run src/app/ViewHost.test.tsx`
-- [ ] 5.3 TDD `UpdateCheckFailedNote` (shown only when the check failed, hidden on `online`, no note for offline alone) and `StorageWarning` with polite/alert roles and no focus steal (FR8, FR9, NFR-A2); verify `npx vitest run src/app/UpdateCheckFailedNote.test.tsx src/app/StorageWarning.test.tsx` — one command
-- [ ] 5.4 TDD `MainPage` (header, content, bottom bar slot, notices) and switch `AppShell` to render it; update `AppShell.test.tsx` and the existing feature scenario "Shell with no registered views" (FR1, D3); verify `npx vitest run src/app/AppShell.test.tsx`
+- [x] 5.2 TDD `ViewHost` with `ViewSkeleton` and `ViewErrorFallback`: loading, error, retry after failed lazy import, resize re-resolution (installing the `resizeObserverFake`), second test view without page edit, fallback has `role="alert"` (FR2, FR4, FR5, FR6, NFR-A2, M4, D3, D4); verify `npx vitest run src/app/ViewHost.test.tsx`
+- [x] 5.3 TDD `UpdateCheckFailedNote` (shown only when the check failed, hidden on `online`, no note for offline alone) and `StorageWarning` with polite/alert roles and no focus steal (FR8, FR9, NFR-A2); verify `npx vitest run src/app/UpdateCheckFailedNote.test.tsx src/app/StorageWarning.test.tsx` — one command
+- [x] 5.4 TDD `MainPage` (header, content, bottom bar slot, notices) and switch `AppShell` to render it; update `AppShell.test.tsx` and the existing feature scenario "Shell with no registered views" (FR1, D3); verify `npx vitest run src/app/AppShell.test.tsx`
 - [ ] 5.5 Export new components from `app/index.ts`; verify the `main_page_unit` feature run is green: `npx vitest run src/test/features/main_page`
 
 ## 6. Accessibility, responsive, bundle
