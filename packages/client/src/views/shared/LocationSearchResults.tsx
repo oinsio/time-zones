@@ -34,7 +34,7 @@ export function LocationSearchResults({
           onClick={() => !result.isAdded && onChoose(result)}
           className={cn(
             "flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-md border border-transparent px-3 py-2",
-            resultIndex === activeIndex && "border-border bg-muted",
+            resultIndex === activeIndex && "border-border bg-background",
             result.isAdded && "cursor-default text-muted-foreground",
           )}
         >
