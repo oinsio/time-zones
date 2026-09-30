@@ -34,6 +34,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   f.BeforeEachScenario(async () => {
     cleanup();
+    localStorage.clear();
     fakeServiceWorker.isUpdateAvailable = false;
     fakeServiceWorker.shouldUpdateCheckFail = false;
     registryOverride.views = undefined;

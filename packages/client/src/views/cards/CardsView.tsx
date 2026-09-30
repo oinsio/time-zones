@@ -57,7 +57,7 @@ export default function CardsView() {
         addLocationButtonRef={addLocationButtonRef}
         onAdded={handleAdded}
       />
-      <p role="status" className="sr-only">
+      <p aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </p>
     </div>

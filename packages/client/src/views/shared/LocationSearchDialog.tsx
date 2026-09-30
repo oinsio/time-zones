@@ -120,7 +120,7 @@ export function LocationSearchDialog({
             onChoose={onChoose}
           />
         )}
-        <p role="status" className="sr-only">
+        <p aria-live="polite" aria-atomic="true" className="sr-only">
           {isReady && hasQuery
             ? t("locations.resultCount", { count: presentedResults.length })
             : ""}

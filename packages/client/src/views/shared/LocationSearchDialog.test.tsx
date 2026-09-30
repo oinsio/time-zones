@@ -154,7 +154,7 @@ describe("LocationSearchDialog", () => {
 
   it("should announce the result count politely for a typed query", () => {
     renderDialog({ query: "o" });
-    expect(screen.getByRole("status")).toHaveTextContent("2 results");
+    expect(screen.getByText("2 results")).toHaveAttribute("aria-live", "polite");
   });
 
   it("should emit close when Esc is pressed", async () => {

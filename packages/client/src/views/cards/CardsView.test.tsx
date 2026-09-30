@@ -102,13 +102,19 @@ describe("CardsView", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add location" }));
     await userEvent.type(await screen.findByRole("combobox"), "Moscow");
     await userEvent.click(screen.getByRole("option", { name: /Moscow/ }));
-    expect(screen.getByRole("status")).toHaveTextContent("Moscow added");
+    expect(screen.getByText("Moscow added")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
   });
 
   it("should announce a removed location politely", async () => {
     renderCards(savedLocations("Alpha", "Beta"));
     await userEvent.click(screen.getByRole("button", { name: "Remove Alpha" }));
-    expect(screen.getByRole("status")).toHaveTextContent("Alpha removed");
+    expect(screen.getByText("Alpha removed")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
   });
 

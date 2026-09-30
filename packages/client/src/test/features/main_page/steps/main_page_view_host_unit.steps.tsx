@@ -5,7 +5,9 @@ import { cleanup, render, screen } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
+import { createInMemoryLocationRepository } from "@/adapters";
 import { ViewHost } from "@/app";
+import { LocationsProvider } from "@/controller";
 import { installResizeObserverFake } from "@/test/resizeObserverFake";
 import { buildTextView } from "@/test/viewFixtures";
 import { AutoViewMode, type ViewDefinition, viewRegistry } from "@/views";
@@ -32,7 +34,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   ];
 
   const renderHost = (containerWidth: number, mode = AutoViewMode.AUTO) => {
-    render(createElement(ViewHost, { registry: hostRegistry, mode }));
+    render(
+      createElement(
+        LocationsProvider,
+        { repository: createInMemoryLocationRepository() },
+        createElement(ViewHost, { registry: hostRegistry, mode }),
+      ),
+    );
     resizeObserver.reportWidth(containerWidth);
   };
   const emptyStateText = () => i18n.t("views.cardsEmptyState");
