@@ -17,7 +17,7 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 
 ## 3. Locales
 
-- [ ] 3.1 Add `mainPage.*` and `views.cards.*` keys (loading label, error text, retry, empty text, offline note, storage warning, Cards title) to `locales/en.json` and `locales/ru.json` (FR10, FR3); verify `npx vitest run src/locales` (identical key sets)
+- [ ] 3.1 Add `mainPage.*` keys (loading label, error text, retry, update-check-failed note, storage warning) and `views.cardsTitle`, `views.cardsEmptyState` keys to `locales/en.json` and `locales/ru.json` (FR10, FR3); verify `npx vitest run src/locales` (identical key sets)
 
 ## 4. Cards view and registry
 

@@ -22,7 +22,7 @@ The host measures its own content element with `ResizeObserver` in a controller 
 `useOnlineStatus` reads `navigator.onLine` and listens to `online`/`offline` events. Storage availability goes through a port: a `StorageAvailability` port (`isStorageAvailable(): boolean`) is declared in `src/ports/`; `src/adapters/` implements it with a localStorage adapter (write/remove probe using a key from `constants/storage.ts`) and an in-memory adapter with a configurable result, and both pass one shared contract test. `useStorageAvailability(storageAvailability = localStorageAvailability)` calls only the port, like the `clock: Clock = systemClock` default in `.claude/rules/temporal.md`; its tests pass the in-memory adapter. Later repository adapters reuse this probe (ADR-0004).
 
 ### D6. Empty state is the Cards skeleton
-`views/cards/CardsView.tsx` renders only the empty state text, because no model exists (NG1). It renders no action (Q1). Strings live under `mainPage.*` and `views.cards.*` keys.
+`views/cards/CardsView.tsx` renders only the empty state text, because no model exists (NG1). It renders no action (Q1). Strings use flat two-level keys (`.claude/rules/i18n.md`): `views.cardsTitle` (the registry `titleKey`) and `views.cardsEmptyState`; page strings live under `mainPage.*`.
 
 ### D7. Region slots are plain elements
 Header controls and the bottom bar are empty landmark-free containers with stable `data-testid`-free structure; a later change fills them. No slot API is invented ahead of need.
