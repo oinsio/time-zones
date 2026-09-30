@@ -104,7 +104,9 @@ not the other sections. It is the reviewer's record plus your answers.
 - Before you stop, run one at a time what CI runs — the stage re-runs exactly
   these: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
   `pnpm --filter @time-zones/client check:bundle-size`,
-  `pnpm --filter @time-zones/client test:bdd`.
+  `pnpm --filter @time-zones/client test:bdd`. All must pass. On a retry after
+  a failed check, fixing that one failure is not enough: the checks stop at the
+  first failure, so run the whole list again before you stop.
 - Commit as you go — one commit per fixed finding, subject starting with its
   id (`R3: reuse clock tick interval`). Never push: the factory owns the remote.
 
