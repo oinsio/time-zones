@@ -17,11 +17,13 @@ executor:
   model: opus
   # Only these four keys are accepted.
   settings:
-    # Agent turns per round. Per-item evidence, greps and scoped Stryker runs are turn-hungry.
-    maxTurns: 60
+    # Agent turns per round. Per-item evidence, greps and scoped Stryker runs are turn-hungry;
+    # 60 ran out on task #18 just as the report was written.
+    maxTurns: 120
     # Round is killed after this; counts as infra failure, not an attempt.
-    # pnpm install + scoped Stryker runs on the changed production files.
-    roundTimeout: 3600s
+    # pnpm install + scoped Stryker runs on the changed production files; 60 turns took 24
+    # minutes on task #18, doubled along with the turns.
+    roundTimeout: 7200s
     # Cannot widen what .claude/settings.json denies. Bash is for git, grep, pnpm install
     # and scoped Stryker; the scope check below rejects any edit outside review-code.md.
     allowedTools:
