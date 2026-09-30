@@ -1,7 +1,7 @@
 # main-page Specification
 
 ## Purpose
-TBD - created by archiving change add-main-page-scaffold. Update Purpose after archive.
+The main page of the app: the page frame (header, content region hosting the active view, bottom bar slot, notices region) that later MVP features plug into.
 
 ## Requirements
 
