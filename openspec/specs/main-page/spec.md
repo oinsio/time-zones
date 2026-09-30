@@ -85,11 +85,17 @@ If the active view throws while rendering or fails to load, the content region S
 - **AND** focus was not moved when the error appeared
 
 ### Requirement: Empty state
-When there are no locations, the Cards view SHALL show an explanation that no locations are added. It MUST NOT show an action that does nothing. <!-- implements FR7, UX1 of add-main-page-scaffold -->
+When there are no locations, the Cards view SHALL show an explanation that no locations are added and an "Add location" action that opens the search. It MUST NOT show an action that does nothing. <!-- implements FR7, UX1 of add-main-page-scaffold; FR17 of add-locations-via-search -->
 
 #### Scenario: First launch
 - **WHEN** the user opens the app with no locations
 - **THEN** the explanation is shown in the current language
+- **AND** the "Add location" action is shown
+
+#### Scenario: Add location from the empty state
+- **GIVEN** there are no locations
+- **WHEN** the user chooses "Add location"
+- **THEN** the search opens with popular suggestions
 
 ### Requirement: Update check failed note
 While the browser is offline, the page MUST keep working with the same content and MUST NOT show a note because of the missing network alone. When a check for a new version fails because the network is unreachable, the page SHALL show a short non-blocking note that the latest version could not be fetched, announced politely and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
