@@ -127,3 +127,24 @@ Then(
     await expect(removeButton(locationsWorld.page, cityName)).toBeFocused();
   },
 );
+
+// Verifies NFR-A2 of add-locations-via-search.
+When(
+  "the user opens the search, types {string} and presses Down {int} times",
+  async ({ locationsWorld }, query: string, pressCount: number) => {
+    const { page } = locationsWorld;
+    await openSearch(page);
+    await typeQuery(page, query);
+    await expect(page.getByRole("option").first()).toBeVisible();
+    for (let press = 0; press < pressCount; press += 1) {
+      await page.keyboard.press("ArrowDown");
+    }
+  },
+);
+
+// Verifies NFR-A2 of add-locations-via-search.
+Then("the active search option is in view", async ({ locationsWorld }) => {
+  await expect(
+    locationsWorld.page.getByRole("option", { selected: true }),
+  ).toBeInViewport();
+});

@@ -32,6 +32,11 @@ Feature: Locations in every registered view
     Then the search is closed
     And focus is on the "Add location" action
 
+  @add-locations-via-search @view-contract @NFR-A2
+  Scenario: The active search option stays in view
+    When the user opens the search, types "a" and presses Down 15 times
+    Then the active search option is in view
+
   @add-locations-via-search @view-contract @FR10
   Scenario: Remove a location
     Given the stored locations are "Almaty", "Moscow"

@@ -1,5 +1,11 @@
 import { X } from "lucide-react";
-import { type KeyboardEvent, useId, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -14,6 +20,7 @@ import { LocationSearchResults } from "./LocationSearchResults";
 import { LocationSearchStates } from "./LocationSearchStates";
 
 const FIRST_OPTION_INDEX = 0;
+const ACTIVE_OPTION_SCROLL_BLOCK = "nearest";
 
 type LocationSearchDialogProps = {
   isOpen: boolean;
@@ -52,6 +59,13 @@ export function LocationSearchDialog({
   const isReady = status === CitySearchStatus.READY;
   const lastIndex = presentedResults.length - 1;
   const activeOptionIndex = Math.min(activeIndex, lastIndex);
+
+  useEffect(() => {
+    if (activeOptionIndex < FIRST_OPTION_INDEX) return;
+    document
+      .getElementById(`${optionIdPrefix}${activeOptionIndex}`)
+      ?.scrollIntoView?.({ block: ACTIVE_OPTION_SCROLL_BLOCK });
+  }, [activeOptionIndex, optionIdPrefix]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === KeyboardKey.ARROW_DOWN) {
