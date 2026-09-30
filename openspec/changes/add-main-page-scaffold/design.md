@@ -10,7 +10,7 @@ Driven by FR1–FR10 of proposal.md. Current state: `AppShell` renders the title
 `resolveActiveView(registry, mode, containerWidth)` is a pure function exported from `views/index.ts`. It implements the ADR-0005 AUTO rule plus the fallback of FR2, so it is unit- and mutation-tested without React. `ViewMode` is `AUTO | ViewId`; the mode enum member lives next to `ViewId`.
 
 ### D2. Container width, not viewport width
-The host measures its own content element with `ResizeObserver` in a controller hook `useContainerWidth(ref)`. ADR-0005 speaks of container width; measuring the element keeps the host valid if the page is later embedded. jsdom has no `ResizeObserver`, so tests inject a stub in `test/setup.ts`.
+The host measures its own content element with `ResizeObserver` in a controller hook `useContainerWidth(ref)`. ADR-0005 speaks of container width; measuring the element keeps the host valid if the page is later embedded. `test/setup.ts` already has a global no-op `ResizeObserver` stub that never reports a width, so it stays as it is; width-driven tests install a controllable fake from `test/resizeObserverFake.ts` with `vi.stubGlobal` and restore it with `vi.unstubAllGlobals()` in `afterEach`.
 
 ### D3. Page components stay in `app/`
 `MainPage`, `ViewHost`, `ViewSkeleton`, `ViewErrorFallback`, `OfflineNote`, `StorageWarning` live in `src/app/` next to `AppShell` (they are shell, not views). `AppShell` keeps notices and hooks and renders `MainPage`. The view mode is a prop of `ViewHost` defaulting to `AUTO` until preferences exist (NG3).

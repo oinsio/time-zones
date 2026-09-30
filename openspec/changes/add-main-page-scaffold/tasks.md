@@ -10,7 +10,7 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 
 ## 2. Controller hooks (TDD)
 
-- [ ] 2.1 TDD `useContainerWidth` with a `ResizeObserver` stub added to `test/setup.ts` (FR4, D2); verify `npx vitest run src/controller/useContainerWidth.test.ts`
+- [ ] 2.1 Add a controllable fake `test/resizeObserverFake.ts` (records observers, lets a test report a width; the global no-op stub in `test/setup.ts` stays), then TDD `useContainerWidth` installing it with `vi.stubGlobal` and `vi.unstubAllGlobals()` in `afterEach` (FR4, D2); verify `npx vitest run src/controller/useContainerWidth.test.ts`
 - [ ] 2.2 TDD `useOnlineStatus` — initial value, offline and online events (FR8, D5); verify `npx vitest run src/controller/useOnlineStatus.test.ts`
 - [ ] 2.3 Declare the `StorageAvailability` port in `ports/` and implement the localStorage and in-memory adapters in `adapters/` (each folder with `index.ts`), with a shared contract test run against both (FR9, D5); verify `npx vitest run src/adapters`
 - [ ] 2.4 TDD `useStorageAvailability(storageAvailability = localStorageAvailability)` using the in-memory adapter — available, unavailable (FR9, D5); verify `npx vitest run src/controller/useStorageAvailability.test.ts`; export all three hooks from `controller/index.ts`
@@ -28,7 +28,7 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 ## 5. Page components (TDD)
 
 - [ ] 5.1 Write `test/features/main_page/main_page.feature` and `main_page.steps.ts` tagged `@add-main-page-scaffold @FR-X` for all scenarios of the main-page spec; verify red with `npx vitest run src/test/features/main_page`
-- [ ] 5.2 TDD `ViewHost` with `ViewSkeleton` and `ViewErrorFallback`: loading, error, retry after failed lazy import, resize re-resolution, second test view without page edit (FR2, FR4, FR5, FR6, M4, D3, D4); verify `npx vitest run src/app/ViewHost.test.tsx`
+- [ ] 5.2 TDD `ViewHost` with `ViewSkeleton` and `ViewErrorFallback`: loading, error, retry after failed lazy import, resize re-resolution (installing the `resizeObserverFake`), second test view without page edit (FR2, FR4, FR5, FR6, M4, D3, D4); verify `npx vitest run src/app/ViewHost.test.tsx`
 - [ ] 5.3 TDD `OfflineNote` and `StorageWarning` with polite/alert roles and no focus steal (FR8, FR9, NFR-A2); verify `npx vitest run src/app/OfflineNote.test.tsx src/app/StorageWarning.test.tsx` — one command
 - [ ] 5.4 TDD `MainPage` (header, content, bottom bar slot, notices) and switch `AppShell` to render it; update `AppShell.test.tsx` and the existing feature scenario "Shell with no registered views" (FR1, UX3, D3); verify `npx vitest run src/app/AppShell.test.tsx`
 - [ ] 5.5 Export new components from `app/index.ts`; verify the `main_page` feature run is green: `npx vitest run src/test/features/main_page`
