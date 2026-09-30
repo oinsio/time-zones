@@ -29,9 +29,9 @@ Audience: every user of the app; without this change the app shows no useful con
 
 ## Impact
 
-- `packages/client/src/`: `model/` (first domain state), `ports/`, `adapters/` (location repository, city search), `presenter/`, `controller/`, `views/cards/`, `views/shared/`, `components/ui/`, `constants/`, `locales/`.
-- New dependencies: a dialog primitive for the search overlay; CLDR data packages as dev dependencies for a build-time extraction script (see design.md).
-- Build: one more lazily loaded chunk (search data); the bundle-size check is extended.
+- `packages/client/src/`: `model/` (first domain state), `ports/`, `adapters/` (location repository, city search), `presenter/`, `controller/`, `views/cards/`, `views/shared/`, `app/` (provider around the page; the content region names its active view for the view-contract tests), `components/ui/`, `styles/` (new design tokens), `constants/`, `locales/`.
+- New dependencies: a dialog primitive for the search overlay; CLDR data packages as dev dependencies, read by a build-time extraction step (ADR-0006; see design.md).
+- Build: the zone data is extracted from CLDR during every build and test run; one more lazily loaded chunk (search data); the bundle-size check is extended.
 
 ## Goals
 
@@ -129,7 +129,7 @@ Audience: every user of the app; without this change the app shows no useful con
 Feature files under `packages/client/src/test/features/`, tagged `@add-locations-via-search`:
 
 - `location_search/` — matching by name, country and abbreviation, ranking, suggestions, performance (vitest-cucumber);
-- `locations/` — adding, removing, persistence (vitest-cucumber), the Cards view list in jsdom (`locations_ui_unit.feature`) and in a real browser (`locations_ui_e2e.feature`: axe-core, keyboard, focus, announcements, layout, screenshots, cross-tab, offline).
+- `locations/` — adding, removing, persistence (vitest-cucumber), the Cards view list in jsdom (`locations_ui_unit.feature`) and in a real browser: `locations_view_contract_e2e.feature` (adding, removing, keyboard, focus and axe-core, run for every registered view per ADR-0005) and `locations_ui_e2e.feature` (search data states, announcements, layout, screenshots, cross-tab, offline).
 
 ## Visual Reference
 
@@ -143,7 +143,7 @@ No changes (no IA documents exist under `docs/ia/`).
 
 - M1: 100% of FR1–FR18, NFR-P1–NFR-R2 and UX1–UX5 have at least one automated test tagged `@add-locations-via-search`.
 - M2: Mutation score of the new model, search matching and ranking, and repository code is at least 95% (minimum 90%).
-- M3: axe-core reports 0 violations across the 9 states of the UI States Matrix (every row except the offline one) × 2 themes = 18 checks.
+- M3: axe-core reports 0 violations across the 9 states of the UI States Matrix (every row except the offline one) × 2 themes = 18 checks for each registered view (18 today: only Cards is registered).
 - M4: On the bundled data, `IST` returns Kolkata, Jerusalem and Dublin as its first 3 results in that order; `EST` returns New York first; `Moscow` and `Москва` return Moscow first; every result for `Kazakhstan` has country KZ and Almaty is among them.
 - M5: 0 raw offsets stored: a stored document with a legacy identifier (`Asia/Calcutta`) loads as `Asia/Kolkata`, and adding `+05:00` is rejected — both covered by tests.
 - M6: Each of 10 sample queries completes in at most 50 ms in the performance scenario.

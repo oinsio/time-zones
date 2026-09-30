@@ -22,7 +22,7 @@ A location SHALL consist of a canonical IANA time zone identifier, a city label 
 #### Scenario: Raw offset is rejected
 - **WHEN** a location with the zone `+05:00` is added
 - **THEN** the addition is rejected as an unknown time zone
-- **AND** nothing is stored
+- **AND** the list is unchanged
 
 #### Scenario: Unknown zone is rejected
 - **WHEN** a location with the zone `Mars/Olympus_Mons` is added
@@ -52,7 +52,7 @@ Removing a location SHALL take it out of the list immediately and MUST keep the 
 #### Scenario: Remove the last location
 - **GIVEN** the list contains only Moscow
 - **WHEN** the user removes Moscow
-- **THEN** the list is empty and the empty state is shown
+- **THEN** the list is empty
 
 #### Scenario: Location already gone
 - **GIVEN** Moscow was removed in another tab
@@ -61,12 +61,17 @@ Removing a location SHALL take it out of the list immediately and MUST keep the 
 - **AND** the list is unchanged
 
 ### Requirement: List in the Cards view
-The Cards view SHALL show one row per location, in list order, with the city label, the country name in the interface language and a remove action whose accessible name includes the city. It MUST also offer an "Add location" action that opens the search. After a removal, focus MUST move to the next location's remove action, or the previous one, or the "Add location" action when the list becomes empty. Adding and removing MUST be announced politely without moving focus. <!-- implements FR10, FR17, NFR-A3, UX5 of add-locations-via-search -->
+The Cards view SHALL show one row per location, in list order, with the city label, the country name in the interface language and a remove action whose accessible name includes the city. It MUST also offer an "Add location" action that opens the search. After a removal, focus MUST move to the next location's remove action, or the previous one, or the "Add location" action when the list becomes empty. Adding and removing MUST be announced politely without moving focus. Adding and removing a location are part of the view contract: these behaviours MUST hold for every registered view, not only Cards. <!-- implements FR10, FR17, NFR-A3, UX5 of add-locations-via-search -->
 
 #### Scenario: Rows show city and country
 - **GIVEN** the list is Almaty and Moscow and the interface language is English
 - **WHEN** the user opens the app
 - **THEN** two rows are shown: "Almaty" with "Kazakhstan" and "Moscow" with "Russia"
+
+#### Scenario: Empty state after the last removal
+- **GIVEN** the list contains only Moscow
+- **WHEN** the user removes Moscow
+- **THEN** the empty state with the "Add location" action is shown
 
 #### Scenario: Remove action names the city
 - **WHEN** the list contains Moscow
