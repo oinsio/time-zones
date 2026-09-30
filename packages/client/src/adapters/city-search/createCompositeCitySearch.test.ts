@@ -181,3 +181,26 @@ describe("composite city search suggestions", () => {
     );
   });
 });
+
+describe("composite city search popularity", () => {
+  it("should list a popular city before an unpopular one that sorts earlier by name", () => {
+    const popularitySearch = createCompositeCitySearch([
+      city("Asia/Tbilisi", "Tbilisi", "Тбилиси", "GE"),
+      city("Asia/Tokyo", "Tokyo", "Токио", "JP"),
+    ]);
+    const matchedIds = popularitySearch
+      .search("t", "en")
+      .map((result) => result.record.timeZoneId);
+    expect(
+      matchedIds.filter((id) => id === "Asia/Tokyo" || id === "Asia/Tbilisi"),
+    ).toEqual(["Asia/Tokyo", "Asia/Tbilisi"]);
+  });
+
+  it("should keep the abbreviation table order for abbreviation matches", () => {
+    expect(idsOf("IST").slice(0, 3)).toEqual([
+      "Asia/Kolkata",
+      "Asia/Jerusalem",
+      "Europe/Dublin",
+    ]);
+  });
+});

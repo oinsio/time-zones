@@ -201,3 +201,50 @@ describe("zone cities source matching", () => {
     expect(source.match("x")).toEqual([]);
   });
 });
+
+describe("zone cities source edge cases", () => {
+  it("should drop listed identifiers that are not valid zones", () => {
+    const source = createZoneCitiesSource([moscow], () => [
+      "Europe/Moscow",
+      "Mars/Olympus_Mons",
+      "+05:00",
+    ]);
+    expect(idsOf(source)).toEqual(["Europe/Moscow", "UTC"]);
+  });
+
+  it("should use every data zone when the browser has no supportedValuesOf", () => {
+    const original = Object.getOwnPropertyDescriptor(
+      Intl,
+      "supportedValuesOf",
+    ) as PropertyDescriptor;
+    Object.defineProperty(Intl, "supportedValuesOf", {
+      ...original,
+      value: undefined,
+    });
+    try {
+      expect(idsOf(createZoneCitiesSource([moscow, almaty]))).toEqual([
+        "Europe/Moscow",
+        "Asia/Almaty",
+        "UTC",
+      ]);
+    } finally {
+      Object.defineProperty(Intl, "supportedValuesOf", original);
+    }
+  });
+
+  it("should not match the end of a word", () => {
+    const source = createZoneCitiesSource([newYork], () => [
+      "America/New_York",
+    ]);
+    expect(source.match("ork")).toEqual([]);
+  });
+
+  it("should still match by city when the country code is unknown to Intl", () => {
+    const source = createZoneCitiesSource(
+      [{ ...moscow, countryCode: "QQ" }],
+      () => ["Europe/Moscow"],
+    );
+    expect(source.match("mos")).toHaveLength(1);
+    expect(source.match("russia")).toEqual([]);
+  });
+});

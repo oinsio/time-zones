@@ -21,19 +21,21 @@ const MATCH_KIND_ORDER: readonly SearchMatchKind[] = [
 const kindPosition = (matchKind: SearchMatchKind): number =>
   MATCH_KIND_ORDER.indexOf(matchKind);
 
-/** Keeps one result per zone: the one with the best match kind. */
-function keepBestResultPerZone(
+/**
+ * Keeps one result per zone: the first one. Abbreviation results come first
+ * and the zone source returns one result per zone at its best kind, so the
+ * first result of a zone is its best.
+ */
+function keepFirstResultPerZone(
   results: readonly CitySearchResult[],
 ): CitySearchResult[] {
-  const bestByZoneId = new Map<string, CitySearchResult>();
+  const firstByZoneId = new Map<string, CitySearchResult>();
   for (const result of results) {
-    const known = bestByZoneId.get(result.record.timeZoneId);
-    const isBetter =
-      known === undefined ||
-      kindPosition(result.matchKind) < kindPosition(known.matchKind);
-    if (isBetter) bestByZoneId.set(result.record.timeZoneId, result);
+    if (!firstByZoneId.has(result.record.timeZoneId)) {
+      firstByZoneId.set(result.record.timeZoneId, result);
+    }
   }
-  return [...bestByZoneId.values()];
+  return [...firstByZoneId.values()];
 }
 
 /**
@@ -56,29 +58,25 @@ export function createCompositeCitySearch(
       const normalizedQuery = normalizeSearchText(query);
       if (normalizedQuery === "") return [];
       const collator = new Intl.Collator(language);
-      const uniqueResults = keepBestResultPerZone([
+      const uniqueResults = keepFirstResultPerZone([
         ...abbreviationSource.match(normalizedQuery),
         ...zoneSource.match(normalizedQuery),
       ]);
-      const orderedResults = uniqueResults
-        .map((result, position) => ({ result, position }))
-        .sort((first, second) => {
-          const byKind =
-            kindPosition(first.result.matchKind) -
-            kindPosition(second.result.matchKind);
-          if (byKind !== 0) return byKind;
-          if (first.result.matchKind === SearchMatchKind.ABBREVIATION) {
-            return first.position - second.position;
-          }
-          return (
-            second.result.record.rank - first.result.record.rank ||
-            collator.compare(
-              first.result.record.names[language],
-              second.result.record.names[language],
-            )
-          );
-        })
-        .map(({ result }) => result);
+      const orderedResults = uniqueResults.sort((first, second) => {
+        const byKind =
+          kindPosition(first.matchKind) - kindPosition(second.matchKind);
+        if (byKind !== 0) return byKind;
+        if (first.matchKind === SearchMatchKind.ABBREVIATION) {
+          return 0; // the sort is stable: table order is kept
+        }
+        return (
+          second.record.rank - first.record.rank ||
+          collator.compare(
+            first.record.names[language],
+            second.record.names[language],
+          )
+        );
+      });
       return orderedResults.slice(0, MAX_SEARCH_RESULTS);
     },
     suggest: () =>
