@@ -136,6 +136,16 @@ describe("usePwaUpdateStatus update check", () => {
     expect(result.current.isUpdateCheckFailed).toBe(false);
   });
 
+  it("should keep the failure while the browser is offline", async () => {
+    const { result } = await registerAndCheck(
+      vi.fn().mockRejectedValue(new TypeError("network unreachable")),
+    );
+    act(() => {
+      window.dispatchEvent(new Event("offline"));
+    });
+    expect(result.current.isUpdateCheckFailed).toBe(true);
+  });
+
   it("should not fail when the worker registers without a registration", async () => {
     const { result, onRegisteredSW } = registerWithUpdate(vi.fn());
     await act(async () => {
