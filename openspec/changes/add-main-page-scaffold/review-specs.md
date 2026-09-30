@@ -6,9 +6,9 @@
 |---|---|
 | Stale claims | 4 |
 | Requirements fully covered | 30/33 |
-| Contradictions | 6 |
+| Contradictions | 7 |
 | CRITICAL | 0 |
-| WARNING | 11 |
+| WARNING | 12 |
 | SUGGESTION | 2 |
 
 ## Freshness
@@ -44,7 +44,7 @@
 | FR5 | ✅ | ✅ Loading state | ✅ 5.2 |
 | FR6 | ✅ | ✅ Error state with retry | ✅ 5.2 (retry factory under-specified and untested, R5) |
 | FR7 | ✅ | ✅ Empty state | ✅ 4.1 |
-| FR8 | ✅ | ✅ Offline note | ✅ 2.2, 5.3 |
+| FR8 | ✅ (trigger contradicts views.md, R12) | ✅ Offline note | ✅ 2.2, 5.3 |
 | FR9 | ✅ | ✅ Storage unavailable warning | ✅ 2.3, 5.3 (layering, R4) |
 | FR10 | ✅ | ✅ Page strings are localized | ✅ 3.1 (key depth, R11) |
 | NFR-P1 | ✅ | ✅ Cards view is registered and lazy | ✅ 6.2 (runs before the build in CI, R1) |
@@ -78,7 +78,8 @@
 - Design D4 "the registry component is wrapped in a small factory that drops a failed promise on retry" (`design.md:19`) vs task 4.2 "Register `cardsView` in `views/index.ts` with lazy component" (`tasks.md:24`), which registers a plain lazy component and builds no factory (R5).
 - Design D6 "Strings live under `mainPage.*` and `views.cards.*` keys" (`design.md:25`) and task 3.1 "Add `mainPage.*` and `views.cards.*` keys" (`tasks.md:19`) vs `.claude/rules/i18n.md:12` "Use flat two-level namespacing: `domain.specificKey`" and the existing two-level `app.*` keys (`packages/client/src/locales/en.json`) (R11).
 - Task 5.1 puts "all scenarios of the main-page spec" into the jsdom feature `main_page.feature` (`tasks.md:28`) vs task 6.1 covering the axe and 320/2560 px scenarios in `main_page_e2e.feature` (`tasks.md:36`) and `.claude/rules/gherkin.md:65` ("If a scenario requires a real browser (focus, aria, layout), it goes into `*_e2e.feature`") (R8).
-- Modified app-shell scenario "the shell renders the app title and an error-free empty content region" (`specs/app-shell/spec.md:10-12`) vs UX1 "The user never sees a blank content area: every state shows text" (`proposal.md:85`) (R12).
+- Modified app-shell scenario "the shell renders the app title and an error-free empty content region" (`specs/app-shell/spec.md:10-12`) vs UX1 "The user never sees a blank content area: every state shows text" (`proposal.md:85`) (R13).
+- FR8 "While the browser is offline, the page shows a short non-blocking note" (`proposal.md:64`), requirement "Offline note" (`specs/main-page/spec.md:80-90`), design D5 (`design.md:22`) and the UI States Matrix row "offline | any | same content plus offline note" (`proposal.md:96`) vs `docs/architecture/views.md:129` "Offline | no network | the app works fully; only a note when an update cannot be fetched", which `docs/design/README.md:40` names as the source for offline states and which wins on conflict (`CLAUDE.md`, "docs win on conflict") (R12).
 
 ## Findings
 
@@ -181,7 +182,16 @@
 - Fix risk: none; the key-set parity test (`packages/client/src/locales/locales.test.ts:63-72`) collects key paths at any depth, so it still passes.
 - Status: open
 
-### R12 — SUGGESTION — Empty-registry scenario allows a blank content area, contradicting UX1
+### R12 — WARNING — Offline note shown whenever the browser is offline, against views.md
+- Location: `openspec/changes/add-main-page-scaffold/proposal.md:64`
+- Rule: `CLAUDE.md` ("Screen design (docs win on conflict)"); `docs/design/README.md:40` (build offline states from `views.md`)
+- Problem: FR8 shows "a short non-blocking note that the app works offline" whenever the browser is offline, and hides it when the connection returns. Requirement "Offline note" (`specs/main-page/spec.md:80-90`), design D5 (`design.md:22`, `useOnlineStatus` on `navigator.onLine`), task 2.2 (`tasks.md:14`), task 5.3 (`tasks.md:30`), U3 (`proposal.md:48`) and the UI States Matrix row "offline | any | same content plus offline note" (`proposal.md:96`) all build this. The design documents define the Offline state differently: "the app works fully; only a note when an update cannot be fetched" (`docs/architecture/views.md:129`). `docs/design/README.md:40` says offline states are built from `views.md`, and `CLAUDE.md` says the docs win on conflict. The app already tells the user once that it works offline, through the offline-ready notice (`openspec/specs/app-shell/spec.md:37-50`).
+- Impact: The page builds an always-on offline banner that the design documents exclude. An offline-first app then shows a note on every offline use, in the same notices region as the offline-ready and update notices (R7). The case the documents do want, a note when a new version cannot be fetched, is never built, and the Offline state of M2 and NFR-A1 is checked against the wrong UI.
+- Fix: Rewrite FR8 as "While the browser is offline, the page keeps working with the same content and shows no note because of the missing network alone. When a check for a new version fails because the network is unreachable, the notices region shows a short polite note that the latest version could not be fetched; the note disappears when the connection returns." Rewrite requirement "Offline note" and its scenarios to match: "Update cannot be fetched" (WHEN the app checks for a new version while offline THEN the note is announced politely AND the view stays usable), "Offline without a pending check" (WHEN the browser goes offline THEN no note is shown), and "Connection restored" (unchanged). In D5, have `usePwaUpdateStatus` pass `onRegisteredSW(swUrl, registration)` to `useRegisterSW`, call `registration.update()` once, and expose `isUpdateCheckFailed` when that promise rejects. `useOnlineStatus` stays and clears the flag on `online`. Change U3 and the matrix row to "offline | any | same content; note only when the update check failed". Task 2.2 keeps `useOnlineStatus`. Add a task step that extends `src/controller/usePwaUpdateStatus.test.ts`, whose `useRegisterSW` mock (line 8) gets a registration whose `update` rejects (`npx vitest run src/controller/usePwaUpdateStatus.test.ts`). Add an `app-shell` delta that states the new failed-update note next to the existing notices.
+- Fix risk: It changes `usePwaUpdateStatus` from the archived setup change, so the change needs an `app-shell` delta and the hook's existing tests must keep passing. `registration.update()` makes one extra request on start while online; the browser makes a similar request on navigation anyway. The E2E offline state for NFR-A1 must install the service worker first and then use `context.setOffline(true)` before reloading. Moderate.
+- Status: open
+
+### R13 — SUGGESTION — Empty-registry scenario allows a blank content area, contradicting UX1
 - Location: `openspec/changes/add-main-page-scaffold/specs/app-shell/spec.md:12`
 - Rule: —
 - Problem: The modified scenario expects "an error-free empty content region" when no view is registered. UX1 (`proposal.md:85`) says the user never sees a blank content area. `resolveActiveView` must handle an empty registry (task 1.2), so tests reach this state.
@@ -190,7 +200,7 @@
 - Fix risk: none; once Cards is registered, the empty registry is reachable only in tests.
 - Status: open
 
-### R13 — SUGGESTION — design.md lacks the sections the design rule requires
+### R14 — SUGGESTION — design.md lacks the sections the design rule requires
 - Location: `openspec/changes/add-main-page-scaffold/design.md:1`
 - Rule: `.claude/rules/design-decisions.md`
 - Problem: design.md has Context and Decisions D1–D7 but no "Consequences" and no "Alternatives Considered" section, both required by the rule. D2, D5 and D7 name no requirement id, although the rule says "Always reference the FR/NFR/UX from proposal.md that drove the decision".
@@ -201,4 +211,4 @@
 
 ## Verdict
 
-Needs revision. There are no CRITICAL findings: the change builds what the task asks for, a main-page scaffold with a registry-driven view host, in line with ADR-0002 and ADR-0005. Blocking: WARNINGs R1–R11. These include a bundle task that breaks CI, a missing script, a storage scenario that contradicts the running app, a storage probe that bypasses the port rule, and a retry factory described by a mechanism that does not retry and built by no task. The rest are an untested half of NFR-A2, an undefined notice placement for UX3, browser-only scenarios in the jsdom feature, a stale test-setup claim, UX2 without a task, and three-level i18n keys against the i18n rule. R12 and R13 are polish.
+Needs revision. There are no CRITICAL findings: the change builds what the task asks for, a main-page scaffold with a registry-driven view host, in line with ADR-0002 and ADR-0005. Blocking: WARNINGs R1–R12. These include a bundle task that breaks CI, a missing script, a storage scenario that contradicts the running app, a storage probe that bypasses the port rule, and a retry factory described by a mechanism that does not retry and built by no task. The rest are an untested half of NFR-A2, an undefined notice placement for UX3, browser-only scenarios in the jsdom feature, a stale test-setup claim, UX2 without a task, and three-level i18n keys against the i18n rule, and an always-on offline note that `docs/architecture/views.md` excludes. R13 and R14 are polish.
