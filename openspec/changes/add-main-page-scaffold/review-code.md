@@ -116,7 +116,8 @@ Not measured (no logic beyond a translated string in a card): `NoticeCard.tsx`, 
 - Impact: a screen-reader user in private mode (U4) is never told that their changes will not be saved; they find out only if they happen to navigate to the end of the page. The update-check-failed note does not have this problem because it is inserted after the region exists.
 - Fix: start `useStorageAvailability` from `true` and run `storageAvailability.isStorageAvailable()` in a `useEffect` on mount that sets the state, so the warning is inserted into an already rendered live region. Add a unit test in `controller/useStorageAvailability.test.ts` that the first render reports `true` and the value after mount is the port's answer (e.g. record the values the hook returns across renders).
 - Fix risk: the warning appears one commit later; it is out of the document flow (FR1/UX3), so the header does not move. Existing tests render through RTL `render`/`renderHook`, which flush effects inside `act`, so `AppShell.pageNotices.test.tsx:99`, "Private mode" and the e2e `toBeVisible` waits keep passing. Without the first-render test the `useState(true)` initial value becomes a surviving mutant and `useStorageAvailability.ts` (only 2 mutants today) could drop below 90%.
-- Status: open
+- Status: fixed
+- Resolution: useStorageAvailability now starts as available and probes the port in a useEffect on mount, so the warning enters an already rendered live region; covered by useStorageAvailability.test.ts "should report storage as available on the first render and ask the port after mount".
 
 ### R2 — WARNING — ViewSkeleton mutation score 50%, placeholder rows untested
 - Location: `packages/client/src/app/ViewSkeleton.tsx:4-7`
@@ -125,7 +126,8 @@ Not measured (no logic beyond a translated string in a card): `NoticeCard.tsx`, 
 - Impact: a regression that drops the visual placeholder rows leaves sighted users with an empty-looking content area while the view loads (FR5, UX1 "never a blank content area"), and no test fails.
 - Fix: add a test in `app/ViewHost.test.tsx` (next to "should show a busy skeleton while the view loads") that the busy skeleton contains 3 `aria-hidden` placeholder rows, using the never-loading view already built there. Mark the two key mutants on line 6 as equivalent with a `// Stryker disable next-line ArrowFunction,StringLiteral: equivalent — keys only silence React's list warning` comment, the same way `ViewErrorBoundary.tsx:22` does.
 - Fix risk: the row count is not exported; the test either repeats `3` as test data (allowed in tests by `code-style.md`) or the constant is exported from `ViewSkeleton.tsx` only for the test. None for production behaviour.
-- Status: open
+- Status: fixed
+- Resolution: added ViewHost.test.tsx "should draw placeholder rows hidden from assistive technology in the skeleton" and a Stryker disable for the two equivalent key mutants; ViewSkeleton.tsx now scores 100%.
 
 ### R3 — SUGGESTION — Retry while still offline reloads the page into the browser error page
 - Location: `packages/client/src/views/createRetryableLazyView.ts:11,28-32`
@@ -134,7 +136,8 @@ Not measured (no logic beyond a translated string in a card): `NoticeCard.tsx`, 
 - Impact: the header, notices and the error with its Retry action are replaced by the browser's offline error page; the user loses the app instead of seeing the error state again. The reload is also untested with its default (`reloadBrowserPage` survives mutation).
 - Fix: in `reloadBrowserPage` reload only when `navigator.onLine` is true; otherwise do nothing, so the rejection rethrown by `loadAfterFailure` shows the error fallback again and Retry stays available. Add a test in `views/createRetryableLazyView.test.tsx` that stubs `navigator.onLine` to `false` (`vi.spyOn(navigator, "onLine", "get")`) and checks that no reload happens and the error stays, and one with `true` that `window.location.reload` is called (spy restored in `afterEach`).
 - Fix risk: `navigator.onLine` can be `true` while the network is unreachable, so that case still reloads as today. When a browser caches the failed import, a retry while offline keeps showing the error until the connection returns, which is the intended error state.
-- Status: open
+- Status: fixed
+- Resolution: reloadBrowserPage reloads only when navigator.onLine is true; covered by createRetryableLazyView.test.tsx online/offline reload cases; the file scores 100% under Stryker.
 
 ### R4 — SUGGESTION — No test that the update-check-failed note stays while offline
 - Location: `packages/client/src/controller/usePwaUpdateStatus.ts:34`
@@ -143,7 +146,8 @@ Not measured (no logic beyond a translated string in a card): `NoticeCard.tsx`, 
 - Impact: a regression that hides the note as soon as the browser reports offline — exactly when it matters (U3) — would go unnoticed.
 - Fix: add a case in `controller/usePwaUpdateStatus.test.ts` ("should keep the failure while the browser is offline"): let the update check reject, dispatch `offline`, and expect `isUpdateCheckFailed` to stay `true`.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: added usePwaUpdateStatus.test.ts "should keep the failure while the browser is offline"; the file now scores 100% under Stryker.
 
 ### R5 — SUGGESTION — E2E step file exceeds the 200-line limit
 - Location: `packages/client/src/test/features/main_page/steps/main_page_e2e.steps.ts:1`
@@ -152,7 +156,8 @@ Not measured (no logic beyond a translated string in a card): `NoticeCard.tsx`, 
 - Impact: breaks the project file-size invariant for a file this branch created; splitting would not hurt clarity since the concerns are independent.
 - Fix: move the keyboard-retry and header-position steps (`:176-252`) into `steps/main_page_recovery_e2e.steps.ts`, and move the shared helpers (`installServiceWorker`, `failStorageWrites`, `APP_ROOT_URL`, text constants) into `steps/main_page_e2e.fixtures.ts` or a small helper module imported by both step files.
 - Fix risk: the new file must match the playwright-bdd steps glob `src/test/features/**/steps/*_e2e.{steps,fixtures}.ts` (the name above does); each step text must be defined in exactly one file or playwright-bdd reports duplicates; `createBdd(test)` must use the same `test` from the fixtures file in both files.
-- Status: open
+- Status: fixed
+- Resolution: split into main_page_e2e.steps.ts (153 lines), main_page_recovery_e2e.steps.ts (88 lines) and shared mainPageE2eHelpers.ts; each step text is defined in one file only.
 
 ## Verdict
 

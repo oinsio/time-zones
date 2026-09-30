@@ -1,17 +1,19 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
-import { englishLocale } from "./englishTexts";
+import { type MainPageWorld, test } from "./main_page_e2e.fixtures";
 import {
-  type BoundingBox,
-  type MainPageWorld,
-  test,
-} from "./main_page_e2e.fixtures";
+  APP_ROOT_URL,
+  EMPTY_STATE_TEXT,
+  ERROR_TEXT,
+  failStorageWrites,
+  installServiceWorker,
+  STORAGE_WARNING_TEXT,
+} from "./mainPageE2eHelpers";
 import { readThemeColours, type Theme } from "./themeTokens";
 
 const { Given, When, Then } = createBdd(test);
 
-const APP_ROOT_URL = ".";
 const SCREEN_HEIGHT_PX = 800;
 const NOTICE_CARD_SELECTOR = '[role="status"] > div';
 const BUSY_SKELETON_SELECTOR = '[aria-busy="true"]';
@@ -24,29 +26,6 @@ enum MainPageState {
   OFFLINE = "offline",
   STORAGE_UNAVAILABLE = "storage unavailable",
 }
-
-const EMPTY_STATE_TEXT = englishLocale.views.cardsEmptyState;
-const ERROR_TEXT = englishLocale.mainPage.viewError;
-const RETRY_LABEL = englishLocale.mainPage.retry;
-const UPDATE_CHECK_FAILED_TEXT = englishLocale.mainPage.updateCheckFailed;
-const STORAGE_WARNING_TEXT = englishLocale.mainPage.storageUnavailable;
-
-const failStorageWrites = () => {
-  Storage.prototype.setItem = () => {
-    throw new DOMException("quota", "QuotaExceededError");
-  };
-};
-
-// Verifies NFR-A1 of add-main-page-scaffold: the service worker precaches the
-// build and controls the page before the offline state is entered.
-const installServiceWorker = async ({ page }: { page: Page }) => {
-  await page.goto(APP_ROOT_URL);
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-  });
-  await page.reload();
-  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
-};
 
 Given(
   /^the user prefers the (light|dark) theme$/,
@@ -172,81 +151,3 @@ Then(
     expect(pageWidths.scrollWidth).toBeLessThanOrEqual(pageWidths.clientWidth);
   },
 );
-
-// Verifies FR6, NFR-A2 of add-main-page-scaffold: first visit, before the
-// service worker controls the page, so page.route sees the chunk request.
-Given(
-  "the view cannot be loaded on the first visit",
-  async ({ mainPageWorld }) => {
-    await mainPageWorld.blockCardsChunk();
-  },
-);
-
-When("the main page shows the error", async ({ mainPageWorld }) => {
-  await mainPageWorld.page.goto(APP_ROOT_URL);
-  await expect(mainPageWorld.page.getByRole("alert")).toContainText(ERROR_TEXT);
-});
-
-Then("focus has not moved", async ({ mainPageWorld }) => {
-  const focusedTagName = await mainPageWorld.page.evaluate(
-    () => document.activeElement?.tagName,
-  );
-  expect(focusedTagName).toBe("BODY");
-});
-
-When("the failure cause is gone", async ({ mainPageWorld }) => {
-  await mainPageWorld.unblockCardsChunk();
-});
-
-When(
-  "the user reaches Retry with Tab and presses Enter",
-  async ({ mainPageWorld }) => {
-    const { page } = mainPageWorld;
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("button", { name: RETRY_LABEL })).toBeFocused();
-    await page.keyboard.press("Enter");
-  },
-);
-
-Then("the view is shown", async ({ mainPageWorld }) => {
-  await expect(mainPageWorld.page.getByText(EMPTY_STATE_TEXT)).toBeVisible();
-});
-
-// Verifies FR1, UX3 of add-main-page-scaffold: the header stays put.
-Given(
-  "the app has been installed and its header position is recorded",
-  async ({ mainPageWorld }) => {
-    await installServiceWorker(mainPageWorld);
-    await expect(mainPageWorld.page.getByText(EMPTY_STATE_TEXT)).toBeVisible();
-    mainPageWorld.recordedHeaderBox = await readHeaderBox(mainPageWorld.page);
-  },
-);
-
-When(
-  "the update check fails because the network is unreachable",
-  async ({ mainPageWorld }) => {
-    await mainPageWorld.failUpdateChecksOnNextLoad();
-    await mainPageWorld.page.reload();
-    await expect(
-      mainPageWorld.page.getByText(UPDATE_CHECK_FAILED_TEXT),
-    ).toBeVisible();
-  },
-);
-
-When("storage becomes unavailable", async ({ mainPageWorld }) => {
-  const { page } = mainPageWorld;
-  await page.addInitScript(failStorageWrites);
-  await page.reload();
-  await expect(page.getByText(STORAGE_WARNING_TEXT)).toBeVisible();
-});
-
-Then("the header has not moved", async ({ mainPageWorld }) => {
-  const currentHeaderBox = await readHeaderBox(mainPageWorld.page);
-  expect(currentHeaderBox).toEqual(mainPageWorld.recordedHeaderBox);
-});
-
-async function readHeaderBox(page: Page): Promise<BoundingBox> {
-  const headerBox = await page.getByRole("heading", { level: 1 }).boundingBox();
-  if (!headerBox) throw new Error("The page heading has no bounding box");
-  return headerBox;
-}
