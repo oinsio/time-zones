@@ -89,3 +89,7 @@ verify:
 #   tracker: move the issue back to gnomish:ready (no reply needed);
 #   local: gnomish run --dir=<path-to-time-zones-clone> --resume=<task>, then confirm.
 advancement: auto
+# A large change needs more rounds: each verdict names real defects the previous one
+# did not, and on task #16 the gnome closed every listed finding yet ran out of attempts.
+autonomy:
+  attemptLimit: 4

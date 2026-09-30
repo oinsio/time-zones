@@ -133,6 +133,31 @@ artifacts name and confirm the claim holds; check that every FR, NFR and UX
 item has a task naming its automated test; check that each test sits where
 `bdd-unit.md` and `bdd-e2e.md` put it. Fix what you find before you stop.
 
+Then make one more pass that reads the artifacts against each other and against
+the build, not against the rules:
+
+- **Numbers agree with rules.** For every exact count, threshold or example
+  result in a success metric or a scenario ("returns exactly 3 results"), apply
+  the matching rules the specs define — prefix, word or substring match, country
+  expansion, every source the design queries — to the real data and confirm the
+  number still holds. If it does not, change the rule or the number, not just
+  one of them.
+- **One behaviour, one answer.** The proposal, the spec deltas, `design.md` and
+  `tasks.md` must say the same thing about each FR; a decision made in
+  `design.md` must not quietly narrow or widen a requirement.
+- **Every API the design names compiles.** For each platform or library API the
+  design or tasks call (`Intl.*`, `Temporal.*`, a DOM method, a package
+  function), check that the `lib`, `target` and `types` in
+  `packages/client/tsconfig*.json` and the installed packages declare it. If
+  they do not, add a task that changes the config, or pick another API.
+- **Verification commands really verify.** A task's check — a grep, a coverage
+  test, a script — must fail when this change's work is missing. Make sure it
+  cannot pass on artifacts that earlier changes already left in the repository,
+  for example by matching this change's tag as well as the requirement id.
+- **Placement by assertion, not by title.** A scenario that asserts an
+  accessible name, `aria-*` state, focus or layout belongs in `*_e2e.feature`,
+  whatever the feature is called.
+
 **A retry re-checks everything.** If your prompt carries prior-attempt
 feedback, the judge rejected the previous round — and a judge reports what it
 found, not everything there is. Fixing the listed findings is not the end of
