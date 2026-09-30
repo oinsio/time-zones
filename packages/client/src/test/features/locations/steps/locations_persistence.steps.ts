@@ -1,19 +1,15 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { expect } from "vitest";
 // "pure" skips auto-cleanup: each step is its own test, the app must survive between steps.
 import { act, cleanup, renderHook } from "@testing-library/react/pure";
 import { createElement, type ReactNode } from "react";
+import { expect } from "vitest";
 import {
   createLocalStorageLocationRepository,
   type LocationsSyncChannel,
 } from "@/adapters";
 import { STORAGE_KEYS } from "@/constants";
-import {
-  LocationsProvider,
-  LocationsStatus,
-  useLocations,
-} from "@/controller";
+import { LocationsProvider, LocationsStatus, useLocations } from "@/controller";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
@@ -91,18 +87,24 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   f.Scenario("List survives a reload", ({ Given, When, Then }) => {
-    Given("the user added {string}, then {string}", (_ctx, first: string, second: string) => {
-      const firstSession = openApp();
-      addCity(firstSession, first);
-      addCity(firstSession, second);
-      firstSession.unmount();
-    });
+    Given(
+      "the user added {string}, then {string}",
+      (_ctx, first: string, second: string) => {
+        const firstSession = openApp();
+        addCity(firstSession, first);
+        addCity(firstSession, second);
+        firstSession.unmount();
+      },
+    );
     When("the app is opened again", () => {
       app = openApp();
     });
-    Then("the list is {string}, {string} in that order", (_ctx, first: string, second: string) => {
-      expect(labelsOf(app)).toEqual([first, second]);
-    });
+    Then(
+      "the list is {string}, {string} in that order",
+      (_ctx, first: string, second: string) => {
+        expect(labelsOf(app)).toEqual([first, second]);
+      },
+    );
   });
 
   f.Scenario("First launch writes nothing", ({ When, Then }) => {
@@ -117,34 +119,43 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario(
     "Legacy identifier is canonicalized on load",
     ({ Given, When, Then }) => {
-      Given("the stored list holds {string} in {string}", (_ctx, label: string, zone: string) => {
-        storeDocument([{ ...cityEntry(label), timeZoneId: zone }]);
+      Given(
+        "the stored list holds {string} in {string}",
+        (_ctx, label: string, zone: string) => {
+          storeDocument([{ ...cityEntry(label), timeZoneId: zone }]);
+        },
+      );
+      When("the app is opened", () => {
+        app = openApp();
+      });
+      Then(
+        "the list holds {string} in {string}",
+        (_ctx, label: string, zone: string) => {
+          expect(app.result.current.locations).toEqual([
+            buildLocation({ ...cityEntry(label), timeZoneId: zone }),
+          ]);
+        },
+      );
+    },
+  );
+
+  f.ScenarioOutline(
+    "Unreadable stored list",
+    ({ Given, When, Then }, variables) => {
+      Given("the stored list is <document>", () => {
+        localStorage.setItem(
+          STORAGE_KEYS.LOCATIONS,
+          UNREADABLE_DOCUMENTS[variables.document] ?? "",
+        );
       });
       When("the app is opened", () => {
         app = openApp();
       });
-      Then("the list holds {string} in {string}", (_ctx, label: string, zone: string) => {
-        expect(app.result.current.locations).toEqual([
-          buildLocation({ ...cityEntry(label), timeZoneId: zone }),
-        ]);
+      Then("the list is reported as unreadable", () => {
+        expect(app.result.current.loadStatus).toBe(LocationsStatus.UNREADABLE);
       });
     },
   );
-
-  f.ScenarioOutline("Unreadable stored list", ({ Given, When, Then }, variables) => {
-    Given("the stored list is <document>", () => {
-      localStorage.setItem(
-        STORAGE_KEYS.LOCATIONS,
-        UNREADABLE_DOCUMENTS[variables.document] ?? "",
-      );
-    });
-    When("the app is opened", () => {
-      app = openApp();
-    });
-    Then("the list is reported as unreadable", () => {
-      expect(app.result.current.loadStatus).toBe(LocationsStatus.UNREADABLE);
-    });
-  });
 
   f.Scenario("Reset", ({ Given, And, When, Then }) => {
     Given("the stored list is not valid JSON", () => {
@@ -174,27 +185,36 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the user adds {string} in the first tab", (_ctx, label: string) => {
       addCity(app, label);
     });
-    Then("the second tab shows {string} without a reload", (_ctx, label: string) => {
-      expect(labelsOf(secondApp)).toEqual([label]);
-    });
+    Then(
+      "the second tab shows {string} without a reload",
+      (_ctx, label: string) => {
+        expect(labelsOf(secondApp)).toEqual([label]);
+      },
+    );
   });
 
   f.Scenario("Removed in another tab", ({ Given, When, Then }) => {
-    Given("the app is open in two tabs and both show {string}", (_ctx, label: string) => {
-      storeDocument([cityEntry(label)]);
-      const hub = createInMemoryChannelHub();
-      app = openApp(hub.createChannel);
-      secondApp = openApp(hub.createChannel);
-      expect(labelsOf(app)).toEqual([label]);
-      expect(labelsOf(secondApp)).toEqual([label]);
-    });
-    When("the user removes {string} in the second tab", (_ctx, label: string) => {
-      act(() => {
-        secondApp.result.current.removeLocation(
-          buildLocation({ label, ...KNOWN_CITIES[label] }).id,
-        );
-      });
-    });
+    Given(
+      "the app is open in two tabs and both show {string}",
+      (_ctx, label: string) => {
+        storeDocument([cityEntry(label)]);
+        const hub = createInMemoryChannelHub();
+        app = openApp(hub.createChannel);
+        secondApp = openApp(hub.createChannel);
+        expect(labelsOf(app)).toEqual([label]);
+        expect(labelsOf(secondApp)).toEqual([label]);
+      },
+    );
+    When(
+      "the user removes {string} in the second tab",
+      (_ctx, label: string) => {
+        act(() => {
+          secondApp.result.current.removeLocation(
+            buildLocation({ label, ...KNOWN_CITIES[label] }).id,
+          );
+        });
+      },
+    );
     Then("the first tab no longer shows {string}", (_ctx, label: string) => {
       expect(labelsOf(app)).not.toContain(label);
     });

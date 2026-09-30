@@ -20,7 +20,9 @@ describe("LocationsLoadError", () => {
   it("should emit reset when Reset is used", async () => {
     const onReset = vi.fn();
     render(<LocationsLoadError onReset={onReset} />);
-    await userEvent.click(screen.getByRole("button", { name: "Reset the list" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Reset the list" }),
+    );
     expect(onReset).toHaveBeenCalledTimes(1);
   });
 });

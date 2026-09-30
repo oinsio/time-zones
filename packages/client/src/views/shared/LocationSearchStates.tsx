@@ -29,7 +29,10 @@ export function LocationSearchStates({
   }
   if (status === CitySearchStatus.FAILED) {
     return (
-      <div role="alert" className="flex flex-col items-start gap-3 py-4 text-danger">
+      <div
+        role="alert"
+        className="flex flex-col items-start gap-3 py-4 text-danger"
+      >
         <p>{t("locations.searchLoadError")}</p>
         <button
           type="button"

@@ -23,7 +23,8 @@ export function useLocations() {
     store.getSnapshot,
   );
   const { i18n } = useTranslation();
-  const language = (i18n.resolvedLanguage ?? i18n.language) as SupportedLanguage;
+  const language = (i18n.resolvedLanguage ??
+    i18n.language) as SupportedLanguage;
   const rows = useMemo(
     () => presentLocationRows(locations, language),
     [locations, language],

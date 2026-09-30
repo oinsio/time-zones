@@ -1,11 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { localStorageLocationRepository } from "@/adapters";
 import { LOCATIONS_WRITE_DEBOUNCE_MS } from "@/constants";
-import {
-  createStore,
-  LocationCommandType,
-  reduceLocations,
-} from "@/model";
+import { createStore, LocationCommandType, reduceLocations } from "@/model";
 import {
   type LocationRepository,
   type LocationsLoadResult,
@@ -23,7 +19,7 @@ import { timeoutWriteScheduler, type WriteScheduler } from "./writeScheduler";
 const PAGE_HIDE_EVENT = "pagehide";
 
 type LocationsProviderProps = {
-  children: ReactNode;
+  children?: ReactNode;
   repository?: LocationRepository;
   writeScheduler?: WriteScheduler;
 };
@@ -80,7 +76,9 @@ export function LocationsProvider({
         LOCATIONS_WRITE_DEBOUNCE_MS,
       );
     };
-    const dispatchAndSchedule = (command: Parameters<typeof store.dispatch>[0]) => {
+    const dispatchAndSchedule = (
+      command: Parameters<typeof store.dispatch>[0],
+    ) => {
       const outcome = store.dispatch(command);
       if (outcome.ok) scheduleWrite();
       return outcome;
@@ -90,7 +88,10 @@ export function LocationsProvider({
         if (cancelPendingWrite.current) flushWrite();
       },
       addLocation: (input: AddLocationInput) =>
-        dispatchAndSchedule({ type: LocationCommandType.ADD_LOCATION, ...input }),
+        dispatchAndSchedule({
+          type: LocationCommandType.ADD_LOCATION,
+          ...input,
+        }),
       removeLocation: (id: string) =>
         dispatchAndSchedule({ type: LocationCommandType.REMOVE_LOCATION, id }),
       resetLocations: () => {

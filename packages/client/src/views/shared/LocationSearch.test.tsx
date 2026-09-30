@@ -1,8 +1,9 @@
 // Verifies FR6, FR8, FR15, NFR-P2 of add-locations-via-search.
+
+import zoneCities from "virtual:zone-cities";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import zoneCities from "virtual:zone-cities";
 import {
   createCompositeCitySearch,
   createInMemoryLocationRepository,
@@ -14,7 +15,9 @@ import { LocationSearch } from "./LocationSearch";
 
 function LocationNames() {
   const { rows } = useLocations();
-  return <p data-testid="names">{rows.map((row) => row.cityLabel).join(",")}</p>;
+  return (
+    <p data-testid="names">{rows.map((row) => row.cityLabel).join(",")}</p>
+  );
 }
 
 const renderSearch = (
@@ -69,9 +72,7 @@ describe("LocationSearch", () => {
     await openSearch();
     await screen.findByText("Popular locations");
     await userEvent.type(screen.getByRole("combobox"), "Mos");
-    expect(
-      screen.getByRole("option", { name: /Moscow/ }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Moscow/ })).toBeInTheDocument();
   });
 
   it("should add the chosen city and close the search", async () => {

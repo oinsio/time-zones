@@ -1,11 +1,11 @@
 import { createContext } from "react";
 import type {
   LocationCommand,
+  LocationErrorCode,
   LocationsReduceResult,
   LocationsState,
   Store,
 } from "@/model";
-import type { LocationErrorCode } from "@/model";
 
 /** Whether the stored list could be read (D5). */
 export enum LocationsStatus {

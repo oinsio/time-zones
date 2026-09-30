@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { loadCitySearch } from "@/adapters";
 import type { SupportedLanguage } from "@/i18n";
 import type { Location } from "@/model";
-import { type PresentedSearchResult, presentSearchResults } from "@/presenter";
 import type { CitySearch, LoadCitySearch } from "@/ports";
+import { type PresentedSearchResult, presentSearchResults } from "@/presenter";
 
 export enum CitySearchStatus {
   LOADING = "LOADING",
@@ -22,13 +22,15 @@ const loadedSearches = new WeakMap<LoadCitySearch, CitySearch>();
  */
 export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
   const { i18n } = useTranslation();
-  const language = (i18n.resolvedLanguage ?? i18n.language) as SupportedLanguage;
+  const language = (i18n.resolvedLanguage ??
+    i18n.language) as SupportedLanguage;
   const [search, setSearch] = useState<CitySearch | undefined>(() =>
     loadedSearches.get(load),
   );
   const [isFailed, setIsFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` re-runs the load on retry
   useEffect(() => {
     if (loadedSearches.has(load)) return;
     let isCurrent = true;
@@ -52,7 +54,10 @@ export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
   }, []);
 
   const presentResults = useCallback(
-    (query: string, locations: readonly Location[]): PresentedSearchResult[] => {
+    (
+      query: string,
+      locations: readonly Location[],
+    ): PresentedSearchResult[] => {
       if (search === undefined) return [];
       const results =
         query.trim() === "" ? search.suggest() : search.search(query, language);

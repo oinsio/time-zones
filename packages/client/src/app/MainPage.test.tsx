@@ -61,9 +61,7 @@ describe("MainPage", () => {
   it("should render notices in a polite region", () => {
     renderMainPage(<p>{NOTICE_TEXT}</p>);
     expect(getNoticesRegion()).toHaveAttribute("aria-live", "polite");
-    expect(getNoticesRegion()).toContainElement(
-      screen.getByText(NOTICE_TEXT),
-    );
+    expect(getNoticesRegion()).toContainElement(screen.getByText(NOTICE_TEXT));
   });
 
   it("should render an empty polite region when there are no notices", () => {

@@ -1,7 +1,7 @@
 import { type RefObject, useRef, useState } from "react";
 import { CitySearchStatus, useCitySearch, useLocations } from "@/controller";
-import type { PresentedSearchResult } from "@/presenter";
 import type { LoadCitySearch } from "@/ports";
+import type { PresentedSearchResult } from "@/presenter";
 import { AddLocationButton } from "./AddLocationButton";
 import { LocationSearchDialog } from "./LocationSearchDialog";
 
@@ -45,7 +45,9 @@ function OpenLocationSearch({
       isOpen
       status={status}
       presentedResults={
-        status === CitySearchStatus.READY ? presentResults(query, locations) : []
+        status === CitySearchStatus.READY
+          ? presentResults(query, locations)
+          : []
       }
       query={query}
       onQueryChange={setQuery}

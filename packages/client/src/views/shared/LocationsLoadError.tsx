@@ -11,7 +11,10 @@ type LocationsLoadErrorProps = {
 export function LocationsLoadError({ onReset }: LocationsLoadErrorProps) {
   const { t } = useTranslation();
   return (
-    <div role="alert" className="flex flex-col items-center gap-3 py-8 text-danger">
+    <div
+      role="alert"
+      className="flex flex-col items-center gap-3 py-8 text-danger"
+    >
       <p>{t("locations.loadError")}</p>
       <button
         type="button"

@@ -70,7 +70,9 @@ describe("ViewHost", () => {
   });
 
   it("should mark the content container with the active view id", async () => {
-    const { container } = render(<ViewHost registry={[narrowView, wideView]} />);
+    const { container } = render(
+      <ViewHost registry={[narrowView, wideView]} />,
+    );
     await screen.findByText(NARROW_TEXT);
     expect(container.querySelector("[data-view-id]")).toHaveAttribute(
       "data-view-id",

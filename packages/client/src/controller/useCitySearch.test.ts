@@ -1,6 +1,7 @@
 // Verifies FR6, FR15 of add-locations-via-search (D8, D9).
-import { act, renderHook, waitFor } from "@testing-library/react";
+
 import zoneCities from "virtual:zone-cities";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { createCompositeCitySearch } from "@/adapters";
 import type { CitySearch, LoadCitySearch } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";

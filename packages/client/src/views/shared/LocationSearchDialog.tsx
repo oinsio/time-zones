@@ -67,7 +67,10 @@ export function LocationSearchDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(isNowOpen) => !isNowOpen && onClose()}>
-      <DialogContent aria-describedby={undefined} onCloseAutoFocus={onCloseAutoFocus}>
+      <DialogContent
+        aria-describedby={undefined}
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         <div className="flex items-center justify-between gap-3">
           <DialogTitle className="text-lg font-semibold">
             {t("locations.searchTitle")}

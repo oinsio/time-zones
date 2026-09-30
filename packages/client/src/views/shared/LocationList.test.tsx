@@ -35,14 +35,18 @@ describe("LocationList", () => {
   });
 
   it("should move focus to the next remove action after a removal", async () => {
-    const { rerender } = render(<LocationList rows={rows} onRemove={vi.fn()} />);
+    const { rerender } = render(
+      <LocationList rows={rows} onRemove={vi.fn()} />,
+    );
     await userEvent.click(screen.getByRole("button", { name: "Remove Tokyo" }));
     rerender(<LocationList rows={[rows[0], rows[2]]} onRemove={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Remove Kyiv" })).toHaveFocus();
   });
 
   it("should move focus to the previous remove action after removing the last row", async () => {
-    const { rerender } = render(<LocationList rows={rows} onRemove={vi.fn()} />);
+    const { rerender } = render(
+      <LocationList rows={rows} onRemove={vi.fn()} />,
+    );
     await userEvent.click(screen.getByRole("button", { name: "Remove Kyiv" }));
     rerender(<LocationList rows={[rows[0], rows[1]]} onRemove={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Remove Tokyo" })).toHaveFocus();

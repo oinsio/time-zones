@@ -3,10 +3,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import {
-  createInMemoryLocationRepository,
-  type InMemoryLocationRepositoryOptions,
-} from "@/adapters";
+import { createInMemoryLocationRepository } from "@/adapters";
 import { LocationsProvider } from "@/controller";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
@@ -14,7 +11,9 @@ import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import CardsView from "./CardsView";
 
-const renderCards = (options: InMemoryLocationRepositoryOptions = {}) =>
+type RepositoryOptions = Parameters<typeof createInMemoryLocationRepository>[0];
+
+const renderCards = (options: RepositoryOptions = {}) =>
   render(
     <LocationsProvider
       repository={createInMemoryLocationRepository(options)}
@@ -62,7 +61,9 @@ describe("CardsView", () => {
   it("should list the saved locations and keep the action", () => {
     renderCards(savedLocations("Alpha", "Beta"));
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
-    expect(screen.queryByText("No locations added yet.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("No locations added yet."),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add location" })).toBeVisible();
   });
 
@@ -71,7 +72,9 @@ describe("CardsView", () => {
       initialDocument: { status: LocationsLoadStatus.UNREADABLE },
     });
     expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(screen.queryByText("No locations added yet.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("No locations added yet."),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Add location" }),
     ).not.toBeInTheDocument();
@@ -81,7 +84,9 @@ describe("CardsView", () => {
     renderCards({
       initialDocument: { status: LocationsLoadStatus.UNREADABLE },
     });
-    await userEvent.click(screen.getByRole("button", { name: "Reset the list" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Reset the list" }),
+    );
     expect(screen.getByText("No locations added yet.")).toBeInTheDocument();
   });
 

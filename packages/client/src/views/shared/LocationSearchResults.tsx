@@ -23,12 +23,13 @@ export function LocationSearchResults({
 }: LocationSearchResultsProps) {
   const { t } = useTranslation();
   return (
-    <ul id={listboxId} role="listbox" className="flex flex-col gap-1">
+    <div id={listboxId} role="listbox" className="flex flex-col gap-1">
       {results.map((result, resultIndex) => (
-        <li
+        <div
           key={`${result.timeZoneId}-${result.cityName}`}
           id={`${optionIdPrefix}${resultIndex}`}
           role="option"
+          tabIndex={-1}
           aria-selected={resultIndex === activeIndex}
           aria-disabled={result.isAdded}
           onClick={() => !result.isAdded && onChoose(result)}
@@ -56,8 +57,8 @@ export function LocationSearchResults({
           {result.isAdded && (
             <span className="text-sm">{t("locations.added")}</span>
           )}
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
