@@ -105,6 +105,7 @@ Features are developed with [OpenSpec](openspec/): `/opsx:propose` → `/opsx:ap
 | Path                | What it is                                                                       |
 |---------------------|----------------------------------------------------------------------------------|
 | `gnomish`           | wrapper script — the only way to run the factory here                            |
+| `gnomish-up`        | `serve` plus a live dashboard and the INFO log in one terminal, via the wrapper  |
 | `gnomish.env`       | this instance's settings: instance name, host binding, log and secrets locations |
 | `gnomish.local.env` | optional personal overrides of `gnomish.env`, git-ignored                        |
 | `gnomish.jar`       | the factory build, git-ignored, you put it there yourself                        |
@@ -175,6 +176,10 @@ The wrapper adds `--dir` (this project) and loads [`gnomish.env`](.gnomish/facto
 # Tasks from GitHub issues: label an issue gnomish:ready, then
 .gnomish/factory/gnomish take 42          # work that issue
 .gnomish/factory/gnomish serve --drain    # work the whole ready queue, then exit
+
+# The same daemon, but watchable: opens the dashboard in a browser and follows the INFO log
+.gnomish/factory/gnomish-up               # serve flags pass through: --drain, --slots=2
+.gnomish/factory/gnomish-up --no-open --no-logs
 
 .gnomish/factory/gnomish status <task-id> # where a task is and what happened to it
 ```

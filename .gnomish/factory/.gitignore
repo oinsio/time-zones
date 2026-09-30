@@ -2,3 +2,4 @@
 gnomish.jar
 gnomish.bak-*.jar
 gnomish.local.env
+logs/
