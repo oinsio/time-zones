@@ -98,7 +98,7 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 
 ## Behavior
 
-`packages/client/src/test/features/main_page/main_page.feature`, tagged `@add-main-page-scaffold`.
+`packages/client/src/test/features/main_page/main_page_unit.feature` (jsdom) and `main_page_e2e.feature` (real browser: axe-core, layout, keyboard, header position), both tagged `@add-main-page-scaffold`.
 
 ## Visual Reference
 
