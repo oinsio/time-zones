@@ -11,6 +11,8 @@ The application SHALL contain the layer modules model, presenter, controller and
 - **WHEN** the view registry contains no views
 - **THEN** the shell renders the app title and an error-free empty content region
 
+## ADDED Requirements
+
 ### Requirement: Update check failure note
 When the check for a new version fails because the network is unreachable, the shell SHALL show a short polite note in the notices region next to the existing notices, without replacing them and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
 

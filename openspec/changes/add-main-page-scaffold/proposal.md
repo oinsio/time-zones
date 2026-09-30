@@ -83,7 +83,7 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 
 ## UX Acceptance Criteria
 
-- UX1: The user never sees a blank content area: every state shows text.
+- UX1: The user never sees a blank content area: every state of a registered view shows text.
 - UX2: The page uses design tokens only and follows the system theme.
 - UX3: Loading, empty, update-check-failed and storage messages do not shift the header.
 
