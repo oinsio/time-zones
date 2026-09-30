@@ -8,6 +8,7 @@ export const englishLocale = JSON.parse(
   readFileSync(ENGLISH_LOCALE_FILE, "utf8"),
 ) as {
   views: { cardsEmptyState: string };
+  locations: Record<string, string>;
   mainPage: {
     viewError: string;
     retry: string;
