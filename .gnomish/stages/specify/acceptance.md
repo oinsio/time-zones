@@ -37,6 +37,12 @@ spec delta — but only when the task genuinely changes no behaviour.
   automated test that proves it under `packages/client/src/`. A task whose
   verification is a manual check fails this criterion.
 - The change is scoped to the task and nothing beyond it.
+
+Check every criterion above before you give a verdict, and report every
+violation you find — not the first few. A rejected change goes back for one
+more round, and a violation you saw but did not report costs a whole attempt
+later. When a finding cites a rule, an ADR or the code, quote what the source
+actually says, so the fix is made against the source and not a paraphrase.
 Judge by reading the change directory, `docs/adr/`, `.claude/rules/`,
 `openspec/specs/` and the source. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do not run the build,
 the tests, or the OpenSpec CLI: `openspec validate --changes --strict` has

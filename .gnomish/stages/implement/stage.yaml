@@ -85,12 +85,14 @@ verify:
       [ -z "$forbidden" ] || { echo "$forbidden"; echo "the implement stage edits only packages/ and the checkboxes of $change/tasks.md - restore the files above with: git checkout $since -- <file>"; exit 1; }
       dependencies=$(printf '%s\n' "$changed" | grep -E '(^|/)(package\.json|pnpm-lock\.yaml)$' || true)
       if [ -n "$dependencies" ] && ! grep -qiE 'pnpm add|dependenc' "$change/tasks.md"; then echo "$dependencies"; echo "tasks.md asks for no new dependency - restore the files above with: git checkout $since -- <file>"; exit 1; fi
-  # LLM judge grades the implementation against acceptance.md; read-only.
+  # LLM judge grades the implementation against acceptance.md; read-only. Opus, like the
+  # other judges: an independent, stronger check than the sonnet that wrote the code.
   - type: judge
     criteriaFile: stages/implement/acceptance.md
-    model: sonnet
+    model: opus
     settings:
-      maxTurns: 15
+      # Room to check every criterion, not just the first few findings.
+      maxTurns: 30
       disallowedTools:
         - Bash
         - Agent

@@ -8,15 +8,15 @@ inputs:
 # Name of what the stage produces.
 outputs:
   - id: spec-review-report
-# Who does the work: a Claude Code CLI agent. Opus: an independent, stronger reviewer
-# than the sonnet that wrote the change.
+# Who does the work: a Claude Code CLI agent. Opus, in a fresh context: an independent
+# reviewer of the change the specify stage wrote.
 executor:
   type: agent-cli
   model: opus
   # Only these four keys are accepted.
   settings:
     # Agent turns per round. Every claim about the codebase is checked by grep/read.
-    maxTurns: 40
+    maxTurns: 60
     # Round is killed after this; counts as infra failure, not an attempt.
     roundTimeout: 1200s
     # Cannot widen what .claude/settings.json denies. Bash is for git, grep and the
@@ -107,7 +107,8 @@ verify:
     criteriaFile: stages/review-specs/acceptance.md
     model: opus
     settings:
-      maxTurns: 20
+      # Room to check every criterion, not just the first few findings.
+      maxTurns: 30
       disallowedTools:
         - Bash
         - Agent

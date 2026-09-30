@@ -10,14 +10,15 @@ inputs:
 # Name of what the stage produces.
 outputs:
   - id: spec-review-resolution
-# Who does the work: a Claude Code CLI agent.
+# Who does the work: a Claude Code CLI agent. Opus, like specify: it rewrites the contract
+# every later stage builds on, and must weigh an opus reviewer's findings on equal terms.
 executor:
   type: agent-cli
-  model: sonnet
+  model: opus
   # Only these four keys are accepted.
   settings:
-    # Agent turns per round.
-    maxTurns: 40
+    # Agent turns per round: the required reading (ADRs, rules) comes first.
+    maxTurns: 60
     # Round is killed after this; counts as infra failure, not an attempt.
     roundTimeout: 1200s
     # Cannot widen what .claude/settings.json denies.
@@ -94,7 +95,8 @@ verify:
     criteriaFile: stages/fix-specs/acceptance.md
     model: opus
     settings:
-      maxTurns: 20
+      # Room to check every criterion, not just the first few findings.
+      maxTurns: 30
       disallowedTools:
         - Bash
         - Agent

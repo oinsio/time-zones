@@ -57,10 +57,25 @@ that matter here:
 **ADRs.** List `docs/adr/` fresh every time — new ADRs are added over time, so
 never assume a fixed set. Only an ADR whose status is `Accepted` binds; one
 marked `Superseded by ADR-XXXX` is replaced by that ADR, and `Proposed`,
-`Rejected` or `Deprecated` ones bind nothing. Read every ADR whose subject the
-change touches — the titles tell you which — and `docs/architecture/overview.md`
-and `docs/design/README.md` when the change has UI. A design that contradicts
-an `Accepted` ADR is wrong even if it validates.
+`Rejected` or `Deprecated` ones bind nothing. A design that contradicts an
+`Accepted` ADR is wrong even if it validates.
+
+## Read before you write
+
+Before the first artifact, read these in full — not a grep, not the first
+lines:
+
+- `CLAUDE.md`;
+- every `Accepted` ADR under `docs/adr/` — all of them, not the ones whose
+  title looks relevant: the layering, the time model and the persistence
+  decisions bind every feature;
+- `docs/architecture/overview.md` (modules, folders, how data reaches the
+  views) and, when the change has UI, `docs/design/README.md`;
+- every rule file listed above under "What the skill cannot know".
+
+An artifact may say the change follows an ADR or a rule only if you read it in
+this round. Never write "followed, not restated" about a document you have not
+opened. When you cite a rule, quote what it actually says — do not widen it.
 
 Before writing anything, read the existing specs under `openspec/specs/` and the
 most recent archived change under `openspec/changes/archive/` to match the house
@@ -108,6 +123,27 @@ Rules this stage adds on top of the skill:
 - Do not implement anything. Commit as you go, and often — small commits on the
   task branch are what makes an attempt readable afterwards. Never push: the
   factory owns the remote and pushes the branch itself.
+
+## Before you stop
+
+A judge grades the change against `.gnomish/stages/specify/acceptance.md`.
+Read that file and review your change against every criterion in it, one by
+one, as the judge will: open each file, script, constant and rule your
+artifacts name and confirm the claim holds; check that every FR, NFR and UX
+item has a task naming its automated test; check that each test sits where
+`bdd-unit.md` and `bdd-e2e.md` put it. Fix what you find before you stop.
+
+**A retry re-checks everything.** If your prompt carries prior-attempt
+feedback, the judge rejected the previous round — and a judge reports what it
+found, not everything there is. Fixing the listed findings is not the end of
+the round:
+
+- check each finding against its source before acting on it; a finding can
+  paraphrase a rule loosely, and copying that paraphrase into the design only
+  moves the error;
+- after the fixes, do the required reading above if you have not done it in
+  this round, and repeat the full review against `acceptance.md` — the whole
+  change, not only the lines the feedback names.
 
 ## Two things about this working copy
 
