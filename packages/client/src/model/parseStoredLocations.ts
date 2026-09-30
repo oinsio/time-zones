@@ -9,6 +9,9 @@ export type ParseStoredLocationsResult =
   | { ok: true; locations: readonly Location[] }
   | { ok: false };
 
+/** ISO 3166-1 alpha-2 code, or empty for zones without a country. */
+const COUNTRY_CODE_PATTERN = /^([A-Z]{2})?$/;
+
 const REJECTED: ParseStoredLocationsResult = { ok: false };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -27,7 +30,8 @@ export function parseStoredLocations(
       !isRecord(entry) ||
       typeof entry.timeZoneId !== "string" ||
       typeof entry.label !== "string" ||
-      typeof entry.countryCode !== "string"
+      typeof entry.countryCode !== "string" ||
+      !COUNTRY_CODE_PATTERN.test(entry.countryCode)
     ) {
       return REJECTED;
     }

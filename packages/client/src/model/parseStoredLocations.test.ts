@@ -47,6 +47,23 @@ describe("parseStoredLocations", () => {
     });
   });
 
+  it.each(["Kazakhstan", "K", "kz", "<b>"])(
+    "should reject the document for the country code %s",
+    (countryCode) => {
+      const outcome = parseStoredLocations({
+        locations: [{ ...almaty, countryCode }],
+      });
+      expect(outcome).toEqual({ ok: false });
+    },
+  );
+
+  it("should accept an empty country code", () => {
+    const outcome = parseStoredLocations({
+      locations: [{ ...almaty, countryCode: "" }],
+    });
+    expect(outcome).toMatchObject({ ok: true });
+  });
+
   it.each(["+05:00", "Mars/Olympus_Mons"])(
     "should reject the whole document for the identifier %s",
     (timeZoneId) => {

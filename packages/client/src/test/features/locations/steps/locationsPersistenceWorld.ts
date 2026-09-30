@@ -25,6 +25,14 @@ export const UNREADABLE_DOCUMENTS: Record<string, string> = {
       locations: [{ timeZoneId: "+05:00", label: "Nowhere", countryCode: "" }],
     },
   }),
+  'holding a location with the country code "Kazakhstan"': JSON.stringify({
+    schemaVersion: DOCUMENT_VERSION,
+    payload: {
+      locations: [
+        { timeZoneId: "Asia/Almaty", label: "Almaty", countryCode: "Kazakhstan" },
+      ],
+    },
+  }),
 };
 
 export const storeDocument = (

@@ -26,10 +26,11 @@ Feature: Locations persistence
     Then the list is reported as unreadable
 
     Examples:
-      | document                         |
-      | not valid JSON                   |
-      | written by a newer version       |
-      | holding a location in "+05:00"   |
+      | document                                              |
+      | not valid JSON                                        |
+      | written by a newer version                            |
+      | holding a location in "+05:00"                        |
+      | holding a location with the country code "Kazakhstan" |
 
   @add-locations-via-search @FR12
   Scenario: Reset
