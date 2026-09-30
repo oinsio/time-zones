@@ -22,6 +22,13 @@ const kolkata: PresentedSearchResult = {
   matchedAbbreviation: "IST",
   isAdded: false,
 };
+const berlin: PresentedSearchResult = {
+  timeZoneId: "Europe/Berlin",
+  cityName: "Berlin",
+  countryCode: "DE",
+  countryName: "Germany",
+  isAdded: false,
+};
 const addedTokyo: PresentedSearchResult = {
   timeZoneId: "Asia/Tokyo",
   cityName: "Tokyo",
@@ -139,6 +146,43 @@ describe("LocationSearchDialog", () => {
       "{ArrowDown}{ArrowUp}{Enter}",
     );
     expect(onChoose).toHaveBeenCalledWith(moscow);
+  });
+
+  it("should move one option at a time with ArrowDown", async () => {
+    const { onChoose } = renderDialog({
+      presentedResults: [moscow, kolkata, berlin],
+    });
+    await userEvent.type(screen.getByRole("combobox"), "{ArrowDown}{Enter}");
+    expect(onChoose).toHaveBeenCalledWith(kolkata);
+  });
+
+  it("should stay on the last option when ArrowDown goes past it", async () => {
+    const { onChoose } = renderDialog({
+      presentedResults: [moscow, kolkata, berlin],
+    });
+    await userEvent.type(
+      screen.getByRole("combobox"),
+      "{ArrowDown}{ArrowDown}{ArrowDown}{ArrowDown}{Enter}",
+    );
+    expect(onChoose).toHaveBeenCalledWith(berlin);
+  });
+
+  it("should stay on the first option when ArrowUp goes past it", async () => {
+    const { onChoose } = renderDialog();
+    await userEvent.type(screen.getByRole("combobox"), "{ArrowUp}{Enter}");
+    expect(onChoose).toHaveBeenCalledWith(moscow);
+  });
+
+  it("should emit nothing when Enter is pressed on an added result", async () => {
+    const { onChoose } = renderDialog({ presentedResults: [addedTokyo] });
+    await userEvent.type(screen.getByRole("combobox"), "{Enter}");
+    expect(onChoose).not.toHaveBeenCalled();
+  });
+
+  it("should emit nothing when Enter is pressed without results", async () => {
+    const { onChoose } = renderDialog({ query: "zzz", presentedResults: [] });
+    await userEvent.type(screen.getByRole("combobox"), "{Enter}");
+    expect(onChoose).not.toHaveBeenCalled();
   });
 
   it("should point the combobox at the active option", async () => {

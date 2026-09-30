@@ -51,4 +51,19 @@ describe("LocationList", () => {
     rerender(<LocationList rows={[rows[0], rows[1]]} onRemove={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Remove Tokyo" })).toHaveFocus();
   });
+
+  it("should not move focus when the list is first shown", () => {
+    render(<LocationList rows={rows} onRemove={vi.fn()} />);
+    expect(document.body).toHaveFocus();
+  });
+
+  it("should leave focus alone when the last remaining row is removed", async () => {
+    const singleRow = [rows[0]];
+    const { rerender } = render(
+      <LocationList rows={singleRow} onRemove={vi.fn()} />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Remove Moscow" }));
+    rerender(<LocationList rows={[]} onRemove={vi.fn()} />);
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+  });
 });

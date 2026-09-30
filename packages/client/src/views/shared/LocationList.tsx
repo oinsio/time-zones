@@ -19,7 +19,7 @@ export function LocationList({ rows, onRemove }: LocationListProps) {
   useEffect(() => {
     const focusIndex = focusIndexAfterRemoval.current;
     focusIndexAfterRemoval.current = null;
-    if (focusIndex === null || rows.length === 0) return;
+    if (focusIndex === null) return;
     removeButtons.current[Math.min(focusIndex, rows.length - 1)]?.focus();
   }, [rows]);
 
