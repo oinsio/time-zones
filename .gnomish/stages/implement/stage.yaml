@@ -94,8 +94,9 @@ verify:
     settings:
       # Room to check every criterion, not just the first few findings. The judge has only
       # Read/Grep/Glob (the factory hard-wires it read-only), so a whole-feature change costs a
-      # turn per file read; 30 ran out on a 187-file change before any verdict.
-      maxTurns: 80
+      # turn per file read; 30 ran out on a 187-file change before any verdict, and a
+      # whole-feature review wants slack beyond the 80 that then sufficed.
+      maxTurns: 120
       disallowedTools:
         - Bash
         - Agent
