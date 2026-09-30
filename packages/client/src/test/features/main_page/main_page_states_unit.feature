@@ -27,3 +27,12 @@ Feature: Main page view states
     Given the active UI language is en
     When the user opens the app with no locations
     Then the empty state explanation is shown in the current language
+    And the "Add location" action is offered
+
+  @add-locations-via-search @FR17
+  Scenario: Add location from the empty state
+    Given the active UI language is en
+    And the app is open with no locations
+    When the user adds Moscow from the search
+    Then Moscow is in the list
+    And the empty state explanation is gone

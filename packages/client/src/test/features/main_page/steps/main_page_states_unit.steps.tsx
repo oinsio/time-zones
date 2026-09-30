@@ -8,6 +8,7 @@ import { createElement } from "react";
 import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
 import { fakeServiceWorker } from "@/test/fakeServiceWorker";
+import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import { registryOverride } from "@/test/registryOverride";
 import { buildTestView, failingThenLoading } from "@/test/viewFixtures";
 
@@ -44,6 +45,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   f.AfterEachScenario(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   f.AfterAllScenarios(() => {
@@ -120,7 +122,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @add-main-page-scaffold @FR7 @UX1
-  f.Scenario("First launch", ({ Given, When, Then }) => {
+  f.Scenario("First launch", ({ Given, When, Then, And }) => {
     Given("the active UI language is en", async () => {
       await i18n.changeLanguage("en");
     });
@@ -133,5 +135,36 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         ).toBeInTheDocument();
       },
     );
+    And('the "Add location" action is offered', () => {
+      expect(screen.getByRole("button")).toHaveTextContent(
+        i18n.t("locations.addLocation"),
+      );
+    });
+  });
+
+  // @add-locations-via-search @FR17
+  f.Scenario("Add location from the empty state", ({ Given, And, When, Then }) => {
+    Given("the active UI language is en", async () => {
+      await i18n.changeLanguage("en");
+    });
+    And("the app is open with no locations", async () => {
+      stubZoneCitiesFetch();
+      await openApp();
+    });
+    When("the user adds Moscow from the search", async () => {
+      await userEvent.click(
+        screen.getByRole("button", { name: i18n.t("locations.addLocation") }),
+      );
+      await userEvent.type(await screen.findByRole("combobox"), "Moscow");
+      await userEvent.click(screen.getByRole("option", { name: /Moscow/ }));
+    });
+    Then("Moscow is in the list", () => {
+      expect(screen.getByRole("listitem")).toHaveTextContent("Moscow");
+    });
+    And("the empty state explanation is gone", () => {
+      expect(
+        screen.queryByText("No locations added yet."),
+      ).not.toBeInTheDocument();
+    });
   });
 });
