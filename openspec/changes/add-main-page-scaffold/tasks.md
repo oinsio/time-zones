@@ -33,6 +33,6 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 
 ## 6. Accessibility, responsive, bundle
 
-- [ ] 6.1 BDD E2E `main_page_e2e.feature` + steps: axe-core in 5 states × light/dark, no horizontal scroll at 320 and 2560 px (NFR-A1, NFR-R1, M2); verify `pnpm test:e2e` scoped to this feature
+- [ ] 6.1 BDD E2E `main_page_e2e.feature` + steps: axe-core in 5 states × light/dark, no horizontal scroll at 320 and 2560 px (NFR-A1, NFR-R1, M2); verify `pnpm --filter @time-zones/client test:bdd --grep @add-main-page-scaffold`
 - [ ] 6.2 Bundle check: extend `scripts/check-bundle-size.mjs` (package root) to also fail when the build emits no separate chunk whose file name starts with `CardsView-`; the 150 KB gzipped budget stays enforced by the existing check (NFR-P1, M5); verify `pnpm build && pnpm --filter @time-zones/client check:bundle-size`
 - [ ] 6.3 Scoped mutation run on `app/ViewHost.tsx` and the three hooks (≤ 5 files), score ≥ 90% (M3); verify with `cd packages/client && npx stryker run --mutate '<files>'`
