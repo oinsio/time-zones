@@ -4,8 +4,10 @@
  * modulepreload links; lazily imported chunks are not counted.
  * Also fails when the Cards view is not a separate chunk, because that chunk
  * is what keeps views out of the initial JavaScript.
+ * The search data file must exist as a separate JSON asset within its own
+ * gzipped budget and must not be referenced by index.html (no preload).
  * Implements NFR-P1, M5 of setup-app-shell-and-pages-deploy (D11) and NFR-P1,
- * M5 of add-main-page-scaffold.
+ * M5 of add-main-page-scaffold; NFR-P2, M7 of add-locations-via-search (D8).
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -19,6 +21,9 @@ const EXIT_CODE_CHECK_FAILED = 1;
 const ENTRY_HTML_FILE = "index.html";
 const ASSETS_DIRECTORY = "assets";
 const CARDS_VIEW_CHUNK_PREFIX = "CardsView-";
+const CITY_SEARCH_DATA_PREFIX = "city-search-";
+const CITY_SEARCH_DATA_EXTENSION = ".json";
+const CITY_SEARCH_DATA_BUDGET_KB = 30;
 
 const ENTRY_SCRIPT_PATTERN = /<script[^>]*type="module"[^>]*src="([^"]+)"/g;
 const MODULE_PRELOAD_PATTERN =
@@ -56,6 +61,14 @@ function hasSeparateCardsViewChunk() {
   );
 }
 
+function findCitySearchDataFile() {
+  return readdirSync(join(buildDirectory, ASSETS_DIRECTORY)).find(
+    (fileName) =>
+      fileName.startsWith(CITY_SEARCH_DATA_PREFIX) &&
+      fileName.endsWith(CITY_SEARCH_DATA_EXTENSION),
+  );
+}
+
 const entryHtml = readFileSync(join(buildDirectory, ENTRY_HTML_FILE), "utf8");
 const initialScriptUrls = collectInitialScriptUrls(entryHtml);
 
@@ -82,9 +95,37 @@ if (!hasSeparateCardsViewChunk()) {
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
+const citySearchDataFile = findCitySearchDataFile();
+if (citySearchDataFile === undefined) {
+  console.error(
+    `No ${CITY_SEARCH_DATA_PREFIX}*${CITY_SEARCH_DATA_EXTENSION} file in ${ASSETS_DIRECTORY}/ — the search data must be a separate file`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+if (entryHtml.includes(CITY_SEARCH_DATA_PREFIX)) {
+  console.error(
+    `${ENTRY_HTML_FILE} references ${CITY_SEARCH_DATA_PREFIX}* — the search data must not be preloaded`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const citySearchDataBytes = getGzippedSizeInBytes(
+  join(buildDirectory, ASSETS_DIRECTORY, citySearchDataFile),
+);
+if (citySearchDataBytes > CITY_SEARCH_DATA_BUDGET_KB * BYTES_PER_KB) {
+  console.error(
+    `${citySearchDataFile}: ${formatKilobytes(citySearchDataBytes)} KB gzipped — over the ${CITY_SEARCH_DATA_BUDGET_KB} KB budget`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
 if (totalGzippedBytes > budgetBytes) {
   console.error(`${summary} — over budget`);
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
 console.log(summary);
+console.log(
+  `Search data: ${formatKilobytes(citySearchDataBytes)} KB gzipped (budget ${CITY_SEARCH_DATA_BUDGET_KB} KB)`,
+);
