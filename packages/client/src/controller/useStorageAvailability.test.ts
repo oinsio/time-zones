@@ -18,4 +18,17 @@ describe("useStorageAvailability", () => {
     const { result } = renderHook(() => useStorageAvailability());
     expect(result.current).toBe(true);
   });
+
+  // NFR-A2: the warning must be inserted into an already rendered live region.
+  it("should report storage as available on the first render and ask the port after mount", () => {
+    const renderedValues: boolean[] = [];
+    renderHook(() => {
+      const isAvailable = useStorageAvailability(
+        inMemoryStorageAvailability(false),
+      );
+      renderedValues.push(isAvailable);
+      return isAvailable;
+    });
+    expect([renderedValues[0], renderedValues.at(-1)]).toEqual([true, false]);
+  });
 });
