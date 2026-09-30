@@ -1,5 +1,5 @@
 # Stage goal, shown to the gnome.
-purpose: open (or update) the pull request that hands this task's branch to a human reviewer, and mirror its body into pr-body.md so the judge can read what was published
+purpose: open (or update) the pull request that hands this task's branch to a human reviewer, and mirror its body into pr-body.md so the checks can read what was published
 # The checkout, plus what the implement, fix-code and archive stages produced.
 inputs:
   - kind: source
@@ -65,7 +65,7 @@ verify:
         exit 1
       fi
   # The published title and body carry review-worthy content, and pr-body.md is a faithful
-  # mirror of the body - the judge below reads the file, so the two must not drift.
+  # mirror of the body - the check after next reads the file, so the two must not drift.
   - type: command
     command: |
       set -e
@@ -73,7 +73,7 @@ verify:
       branch=$(git branch --show-current)
       number=$(gh pr list --repo "$repo" --head "$branch" --state open --json number --jq '.[0].number // empty')
       if [ ! -f pr-body.md ]; then
-        echo "pr-body.md is missing - the stage must leave the published body in that file, it is the only thing the judge can read"
+        echo "pr-body.md is missing - the stage must leave the published body in that file, it is the only thing the checks can read"
         exit 1
       fi
       title=$(gh pr view "$number" --repo "$repo" --json title --jq .title)
@@ -109,24 +109,36 @@ verify:
       [ -z "$dirty" ] || { echo "$dirty"; echo "the deliver stage writes only pr-body.md - restore the files above with: git checkout -- <file>"; exit 1; }
       commits=$(git log --format='%h %s' "$since"..HEAD | grep -v ' gnomish: ' || true)
       [ -z "$commits" ] || { echo "$commits"; echo "the deliver stage commits nothing - the commits above must not be on the task branch"; exit 1; }
-  # LLM judge grades the pull request body against acceptance.md; read-only.
-  - type: judge
-    criteriaFile: stages/deliver/acceptance.md
-    model: sonnet
-    settings:
-      # A turn per file read; 10 leaves no slack on a feature-sized change.
-      maxTurns: 20
-      disallowedTools:
-        - Bash
-        - Agent
-        - ScheduleWakeup
-        - SendMessage
-        - ToolSearch
-        - Edit
-        - Write
-        - WebFetch
-        - WebSearch
-    # Judge runs; must be odd, majority wins.
-    votes: 1
+  # What the body claims holds against the branch: the archive it points at exists, the ids
+  # it names are in that change's proposal, the test files it names exist, every rejected
+  # review finding is named, and the issue is referenced, not closed. No judge: a human
+  # reviews the pull request itself, and a judge's box holds only the branch's commits, not the
+  # git-ignored pr-body.md.
+  - type: command
+    command: |
+      set -e
+      archive=$(grep -oE 'openspec/changes/archive/[0-9]{4}/[0-9]{2}/[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+' pr-body.md | head -1 || true)
+      [ -n "$archive" ] || { echo "the body never names the archived change - point at openspec/changes/archive/YYYY/MM/YYYY-MM-DD-<change>/"; exit 1; }
+      [ -d "$archive" ] || { echo "the body points at $archive, which does not exist - name the directory the archive stage created"; exit 1; }
+      if grep -qiE '(close[sd]?|fix(e[sd])?|resolve[sd]?):? #[0-9]' pr-body.md; then
+        echo "the body closes an issue - this project closes its own issues, use 'Refs #<issue>'"; exit 1
+      fi
+      requirement_ids() { grep -oE '\b(FR|UX|M|G|NG)-?[0-9]+\b|\bNFR-[A-Z]+[0-9]+\b' "$1" | sed -E 's/^(FR|UX|M|G|NG)-/\1/' | sort -u; }
+      body_ids=$(requirement_ids pr-body.md || true)
+      [ -n "$body_ids" ] || { echo "the body names no requirement ids - list the ones the change implements from $archive/proposal.md"; exit 1; }
+      proposal_ids=$(requirement_ids "$archive/proposal.md" || true)
+      unknown_ids=$(for id in $body_ids; do printf '%s\n' "$proposal_ids" | grep -qxF "$id" || echo "$id"; done)
+      [ -z "$unknown_ids" ] || { echo "$unknown_ids"; echo "the body names the ids above, which $archive/proposal.md does not define - use the proposal's own ids"; exit 1; }
+      test_files=$(grep -oE '[A-Za-z0-9_./-]+\.(feature|test\.tsx?)' pr-body.md | sed 's|^packages/client/src/||' | sort -u || true)
+      [ -n "$test_files" ] || { echo "the body names no .feature or test files - say which ones under packages/client/src/ cover the change"; exit 1; }
+      missing_files=$(printf '%s\n' "$test_files" | while read -r name; do [ -n "$(find packages/client/src -path "*/$name" -print -quit)" ] || echo "$name"; done)
+      [ -z "$missing_files" ] || { echo "$missing_files"; echo "the body names the files above, and none exists under packages/client/src/ - name the real ones"; exit 1; }
+      for review in review-specs.md review-code.md; do
+        [ -f "$archive/$review" ] || continue
+        grep -qF "$review" pr-body.md || { echo "the body never summarises $review - give its fixed and rejected counts"; exit 1; }
+        for finding in $(awk '/^### /{ finding = $2 } /^- Status: rejected/{ print finding }' "$archive/$review"); do
+          grep -qw "$finding" pr-body.md || { echo "$review rejects $finding, and the body never names it - list every rejected finding with its reason"; exit 1; }
+        done
+      done
 # auto = go to next stage; manual = wait for a human.
 advancement: auto
