@@ -16,6 +16,7 @@ const NARROW_CONTAINER_WIDTH = 320;
 const WIDE_MIN_WIDTH = 768;
 const NARROW_TEXT = "narrow view";
 const WIDE_TEXT = "wide view";
+const PLACEHOLDER_ROW_COUNT = 3;
 const RESOLVED_TEXT = "resolved view";
 const RESOLVED_VIEW = () => <p>{RESOLVED_TEXT}</p>;
 
@@ -84,6 +85,15 @@ describe("ViewHost", () => {
       <ViewHost registry={[buildNeverLoadingView()]} />,
     );
     expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
+  });
+
+  it("should draw placeholder rows hidden from assistive technology in the skeleton", () => {
+    const { container } = render(
+      <ViewHost registry={[buildNeverLoadingView()]} />,
+    );
+    expect(
+      container.querySelectorAll('[aria-busy="true"] [aria-hidden="true"]'),
+    ).toHaveLength(PLACEHOLDER_ROW_COUNT);
   });
 
   it("should label the skeleton for assistive technology", () => {

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 const PLACEHOLDER_ROW_COUNT = 3;
 const PLACEHOLDER_ROWS = Array.from(
   { length: PLACEHOLDER_ROW_COUNT },
+  // Stryker disable next-line ArrowFunction,StringLiteral: equivalent — keys only silence React's list warning
   (_, rowNumber) => `placeholder-row-${rowNumber}`,
 );
 
