@@ -29,7 +29,11 @@ export const UNREADABLE_DOCUMENTS: Record<string, string> = {
     schemaVersion: DOCUMENT_VERSION,
     payload: {
       locations: [
-        { timeZoneId: "Asia/Almaty", label: "Almaty", countryCode: "Kazakhstan" },
+        {
+          timeZoneId: "Asia/Almaty",
+          label: "Almaty",
+          countryCode: "Kazakhstan",
+        },
       ],
     },
   }),
