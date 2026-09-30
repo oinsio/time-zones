@@ -29,9 +29,11 @@ RUN test -n "$PNPM_VERSION" && test -n "$OPENSPEC_VERSION" && test -n "$PLAYWRIG
  || { echo "PNPM_VERSION, OPENSPEC_VERSION and PLAYWRIGHT_VERSION are required - build with .gnomish/factory/build-sandbox" >&2; exit 1; }
 
 # git + curl are the contract; jq runs in the Claude Code hooks; gh from GitHub's own apt
-# repository, Debian's is too old for `gh pr list --json`.
+# repository, Debian's is too old for `gh pr list --json`. procps gives `ps`, which tree-kill
+# (Stryker, vitest) needs to stop its child processes; without it every run leaves orphans.
+# tini is PID 1 (see ENTRYPOINT below).
 RUN apt-get update \
- && apt-get install -y --no-install-recommends git curl ca-certificates jq gnupg \
+ && apt-get install -y --no-install-recommends git curl ca-certificates jq gnupg procps tini \
  && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
       -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
@@ -97,6 +99,11 @@ ENV HTTP_PROXY=http://${PROXY_HOST}:${PROXY_PORT} \
     CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 \
     DISABLE_AUTOUPDATER=1 \
     CI=1
+
+# The factory starts the box with a bare keep-alive command and no --init, so without this the
+# keep-alive `sleep` is PID 1 and never reaps: every orphaned process stays a zombie holding a
+# PID until the box dies, and a task-long box runs into --pids-limit. tini reaps them.
+ENTRYPOINT ["/usr/bin/tini", "--", "docker-entrypoint.sh"]
 
 USER gnome
 WORKDIR /gnomish/work

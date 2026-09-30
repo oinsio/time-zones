@@ -68,6 +68,11 @@ Fix with the same discipline as the implement stage:
   `packages/client/reports/mutation/mutation-report.json`. Target ≥95%,
   minimum ≥90%. NEVER run Stryker without `--mutate`, never
   `pnpm test:mutation`.
+- **The box is not yours to repair.** A tool that fails because of the
+  environment (`EAGAIN`, `ENOSPC`, out of memory, a missing system command, a
+  denied host) is reported, not worked around: no shims for system tools, no
+  fake `PATH` entries, no retry loops. Commit what is done and name the failing
+  command and the exact error in your closing summary.
 - **Traceability, domain and UI rules** as in the implement stage: requirement
   references on new tests, Temporal only, IANA ids only, `fakeClock`, i18n in
   every locale, all UI states, constants instead of literals, imports through
