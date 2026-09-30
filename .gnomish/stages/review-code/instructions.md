@@ -95,7 +95,9 @@ run, one run at a time, never in the background:
 without `--mutate` and never `pnpm test:mutation`. A file below 90% is a
 WARNING; a survivor that exposes an untested requirement is its own finding.
 If Stryker cannot run, say so in the Mutation section — never report a score
-you did not measure.
+you did not measure. If it fails because of the environment (`EAGAIN`, out of
+memory, a missing system command), quote the error there and move on; do not
+work around the box with shims or replacements for system tools.
 
 ## The report
 

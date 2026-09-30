@@ -89,6 +89,13 @@ code.
   better tests: target ≥95%, minimum ≥90%. NEVER run Stryker without `--mutate`
   and never `pnpm test:mutation` — the full suite freezes the machine. State
   the score per file in your closing summary.
+- **The box is not yours to repair.** If a tool fails because of the
+  environment rather than the code — `EAGAIN`, `ENOSPC`, out of memory, a
+  missing system command, a denied host — do not work around it: no shims or
+  replacements for system tools, no fake `PATH` entries, no retry loops.
+  Commit what is done and finish the round, naming the failing command and the
+  exact error in your closing summary. A human fixes the sandbox; a workaround
+  only hides the fault until it kills the round.
 - **Traceability.** New code and tests reference the requirement they
   implement: `Implements FR-X of <change-name>` in JSDoc, `@<change-name> @FRx`
   tags on Gherkin scenarios, `// Verifies NFR-Ax of <change-name>` on a11y
