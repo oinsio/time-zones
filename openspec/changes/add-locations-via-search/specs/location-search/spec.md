@@ -155,6 +155,11 @@ Computing the results of one query over the full bundled data SHALL take at most
 - **WHEN** each of 10 sample queries is run over the full data
 - **THEN** each completes in at most 50 ms
 
+#### Scenario: Data loads only when the search opens
+- **WHEN** the user opens the app and has not opened the search
+- **THEN** the search data has not been requested
+- **AND** it is requested when the user opens the search
+
 #### Scenario: Bundle budget
 - **WHEN** the app is built
 - **THEN** the search data is a separate chunk of at most 30 KB gzipped

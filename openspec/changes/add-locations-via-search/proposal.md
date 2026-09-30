@@ -120,6 +120,7 @@ Audience: every user of the app; without this change the app shows no useful con
 | any | search data loading | loading placeholder in the search |
 | any | search data failed to load | error message with Retry in the search |
 | any | empty query | popular suggestions |
+| any | query with matches | results list |
 | any | query without matches | no-results message with hint |
 | offline | any of the above | same behaviour; search data comes from the offline cache |
 
@@ -142,7 +143,7 @@ No changes (no IA documents exist under `docs/ia/`).
 
 - M1: 100% of FR1–FR18, NFR-P1–NFR-R2 and UX1–UX5 have at least one automated test tagged `@add-locations-via-search`.
 - M2: Mutation score of the new model, search matching and ranking, and repository code is at least 95% (minimum 90%).
-- M3: axe-core reports 0 violations across 8 states × 2 themes = 16 checks.
+- M3: axe-core reports 0 violations across the 9 states of the UI States Matrix (every row except the offline one) × 2 themes = 18 checks.
 - M4: On the bundled data, `IST` returns Kolkata, Jerusalem and Dublin as its first 3 results in that order; `EST` returns New York first; `Moscow` and `Москва` return Moscow first; every result for `Kazakhstan` has country KZ and Almaty is among them.
 - M5: 0 raw offsets stored: a stored document with a legacy identifier (`Asia/Calcutta`) loads as `Asia/Kolkata`, and adding `+05:00` is rejected — both covered by tests.
 - M6: Each of 10 sample queries completes in at most 50 ms in the performance scenario.

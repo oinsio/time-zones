@@ -57,7 +57,7 @@ The port is synchronous because `localStorage` is: the list is known at the firs
 
 Adapters in `adapters/`: `createLocalStorageLocationRepository({ storage, createChannel })` with `localStorageLocationRepository` bound to `globalThis.localStorage`, and `createInMemoryLocationRepository(initialDocument?)`. One contract suite, `locationRepository.contract.ts`, runs against both.
 
-Document under `LOCATIONS_STORAGE_KEY = "time-zones:locations"`:
+Document under `STORAGE_KEYS.LOCATIONS = "time-zones:locations"` — a new `STORAGE_KEYS` object in `constants/storage.ts`, because ADR-0004 says "Keys come from `STORAGE_KEYS` constants"; the existing `STORAGE_AVAILABILITY_PROBE_KEY` stays as it is:
 
 ```json
 { "schemaVersion": 1, "payload": { "locations": [ { "timeZoneId": "Asia/Almaty", "label": "Almaty", "countryCode": "KZ" } ] } }
@@ -152,7 +152,7 @@ Check of the numbers in M4 against these rules: `IST` → the three `ABBREVIATIO
 `controller/useCitySearch.ts(loadCitySearch = defaultLoad)` returns `{ status: CitySearchStatus.LOADING | READY | FAILED, citySearch, retry }`. A successful load is cached at module level, so reopening is instant; a failed load is not cached, so `retry` imports again.
 
 ### D9. Presenter (ADR-0002)
-`presenter/presentLocationRows(locations, language)` → `{ id, cityLabel, countryName }`; `presenter/presentSearchResults(results, locations, language)` → `{ timeZoneId, cityName, countryName, matchedAbbreviation?, isAdded }`. Country names come from `Intl.DisplayNames(language, { type: "region" })`, cached per language; an empty code gives an empty name. `isAdded` is true when a location has the result's `timeZoneId` and a label equal to one of the record's names (FR8). Static UI strings (buttons, messages) use `t()` in the views, as `CardsView` and the `app/` components do today.
+`presenter/presentLocationRows(locations, language)` → `{ id, cityLabel, countryName }`; `presenter/presentSearchResults(results, locations, language)` → `{ timeZoneId, cityName, countryName, matchedAbbreviation?, isAdded }`. Country names come from `Intl.DisplayNames(language, { type: "region" })`, cached per language; an empty code gives an empty name. `isAdded` is true when a location has the result's `timeZoneId` and a label equal to one of the record's names (FR8). Views receive presenter output only: `useLocations()` returns `rows` from `presentLocationRows` for the active language (`useTranslation().i18n.language`), and `useCitySearch()` exposes `presentResults(query)` that runs `search` or `suggest` and then `presentSearchResults`. Static UI strings (buttons, messages) use `t()` in the views, as `CardsView` and the `app/` components do today.
 
 ### D10. Search overlay and list UI (FR15, FR17, NFR-A2, NFR-A3, NFR-R1)
 - `components/ui/dialog.tsx`: the shadcn/ui Dialog over `@radix-ui/react-dialog` (new dependency). Radix gives the focus trap, Esc to close, `aria-modal` and focus return to the trigger, and runs in jsdom. Classes: full screen (`inset-0`) below `sm` (640 px, Tailwind default — `tailwind.config.ts` defines no custom screens), centered `max-w-lg` from `sm`.
@@ -162,15 +162,36 @@ Check of the numbers in M4 against these rules: `IST` → the three `ABBREVIATIO
 - `KeyboardKey` gains `ARROW_DOWN`, `ARROW_UP`, `ENTER`.
 
 ### D11. Strings (FR18)
-New flat keys under a new `locations` namespace (a new domain, `.claude/rules/i18n.md`): `addLocation`, `removeLocation` (`Remove {{city}}`), `searchTitle`, `searchLabel`, `searchPlaceholder`, `suggestionsHeading`, `noResults`, `noResultsHint`, `searchLoading`, `searchLoadError`, `retry`, `added`, `close`, `addedAnnouncement`, `removedAnnouncement`, `resultCount` (`_one`, `_other` in en; `_one`, `_few`, `_many` in ru), `loadError`, `reset`. `views.cardsEmptyState` stays.
+New flat keys under a new `locations` namespace (a new domain, `.claude/rules/i18n.md`): `addLocation`, `removeLocation` (`Remove {{city}}`), `searchTitle`, `searchLabel`, `searchPlaceholder`, `suggestionsHeading`, `noResults`, `noResultsHint`, `searchLoading`, `searchLoadError`, `retry`, `added`, `close`, `addedAnnouncement`, `removedAnnouncement`, `resultCount` with `_one`, `_few`, `_many` and `_other` in both files — Russian needs `_one`/`_few`/`_many` (`.claude/rules/i18n.md`) plus `_other` for fractions, English needs `_one`/`_other`, and the existing `locales/locales.test.ts` requires identical key sets, so both files carry all four, `loadError`, `reset`. `views.cardsEmptyState` stays.
 
 ### D12. Where tests live
 Per `.claude/rules/bdd-unit.md` and `bdd-e2e.md`:
 - `test/features/location_search/` (vitest-cucumber, real `zoneCities.json`, no mocks): `location_search_by_name`, `location_search_by_country`, `location_search_by_abbreviation`, `location_search_ranking` (order, one entry per zone, limit, suggestions, no matches), `location_search_performance` (`performance.now()`).
 - `test/features/locations/`: `locations_management.feature` (model through the store), `locations_persistence.feature` (both repository adapters, first launch, legacy IDs, unreadable documents, reset, degraded mode, two adapters over one channel), `locations_ui_unit.feature` (jsdom: rows, empty state with action, add from search, marked as added, search loading / error / retry / no results / suggestions, unreadable state with reset, Russian strings).
-- `locations_ui_e2e.feature` (playwright-bdd, real browser): axe-core in 8 states × 2 themes, keyboard flow and focus return, focus after removal, accessible names, polite announcements, layout at 320 / 375 / 1024 / 2560 px, screenshots, cross-tab with two pages of one context, offline search after the service worker is installed. Anything that asserts an accessible name, focus, `aria-*` or layout goes here, never into the `_unit` file.
+- `locations_ui_e2e.feature` (playwright-bdd, real browser): axe-core in the 9 non-offline states of the UI States Matrix × 2 themes, lazy loading of the search chunk (no `city-search-` request before the search opens), keyboard flow and focus return, focus after removal, accessible names, polite announcements, layout at 320 / 375 / 1024 / 2560 px, screenshots, cross-tab with two pages of one context, offline search after the service worker is installed. Anything that asserts an accessible name, focus, `aria-*` or layout goes here, never into the `_unit` file.
+- The add and remove E2E scenarios are the first view-contract scenarios (ADR-0002, ADR-0005). Their steps find elements by role and accessible name, never by Cards-specific markup, so they can run for every registered view once a view-mode setting exists; today the registry holds only Cards.
 - Screenshots use Playwright `toHaveScreenshot` with `SCREENSHOT_MAX_DIFF_PIXEL_RATIO` and committed baselines per project.
 - Data seeding: E2E seeds a version-1 document with `page.addInitScript`; unit steps use `test/factories/buildLocation.ts` (new, per `bdd-unit.md`).
+
+## Consequences
+
+Positive:
+- The model, canonicalization and ranking are pure functions, testable with TDD, BDD and Stryker without rendering.
+- Persistence and search sit behind ports with contract tests; a richer city source or an IndexedDB adapter plugs in without touching the model or the views (ADR-0004, ADR-0006).
+- The search overlay and the list blocks live in `views/shared/`, so the Grid view reuses them.
+
+Negative:
+- A generated data file and an extraction script with two dev dependencies must be kept up to date by hand.
+- The first domain state adds a provider around the page; tests that render `CardsView` alone now wrap it in `LocationsProvider` with the in-memory repository.
+- One more lazy chunk and one more E2E feature with screenshot baselines to maintain.
+
+## Alternatives Considered
+
+- **Asynchronous repository port** (IndexedDB-ready): rejected for now; it would give the list a loading state on every start for a few kilobytes of data. ADR-0004 keeps IndexedDB open behind the same port name.
+- **Asynchronous `search()` per keystroke**: rejected; once the data is loaded, matching is synchronous and fast (NFR-P1), and an async call per keystroke needs race handling for no gain. Only loading is asynchronous (D8).
+- **Native `<dialog>` for the search**: rejected; jsdom does not implement `showModal()`, so the unit scenarios could not open it, and focus return would be hand-written.
+- **Matching `Intl` abbreviations (`timeZoneName: "short"`)**: rejected by ADR-0003 and `.claude/rules/temporal.md` — locale-dependent, ambiguous, often just `GMT+N`.
+- **Storing the English exemplar city and localizing on display**: rejected for this change; the presenter would need the lazily loaded search data to render the list. Recorded as Q1.
 
 ## Risks / Trade-offs
 

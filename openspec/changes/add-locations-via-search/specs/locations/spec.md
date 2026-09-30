@@ -157,7 +157,8 @@ Every string of the list, the search and their states SHALL exist in English and
 #### Scenario: Russian interface
 - **GIVEN** the interface language is Russian
 - **WHEN** the list contains Moscow
-- **THEN** the row shows "Россия" and the remove action and the "Add location" action are in Russian
+- **THEN** the row shows "Россия"
+- **AND** the "Add location" action reads in Russian
 
 ### Requirement: Accessible and responsive list
 The list in each of its states (with locations, empty, unreadable stored list, storage unavailable) SHALL have no automated accessibility violations in light and dark themes, MUST NOT scroll horizontally from 320 px to 2560 px, and MUST match the approved screenshots at 375 px and 1024 px in both themes. <!-- implements NFR-A1, NFR-R1, NFR-R2, UX5 of add-locations-via-search -->
