@@ -1,4 +1,5 @@
-import { act } from "@testing-library/react";
+// "pure": importing the default entry would register auto-cleanup, which breaks BDD steps.
+import { act } from "@testing-library/react/pure";
 
 type ResizeCallback = (entries: ResizeObserverEntry[]) => void;
 
