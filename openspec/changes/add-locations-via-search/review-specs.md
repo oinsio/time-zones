@@ -108,7 +108,8 @@ None.
 - Impact: task 1.3's own verification steps (`typecheck`, then `pnpm build`, whose `tsc -b` builds the same three references) fail as written. From task 2.1 on, CI's `pnpm typecheck` and `pnpm build` fail, and with them the E2E web server (`pnpm build && pnpm preview`). The implementer has to find a workaround the plan does not name.
 - Fix: in design.md D6 (line 109), after "declared in `src/vite-env.d.ts`", add: "and `tsconfig.test.json` gets `src/vite-env.d.ts` in its `include`, because its include pattern does not cover it". In tasks.md 1.3, add "add `"src/vite-env.d.ts"` to `include` in `tsconfig.test.json`" to the list of edits. Keep the declarations in `vite-env.d.ts`: `.gitignore` ignores every other `.d.ts`.
 - Fix risk: the test project then also loads the file's `/// <reference types="vite/client" />` and `vite-plugin-pwa/client`, which its `types` already lists, so no new globals appear. It is a config edit, so no TDD cycle is needed (`tdd-workflow.md`, "When NOT to apply TDD").
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 now says `tsconfig.test.json` gets `"src/vite-env.d.ts"` in its `include` (its test-only pattern misses the file); task 1.3 adds that edit to its list, before its typecheck and build verification.
 
 ### R2 — SUGGESTION — What the provider does with EMPTY or UNREADABLE from another tab is unspecified
 - Location: `openspec/changes/add-locations-via-search/design.md:82`, `openspec/changes/add-locations-via-search/design.md:87`
@@ -117,7 +118,8 @@ None.
 - Impact: two tabs both show the unreadable-list error; the user resets in one; the other tab receives `EMPTY`, but the plan does not say it must leave `UNREADABLE`. A plausible implementation keeps the error on screen until reload, which breaks FR14 ("appears in every other open tab … without a reload") for this path. The reverse case also has no defined behaviour: another tab writes a document this tab cannot read, for example a newer app version after an update.
 - Fix: add to D5 (after line 87): "A change from another instance is applied by its status: `LOADED` → `REPLACE_LOCATIONS` and `loadStatus = READY`; `EMPTY` → `REPLACE_LOCATIONS` with an empty list and `READY`; `UNREADABLE` → `loadStatus = UNREADABLE`; none of them schedules a write." Add those three cases to task 6.1's list.
 - Fix risk: small. It adds one branch to the provider and three cases to `useLocations.test.tsx`. Switching to the error on an external `UNREADABLE` hides this tab's list, but that matches what a reload would show (FR12).
-- Status: open
+- Status: fixed
+- Resolution: design.md D5 now maps a load delivered from another instance by status (LOADED → REPLACE_LOCATIONS + READY, EMPTY → empty list + READY, UNREADABLE → UNREADABLE, no write); task 6.1 lists the three cases for `useLocations.test.tsx`.
 
 ### R3 — SUGGESTION — Unreadable-list state is never checked for horizontal scrolling
 - Location: `openspec/changes/add-locations-via-search/tasks.md:78`, `openspec/changes/add-locations-via-search/specs/locations/spec.md:182`
@@ -126,7 +128,8 @@ None.
 - Impact: an overflow in the error state (for example a long Russian message next to the Reset button at 320 px) passes every automated check, although NFR-R1 names that state.
 - Fix: change the scenario at specs/locations/spec.md:183 to "each list state (with 5 locations, unreadable stored list) is shown at 320 px and 2560 px". In task 9.5 "Narrow and wide screens", add "and the unreadable-stored-list state (a non-JSON document seeded with `page.addInitScript`)".
 - Fix risk: two more E2E cases per Playwright project. The check stays in `locations_ui_e2e.feature`, where layout checks belong (`bdd-unit.md`: responsive layout → E2E).
-- Status: open
+- Status: fixed
+- Resolution: specs/locations/spec.md "Narrow and wide screens" now covers each list state (5 locations, unreadable stored list); task 9.5 adds the unreadable state seeded with a non-JSON document via `page.addInitScript`.
 
 ### R4 — SUGGESTION — The viewport helper's parameter type is unspecified, and the natural one fails the node typecheck
 - Location: `openspec/changes/add-locations-via-search/design.md:210`, `openspec/changes/add-locations-via-search/tasks.md:75`
@@ -135,7 +138,8 @@ None.
 - Impact: an implementer who types the parameters as `ViewDefinition` from `@/views` gets TS2307 in the node project. Task 9.2's verify commands do not run typecheck, so this only appears at task 10.2 or in CI.
 - Fix: in D12 (line 210) and task 9.2, say that `viewContractViewport.ts` declares its own structural parameter type (`{ id: string; autoMinWidth: number }`) and imports nothing from `src/`. It should also say that `view_contract_e2e.fixtures.ts`, which the config imports type-only, imports nothing through `@/`.
 - Fix risk: none. `ViewDefinition` values stay assignable to the structural type, so the config can pass `viewRegistry` unchanged.
-- Status: open
+- Status: fixed
+- Resolution: design.md D12 and task 9.2 now say `viewContractViewport.ts` types its parameters structurally (`{ id: string; autoMinWidth: number }`) and imports nothing from `src/`, and the view-contract fixtures import nothing through `@/`; task 9.2 verification adds `pnpm --filter @time-zones/client typecheck`.
 
 ## Verdict
 
