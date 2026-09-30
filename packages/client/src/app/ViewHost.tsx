@@ -39,7 +39,11 @@ export function ViewHost({
 
   const ActiveViewComponent = activeView?.component;
   return (
-    <div ref={containerRef} className="w-full">
+    <div
+      ref={containerRef}
+      className="w-full"
+      data-view-id={activeView?.id}
+    >
       {ActiveViewComponent && (
         <ViewErrorBoundary
           key={`${activeView?.id}-${retryCount}`}
