@@ -4,30 +4,33 @@
 
 | Item | Value |
 |---|---|
-| Stale claims about the code | 3 (ResizeObserver stub, `pnpm test:e2e` script, bundle check unaware of existing script) |
-| Requirement ids in proposal.md | 33: FR1–FR10 (10), NFR-P1, NFR-A1, NFR-A2, NFR-R1 (4), UX1–UX3 (3), G1–G3 (3), M1–M5 (5), NG1–NG5 (5), Q1–Q3 (3) |
-| Requirements fully covered (proposal → spec → task) | 21/24 verifiable ids: FR1–FR10 (10), NFR-P1, NFR-A1, NFR-R1 (3), UX1 (1), G1, G2 (2), M1–M5 (5). Partial (3): NFR-A2, UX2, UX3. Not verifiable by nature, checked for consistency only (9): G3, NG1–NG5, Q1–Q3 — all consistent |
-| Contradictions | 3 |
-| Findings | CRITICAL 0 · WARNING 7 · SUGGESTION 3 |
+| Stale claims | 4 |
+| Requirements fully covered | 30/33 |
+| Contradictions | 5 |
+| CRITICAL | 0 |
+| WARNING | 10 |
+| SUGGESTION | 2 |
 
 ## Freshness
 
-- ✅ "The app shell shows only a title and renders no view, because the view registry is empty" — `packages/client/src/app/AppShell.tsx:19-30`, `packages/client/src/views/index.ts:10`.
-- ✅ "`ViewId` is an empty enum" — `packages/client/src/views/viewDefinition.ts:4`.
-- ✅ `ViewDefinition` has `titleKey`, `icon`, lazy `component`, `autoMinWidth` — `packages/client/src/views/viewDefinition.ts:10-18`.
-- ✅ "`model` and `presenter` are empty" — `packages/client/src/model/index.ts:3`, `packages/client/src/presenter/index.ts:3`.
+- ✅ "The app shell shows only a title and renders no view, because the view registry is empty" (`proposal.md:5`) — `packages/client/src/app/AppShell.tsx:19-30` renders `viewRegistry[0]` only if present; `packages/client/src/views/index.ts:10` exports an empty array.
+- ✅ "`ViewId` is an empty enum" (`design.md:5`) — `packages/client/src/views/viewDefinition.ts:4`.
+- ✅ `ViewDefinition` has `id`, `titleKey`, `icon`, `component` (a `LazyExoticComponent<ComponentType>`) and `autoMinWidth` — `packages/client/src/views/viewDefinition.ts:10-18`, matching ADR-0005 (`docs/adr/0005-view-registry.md:30-37`).
+- ✅ "`model` and `presenter` are empty" — `packages/client/src/model/index.ts`, `packages/client/src/presenter/index.ts`; no `ports/` or `adapters/` folder exists yet.
 - ✅ "`controller` holds `useDocumentLanguage` and `usePwaUpdateStatus`" — `packages/client/src/controller/index.ts:1-3`.
-- ✅ Global `AppErrorBoundary` exists — `packages/client/src/app/AppErrorBoundary.tsx`.
-- ✅ Existing offline-ready and update notices in a polite region — `packages/client/src/app/AppShell.tsx:32-42`.
-- ✅ Locale key-set parity test exists — `packages/client/src/locales/locales.test.ts:63-72`.
-- ✅ Feature scenario "Shell with no registered views" exists — `packages/client/src/test/features/app_shell/app_shell_notices.feature:20`.
-- ✅ MODIFIED requirement "Layered modules and empty view registry" exists in the stable spec under that exact name — `openspec/specs/app-shell/spec.md:85`.
+- ✅ A global `AppErrorBoundary` exists, separate from what D4 adds — `packages/client/src/app/AppErrorBoundary.tsx:21`.
+- ✅ The existing offline-ready and update notices live in one polite region (FR1) — `packages/client/src/app/AppShell.tsx:32-42`, a fixed bottom `role="status"` element that shows one notice at a time through a ternary.
+- ✅ Locale key-set parity is already tested (task 3.1) — `packages/client/src/locales/locales.test.ts:63-72`.
+- ✅ The feature scenario "Shell with no registered views" that task 5.4 updates exists — `packages/client/src/test/features/app_shell/app_shell_notices.feature:20-24`.
+- ✅ The MODIFIED requirement "Layered modules and empty view registry" exists in the stable spec under that exact name — `openspec/specs/app-shell/spec.md:85-91`.
 - ✅ Nothing of this change is implemented yet: no `ViewHost`, `MainPage`, `resolveActiveView`, `useOnlineStatus`, `useStorageAvailability`, `useContainerWidth` in `packages/client/src`; the only archived change is `openspec/changes/archive/2026/09/2026-09-29-setup-app-shell-and-pages-deploy`.
-- ❌ design.md D2 "jsdom has no `ResizeObserver`, so tests inject a stub in `test/setup.ts`" / tasks.md 2.1 "stub added to `test/setup.ts`" — a no-op global stub already exists at `packages/client/src/test/setup.ts:34-39` (→ R6).
-- ❌ tasks.md 6.1 `pnpm test:e2e` — no such script; the E2E script is `test:bdd` in `packages/client/package.json`, run in CI at `.github/workflows/ci.yml:57` (→ R2).
-- ❌ tasks.md 6.2 treats the 150 KB budget as new — `packages/client/scripts/check-bundle-size.mjs` already enforces it, run in CI after build at `.github/workflows/ci.yml:48` (→ R1).
-- ❌ design.md D4 "the registry component is wrapped in a small factory that drops a failed promise on retry" — `ViewDefinition.component` is a `LazyExoticComponent<ComponentType>` (`packages/client/src/views/viewDefinition.ts:15`), matching ADR-0005's contract (`docs/adr/0005-view-registry.md:35`, "component — lazy React component"); a registry entry holds no loader that a factory could call again (→ R7).
-- ❌ design.md D5 "constant key from `constants/storage.ts`" — the file does not exist (`packages/client/src/constants/` holds only `dom.ts`, `keyboard.ts`, `index.ts`); it is clearly meant to be created and `.claude/rules/code-style.md` places storage keys there, so no finding.
+- ✅ `React.lazy` keeps a rejected import (D4) — true for React 18.3 (`packages/client/package.json`), the lazy object stays in the rejected state.
+- ✅ `constants/storage.ts` (D5) does not exist yet; D5 and task 1.1 create it, and `.claude/rules/code-style.md` places storage keys there.
+- ✅ E2E harness: `packages/client/playwright.bdd.config.ts` picks `src/test/features/**/*_e2e.feature` with steps in `steps/*_e2e.steps.ts` and builds and previews the app itself (`webServer.command`); Vitest includes `src/**/*.{test,steps}.{ts,tsx}` and excludes `*_e2e.steps.ts` (`packages/client/vitest.config.ts`).
+- ❌ D2 (`design.md:13`) "jsdom has no `ResizeObserver`, so tests inject a stub in `test/setup.ts`" and task 2.1 (`tasks.md:13`) "stub added to `test/setup.ts`" — a global no-op stub already exists at `packages/client/src/test/setup.ts:34-39`; its `observe` never calls back (→ R9).
+- ❌ Task 6.1 (`tasks.md:36`) verifies with `pnpm test:e2e` — no such script in `package.json` or `packages/client/package.json`; the playwright-bdd script is `test:bdd`, run in CI at `.github/workflows/ci.yml:57` (→ R2).
+- ❌ Task 6.2 (`tasks.md:37`) plans the 150 KB initial-JS budget as a new Vitest spec — the budget is already enforced by `packages/client/scripts/check-bundle-size.mjs`, run in CI after the build at `.github/workflows/ci.yml:47-48` (→ R1).
+- ❌ Scenario "First launch" (`specs/main-page/spec.md:78`) "nothing is written to storage" — the running app already writes on first launch: `packages/client/src/i18n.ts:30-34` configures the language detector with `caches: ["localStorage"]` under key `language`, and D5's probe writes too (→ R3).
 
 ## Coverage
 
@@ -35,136 +38,156 @@
 |---|---|---|---|
 | FR1 | ✅ | ✅ Main page regions | ✅ 5.4 |
 | FR2 | ✅ | ✅ View host resolves the active view | ✅ 1.2, 5.2 |
-| FR3 | ✅ | ✅ Cards view is registered and lazy | ✅ 4.2, 3.1 |
+| FR3 | ✅ | ✅ Cards view is registered and lazy | ✅ 3.1, 4.2 |
 | FR4 | ✅ | ✅ Scenario: Container is resized | ✅ 2.1, 5.2 |
 | FR5 | ✅ | ✅ Loading state | ✅ 5.2 |
-| FR6 | ✅ | ✅ Error state with retry | ✅ 5.2 |
+| FR6 | ✅ | ✅ Error state with retry | ✅ 5.2 (retry design not implementable as written, R5) |
 | FR7 | ✅ | ✅ Empty state | ✅ 4.1 |
 | FR8 | ✅ | ✅ Offline note | ✅ 2.2, 5.3 |
-| FR9 | ✅ | ✅ Storage unavailable warning | ✅ 2.3, 5.3 |
+| FR9 | ✅ | ✅ Storage unavailable warning | ✅ 2.3, 5.3 (layering, R4) |
 | FR10 | ✅ | ✅ Page strings are localized | ✅ 3.1 |
-| NFR-P1 | ✅ | ✅ Cards view is registered and lazy | ✅ 6.2 (see R1) |
-| NFR-A1 | ✅ | ✅ Accessible and responsive main page | ✅ 6.1 |
-| NFR-A2 | ✅ | ✅ Offline note / Error state (no keyboard-retry scenario) | ❌ retry keyboard and error announcement not tested (R4) |
-| NFR-R1 | ✅ | ✅ Accessible and responsive main page | ✅ 6.1 |
-| UX1 | ✅ | ✅ Loading / Error / Empty | ✅ 4.1 |
-| UX2 | ✅ | ✅ Accessible and responsive main page | ❌ no task references UX2 (R9) |
-| UX3 | ✅ | ❌ cited on Main page regions, no scenario checks it | ❌ 5.4 cites it, but a jsdom test cannot observe a layout shift (R5) |
+| NFR-P1 | ✅ | ✅ Cards view is registered and lazy | ✅ 6.2 (runs before the build in CI, R1) |
+| NFR-A1 | ✅ | ✅ Accessibility check | ✅ 6.1 |
+| NFR-A2 | ✅ | ❌ no scenario for keyboard retry or for the error not taking focus (R6) | ❌ only 5.3 cites it; retry keyboard and error focus untested (R6) |
+| NFR-R1 | ✅ | ✅ Narrow and wide screens | ✅ 6.1 |
+| UX1 | ✅ | ✅ Loading / Error / Empty requirements | ✅ 4.1 |
+| UX2 | ✅ | ✅ Accessible and responsive main page | ❌ no task references UX2 (R10) |
+| UX3 | ✅ | ❌ cited on Main page regions, no scenario checks the header does not shift (R7) | ❌ only 5.4, a jsdom test that cannot observe layout (R7) |
 | G1 | ✅ | ✅ Scenario: Second view needs no page change | ✅ 5.2 |
-| G2 | ✅ | ✅ state requirements | ✅ 5.2, 5.3, 6.1 |
-| G3 | ✅ | — (process goal) | — (not testable by design) |
-| M1 | ✅ | — | ✅ all TDD tasks |
+| G2 | ✅ | ✅ Loading, Error, Empty, Offline, Storage and Accessibility requirements | ✅ 4.1, 5.2, 5.3, 6.1 |
+| G3 | ✅ | n/a — met by FR1 (prepared regions) and FR3 (Cards view) | n/a — met by FR1, FR3 |
+| M1 | ✅ | n/a | ✅ every FR has a TDD or BDD task (1.2–5.5) |
 | M2 | ✅ | ✅ Accessibility check | ✅ 6.1 |
-| M3 | ✅ | — | ✅ 1.3, 6.3 |
+| M3 | ✅ | n/a | ✅ 1.3, 6.3 |
 | M4 | ✅ | ✅ Second view needs no page change | ✅ 5.2 |
-| M5 | ✅ | — | ✅ 6.2 |
-| NG1 | ✅ | — (non-goal) | — (non-goal); consistent: no task builds model, clock or locations (D6 renders empty-state text only) |
-| NG2 | ✅ | — (non-goal) | — (non-goal); consistent: D7 keeps header and bottom bar as empty slots |
-| NG3 | ✅ | — (non-goal) | — (non-goal); consistent: task 1.1 adds `ViewMode` as a host input defaulting to `AUTO`, nothing persisted |
-| NG4 | ✅ | — (non-goal) | — (non-goal); consistent: only `ViewId.CARDS` is added (task 1.1) |
-| NG5 | ✅ | — (non-goal) | — (non-goal); consistent: no Storybook or visual-regression task; deferral recorded in Q2 |
+| M5 | ✅ | n/a | ✅ 6.2 (R1) |
+| NG1 | ✅ | n/a | n/a — no artifact builds the model, clock or locations; D6 renders text only |
+| NG2 | ✅ | n/a | n/a — D7 keeps header controls and bottom bar as empty slots |
+| NG3 | ✅ | n/a | n/a — D3 makes the mode a `ViewHost` prop defaulting to `AUTO`; nothing persists it |
+| NG4 | ✅ | n/a | n/a — task 1.1 adds only `ViewId.CARDS` |
+| NG5 | ✅ | n/a | n/a — no Storybook or visual-regression task |
 | Q1 | ✅ | ✅ Empty state "MUST NOT show an action that does nothing" | ✅ 4.1; answered in design D6 |
-| Q2 | ✅ | — (deliberately open) | — (deferred to the first real view content, see NG5) |
+| Q2 | ✅ | n/a | n/a — deliberately left open (deferred to the first real view content, NG5) |
 | Q3 | ✅ | ✅ Empty state shows only the explanation | ✅ 4.1; answered in design D6 |
 
 ## Consistency
 
-- Empty-state scenario "nothing is written to storage" (`specs/main-page/spec.md:78`) vs design D5 "probes `localStorage` with a write/remove of a constant key … once on mount" (`design.md:22`) — the probe runs on every launch, including first launch (R3).
-- Modified app-shell scenario "the shell renders the app title and an error-free empty content region" (`specs/app-shell/spec.md:10-12`) vs UX1 "The user never sees a blank content area: every state shows text" (`proposal.md:85`) (R8).
-- Design D4 "a rejected lazy import is re-imported … the registry component is wrapped in a small factory that drops a failed promise on retry" (`design.md:19`) vs the `ViewDefinition` contract `component: LazyExoticComponent<ComponentType>` (`packages/client/src/views/viewDefinition.ts:15`, ADR-0005 `docs/adr/0005-view-registry.md:35`) — the registry exposes an already-built lazy component, not a loader, and `React.lazy` keeps the rejection, so the retry the scenario "User retries" (`specs/main-page/spec.md:67-70`) requires is not implementable without an undeclared contract change (R7).
+- Scenario "First launch" "AND nothing is written to storage" (`specs/main-page/spec.md:78`) vs design D5 "probes `localStorage` with a write/remove of a constant key … once on mount" (`design.md:22`) and the existing language cache (`packages/client/src/i18n.ts:33`) (R3).
+- Design D5 "`useStorageAvailability` probes `localStorage`" in a controller hook (`design.md:22`) vs `.claude/rules/architecture.md:35` "Access storage only through repository ports; every adapter passes the shared contract tests" (R4).
+- Design D4 "the registry component is wrapped in a small factory that drops a failed promise on retry" (`design.md:19`) vs the `ViewDefinition` contract `component: LazyExoticComponent<ComponentType>` (`packages/client/src/views/viewDefinition.ts:15`, `docs/adr/0005-view-registry.md:35`), which holds no loader to call again (R5).
+- Task 5.1 puts "all scenarios of the main-page spec" into the jsdom feature `main_page.feature` (`tasks.md:28`) vs task 6.1 covering the axe and 320/2560 px scenarios in `main_page_e2e.feature` (`tasks.md:36`) and `.claude/rules/gherkin.md:65` ("If a scenario requires a real browser (focus, aria, layout), it goes into `*_e2e.feature`") (R8).
+- Modified app-shell scenario "the shell renders the app title and an error-free empty content region" (`specs/app-shell/spec.md:10-12`) vs UX1 "The user never sees a blank content area: every state shows text" (`proposal.md:85`) (R11).
 
 ## Findings
 
 ### R1 — WARNING — Bundle check planned as a Vitest spec that breaks CI and duplicates the existing script
 - Location: `openspec/changes/add-main-page-scaffold/tasks.md:37`
 - Rule: `.claude/rules/test-planning.md`
-- Problem: Task 6.2 plans "a Vitest spec asserting the build output has a separate Cards chunk and initial JS ≤ 150 KB gzipped", verified by "`pnpm run build` then the spec". Vitest includes every `src/**/*.{test,steps}.{ts,tsx}` (`packages/client/vitest.config.ts`), and CI runs `pnpm test` (`.github/workflows/ci.yml:43`) before `pnpm build` (`ci.yml:45`), so `dist/` does not exist when the spec runs. The 150 KB initial-JS budget is already enforced by `packages/client/scripts/check-bundle-size.mjs`, run in CI after the build (`ci.yml:48`).
-- Impact: The new spec fails in CI and in any local `pnpm test` without a fresh build, or gets skipped around; the budget check exists twice with two separate definitions of "initial JS".
-- Fix: Rewrite task 6.2 as: "Extend `scripts/check-bundle-size.mjs` to also fail when no emitted JS chunk other than the initial scripts contains the Cards view (Cards is a separate lazy chunk); the 150 KB budget stays enforced by the existing check (NFR-P1, M5); verify `pnpm run build && pnpm --filter @time-zones/client check:bundle-size`." Update the NFR-P1 and M5 rows accordingly; no proposal change is needed.
-- Fix risk: Finding the Cards chunk by name depends on Vite chunk naming; the script must match on the lazy import's output rather than a hard-coded hash. Low.
+- Problem: Task 6.2 plans "a Vitest spec asserting the build output has a separate Cards chunk and initial JS ≤ 150 KB gzipped", verified by "`pnpm run build` then the spec". Vitest includes every `src/**/*.{test,steps}.{ts,tsx}` (`packages/client/vitest.config.ts`), and CI runs `pnpm test` (`.github/workflows/ci.yml:43`) before `pnpm build` (`ci.yml:45`), so `dist/` does not exist when the spec runs. The 150 KB initial-JS budget is already enforced by `packages/client/scripts/check-bundle-size.mjs`, run in CI after the build (`ci.yml:47-48`).
+- Impact: The new spec fails in CI and in every local `pnpm test` without a fresh build, and the budget ends up defined twice with two definitions of "initial JS".
+- Fix: Rewrite task 6.2 as: "Extend `scripts/check-bundle-size.mjs` to also fail when the build emits no separate chunk for the Cards view; the 150 KB budget stays enforced by the existing check (NFR-P1, M5); verify `pnpm build && pnpm --filter @time-zones/client check:bundle-size`."
+- Fix risk: Finding the Cards chunk depends on Vite's chunk naming (the dynamic import emits `assets/CardsView-<hash>.js`); the script must match the file-name prefix, not a hash, and breaks if the component file is renamed. Low.
 - Status: open
 
 ### R2 — WARNING — E2E task names a script that does not exist
 - Location: `openspec/changes/add-main-page-scaffold/tasks.md:36`
 - Rule: `.claude/rules/bdd-e2e.md`
 - Problem: Task 6.1 verifies with "`pnpm test:e2e` scoped to this feature". Neither the root `package.json` nor `packages/client/package.json` defines `test:e2e`; the playwright-bdd script is `test:bdd` (`bddgen -c playwright.bdd.config.ts && playwright test -c playwright.bdd.config.ts`), which CI runs at `.github/workflows/ci.yml:57`.
-- Impact: The implementer cannot run the stated verification command and has to guess how to scope it, so the task's automated check is undefined.
-- Fix: Replace the command in task 6.1 with "`pnpm build && pnpm --filter @time-zones/client test:bdd -- --grep @add-main-page-scaffold`" (E2E runs against `vite preview` of the production build, per the archived setup change's D3).
+- Impact: The stated verification command fails, and the implementer has to guess how to run and scope the E2E check.
+- Fix: Replace the command in task 6.1 with "`pnpm --filter @time-zones/client test:bdd -- --grep @add-main-page-scaffold`". The Playwright `webServer` in `playwright.bdd.config.ts` already builds and previews the app, so no separate build step is needed.
 - Fix risk: none.
 - Status: open
 
-### R3 — WARNING — Empty-state scenario forbids the storage write that the storage probe makes
+### R3 — WARNING — Empty-state scenario forbids storage writes the app already makes
 - Location: `openspec/changes/add-main-page-scaffold/specs/main-page/spec.md:78`
 - Rule: —
-- Problem: Scenario "First launch" says "AND nothing is written to storage". Design D5 (`design.md:22`) has `useStorageAvailability` write and remove a probe key in `localStorage` once on mount, which happens on every launch, including the first one.
-- Impact: A step definition that checks the scenario literally (a `setItem` spy, or storage state during render) fails against the design as specified. Or the implementer drops the probe to make it pass, and FR9 then cannot detect private mode.
-- Fix: Change the step to "AND no location or preference is left in storage" (assert that `localStorage` is empty after render), which keeps the intent from `docs/architecture/views.md` ("nothing is stored until the user acts") and allows the transient probe.
-- Fix risk: none; the probe removes its key, so storage is empty after mount.
+- Problem: Scenario "First launch" says "AND nothing is written to storage". The running app already writes on first launch: `packages/client/src/i18n.ts:30-34` sets the language detector's `caches: ["localStorage"]`, which stores the detected language under key `language`. Design D5 (`design.md:22`) also has the storage probe write and remove a key on every mount. FR7 (`proposal.md:63`), which the scenario implements, says nothing about storage.
+- Impact: A step that checks this literally (a `setItem` spy, or storage contents after the app starts) fails in the real app because of the language cache and the probe. Or the implementer weakens the probe or the language cache to make it pass, which breaks FR9 or the language persistence of the setup change.
+- Fix: Delete the step "AND nothing is written to storage" from scenario "First launch". Keep "the explanation is shown in the current language".
+- Fix risk: The intent "nothing is stored until the user acts" (`docs/architecture/views.md:132`) is not checked by this change. Nothing is lost, because no location or preference writer exists here (NG1, NG3), and the locations change will own that check. Low.
 - Status: open
 
-### R4 — WARNING — NFR-A2 keyboard retry and error announcement have no test
-- Location: `openspec/changes/add-main-page-scaffold/tasks.md:29`
-- Rule: `.claude/rules/test-planning.md`
-- Problem: NFR-A2 (`proposal.md:77`) requires the error message to be announced (polite or alert) without taking focus, and "the retry action works with Tab and Enter". Task 5.3, the only task citing NFR-A2, covers only `OfflineNote` and `StorageWarning`. Task 5.2 (`ViewHost`, `ViewErrorFallback`) does not cite NFR-A2 and names no role or keyboard check. No spec scenario covers keyboard retry.
-- Impact: The retry control can ship unreachable by keyboard, or the error can render without a live-region role, and no test fails. Half of NFR-A2 goes unverified, against M1.
-- Fix: In task 5.2 add "error fallback has `role="alert"` and does not move focus; Retry is reached with Tab and activated with Enter (NFR-A2)" to the listed behaviours. Add to the "Error state with retry" requirement a scenario: "WHEN the view failed and the user uses only the keyboard THEN Retry is reachable with Tab and works with Enter".
-- Fix risk: none.
+### R4 — WARNING — Storage probe reads localStorage directly instead of through a port
+- Location: `openspec/changes/add-main-page-scaffold/design.md:22`
+- Rule: `.claude/rules/architecture.md` (Persistence: "Access storage only through repository ports; every adapter passes the shared contract tests"); `docs/adr/0004-local-persistence-strategy.md`
+- Problem: D5 has the controller hook `useStorageAvailability` probe `localStorage` itself, with a write and remove of a constant key. The architecture rule allows storage access only through ports whose adapters pass shared contract tests. ADR-0004 puts storage access behind ports with a storage adapter and an in-memory adapter (`docs/adr/0004-local-persistence-strategy.md:14-29`), and handles "storage unavailable" in that layer (`:60`). `docs/architecture/overview.md` plans `ports/` and `adapters/` folders for this. Task 2.3 builds and tests the hook against the global `localStorage` mock.
+- Impact: The first storage access in the codebase bypasses the port pattern. The hook cannot be tested without touching the global storage mock, and the future LocalStorage adapter will either duplicate the probe or have to reach into a controller hook.
+- Fix: Rewrite D5's storage half and task 2.3 as follows. "A `StorageAvailability` port (`isStorageAvailable(): boolean`) is declared in `src/ports/`. `src/adapters/` implements it with a localStorage adapter (probe using the key from `constants/storage.ts`) and an in-memory adapter with a configurable result, and both pass one shared contract test. `useStorageAvailability(storageAvailability = localStorageAvailability)` calls only the port, like the `clock: Clock = systemClock` default in `.claude/rules/temporal.md`. Its tests pass the in-memory adapter." Task 2.3 lists the port, both adapters, the contract test (`npx vitest run src/adapters`) and the hook test.
+- Fix risk: Adds the `ports/` and `adapters/` modules (each with an `index.ts`) before the persistence change. They are already in the planned layout (`docs/architecture/overview.md`), so the layout does not change, but the later repository adapters must reuse this probe. About 4 extra small files. Low.
 - Status: open
 
-### R5 — WARNING — Placement of the offline note and storage warning is undefined, and UX3 is untestable as planned
-- Location: `openspec/changes/add-main-page-scaffold/design.md:16`
-- Rule: `.claude/rules/test-planning.md`
-- Problem: UX3 (`proposal.md:87`) requires that loading, empty, offline and storage messages do not shift the header. D3 lists `OfflineNote` and `StorageWarning` as components but does not say where they render: in the existing fixed bottom notices region (`AppShell.tsx:32-42`, which shows one notice at a time through a ternary), or as an in-flow "warning banner" (`proposal.md:97`) above or below the header. FR1 describes the notices region only as keeping the existing two notices. No scenario checks UX3. Task 5.4 cites UX3, but its jsdom test cannot measure layout.
-- Impact: The implementer must choose a placement. An in-flow banner above the header shifts it (violating UX3). Putting the new notes into the existing ternary can hide the update notice while offline. No test catches either outcome.
-- Fix: In D3, state that `OfflineNote` and `StorageWarning` render in the notices region, out of the document flow, stacked with (not replacing) the PWA notice. Update FR1 to list them. In task 6.1 add an E2E assertion that the `h1` bounding box is identical in the default, offline and storage-unavailable states (UX3). Remove UX3 from task 5.4.
-- Fix risk: Stacking up to three notices at 320 px may cover content; the 320 px no-horizontal-scroll check in 6.1 still applies. Moderate.
-- Status: open
-
-### R6 — WARNING — ResizeObserver stub claimed missing, but a no-op stub already exists
-- Location: `openspec/changes/add-main-page-scaffold/tasks.md:13`
-- Rule: —
-- Problem: D2 (`design.md:13`) and task 2.1 plan to add a `ResizeObserver` stub to `test/setup.ts`. That file already defines a global no-op stub (`packages/client/src/test/setup.ts:34-39`) whose `observe` never invokes the callback.
-- Impact: The existing stub never reports a width, so it cannot drive the `useContainerWidth` and resize re-resolution tests (FR4, task 5.2). Adding a "new" stub to setup.ts either duplicates the global or silently changes it for every existing test.
-- Fix: Change task 2.1 and D2 to "replace the no-op `ResizeObserver` stub in `test/setup.ts` with a controllable fake that records observers and lets a test trigger a resize with a given width; existing tests keep passing because nothing triggers it".
-- Fix risk: Existing tests that render `AppShell` pick up the new fake; since it never fires on its own, their behaviour is unchanged. Low.
-- Status: open
-
-### R7 — WARNING — Retry after a failed lazy import needs a loader the ViewDefinition contract does not have
+### R5 — WARNING — Retry after a failed lazy import needs a loader the ViewDefinition contract does not have
 - Location: `openspec/changes/add-main-page-scaffold/design.md:19`
 - Rule: `docs/adr/0005-view-registry.md` (ViewDefinition contract)
-- Problem: D4 says retry re-imports a failed lazy view because "the registry component is wrapped in a small factory that drops a failed promise on retry". But a registry entry's `component` is already a `LazyExoticComponent<ComponentType>` (`packages/client/src/views/viewDefinition.ts:15`; ADR-0005 `docs/adr/0005-view-registry.md:35` "component — lazy React component"). `React.lazy` stores the rejected result on that lazy object, and the entry exposes no loader, so neither `ViewHost` nor a wrapper can import the chunk again from the registry entry. Bumping the boundary `key` only remounts the same rejected lazy component. Neither task 1.1 (which edits `viewDefinition.ts`) nor the MODIFIED app-shell requirement declares a change to `ViewDefinition`, and task 4.2 registers Cards with no mention of a loader.
-- Impact: Implemented as written, scenario "User retries" (`specs/main-page/spec.md:67-70`) fails for a failed chunk load (the likely offline/deploy-skew case FR6 targets): Retry shows the same error again. Or the implementer silently changes the `ViewDefinition` contract from ADR-0005 during task 5.2 without it being planned, reviewed or tested.
-- Fix: In D4, replace the factory sentence with an explicit contract extension: "`ViewDefinition` gains `loadComponent: () => Promise<{ default: ComponentType }>`; a helper `defineLazyView(loader)` in `views/` builds both `component: lazy(loader)` and `loadComponent: loader` from one loader, so they cannot diverge; on retry after a load failure `ViewHost` builds a fresh `lazy(definition.loadComponent)` and bumps the boundary key." Add the helper and field to task 1.1 (with a unit test that a rejected loader can be retried), use `defineLazyView` in task 4.2, and note in D4 that the field extends — does not replace — ADR-0005's `component`.
-- Fix risk: Adds one field to ADR-0005's documented contract; `component` stays lazy, so ADR-0005's rules (lazy loading, registry as single source) still hold, but the ADR's field table becomes incomplete until it is amended. Low.
+- Problem: D4 says retry re-imports a failed lazy view because "the registry component is wrapped in a small factory that drops a failed promise on retry". A registry entry's `component` is already a `LazyExoticComponent<ComponentType>` (`packages/client/src/views/viewDefinition.ts:15`; ADR-0005 `docs/adr/0005-view-registry.md:35` "component — lazy React component"). `React.lazy` keeps the rejection on that lazy object, and the entry exposes no loader, so neither `ViewHost` nor a wrapper can import the chunk again from the entry. Bumping the boundary `key` only remounts the same rejected component. Task 1.1 edits `viewDefinition.ts` without any contract change, and task 4.2 registers Cards with no loader.
+- Impact: Implemented as written, scenario "User retries" (`specs/main-page/spec.md:67-70`) fails for a failed chunk load, the offline and deploy-skew case FR6 targets: Retry shows the same error again. Otherwise the implementer changes the ADR-0005 contract during task 5.2 without it being planned or tested.
+- Fix: In D4, replace the factory sentence with: "`ViewDefinition` gains `loadComponent: () => Promise<{ default: ComponentType }>`; a helper `defineLazyView(loader)` in `views/` builds both `component: lazy(loader)` and `loadComponent: loader` from one loader so they cannot diverge; on retry after a load failure `ViewHost` renders a fresh `lazy(definition.loadComponent)` and bumps the boundary key." Add the field and helper to task 1.1 with a unit test that a rejected loader can be retried, and use `defineLazyView` in task 4.2. Note in D4 that the field extends ADR-0005's `component` rather than replacing it.
+- Fix risk: Adds one field to ADR-0005's documented contract. `component` stays lazy, so ADR-0005's rules still hold, but its field table is incomplete until the ADR is amended. The existing `AppShell.test.tsx` builds definitions with `as unknown as ViewDefinition`, so it still compiles. Low.
 - Status: open
 
-### R8 — SUGGESTION — Empty-registry scenario allows a blank content area, contradicting UX1
-- Location: `openspec/changes/add-main-page-scaffold/specs/app-shell/spec.md:12`
-- Rule: —
-- Problem: The modified scenario expects "an error-free empty content region" when no view is registered. UX1 (`proposal.md:85`) says the user never sees a blank content area. `resolveActiveView` must handle an empty registry (task 1.2), so this state is reachable in tests.
-- Impact: The implementer cannot tell whether `ViewHost` should render nothing or a fallback text for an empty registry, and the unit scenario and a UX1 check would assert opposite things.
-- Fix: Scope UX1 to states with a registered view ("every state of a registered view shows text"), or change the scenario's THEN to "the app title and no error are shown", which leaves the content unasserted. The first is the smaller edit.
-- Fix risk: none; the empty registry is a developer-only state after this change.
+### R6 — WARNING — NFR-A2 keyboard retry and error focus have no scenario and no test
+- Location: `openspec/changes/add-main-page-scaffold/tasks.md:29`
+- Rule: `.claude/rules/test-planning.md`, `.claude/rules/bdd-unit.md` (keyboard accessibility and focus are E2E, not unit BDD)
+- Problem: NFR-A2 (`proposal.md:77`) requires the error message to be announced without taking focus and "the retry action works with Tab and Enter". Task 5.3, the only task citing NFR-A2, covers only `OfflineNote` and `StorageWarning`. Task 5.2 (`ViewHost`, `ViewErrorFallback`) does not cite NFR-A2. No spec scenario covers keyboard retry, and task 6.1 does no keyboard or focus check.
+- Impact: The Retry control can ship unreachable by keyboard, or the error can take focus or lack a live role, and no test fails. Half of NFR-A2 goes unverified, against M1.
+- Fix: Add to requirement "Error state with retry" the scenario "User retries from the keyboard: GIVEN the view failed and the failure cause is gone, WHEN the user reaches Retry with Tab and presses Enter, THEN the view is shown, AND focus was not moved when the error appeared". In task 6.1, add this scenario to `main_page_e2e.feature`. It runs on a first visit, before the service worker controls the page. The step aborts the Cards chunk request with `page.route` and then removes the route before Retry. Add NFR-A2 to task 5.2 for a jsdom check that the fallback has `role="alert"`.
+- Fix risk: The step matches the Cards chunk by its file-name prefix (`CardsView-`), which breaks if the component file is renamed. It depends on R5 being fixed, because retry cannot pass otherwise. Moderate.
 - Status: open
 
-### R9 — SUGGESTION — UX2 has no task
-- Location: `openspec/changes/add-main-page-scaffold/proposal.md:86`
-- Rule: `.claude/rules/traceability.md`
-- Problem: UX2 (design tokens only, follows the system theme) appears on the "Accessible and responsive main page" requirement, but no task in `tasks.md` references UX2.
-- Impact: M1-style coverage greps find no implementing test for UX2, and the traceability chain breaks at the task level.
-- Fix: Add UX2 to task 6.1's reference list, since its light/dark axe runs cover theme following, and state in task 5.4 that new components use only token-based Tailwind classes (no inline styles).
+### R7 — WARNING — Placement of the offline note and storage warning is undefined, and UX3 is untestable as planned
+- Location: `openspec/changes/add-main-page-scaffold/design.md:16`
+- Rule: `.claude/rules/test-planning.md`
+- Problem: UX3 (`proposal.md:87`) requires that loading, empty, offline and storage messages do not shift the header. D3 lists `OfflineNote` and `StorageWarning` but does not say where they render. The options are the existing fixed bottom notices region (`packages/client/src/app/AppShell.tsx:32-42`, which shows one notice at a time through a ternary) or an in-flow "warning banner" (`proposal.md:97`). FR1 describes the notices region as keeping only the two existing notices. No scenario checks UX3, and task 5.4, the only task citing it, is a jsdom test that cannot measure layout.
+- Impact: The implementer must pick a placement. An in-flow banner above the header shifts it and breaks UX3. Adding the new notes to the existing ternary hides the update notice while offline. No test catches either outcome.
+- Fix: In D3, state that `OfflineNote` and `StorageWarning` render in the existing notices region, out of the document flow, stacked with the PWA notice instead of replacing it. Extend FR1 and requirement "Main page regions" to list them. Add a scenario to "Main page regions": "WHEN the page is offline or storage is unavailable THEN the header keeps its position". Implement it in task 6.1 as an E2E check that the `h1` bounding box is the same in the default, offline and storage-unavailable states (UX3). Remove UX3 from task 5.4.
+- Fix risk: Up to three stacked notices at 320 px may cover content. The 320 px no-horizontal-scroll check in 6.1 still applies, but overlap is not caught. Moderate.
+- Status: open
+
+### R8 — WARNING — Browser-only scenarios assigned to the jsdom feature file
+- Location: `openspec/changes/add-main-page-scaffold/tasks.md:28`
+- Rule: `.claude/rules/gherkin.md` ("If a scenario requires a real browser (focus, aria, layout), it goes into `*_e2e.feature`"; `_unit` suffix when paired with `_e2e`), `.claude/rules/bdd-unit.md`
+- Problem: Task 5.1 writes `test/features/main_page/main_page.feature` and `main_page.steps.ts` "for all scenarios of the main-page spec". That includes "Accessibility check" and "Narrow and wide screens" (`specs/main-page/spec.md:110-116`), which need axe-core and real layout, and which task 6.1 also covers in `main_page_e2e.feature`. The paired unit file should be named `main_page_unit.feature`, with steps under `steps/` (`bdd-unit.md` file structure). Proposal "Behavior" (`proposal.md:101`) names only the unit file.
+- Impact: The implementer writes jsdom steps for axe and horizontal scrolling that cannot observe either. The steps pass vacuously or fail, and the same scenarios are implemented twice.
+- Fix: Change task 5.1 to "Write `test/features/main_page/main_page_unit.feature` and `steps/main_page_unit.steps.ts` for every main-page scenario except those of 'Accessible and responsive main page', which task 6.1 writes in `main_page_e2e.feature` and `steps/main_page_e2e.steps.ts`". Update task 5.5's path, and list both files in proposal "Behavior".
 - Fix risk: none.
 - Status: open
 
-### R10 — SUGGESTION — design.md lacks the sections the design rule requires
+### R9 — WARNING — ResizeObserver stub claimed missing, but a no-op stub already exists
+- Location: `openspec/changes/add-main-page-scaffold/tasks.md:13`
+- Rule: —
+- Problem: D2 (`design.md:13`) and task 2.1 plan to add a `ResizeObserver` stub to `test/setup.ts`. That file already defines a global no-op stub (`packages/client/src/test/setup.ts:34-39`) whose `observe` never calls back.
+- Impact: The existing stub never reports a width, so it cannot drive the `useContainerWidth` tests (task 2.1) or the resize re-resolution tests (FR4, task 5.2). Adding another stub to `setup.ts` either duplicates the global or changes it for every existing test.
+- Fix: Change D2 and task 2.1 to "add a controllable fake in `test/resizeObserverFake.ts` that records observers and lets a test report a width. `useContainerWidth.test.ts` and `ViewHost.test.tsx` install it with `vi.stubGlobal("ResizeObserver", …)` and restore it with `vi.unstubAllGlobals()` in `afterEach`. The global no-op stub in `setup.ts` stays as it is."
+- Fix risk: none; other tests keep the global no-op stub.
+- Status: open
+
+### R10 — WARNING — UX2 has no task
+- Location: `openspec/changes/add-main-page-scaffold/tasks.md:36`
+- Rule: `.claude/rules/traceability.md`, `.claude/rules/test-planning.md`
+- Problem: UX2 (`proposal.md:86`, "design tokens only and follows the system theme") is cited on requirement "Accessible and responsive main page" (`specs/main-page/spec.md:108`), but no task in `tasks.md` references UX2 or checks theme colours.
+- Impact: Nothing verifies that the new components use tokens and follow the system theme. A hard-coded colour in `ViewErrorFallback` or `StorageWarning` passes every planned test as long as its contrast is fine, and the coverage grep for UX2 finds no test.
+- Fix: Add UX2 to task 6.1's references and to its light/dark runs, with the assertion that the computed background and text colours of the content region and of each shown notice equal the `--color-background`/`--color-foreground` (or `--color-notice`/`--color-notice-foreground`) token values of the active theme (`packages/client/src/styles/tokens.css`).
+- Fix risk: The step must compare normalised colours (computed `rgb()` vs token hex). Low.
+- Status: open
+
+### R11 — SUGGESTION — Empty-registry scenario allows a blank content area, contradicting UX1
+- Location: `openspec/changes/add-main-page-scaffold/specs/app-shell/spec.md:12`
+- Rule: —
+- Problem: The modified scenario expects "an error-free empty content region" when no view is registered. UX1 (`proposal.md:85`) says the user never sees a blank content area. `resolveActiveView` must handle an empty registry (task 1.2), so tests reach this state.
+- Impact: The implementer cannot tell whether `ViewHost` should render nothing or a fallback text for an empty registry, and the updated unit scenario and a UX1 check would assert opposite things.
+- Fix: Scope UX1 to "every state of a registered view shows text", leaving the empty-registry scenario as written.
+- Fix risk: none; once Cards is registered, the empty registry is reachable only in tests.
+- Status: open
+
+### R12 — SUGGESTION — design.md lacks the sections the design rule requires
 - Location: `openspec/changes/add-main-page-scaffold/design.md:1`
 - Rule: `.claude/rules/design-decisions.md`
-- Problem: design.md has Context and Decisions D1–D7 but no "Consequences" and no "Alternatives Considered". D2, D5 and D7 name no requirement id (the rule says "Always reference the FR/NFR/UX … that drove the decision").
-- Impact: Reviewers of later changes cannot see why, for example, container width was chosen over viewport width (D2) or why the error boundary is separate (D4) versus the rejected options. Low.
-- Fix: Add a short "Consequences" (positive/negative) section and an "Alternatives Considered" section (e.g. viewport media query vs `ResizeObserver` for D2; reusing `AppErrorBoundary` for D4). Append "(FR4)" to D2, "(FR8, FR9)" to D5 and "(FR1)" to D7.
+- Problem: design.md has Context and Decisions D1–D7 but no "Consequences" and no "Alternatives Considered" section, both required by the rule. D2, D5 and D7 name no requirement id, although the rule says "Always reference the FR/NFR/UX from proposal.md that drove the decision".
+- Impact: Later changes cannot see which alternatives were rejected, for example viewport media queries versus `ResizeObserver` (D2) or reusing `AppErrorBoundary` (D4), and the traceability grep misses three decisions.
+- Fix: Add a short "Consequences" section (positive/negative) and an "Alternatives Considered" section (viewport media query vs `ResizeObserver` for D2; reusing `AppErrorBoundary` for D4). Append "(FR4)" to D2, "(FR8, FR9)" to D5 and "(FR1)" to D7.
 - Fix risk: none.
 - Status: open
 
 ## Verdict
 
-Needs revision. No CRITICAL findings, so the change targets the right thing: a main-page scaffold with a registry-driven view host, in line with ADR-0002, ADR-0004 and ADR-0005. The WARNINGs R1–R7 should be fixed first because they will surface during implementation: a CI-breaking bundle task, a missing script, a spec/design contradiction, an untested accessibility requirement, an undefined notice placement, a stale test-setup claim and a retry design that the `ViewDefinition` contract cannot support. R8–R10 are polish.
+Needs revision. There are no CRITICAL findings: the change builds what the task asks for, a main-page scaffold with a registry-driven view host, in line with ADR-0002 and ADR-0005. Blocking: WARNINGs R1–R10. These include a bundle task that breaks CI, a missing script, a storage scenario that contradicts the running app, a storage probe that bypasses the port rule, and a retry design the `ViewDefinition` contract cannot support. The rest are an untested half of NFR-A2, an undefined notice placement for UX3, browser-only scenarios in the jsdom feature, a stale test-setup claim, and UX2 without a task. R11 and R12 are polish.
