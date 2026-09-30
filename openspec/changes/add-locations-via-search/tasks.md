@@ -41,8 +41,8 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
 
 ## 5. Presenter (TDD)
 
-- [ ] 5.1 TDD `presenter/presentLocationRows.ts` and `presenter/presentSearchResults.ts`: country names in `en` ("Kazakhstan") and `ru` ("Россия"), empty code → empty name, `matchedAbbreviation` passed through, `isAdded` when a location has the zone and a label equal to the English or the Russian name; export from `presenter/index.ts` (FR5, FR8, UX3, D9); verify `npx vitest run src/presenter`
-- [ ] 5.2 Mutation run on both presenter files, score ≥ 95% (minimum 90%) (M2); verify `npx stryker run --mutate 'src/presenter/presentLocationRows.ts,src/presenter/presentSearchResults.ts'`
+- [x] 5.1 TDD `presenter/presentLocationRows.ts` and `presenter/presentSearchResults.ts`: country names in `en` ("Kazakhstan") and `ru` ("Россия"), empty code → empty name, `matchedAbbreviation` passed through, `isAdded` when a location has the zone and a label equal to the English or the Russian name; export from `presenter/index.ts` (FR5, FR8, UX3, D9); verify `npx vitest run src/presenter`
+- [x] 5.2 Mutation run on both presenter files, score ≥ 95% (minimum 90%) (M2); verify `npx stryker run --mutate 'src/presenter/presentLocationRows.ts,src/presenter/presentSearchResults.ts'`
 
 ## 6. Controller (TDD) and persistence behaviour
 
