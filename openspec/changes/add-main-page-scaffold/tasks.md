@@ -10,11 +10,11 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 
 ## 2. Controller hooks (TDD)
 
-- [ ] 2.1 Add a controllable fake `test/resizeObserverFake.ts` (records observers, lets a test report a width; the global no-op stub in `test/setup.ts` stays), then TDD `useContainerWidth` installing it with `vi.stubGlobal` and `vi.unstubAllGlobals()` in `afterEach` (FR4, D2); verify `npx vitest run src/controller/useContainerWidth.test.ts`
-- [ ] 2.2 TDD `useOnlineStatus` — initial value, offline and online events (FR8, D5); verify `npx vitest run src/controller/useOnlineStatus.test.ts`
-- [ ] 2.2b Extend `controller/usePwaUpdateStatus.ts` with `isUpdateCheckFailed` (`onRegisteredSW` + one `registration.update()`); extend `usePwaUpdateStatus.test.ts` whose `useRegisterSW` mock gets a registration whose `update` rejects, existing tests stay green (FR8, D5); verify `npx vitest run src/controller/usePwaUpdateStatus.test.ts`
-- [ ] 2.3 Declare the `StorageAvailability` port in `ports/` and implement the localStorage and in-memory adapters in `adapters/` (each folder with `index.ts`), with a shared contract test run against both (FR9, D5); verify `npx vitest run src/adapters`
-- [ ] 2.4 TDD `useStorageAvailability(storageAvailability = localStorageAvailability)` using the in-memory adapter — available, unavailable (FR9, D5); verify `npx vitest run src/controller/useStorageAvailability.test.ts`; export all three hooks from `controller/index.ts`
+- [x] 2.1 Add a controllable fake `test/resizeObserverFake.ts` (records observers, lets a test report a width; the global no-op stub in `test/setup.ts` stays), then TDD `useContainerWidth` installing it with `vi.stubGlobal` and `vi.unstubAllGlobals()` in `afterEach` (FR4, D2); verify `npx vitest run src/controller/useContainerWidth.test.ts`
+- [x] 2.2 TDD `useOnlineStatus` — initial value, offline and online events (FR8, D5); verify `npx vitest run src/controller/useOnlineStatus.test.ts`
+- [x] 2.2b Extend `controller/usePwaUpdateStatus.ts` with `isUpdateCheckFailed` (`onRegisteredSW` + one `registration.update()`); extend `usePwaUpdateStatus.test.ts` whose `useRegisterSW` mock gets a registration whose `update` rejects, existing tests stay green (FR8, D5); verify `npx vitest run src/controller/usePwaUpdateStatus.test.ts`
+- [x] 2.3 Declare the `StorageAvailability` port in `ports/` and implement the localStorage and in-memory adapters in `adapters/` (each folder with `index.ts`), with a shared contract test run against both (FR9, D5); verify `npx vitest run src/adapters`
+- [x] 2.4 TDD `useStorageAvailability(storageAvailability = localStorageAvailability)` using the in-memory adapter — available, unavailable (FR9, D5); verify `npx vitest run src/controller/useStorageAvailability.test.ts`; export all three hooks from `controller/index.ts`
 
 ## 3. Locales
 
