@@ -180,7 +180,7 @@ The list in each of its states (with locations, empty, unreadable stored list, s
 - **THEN** no violations are reported
 
 #### Scenario: Narrow and wide screens
-- **WHEN** the list with 5 locations is shown at 320 px and 2560 px
+- **WHEN** each list state (with 5 locations, unreadable stored list) is shown at 320 px and 2560 px
 - **THEN** there is no horizontal scrolling
 
 #### Scenario: Screenshots
