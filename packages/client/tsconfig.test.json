@@ -8,5 +8,10 @@
       "vite-plugin-pwa/client"
     ]
   },
-  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**/*"]
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/test/**/*",
+    "src/vite-env.d.ts"
+  ]
 }
