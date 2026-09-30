@@ -41,3 +41,9 @@ finding costs more than a missing one, because the next stage will act on it.
 
 Judge by reading `review-code.md`, the change's OpenSpec artifacts and the
 source only; each finding's Location tells you where to look. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do not run the build, the tests or Stryker.
+
+Check every criterion above before you give a verdict, and report every
+violation you find — not the first few. A rejected round goes back for one
+more attempt, and a violation you saw but did not report costs a whole attempt
+later. When a finding cites a rule, an ADR or the code, quote what the source
+actually says, so the fix is made against the source and not a paraphrase.

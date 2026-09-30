@@ -69,8 +69,11 @@ here: `.claude/rules/tdd-workflow.md`, `.claude/rules/architecture.md`,
 `.claude/rules/naming.md`, `.claude/rules/i18n.md`,
 `.claude/rules/ui-states.md`, `.claude/rules/bdd-unit.md`,
 `.claude/rules/bdd-e2e.md`, `.claude/rules/traceability.md`,
-`.claude/rules/process-invariants.md`. Match the patterns of the code already in
-`packages/client/src/` before writing new code.
+`.claude/rules/process-invariants.md`. Read every `Accepted` ADR under
+`docs/adr/` in full as well, and `docs/architecture/overview.md`: the change's
+`design.md` builds on them, and code that contradicts one fails review. Match
+the patterns of the code already in `packages/client/src/` before writing new
+code.
 
 - **TDD.** For every behaviour: write the failing test, run it and see it fail,
   write the minimum code to pass, refactor. Run tests scoped to the file you
@@ -118,6 +121,10 @@ failed check, a previous round was rejected. The checks stop at the first
 failure, so the ones after it never ran and may fail as well. Fixing the
 reported failure is not the end of the round: after the fix, run every command
 above, one at a time, and stop only when all of them pass.
+
+**Then grade yourself as the judge will.** A judge grades this round against
+`.gnomish/stages/implement/acceptance.md`. Read it and check your work against
+every criterion in it, one by one; fix what you find first.
 
 Commit as you go, and often — one commit per finished task is a good rhythm;
 small commits on the task branch are what makes an attempt readable

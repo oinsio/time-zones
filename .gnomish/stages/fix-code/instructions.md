@@ -30,8 +30,9 @@ before editing anything:
 **ADRs.** List `docs/adr/` fresh every time — new ADRs are added over time, so
 never assume a fixed set. Only an ADR whose status is `Accepted` binds; one
 marked `Superseded by ADR-XXXX` is replaced by that ADR, and `Proposed`,
-`Rejected` or `Deprecated` ones bind nothing. Read the ones whose subject the
-change touches — the titles tell you which.
+`Rejected` or `Deprecated` ones bind nothing. Read every `Accepted` ADR in full
+before you start — all of them, not the ones whose title looks relevant: the
+layering, the time model and the persistence decisions bind every change.
 
 Then decide: **fix** it, or **reject** it with one of these reasons:
 
@@ -109,6 +110,10 @@ not the other sections. It is the reviewer's record plus your answers.
   first failure, so run the whole list again before you stop.
 - Commit as you go — one commit per fixed finding, subject starting with its
   id (`R3: reuse clock tick interval`). Never push: the factory owns the remote.
+
+**Before you stop, grade yourself as the judge will.** A judge grades this
+round against `.gnomish/stages/fix-code/acceptance.md`. Read it and check your
+work against every criterion in it, one by one; fix what you find first.
 
 Keep your output small: pipe long command output through `tail -30`, read the
 lines you need rather than whole files, and keep your closing summary to the

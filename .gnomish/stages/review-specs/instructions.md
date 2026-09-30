@@ -31,8 +31,9 @@ introducing new errors elsewhere.
 **ADRs.** List `docs/adr/` fresh every time — new ADRs are added over time, so
 never assume a fixed set. Only an ADR whose status is `Accepted` binds; one
 marked `Superseded by ADR-XXXX` is replaced by that ADR, and `Proposed`,
-`Rejected` or `Deprecated` ones bind nothing. Read the ones whose subject the
-change touches — the titles tell you which.
+`Rejected` or `Deprecated` ones bind nothing. Read every `Accepted` ADR in full
+before you start — all of them, not the ones whose title looks relevant: the
+layering, the time model and the persistence decisions bind every change.
 
 ## A finding must be worth fixing
 
@@ -175,6 +176,10 @@ a finding.
   anything else.
 - Commit `review-specs.md` when done. Never push: the factory owns the remote.
 - **Nobody is going to answer you.** Decide within the task and the rules.
+
+**Before you stop, grade yourself as the judge will.** A judge grades this
+round against `.gnomish/stages/review-specs/acceptance.md`. Read it and check your
+work against every criterion in it, one by one; fix what you find first.
 
 Keep your output small: pipe long command output through `tail -30`, read the
 lines you need rather than whole files, and keep your closing summary to the

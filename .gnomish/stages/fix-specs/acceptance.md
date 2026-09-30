@@ -31,3 +31,9 @@ the fixer: neither is right by default.
 Judge by reading `review-specs.md`, the task, the change's artifacts,
 `openspec/specs/`, `docs/adr/`, `.claude/rules/` and the source only. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do not run the build, the
 tests or the OpenSpec CLI.
+
+Check every criterion above before you give a verdict, and report every
+violation you find — not the first few. A rejected round goes back for one
+more attempt, and a violation you saw but did not report costs a whole attempt
+later. When a finding cites a rule, an ADR or the code, quote what the source
+actually says, so the fix is made against the source and not a paraphrase.

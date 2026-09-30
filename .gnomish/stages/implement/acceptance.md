@@ -28,3 +28,9 @@ Judge by reading the source and the OpenSpec change only. You have no git: judge
 the build or the tests: lint, typecheck, unit tests, build, the bundle budget
 and the BDD E2E suite have already run as separate checks before you, and their
 green result is a precondition of your review, not part of it.
+
+Check every criterion above before you give a verdict, and report every
+violation you find — not the first few. A rejected round goes back for one
+more attempt, and a violation you saw but did not report costs a whole attempt
+later. When a finding cites a rule, an ADR or the code, quote what the source
+actually says, so the fix is made against the source and not a paraphrase.

@@ -114,7 +114,8 @@ verify:
     criteriaFile: stages/fix-code/acceptance.md
     model: opus
     settings:
-      maxTurns: 20
+      # Room to check every criterion, not just the first few findings.
+      maxTurns: 30
       disallowedTools:
         - Bash
         - Agent
