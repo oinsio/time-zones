@@ -2,9 +2,12 @@
  * Fails the build when the initial JavaScript exceeds the gzipped budget.
  * Initial JavaScript = the entry script of dist/index.html plus its
  * modulepreload links; lazily imported chunks are not counted.
- * Implements NFR-P1, M5 of setup-app-shell-and-pages-deploy (D11).
+ * Also fails when the Cards view is not a separate chunk, because that chunk
+ * is what keeps views out of the initial JavaScript.
+ * Implements NFR-P1, M5 of setup-app-shell-and-pages-deploy (D11) and NFR-P1,
+ * M5 of add-main-page-scaffold.
  */
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { APP_BASE_PATH, BUILD_OUT_DIR } from "../app.config.ts";
@@ -14,6 +17,8 @@ const BYTES_PER_KB = 1024;
 const SIZE_FRACTION_DIGITS = 1;
 const EXIT_CODE_CHECK_FAILED = 1;
 const ENTRY_HTML_FILE = "index.html";
+const ASSETS_DIRECTORY = "assets";
+const CARDS_VIEW_CHUNK_PREFIX = "CardsView-";
 
 const ENTRY_SCRIPT_PATTERN = /<script[^>]*type="module"[^>]*src="([^"]+)"/g;
 const MODULE_PRELOAD_PATTERN =
@@ -44,6 +49,13 @@ function formatKilobytes(sizeInBytes) {
   return (sizeInBytes / BYTES_PER_KB).toFixed(SIZE_FRACTION_DIGITS);
 }
 
+function hasSeparateCardsViewChunk() {
+  const assetFileNames = readdirSync(join(buildDirectory, ASSETS_DIRECTORY));
+  return assetFileNames.some((fileName) =>
+    fileName.startsWith(CARDS_VIEW_CHUNK_PREFIX),
+  );
+}
+
 const entryHtml = readFileSync(join(buildDirectory, ENTRY_HTML_FILE), "utf8");
 const initialScriptUrls = collectInitialScriptUrls(entryHtml);
 
@@ -60,6 +72,13 @@ const summary = `Initial JS: ${totalKilobytes} KB gzipped (budget ${INITIAL_JS_B
 
 if (initialScriptUrls.length === 0) {
   console.error(`No entry script found in ${ENTRY_HTML_FILE}`);
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+if (!hasSeparateCardsViewChunk()) {
+  console.error(
+    `No separate ${CARDS_VIEW_CHUNK_PREFIX}* chunk in ${ASSETS_DIRECTORY}/ — the Cards view must be lazy-loaded`,
+  );
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 

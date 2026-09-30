@@ -1,5 +1,6 @@
-// Verifies FR2, FR11 of setup-app-shell-and-pages-deploy: title in the active
-// language and rendering driven by the view registry.
+// Verifies FR2, FR11 of setup-app-shell-and-pages-deploy and FR1 of
+// add-main-page-scaffold: title in the active language and rendering driven by
+// the view registry.
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import { lazy } from "react";
@@ -8,7 +9,8 @@ import { AppShell } from "./AppShell";
 
 const registeredViews = vi.hoisted((): ViewDefinition[] => []);
 
-vi.mock("@/views", () => ({
+vi.mock("@/views", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/views")>()),
   get viewRegistry() {
     return registeredViews;
   },
@@ -51,9 +53,13 @@ describe("AppShell", () => {
     expect(document.title).toBe("Time Zones");
   });
 
-  it("should render only the heading in main when no views are registered", () => {
+  it("should render an empty content region when no views are registered", () => {
     render(<AppShell />);
-    expect(screen.getByRole("main").children).toHaveLength(1);
+    expect(screen.getByRole("main").textContent).toBe("");
+  });
+
+  it("should not fail when no views are registered", () => {
+    expect(() => render(<AppShell />)).not.toThrow();
   });
 
   it("should render the first registered view inside main", async () => {

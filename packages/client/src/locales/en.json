@@ -14,5 +14,16 @@
     "dismiss": "Dismiss",
     "errorTitle": "Something went wrong",
     "errorMessage": "The app ran into a problem. Reload the page to continue."
+  },
+  "mainPage": {
+    "loading": "Loading…",
+    "viewError": "The view could not be loaded.",
+    "retry": "Retry",
+    "updateCheckFailed": "The latest version could not be fetched. The app keeps working.",
+    "storageUnavailable": "Storage is unavailable, so your changes will not be saved."
+  },
+  "views": {
+    "cardsTitle": "Cards",
+    "cardsEmptyState": "No locations added yet."
   }
 }

@@ -2,6 +2,7 @@ import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { KeyboardKey } from "@/constants";
 import { NoticeButton } from "./NoticeButton";
+import { NoticeCard } from "./NoticeCard";
 
 interface NoticeProps {
   message: string;
@@ -26,10 +27,10 @@ export function Notice({ message, onDismiss, actions }: NoticeProps) {
   }, [onDismiss]);
 
   return (
-    <div className="pointer-events-auto flex w-full max-w-md flex-wrap items-center gap-2 rounded-lg bg-notice p-3 text-notice-foreground shadow-lg">
+    <NoticeCard>
       <p className="flex-1">{message}</p>
       {actions}
       <NoticeButton onClick={onDismiss}>{t("app.dismiss")}</NoticeButton>
-    </div>
+    </NoticeCard>
   );
 }

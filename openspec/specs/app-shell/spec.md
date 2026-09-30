@@ -83,12 +83,15 @@ If rendering fails unexpectedly, the shell SHALL replace the page content with a
 - **THEN** the app is loaded again
 
 ### Requirement: Layered modules and empty view registry
-The application SHALL contain the layer modules model, presenter, controller and views, each exposing a single public entry point. The view registry MUST exist and MUST be empty in this change. The shell MUST read the registry and render no view while the registry is empty, without errors. <!-- implements FR11 of setup-app-shell-and-pages-deploy -->
+The application SHALL contain the layer modules model, presenter, controller and views, each exposing a single public entry point. The view registry MUST exist and MUST contain the Cards view. The shell MUST render the main page, which reads the registry, and MUST NOT fail if the registry is empty. <!-- implements FR2, FR3 of add-main-page-scaffold -->
+
+#### Scenario: Shell renders the main page
+- **WHEN** the app is opened
+- **THEN** the shell renders the main page with the Cards view
 
 #### Scenario: Shell with no registered views
 - **WHEN** the view registry contains no views
-- **THEN** the shell renders only the app title
-- **AND** no error is reported
+- **THEN** the shell renders the app title and an error-free empty content region
 
 ### Requirement: Locale files describe themselves
 Every locale file SHALL carry a metadata block with `code`, `name`, `nativeName`, `baseLanguage` and `emoji`. The `code` MUST equal the locale file name. Every shell string MUST exist in every locale file. <!-- implements FR10, FR2 of setup-app-shell-and-pages-deploy -->
@@ -111,3 +114,11 @@ The shell, the recovery screen and both notices SHALL have no automated accessib
 #### Scenario: Narrow and wide screens
 - **WHEN** the shell is opened at 320 px and at 2560 px wide
 - **THEN** the page has no horizontal scrolling
+
+### Requirement: Update check failure note
+When the check for a new version fails because the network is unreachable, the shell SHALL show a short polite note in the notices region next to the existing notices, without replacing them and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
+
+#### Scenario: Update check fails offline
+- **WHEN** the app checks for a new version while the network is unreachable
+- **THEN** the note that the latest version could not be fetched is announced politely
+- **AND** a shown update or offline-ready notice stays visible
