@@ -91,8 +91,10 @@ verify:
     criteriaFile: stages/implement/acceptance.md
     model: opus
     settings:
-      # Room to check every criterion, not just the first few findings.
-      maxTurns: 30
+      # Room to check every criterion, not just the first few findings. The judge has only
+      # Read/Grep/Glob (the factory hard-wires it read-only), so a whole-feature change costs a
+      # turn per file read; 30 ran out on a 187-file change before any verdict.
+      maxTurns: 80
       disallowedTools:
         - Bash
         - Agent

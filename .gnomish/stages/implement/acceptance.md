@@ -29,6 +29,20 @@ the build or the tests: lint, typecheck, unit tests, build, the bundle budget
 and the BDD E2E suite have already run as separate checks before you, and their
 green result is a precondition of your review, not part of it.
 
+Your turns are limited and each one counts, however many tools it calls. Work
+economically:
+
+- Start from the change's `tasks.md` and `specs/`: they name the files the
+  change added or touched. Do not walk the whole tree.
+- Read several files in one turn with parallel `Read` calls, not one per turn.
+- Check the mechanical rules with one `Grep` over `packages/client/src` each
+  instead of reading files for them: `new Date(`, `Date.now`,
+  `useFakeTimers`, `setSystemTime`, `Implements FR`, `@<change-name>` tags,
+  imports that reach into a sibling module past its `index.ts`, every locale
+  file holding the new i18n keys.
+- Keep a few turns in reserve: a round that ends without the verdict JSON is
+  lost, whatever you found.
+
 Check every criterion above before you give a verdict, and report every
 violation you find — not the first few. A rejected round goes back for one
 more attempt, and a violation you saw but did not report costs a whole attempt

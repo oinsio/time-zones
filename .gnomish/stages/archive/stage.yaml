@@ -74,7 +74,8 @@ verify:
     criteriaFile: stages/archive/acceptance.md
     model: sonnet
     settings:
-      maxTurns: 10
+      # A turn per file read; 10 leaves no slack on a feature-sized change.
+      maxTurns: 20
       disallowedTools:
         - Bash
         - Agent
