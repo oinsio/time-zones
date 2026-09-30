@@ -222,7 +222,8 @@ Not measured: `src/adapters/loadCitySearch.ts` (one-line wiring; Stryker reporte
 - Impact: With a stored document such as `{"schemaVersion":1,"payload":{"locations":[{"timeZoneId":"Asia/Almaty","label":"Almaty","countryCode":"Kazakhstan"}]}}` (hand-edited, corrupted, or written by a foreign tool), the render throws and `AppErrorBoundary` replaces the whole page with the recovery screen. Its only action is "Reload", which loads the same document and crashes again. The Cards view never shows the FR12 error with Reset, so the user is locked out until they clear site data by hand. FR12 says a document that "does not match the expected document" must show the error with a reset action.
 - Fix: In `parseStoredLocations`, reject the document (return `REJECTED`) when `countryCode` is neither `""` nor two upper-case ASCII letters. Use a named constant such as `COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/` in that file. This is the format `Location.countryCode` documents ("ISO 3166-1 alpha-2 code; empty for zones without a country") and the only format `extractZoneData` produces. Add `it.each` cases to `src/model/parseStoredLocations.test.ts` (`"Kazakhstan"`, `"K"`, `"kz"` rejected; `""` and `"KZ"` accepted). Add an Example row "holding a location with the country code "Kazakhstan"" to the `Unreadable stored list` outline in `test/features/locations/locations_persistence.feature` (`@FR12`), with the matching entry in the `UNREADABLE_DOCUMENTS` map of `steps/locations_persistence.steps.ts`.
 - Fix risk: Low. Every document this app writes carries `""` or a two-letter upper-case code taken from the extracted records, so no valid list becomes unreadable. The model stays pure (a regex, no `Intl` call). The new outline row fails until its document text is added to `UNREADABLE_DOCUMENTS`, because the step looks the text up there.
-- Status: open
+- Status: fixed
+- Resolution: parseStoredLocations now rejects a country code that is not empty or two upper-case letters; covered by parseStoredLocations.test.ts (country code cases) and a new Unreadable stored list example in locations_persistence.feature.
 
 ### R2 — WARNING — Arrow keys move the active search option out of view
 - Location: `packages/client/src/views/shared/LocationSearchDialog.tsx:56`
@@ -231,7 +232,8 @@ Not measured: `src/adapters/loadCitySearch.ts` (one-line wiring; Stryker reporte
 - Impact: A keyboard user who types "a" and presses ArrowDown about ten times highlights an option that is below the fold. Pressing Enter then adds a location they cannot see. This breaks WCAG 2.4.7 (focus visible) for the keyboard flow that NFR-A2 requires. The view-contract keyboard scenarios only press ArrowDown once, so they do not catch it.
 - Fix: In `LocationSearchDialog`, add a `useEffect` keyed on `activeOptionIndex` that calls `document.getElementById(\`${optionIdPrefix}${activeOptionIndex}\`)?.scrollIntoView?.({ block: "nearest" })`, and put `"nearest"` in a named constant. Add a view-contract scenario tagged `@add-locations-via-search @view-contract @NFR-A2` to `locations_view_contract_e2e.feature`: search for "a", press ArrowDown until at least the 15th option is active, then expect the selected option (`getByRole("option", { selected: true })`) to be in the viewport. D12 and `bdd-unit.md` put focus and layout checks in E2E, not jsdom.
 - Fix risk: jsdom does not implement `Element.prototype.scrollIntoView`, so an unguarded call throws in the existing jsdom tests (`LocationSearchDialog.keyboard.test.tsx`, `locations_ui_unit.steps.tsx`). The optional call `?.()` avoids that. Because jsdom cannot observe the scroll, the `?.` guard may leave a mutation survivor. With `block: "nearest"` the effect does not scroll while the first option is already visible, so the committed NFR-R2 screenshot baselines (no arrow navigation) should not change.
-- Status: open
+- Status: fixed
+- Resolution: LocationSearchDialog scrolls the active option into view with a guarded scrollIntoView effect; covered by the new view-contract E2E scenario "The active search option stays in view" (NFR-A2).
 
 ### R3 — WARNING — Abbreviation table scores 75.73% under mutation; most rows can be broken unnoticed
 - Location: `packages/client/src/adapters/city-search/timeZoneAbbreviations.ts:10`
@@ -240,7 +242,8 @@ Not measured: `src/adapters/loadCitySearch.ts` (one-line wiring; Stryker reporte
 - Impact: A regression such as `PST: []`, or `CDT: ["America/Chicago"]` losing Havana, makes `PST` or `CDT` return no abbreviation result (FR4, UX3), and CI stays green. The D7 table is the app's own mapping, which ADR-0003 says "has to be maintained", so this is where edits will happen.
 - Fix: Add an `it.each` over every row of the D7 table to `src/adapters/city-search/abbreviationSource.test.ts`. Build the source from `virtual:zone-cities` with the default browser zone list, as `createCompositeCitySearch` does. Assert that `match(abbreviation)` returns exactly that row's zone IDs in table order, each with `matchedAbbreviation` equal to the abbreviation. Then re-run `npx stryker run --mutate 'src/adapters/city-search/timeZoneAbbreviations.ts'` to at least 90%.
 - Fix risk: Low. The test file grows by about 45 table rows (still under 200 lines). Using the real extracted data makes the test depend on CLDR and on Node's `Intl.supportedValuesOf`. That is intended: a table zone missing from the data should fail loudly. Keep the fixture-based cases so the file still unit-tests matching without depending on the data.
-- Status: open
+- Status: fixed
+- Resolution: added timeZoneAbbreviations.test.ts checking every table row against the real zone data; Stryker score for the table file rose to 100%.
 
 ### R4 — SUGGESTION — `data-view-id` is traced to FR12, which it does not implement
 - Location: `packages/client/src/app/ViewHost.tsx:25`
@@ -249,7 +252,8 @@ Not measured: `src/adapters/loadCitySearch.ts` (one-line wiring; Stryker reporte
 - Impact: A traceability grep for FR12 lists `ViewHost.tsx` as implementing the unreadable-list behaviour. The requirements the attribute actually serves have no link from this file, so a later change to the view contract will not find it.
 - Fix: Replace `(D12, FR12)` with `(D12; view contract for FR8, FR10, NFR-A1, NFR-A2, NFR-A3)`.
 - Fix risk: none — a comment-only change.
-- Status: open
+- Status: fixed
+- Resolution: the ViewHost JSDoc now traces the view id to FR8, FR10 and NFR-A1 to NFR-A3 instead of FR12.
 
 ## Verdict
 
