@@ -127,7 +127,7 @@ Choosing a result SHALL add its location to the end of the list, close the searc
 - **THEN** the results change after each character without a submit action
 
 ### Requirement: Search data states
-The search data SHALL be loaded when the search is first opened. While it loads, the search MUST show a loading placeholder; if loading fails, it MUST show an error message with a retry action, and retry MUST load it again. After the first visit the search MUST work without a network connection. <!-- implements FR15, FR16, UX1 of add-locations-via-search -->
+The search data SHALL be loaded when the search is first opened. While it loads, the search MUST show a loading placeholder; if loading fails, it MUST show an error message with a retry action, and retry MUST load it again without reloading the page. After the first visit the search MUST work without a network connection. <!-- implements FR15, FR16, UX1 of add-locations-via-search -->
 
 #### Scenario: Data is loading
 - **WHEN** the user opens the search and the data has not loaded yet
@@ -142,6 +142,7 @@ The search data SHALL be loaded when the search is first opened. While it loads,
 - **GIVEN** the error message is shown and the data can now be loaded
 - **WHEN** the user retries
 - **THEN** the suggestions are shown
+- **AND** the page was not reloaded
 
 #### Scenario: Offline search
 - **GIVEN** the user visited the app before
@@ -149,7 +150,7 @@ The search data SHALL be loaded when the search is first opened. While it loads,
 - **THEN** Moscow is among the results
 
 ### Requirement: Search is fast and lazy
-Computing the results of one query over the full bundled data SHALL take at most 50 ms. The search data MUST NOT be part of the initial JavaScript; it MUST be a separate chunk of at most 30 KB gzipped, and the initial JavaScript MUST stay at most 150 KB gzipped. The page MUST NOT request the search data before the search is first opened; the service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search -->
+Computing the results of one query over the full bundled data SHALL take at most 50 ms. The search data MUST NOT be part of the initial JavaScript; it MUST be a separate file of at most 30 KB gzipped, and the initial JavaScript MUST stay at most 150 KB gzipped. The page MUST NOT request the search data before the search is first opened; the service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search -->
 
 #### Scenario: Query timing
 - **WHEN** each of 10 sample queries is run over the full data
@@ -162,8 +163,8 @@ Computing the results of one query over the full bundled data SHALL take at most
 
 #### Scenario: Bundle budget
 - **WHEN** the app is built
-- **THEN** the search data is a separate chunk of at most 30 KB gzipped
-- **AND** that chunk is not part of the initial JavaScript
+- **THEN** the search data is a separate file of at most 30 KB gzipped
+- **AND** that file is not part of the initial JavaScript
 - **AND** the initial JavaScript is at most 150 KB gzipped
 
 ### Requirement: Keyboard-operable search
@@ -172,6 +173,12 @@ The search SHALL be fully operable with the keyboard: it opens from the "Add loc
 #### Scenario: Add with the keyboard
 - **WHEN** the user opens the search with Enter, types "Tokyo", presses Down and Enter
 - **THEN** Tokyo is in the list
+- **AND** focus is on the "Add location" action
+
+#### Scenario: Add the first location with the keyboard
+- **GIVEN** the list is empty
+- **WHEN** the user opens the search with Enter, types "Tokyo", presses Down and Enter
+- **THEN** Tokyo is the only location in the list
 - **AND** focus is on the "Add location" action
 
 #### Scenario: Close with Esc

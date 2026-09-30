@@ -31,7 +31,8 @@ Audience: every user of the app; without this change the app shows no useful con
 
 - `packages/client/src/`: `model/` (first domain state), `ports/`, `adapters/` (location repository, city search), `presenter/`, `controller/`, `views/cards/`, `views/shared/`, `app/` (provider around the page; the content region names its active view for the view-contract tests), `components/ui/`, `styles/` (new design tokens), `constants/`, `locales/`.
 - New dependencies: a dialog primitive for the search overlay; CLDR data packages as dev dependencies, read by a build-time extraction step (ADR-0006; see design.md).
-- Build: the zone data is extracted from CLDR during every build and test run; one more lazily loaded chunk (search data); the bundle-size check is extended.
+- Build: the zone data is extracted from CLDR during every build and test run and shipped as one separate data file, loaded when the search opens; the bundle-size check is extended.
+- E2E setup: the view-contract scenarios run once per registered view, driven by the view registry (ADR-0005).
 
 ## Goals
 
@@ -78,7 +79,7 @@ Audience: every user of the app; without this change the app shows no useful con
 - FR12: When the stored list cannot be read (corrupted, invalid, or written by a newer app version), the Cards view shows an error message with a reset action; reset clears the stored list and shows the empty state. The app never shows a blank page because of stored data.
 - FR13: When storage is unavailable, adding and removing still work for the session and the existing storage warning tells the user changes will not be saved.
 - FR14: A change to the list in one open tab or window appears in every other open tab of the app without a reload; the last write wins.
-- FR15: While the search data is loading, the search shows a loading placeholder; if loading fails, it shows an error message with a retry action.
+- FR15: While the search data is loading, the search shows a loading placeholder; if loading fails, it shows an error message with a retry action, and retry loads the data again without reloading the page.
 - FR16: Search, adding and removing work offline after the first visit.
 - FR17: The empty state shows the explanation and an "Add location" action that opens the search; with at least one location the Cards view shows the list and the same action.
 - FR18: Every new string exists in English and Russian, with plural forms where a count is shown.
@@ -88,7 +89,7 @@ Audience: every user of the app; without this change the app shows no useful con
 #### Performance
 
 - NFR-P1: Computing the results for one query over the full bundled data takes at most 50 ms.
-- NFR-P2: Initial JavaScript stays at most 150 KB gzipped. The search data is a separate chunk of at most 30 KB gzipped that is not part of the initial JavaScript, and the page first requests it when the search is opened. The service worker may download and cache that chunk in the background for offline use (FR16); that does not count as the page requesting it.
+- NFR-P2: Initial JavaScript stays at most 150 KB gzipped. The search data is a separate file of at most 30 KB gzipped that is not part of the initial JavaScript, and the page first requests it when the search is opened. The service worker may download and cache that file in the background for offline use (FR16); that does not count as the page requesting it.
 
 #### Accessibility
 
@@ -147,10 +148,11 @@ No changes (no IA documents exist under `docs/ia/`).
 - M4: On the bundled data, `IST` returns Kolkata, Jerusalem and Dublin as its first 3 results in that order; `EST` returns New York first; `Moscow` and `Москва` return Moscow first; every result for `Kazakhstan` has country KZ and Almaty is among them.
 - M5: 0 raw offsets stored: a stored document with a legacy identifier (`Asia/Calcutta`) loads as `Asia/Kolkata`, and adding `+05:00` is rejected — both covered by tests.
 - M6: Each of 10 sample queries completes in at most 50 ms in the performance scenario.
-- M7: Initial JavaScript at most 150 KB gzipped; the search chunk exists separately, is neither the entry script nor a modulepreload link of `index.html`, and is at most 30 KB gzipped; the page issues 0 requests for it before the search is opened and at least 1 after.
+- M7: Initial JavaScript at most 150 KB gzipped; the search data file exists separately, is not referenced by `index.html`, and is at most 30 KB gzipped; the page issues 0 requests for it before the search is opened and at least 1 after.
 
 ## Open Questions
 
 - Q1: A city label keeps the language that was active when the location was added; relabelling on a language switch is left to a later change.
 - Q2: Storybook is still not set up (Q2 of `add-main-page-scaffold`); UI states are covered by jsdom scenarios and E2E screenshots. Introducing Storybook is a separate tooling change.
 - Q3: The abbreviation table and the popular-locations list are a first version (see design.md); extending them needs no spec change.
+- Q4: ADR-0005 says the view-contract scenarios are "parameterized by the registry" but not how. This change runs them as one Playwright project per registered view (design.md D12); whether ADR-0005 should record that mechanism is referred to `docs/adr/` and not settled here.
