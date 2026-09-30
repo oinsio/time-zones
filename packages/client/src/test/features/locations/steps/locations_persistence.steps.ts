@@ -1,77 +1,24 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the app must survive between steps.
-import { act, cleanup, renderHook } from "@testing-library/react/pure";
-import { createElement, type ReactNode } from "react";
+import { act, cleanup } from "@testing-library/react/pure";
 import { expect } from "vitest";
-import {
-  createLocalStorageLocationRepository,
-  type LocationsSyncChannel,
-} from "@/adapters";
 import { STORAGE_KEYS } from "@/constants";
-import { LocationsProvider, LocationsStatus, useLocations } from "@/controller";
+import { LocationsStatus } from "@/controller";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
-import { immediateWriteScheduler } from "@/test/writeSchedulers";
+import {
+  addCity,
+  cityEntry,
+  labelsOf,
+  NOT_JSON,
+  type OpenedApp,
+  openApp,
+  storeDocument,
+  UNREADABLE_DOCUMENTS,
+} from "./locationsPersistenceWorld";
 
 const feature = await loadFeature("../locations_persistence.feature");
-
-const DOCUMENT_VERSION = 1;
-const NEWER_DOCUMENT_VERSION = 99;
-const NOT_JSON = "{not json";
-const UNREADABLE_DOCUMENTS: Record<string, string> = {
-  "not valid JSON": NOT_JSON,
-  "written by a newer version": JSON.stringify({
-    schemaVersion: NEWER_DOCUMENT_VERSION,
-    payload: { locations: [] },
-  }),
-  'holding a location in "+05:00"': JSON.stringify({
-    schemaVersion: DOCUMENT_VERSION,
-    payload: {
-      locations: [{ timeZoneId: "+05:00", label: "Nowhere", countryCode: "" }],
-    },
-  }),
-};
-
-const storeDocument = (
-  entries: { timeZoneId: string; label: string; countryCode: string }[],
-) =>
-  localStorage.setItem(
-    STORAGE_KEYS.LOCATIONS,
-    JSON.stringify({
-      schemaVersion: DOCUMENT_VERSION,
-      payload: { locations: entries },
-    }),
-  );
-const cityEntry = (label: string) => ({
-  label,
-  timeZoneId: KNOWN_CITIES[label]?.timeZoneId ?? "",
-  countryCode: KNOWN_CITIES[label]?.countryCode ?? "",
-});
-
-type OpenedApp = ReturnType<typeof openApp>;
-
-function openApp(createChannel?: () => LocationsSyncChannel | undefined) {
-  const repository = createLocalStorageLocationRepository({
-    getStorage: () => localStorage,
-    createChannel,
-  });
-  return renderHook(() => useLocations(), {
-    wrapper: ({ children }: { children: ReactNode }) =>
-      createElement(
-        LocationsProvider,
-        { repository, writeScheduler: immediateWriteScheduler },
-        children,
-      ),
-  });
-}
-
-const labelsOf = (app: OpenedApp) =>
-  app.result.current.locations.map(({ label }) => label);
-const addCity = (app: OpenedApp, label: string) =>
-  act(() => {
-    app.result.current.addLocation(cityEntry(label));
-  });
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.AfterAllScenarios(() => {
@@ -86,6 +33,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     localStorage.clear();
   });
 
+  // @add-locations-via-search @FR11
   f.Scenario("List survives a reload", ({ Given, When, Then }) => {
     Given(
       "the user added {string}, then {string}",
@@ -107,6 +55,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
+  // @add-locations-via-search @FR11
   f.Scenario("First launch writes nothing", ({ When, Then }) => {
     When("the user opens the app for the first time and adds nothing", () => {
       app = openApp();
@@ -116,6 +65,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
+  // @add-locations-via-search @FR9
   f.Scenario(
     "Legacy identifier is canonicalized on load",
     ({ Given, When, Then }) => {
@@ -139,6 +89,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @add-locations-via-search @FR12
   f.ScenarioOutline(
     "Unreadable stored list",
     ({ Given, When, Then }, variables) => {
@@ -157,6 +108,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @add-locations-via-search @FR12
   f.Scenario("Reset", ({ Given, And, When, Then }) => {
     Given("the stored list is not valid JSON", () => {
       localStorage.setItem(STORAGE_KEYS.LOCATIONS, NOT_JSON);
@@ -176,6 +128,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
+  // @add-locations-via-search @FR14
   f.Scenario("Added in another tab", ({ Given, When, Then }) => {
     Given("the app is open in two tabs with the same list", () => {
       const hub = createInMemoryChannelHub();
@@ -193,6 +146,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
+  // @add-locations-via-search @FR14
   f.Scenario("Removed in another tab", ({ Given, When, Then }) => {
     Given(
       "the app is open in two tabs and both show {string}",

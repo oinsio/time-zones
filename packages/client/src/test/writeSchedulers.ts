@@ -1,4 +1,4 @@
-import type { WriteScheduler } from "@/controller/writeScheduler";
+import type { WriteScheduler } from "@/controller";
 
 /** Runs a scheduled write at once, so tests need no timers. */
 export const immediateWriteScheduler: WriteScheduler = {

@@ -1,4 +1,9 @@
-import { POPULAR_TIME_ZONE_IDS } from "@/constants";
+import {
+  POPULAR_TIME_ZONE_IDS,
+  REGION_DISPLAY_TYPE,
+  UTC_ZONE_ID,
+} from "@/constants";
+import { SUPPORTED_LANGUAGES } from "@/i18n";
 import { canonicalizeTimeZoneId } from "@/model";
 import {
   type CityRecord,
@@ -15,10 +20,7 @@ import { findAbbreviationsOfZone } from "./timeZoneAbbreviations";
  * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
  */
 
-const UTC_ZONE_ID = "UTC";
 const ZONE_ID_SEPARATOR = "/";
-const REGION_DISPLAY_TYPE = "region";
-const LANGUAGES = ["en", "ru"] as const;
 const UNDERSCORES = /_/g;
 
 /** Zones the browser knows, or `undefined` when it cannot list them. */
@@ -84,7 +86,7 @@ function buildRecord(
 
 function readCountryTexts(countryCode: string): SearchableText[] {
   if (countryCode === "") return [];
-  return LANGUAGES.flatMap((language) => {
+  return SUPPORTED_LANGUAGES.flatMap((language) => {
     const countryName = new Intl.DisplayNames(language, {
       type: REGION_DISPLAY_TYPE,
       fallback: "none",
@@ -107,7 +109,7 @@ export function createZoneCitiesSource(
   );
   const searchableRecords = records.map((record) => ({
     record,
-    cityTexts: LANGUAGES.map((language) =>
+    cityTexts: SUPPORTED_LANGUAGES.map((language) =>
       toSearchableText(record.names[language]),
     ),
     countryTexts: readCountryTexts(record.countryCode),

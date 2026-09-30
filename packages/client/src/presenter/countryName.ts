@@ -1,6 +1,5 @@
+import { REGION_DISPLAY_TYPE } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
-
-const REGION_DISPLAY_TYPE = "region";
 
 const displayNamesByLanguage = new Map<SupportedLanguage, Intl.DisplayNames>();
 

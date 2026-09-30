@@ -1,6 +1,7 @@
 /**
  * Framework-agnostic store around a pure reducer (ADR-0002); read with
- * `useSyncExternalStore` by the controller. Implements D3 of add-locations-via-search.
+ * `useSyncExternalStore` by the controller. Implements FR8, FR10, FR11 of
+ * add-locations-via-search (D3).
  */
 export type ReduceResult<State, ErrorCode> =
   | { ok: true; state: State }

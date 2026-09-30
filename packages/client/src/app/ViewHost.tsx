@@ -21,7 +21,8 @@ interface ViewHostProps {
 /**
  * Content region: resolves the active view from the registry and the
  * container width, loads it lazily and isolates its failures.
- * Implements FR2, FR4, FR5, FR6 of add-main-page-scaffold (D1-D4).
+ * Implements FR2, FR4, FR5, FR6 of add-main-page-scaffold (D1-D4); exposes
+ * the active view id for add-locations-via-search (D12, FR12).
  */
 export function ViewHost({
   registry = viewRegistry,

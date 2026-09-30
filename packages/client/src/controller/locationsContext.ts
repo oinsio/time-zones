@@ -7,7 +7,7 @@ import type {
   Store,
 } from "@/model";
 
-/** Whether the stored list could be read (D5). */
+/** Whether the stored list could be read. Implements FR12 of add-locations-via-search (D5). */
 export enum LocationsStatus {
   READY = "READY",
   UNREADABLE = "UNREADABLE",

@@ -1,4 +1,5 @@
 Feature: Locations persistence
+  Implements change add-locations-via-search.
   As a user I find my list again when I come back, and every open tab agrees
 
   @add-locations-via-search @FR11 @UX4
