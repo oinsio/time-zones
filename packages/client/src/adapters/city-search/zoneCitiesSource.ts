@@ -1,5 +1,6 @@
 import {
   POPULAR_TIME_ZONE_IDS,
+  REGION_DISPLAY_FALLBACK,
   REGION_DISPLAY_TYPE,
   UTC_ZONE_ID,
 } from "@/constants";
@@ -89,7 +90,7 @@ function readCountryTexts(countryCode: string): SearchableText[] {
   return SUPPORTED_LANGUAGES.flatMap((language) => {
     const countryName = new Intl.DisplayNames(language, {
       type: REGION_DISPLAY_TYPE,
-      fallback: "none",
+      fallback: REGION_DISPLAY_FALLBACK,
     }).of(countryCode);
     return countryName === undefined ? [] : [toSearchableText(countryName)];
   });

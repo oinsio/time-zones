@@ -7,6 +7,7 @@ export {
 export {
   MAX_SEARCH_RESULTS,
   POPULAR_TIME_ZONE_IDS,
+  REGION_DISPLAY_FALLBACK,
   REGION_DISPLAY_TYPE,
   UTC_ZONE_ID,
 } from "./search";

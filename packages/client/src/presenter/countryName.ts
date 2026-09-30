@@ -1,4 +1,4 @@
-import { REGION_DISPLAY_TYPE } from "@/constants";
+import { REGION_DISPLAY_FALLBACK, REGION_DISPLAY_TYPE } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 
 const displayNamesByLanguage = new Map<SupportedLanguage, Intl.DisplayNames>();
@@ -8,7 +8,7 @@ function getDisplayNames(language: SupportedLanguage): Intl.DisplayNames {
   if (cachedDisplayNames) return cachedDisplayNames;
   const displayNames = new Intl.DisplayNames(language, {
     type: REGION_DISPLAY_TYPE,
-    fallback: "none",
+    fallback: REGION_DISPLAY_FALLBACK,
   });
   displayNamesByLanguage.set(language, displayNames);
   return displayNames;
