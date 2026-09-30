@@ -65,6 +65,35 @@ verify:
       done
       open=$(grep -cE '^- Status: open$' "$review" || true)
       [ "$open" = "$findings" ] || { echo "every finding must stay at '- Status: open' - only the fix-code stage sets a status"; exit 1; }
+  # The Summary numbers are derived, not estimated, and every task, requirement id and
+  # delta-spec scenario has its line.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-code.md"
+      section() { awk -v heading="## $1" 'index($0, heading) == 1 { inside = 1; next } /^## / { inside = 0 } inside' "$review"; }
+      summary_value() { section Summary | awk -F'|' -v label="$1" '{ cell = $2; gsub(/^[ \t]+|[ \t]+$/, "", cell); if (cell == label) { value = $3; gsub(/^[ \t]+|[ \t]+$/, "", value); print value; exit } }'; }
+      expect() {
+        actual=$(summary_value "$1")
+        [ "$actual" = "$2" ] || { echo "Summary row '| $1 | ... |' reads '$actual' but the report gives $2 - recount from the sections, see stages/review-code/instructions.md"; exit 1; }
+      }
+      task_lines=$(section Tasks | grep -E '^- (✅|❌) ' || true)
+      requirement_lines=$(section Requirements | grep -E '^- (✅|⚠️|❌) ' || true)
+      tasks_total=$(grep -cE '^[[:space:]]*- \[[ xX]\] ' "$change/tasks.md" || true)
+      tasks_listed=$(printf '%s\n' "$task_lines" | grep -c . || true)
+      [ "$tasks_listed" = "$tasks_total" ] || { echo "tasks.md has $tasks_total tasks but the Tasks section has $tasks_listed '- ✅|❌ <task>' lines - one per task"; exit 1; }
+      missing=$(for id in $(grep -oE '^- (FR|NFR-[A-Z]+|UX|M)[0-9]+:' "$change/proposal.md" | sed -E 's/^- //; s/:$//' | sort -u); do
+        printf '%s\n' "$requirement_lines" | grep -qE "^- (✅|⚠️|❌) $id([^0-9]|$)" || echo "$id"
+      done)
+      [ -z "$missing" ] || { echo "$missing"; echo "these ids are defined in proposal.md but have no '- ✅|⚠️|❌ <id>' line in Requirements"; exit 1; }
+      scenarios_total=$(find "$change/specs" -name spec.md -exec grep -hE '^#### Scenario:' {} + 2>/dev/null | grep -c . || true)
+      scenarios_listed=$(printf '%s\n' "$requirement_lines" | grep -cE '^- (✅|⚠️|❌) Scenario: ' || true)
+      [ "$scenarios_listed" = "$scenarios_total" ] || { echo "the spec deltas hold $scenarios_total scenarios but Requirements has $scenarios_listed '- ✅|⚠️|❌ Scenario:' lines - one per scenario"; exit 1; }
+      expect 'Tasks verified' "$(printf '%s\n' "$task_lines" | grep -c '^- ✅' || true)/$tasks_listed"
+      expect 'Requirements traced' "$(printf '%s\n' "$requirement_lines" | grep -c '^- ✅' || true)/$(printf '%s\n' "$requirement_lines" | grep -c . || true)"
+      for severity in CRITICAL WARNING SUGGESTION; do
+        expect "$severity" "$(grep -cE "^### R[0-9]+ — $severity — " "$review" || true)"
+      done
   # The reviewer changes nothing but review-code.md. The stage's baseline is the parent of the
   # commit that first added review-code.md (only this stage creates it); .gnomish-task/ is the
   # factory's own bookkeeping.

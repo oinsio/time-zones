@@ -76,6 +76,18 @@ verify:
       done;
       grep -qE '(^|[^A-Za-z])FR[0-9]+' "$proposal" || { echo "$proposal declares no FR<n> requirement id — every requirement needs one, see .claude/rules/traceability.md"; exit 1; };
       grep -qE '(^|[^A-Za-z])M[0-9]+' "$proposal" || { echo "$proposal declares no M<n> success metric id — see .claude/rules/traceability.md"; exit 1; }
+  # review-specs.md is the reviewer's record: only its Status lines and the added Resolution
+  # lines change. The baseline is the last round commit of the review-specs stage.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-specs#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      review="$change/review-specs.md"
+      hunks=$(git diff -U0 "$since" -- "$review" | grep -E '^[-+]' | grep -vE '^(---|\+\+\+) ' || true)
+      removed=$(printf '%s\n' "$hunks" | grep -E '^-' | grep -vxF -- '-- Status: open' || true)
+      added=$(printf '%s\n' "$hunks" | grep -E '^\+' | grep -vE '^\+(- Status: |- Resolution: |  +[^ ])' || true)
+      [ -z "$removed$added" ] || { printf '%s\n' "$removed" "$added" | grep .; echo "only the '- Status:' lines and the new '- Resolution:' lines (continuation lines indented) of $review may change - restore the rest with: git checkout $since -- $review, then re-apply the statuses"; exit 1; }
   # LLM judge checks each revision and challenges each rejection; read-only. Opus, like the
   # reviewer: it arbitrates between the reviewer and the fixer.
   - type: judge

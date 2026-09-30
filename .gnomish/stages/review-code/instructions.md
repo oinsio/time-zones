@@ -12,6 +12,13 @@ Read `CLAUDE.md` first, then the change's `proposal.md`, `design.md`,
 `git diff $(git merge-base HEAD origin/main) --stat`, and the specific hunks you
 need. The rules you review against are in `.claude/rules/`; ADRs in `docs/adr/`.
 
+**A retry is a full review.** If `review-code.md` already exists, a previous
+round was rejected and its feedback is in your prompt. Fix every point it
+names, then re-verify the whole report as if writing it fresh: every Tasks and
+Requirements line, every finding's Problem, Fix and Fix risk, and every
+Summary number. Patching only the flagged points tends to introduce new
+errors elsewhere.
+
 **ADRs.** List `docs/adr/` fresh every time — new ADRs are added over time, so
 never assume a fixed set. Only an ADR whose status is `Accepted` binds; one
 marked `Superseded by ADR-XXXX` is replaced by that ADR, and `Proposed`,
@@ -47,9 +54,11 @@ Severity is about impact:
 
 1. **Every task in `tasks.md`**, ticked or not: find evidence (`file:line`).
    Do not trust the checkbox. Ticked with no evidence is CRITICAL.
-2. **Every requirement id** (FR/NFR/UX) from the proposal and every delta-spec
-   scenario: an implementing entity carrying its traceability link
-   (`.claude/rules/traceability.md`) and a test that covers it.
+2. **Every requirement id** (`FR`, `NFR-*`, `UX`, `M`) the proposal defines
+   and every delta-spec scenario: an implementing entity carrying its
+   traceability link (`.claude/rules/traceability.md`) and a test that covers
+   it — for an `M` id, the measurement it names. `G`, `NG` and `Q` ids are not
+   listed.
 3. **Project rules** on the changed files: `process-invariants.md` (file size,
    imports only through `index.ts`), `code-style.md`, `naming.md`,
    `architecture.md`, `temporal.md`, `i18n.md` (every locale), `ui-states.md`
@@ -94,14 +103,30 @@ level-2 sections. Level-3 headings are reserved for findings — a check reads
 them.
 
     # Review: <change-name>
-    ## Summary       — table: tasks verified X/Y, requirements traced A/B,
-                       findings per severity
-    ## Tasks         — one line per task: ✅/❌ + evidence or what is missing
-    ## Requirements  — one line per id/scenario: ✅/⚠️/❌ + evidence
+    ## Summary       — the table below, filled last
+    ## Tasks         — one `- ✅ <task number> …` / `- ❌ <task number> …` line
+                       per task in tasks.md, with evidence or what is missing
+    ## Requirements  — one `- ✅|⚠️|❌ <id> — …` line per id and one
+                       `- ✅|⚠️|❌ Scenario: <name> — …` line per delta-spec
+                       scenario, with evidence
     ## Mutation      — score per file measured, or why not measured
     ## Findings      — CRITICAL first, then WARNING, then SUGGESTION;
                        "None." if there are none
     ## Verdict       — ready / not ready, with the blocking finding ids
+
+**Summary** is exactly this table. Each value is a bare number, computed from
+the other sections after they are final — a check recounts every row, checks
+that every task, id and scenario has its line, and rejects a mismatch:
+
+    | Item | Value |
+    |---|---|
+    | Tasks verified | <`- ✅` lines in Tasks>/<all lines in Tasks> |
+    | Requirements traced | <`- ✅` lines in Requirements>/<all lines in Requirements> |
+    | CRITICAL | <number of CRITICAL findings> |
+    | WARNING | <number of WARNING findings> |
+    | SUGGESTION | <number of SUGGESTION findings> |
+
+Explanations go into the sections, not into the Summary cells.
 
 Each finding, numbered `R1`, `R2`, … in order:
 
@@ -113,6 +138,11 @@ Each finding, numbered `R1`, `R2`, … in order:
     - Fix: the concrete change to make.
     - Fix risk: what the fix could break or cost, or `none`.
     - Status: open
+
+**Fix risk** is a claim like any other: before writing `none`, check the fix
+against what the surrounding code already does, where
+`.claude/rules/bdd-unit.md` and `bdd-e2e.md` put its test, and the layering in
+`.claude/rules/architecture.md`.
 
 Leave every status at `open` — only the fix-code stage sets it. A task, requirement
 or mutation gap you list as ❌/⚠️ that is worth fixing also becomes a finding.

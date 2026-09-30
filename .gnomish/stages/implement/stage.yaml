@@ -72,6 +72,19 @@ verify:
   # BDD E2E via playwright-bdd; needs Chromium from `playwright install chromium` on this host.
   - type: command
     command: pnpm --filter @time-zones/client test:bdd
+  # The contract stays as fix-specs left it: of the change only tasks.md moves, and no process
+  # or ADR file changes. The baseline is the last round commit of the previous stage.
+  # package.json / the lockfile change only when tasks.md asks for a dependency.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^implement#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
+      forbidden=$(printf '%s\n' "$changed" | grep -E '^(openspec/|\.gnomish/|\.github/|\.claude/|docs/adr/)' | grep -vxF "$change/tasks.md" || true)
+      [ -z "$forbidden" ] || { echo "$forbidden"; echo "the implement stage edits only packages/ and the checkboxes of $change/tasks.md - restore the files above with: git checkout $since -- <file>"; exit 1; }
+      dependencies=$(printf '%s\n' "$changed" | grep -E '(^|/)(package\.json|pnpm-lock\.yaml)$' || true)
+      if [ -n "$dependencies" ] && ! grep -qiE 'pnpm add|dependenc' "$change/tasks.md"; then echo "$dependencies"; echo "tasks.md asks for no new dependency - restore the files above with: git checkout $since -- <file>"; exit 1; fi
   # LLM judge grades the implementation against acceptance.md; read-only.
   - type: judge
     criteriaFile: stages/implement/acceptance.md

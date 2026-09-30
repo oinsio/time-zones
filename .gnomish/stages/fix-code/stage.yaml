@@ -86,6 +86,28 @@ verify:
   # BDD E2E via playwright-bdd; needs Chromium from `playwright install chromium` on this host.
   - type: command
     command: pnpm --filter @time-zones/client test:bdd
+  # The fixer edits only packages/client/ and the resolutions in review-code.md; the
+  # contract and the process files stay as they were when the stage started.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-code#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
+      outside=$(printf '%s\n' "$changed" | grep . | grep -v '^packages/client/' | grep -vxF "$change/review-code.md" || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the fix-code stage edits only packages/client/ and the resolutions in $change/review-code.md - restore the files above with: git checkout $since -- <file>"; exit 1; }
+  # review-code.md is the reviewer's record: only its Status lines and the added Resolution
+  # lines change.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-code#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      review="$change/review-code.md"
+      hunks=$(git diff -U0 "$since" -- "$review" | grep -E '^[-+]' | grep -vE '^(---|\+\+\+) ' || true)
+      removed=$(printf '%s\n' "$hunks" | grep -E '^-' | grep -vxF -- '-- Status: open' || true)
+      added=$(printf '%s\n' "$hunks" | grep -E '^\+' | grep -vE '^\+(- Status: |- Resolution: |  +[^ ])' || true)
+      [ -z "$removed$added" ] || { printf '%s\n' "$removed" "$added" | grep .; echo "only the '- Status:' lines and the new '- Resolution:' lines (continuation lines indented) of $review may change - restore the rest with: git checkout $since -- $review, then re-apply the statuses"; exit 1; }
   # LLM judge checks each fix and challenges each rejection; read-only. Opus, like the
   # reviewer: it arbitrates between the reviewer and the fixer.
   - type: judge

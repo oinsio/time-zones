@@ -62,6 +62,34 @@ verify:
       done
       open=$(grep -cE '^- Status: open$' "$review" || true)
       [ "$open" = "$findings" ] || { echo "every finding must stay at '- Status: open' - only the fix-specs stage sets a status"; exit 1; }
+  # The Summary numbers are derived, not estimated: they must match the Freshness ❌ lines,
+  # the Coverage rows, the Consistency items and the finding headings. The Coverage table
+  # lists every id proposal.md defines ('- <ID>:' lines) exactly once.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-specs.md"
+      section() { awk -v heading="## $1" 'index($0, heading) == 1 { inside = 1; next } /^## / { inside = 0 } inside' "$review"; }
+      summary_value() { section Summary | awk -F'|' -v label="$1" '{ cell = $2; gsub(/^[ \t]+|[ \t]+$/, "", cell); if (cell == label) { value = $3; gsub(/^[ \t]+|[ \t]+$/, "", value); print value; exit } }'; }
+      expect() {
+        actual=$(summary_value "$1")
+        [ "$actual" = "$2" ] || { echo "Summary row '| $1 | ... |' reads '$actual' but the report gives $2 - recount from the sections, see stages/review-specs/instructions.md"; exit 1; }
+      }
+      coverage_rows=$(section Coverage | grep -E '^\| *(FR|NFR-[A-Z]+|UX|NG|M|G|Q)[0-9]+ *\|' || true)
+      coverage_ids=$(printf '%s\n' "$coverage_rows" | awk -F'|' 'NF > 1 { id = $2; gsub(/[ \t]/, "", id); print id }' | sort)
+      duplicates=$(printf '%s\n' "$coverage_ids" | uniq -d)
+      [ -z "$duplicates" ] || { echo "$duplicates"; echo "each requirement id appears in the Coverage table exactly once"; exit 1; }
+      defined_ids=$(grep -oE '^- (FR|NFR-[A-Z]+|UX|NG|M|G|Q)[0-9]+:' "$change/proposal.md" | sed -E 's/^- //; s/:$//' | sort -u)
+      missing=$(for id in $defined_ids; do printf '%s\n' "$coverage_ids" | grep -qxF "$id" || echo "$id"; done)
+      [ -z "$missing" ] || { echo "$missing"; echo "these ids are defined in proposal.md but have no Coverage row - list every id, with n/a where a column does not apply"; exit 1; }
+      total=$(printf '%s\n' "$coverage_rows" | grep -c . || true)
+      covered=$(printf '%s\n' "$coverage_rows" | grep -v '❌' | grep -c . || true)
+      expect 'Stale claims' "$(section Freshness | grep -cE '^- ❌' || true)"
+      expect 'Requirements fully covered' "$covered/$total"
+      expect 'Contradictions' "$(section Consistency | grep -cE '^- ' || true)"
+      for severity in CRITICAL WARNING SUGGESTION; do
+        expect "$severity" "$(grep -cE "^### R[0-9]+ — $severity — " "$review" || true)"
+      done
   # The reviewer changes nothing but review-specs.md. The stage's baseline is the parent of
   # the commit that first added review-specs.md (only this stage creates it); .gnomish-task/
   # is the factory's own bookkeeping.
@@ -94,3 +122,7 @@ verify:
     votes: 1
 # auto = go to next stage; manual = wait for a human.
 advancement: auto
+# The judge reviews the whole report adversarially, so a sound review can still need a
+# second correction round; one extra attempt before escalating to a human.
+autonomy:
+  attemptLimit: 3

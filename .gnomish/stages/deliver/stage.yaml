@@ -99,6 +99,16 @@ verify:
         echo "the body never references the task issue - add a 'Refs #$issue' line so the reviewer can find it"
         exit 1
       fi
+  # The stage writes only the git-ignored pr-body.md: no working-copy change, no commit of
+  # its own since the stage started (the factory's own 'gnomish:' commits aside).
+  - type: command
+    command: |
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^deliver#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      dirty=$(git status --porcelain | grep -v ' \.gnomish-task/' || true)
+      [ -z "$dirty" ] || { echo "$dirty"; echo "the deliver stage writes only pr-body.md - restore the files above with: git checkout -- <file>"; exit 1; }
+      commits=$(git log --format='%h %s' "$since"..HEAD | grep -v ' gnomish: ' || true)
+      [ -z "$commits" ] || { echo "$commits"; echo "the deliver stage commits nothing - the commits above must not be on the task branch"; exit 1; }
   # LLM judge grades the pull request body against acceptance.md; read-only.
   - type: judge
     criteriaFile: stages/deliver/acceptance.md

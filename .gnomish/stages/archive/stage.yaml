@@ -61,6 +61,14 @@ verify:
       then echo "the archived tasks listed above are still open - the change was archived unfinished"; exit 1; fi
   - type: command
     command: openspec validate --specs --strict --no-interactive
+  # Archiving touches nothing outside openspec/.
+  - type: command
+    command: |
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^archive#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
+      outside=$(printf '%s\n' "$changed" | grep . | grep -v '^openspec/' || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the archive stage changes nothing outside openspec/ - restore the files above with: git checkout $since -- <file>"; exit 1; }
   # LLM judge grades the archive against acceptance.md; read-only.
   - type: judge
     criteriaFile: stages/archive/acceptance.md

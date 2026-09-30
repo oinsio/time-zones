@@ -14,7 +14,19 @@ then every file of the change: `proposal.md`, `design.md`, `tasks.md`,
 touches, the ADRs in `docs/adr/`, and the rules the artifacts answer to:
 `.claude/rules/proposal-format.md`, `delta-specs.md`, `design-decisions.md`,
 `gherkin.md`, `traceability.md`, `test-planning.md`, `ui-states.md`,
-`process-invariants.md`.
+`process-invariants.md`, `architecture.md`, `bdd-unit.md`, `bdd-e2e.md`,
+`i18n.md`, `temporal.md`, `code-style.md`. The last six decide where a test
+belongs (jsdom unit vs real-browser E2E), which layer may touch storage, the
+clock or the DOM, and how strings and constants are placed — a design or task
+that disagrees with them is a finding, and a Fix you propose must agree with
+them too.
+
+**A retry is a full review.** If `review-specs.md` already exists, a previous
+round was rejected and its feedback is in your prompt. Fix every point it
+names, then re-verify the whole report as if writing it fresh: every ✅ and ❌,
+every Coverage row, every finding's Problem, Fix and Fix risk, and every
+Summary number. Earlier rounds failed by patching the flagged points and
+introducing new errors elsewhere.
 
 **ADRs.** List `docs/adr/` fresh every time — new ADRs are added over time, so
 never assume a fixed set. Only an ADR whose status is `Accepted` binds; one
@@ -55,7 +67,12 @@ Severity is about impact:
 1. **Freshness against the codebase.** Every file, module, component, hook,
    constant or spec the artifacts name as existing — does it exist under that
    name and path? Every "today the app does X" — does the code still do X?
-   Every `MODIFIED`/`REMOVED` requirement — does it exist in `openspec/specs/`
+   Every claim about what the running app does or does not do — "nothing
+   is written to storage", "no request is made", "the title is the only
+   `h1`" — grep for every existing writer or producer first (for storage:
+   `localStorage`, `sessionStorage`, `indexedDB`, library options such as an
+   i18n detector cache), since existing code may already do what the
+   artifact says never happens. Every `MODIFIED`/`REMOVED` requirement — does it exist in `openspec/specs/`
    as restated? Is any part already implemented, in code or by an archived
    change under `openspec/changes/archive/`? Cite what reality looks like.
 2. **Faithful to the task.** The change delivers what the task asks — all of
@@ -78,7 +95,10 @@ Severity is about impact:
 6. **External consistency.** An ADDED requirement neither duplicates nor
    contradicts one in `openspec/specs/`; the change does not silently break an
    invariant the code or tests already enforce (grep the touched entities);
-   tech choices match the ADRs and `.claude/rules/architecture.md`; the scope
+   tech choices match the ADRs and `.claude/rules/architecture.md` — in
+   particular, which layer each new hook or module sits in and whether it
+   reaches storage, the clock or the network only through the port the rules
+   name; the scope
    fits one change (`process-invariants.md`); the change is named
    `kebab-case-descriptive`.
 
@@ -89,15 +109,45 @@ level-2 sections. Level-3 headings are reserved for findings — a check reads
 them.
 
     # Specs review: <change-name>
-    ## Summary      — table: stale claims, requirements fully covered X/Y,
-                      contradictions, findings per severity
-    ## Freshness    — one line per claim checked: ✅/❌ + where reality is
-    ## Coverage     — table: requirement id | proposal | spec | task (✅/❌)
-    ## Consistency  — contradictions and conflicts, each with both citations,
-                      or "None."
+    ## Summary      — the table below, filled last
+    ## Freshness    — one `- ✅ …` / `- ❌ …` line per claim checked, with
+                      where reality is
+    ## Coverage     — table: requirement id | proposal | spec | task
+    ## Consistency  — one `- …` line per contradiction, each with both
+                      citations, or "None."
     ## Findings     — CRITICAL first, then WARNING, then SUGGESTION;
                       "None." if there are none
     ## Verdict      — ready to implement / needs revision, with the blocking ids
+
+**Summary** is exactly this table. Each value is a bare number, computed from
+the other sections after they are final — a check recounts every row and
+rejects a mismatch:
+
+    | Item | Value |
+    |---|---|
+    | Stale claims | <number of `- ❌` lines in Freshness> |
+    | Requirements fully covered | <Coverage rows with no ❌>/<all Coverage rows> |
+    | Contradictions | <number of `- ` lines in Consistency; 0 for "None."> |
+    | CRITICAL | <number of CRITICAL findings> |
+    | WARNING | <number of WARNING findings> |
+    | SUGGESTION | <number of SUGGESTION findings> |
+
+Explanations go into the sections, not into the Summary cells.
+
+**Coverage** has one row per id that `proposal.md` defines — every `FR`,
+`NFR-*`, `UX`, `M`, `G`, `NG` and `Q` id, each exactly once; a check compares
+the rows with the proposal. Each cell reads ✅, ❌ or `n/a`, optionally
+followed by a short note. `n/a` is allowed only where the column does not
+apply to the id's kind:
+
+- `FR`, `NFR-*`, `UX` — spec and task are required (✅ or ❌, never `n/a`).
+- `M` — task is required; spec may be `n/a`.
+- `G` — spec and task may be `n/a` when the goal is met by the FR/M ids it
+  names; note which.
+- `NG` — spec and task are `n/a`; the note says whether any artifact builds
+  what the non-goal excludes (if one does, that is ❌ and a finding).
+- `Q` — spec and task are `n/a` unless the answer adds behaviour; the note
+  says where it is answered (`design.md` D<n>) or that it stays open.
 
 Each finding, numbered `R1`, `R2`, … in order:
 
@@ -109,6 +159,10 @@ Each finding, numbered `R1`, `R2`, … in order:
     - Fix: the concrete edit to the artifact.
     - Fix risk: what the edit could break or cost, or `none`.
     - Status: open
+
+**Fix risk** is a claim like any other: before writing `none`, check that the
+edited artifact would still hold against the code (existing side effects),
+the rules above (test placement, layering) and the other artifacts.
 
 Leave every status at `open` — only the fix-specs stage sets it. A gap you
 mark ❌ in Freshness, Coverage or Consistency that is worth fixing also becomes
