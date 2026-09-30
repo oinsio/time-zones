@@ -18,13 +18,13 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 
 ## 3. Locales
 
-- [ ] 3.1 Add `mainPage.*` keys (loading label, error text, retry, update-check-failed note, storage warning) and `views.cardsTitle`, `views.cardsEmptyState` keys to `locales/en.json` and `locales/ru.json` (FR10, FR3); verify `npx vitest run src/locales` (identical key sets)
+- [x] 3.1 Add `mainPage.*` keys (loading label, error text, retry, update-check-failed note, storage warning) and `views.cardsTitle`, `views.cardsEmptyState` keys to `locales/en.json` and `locales/ru.json` (FR10, FR3); verify `npx vitest run src/locales` (identical key sets)
 
 ## 4. Cards view and registry
 
-- [ ] 4.1 TDD `views/cards/CardsView.tsx` empty state without any action, in en and ru (FR7, UX1); verify `npx vitest run src/views/cards`
-- [ ] 4.2 TDD `createRetryableLazyView` in `views/createRetryableLazyView.ts` with a loader that rejects once and then resolves: after a remount the view renders and the loader was called twice (FR6, D4); verify `npx vitest run src/views/createRetryableLazyView.test.tsx`
-- [ ] 4.3 Register `cardsView` in `views/index.ts` with `component: createRetryableLazyView(() => import("./cards/CardsView"))` and title key (FR3, D6); verify registry test `npx vitest run src/views/viewRegistry.test.ts` (one view, Cards, title key in every locale)
+- [x] 4.1 TDD `views/cards/CardsView.tsx` empty state without any action, in en and ru (FR7, UX1); verify `npx vitest run src/views/cards`
+- [x] 4.2 TDD `createRetryableLazyView` in `views/createRetryableLazyView.ts` with a loader that rejects once and then resolves: after a remount the view renders and the loader was called twice (FR6, D4); verify `npx vitest run src/views/createRetryableLazyView.test.tsx`
+- [x] 4.3 Register `cardsView` in `views/index.ts` with `component: createRetryableLazyView(() => import("./cards/CardsView"))` and title key (FR3, D6); verify registry test `npx vitest run src/views/viewRegistry.test.ts` (one view, Cards, title key in every locale)
 
 ## 5. Page components (TDD)
 
