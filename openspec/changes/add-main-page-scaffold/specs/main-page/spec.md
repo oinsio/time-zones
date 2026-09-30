@@ -75,7 +75,6 @@ When there are no locations, the Cards view SHALL show an explanation that no lo
 #### Scenario: First launch
 - **WHEN** the user opens the app with no locations
 - **THEN** the explanation is shown in the current language
-- **AND** nothing is written to storage
 
 ### Requirement: Offline note
 While the browser is offline, the page SHALL show a short non-blocking note that the app works offline, announced politely and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
