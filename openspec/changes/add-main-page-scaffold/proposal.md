@@ -54,7 +54,7 @@ Audience: the developer adding MVP features, and users who from now on see a rea
 
 ### Functional
 
-- FR1: The main page has regions in order: header with the app title as the only `h1` and an empty slot for controls, content, bottom bar slot, and a polite notices region that keeps the existing offline-ready and update notices.
+- FR1: The main page has regions in order: header with the app title as the only `h1` and an empty slot for controls, content, bottom bar slot, and a polite notices region, out of the document flow, that keeps the existing offline-ready and update notices and stacks the update-check-failed note and the storage warning with them instead of replacing them.
 - FR2: The view host resolves the active view from the registry and the mode (`AUTO` or a view id): for `AUTO` it picks the view with the largest `autoMinWidth` not exceeding the container width, falling back to the view with the smallest `autoMinWidth` when none fits; an unknown view id resolves as `AUTO`.
 - FR3: The registry contains the `Cards` view (`ViewId.CARDS`); its component is lazy-loaded and its title key exists in every locale file.
 - FR4: The host reacts to container width changes and re-resolves `AUTO` without reloading.

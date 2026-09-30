@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Main page regions
-The main page SHALL consist of a header with the app title as the only page heading and an empty slot for future controls, a content region hosting the active view, an empty bottom bar slot, and a polite notices region that keeps the offline-ready and update notices. <!-- implements FR1, UX3 of add-main-page-scaffold -->
+The main page SHALL consist of a header with the app title as the only page heading and an empty slot for future controls, a content region hosting the active view, an empty bottom bar slot, and a polite notices region, out of the document flow, that keeps the offline-ready and update notices and stacks the update-check-failed note and the storage warning with them. <!-- implements FR1, UX3 of add-main-page-scaffold -->
 
 #### Scenario: User opens the app
 - **WHEN** the user opens the app
@@ -11,6 +11,10 @@ The main page SHALL consist of a header with the app title as the only page head
 #### Scenario: Notices stay available
 - **WHEN** a new version becomes available while a view is shown
 - **THEN** the update notice is announced politely in the notices region
+
+#### Scenario: Header keeps its position
+- **WHEN** the page shows the update-check-failed note or the storage warning
+- **THEN** the header keeps its position
 
 ### Requirement: View host resolves the active view
 The view host SHALL choose the view from the registry and the view mode. For `AUTO` it MUST pick the registered view with the largest minimum width not exceeding the container width, or the view with the smallest minimum width when none fits. A view id missing from the registry MUST resolve as `AUTO`. The host MUST re-resolve when the container width changes, without reloading the page. <!-- implements FR2, FR4 of add-main-page-scaffold -->
