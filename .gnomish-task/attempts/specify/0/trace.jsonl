@@ -1,0 +1,4 @@
+{"seq":0,"tool":"Skill","start":"2026-09-30T06:59:33.354420Z","durationMillis":18}
+{"seq":1,"tool":"Bash","start":"2026-09-30T06:59:34.001669Z","durationMillis":418}
+{"seq":2,"tool":"Bash","start":"2026-09-30T06:59:37.120369Z","durationMillis":1662}
+{"seq":3,"tool":"Bash","start":"2026-09-30T06:59:40.530404Z","durationMillis":796}
