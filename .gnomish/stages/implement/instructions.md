@@ -16,6 +16,31 @@ Never edit `package.json` or `pnpm-lock.yaml` to make an install or a test pass.
 If the change genuinely needs a new dependency, `tasks.md` says so; otherwise
 say in your closing summary what was missing instead of adding it.
 
+## Check the baseline before you change anything
+
+On the first round of this stage (your prompt carries no feedback from a failed
+check), prove the project is healthy before writing a line. Run, one at a time,
+what CI runs, on the branch exactly as you received it:
+
+    pnpm lint
+    pnpm typecheck
+    pnpm test
+    pnpm build
+    pnpm --filter @time-zones/client check:bundle-size
+    pnpm --filter @time-zones/client test:bdd
+
+If all pass, go on. If any fails, the breakage predates your work and is not
+yours to fix here — a change built on a red baseline cannot pass the stage
+checks. Stop: change no files, make no commits. Write a decision JSON to the
+path in `$GNOMISH_DECISION_FILE` and finish your turn:
+
+    {"question": "<report>", "options": ["Fix the project and resume the task", "<other realistic option>"]}
+
+The report names every failing command, the failing tests or errors (a few
+lines of output each, not the whole log), and the likely cause — for example a
+Node version that differs from `.nvmrc`, or a Playwright browser that is not
+installed. A human reads it to fix the project, so be exact.
+
 ## How to do it
 
 Invoke the repository's own skill and follow it end to end:
@@ -87,6 +112,12 @@ Run, one at a time, what CI runs — the stage re-runs exactly these as checks:
 `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
 `pnpm --filter @time-zones/client check:bundle-size`,
 `pnpm --filter @time-zones/client test:bdd`. All must pass.
+
+**A retry runs the whole list too.** If your prompt carries feedback from a
+failed check, a previous round was rejected. The checks stop at the first
+failure, so the ones after it never ran and may fail as well. Fixing the
+reported failure is not the end of the round: after the fix, run every command
+above, one at a time, and stop only when all of them pass.
 
 Commit as you go, and often — one commit per finished task is a good rhythm;
 small commits on the task branch are what makes an attempt readable

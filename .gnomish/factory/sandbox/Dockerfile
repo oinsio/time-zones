@@ -1,8 +1,8 @@
 # Sandbox image for the time-zones pipeline: the box every gnome round, judge vote and command
 # check runs in when the factory binds `container` (FACTORY_BINDINGS_DEFAULT in gnomish.env).
 # Build it with .gnomish/factory/build-sandbox, not by hand: the script reads the tag from
-# gnomish.env and every tool version below from package.json and pnpm-lock.yaml, so the image
-# cannot drift from what the repository pins.
+# gnomish.env, the Node version from .nvmrc and every tool version below from package.json and
+# pnpm-lock.yaml, so the image cannot drift from what the repository pins.
 #
 # Derived from the factory's reference recipe (gnomish-factory: docs/examples/sandbox-image/),
 # minus the JVM toolchain and plus what the four stages call:
@@ -13,7 +13,7 @@
 # The factory's image contract: git and curl on PATH; a non-root user `gnome` with uid 1000
 # owning /gnomish/**; control surfaces (agent policy, CA, proxy settings) root-owned. The box
 # has no route to any registry except through the egress guard, so every tool is baked here.
-ARG NODE_VERSION=22
+ARG NODE_VERSION=26
 FROM node:${NODE_VERSION}-bookworm-slim
 
 ARG PNPM_VERSION
