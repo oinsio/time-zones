@@ -69,6 +69,12 @@ If the active view throws while rendering or fails to load, the content region S
 - **WHEN** the user activates Retry
 - **THEN** the view is shown
 
+#### Scenario: User retries from the keyboard
+- **GIVEN** the view failed and the failure cause is gone
+- **WHEN** the user reaches Retry with Tab and presses Enter
+- **THEN** the view is shown
+- **AND** focus was not moved when the error appeared
+
 ### Requirement: Empty state
 When there are no locations, the Cards view SHALL show an explanation that no locations are added. It MUST NOT show an action that does nothing. <!-- implements FR7, UX1 of add-main-page-scaffold -->
 
