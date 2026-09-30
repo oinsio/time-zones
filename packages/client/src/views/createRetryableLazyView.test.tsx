@@ -22,6 +22,12 @@ class CatchingBoundary extends Component<
   }
 }
 
+const failingThenLoadingLoader = () =>
+  vi
+    .fn()
+    .mockRejectedValueOnce(new Error("chunk failed"))
+    .mockResolvedValueOnce({ default: LoadedView });
+
 const mountView = (RetryableView: ReturnType<typeof createRetryableLazyView>) =>
   render(
     <CatchingBoundary>
@@ -92,6 +98,47 @@ describe("createRetryableLazyView", () => {
   it("should ignore a reset of a plain lazy component", () => {
     const plainView = lazy(async () => ({ default: LoadedView }));
     expect(() => resetLazyView(plainView)).not.toThrow();
+  });
+
+  it("should reload the page when the retried load fails again", async () => {
+    const reloadPage = vi.fn();
+    const RetryableView = createRetryableLazyView(
+      () => Promise.reject(new Error("chunk failed")),
+      reloadPage,
+    );
+    const firstMount = mountView(RetryableView);
+    await screen.findByText("failed");
+    firstMount.unmount();
+    resetLazyView(RetryableView);
+    mountView(RetryableView);
+    await screen.findByText("failed");
+    expect(reloadPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("should not reload the page when the first load fails", async () => {
+    const reloadPage = vi.fn();
+    const RetryableView = createRetryableLazyView(
+      () => Promise.reject(new Error("chunk failed")),
+      reloadPage,
+    );
+    mountView(RetryableView);
+    await screen.findByText("failed");
+    expect(reloadPage).not.toHaveBeenCalled();
+  });
+
+  it("should not reload the page when the retried load succeeds", async () => {
+    const reloadPage = vi.fn();
+    const RetryableView = createRetryableLazyView(
+      failingThenLoadingLoader(),
+      reloadPage,
+    );
+    const firstMount = mountView(RetryableView);
+    await screen.findByText("failed");
+    firstMount.unmount();
+    resetLazyView(RetryableView);
+    mountView(RetryableView);
+    await screen.findByText(VIEW_TEXT);
+    expect(reloadPage).not.toHaveBeenCalled();
   });
 
   it("should load only once when the first load succeeds", async () => {

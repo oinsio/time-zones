@@ -10,13 +10,15 @@ export const buildTestView = (
   id: string,
   autoMinWidth: number,
   loadComponent: () => Promise<ComponentType>,
+  reloadPage: () => void = () => undefined,
 ): ViewDefinition => ({
   id: id as ViewId,
   titleKey: "app.title",
   icon: () => null,
-  component: createRetryableLazyView(async () => ({
-    default: await loadComponent(),
-  })),
+  component: createRetryableLazyView(
+    async () => ({ default: await loadComponent() }),
+    reloadPage,
+  ),
   autoMinWidth,
 });
 
