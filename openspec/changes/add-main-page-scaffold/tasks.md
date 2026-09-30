@@ -4,9 +4,9 @@ All paths are under `packages/client/src/`. Run tests one command at a time.
 
 ## 1. View resolution (TDD)
 
-- [ ] 1.1 Add `ViewId.CARDS`, `ViewMode` (`AUTO | ViewId`) and constants in `views/viewDefinition.ts` and `constants/` (FR2, FR3, D1); verify `pnpm typecheck`
-- [ ] 1.2 TDD `resolveActiveView` in `views/resolveActiveView.ts` with `it.each` cases: widest fit, no fit fallback, unknown id, single view, empty registry (FR2, D1); verify red then green with `npx vitest run src/views/resolveActiveView.test.ts`
-- [ ] 1.3 Scoped mutation run on `views/resolveActiveView.ts`, score ≥ 95% (M3); verify with `cd packages/client && npx stryker run --mutate 'src/views/resolveActiveView.ts'`
+- [x] 1.1 Add `ViewId.CARDS`, `ViewMode` (`AUTO | ViewId`) and constants in `views/viewDefinition.ts` and `constants/` (FR2, FR3, D1); verify `pnpm typecheck`
+- [x] 1.2 TDD `resolveActiveView` in `views/resolveActiveView.ts` with `it.each` cases: widest fit, no fit fallback, unknown id, single view, empty registry (FR2, D1); verify red then green with `npx vitest run src/views/resolveActiveView.test.ts`
+- [x] 1.3 Scoped mutation run on `views/resolveActiveView.ts`, score ≥ 95% (M3); verify with `cd packages/client && npx stryker run --mutate 'src/views/resolveActiveView.ts'`
 
 ## 2. Controller hooks (TDD)
 
