@@ -3,7 +3,8 @@
 The active change's `review-specs.md` lists the reviewer's findings, each now
 closed with a `Status` (`fixed` or `rejected (<reason>)`) and a `Resolution` —
 checks before you have confirmed that shape, that only the change directory
-changed, and that the change validates. You arbitrate between the reviewer and
+changed, that nothing in `review-specs.md` but those lines changed, and that
+the change validates. You arbitrate between the reviewer and
 the fixer: neither is right by default.
 
 - Every `fixed` finding is really fixed: the change's artifacts now close the
@@ -14,9 +15,11 @@ the fixer: neither is right by default.
   `.claude/rules/`. A revision that follows the review into harm fails this
   criterion — it should have been rejected.
 - The artifacts are still coherent with one another after the revisions:
-  every requirement id is defined in `proposal.md`, has a scenario in the spec
-  deltas and a task naming its automated test; `design.md` and `tasks.md` do
-  not contradict the revised proposal or specs.
+  every id is defined in `proposal.md`; every `FR`, `NFR-*` and `UX` id has a
+  scenario in the spec deltas and a task naming its automated test, every `M`
+  id a task (`G`, `NG` and `Q` ids need neither, as in the review's Coverage
+  rules); `design.md` and `tasks.md` do not contradict the revised proposal
+  or specs, `.claude/rules/architecture.md` or an ADR.
 - Every rejection is justified by evidence you can confirm: a
   `false-positive` shows the artifacts do not have the problem; a
   `contradicts-spec` names the task clause, spec, ADR or rule the edit would
@@ -24,9 +27,7 @@ the fixer: neither is right by default.
   `out-of-scope` shows the finding asks for more than the task; `not-worth-it`
   weighs the gap against the edit. A rejection that dodges a real, cheap-to-close
   gap fails this criterion — most of all for a CRITICAL finding.
-- The findings text, their severities and the other sections of
-  `review-specs.md` are as the reviewer wrote them.
 
 Judge by reading `review-specs.md`, the task, the change's artifacts,
-`openspec/specs/`, `docs/adr/` and the diff only. Do not run the build, the
+`openspec/specs/`, `docs/adr/`, `.claude/rules/` and the source only. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do not run the build, the
 tests or the OpenSpec CLI.

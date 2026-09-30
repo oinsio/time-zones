@@ -58,7 +58,14 @@ the skill would ask or pause for a human, decide yourself within the task and
 the rules — **nobody is going to answer you**. The rules the artifacts answer
 to: `.claude/rules/proposal-format.md`, `delta-specs.md`,
 `design-decisions.md`, `gherkin.md`, `traceability.md`, `test-planning.md`,
-`ui-states.md`, `process-invariants.md`.
+`ui-states.md`, `process-invariants.md`, and — for what a revised design and
+its tasks must respect — `architecture.md` (storage, the clock and the network
+only through ports), `bdd-unit.md` and `bdd-e2e.md` (which tests jsdom can
+run and which need a real browser), `i18n.md`, `temporal.md`, `code-style.md`.
+A revision that closes a finding but breaks one of these is not a fix.
+
+Before a revision states a fact about the existing code — a file, script or
+helper exists, or "nothing does X today" — open it or grep for it.
 
 - A requirement you add or change keeps an id; a new requirement gets the next
   free id and a scenario and a task that names its automated test.
@@ -66,6 +73,11 @@ to: `.claude/rules/proposal-format.md`, `delta-specs.md`,
   tasks. A fix in one that leaves another contradicting it is not a fix.
 - `openspec validate --changes --strict --no-interactive` must pass when you
   stop — the stage re-runs it.
+
+**A retry re-checks everything.** If some findings already carry a status, a
+previous round was rejected and its feedback is in your prompt. Address every
+point it names, then re-check every resolution — fixed and rejected — against
+the current files, not only the ones the feedback names.
 
 ## Recording the resolution
 

@@ -55,12 +55,21 @@ verify:
       done;
       grep -qE '(^|[^A-Za-z])FR[0-9]+' "$proposal" || { echo "$proposal declares no FR<n> requirement id — every requirement needs one, see .claude/rules/traceability.md"; exit 1; };
       grep -qE '(^|[^A-Za-z])M[0-9]+' "$proposal" || { echo "$proposal declares no M<n> success metric id — see .claude/rules/traceability.md"; exit 1; }
-  # LLM judge grades the change against acceptance.md; read-only.
+  # The stage writes specifications only: nothing outside the one change directory.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      base=$(git merge-base HEAD origin/main)
+      outside=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -v "^$change/" | grep -v '^\.gnomish-task/' || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the specify stage writes only under $change/ - restore the files above with: git checkout $base -- <file>"; exit 1; }
+  # LLM judge grades the change against acceptance.md; read-only. Opus with room to open
+  # the ADRs, the rules and the code: a design that breaks the architecture or states
+  # stale facts about the code costs every later stage.
   - type: judge
     criteriaFile: stages/specify/acceptance.md
-    model: sonnet
+    model: opus
     settings:
-      maxTurns: 10
+      maxTurns: 20
       disallowedTools:
         - Bash
         - Agent

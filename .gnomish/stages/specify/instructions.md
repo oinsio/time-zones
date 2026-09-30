@@ -37,15 +37,41 @@ stage picks it up from the files.
 
 Read `CLAUDE.md` first — it is the project's own contract and it wins over both
 the skill and these instructions where they disagree. The rules it points at
-that matter here: `.claude/rules/proposal-format.md` (required proposal
-sections), `.claude/rules/traceability.md` (requirement ids),
-`.claude/rules/delta-specs.md` (ADDED/MODIFIED/REMOVED spec format),
-`.claude/rules/test-planning.md` (tasks must name automated tests, never manual
-checks), `.claude/rules/gherkin.md`, `.claude/rules/process-invariants.md`.
+that matter here:
+
+- the shape of the artifacts: `.claude/rules/proposal-format.md` (required
+  proposal sections), `.claude/rules/traceability.md` (requirement ids),
+  `.claude/rules/delta-specs.md` (ADDED/MODIFIED/REMOVED spec format),
+  `.claude/rules/design-decisions.md`, `.claude/rules/gherkin.md`,
+  `.claude/rules/process-invariants.md`;
+- what the design must respect: `.claude/rules/architecture.md` (which layer
+  may do what — storage, the clock and the network only through ports),
+  `.claude/rules/ui-states.md`, `.claude/rules/i18n.md`,
+  `.claude/rules/temporal.md`, `.claude/rules/code-style.md` (where constants
+  and storage keys live);
+- where each test belongs: `.claude/rules/test-planning.md` (tasks name
+  automated tests, never manual checks), `.claude/rules/bdd-unit.md` and
+  `.claude/rules/bdd-e2e.md` (what jsdom can test and what needs a real
+  browser — keyboard, layout, focus).
+
+**ADRs.** List `docs/adr/` fresh every time — new ADRs are added over time, so
+never assume a fixed set. Only an ADR whose status is `Accepted` binds; one
+marked `Superseded by ADR-XXXX` is replaced by that ADR, and `Proposed`,
+`Rejected` or `Deprecated` ones bind nothing. Read every ADR whose subject the
+change touches — the titles tell you which — and `docs/architecture/overview.md`
+and `docs/design/README.md` when the change has UI. A design that contradicts
+an `Accepted` ADR is wrong even if it validates.
 
 Before writing anything, read the existing specs under `openspec/specs/` and the
 most recent archived change under `openspec/changes/archive/` to match the house
 style.
+
+**Every claim about the existing code is checked, not remembered.** Before an
+artifact says a file, script, constant, test helper or behaviour exists — or
+that it does not, or that "nothing does X today" — open it or grep for it
+under `packages/client/` and `package.json`. That includes side effects of
+code already there (for example which modules already write to storage). A
+reviewer checks every such claim, and a stale one sends the change back.
 
 Rules this stage adds on top of the skill:
 
@@ -56,7 +82,8 @@ Rules this stage adds on top of the skill:
   name like `update` or `wip`. The next stage has to find it unambiguously.
 - Every requirement carries an id — `FR1`, `NFR-P1`, `NFR-A1`, `NFR-R1`, `UX1`,
   `M1`, `G1`, `NG1`, `Q1` — and success metrics are concrete numbers, never
-  "the feature works".
+  "the feature works". Define each id at the start of its own list item in
+  `proposal.md` — `- FR1: …` — since later stages find the ids that way.
 - Specs describe observable behaviour — inputs, outputs, error conditions — not
   implementation steps. The "how" belongs in `design.md`, and only for decisions
   local to this change; a global architectural decision is an ADR under

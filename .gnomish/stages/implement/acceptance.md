@@ -22,15 +22,9 @@
   locale.
 - UI the change adds handles its loading, error, empty and offline states, not
   only the happy path.
-- The contract from the previous stage is intact: `proposal.md`, `design.md`
-  and the files under `specs/` are unchanged by this stage — only `tasks.md`
-  checkboxes moved. Nothing under `openspec/specs/`,
-  `openspec/changes/archive/`, `.gnomish/`, `.github/` or `.claude/` changed,
-  and `package.json`/`pnpm-lock.yaml` changed only if `tasks.md` called for a
-  new dependency.
 - Code style matches the surrounding code.
 
-Judge by reading the source, the OpenSpec change and the diff only. Do not run
+Judge by reading the source and the OpenSpec change only. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do not run
 the build or the tests: lint, typecheck, unit tests, build, the bundle budget
 and the BDD E2E suite have already run as separate checks before you, and their
 green result is a precondition of your review, not part of it.

@@ -73,6 +73,11 @@ Fix with the same discipline as the implement stage:
   `index.ts`, files under 200 lines.
 - Fix only what the findings you accept require — no unrelated refactoring.
 
+**A retry re-checks everything.** If some findings already carry a status, a
+previous round was rejected and its feedback is in your prompt. Address every
+point it names, then re-check every resolution — fixed and rejected — against
+the current files, not only the ones the feedback names.
+
 ## Recording the resolution
 
 In `review-code.md`, for every finding, replace `- Status: open` with the outcome

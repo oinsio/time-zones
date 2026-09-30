@@ -10,7 +10,7 @@ against the change it describes.
   the task can follow: not a list of file names, not a restatement of the task
   title.
 - What it claims matches the branch: the behaviour it describes is the
-  behaviour the diff implements, and it does not promise work that is absent or
+  behaviour the code implements, and it does not promise work that is absent or
   omit a user-visible change that is present.
 - It names the requirement ids the change implements, and they exist in the
   archived change's `proposal.md`.
@@ -23,11 +23,10 @@ against the change it describes.
   `openspec/changes/archive/YYYY/MM/`, and that directory exists.
 - It references the task's issue with `Refs #<issue>`, not `Closes`/`Fixes` —
   this project closes its own issues.
-- This stage wrote nothing but `pr-body.md`: `packages/`, `openspec/`, `docs/`,
-  `package.json`, the lockfile, `.github/`, `.claude/` and `.gnomish/` are
-  untouched by it.
 
-Judge by reading `pr-body.md`, the branch diff and the archived change only. Do
+Judge by reading `pr-body.md`, the source and the archived change only. A
+check before you has already confirmed that this stage wrote and committed
+nothing else. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do
 not run the build, the tests or `gh`: the deterministic checks have already run
 before you, and their green result is a precondition of your review, not part
 of it.
