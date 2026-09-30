@@ -13,7 +13,8 @@ describe("getContractViewportWidth", () => {
       expectedWidth: 1280,
     },
     {
-      description: "one less than the next view's minimum for the narrower view",
+      description:
+        "one less than the next view's minimum for the narrower view",
       views: [buildView("cards", 0), buildView("grid", 768)],
       viewId: "cards",
       expectedWidth: 767,

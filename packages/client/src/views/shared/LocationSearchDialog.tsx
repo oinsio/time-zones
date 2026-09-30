@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { type KeyboardEvent, useId, useState } from "react";
+import { type KeyboardEvent, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -45,6 +45,7 @@ export function LocationSearchDialog({
 }: LocationSearchDialogProps) {
   const { t } = useTranslation();
   const listboxId = useId();
+  const queryInputRef = useRef<HTMLInputElement>(null);
   const optionIdPrefix = `${listboxId}-option-`;
   const [activeIndex, setActiveIndex] = useState(FIRST_OPTION_INDEX);
   const hasQuery = query.trim() !== "";
@@ -69,6 +70,10 @@ export function LocationSearchDialog({
     <Dialog open={isOpen} onOpenChange={(isNowOpen) => !isNowOpen && onClose()}>
       <DialogContent
         aria-describedby={undefined}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          queryInputRef.current?.focus();
+        }}
         onCloseAutoFocus={onCloseAutoFocus}
       >
         <div className="flex items-center justify-between gap-3">
@@ -83,6 +88,7 @@ export function LocationSearchDialog({
           </DialogClose>
         </div>
         <input
+          ref={queryInputRef}
           type="text"
           role="combobox"
           aria-label={t("locations.searchLabel")}

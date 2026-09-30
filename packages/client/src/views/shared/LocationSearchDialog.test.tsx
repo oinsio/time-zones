@@ -216,6 +216,12 @@ describe("LocationSearchDialog", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  // NFR-A2: the query field has focus when the search opens.
+  it("should focus the query field when it opens", () => {
+    renderDialog();
+    expect(screen.getByRole("combobox")).toHaveFocus();
+  });
+
   it("should keep the typed text in the field", () => {
     function Harness() {
       const [query, setQuery] = useState("");

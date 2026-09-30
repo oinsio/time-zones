@@ -3,6 +3,8 @@ import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import { test as contractTest } from "../../view_contract/steps/view_contract_e2e.fixtures";
 
 const SEARCH_DATA_URL_PATTERN = /\/city-search-[^/]+\.json$/;
+const BLANK_PAGE_URL = "about:blank";
+const APP_ROOT_URL = ".";
 
 export type StoredLocation = {
   timeZoneId: string;
@@ -18,8 +20,35 @@ export type StoredLocation = {
  */
 export class LocationsWorld {
   private readonly heldRoutes: Route[] = [];
+  /** URLs of the search data the page itself requested, from its first navigation. */
+  readonly searchDataRequestUrls: string[] = [];
+  otherTab: Page | undefined;
 
-  constructor(readonly page: Page) {}
+  constructor(readonly page: Page) {
+    page.on("request", (pageRequest) => {
+      if (SEARCH_DATA_URL_PATTERN.test(new URL(pageRequest.url()).pathname)) {
+        this.searchDataRequestUrls.push(pageRequest.url());
+      }
+    });
+  }
+
+  /** Reloads the app when it is open, so a seed set now is read by it. */
+  async reloadIfOpen() {
+    if (this.page.url() !== BLANK_PAGE_URL) await this.page.reload();
+  }
+
+  /** Opens the app in a second page of the same browser context. */
+  /** The second page; fails when the scenario never opened one. */
+  requireOtherTab(): Page {
+    if (!this.otherTab) throw new Error("The app is not open in a second tab");
+    return this.otherTab;
+  }
+
+  async openOtherTab(): Promise<Page> {
+    this.otherTab = await this.page.context().newPage();
+    await this.otherTab.goto(APP_ROOT_URL);
+    return this.otherTab;
+  }
 
   /** Seeds a version-1 document once, before the app reads it. */
   async seedList(locations: StoredLocation[]) {

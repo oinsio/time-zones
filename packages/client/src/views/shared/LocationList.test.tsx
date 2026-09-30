@@ -62,7 +62,9 @@ describe("LocationList", () => {
     const { rerender } = render(
       <LocationList rows={singleRow} onRemove={vi.fn()} />,
     );
-    await userEvent.click(screen.getByRole("button", { name: "Remove Moscow" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remove Moscow" }),
+    );
     rerender(<LocationList rows={[]} onRemove={vi.fn()} />);
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);
   });
