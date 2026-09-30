@@ -11,21 +11,25 @@ The facts you need are in the working copy — read them, do not guess:
   value for `--repo`. Do not rely on `origin`;
 - the task's issue number: `taskId` in `.gnomish-task/task.json`, e.g.
   `github:owner/repo#29` → issue `29`. Read that file, never write to it;
-- what actually changed: `git diff origin/main...HEAD --stat`, and the
-  archived change under `openspec/changes/archive/YYYY/MM/` for the reasoning
-  behind it — its `proposal.md` holds the requirement ids (`FR1`, `UX1`, …) and
-  success metrics. Read the specific files you need; do not dump whole diffs.
+- what actually changed: `gh api repos/<repo>/compare/main...<branch> --jq '.files[].filename'`
+  lists the changed files — the checkout may have no `origin` remote and no
+  `main`, so `git diff origin/main...HEAD` can fail. The archived change under
+  `openspec/changes/archive/YYYY/MM/` holds the reasoning behind it: its
+  `proposal.md` has the requirement ids (`FR1`, `UX1`, …) and success metrics.
+  Read the specific files you need; do not dump whole diffs.
 
 Steps:
 
-1. Check the branch is on the remote: `git ls-remote --heads origin <branch>`.
-   The factory pushes it after every attempt, so it is normally there. If it is
-   not, run `git push origin HEAD` — that publishes existing commits only, it
-   creates none.
+1. The factory pushes the branch after every attempt, so it is on GitHub
+   already. Do not push. If `gh pr create` reports that the head branch does
+   not exist, stop and say so in your closing summary — that is an operator
+   problem.
 2. Write the pull request body to `pr-body.md` in the repository root. That
-   file is git-ignored: it is the copy the reviewer of this stage reads, and it
-   must stay identical to what you publish. Write it in English, for a human
-   who has not seen the task:
+   file is git-ignored: it is the copy this stage's checks read, and it must
+   stay identical to what you publish. The checks verify that the archive path,
+   the requirement ids and the test files it names exist, and that every
+   rejected review finding is named — so name them exactly. Write it in
+   English, for a human who has not seen the task:
    - one paragraph on what changed and why;
    - the user-visible behaviour before and after (a pure refactor or tooling
      change says there is none);
@@ -58,8 +62,8 @@ Rules:
   `packages/`, `openspec/`, `docs/`, `package.json`, the lockfile, `.github/`,
   `.claude/`, `.gnomish/`, `.gnomish-task/` — is finished work; leave it
   exactly as you found it.
-- Do not commit. Do not merge the pull request, do not close the issue, do not
-  push anything but the existing branch tip.
+- Do not commit, do not push. Do not merge the pull request, do not close the
+  issue.
 - Keep the `gh` command lines simple and literal: substitute the branch, repo
   and issue number as plain text you have already read, and pass the body with
   `--body-file`. Command substitutions inside the arguments and here-documents
