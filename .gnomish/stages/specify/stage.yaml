@@ -14,9 +14,11 @@ executor:
   # Only these four keys are accepted.
   settings:
     # Agent turns per round: the required reading (ADRs, rules, overview) comes first.
-    maxTurns: 60
+    # 60 ran out on task #18 (a whole-feature change) before the round could finish.
+    maxTurns: 120
     # Round is killed after this; counts as infra failure, not an attempt.
-    roundTimeout: 1200s
+    # 60 turns took about 9 minutes on task #18; doubled along with the turns.
+    roundTimeout: 2400s
     # Cannot widen what .claude/settings.json denies.
     allowedTools:
       - Read

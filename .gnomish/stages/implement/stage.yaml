@@ -16,11 +16,12 @@ executor:
   model: sonnet
   # Only these four keys are accepted.
   settings:
-    # Agent turns per round. TDD, hooks and scoped mutation runs are turn-hungry.
-    maxTurns: 80
+    # Agent turns per round. TDD, hooks and scoped mutation runs are turn-hungry; 80 ran out
+    # twice on task #18 with tasks still open, so a whole-feature change needed two rounds.
+    maxTurns: 160
     # Round is killed after this; counts as infra failure, not an attempt.
-    # pnpm install + the test hook after every edit + scoped Stryker runs.
-    roundTimeout: 3600s
+    # pnpm install + the test hook after every edit + scoped Stryker runs; doubled with the turns.
+    roundTimeout: 7200s
     # Cannot widen what .claude/settings.json denies.
     allowedTools:
       - Read
@@ -93,8 +94,9 @@ verify:
     settings:
       # Room to check every criterion, not just the first few findings. The judge has only
       # Read/Grep/Glob (the factory hard-wires it read-only), so a whole-feature change costs a
-      # turn per file read; 30 ran out on a 187-file change before any verdict.
-      maxTurns: 80
+      # turn per file read; 30 ran out on a 187-file change before any verdict, and a
+      # whole-feature review wants slack beyond the 80 that then sufficed.
+      maxTurns: 120
       disallowedTools:
         - Bash
         - Agent
@@ -109,3 +111,7 @@ verify:
     votes: 1
 # auto = go to next stage; manual = wait for a human.
 advancement: auto
+# A whole-feature change takes rounds to finish and more to settle the judge's findings, and a
+# factory-side failure can burn an attempt too: on task #18 the default of 2 ran out three times.
+autonomy:
+  attemptLimit: 6
