@@ -20,7 +20,6 @@ export function canonicalizeTimeZoneId(input: string): string | undefined {
   } catch {
     return undefined;
   }
-  return Object.hasOwn(timeZoneAliases, normalizedId)
-    ? timeZoneAliases[normalizedId]
-    : normalizedId;
+  const canonicalId: unknown = timeZoneAliases[normalizedId];
+  return typeof canonicalId === "string" ? canonicalId : normalizedId;
 }
