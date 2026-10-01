@@ -56,6 +56,7 @@ export async function readListOrder(page: Page): Promise<string[]> {
 }
 
 export async function centreOf(locator: Locator): Promise<Point> {
+  await locator.waitFor();
   const box = await locator.boundingBox();
   if (!box) throw new Error("The element has no box");
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };

@@ -107,6 +107,7 @@ When(
   "the user starts dragging {string} with the mouse to the right and down",
   async ({ locationsWorld }, cityName: string) => {
     const { page } = locationsWorld;
+    await expect(moveHandle(page, cityName)).toBeVisible();
     const neighbour = (await readListOrder(page)).find(
       (name) => name !== cityName,
     );
@@ -130,6 +131,8 @@ When(
     await expect(
       page.locator(LIVE_REGION, { hasText: "picked up" }),
     ).toHaveCount(1);
+    // The keyboard sensor starts listening for arrow keys one task later.
+    await waitForTwoAnimationFrames(page);
   },
 );
 
