@@ -106,6 +106,7 @@ Feature: Locations in a real browser
     When the user opens the search
     Then the search is a centered dialog
 
+  @open-location-search-with-slash-shortcut @NFR-R1 @M5
   @add-locations-via-search @NFR-R2
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the locations screen uses the <theme> theme
