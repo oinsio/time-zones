@@ -1,0 +1,5 @@
+# Gnomish Factory — локальные файлы конкретного оператора
+gnomish.jar
+gnomish.bak-*.jar
+gnomish.local.env
+logs/
