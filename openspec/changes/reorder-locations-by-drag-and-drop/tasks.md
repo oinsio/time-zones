@@ -4,9 +4,9 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
 
 ## 1. Dependencies, constants and strings (no TDD: setup, constants, strings)
 
-- [ ] 1.1 Add `@dnd-kit/core` `^6.3.1`, `@dnd-kit/sortable` `^10.0.0` and `@dnd-kit/utilities` `^3.2.2` to `dependencies` of `packages/client/package.json` with `pnpm --filter @time-zones/client add` (design D4, FR1, FR7); verify `pnpm --filter @time-zones/client typecheck`
-- [ ] 1.2 Add `constants/reorder.ts` with `REORDER_TRANSITION_DURATION_MS = 200`, `REORDER_TRANSITION_EASING = "ease"`, `REORDER_POINTER_ACTIVATION_DISTANCE_PX = 4`, `MIN_LOCATIONS_TO_REORDER = 2`, `REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)"` and export them from `constants/index.ts` (design D6; FR1, NFR-A4, UX1, UX3); verify `pnpm --filter @time-zones/client typecheck`
-- [ ] 1.3 Add the 7 keys of design D6 (`locations.moveLocation`, `reorderRoleDescription`, `reorderInstructions`, `reorderPickedUp`, `reorderMovedOver`, `reorderDropped`, `reorderCancelled`) with the given texts to both `locales/en.json` and `locales/ru.json` (FR8); verify `npx vitest run src/locales/locales.test.ts` (its key-parity test fails if one file lacks a key)
+- [x] 1.1 Add `@dnd-kit/core` `^6.3.1`, `@dnd-kit/sortable` `^10.0.0` and `@dnd-kit/utilities` `^3.2.2` to `dependencies` of `packages/client/package.json` with `pnpm --filter @time-zones/client add` (design D4, FR1, FR7); verify `pnpm --filter @time-zones/client typecheck`
+- [x] 1.2 Add `constants/reorder.ts` with `REORDER_TRANSITION_DURATION_MS = 200`, `REORDER_TRANSITION_EASING = "ease"`, `REORDER_POINTER_ACTIVATION_DISTANCE_PX = 4`, `MIN_LOCATIONS_TO_REORDER = 2`, `REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)"` and export them from `constants/index.ts` (design D6; FR1, NFR-A4, UX1, UX3); verify `pnpm --filter @time-zones/client typecheck`
+- [x] 1.3 Add the 7 keys of design D6 (`locations.moveLocation`, `reorderRoleDescription`, `reorderInstructions`, `reorderPickedUp`, `reorderMovedOver`, `reorderDropped`, `reorderCancelled`) with the given texts to both `locales/en.json` and `locales/ru.json` (FR8); verify `npx vitest run src/locales/locales.test.ts` (its key-parity test fails if one file lacks a key)
 
 ## 2. Model (TDD)
 
