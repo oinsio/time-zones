@@ -97,7 +97,8 @@
 - Impact: Task 5.2 still passes, because Vitest does not type-check. But the type check in 7.1 (`build`) and 7.4 (`build`, and also `typecheck` if run) fails with a missing `onMove` prop on a file that no task names. The implementer finds the break only at the end.
 - Fix: In tasks.md 4.4, add: "In `test/features/locations/steps/locations_utc_offset_unit.steps.tsx` pass `onMove={latestLocations.moveLocation}` to `LocationList`; verify `pnpm --filter @time-zones/client typecheck`, then `npx vitest run src/test/features/locations/steps/locations_utc_offset_unit.steps.tsx`".
 - Fix risk: none — `moveLocation` exists on `useLocations()` after task 3.1, which comes before 4.4.
-- Status: open
+- Status: fixed
+- Resolution: confirmed `locations_utc_offset_unit.steps.tsx:51-54` renders `LocationList` without `onMove` and is in `tsconfig.test.json`; tasks.md 4.4 now passes `onMove={latestLocations.moveLocation}` there and verifies with `typecheck` and a vitest run of that steps file.
 
 ### R2 — WARNING — Announcements are undefined when the card is over no position
 - Location: `openspec/changes/reorder-locations-by-drag-and-drop/design.md:56`
