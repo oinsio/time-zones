@@ -1,0 +1,99 @@
+# Цель стадии, которую видит гном.
+purpose: turn the task into one complete, validated OpenSpec change under openspec/changes/
+# Работает с checkout репозитория для задачи.
+inputs:
+  - kind: source
+# Название того, что производит стадия.
+outputs:
+  - id: openspec-change
+# Кто выполняет работу: агент Claude Code CLI. Opus: спецификация — это контракт, на котором
+# строятся все следующие стадии, а sonnet пропускал обязательное чтение и оставлял пробелы судье.
+executor:
+  type: agent-cli
+  model: opus
+  # Допускаются только эти четыре ключа.
+  settings:
+    # Ходов агента за раунд: сначала идёт обязательное чтение (ADR, правила, обзор).
+    # 60 ходов закончились на задаче #18 (изменение на целую фичу) раньше, чем раунд успел завершиться.
+    maxTurns: 120
+    # По истечении раунд принудительно завершается; считается сбоем инфраструктуры, а не попыткой.
+    # 60 ходов на задаче #18 заняли около 9 минут; увеличено вдвое вместе с ходами.
+    roundTimeout: 2400s
+    # Не может расширить то, что запрещает .claude/settings.json.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+      - Skill
+    # Без субагентов, без веба, без планирования.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Промпт для гнома.
+instructions: stages/specify/instructions.md
+# Выполняются по порядку после каждого раунда; сбой возвращается как обратная связь и сжигает попытку.
+verify:
+  # Ровно одно активное изменение.
+  - type: command
+    command: >-
+      count=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive | wc -l | tr -d ' ');
+      [ "$count" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found $count"; exit 1; }
+  # Собственная строгая валидация OpenSpec.
+  - type: command
+    command: openspec validate --changes --strict --no-interactive
+  # В proposal.md есть обязательные разделы и id FR/M.
+  - type: command
+    command: >-
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive);
+      proposal="$change/proposal.md";
+      for section in '## Why' '## What Changes' '## Goals' '## Non-Goals' '## Requirements' '## Success Metrics'; do
+        grep -q "^$section" "$proposal" || { echo "$proposal has no '$section' section — see .claude/rules/proposal-format.md"; exit 1; };
+      done;
+      grep -qE '(^|[^A-Za-z])FR[0-9]+' "$proposal" || { echo "$proposal declares no FR<n> requirement id — every requirement needs one, see .claude/rules/traceability.md"; exit 1; };
+      grep -qE '(^|[^A-Za-z])M[0-9]+' "$proposal" || { echo "$proposal declares no M<n> success metric id — see .claude/rules/traceability.md"; exit 1; }
+  # Стадия пишет только спецификации: ничего за пределами единственного каталога изменения.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      base=$(git merge-base HEAD origin/main)
+      outside=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -v "^$change/" | grep -v '^\.gnomish-task/' || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the specify stage writes only under $change/ - restore the files above with: git checkout $base -- <file>"; exit 1; }
+  # LLM-судья оценивает изменение по acceptance.md; только чтение. Opus с запасом, чтобы открыть
+  # ADR, правила и код: дизайн, который ломает архитектуру или утверждает устаревшие
+  # факты о коде, обходится дорого каждой следующей стадии.
+  - type: judge
+    criteriaFile: stages/specify/acceptance.md
+    model: opus
+    settings:
+      # Запас, чтобы проверить каждый критерий, а не только первые несколько находок. Судья только читает
+      # (только Read/Grep/Glob, жёстко зашито в фабрику) и платит ходом за каждый открытый файл; судья
+      # стадии implement исчерпал 30 ходов на изменении из 187 файлов и эскалировал без вердикта.
+      maxTurns: 60
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Запусков судьи; число должно быть нечётным, побеждает большинство.
+    votes: 1
+# auto = перейти к следующей стадии; manual = ждать человека.
+# manual паркует задачу как gnomish:needs-human (контрольная точка). Чтобы продолжить:
+#   tracker: верните issue в gnomish:ready (отвечать не нужно);
+#   local: gnomish run --dir=<path-to-time-zones-clone> --resume=<task>, затем подтвердите.
+advancement: auto
+# Большому изменению нужно больше раундов: каждый вердикт называет реальные дефекты, которых не было
+# в предыдущем, и на задаче #16 гном закрыл все перечисленные находки, но всё равно исчерпал попытки.
+autonomy:
+  attemptLimit: 4
