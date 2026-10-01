@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { localStorageLocationRepository } from "@/adapters";
 import { LOCATIONS_WRITE_DEBOUNCE_MS } from "@/constants";
+import { type Clock, systemClock } from "@/lib/temporal";
 import { createStore, LocationCommandType, reduceLocations } from "@/model";
 import {
   type LocationRepository,
@@ -22,6 +23,7 @@ type LocationsProviderProps = {
   children?: ReactNode;
   repository?: LocationRepository;
   writeScheduler?: WriteScheduler;
+  clock?: Clock;
 };
 
 const statusOf = (result: LocationsLoadResult): LocationsStatus =>
@@ -46,11 +48,14 @@ function createLocationsStore(initialResult: LocationsLoadResult) {
  * the user's own changes (debounced, flushed on `pagehide`), applies changes
  * made by other tabs, and reports a failed save.
  * Implements FR11, FR12, FR13, FR14 of add-locations-via-search (D3, D5).
+ * Hands the clock to `useLocations` for the UTC offsets (FR4 of
+ * show-utc-offset-on-location-rows, D4).
  */
 export function LocationsProvider({
   children,
   repository = localStorageLocationRepository,
   writeScheduler = timeoutWriteScheduler,
+  clock = systemClock,
 }: LocationsProviderProps) {
   const [initialResult] = useState(() => repository.load());
   const [store] = useState(() => createLocationsStore(initialResult));
@@ -125,13 +130,14 @@ export function LocationsProvider({
   const value = useMemo<LocationsContextValue>(
     () => ({
       store,
+      clock,
       loadStatus,
       hasSaveFailed,
       addLocation: actions.addLocation,
       removeLocation: actions.removeLocation,
       resetLocations: actions.resetLocations,
     }),
-    [store, loadStatus, hasSaveFailed, actions],
+    [store, clock, loadStatus, hasSaveFailed, actions],
   );
 
   return (

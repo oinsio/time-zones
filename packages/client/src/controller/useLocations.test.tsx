@@ -1,8 +1,11 @@
 // Verifies FR11–FR14 of add-locations-via-search (D3, D5).
+// Verifies FR2, FR4 of show-utc-offset-on-location-rows (D4).
 import { act, renderHook } from "@testing-library/react";
 import i18n from "i18next";
 import { createInMemoryLocationRepository } from "@/adapters";
+import { type Clock, fakeClock } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
+import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { moscow, renderLocations } from "@/test/renderLocations";
 import { LocationsStatus, useLocations } from "./useLocations";
 
@@ -48,9 +51,55 @@ describe("useLocations", () => {
           locations: [moscow],
         },
       });
-      const { result } = renderLocations(repository);
+      const { result } = renderLocations(
+        repository,
+        immediateWriteScheduler,
+        fakeClock("2026-07-15T12:00:00Z"),
+      );
       expect(result.current.rows).toEqual([
-        { id: moscow.id, cityLabel: "Moscow", countryName: "Россия" },
+        {
+          id: moscow.id,
+          cityLabel: "Moscow",
+          countryName: "Россия",
+          utcOffsetLabel: "UTC+3",
+        },
+      ]);
+    });
+
+    it("should read the instant again when the list changes", () => {
+      const january = fakeClock("2026-01-15T12:00:00Z");
+      const july = fakeClock("2026-07-15T12:00:00Z");
+      let currentClock = january;
+      const switchableClock: Clock = {
+        instant: () => currentClock.instant(),
+        plainDateISO: () => currentClock.plainDateISO(),
+        timeZoneId: () => currentClock.timeZoneId(),
+      };
+      const newYork = {
+        timeZoneId: "America/New_York",
+        label: "New York",
+        countryCode: "US",
+      };
+      const { result } = renderLocations(
+        createInMemoryLocationRepository(),
+        immediateWriteScheduler,
+        switchableClock,
+      );
+      act(() => {
+        result.current.addLocation(newYork);
+      });
+      expect(result.current.rows[0]?.utcOffsetLabel).toBe("UTC\u22125");
+      currentClock = july;
+      act(() => {
+        result.current.addLocation({
+          timeZoneId: "Asia/Kolkata",
+          label: "Kolkata",
+          countryCode: "IN",
+        });
+      });
+      expect(result.current.rows.map((row) => row.utcOffsetLabel)).toEqual([
+        "UTC\u22124",
+        "UTC+5:30",
       ]);
     });
 

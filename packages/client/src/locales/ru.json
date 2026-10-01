@@ -27,6 +27,7 @@
     "cardsEmptyState": "Локации пока не добавлены."
   },
   "locations": {
+    "utcOffsetPrefix": "UTC",
     "addLocation": "Добавить место",
     "removeLocation": "Удалить: {{city}}",
     "searchTitle": "Добавить место",
