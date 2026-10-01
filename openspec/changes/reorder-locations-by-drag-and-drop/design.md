@@ -23,7 +23,7 @@ Binding rules: ADR-0002 and `.claude/rules/architecture.md` — model is "pure T
 
 ### D1. Model: `MOVE_LOCATION` command
 
-`LocationCommandType.MOVE_LOCATION` with `{ type, id: string, targetIndex: number }`; `targetIndex` is the 0-based index in the list after the move, i.e. the spec's position − 1. New `LocationErrorCode.LOCATION_POSITION_OUT_OF_RANGE`. The list logic lives in a new pure `model/moveLocation.ts` (`moveLocationInList(locations, id, targetIndex): LocationsReduceResult`-style result) so `locations.ts` stays small; `reduceLocations` delegates to it.
+`LocationCommandType.MOVE_LOCATION` with `{ type, id: string, targetIndex: number }`; `targetIndex` is the 0-based index in the list after the move, i.e. the spec's position − 1. New `LocationErrorCode.LOCATION_POSITION_OUT_OF_RANGE`. The list logic lives in a new pure `model/moveLocation.ts` (`moveLocationInList(state: LocationsState, id: string, targetIndex: number): LocationsReduceResult`, taking the whole state so a same-position move can return that very object) so `locations.ts` stays small; `reduceLocations` delegates to it.
 
 Rules (FR2): unknown `id` → `LOCATION_NOT_FOUND`; `targetIndex` not an integer, `< 0` or `> locations.length - 1` → `LOCATION_POSITION_OUT_OF_RANGE`; `targetIndex` equal to the current index → `{ ok: true, state }` with the **same** state object (the store does not notify); otherwise remove and insert at `targetIndex`, returning a new array. Ids, zones, labels and country codes are copied unchanged — no offset is stored. Exported from `model/index.ts`.
 

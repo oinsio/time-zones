@@ -117,7 +117,8 @@
 - Impact: An implementer who follows the signature returns a new `{ locations }` wrapper. Then the `toBe` test cannot be written against the function. Worse, if the reducer wraps the result, the store sees a changed snapshot and D2 schedules a write, so FR3 / M5 ("0 storage writes after a move to the card's own position") fails.
 - Fix: In design.md D1, change the signature to `moveLocationInList(state: LocationsState, id: string, targetIndex: number): LocationsReduceResult`. In task 2.1, build the input as a `LocationsState`.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: design.md D1 now declares `moveLocationInList(state: LocationsState, id: string, targetIndex: number): LocationsReduceResult` (`LocationsState` and `LocationsReduceResult` exist in `model/locations.ts:17,44`); tasks.md 2.1 builds a `LocationsState` and passes it, so the `toBe` same-object test is writable.
 
 ### R4 — SUGGESTION — Two E2E scenarios use a plural handle step that is never defined
 - Location: `openspec/changes/reorder-locations-by-drag-and-drop/tasks.md:57`
