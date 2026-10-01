@@ -1,0 +1,131 @@
+# Цель стадии, которую видит гном.
+purpose: review this task's OpenSpec change for freshness, completeness and consistency before any code is written, and record every finding worth acting on in the change's review-specs.md, changing no artifact
+# Чекаут репозитория плюс change, созданный стадией specify.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+# Имя того, что производит стадия.
+outputs:
+  - id: spec-review-report
+# Кто выполняет работу: агент Claude Code CLI. Opus в чистом контексте — независимый
+# ревьюер change, написанного стадией specify.
+executor:
+  type: agent-cli
+  model: opus
+  # Допускаются только эти четыре ключа.
+  settings:
+    # Ходов агента за раунд. Каждое утверждение о кодовой базе проверяется через grep/read.
+    maxTurns: 60
+    # По истечении раунд прерывается; считается сбоем инфраструктуры, а не попыткой.
+    roundTimeout: 1200s
+    # Не может расширить то, что запрещает .claude/settings.json. Bash нужен для git, grep и
+    # OpenSpec CLI; проверка области изменений ниже отклоняет любую правку вне review-specs.md.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+    # Без субагентов, без веба, без планирования.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Промпт для гнома.
+instructions: stages/review-specs/instructions.md
+# Выполняются по порядку после каждого раунда (sh -c, POSIX); сбой возвращается агенту и сжигает попытку.
+verify:
+  # Ровно один активный change, и в нём лежит review-specs.md с обязательными разделами и
+  # корректно оформленным списком находок, который стадия fix-specs сможет закрыть пункт за пунктом.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      [ "$(printf '%s\n' "$change" | grep -c .)" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found: $change"; exit 1; }
+      review="$change/review-specs.md"
+      [ -f "$review" ] || { echo "$review is missing - write the review report there, see stages/review-specs/instructions.md"; exit 1; }
+      for section in '## Summary' '## Freshness' '## Coverage' '## Consistency' '## Findings' '## Verdict'; do
+        grep -q "^$section" "$review" || { echo "$review has no '$section' section"; exit 1; }
+      done
+      bad=$(grep -n '^### ' "$review" | grep -vE '^[0-9]+:### R[0-9]+ — (CRITICAL|WARNING|SUGGESTION) — .+' || true)
+      [ -z "$bad" ] || { echo "$bad"; echo "level-3 headings are findings only and read '### R<n> — CRITICAL|WARNING|SUGGESTION — <title>'"; exit 1; }
+      duplicates=$(grep -oE '^### R[0-9]+ ' "$review" | sort | uniq -d)
+      [ -z "$duplicates" ] || { echo "$duplicates"; echo "finding ids must be unique"; exit 1; }
+      findings=$(grep -cE '^### R[0-9]+ — ' "$review" || true)
+      for field in Location Rule Problem Impact Fix 'Fix risk' Status; do
+        count=$(grep -cE "^- $field: " "$review" || true)
+        [ "$count" = "$findings" ] || { echo "$review has $findings findings but $count '- $field:' lines - every finding carries every field exactly once"; exit 1; }
+      done
+      open=$(grep -cE '^- Status: open$' "$review" || true)
+      [ "$open" = "$findings" ] || { echo "every finding must stay at '- Status: open' - only the fix-specs stage sets a status"; exit 1; }
+  # Числа в Summary вычисляются, а не оцениваются: они должны совпадать со строками ❌ в Freshness,
+  # строками Coverage, пунктами Consistency и заголовками находок. Таблица Coverage
+  # перечисляет каждый id, определённый в proposal.md (строки '- <ID>:'), ровно один раз.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-specs.md"
+      section() { awk -v heading="## $1" 'index($0, heading) == 1 { inside = 1; next } /^## / { inside = 0 } inside' "$review"; }
+      summary_value() { section Summary | awk -F'|' -v label="$1" '{ cell = $2; gsub(/^[ \t]+|[ \t]+$/, "", cell); if (cell == label) { value = $3; gsub(/^[ \t]+|[ \t]+$/, "", value); print value; exit } }'; }
+      expect() {
+        actual=$(summary_value "$1")
+        [ "$actual" = "$2" ] || { echo "Summary row '| $1 | ... |' reads '$actual' but the report gives $2 - recount from the sections, see stages/review-specs/instructions.md"; exit 1; }
+      }
+      coverage_rows=$(section Coverage | grep -E '^\| *(FR|NFR-[A-Z]+|UX|NG|M|G|Q)[0-9]+ *\|' || true)
+      coverage_ids=$(printf '%s\n' "$coverage_rows" | awk -F'|' 'NF > 1 { id = $2; gsub(/[ \t]/, "", id); print id }' | sort)
+      duplicates=$(printf '%s\n' "$coverage_ids" | uniq -d)
+      [ -z "$duplicates" ] || { echo "$duplicates"; echo "each requirement id appears in the Coverage table exactly once"; exit 1; }
+      defined_ids=$(grep -oE '^- (FR|NFR-[A-Z]+|UX|NG|M|G|Q)[0-9]+:' "$change/proposal.md" | sed -E 's/^- //; s/:$//' | sort -u)
+      missing=$(for id in $defined_ids; do printf '%s\n' "$coverage_ids" | grep -qxF "$id" || echo "$id"; done)
+      [ -z "$missing" ] || { echo "$missing"; echo "these ids are defined in proposal.md but have no Coverage row - list every id, with n/a where a column does not apply"; exit 1; }
+      total=$(printf '%s\n' "$coverage_rows" | grep -c . || true)
+      covered=$(printf '%s\n' "$coverage_rows" | grep -v '❌' | grep -c . || true)
+      expect 'Stale claims' "$(section Freshness | grep -cE '^- ❌' || true)"
+      expect 'Requirements fully covered' "$covered/$total"
+      expect 'Contradictions' "$(section Consistency | grep -cE '^- ' || true)"
+      for severity in CRITICAL WARNING SUGGESTION; do
+        expect "$severity" "$(grep -cE "^### R[0-9]+ — $severity — " "$review" || true)"
+      done
+  # Ревьюер не меняет ничего, кроме review-specs.md. Базовая точка стадии — родитель
+  # коммита, который впервые добавил review-specs.md (его создаёт только эта стадия); .gnomish-task/
+  # — собственный служебный учёт фабрики.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-specs.md"
+      added=$(git log --diff-filter=A --format=%H -- "$review" | tail -1)
+      base=HEAD
+      [ -z "$added" ] || base="$added^"
+      touched=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -vxF "$review" | grep -v '^\.gnomish-task/' || true)
+      [ -z "$touched" ] || { echo "$touched"; echo "the review-specs stage writes nothing but $review - restore the files above with: git checkout $base -- <file>"; exit 1; }
+  # LLM-судья проверяет каждую находку на соответствие acceptance.md; только чтение.
+  - type: judge
+    criteriaFile: stages/review-specs/acceptance.md
+    model: opus
+    settings:
+      # Запас, чтобы проверить каждый критерий, а не только первые несколько находок. Судья только читает
+      # (Read/Grep/Glob, жёстко зашито фабрикой) и тратит ход на каждый открытый файл; судья
+      # стадии implement исчерпал 30 ходов на change из 187 файлов и эскалировал без вердикта.
+      maxTurns: 60
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Число запусков судьи; должно быть нечётным, побеждает большинство.
+    votes: 1
+# auto = перейти к следующей стадии; manual = ждать человека.
+advancement: auto
+# Судья проверяет весь отчёт придирчиво, поэтому даже добротному ревью может понадобиться
+# второй раунд исправлений; одна дополнительная попытка перед эскалацией к человеку.
+autonomy:
+  attemptLimit: 3
