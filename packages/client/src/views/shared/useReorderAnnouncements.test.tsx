@@ -35,6 +35,20 @@ describe("useReorderAnnouncements", () => {
     ).toBe("Moscow picked up at position 1 of 3");
   });
 
+  it("should name the picked-up row, not the first one", () => {
+    const { announcements } = renderAnnouncements();
+    expect(
+      announcements?.onDragStart?.({ active: eventOf("New York").active }),
+    ).toBe("New York picked up at position 3 of 3");
+  });
+
+  it("should not throw for a row that is not in the list", () => {
+    const { announcements } = renderAnnouncements();
+    expect(() =>
+      announcements?.onDragStart?.({ active: eventOf("Nowhere").active }),
+    ).not.toThrow();
+  });
+
   it("should announce the position of the row it is over", () => {
     const { announcements } = renderAnnouncements();
     expect(announcements?.onDragOver?.(eventOf("Moscow", "New York"))).toBe(

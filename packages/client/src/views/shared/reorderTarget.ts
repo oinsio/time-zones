@@ -8,7 +8,7 @@ export function getMoveTargetIndex(
   activeId: string,
   overId: string | undefined,
 ): number | undefined {
-  if (overId === undefined || overId === activeId) return undefined;
+  if (overId === activeId) return undefined;
   const targetIndex = rows.findIndex((row) => row.id === overId);
   return targetIndex === -1 ? undefined : targetIndex;
 }
