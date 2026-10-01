@@ -1,0 +1,115 @@
+# Цель стадии, которую видит гном.
+purpose: triage every finding in the change's review-specs.md, revise the change's artifacts for the ones worth fixing, reject the rest with evidence, and leave the change valid
+# Рабочая копия, а также изменение и его ревью.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+  - kind: internal
+    producerOutputId: spec-review-report
+# Название того, что производит стадия.
+outputs:
+  - id: spec-review-resolution
+# Кто выполняет работу: агент Claude Code CLI. Opus, как и в specify: стадия переписывает контракт,
+# на котором строятся все последующие стадии, и должна взвешивать замечания ревьюера на opus на равных.
+executor:
+  type: agent-cli
+  model: opus
+  # Допускаются только эти четыре ключа.
+  settings:
+    # Ходов агента на раунд: сначала идёт обязательное чтение (ADR, правила).
+    maxTurns: 60
+    # По истечении раунд прерывается; это считается сбоем инфраструктуры, а не попыткой.
+    roundTimeout: 1200s
+    # Не может расширить то, что запрещает .claude/settings.json.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+      - Skill
+    # Без субагентов, без веба, без планирования.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Промпт для гнома.
+instructions: stages/fix-specs/instructions.md
+# Выполняются по порядку после каждого раунда (sh -c, POSIX); провал возвращается агенту и сжигает попытку.
+verify:
+  # Ровно одно активное изменение; у каждого замечания есть итоговый статус и резолюция.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      [ "$(printf '%s\n' "$change" | grep -c .)" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found: $change"; exit 1; }
+      review="$change/review-specs.md"
+      [ -f "$review" ] || { echo "$review is missing - the review-specs stage left it there; restore it from git"; exit 1; }
+      open=$(grep -nE '^- Status: open' "$review" || true)
+      [ -z "$open" ] || { echo "$open"; echo "these findings are still open - fix or reject each one, see stages/fix-specs/instructions.md"; exit 1; }
+      bad=$(grep -nE '^- Status: ' "$review" | grep -vE '^[0-9]+:- Status: (fixed|rejected \((false-positive|contradicts-spec|harmful|out-of-scope|not-worth-it)\))$' || true)
+      [ -z "$bad" ] || { echo "$bad"; echo "a status reads 'fixed' or 'rejected (false-positive|contradicts-spec|harmful|out-of-scope|not-worth-it)'"; exit 1; }
+      findings=$(grep -cE '^### R[0-9]+ — ' "$review" || true)
+      resolutions=$(grep -cE '^- Resolution: .{20,}' "$review" || true)
+      [ "$resolutions" = "$findings" ] || { echo "$review has $findings findings but $resolutions '- Resolution:' lines of substance - every finding gets one, right after its Status"; exit 1; }
+  # Всё, что эта ветка успела изменить, лежит внутри каталога изменения: specify,
+  # review-specs и fix-specs пишут только спецификации.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      base=$(git merge-base HEAD origin/main)
+      outside=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -v "^$change/" | grep -v '^\.gnomish-task/' || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the fix-specs stage revises only files under $change/ - restore the files above with: git checkout $base -- <file>"; exit 1; }
+  # Собственная строгая валидация OpenSpec, как после specify.
+  - type: command
+    command: openspec validate --changes --strict --no-interactive
+  # В proposal.md по-прежнему есть обязательные разделы и идентификаторы FR/M.
+  - type: command
+    command: >-
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive);
+      proposal="$change/proposal.md";
+      for section in '## Why' '## What Changes' '## Goals' '## Non-Goals' '## Requirements' '## Success Metrics'; do
+        grep -q "^$section" "$proposal" || { echo "$proposal has no '$section' section — see .claude/rules/proposal-format.md"; exit 1; };
+      done;
+      grep -qE '(^|[^A-Za-z])FR[0-9]+' "$proposal" || { echo "$proposal declares no FR<n> requirement id — every requirement needs one, see .claude/rules/traceability.md"; exit 1; };
+      grep -qE '(^|[^A-Za-z])M[0-9]+' "$proposal" || { echo "$proposal declares no M<n> success metric id — see .claude/rules/traceability.md"; exit 1; }
+  # review-specs.md — запись ревьюера: меняются только его строки Status и добавленные строки
+  # Resolution. Базой служит последний коммит раунда стадии review-specs.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-specs#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      review="$change/review-specs.md"
+      hunks=$(git diff -U0 "$since" -- "$review" | grep -E '^[-+]' | grep -vE '^(---|\+\+\+) ' || true)
+      removed=$(printf '%s\n' "$hunks" | grep -E '^-' | grep -vxF -- '-- Status: open' || true)
+      added=$(printf '%s\n' "$hunks" | grep -E '^\+' | grep -vE '^\+(- Status: |- Resolution: |  +[^ ])' || true)
+      [ -z "$removed$added" ] || { printf '%s\n' "$removed" "$added" | grep .; echo "only the '- Status:' lines and the new '- Resolution:' lines (continuation lines indented) of $review may change - restore the rest with: git checkout $since -- $review, then re-apply the statuses"; exit 1; }
+  # LLM-судья проверяет каждую правку и оспаривает каждое отклонение; только чтение. Opus, как и
+  # ревьюер: он арбитр между ревьюером и исправляющим.
+  - type: judge
+    criteriaFile: stages/fix-specs/acceptance.md
+    model: opus
+    settings:
+      # Запас, чтобы проверить каждый критерий, а не только первые несколько замечаний. Судья работает
+      # только на чтение (только Read/Grep/Glob, жёстко задано фабрикой) и тратит ход на каждый открытый
+      # файл; судья стадии implement исчерпал 30 ходов на изменении из 187 файлов и эскалировал без вердикта.
+      maxTurns: 60
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Число прогонов судьи; должно быть нечётным, побеждает большинство.
+    votes: 1
+# auto = перейти к следующей стадии; manual = ждать человека.
+advancement: auto
