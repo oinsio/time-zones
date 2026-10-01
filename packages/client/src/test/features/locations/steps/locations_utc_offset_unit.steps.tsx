@@ -205,9 +205,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @show-utc-offset-on-location-rows @FR5
   f.Scenario("Russian interface", ({ Given, And, When, Then }) => {
-    Given("the interface language is Russian", () =>
-      i18n.changeLanguage(RUSSIAN_LANGUAGE),
-    );
+    Given("the interface language is Russian", async () => {
+      await i18n.changeLanguage(RUSSIAN_LANGUAGE);
+    });
     And("the current instant is {string}", givenInstant);
     And("the list contains {string}", containList);
     When("the user opens the app", openApp);

@@ -16,6 +16,11 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
   Almaty: { timeZoneId: "Asia/Almaty", label: "Almaty", countryCode: "KZ" },
   Moscow: { timeZoneId: "Europe/Moscow", label: "Moscow", countryCode: "RU" },
   Kolkata: { timeZoneId: "Asia/Kolkata", label: "Kolkata", countryCode: "IN" },
+  Kathmandu: {
+    timeZoneId: "Asia/Kathmandu",
+    label: "Kathmandu",
+    countryCode: "NP",
+  },
   Tokyo: { timeZoneId: "Asia/Tokyo", label: "Tokyo", countryCode: "JP" },
   "New York": {
     timeZoneId: "America/New_York",

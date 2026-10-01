@@ -5,8 +5,8 @@ import i18n from "i18next";
 import { createInMemoryLocationRepository } from "@/adapters";
 import { type Clock, fakeClock } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
-import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { moscow, renderLocations } from "@/test/renderLocations";
+import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationsStatus, useLocations } from "./useLocations";
 
 describe("useLocations", () => {
