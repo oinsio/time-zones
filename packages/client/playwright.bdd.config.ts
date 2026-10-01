@@ -24,13 +24,19 @@ const VIEW_REGISTRY_MODULE_PATH: string = "./src/views/index.ts";
 const { viewRegistry } = await import(VIEW_REGISTRY_MODULE_PATH);
 const VIEW_CONTRACT_TAG_PATTERN = /@view-contract/;
 const SCREENSHOT_MAX_DIFF_PIXEL_RATIO = 0.01;
-/**
- * One set of baselines per OS: Chromium rasterizes text and focus rings
- * differently on macOS and Linux, enough to break the ratio above. CI checks
- * the `linux` set; a run on a Mac host checks the `darwin` set.
- */
 const SCREENSHOT_PATH_TEMPLATE =
-  "src/test/features/__screenshots__/{projectName}/{platform}/{arg}{ext}";
+  "src/test/features/__screenshots__/{projectName}/{arg}{ext}";
+/**
+ * Screenshot scenarios run only inside the pinned Playwright image
+ * (`pnpm test:screenshots`, which sets E2E_SCREENSHOTS): Chromium rasterizes
+ * text and focus rings differently on every OS and distro, so one set of
+ * baselines holds only where the renderer is the same everywhere.
+ */
+const SCREENSHOT_TAG_PATTERN = /@screenshot/;
+const isScreenshotRun = !!process.env.E2E_SCREENSHOTS;
+const browserGrepInvert = isScreenshotRun
+  ? VIEW_CONTRACT_TAG_PATTERN
+  : [VIEW_CONTRACT_TAG_PATTERN, SCREENSHOT_TAG_PATTERN];
 
 const E2E_ORIGIN = `http://localhost:${E2E_PORT}`;
 const E2E_APP_URL = `${E2E_ORIGIN}${APP_BASE_PATH}`;
@@ -83,12 +89,12 @@ export default defineConfig<ContractViewOptions>({
   projects: [
     {
       name: "chromium",
-      grepInvert: VIEW_CONTRACT_TAG_PATTERN,
+      grepInvert: browserGrepInvert,
       use: { ...devices["Desktop Chrome"] },
     },
     {
       name: "mobile-chrome",
-      grepInvert: VIEW_CONTRACT_TAG_PATTERN,
+      grepInvert: browserGrepInvert,
       use: { ...devices["Pixel 5"] },
     },
     ...viewContractProjects,

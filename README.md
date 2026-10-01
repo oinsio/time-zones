@@ -78,6 +78,17 @@ pnpm preflight    # lint + typecheck + tests
 
 The app is served under `/time-zones/` in every mode (dev, preview, production), so open `http://localhost:<port>/time-zones/`. The base path is defined once in [`packages/client/app.config.ts`](packages/client/app.config.ts).
 
+### Screenshot tests
+
+Chromium renders text and focus rings slightly differently on macOS, on each Linux distribution and on the CI runner, so the screenshot baselines in [`packages/client/src/test/features/__screenshots__/`](packages/client/src/test/features/__screenshots__/) are taken and checked in one place only: the Playwright Docker image of the installed `@playwright/test`, with the Node and pnpm of this repository ([`packages/client/screenshots/Dockerfile`](packages/client/screenshots/Dockerfile)). It works the same on macOS and Linux and needs only a running Docker:
+
+```bash
+pnpm --filter @time-zones/client test:screenshots                      # check the baselines
+pnpm --filter @time-zones/client test:screenshots --update-snapshots   # re-approve the changed ones
+```
+
+`pnpm --filter @time-zones/client test:bdd` skips the `@screenshot` scenarios; CI runs both. After a UI change, re-approve with the command above and commit the changed images. Never re-approve with a plain `playwright test` on your machine: those images match only your OS and fail in CI.
+
 ### Replacing the logo
 
 All icons (favicon, Apple touch icon, 192/512 px and maskable manifest icons) are generated during the build from one image. To change the logo, replace [`packages/client/assets/app-icon-source.jpg`](packages/client/assets/app-icon-source.jpg) with a square image (at least 512×512 px) and run `pnpm build` — no other edits are needed. Padding and background of the maskable icon are set in [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
@@ -86,7 +97,7 @@ Features are developed with [OpenSpec](openspec/): `/opsx:propose` → `/opsx:ap
 
 ## Deployment
 
-- Every pull request runs [CI](.github/workflows/ci.yml): lint, typecheck, unit tests, production build, initial JS budget (150 KB gzipped), a check that the build left sources untouched, and the smoke E2E.
+- Every pull request runs [CI](.github/workflows/ci.yml): lint, typecheck, unit tests, production build, initial JS budget (150 KB gzipped), a check that the build left sources untouched, the smoke E2E and the [screenshot tests](#screenshot-tests).
 - Every push to `main` runs the same checks and, only if they pass, [deploys](.github/workflows/deploy.yml) the build to GitHub Pages. A failed check leaves the previous version live; rollback is a revert on `main`.
 
 ## Gnomish Factory
