@@ -11,6 +11,7 @@ The "Add location" action MUST expose `/` as its keyboard shortcut to assistive 
 - **GIVEN** the main page shows the "Add location" action and focus is not in a text field
 - **WHEN** the user presses `/`, types "Tokyo", presses Down and Enter
 - **THEN** the search opened with focus in an empty query field
+- **AND** the key press did not reach the browser's own `/` action
 - **AND** Tokyo is in the list
 - **AND** focus is on the "Add location" action
 
@@ -31,6 +32,12 @@ The "Add location" action MUST expose `/` as its keyboard shortcut to assistive 
 - **THEN** the search does not open
 - **AND** the `/` is entered into that element
 
+#### Scenario: Slash typed in the open search
+- **GIVEN** the search was opened with `/` and focus is in its query field
+- **WHEN** the user presses `/`
+- **THEN** exactly one search is open
+- **AND** the query field holds `/`
+
 #### Scenario: Search already open
 - **GIVEN** the search is open and focus is on its close action
 - **WHEN** the user presses `/`
@@ -42,7 +49,8 @@ The "Add location" action MUST expose `/` as its keyboard shortcut to assistive 
 - **THEN** the search does not open
 
 #### Scenario: Shift on layouts that need it
-- **WHEN** the user presses `/` while holding Shift
+- **GIVEN** a keyboard layout on which `/` is typed with Shift
+- **WHEN** the user presses Shift and the key that produces `/`
 - **THEN** the search opens
 
 #### Scenario: Stored list unreadable

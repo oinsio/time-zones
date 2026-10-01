@@ -55,23 +55,27 @@ Both files are internal to the `views/shared` module and are not exported from `
 
 ### D5. Test placement
 
-| What | Where | Why |
-|---|---|---|
-| Predicate: `/`, Shift, each ignore case (FR1, FR2, FR4) | `views/shared/searchShortcut.test.ts` (Vitest, `it.each`) | pure function, mutation target |
-| Hook: listener on/off, `preventDefault`, the 3 text-entry targets, unmount (FR2, FR3, UX1) | `views/shared/useSearchShortcut.test.tsx` (Vitest, `renderHook`) | DOM event wiring |
-| `aria-keyshortcuts` and accessible name (NFR-A1) | `views/shared/AddLocationButton.test.tsx` (Vitest) | attribute check as a component test |
-| Opening, lazy data, focus return, already open (FR1, FR3, FR5, NFR-P1) | `views/shared/LocationSearch.shortcut.test.tsx` (Vitest component test) | wiring of the hook into `LocationSearch` |
-| Unreadable list (FR6) | `views/cards/CardsView.shortcut.test.tsx` (Vitest component test, the `renderCards` setup of `CardsView.test.tsx`) | `CardsView` decides whether `LocationSearch` is rendered |
-| Focus into the query field, add with keyboard, focus return, attribute in a real browser (FR1, FR5, NFR-A1, UX1, UX2) | `test/features/locations/locations_search_shortcut_e2e.feature` + `steps/locations_search_shortcut_e2e.steps.ts` (playwright-bdd, `@view-contract`) | focus and aria need a real browser (ADR-0001) |
-| axe-core and screenshots (NFR-A1, NFR-R1) | existing outlines in `locations_view_contract_e2e.feature` and `locations_ui_e2e.feature`, tagged with this change | no new state; prove nothing regressed |
+Every rule of this change is keyboard behaviour, which `.claude/rules/bdd-unit.md` marks "Keyboard accessibility | no | yes" and "aria-labels, focus management | no | yes" (unit BDD | E2E BDD), and ADR-0001 says "vitest-cucumber runs in jsdom — no real focus, aria, layout". So the specification of the change is one playwright-bdd feature in a real browser, and no unit BDD feature is written.
 
-No unit BDD (vitest-cucumber) feature is written. `.claude/rules/bdd-unit.md` marks "Keyboard accessibility" and "aria-labels, focus management" as "no" for unit BDD and "yes" for E2E BDD, and every rule of this change is a keyboard rule; the Gherkin specification of the change is the E2E feature.
+| What | Where |
+|---|---|
+| Every spec scenario: opening, suggestions, the key not reaching the browser, adding with the keyboard, focus return, the announced shortcut, lazy data, the 3 text-entry elements, the open search (query field and close action), Ctrl / Meta / Alt, Shift, unreadable list (FR1–FR6, NFR-P1, NFR-A1, UX1, UX2, M2, M4) | `test/features/locations/locations_search_shortcut_e2e.feature` + `steps/locations_search_shortcut_e2e.steps.ts` (playwright-bdd, `@view-contract`, so it runs in every `view-contract-<id>` project) |
+| axe-core and screenshots (NFR-A1, NFR-R1, M5) | existing outlines in `locations_view_contract_e2e.feature` and `locations_ui_e2e.feature`, tagged with this change; no new state, they prove nothing regressed |
+| Predicate: `/`, Shift, each ignore case | `views/shared/searchShortcut.test.ts` (Vitest, `it.each`) — TDD and mutation guard |
+| Hook: listener on/off, `preventDefault`, unmount | `views/shared/useSearchShortcut.test.tsx` (Vitest, `renderHook`) — TDD and mutation guard |
+| `aria-keyshortcuts` attribute | `views/shared/AddLocationButton.test.tsx` (Vitest) — TDD and mutation guard |
+| `LocationSearch` opens on `/`, loads data once | `views/shared/LocationSearch.shortcut.test.tsx` (Vitest) — TDD and mutation guard |
 
-The Vitest tests above are plain unit and component tests — the level `.claude/rules/test-planning.md` asks for ("**Unit tests (Vitest)** — domain logic, utils, hooks via TDD"), as `LocationSearchDialog.keyboard.test.tsx` already does for the existing keyboard path. They guard the wiring for mutation testing; the E2E scenario is the proof for focus and `aria-keyshortcuts` in a real browser.
+The Vitest tests are plain unit and component tests, the level `.claude/rules/test-planning.md` asks for ("**Unit tests (Vitest)** — domain logic, utils, hooks via TDD"), and the files Stryker mutates (M3). They assert only state and calls (`onShortcut` called, `dispatchEvent` result, dialog rendered, stub called), never real focus or text entry — those are asserted only in the E2E feature. Text-entry elements a Vitest test appends to `document.body` are removed in `afterEach` with `element.remove()`, because Testing Library's `cleanup()` unmounts only the containers it rendered.
 
-Text-entry elements a Vitest test creates itself (`<input>`, `<textarea>`, contenteditable `<div>`) are appended to `document.body`, which Testing Library's automatic `cleanup()` does not remove (it unmounts only the containers it rendered). Each such test file removes them explicitly in `afterEach` (`element.remove()`).
+E2E techniques, decided here so every scenario is real-browser evidence:
 
-In `LocationSearch.shortcut.test.tsx` the "search already open" case presses `/` while focus is on the dialog's close action, so the query field does not receive the key and the query must stay empty.
+- **Text-entry elements.** The app has no text field outside the search, so the step adds one: `page.evaluate` appends an `<input type="text">`, a `<textarea>` or a `<div contenteditable="true">` with a `data-testid` to `document.body` and focuses it; the real `page.keyboard.press("/")` must then leave `/` in it (`toHaveValue("/")` / `toHaveText("/")`) — the browser itself inserts the character, which jsdom cannot show.
+- **The key does not reach the browser (UX1).** Before pressing, the step adds a bubbling `keydown` listener on `window` (after the `document` listener of D3) that stores `event.defaultPrevented` for `/` on `window`; the Then step reads it back with `page.evaluate` and expects `true`. Chromium has no own `/` action to observe, so a prevented default is the observable proof that no browser action (Firefox quick find) can start.
+- **Shift.** Playwright types with a US layout, where Shift + the `/` key produces `?`. The step uses a Chrome DevTools Protocol session (`page.context().newCDPSession(page)`, `Input.dispatchKeyEvent` with `key: "/"`, `code: "Digit7"`, `text: "/"`, `modifiers: 8` for Shift) — a trusted key event as a German layout sends it. The `view-contract-<id>` projects use `devices["Desktop Chrome"]` (Chromium), where CDP is available.
+- **Negative assertions.** "The search does not open" first waits two animation frames in the page (`requestAnimationFrame` twice in `page.evaluate`) so a React render caused by the key has happened, then expects `page.getByRole("dialog")` to have count 0 — `toBeHidden()` alone would pass before a late render.
+- **Step texts with `/`.** `/` is the alternation operator of Cucumber expressions, so every step text that contains it is defined with a regular expression.
+- **Unreadable list.** The existing "the locations are in the unreadable state" step (`locationsStates.ts`) seeds the unreadable document and reloads.
 
 ## Consequences
 

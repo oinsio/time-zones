@@ -26,7 +26,7 @@ _None._
 ## Impact
 
 - `packages/client/src/`: `views/shared/` (a keyboard shortcut predicate and hook, with their module-local DOM constants; `LocationSearch.tsx` opens on the shortcut, `AddLocationButton.tsx` gains `aria-keyshortcuts`), `constants/keyboard.ts` (the `/` key added to the existing `KeyboardKey` enum — nothing else in `constants/`).
-- Tests: Vitest unit and component tests under `views/shared/` and `views/cards/`; one new `locations_search_shortcut_e2e.feature` (playwright-bdd) under `src/test/features/locations/`. No unit BDD (vitest-cucumber) feature: every rule of this change is about keyboard handling, which `.claude/rules/bdd-unit.md` puts in E2E BDD, not unit BDD.
+- Tests: one new `locations_search_shortcut_e2e.feature` (playwright-bdd, real browser) under `src/test/features/locations/` that specifies every rule of this change, the opening and each ignore case; Vitest unit and component tests under `views/shared/` as the TDD and mutation guard of the new code. No unit BDD (vitest-cucumber) feature: every rule of this change is about keyboard handling, which `.claude/rules/bdd-unit.md` puts in E2E BDD ("Keyboard accessibility | no | yes"), not unit BDD.
 - No new dependencies, no locale keys (the shortcut has no visible text), no storage schema change.
 
 ## Goals
@@ -94,9 +94,15 @@ _None._
 
 Feature file under `packages/client/src/test/features/locations/`, tagged `@open-location-search-with-slash-shortcut`:
 
-- `locations_search_shortcut_e2e.feature` — one scenario: `/` opens the search with focus in the query field, a location is added with the keyboard, focus returns to the action, and the action announces the shortcut (playwright-bdd, every registered view).
+- `locations_search_shortcut_e2e.feature` (playwright-bdd, real browser, every registered view through `@view-contract`):
+  - `/` opens the search with focus in an empty query field and the suggestions, the key press does not reach the browser, a location is added with the keyboard, focus returns to the action, and the action announces the shortcut (FR1, FR5, NFR-A1, UX1, UX2);
+  - the search data is not requested before `/` and is requested after it (NFR-P1);
+  - `/` in a text input, a textarea and a contenteditable element is typed into it and the search does not open (FR2);
+  - `/` in the open search's query field is typed into the query, and `/` on its close action changes nothing (FR3);
+  - `/` with Ctrl, Meta or Alt held does not open the search; `/` typed with Shift does (FR4);
+  - `/` while the stored list is unreadable does not open the search (FR6).
 
-The ignore cases (FR2–FR4, FR6) and lazy data (NFR-P1) are covered by Vitest unit and component tests, not by a Gherkin feature.
+Vitest unit and component tests under `views/shared/` drive the code by TDD and are the mutation target (M3); the behaviour is proven by the feature above.
 
 ## Visual Reference
 
@@ -109,7 +115,7 @@ No changes (no IA documents exist under `docs/ia/`).
 ## Success Metrics
 
 - M1: 100% of FR1–FR6, NFR-P1, NFR-A1, NFR-R1, UX1 and UX2 have at least one automated test tagged or commented with `open-location-search-with-slash-shortcut`.
-- M2: 7 of 7 ignore cases — text input, textarea, contenteditable, search already open, Ctrl, Meta, Alt — leave the search state unchanged in the unit tests, and in the 3 text-entry cases the `/` is not default-prevented.
+- M2: 7 of 7 ignore cases — text input, textarea, contenteditable, search already open (focus on its close action), Ctrl, Meta, Alt — leave the search state unchanged in the E2E feature, and in the 3 text-entry cases the element holds `/` afterwards.
 - M3: Mutation score of the new and changed view code is at least 95% (minimum 90%).
 - M4: The E2E scenario adds a location with 0 pointer actions, in 1 of 1 registered view (Cards).
 - M5: axe-core reports 0 violations in the 4 existing list and empty accessibility examples (2 states × 2 themes) with the shortcut attribute in place; 0 of the 16 list and empty screenshot baselines re-approved (8 examples × the `chromium` and `mobile-chrome` projects, NFR-R1).
