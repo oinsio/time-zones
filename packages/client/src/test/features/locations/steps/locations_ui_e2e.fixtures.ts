@@ -32,9 +32,18 @@ export class LocationsWorld {
     });
   }
 
-  /** Reloads the app when it is open, so a seed set now is read by it. */
+  /**
+   * Reloads the app when it is open, so a seed set now is read by it. Waits
+   * for the service worker to activate first: its first install shows the
+   * offline-ready notice, and an install that ends after the reload would put
+   * that notice on the reloaded page only some of the time.
+   */
   async reloadIfOpen() {
-    if (this.page.url() !== BLANK_PAGE_URL) await this.page.reload();
+    if (this.page.url() === BLANK_PAGE_URL) return;
+    await this.page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+    });
+    await this.page.reload();
   }
 
   /** Opens the app in a second page of the same browser context. */

@@ -24,8 +24,13 @@ const VIEW_REGISTRY_MODULE_PATH: string = "./src/views/index.ts";
 const { viewRegistry } = await import(VIEW_REGISTRY_MODULE_PATH);
 const VIEW_CONTRACT_TAG_PATTERN = /@view-contract/;
 const SCREENSHOT_MAX_DIFF_PIXEL_RATIO = 0.01;
+/**
+ * One set of baselines per OS: Chromium rasterizes text and focus rings
+ * differently on macOS and Linux, enough to break the ratio above. CI checks
+ * the `linux` set; a run on a Mac host checks the `darwin` set.
+ */
 const SCREENSHOT_PATH_TEMPLATE =
-  "src/test/features/__screenshots__/{projectName}/{arg}{ext}";
+  "src/test/features/__screenshots__/{projectName}/{platform}/{arg}{ext}";
 
 const E2E_ORIGIN = `http://localhost:${E2E_PORT}`;
 const E2E_APP_URL = `${E2E_ORIGIN}${APP_BASE_PATH}`;
