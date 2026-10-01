@@ -1,0 +1,117 @@
+# Цель стадии, которую видит гном.
+purpose: implement the OpenSpec change from the specify stage in packages/client with TDD and keep CI green
+# Рабочая копия плюс изменение, подготовленное стадией specify в редакции fix-specs.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+  - kind: internal
+    producerOutputId: spec-review-resolution
+# Название того, что производит стадия.
+outputs:
+  - id: implementation-diff
+# Кто выполняет работу: агент Claude Code CLI.
+executor:
+  type: agent-cli
+  model: sonnet
+  # Допускаются только эти четыре ключа.
+  settings:
+    # Ходов агента за раунд. TDD, хуки и точечные мутационные прогоны съедают много ходов; 80 на
+    # задаче #18 дважды заканчивались при открытых задачах, и изменению на целую фичу понадобилось два раунда.
+    maxTurns: 160
+    # По истечении раунд убивается; это считается сбоем инфраструктуры, а не попыткой.
+    # pnpm install + тестовый хук после каждой правки + точечные прогоны Stryker; удвоено вместе с ходами.
+    roundTimeout: 7200s
+    # Не может расширить то, что запрещает .claude/settings.json.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+      - Skill
+    # Без субагентов, без веба, без планирования.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Промпт для гнома.
+instructions: stages/implement/instructions.md
+# Выполняются по порядку после каждого раунда (sh -c, POSIX), от дешёвых к дорогим, по одной — те же
+# шаги, что в .github/workflows/ci.yml. Провал возвращается агенту как обратная связь и сжигает попытку.
+verify:
+  # Worktree стартует без node_modules; команда идемпотентна и быстра после первой установки.
+  - type: command
+    command: pnpm install --frozen-lockfile --prefer-offline
+  # Все задачи активного изменения отмечены галочкой.
+  - type: command
+    command: >-
+      if grep -rn '^[[:space:]]*- \[ \]' openspec/changes --include=tasks.md --exclude-dir=archive;
+      then echo "the tasks listed above are still open - do them, then tick them in tasks.md"; exit 1; fi
+  # Файлы, добавленные или изменённые этой веткой в packages/client/src, не превышают жёсткий предел в 300 строк.
+  - type: command
+    command: >-
+      base=$(git merge-base HEAD origin/main);
+      oversized=$({ git diff --name-only --diff-filter=AM "$base" -- packages/client/src;
+      git ls-files -o --exclude-standard packages/client/src; } | sort -u |
+      while read -r file; do [ -f "$file" ] && lines=$(wc -l < "$file") && [ "$lines" -gt 300 ] && echo "$file: $lines lines"; done);
+      [ -z "$oversized" ] || { echo "$oversized"; echo "these files exceed the 300-line hard cap - split them, see .claude/rules/process-invariants.md"; exit 1; }
+  - type: command
+    command: pnpm lint
+  - type: command
+    command: pnpm typecheck
+  - type: command
+    command: pnpm test
+  - type: command
+    command: pnpm build
+  - type: command
+    command: pnpm --filter @time-zones/client check:bundle-size
+  # BDD E2E через playwright-bdd; нужен Chromium, установленный на этом хосте через `playwright install chromium`.
+  - type: command
+    command: pnpm --filter @time-zones/client test:bdd
+  # Контракт остаётся таким, каким его оставила fix-specs: из изменения меняется только tasks.md, а файлы
+  # процесса и ADR не трогаются. Точка отсчёта — последний коммит раунда предыдущей стадии.
+  # package.json и lockfile меняются, только если tasks.md просит добавить зависимость.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^implement#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
+      forbidden=$(printf '%s\n' "$changed" | grep -E '^(openspec/|\.gnomish/|\.github/|\.claude/|docs/adr/)' | grep -vxF "$change/tasks.md" || true)
+      [ -z "$forbidden" ] || { echo "$forbidden"; echo "the implement stage edits only packages/ and the checkboxes of $change/tasks.md - restore the files above with: git checkout $since -- <file>"; exit 1; }
+      dependencies=$(printf '%s\n' "$changed" | grep -E '(^|/)(package\.json|pnpm-lock\.yaml)$' || true)
+      if [ -n "$dependencies" ] && ! grep -qiE 'pnpm add|dependenc' "$change/tasks.md"; then echo "$dependencies"; echo "tasks.md asks for no new dependency - restore the files above with: git checkout $since -- <file>"; exit 1; fi
+  # LLM-судья оценивает реализацию по acceptance.md; только чтение. Opus, как и
+  # другие судьи: независимая и более сильная проверка, чем sonnet, писавший код.
+  - type: judge
+    criteriaFile: stages/implement/acceptance.md
+    model: opus
+    settings:
+      # Запас, чтобы проверить каждый критерий, а не только первые находки. У судьи есть только
+      # Read/Grep/Glob (фабрика жёстко делает его read-only), поэтому изменение на целую фичу стоит
+      # хода на каждое чтение файла; 30 закончились на изменении из 187 файлов до всякого вердикта, а
+      # ревью целой фичи требует запаса сверх 80, которых тогда хватило.
+      maxTurns: 120
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Число прогонов судьи; должно быть нечётным, решает большинство.
+    votes: 1
+# auto = перейти к следующей стадии; manual = ждать человека.
+advancement: auto
+# Изменению на целую фичу нужны раунды на доделку и ещё раунды на разбор находок судьи, а
+# сбой на стороне фабрики тоже может сжечь попытку: на задаче #18 стандартные 2 заканчивались трижды.
+autonomy:
+  attemptLimit: 6
