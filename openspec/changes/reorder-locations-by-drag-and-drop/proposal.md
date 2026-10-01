@@ -127,7 +127,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M2: In the list Almaty, Moscow, Kolkata, Tokyo the model produces exactly these results — 7 of 7: Almaty to position 4 → Moscow, Kolkata, Tokyo, Almaty; Tokyo to 1 → Tokyo, Almaty, Moscow, Kolkata; Moscow to 3 → Almaty, Kolkata, Moscow, Tokyo; Kolkata to 2 → Almaty, Kolkata, Moscow, Tokyo; Moscow to 2 → list unchanged; position 0 and position 5 → position-out-of-range error; an unknown location → location-not-found error.
 - M3: Mutation score of the new or changed model, controller and view code is at least 95% (minimum 90%).
 - M4: axe-core reports 0 violations in 4 checks (at rest and while picked up, light and dark themes).
-- M5: 0 storage writes after a cancelled drag and after a drop at the card's own position (2 unit scenarios); the reordered list is restored after a reload and after an offline reopen in both E2E projects (4 runs).
+- M5: 0 storage writes after a move to the card's own position (unit BDD) and after a cancelled drag (E2E, both projects); the reordered list is restored after a reload and after an offline reopen in both E2E projects (4 runs).
 - M6: The card displaced by a keyboard move runs a 200 ms `transform` transition (1 E2E check); with reduced motion it runs 0 transitions (1 E2E check).
 - M7: `pnpm check:bundle-size` passes with the initial JavaScript at or below 150 KB gzipped.
 
