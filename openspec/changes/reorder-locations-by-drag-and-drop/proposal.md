@@ -28,7 +28,7 @@ _None._
 
 - `packages/client/src/`: `model/locations.ts` (new command and error code), `controller/` (`moveLocation` action, reduced-motion hook), `views/shared/` (sortable list, drag handle, announcements), `constants/` (reorder constants), `locales/en.json` and `locales/ru.json`.
 - New runtime dependencies in `packages/client/package.json`: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` (design D4). They load only with the lazily loaded Cards view.
-- Tests: Vitest unit tests next to the changed modules; unit BDD and E2E BDD feature files under `src/test/features/locations/`; the 8 approved "list" screenshots are re-approved because the rows gain a handle.
+- Tests: Vitest unit tests next to the changed modules; unit BDD and E2E BDD feature files under `src/test/features/locations/`; the 4 `list` examples of the existing screenshot outline (8 approved baseline images across the `chromium` and `mobile-chrome` projects) are re-approved because the rows gain a handle.
 - No storage schema change, no network.
 
 ## Goals
@@ -91,7 +91,7 @@ _None._
 ## UX Acceptance Criteria
 
 - UX1: While a card is dragged, the cards it passes slide to their new places with a 200 ms transform transition (`REORDER_TRANSITION_DURATION_MS`), and on drop the card settles into its slot with an animation of the same duration — no card jumps between positions.
-- UX2: The dragged card stays on the list's vertical axis, is raised above the others (shadow) and keeps its width; the slot it leaves is held open until the drop.
+- UX2: The dragged card stays on the list's vertical axis, is raised above the others (shadow) and keeps its width; the cards it has not passed stay where they are, so the list keeps its height and the slot the card left stays open until the drop.
 - UX3: The handle is a grip icon at the leading edge of the card, separate from the remove action; dragging starts only from the handle, so scrolling the page over a card and tapping the remove action keep working. A mouse drag starts after the pointer moves at least 4 px, so a click on the handle is not a drag.
 
 ## UI States Matrix
@@ -111,7 +111,7 @@ _None._
 Feature files under `packages/client/src/test/features/locations/`, tagged `@reorder-locations-by-drag-and-drop`:
 
 - `locations_reorder_unit.feature` — moving, errors, a same-position move writing nothing, persistence, other tab, storage failure, localization, performance (vitest-cucumber, jsdom);
-- `locations_reorder_e2e.feature` — mouse, touch and keyboard drags, a cancelled drag and a click on the handle writing nothing, announcements, focus, transitions and reduced motion, axe-core, layout, reopen, offline reopen, other tab and storage failure through the UI (playwright-bdd).
+- `locations_reorder_e2e.feature` — mouse, touch and keyboard drags, a cancelled drag and a click on the handle writing nothing, a touch scroll over a card, announcements, focus, slide and drop transitions and reduced motion, the dragged card's width and its held slot, axe-core, layout, reopen, offline reopen, other tab and storage failure through the UI (playwright-bdd).
 
 ## Visual Reference
 
@@ -128,7 +128,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M3: Mutation score of the new or changed model, controller and view code is at least 95% (minimum 90%).
 - M4: axe-core reports 0 violations in 4 checks (at rest and while picked up, light and dark themes).
 - M5: 0 storage writes after a move to the card's own position (unit BDD) and after a cancelled drag (E2E, both projects); the reordered list is restored after a reload and after an offline reopen in both E2E projects (4 runs).
-- M6: The card displaced by a keyboard move runs a 200 ms `transform` transition (1 E2E check); with reduced motion it runs 0 transitions (1 E2E check).
+- M6: The card displaced by a keyboard move runs a 200 ms `transform` transition, and the card dropped with the mouse settles into its slot with a 200 ms `transform` transition (2 E2E checks); with reduced motion each of them runs 0 transitions (2 E2E checks).
 - M7: `pnpm check:bundle-size` passes with the initial JavaScript at or below 150 KB gzipped.
 
 ## Open Questions

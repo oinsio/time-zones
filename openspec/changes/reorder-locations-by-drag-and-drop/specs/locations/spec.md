@@ -46,6 +46,13 @@ When the list holds at least 2 locations, every card in the Cards view SHALL hav
 - **THEN** the list is Moscow, Almaty, New York in that order
 - **AND** nothing is written to storage
 
+#### Scenario: Scrolling over a card scrolls the page
+- **GIVEN** the list is Almaty, Moscow, Kolkata, Tokyo, New York on a touch screen too short to show the whole page
+- **WHEN** the user swipes up with a finger over the city name of Almaty
+- **THEN** the page scrolls down
+- **AND** the list is Almaty, Moscow, Kolkata, Tokyo, New York in that order
+- **AND** nothing is written to storage
+
 #### Scenario: A single location has no handle
 - **GIVEN** the list contains only Moscow
 - **WHEN** the user opens the app
@@ -72,12 +79,24 @@ The drag handle SHALL be reachable with Tab and operable with the keyboard: Spac
 - **THEN** the list offers the actions "Move Moscow" and "Move Almaty"
 
 ### Requirement: Smooth reorder transitions
-While a card is dragged, the cards it passes SHALL slide to their new places with a 200 ms transform transition, and the dropped card MUST settle into its slot with an animation of the same duration, so no card jumps between positions. The dragged card MUST stay on the list's vertical axis and keep its width. When the system asks to reduce motion, cards MUST change places without a slide transition and without a drop animation, and reordering MUST still work. <!-- implements NFR-A4, UX1, UX2 of reorder-locations-by-drag-and-drop -->
+While a card is dragged, the cards it passes SHALL slide to their new places with a 200 ms transform transition, and the dropped card MUST settle into its slot with an animation of the same duration, so no card jumps between positions. The dragged card MUST stay on the list's vertical axis and keep its width, and the cards it has not passed MUST stay where they are, so the list keeps its height and the slot the card left stays open until the drop. When the system asks to reduce motion, cards MUST change places without a slide transition and without a drop animation, and reordering MUST still work. <!-- implements NFR-A4, UX1, UX2 of reorder-locations-by-drag-and-drop -->
 
 #### Scenario: Displaced card slides
 - **GIVEN** the list is Moscow, Almaty, New York
 - **WHEN** the user picks up Moscow with the keyboard and moves it down once
 - **THEN** the Almaty card runs a 200 ms transform transition
+
+#### Scenario: Dropped card settles into its slot
+- **GIVEN** the list is Moscow, Almaty, New York
+- **WHEN** the user drags Moscow below Almaty with the mouse and releases it away from the centre of its new slot
+- **THEN** the Moscow card settles into its slot with a 200 ms transform transition
+- **AND** the list is Almaty, Moscow, New York in that order
+
+#### Scenario: The dragged card keeps its width and its slot
+- **GIVEN** the list is Moscow, Almaty, New York
+- **WHEN** the user drags Moscow with the mouse to the right and slightly down without passing another card
+- **THEN** the Moscow card stays in its column, keeps its width and is raised above the others
+- **AND** the list keeps its height and the Almaty card stays where it was
 
 #### Scenario: Reduced motion
 - **GIVEN** the system asks to reduce motion
@@ -85,6 +104,13 @@ While a card is dragged, the cards it passes SHALL slide to their new places wit
 - **WHEN** the user picks up Moscow with the keyboard and moves it down once
 - **THEN** the Almaty card runs no transition
 - **AND** after the drop the list is Almaty, Moscow, New York in that order
+
+#### Scenario: Reduced motion has no drop animation
+- **GIVEN** the system asks to reduce motion
+- **AND** the list is Moscow, Almaty, New York
+- **WHEN** the user drags Moscow below Almaty with the mouse and releases it away from the centre of its new slot
+- **THEN** the Moscow card runs no transition
+- **AND** the list is Almaty, Moscow, New York in that order
 
 ### Requirement: New order is kept and shared
 After a move, the new order SHALL be saved on the device in the existing versioned list document (schema version unchanged) and restored in the same order when the app is opened again, also without a network. A move made in one open tab MUST appear in every other open tab without a reload; when two tabs write, the last write MUST win. When storage cannot be written, moving MUST still work for the session and the existing storage warning MUST be shown. <!-- implements FR4, FR5, FR6 of reorder-locations-by-drag-and-drop -->
