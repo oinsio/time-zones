@@ -1,0 +1,9 @@
+{"seq":0,"tool":"Bash","start":"2026-10-01T12:05:33.725436Z","durationMillis":38}
+{"seq":1,"tool":"Bash","start":"2026-10-01T12:05:37.046654Z","durationMillis":30}
+{"seq":2,"tool":"Skill","start":"2026-10-01T12:05:40.524826Z","durationMillis":11}
+{"seq":3,"tool":"Bash","start":"2026-10-01T12:05:42.794787Z","durationMillis":21}
+{"seq":4,"tool":"Bash","start":"2026-10-01T12:05:49.484915Z","durationMillis":20}
+{"seq":5,"tool":"Read","start":"2026-10-01T12:05:51.781625Z","durationMillis":11}
+{"seq":6,"tool":"Edit","start":"2026-10-01T12:05:55.320055Z","durationMillis":20}
+{"seq":7,"tool":"Edit","start":"2026-10-01T12:05:59.364599Z","durationMillis":15}
+{"seq":8,"tool":"Bash","start":"2026-10-01T12:06:00.383989Z","durationMillis":155}
