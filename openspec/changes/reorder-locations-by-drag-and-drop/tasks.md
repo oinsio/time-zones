@@ -31,7 +31,7 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
 
 ## 5. Unit BDD (vitest-cucumber, jsdom)
 
-- [ ] 5.1 Write `test/features/locations/locations_reorder_unit.feature` (`_unit` because the paired `_e2e` file of 6.1 exists) with the scenarios below, each tagged `@reorder-locations-by-drag-and-drop` plus its ids, and `steps/locations_reorder_unit.steps.ts` per design D7 (`openApp`, `labelsOf` from `steps/locationsPersistenceWorld.ts`; ids from `buildLocationId`; writes counted with `vi.spyOn(localStorage, "setItem")` filtered by `STORAGE_KEYS.LOCATIONS`; `localStorage.clear()` and `vi.restoreAllMocks()` in `BeforeEachScenario`):
+- [x] 5.1 Write `test/features/locations/locations_reorder_unit.feature` (`_unit` because the paired `_e2e` file of 6.1 exists) with the scenarios below, each tagged `@reorder-locations-by-drag-and-drop` plus its ids, and `steps/locations_reorder_unit.steps.ts` per design D7 (`openApp`, `labelsOf` from `steps/locationsPersistenceWorld.ts`; ids from `buildLocationId`; writes counted with `vi.spyOn(localStorage, "setItem")` filtered by `STORAGE_KEYS.LOCATIONS`; `localStorage.clear()` and `vi.restoreAllMocks()` in `BeforeEachScenario`):
   - "Move to every kind of position" — Scenario Outline over the 4 moves of M2 with positions 4, 1, 3, 2 (`@FR2 @M2`);
   - "Move to its own position" — Moscow to position 2; list unchanged and 0 location writes (`@FR2 @FR3 @M5`);
   - "Position outside the list" — Scenario Outline, positions 0 and 5, rejected as position out of range, list unchanged (`@FR2 @M2`);
@@ -43,7 +43,7 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
   - "50 locations within the budget" — `performance.now()` around `reduceLocations` moving the last of 50 built locations to index 0 plus `presentLocationRows` of the result (with `fakeClock` from `@/lib/temporal`), ≤ 50 ms (`@NFR-P1`).
   
   Verify `npx vitest run src/test/features/locations/steps/locations_reorder_unit.steps.ts`
-- [ ] 5.2 Confirm the existing locations scenarios still pass with handles in the rows; verify `npx vitest run src/test/features/locations`
+- [x] 5.2 Confirm the existing locations scenarios still pass with handles in the rows; verify `npx vitest run src/test/features/locations`
 
 ## 6. E2E BDD (playwright-bdd, real browser)
 
