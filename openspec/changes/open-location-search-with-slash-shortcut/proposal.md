@@ -54,7 +54,7 @@ _None._
 
 - FR1: Pressing `/` while the main page shows the "Add location" action opens the location search exactly as that action does: the search shows its suggestions, focus is in the query field and the query is empty (the `/` is not typed into it).
 - FR2: The shortcut is ignored while focus is in a text input, a textarea or a contenteditable element; the `/` is entered into that element as usual.
-- FR3: The shortcut is ignored while the search is already open: the search stays open and its query does not change.
+- FR3: The shortcut is ignored while the search is already open: the search stays open and is not reset — the shortcut itself does not change the query (in the query field `/` is typed like any character, per FR2).
 - FR4: The shortcut is ignored when Ctrl, Meta or Alt is held. Shift is not checked, because on some keyboard layouts `/` is typed with Shift.
 - FR5: Closing a search opened with `/` — with Esc or by adding a location — returns focus to the "Add location" action, as when it was opened from the action.
 - FR6: The shortcut works only while the "Add location" action is on the page. While the stored list is unreadable (the error with Reset is shown instead of the list and the action), pressing `/` does nothing.
@@ -111,7 +111,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M2: 7 of 7 ignore cases — text input, textarea, contenteditable, search already open, Ctrl, Meta, Alt — leave the search state unchanged in the unit tests, and in the 3 text-entry cases the `/` is not default-prevented.
 - M3: Mutation score of the new and changed view code is at least 95% (minimum 90%).
 - M4: The E2E scenario adds a location with 0 pointer actions, in 1 of 1 registered view (Cards).
-- M5: axe-core reports 0 violations in the 4 existing list and empty accessibility examples (2 states × 2 themes) with the shortcut attribute in place; 0 of the 8 list and empty screenshot baselines is re-approved.
+- M5: axe-core reports 0 violations in the 4 existing list and empty accessibility examples (2 states × 2 themes) with the shortcut attribute in place; 0 screenshot baselines re-approved for the 8 list and empty screenshot examples (run in both the `chromium` and `mobile-chrome` projects).
 
 ## Open Questions
 

@@ -13,7 +13,7 @@ Driven by FR1–FR6, NFR-P1, NFR-A1 and UX1 of `proposal.md`. Current state, che
 - `constants/keyboard.ts` holds `enum KeyboardKey` (`ESCAPE`, `ARROW_DOWN`, `ARROW_UP`, `ENTER`), exported from `constants/index.ts`. Event-name strings are module-local constants (`PAGE_HIDE_EVENT` in `controller/LocationsProvider.tsx`, `ONLINE_EVENT` in `controller/useOnlineStatus.ts`).
 - Unit tests run in jsdom (`vitest.config.ts`: `environment: "jsdom"`).
 
-Binding rules read for this change: ADR-0002 — view state such as an "open sheet" is owned by "the view itself" and "never goes into the model"; the controller "maps UI events to commands and runs side effects (clock tick, persistence, cross-tab sync)". `.claude/rules/architecture.md` — views "Keep view state (scroll, open panels, focus) local — never put it into the model" and "Reuse `views/shared/` blocks instead of duplicating them per view". ADR-0005 — shared blocks live in `views/shared/`. ADR-0001 and `.claude/rules/bdd-unit.md` — "Keyboard accessibility", "aria-labels, focus management" are E2E-only, business logic is unit.
+Binding rules read for this change: ADR-0002 — view state such as an "open sheet" is owned by "the view itself" and "never goes into the model"; the controller "maps UI events to commands and runs side effects (clock tick, persistence, cross-tab sync)". `.claude/rules/architecture.md` — views "Keep view state (scroll, open panels, focus) local — never put it into the model" and "Reuse `views/shared/` blocks instead of duplicating them per view". ADR-0005 — shared blocks live in `views/shared/`. ADR-0001 — "vitest-cucumber runs in jsdom — no real focus, aria, layout"; `.claude/rules/bdd-unit.md` marks "Keyboard accessibility" and "aria-labels, focus management" as E2E (playwright-bdd), not unit BDD.
 
 ADR-0003, ADR-0004, ADR-0006 and ADR-0007 are not touched: no time, storage, search-data or reference-zone behaviour changes.
 
@@ -23,13 +23,12 @@ ADR-0003, ADR-0004, ADR-0006 and ADR-0007 are not touched: no time, storage, sea
 
 **Non-Goals:** a general shortcut registry or keymap (NG1, NG3); any model, controller or presenter change. No global architectural decision is made, so no ADR is needed.
 
-## Decisions
+## Decision
 
 ### D1. The shortcut is view behaviour in `views/shared/`
 
 Opening the search changes only `LocationSearch`'s local `isOpen` view state; there is no command and no model state. So the shortcut lives next to it in `views/shared/` and is not a controller hook. Because every view composes `LocationSearch` from `views/shared/`, every registered view gets the shortcut, and when `LocationSearch` is not rendered (unreadable list, view still loading) there is no listener — FR6 holds by construction.
 
-Alternative: a controller hook — rejected, the controller maps events to model commands and owns persistence/clock effects (ADR-0002); opening a panel is neither.
 
 ### D2. Pure predicate: `isSearchShortcutEvent(event)`
 
@@ -49,7 +48,6 @@ New `views/shared/useSearchShortcut.ts`. While `isEnabled` is true it adds one `
 
 Both files are internal to the `views/shared` module and are not exported from `views/shared/index.ts` (only `LocationSearch` uses them).
 
-Alternative: listening on `window` in the capture phase — rejected, a bubbling `document` listener matches `app/Notice.tsx` and lets an element that handles `/` itself call `stopPropagation`.
 
 ### D4. `aria-keyshortcuts` on the button
 
@@ -66,10 +64,29 @@ Alternative: listening on `window` in the capture phase — rejected, a bubbling
 | Focus into the query field, add with keyboard, focus return, attribute in a real browser | `test/features/locations/locations_search_shortcut_e2e.feature` + `steps/locations_search_shortcut_e2e.steps.ts` (playwright-bdd, `@view-contract`) | focus and aria need a real browser (ADR-0001) |
 | axe-core and screenshots | existing outlines in `locations_view_contract_e2e.feature` and `locations_ui_e2e.feature`, tagged with this change | no new state; prove nothing regressed |
 
+The Vitest component tests of tasks 4.1–4.2 also check the attribute and focus return in jsdom, as `LocationSearchDialog.keyboard.test.tsx` already does for the existing keyboard path; they guard the wiring for mutation testing, while the E2E scenario is the proof for focus and `aria-keyshortcuts`. The unit BDD feature makes no focus or `aria-*` assertions.
+
 In the unit feature the "search already open" case presses `/` while focus is on the dialog's close action, so the query field does not receive the key and the query must stay empty.
 
-## Risks / Trade-offs
+## Consequences
+
+Positive:
+
+- One key press opens the search from anywhere on the main page, in every view that composes `LocationSearch`, with no new state, data or locale keys.
+- The decision logic is one pure function, fully mutation-testable.
+
+Negative:
 
 - AltGr layouts: on Windows browsers report AltGr as Ctrl+Alt, so users whose `/` needs AltGr cannot use the shortcut (proposal Q2). Accepted to keep FR4 simple.
 - A future text-entry widget that is neither `input`, `textarea` nor contenteditable (e.g. a custom combobox on a `div`) would not be recognised; it would have to stop propagation of `/` or be added to the predicate.
 - A second view that renders `LocationSearch` twice would register two listeners; today Cards renders it once.
+
+## Alternatives Considered
+
+**A controller hook** (`src/controller/`): rejected — the controller "maps UI events to commands and runs side effects (clock tick, persistence, cross-tab sync)" (ADR-0002); opening a panel changes only view state, with no command.
+
+**Listening on `window` in the capture phase**: rejected — a bubbling `document` listener matches `app/Notice.tsx` and lets an element that handles `/` itself stop propagation.
+
+**Checking `HTMLElement.isContentEditable`**: rejected for the attribute selector of D2, so the predicate behaves the same in the jsdom unit tests and in browsers.
+
+**Ignoring Shift as well**: rejected — on layouts where `/` is typed with Shift (e.g. German, Shift+7) the shortcut would never fire (FR4).
