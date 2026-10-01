@@ -15,7 +15,8 @@ import {
  */
 export default function CardsView() {
   const { t } = useTranslation();
-  const { rows, loadStatus, removeLocation, resetLocations } = useLocations();
+  const { rows, loadStatus, removeLocation, moveLocation, resetLocations } =
+    useLocations();
   const addLocationButtonRef = useRef<HTMLButtonElement>(null);
   const hasRemovedLastLocation = useRef(false);
   const [announcement, setAnnouncement] = useState("");
@@ -51,7 +52,11 @@ export default function CardsView() {
           {t("views.cardsEmptyState")}
         </p>
       ) : (
-        <LocationList rows={rows} onRemove={handleRemove} />
+        <LocationList
+          rows={rows}
+          onRemove={handleRemove}
+          onMove={moveLocation}
+        />
       )}
       <LocationSearch
         addLocationButtonRef={addLocationButtonRef}

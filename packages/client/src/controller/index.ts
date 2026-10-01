@@ -4,6 +4,7 @@ export { useContainerWidth } from "./useContainerWidth";
 export { useDocumentLanguage } from "./useDocumentLanguage";
 export { LocationsStatus, useLocations } from "./useLocations";
 export { useOnlineStatus } from "./useOnlineStatus";
+export { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 export type { PwaUpdateStatus } from "./usePwaUpdateStatus";
 export { usePwaUpdateStatus } from "./usePwaUpdateStatus";
 export { useStorageAvailability } from "./useStorageAvailability";

@@ -1,5 +1,6 @@
 // Public API of the model layer (ADR-0002).
-// Implements FR8, FR9, FR10 of add-locations-via-search.
+// Implements FR8, FR9, FR10 of add-locations-via-search and FR2 of
+// reorder-locations-by-drag-and-drop.
 export {
   buildLocationId,
   type Location,
@@ -10,6 +11,7 @@ export {
   type LocationsState,
   reduceLocations,
 } from "./locations";
+export { moveLocationInList } from "./moveLocation";
 export {
   type ParseStoredLocationsResult,
   parseStoredLocations,

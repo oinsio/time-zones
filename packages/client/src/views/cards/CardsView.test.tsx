@@ -1,5 +1,6 @@
 // Verifies FR7, UX1 of add-main-page-scaffold: the empty state of Cards, and
-// FR10, FR12, FR17, NFR-A2, NFR-A3 of add-locations-via-search.
+// FR10, FR12, FR17, NFR-A2, NFR-A3 of add-locations-via-search, and FR1 of
+// reorder-locations-by-drag-and-drop.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -127,5 +128,15 @@ describe("CardsView", () => {
     renderCards(savedLocations("Alpha"));
     await userEvent.click(screen.getByRole("button", { name: "Remove Alpha" }));
     expect(screen.getByRole("button", { name: "Add location" })).toHaveFocus();
+  });
+
+  it("should render move handles when two locations are stored", () => {
+    renderCards(savedLocations("Moscow", "Almaty"));
+    expect(
+      screen.getByRole("button", { name: "Move Moscow" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Move Almaty" }),
+    ).toBeInTheDocument();
   });
 });

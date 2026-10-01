@@ -1,4 +1,4 @@
-// FR8, FR9, FR10 of add-locations-via-search: locations reducer (D1).
+// FR8, FR9, FR10 of add-locations-via-search and FR2 of reorder-locations-by-drag-and-drop: locations reducer (D1).
 import { describe, expect, it } from "vitest";
 import {
   LocationCommandType,
@@ -136,5 +136,46 @@ describe("reduceLocations REPLACE_LOCATIONS", () => {
       }),
     );
     expect(state.locations).toEqual(locations);
+  });
+});
+
+describe("reduceLocations MOVE_LOCATION", () => {
+  const twoLocations = expectOk(add(expectOk(add(emptyState, moscow)), almaty));
+
+  it("should apply the move to the list", () => {
+    const state = expectOk(
+      reduceLocations(twoLocations, {
+        type: LocationCommandType.MOVE_LOCATION,
+        id: "Asia/Almaty|Almaty",
+        targetIndex: 0,
+      }),
+    );
+    expect(state.locations.map((location) => location.label)).toEqual([
+      "Almaty",
+      "Moscow",
+    ]);
+  });
+
+  it("should return LOCATION_NOT_FOUND for an unknown id", () => {
+    expect(
+      reduceLocations(twoLocations, {
+        type: LocationCommandType.MOVE_LOCATION,
+        id: "none",
+        targetIndex: 0,
+      }),
+    ).toEqual({ ok: false, error: LocationErrorCode.LOCATION_NOT_FOUND });
+  });
+
+  it("should return LOCATION_POSITION_OUT_OF_RANGE for a bad index", () => {
+    expect(
+      reduceLocations(twoLocations, {
+        type: LocationCommandType.MOVE_LOCATION,
+        id: "Asia/Almaty|Almaty",
+        targetIndex: 2,
+      }),
+    ).toEqual({
+      ok: false,
+      error: LocationErrorCode.LOCATION_POSITION_OUT_OF_RANGE,
+    });
   });
 });

@@ -51,6 +51,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         <LocationList
           rows={latestLocations.rows}
           onRemove={latestLocations.removeLocation}
+          onMove={latestLocations.moveLocation}
         />
       );
     };

@@ -1,4 +1,7 @@
 // Verifies FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
+// Verifies FR1 of reorder-locations-by-drag-and-drop.
+import { DndContext } from "@dnd-kit/core";
+import { SortableContext } from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import type { LocationRow as LocationRowModel } from "@/presenter";
@@ -11,11 +14,23 @@ const row: LocationRowModel = {
   utcOffsetLabel: "UTC+5:30",
 };
 
-const renderRow = (overrides: Partial<LocationRowModel> = {}) =>
+const renderRow = (
+  overrides: Partial<LocationRowModel> = {},
+  isReorderable = true,
+) =>
   render(
-    <ul>
-      <LocationRow row={{ ...row, ...overrides }} onRemove={vi.fn()} />
-    </ul>,
+    <DndContext>
+      <SortableContext items={[row.id]}>
+        <ul>
+          <LocationRow
+            row={{ ...row, ...overrides }}
+            onRemove={vi.fn()}
+            isReorderable={isReorderable}
+            prefersReducedMotion={false}
+          />
+        </ul>
+      </SortableContext>
+    </DndContext>,
   );
 
 describe("LocationRow", () => {
@@ -47,5 +62,17 @@ describe("LocationRow", () => {
   it("should show no secondary line when both country and offset are empty", () => {
     renderRow({ countryName: "", utcOffsetLabel: "" });
     expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata$/);
+  });
+
+  it("should show the move handle when reorderable", () => {
+    renderRow();
+    expect(
+      screen.getByRole("button", { name: "Move Kolkata" }),
+    ).toBeInTheDocument();
+  });
+
+  it("should show no move handle when not reorderable", () => {
+    renderRow({}, false);
+    expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
   });
 });

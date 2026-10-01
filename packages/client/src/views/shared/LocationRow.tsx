@@ -1,26 +1,78 @@
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { X } from "lucide-react";
-import { forwardRef } from "react";
+import { forwardRef, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { LocationRow as LocationRowModel } from "@/presenter";
+import { DragHandle } from "./DragHandle";
+import { getReorderTransition } from "./reorderTransition";
+import { useDropSettleAnimation } from "./useDropSettleAnimation";
 
 type LocationRowProps = {
   row: LocationRowModel;
   onRemove: (id: string) => void;
+  isReorderable: boolean;
+  prefersReducedMotion: boolean;
 };
 
 /**
- * One location: city, country, UTC offset and its remove action.
+ * One location: move handle, city, country, UTC offset and its remove action.
  * Implements FR10, UX4 of add-locations-via-search (D10).
  * Implements FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
+ * Implements FR1, UX1, UX2 of reorder-locations-by-drag-and-drop (D5): the
+ * card itself is translated while dragged, so it keeps its width and slot.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
-  function LocationRow({ row, onRemove }, removeButtonRef) {
+  function LocationRow(
+    { row, onRemove, isReorderable, prefersReducedMotion },
+    removeButtonRef,
+  ) {
     const { t } = useTranslation();
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      setActivatorNodeRef,
+      transform,
+      transition,
+      isDragging,
+      isSorting,
+    } = useSortable({
+      id: row.id,
+      transition: getReorderTransition(prefersReducedMotion),
+    });
+    const cardRef = useRef<HTMLLIElement | null>(null);
+    const dropSettle = useDropSettleAnimation(
+      cardRef,
+      isDragging,
+      isSorting,
+      prefersReducedMotion,
+    );
     const hasSecondaryLine =
       row.countryName !== "" || row.utcOffsetLabel !== "";
+    const draggingClassName = isDragging ? " relative z-10 shadow-lg" : "";
     return (
-      <li className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface px-4 py-3">
-        <span className="flex flex-col">
+      <li
+        ref={(element) => {
+          cardRef.current = element;
+          setNodeRef(element);
+        }}
+        style={{
+          transform: dropSettle.transform ?? CSS.Transform.toString(transform),
+          transition: dropSettle.transition ?? transition,
+        }}
+        onTransitionEnd={dropSettle.onTransitionEnd}
+        className={`flex items-center gap-3 rounded-md border border-border bg-surface px-4 py-3${draggingClassName}`}
+      >
+        {isReorderable && (
+          <DragHandle
+            ref={setActivatorNodeRef}
+            city={row.cityLabel}
+            attributes={attributes}
+            listeners={listeners}
+          />
+        )}
+        <span className="flex flex-1 flex-col">
           <span className="font-semibold">{row.cityLabel}</span>
           {hasSecondaryLine && (
             <span className="flex flex-wrap gap-x-2 text-sm text-muted-foreground">
