@@ -1,0 +1,144 @@
+# Цель стадии, которую видит гном.
+purpose: open (or update) the pull request that hands this task's branch to a human reviewer, and mirror its body into pr-body.md so the checks can read what was published
+# Рабочая копия плюс то, что произвели стадии implement, fix-code и archive.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: implementation-diff
+  - kind: internal
+    producerOutputId: code-review-resolution
+  - kind: internal
+    producerOutputId: archived-change
+# Имя результата, который производит стадия.
+outputs:
+  - id: pull-request
+# Кто выполняет работу: агент Claude Code CLI.
+executor:
+  type: agent-cli
+  model: sonnet
+  # Допускаются только эти четыре ключа.
+  settings:
+    # Число ходов агента за раунд.
+    maxTurns: 15
+    # По истечении раунд прерывается; считается сбоем инфраструктуры, а не попыткой.
+    roundTimeout: 600s
+    # Не может расширить то, что запрещает .claude/settings.json.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+    # Без субагентов, без веба, без планирования.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Промпт для гнома.
+instructions: stages/deliver/instructions.md
+# Выполняются по порядку после каждого раунда (sh -c, POSIX); провал возвращается агенту и сжигает попытку.
+# `gh` аутентифицируется через GH_TOKEN: .gnomish/factory/gnomish экспортирует его, а project.yaml
+# разрешает его через factory.sandbox.env-passthrough.
+verify:
+  # Для этой ветки существует открытый pull request, нацеленный на main. Самая дешёвая проверка идёт первой:
+  # без неё всё, что ниже, бессмысленно.
+  - type: command
+    command: |
+      set -e
+      if [ -z "${GH_TOKEN:-}" ]; then
+        echo "GH_TOKEN is absent from the check environment - .gnomish/factory/gnomish exports it from the secrets folder and project.yaml passes it through factory.sandbox.env-passthrough; without it no gh call in this stage can work"
+        exit 1
+      fi
+      repo=$(sed -n 's/^[[:space:]]*repo:[[:space:]]*//p' .gnomish/config.yaml | head -1)
+      branch=$(git branch --show-current)
+      base=$(gh pr list --repo "$repo" --head "$branch" --state open --json baseRefName --jq '.[0].baseRefName // empty')
+      if [ -z "$base" ]; then
+        echo "no open pull request for branch $branch in $repo - open one with: gh pr create --repo $repo --base main --head $branch --title <title> --body-file pr-body.md"
+        exit 1
+      fi
+      if [ "$base" != "main" ]; then
+        echo "the pull request for $branch targets $base, not main - retarget it with: gh pr edit --repo $repo --base main"
+        exit 1
+      fi
+  # Опубликованные заголовок и описание содержат то, что стоит ревьюить, а pr-body.md точно
+  # зеркалирует описание - проверка через одну читает именно файл, поэтому они не должны расходиться.
+  - type: command
+    command: |
+      set -e
+      repo=$(sed -n 's/^[[:space:]]*repo:[[:space:]]*//p' .gnomish/config.yaml | head -1)
+      branch=$(git branch --show-current)
+      number=$(gh pr list --repo "$repo" --head "$branch" --state open --json number --jq '.[0].number // empty')
+      if [ ! -f pr-body.md ]; then
+        echo "pr-body.md is missing - the stage must leave the published body in that file, it is the only thing the checks can read"
+        exit 1
+      fi
+      title=$(gh pr view "$number" --repo "$repo" --json title --jq .title)
+      case "$title" in
+        gnomish:*|"") echo "the pull request title is '$title' - give it a real one describing the change, not a factory commit subject"; exit 1 ;;
+      esac
+      if [ ${#title} -lt 10 ]; then
+        echo "the pull request title '$title' is too short to describe the change"
+        exit 1
+      fi
+      local_body=$(tr -d '[:space:]' < pr-body.md)
+      remote_body=$(gh pr view "$number" --repo "$repo" --json body --jq .body | tr -d '[:space:]')
+      if [ ${#local_body} -lt 120 ]; then
+        echo "pr-body.md holds ${#local_body} non-whitespace characters - too thin for a reviewer; describe what changed, why, and how it was verified"
+        exit 1
+      fi
+      if [ "$local_body" != "$remote_body" ]; then
+        echo "the published body and pr-body.md differ - publish the file itself: gh pr edit $number --repo $repo --body-file pr-body.md"
+        exit 1
+      fi
+      issue=$(sed -n 's/.*"taskId":"[^"#]*#\([0-9][0-9]*\)".*/\1/p' .gnomish-task/task.json 2>/dev/null | head -1)
+      if [ -n "$issue" ] && ! grep -q "#$issue" pr-body.md; then
+        echo "the body never references the task issue - add a 'Refs #$issue' line so the reviewer can find it"
+        exit 1
+      fi
+  # Стадия пишет только игнорируемый git файл pr-body.md: никаких изменений рабочей копии и никаких
+  # собственных коммитов с начала стадии (не считая собственных коммитов фабрики 'gnomish:').
+  - type: command
+    command: |
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^deliver#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      dirty=$(git status --porcelain | grep -v ' \.gnomish-task/' || true)
+      [ -z "$dirty" ] || { echo "$dirty"; echo "the deliver stage writes only pr-body.md - restore the files above with: git checkout -- <file>"; exit 1; }
+      commits=$(git log --format='%h %s' "$since"..HEAD | grep -v ' gnomish: ' || true)
+      [ -z "$commits" ] || { echo "$commits"; echo "the deliver stage commits nothing - the commits above must not be on the task branch"; exit 1; }
+  # Утверждения описания подтверждаются веткой: архив, на который оно указывает, существует, названные
+  # id есть в proposal этого изменения, названные тестовые файлы существуют, каждое отклонённое
+  # замечание ревью названо, а на issue стоит ссылка, а не закрытие. Без судьи: pull request
+  # ревьюит человек, а в окружении судьи есть только коммиты ветки, но не
+  # игнорируемый git файл pr-body.md.
+  - type: command
+    command: |
+      set -e
+      archive=$(grep -oE 'openspec/changes/archive/[0-9]{4}/[0-9]{2}/[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+' pr-body.md | head -1 || true)
+      [ -n "$archive" ] || { echo "the body never names the archived change - point at openspec/changes/archive/YYYY/MM/YYYY-MM-DD-<change>/"; exit 1; }
+      [ -d "$archive" ] || { echo "the body points at $archive, which does not exist - name the directory the archive stage created"; exit 1; }
+      if grep -qiE '(close[sd]?|fix(e[sd])?|resolve[sd]?):? #[0-9]' pr-body.md; then
+        echo "the body closes an issue - this project closes its own issues, use 'Refs #<issue>'"; exit 1
+      fi
+      requirement_ids() { grep -oE '\b(FR|UX|M|G|NG)-?[0-9]+\b|\bNFR-[A-Z]+[0-9]+\b' "$1" | sed -E 's/^(FR|UX|M|G|NG)-/\1/' | sort -u; }
+      body_ids=$(requirement_ids pr-body.md || true)
+      [ -n "$body_ids" ] || { echo "the body names no requirement ids - list the ones the change implements from $archive/proposal.md"; exit 1; }
+      proposal_ids=$(requirement_ids "$archive/proposal.md" || true)
+      unknown_ids=$(for id in $body_ids; do printf '%s\n' "$proposal_ids" | grep -qxF "$id" || echo "$id"; done)
+      [ -z "$unknown_ids" ] || { echo "$unknown_ids"; echo "the body names the ids above, which $archive/proposal.md does not define - use the proposal's own ids"; exit 1; }
+      test_files=$(grep -oE '[A-Za-z0-9_./-]+\.(feature|test\.tsx?)' pr-body.md | sed 's|^packages/client/src/||' | sort -u || true)
+      [ -n "$test_files" ] || { echo "the body names no .feature or test files - say which ones under packages/client/src/ cover the change"; exit 1; }
+      missing_files=$(printf '%s\n' "$test_files" | while read -r name; do [ -n "$(find packages/client/src -path "*/$name" -print -quit)" ] || echo "$name"; done)
+      [ -z "$missing_files" ] || { echo "$missing_files"; echo "the body names the files above, and none exists under packages/client/src/ - name the real ones"; exit 1; }
+      for review in review-specs.md review-code.md; do
+        [ -f "$archive/$review" ] || continue
+        grep -qF "$review" pr-body.md || { echo "the body never summarises $review - give its fixed and rejected counts"; exit 1; }
+        for finding in $(awk '/^### /{ finding = $2 } /^- Status: rejected/{ print finding }' "$archive/$review"); do
+          grep -qw "$finding" pr-body.md || { echo "$review rejects $finding, and the body never names it - list every rejected finding with its reason"; exit 1; }
+        done
+      done
+# auto = перейти к следующей стадии; manual = ждать человека.
+advancement: auto
