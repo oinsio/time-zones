@@ -127,7 +127,8 @@
 - Impact: `bddgen` reports missing step definitions, so `pnpm test:bdd --grep "@reorder-locations-by-drag-and-drop"` fails until the implementer invents a step or rewrites the scenarios.
 - Fix: In tasks.md 6.1, write both scenarios with two lines each: `Then the list offers the move handle "Move Moscow"` / `And the list offers the move handle "Move Almaty"` (and Almaty/Moscow for the outline).
 - Fix risk: none — the singular step already uses the required `exact: true` locator.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 6.1 scenarios "Handle names the city and is large enough" and "The list state shows handles at <width> px in the <theme> theme" now use the defined singular step `the list offers the move handle {string}` twice each; no plural step text remains.
 
 ### R5 — SUGGESTION — NFR-P2 has no delta-spec requirement and no tagged check for M1
 - Location: `openspec/changes/reorder-locations-by-drag-and-drop/specs/locations/spec.md:142`
