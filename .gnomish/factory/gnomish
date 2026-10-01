@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# Обёртка над локально собранным jar Gnomish Factory (gnomish.jar лежит рядом, в git не попадает).
+# Всё, что запускает фабрику, находится здесь, в .gnomish/factory/; остальное содержимое .gnomish/
+# (config.yaml, pipeline.yaml, stages/) — это пайплайн проекта, который фабрика читает сама.
+# Скрипт можно вызывать из любого каталога.
+#
+# Настройки фабрики хранятся в её домашнем каталоге, а не в этом репозитории: этот клон один раз
+# регистрируется как проект time-zones, и ~/.gnomish/projects/time-zones/project.yaml содержит
+# binding, образ песочницы, egress allowlist и всё остальное (шаблоны лежат рядом со скриптом:
+# project.yaml.example.host, project.yaml.example.container). Собственные настройки этой обёртки —
+# имя проекта, уровень логирования, команда запуска Java — лежат в gnomish.env; gnomish.local.env
+# (в git не попадает, необязателен) их переопределяет.
+#
+# Добавляет единственное значение по умолчанию, нужное каждому вызову, а остальное передаёт как есть:
+#   --dir=<этот проект, абсолютный путь>     (относительный --dir в режиме git не распознаётся как git-репозиторий)
+# Собственный --dir=... ЗАМЕНЯЕТ значение по умолчанию, а не добавляется к нему: Spring склеивает
+# повторённую опцию командной строки через запятую, а не даёт победить последней.
+#
+#   .gnomish/factory/gnomish run --task="..." --mode=in-place --interactive
+#   .gnomish/factory/gnomish status <task-id>
+#   .gnomish/factory/gnomish project show time-zones    # все настройки с указанием источника
+#
+# ---------------------------------------------------------------------------
+# Секреты
+#
+# Фабрика читает свои секреты (GNOMISH_GITHUB_TOKEN, GNOMISH_GITHUB_ACTIONS_TOKEN) из
+# ~/.gnomish/projects/time-zones/secrets/<NAME>, затем из ~/.gnomish/secrets/<NAME> — имя файла
+# совпадает с именем переменной, содержимое файла И ЕСТЬ значение, а файлы с правами шире 600
+# отвергаются:
+#
+#   install -m 600 /dev/null ~/.gnomish/projects/time-zones/secrets/GNOMISH_GITHUB_TOKEN
+#
+# Ещё две учётные данные — не секреты фабрики, а обычные переменные, которые дочерний процесс
+# читает из своего окружения, поэтому обёртка экспортирует их из тех же каталогов (см. ниже):
+# CLAUDE_CODE_OAUTH_TOKEN и GH_TOKEN.
+set -euo pipefail
+
+factory_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Корень проекта содержит .gnomish/factory/, откуда бы ни вызывался скрипт.
+project_dir="$(cd "$factory_dir/../.." && pwd)"
+
+# Загружаем gnomish.env, затем gnomish.local.env, не позволяя ни одному из них перекрыть
+# вызывающего: все уже экспортированные переменные GNOMISH_* сначала запоминаются, а потом
+# применяются заново. Это сделано на верхнем уровне намеренно — повторный `declare` внутри
+# функции сделал бы переменные локальными.
+caller_settings="$(while read -r name; do
+    [[ "$name" == GNOMISH_* ]] && declare -p "$name"
+done < <(compgen -e))" || true
+set -a  # каждое присваивание в env-файлах экспортируется, как и подразумевает .env-файл
+for env_file in "$factory_dir/gnomish.env" "$factory_dir/gnomish.local.env"; do
+    if [[ -f "$env_file" ]]; then
+        # shellcheck source=/dev/null
+        source "$env_file"
+    fi
+done
+set +a
+eval "$caller_settings"
+unset caller_settings env_file
+
+if [[ -z "${GNOMISH_PROJECT_NAME:-}" ]]; then
+    echo "gnomish: GNOMISH_PROJECT_NAME is not set — it belongs in $factory_dir/gnomish.env" >&2
+    exit 2
+fi
+factory_home="${GNOMISH_HOME:-$HOME/.gnomish}"
+# Сначала каталог проекта, затем каталог хоста — в том же порядке фабрика сама ищет секреты.
+secret_dirs=("$factory_home/projects/$GNOMISH_PROJECT_NAME/secrets" "$factory_home/secrets")
+
+# Печатает путь к первому непустому файлу с именем $1 в каталогах секретов.
+find_secret_file() {
+    local name="$1" secret_dir
+    for secret_dir in "${secret_dirs[@]}"; do
+        if [[ -s "$secret_dir/$name" ]]; then
+            printf '%s' "$secret_dir/$name"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Экспортирует $1 с содержимым первого найденного файла секрета среди остальных имён, если
+# вызывающий ещё не экспортировал эту переменную. Экспортируется только непустое значение:
+# пустое потребитель не воспримет как «не задано» — для CLI агента оно перекрыло бы вход через
+# keychain этого хоста учётными данными, которые не проходят аутентификацию.
+export_from_secret() {
+    local var="$1" name file value
+    shift
+    [[ -z "${!var:-}" ]] || return 0
+    for name in "$@"; do
+        file="$(find_secret_file "$name")" || continue
+        value="$(tr -d '[:space:]' < "$file")"
+        if [[ -n "$value" ]]; then
+            export "$var=$value"
+        fi
+        return 0
+    done
+}
+
+# Учётные данные CLI агента. На этом хосте CLI мог бы войти через ~/.claude, но в боксе нет
+# keychain, через который можно войти: фабрика задаёт CLAUDE_CODE_OAUTH_TOKEN для раундов агента
+# и голосов судьи из СВОЕГО окружения (это её AI-шов), а не из каталога секретов, поэтому его
+# нужно экспортировать здесь. Запись в passthrough ему не нужна, и в проверки команд он не попадает.
+#
+#   claude setup-token
+#   install -m 600 /dev/null ~/.gnomish/projects/time-zones/secrets/CLAUDE_CODE_OAUTH_TOKEN
+export_from_secret CLAUDE_CODE_OAUTH_TOKEN CLAUDE_CODE_OAUTH_TOKEN
+
+# Стадия deliver запускает `gh` — и в раунде гнома, и в собственных проверках команд этой
+# стадии, — а `gh` берёт учётные данные из GH_TOKEN. GNOMISH_GITHUB_TOKEN трекера для этого не
+# годится: фабрика объявляет это имя учётными данными, поэтому оно вычищается из окружения
+# каждого дочернего процесса и по построению запрещено в passthrough allowlist. GH_TOKEN попадает
+# в дочерние процессы через factory.sandbox.env-passthrough в project.yaml, который копирует его
+# из окружения этого процесса, — отсюда и экспорт.
+#
+# Fine-grained токен с доступом только к Contents + Pull requests в secrets/GH_TOKEN не даёт
+# гному получить собственные права трекера; без него повторно используется токен трекера.
+export_from_secret GH_TOKEN GH_TOKEN GNOMISH_GITHUB_TOKEN
+
+# --dir, если вызывающий не передал свой, — почему его нельзя просто перекрыть, см. примечание в начале.
+dir_default=(--dir="$project_dir")
+for arg in "$@"; do
+    if [[ "$arg" == --dir=* || "$arg" == --dir ]]; then
+        dir_default=()
+        break
+    fi
+done
+
+exec "${GNOMISH_JAVA:-java}" -jar "$factory_dir/gnomish.jar" \
+    ${dir_default[@]+"${dir_default[@]}"} \
+    "$@"
