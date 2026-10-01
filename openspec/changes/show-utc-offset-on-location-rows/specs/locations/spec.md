@@ -83,3 +83,9 @@ Presenting 50 locations with their offsets SHALL take at most 50 ms, and the off
 - **GIVEN** the list is Kolkata, Kathmandu and New York
 - **WHEN** the list is shown at 320 px or 2560 px
 - **THEN** the page does not scroll horizontally
+
+#### Scenario: List screenshots show the offsets
+- **GIVEN** the list state with Almaty and Moscow
+- **WHEN** it is shown at 375 px or 1024 px in the light or the dark theme
+- **THEN** the Almaty row shows `UTC+5` and the Moscow row shows `UTC+3`
+- **AND** the screen matches the re-approved "list" screenshot
