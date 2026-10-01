@@ -1,0 +1,10 @@
+# Порядок запуска стадий
+stages:
+  - specify
+  - review-specs
+  - fix-specs
+  - implement
+  - review-code
+  - fix-code
+  - archive
+  - deliver
