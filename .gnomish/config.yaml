@@ -1,0 +1,59 @@
+# Справка: https://github.com/oinsio/gnomish-factory
+#   docs/guides/operator-guide.md         — секция tracker, метки, токены
+#   docs/guides/operator-guide-serve.md   — wip-limit, task-branch.base
+#   docs/guides/operator-guide-run.md     — точка входа `run` для разовых запусков
+
+# ОБЯЗАТЕЛЬНО. Версия схемы всего дерева .gnomish/.
+schemaVersion: "1"
+
+# Умолчания автономности для всего пайплайна.
+autonomy:
+  # Сколько попыток получает одна стадия, прежде чем задача эскалируется человеку.
+  # Стадия может переопределить это в блоке `autonomy:` своего stage.yaml.
+  attemptLimit: 2
+
+# Трекер, из которого фабрика забирает задачи.
+tracker:
+  # ОБЯЗАТЕЛЬНО. Имя адаптера трекера задач.
+  type: github
+
+  # Необязательно, по умолчанию 3. Сколько неудачных взятий одной задачи допускается.
+  abort-threshold: 3
+
+  # Необязательно, по умолчанию 5m. Как часто живой экземпляр повторно отбивает heartbeat
+  # по каждому своему захвату Working, чтобы другие экземпляры видели, что его процесс ещё жив.
+  heartbeat-interval: 5m
+
+  # Необязательно, по умолчанию 3, минимум 3. Сколько интервалов heartbeat захват без отбивки
+  # переживает, прежде чем считается мёртвым и снимается.
+  # TTL = multiplier × interval, так что умолчания дают 15 минут.
+  heartbeat-ttl-multiplier: 3
+
+  # Необязательно, по умолчанию 10. Общий для проекта предел открытых фронтов (Working +
+  # AwaitingHuman), который соблюдает `serve`. Он действует на весь проект.
+  wip-limit: 10
+
+  # ОБЯЗАТЕЛЬНО, и ключ должен совпадать с `type` выше.
+  github:
+    # ОБЯЗАТЕЛЬНО, умолчания в коде нет. https://api.github.com для github.com; установка
+    # GitHub Enterprise указывает здесь свой endpoint.
+    api-url: https://api.github.com
+
+    # ОБЯЗАТЕЛЬНО. owner/repo — репозиторий, issues которого служат очередью задач.
+    repo: oinsio/time-zones
+
+    # Токен здесь НИКОГДА не записывается. Он читается при создании адаптера из
+    # GNOMISH_GITHUB_TOKEN, который фабрика ищет в
+    # ~/.gnomish/projects/time-zones/secrets/GNOMISH_GITHUB_TOKEN. Любой похожий на учётные данные
+    # ключ в этой подсекции — token, secret, password — отвергается как ошибка загрузки,
+    # а не читается. Этот необязательный ключ переименовывает только читаемую ПЕРЕМЕННУЮ —
+    # для оператора, у которого в профиле подключения она называется иначе.
+    # credential: GNOMISH_GITHUB_TOKEN
+
+    # Необязательно целиком и для каждой записи; ненастроенные записи берут умолчания
+    # адаптера, показанные ниже.
+    labels:
+      ready: { name: "gnomish:ready", color: "2ea44f" }
+      working: { name: "gnomish:working", color: "1f6feb" }
+      needs-human: { name: "gnomish:needs-human", color: "d73a4a" }
+      delivered: { name: "gnomish:delivered", color: "8250df" }
