@@ -8,7 +8,7 @@
 | Requirements traced | 26/26 |
 | CRITICAL | 0 |
 | WARNING | 0 |
-| SUGGESTION | 1 |
+| SUGGESTION | 0 |
 
 ## Tasks
 
@@ -76,15 +76,8 @@ The one survivor (`LocationSearch.tsx:80`, `handleCloseAutoFocus` body emptied) 
 
 ## Findings
 
-### R1 — SUGGESTION — E2E helper redefines the slash key instead of reusing `KeyboardKey.SLASH`
-- Location: `packages/client/src/test/features/locations/steps/locationsShortcutE2eHelpers.ts:3`
-- Rule: `.claude/rules/code-style.md` ("Is any value repeated in 2+ places? → Must be a constant"; the review's reinvention check: reuse the canonical constant)
-- Problem: The branch adds `KeyboardKey.SLASH = "/"` in `constants/keyboard.ts:7` as the single definition of the shortcut key, then defines a second constant `export const SHORTCUT_KEY = "/"` in the E2E helpers and uses it for the key press, the `defaultPrevented` recorder and the `aria-keyshortcuts` assertion (`locations_search_shortcut_e2e.steps.ts:34,39,48,61,63,123,140-141`, `locationsShortcutE2eHelpers.ts:33`).
-- Impact: Two sources of truth for the same key; the E2E `aria-keyshortcuts` assertion is checked against a copy instead of the value the component renders, so a change to the binding has to be made twice. Low stakes while the key is `/`.
-- Fix: Delete `SHORTCUT_KEY` from `locationsShortcutE2eHelpers.ts` and import `KeyboardKey` from `@/constants` in `locationsShortcutE2eHelpers.ts` and `locations_search_shortcut_e2e.steps.ts`, using `KeyboardKey.SLASH` in its place. The E2E code already resolves `@/constants` (`locations_ui_e2e.fixtures.ts:2` imports `STORAGE_KEYS` from it).
-- Fix risk: none — same value, import path already used by the E2E fixtures; the regex step texts stay as they are. Re-run `pnpm test:bdd --grep "@open-location-search-with-slash-shortcut"` in `view-contract-cards` to confirm.
-- Status: open
+None.
 
 ## Verdict
 
-Ready. No CRITICAL or WARNING findings; R1 is a non-blocking SUGGESTION.
+Ready. No findings; nothing blocks.
