@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# Запускает демон фабрики вместе с обзором того, что он делает. Лежит рядом с обёрткой gnomish
+# и управляет фабрикой только через неё, поэтому gnomish.env, gnomish.local.env, project.yaml
+# и секреты применяются точно так же, как при любом другом вызове. Можно вызывать из любого каталога.
+#
+# Равносильно запуску этих трёх команд параллельно, в трёх терминалах:
+#   .gnomish/factory/gnomish dashboard --watch --out=.gnomish/factory/logs/dashboard.html
+#   tail -F ~/.gnomish/projects/time-zones/logs/default.log
+#   .gnomish/factory/gnomish serve --slots=1
+#
+# Рендерер дашборда и слежение за логом уходят в фон, демон остаётся на переднем плане, а Ctrl-C
+# останавливает все три: демон, как и обычно, дорабатывает текущие слоты, после чего два других
+# процесса завершаются вместе с ним.
+#
+# Слежение за логом нужно потому, что в консоль демона попадают только WARN и выше: INFO-рассказ —
+# что делает каждый гном, стадия за стадией, — пишется только в файл лога. Без него нормальный
+# прогон выглядит как молчащий терминал.
+#
+#   .gnomish/factory/gnomish-up                        # GNOMISH_UP_SLOTS слотов, открывает дашборд
+#   .gnomish/factory/gnomish-up --slots=2              # любой флаг serve передаётся как есть
+#   .gnomish/factory/gnomish-up --drain --no-open --no-logs
+#
+# --no-open (не открывать браузер) и --no-logs (не следить за логом) — собственные флаги этого
+# скрипта; всё остальное относится к `gnomish serve`.
+set -euo pipefail
+
+factory_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+gnomish="$factory_dir/gnomish"
+
+# Настройки, которые читает этот скрипт, разрешаются так же, как в обёртке: gnomish.env,
+# затем gnomish.local.env, затем ваша оболочка. Читаются в подоболочке, чтобы ничего лишнего из
+# env-файлов не просочилось в этот процесс — обёртка загружает их сама.
+read_setting() {
+    local name="$1"
+    if [[ -n "${!name:-}" ]]; then
+        printf '%s' "${!name}"
+        return
+    fi
+    (
+        for env_file in "$factory_dir/gnomish.env" "$factory_dir/gnomish.local.env"; do
+            # shellcheck source=/dev/null
+            if [[ -f "$env_file" ]]; then source "$env_file"; fi
+        done
+        printf '%s' "${!name:-}"
+    )
+}
+
+# Фабрика пишет по одному логу на проект и экземпляр в свой домашний каталог:
+# <home>/projects/<project>/logs/<instance>.log. Этот клон запускает экземпляр по умолчанию
+# (factory.instance-name в project.yaml не задан); путь выводит `gnomish project show`.
+factory_home="${GNOMISH_HOME:-$HOME/.gnomish}"
+project_name="$(read_setting GNOMISH_PROJECT_NAME)"
+factory_log_dir="$factory_home/projects/$project_name/logs"
+factory_log="$factory_log_dir/default.log"
+
+dashboard_dir="$(read_setting GNOMISH_DASHBOARD_DIR)"
+dashboard_out="$dashboard_dir/dashboard.html"
+dashboard_log="$dashboard_dir/dashboard-render.log"
+default_slots="$(read_setting GNOMISH_UP_SLOTS)"
+render_wait_seconds="$(read_setting GNOMISH_UP_RENDER_WAIT_SECONDS)"
+render_poll_interval_seconds=0.5
+
+open_browser=1
+follow_logs=1
+serve_args=()
+for arg in "$@"; do
+    case "$arg" in
+        --no-open) open_browser=0 ;;
+        --no-logs) follow_logs=0 ;;
+        *) serve_args+=("$arg") ;;
+    esac
+done
+
+# `--slots` — настоящий флаг CLI, а не свойство Spring, поэтому второй такой флаг — ошибка
+# использования, а не переопределение; значение по умолчанию подставляем, только если вызывающий его не указал.
+has_slots=0
+for arg in ${serve_args[@]+"${serve_args[@]}"}; do
+    case "$arg" in
+        --slots|--slots=*) has_slots=1 ;;
+    esac
+done
+if [[ $has_slots -eq 0 ]]; then
+    serve_args=(--slots="$default_slots" ${serve_args[@]+"${serve_args[@]}"})
+fi
+
+mkdir -p "$dashboard_dir" "$factory_log_dir"
+
+"$gnomish" dashboard --watch --out="$dashboard_out" >"$dashboard_log" 2>&1 &
+dashboard_pid=$!
+logs_pid=""
+
+# shellcheck disable=SC2329  # вызывается из cleanup
+stop_pid() {
+    local pid="$1"
+    [[ -n "$pid" ]] || return 0
+    if kill -0 "$pid" 2>/dev/null; then
+        kill "$pid" 2>/dev/null || true
+        wait "$pid" 2>/dev/null || true
+    fi
+}
+
+# shellcheck disable=SC2329  # вызывается через trap
+cleanup() {
+    stop_pid "$dashboard_pid"
+    stop_pid "$logs_pid"
+}
+trap cleanup EXIT INT TERM
+
+echo "gnomish-up: dashboard renderer pid $dashboard_pid -> $dashboard_out (log: $dashboard_log)"
+
+if [[ $follow_logs -eq 1 ]]; then
+    # -n 0: только рассказ этого запуска, а не вчерашнего. -F: следить по имени, чтобы слежение
+    # пережило ротацию файла logback'ом.
+    # WARN и ERROR отбрасываются, потому что консоль демона их уже выводит — дважды они
+    # выглядели бы как два инцидента. Фильтр привязан к полю уровня в шаблоне лога, поэтому
+    # при изменении шаблона он перестанет совпадать и пропустит все строки: шумнее, но никогда не тише.
+    # Подстановка процесса вместо конвейера, чтобы $! указывал на сам tail: его завершение
+    # закрывает подстановку, и фильтр выходит по EOF.
+    tail -n 0 -F "$factory_log" 2>/dev/null \
+        > >(grep --line-buffered -Ev '\] (WARN|ERROR) +\[taskId=') &
+    logs_pid=$!
+    echo "gnomish-up: following $factory_log (INFO and below; WARN+ comes from the daemon itself)"
+fi
+
+# Ждём первого рендера, прежде чем открывать браузер: вкладка с ещё не созданным файлом —
+# это пустая страница без всякой причины.
+render_polls="$(awk -v total="$render_wait_seconds" -v step="$render_poll_interval_seconds" \
+    'BEGIN { print int(total / step) }')"
+for _ in $(seq 1 "$render_polls"); do
+    [[ -s "$dashboard_out" ]] && break
+    kill -0 "$dashboard_pid" 2>/dev/null || break
+    sleep "$render_poll_interval_seconds"
+done
+
+if ! kill -0 "$dashboard_pid" 2>/dev/null; then
+    echo "gnomish-up: the dashboard renderer exited early, see $dashboard_log — starting the daemon anyway" >&2
+elif [[ ! -s "$dashboard_out" ]]; then
+    echo "gnomish-up: no page rendered within ${render_wait_seconds}s, see $dashboard_log — starting the daemon anyway" >&2
+elif [[ $open_browser -eq 1 ]] && command -v open >/dev/null 2>&1; then
+    open "file://$dashboard_out"
+fi
+
+echo "gnomish-up: starting the daemon — .gnomish/factory/gnomish serve ${serve_args[*]}"
+
+set +e
+"$gnomish" serve ${serve_args[@]+"${serve_args[@]}"}
+serve_status=$?
+set -e
+exit "$serve_status"
