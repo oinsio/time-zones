@@ -1,0 +1,92 @@
+# Цель стадии, которую видит гном.
+purpose: archive this task's completed OpenSpec change under openspec/changes/archive/YYYY/MM/ and fold its spec deltas into openspec/specs/
+# Рабочая копия репозитория, а также то, что произвели стадии specify и implement.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+  - kind: internal
+    producerOutputId: implementation-diff
+# Название того, что производит стадия.
+outputs:
+  - id: archived-change
+# Кто выполняет работу: агент Claude Code CLI.
+executor:
+  type: agent-cli
+  model: sonnet
+  # Допускаются только эти четыре ключа.
+  settings:
+    # Число ходов агента за раунд.
+    maxTurns: 15
+    # По истечении раунд прерывается; считается сбоем инфраструктуры, а не попыткой.
+    roundTimeout: 600s
+    # Не может расширить то, что запрещено в .claude/settings.json.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+    # Без сабагентов, без веба, без планирования.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Промпт для гнома.
+instructions: stages/archive/instructions.md
+# Выполняются по порядку после каждого раунда (sh -c, POSIX); ошибка передаётся агенту и сжигает попытку.
+verify:
+  # Не осталось ни одного активного изменения.
+  - type: command
+    command: >-
+      if find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive | grep .;
+      then echo "the change directories listed above are still active - archive each one with:
+      openspec archive <name> --yes, then move it under openspec/changes/archive/YYYY/MM/"; exit 1; fi
+  # Структура архива из .claude/rules/archive-path.md: archive/YYYY/MM/YYYY-MM-DD-<name>.
+  - type: command
+    command: >-
+      misplaced=$(find openspec/changes/archive -mindepth 1 -maxdepth 1 -type d ! -name '[0-9][0-9][0-9][0-9]';
+      find openspec/changes/archive -mindepth 2 -maxdepth 2 -type d ! -name '[0-1][0-9]';
+      find openspec/changes/archive -mindepth 3 -maxdepth 3 -type d ! -name '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]-*');
+      [ -z "$misplaced" ] || { echo "$misplaced"; echo "these archive entries break the YYYY/MM/YYYY-MM-DD-<name> layout - see .claude/rules/archive-path.md"; exit 1; }
+  # Каждое заархивированное изменение завершено. `openspec validate --archived` не заходит
+  # внутрь группировки YYYY/MM, поэтому чекбоксы проверяются напрямую.
+  - type: command
+    command: >-
+      if grep -rn '^[[:space:]]*- \[ \]' openspec/changes/archive --include=tasks.md;
+      then echo "the archived tasks listed above are still open - the change was archived unfinished"; exit 1; fi
+  - type: command
+    command: openspec validate --specs --strict --no-interactive
+  # Архивирование не затрагивает ничего за пределами openspec/.
+  - type: command
+    command: |
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^archive#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
+      outside=$(printf '%s\n' "$changed" | grep . | grep -v '^openspec/' || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the archive stage changes nothing outside openspec/ - restore the files above with: git checkout $since -- <file>"; exit 1; }
+  # LLM-судья оценивает архив по acceptance.md; только чтение.
+  - type: judge
+    criteriaFile: stages/archive/acceptance.md
+    model: sonnet
+    settings:
+      # Один ход на каждое чтение файла; 10 ходов не оставляют запаса на изменении размером с фичу.
+      maxTurns: 20
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Число прогонов судьи; должно быть нечётным, побеждает большинство.
+    votes: 1
+# auto = перейти к следующей стадии; manual = ждать человека.
+advancement: auto
