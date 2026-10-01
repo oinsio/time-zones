@@ -1,0 +1,26 @@
+# Template of this project's file in the Gnomish Factory home, host binding:
+#   ~/.gnomish/projects/time-zones/project.yaml   (mode 600, outside the clone)
+#
+# The template holds only the factory: section — `gnomish project add` writes clones: itself.
+# Register the clone, append the template, check what the factory resolved:
+#   .gnomish/factory/gnomish project add time-zones --dir="$PWD"
+#   cat .gnomish/factory/project.yaml.example.host >> ~/.gnomish/projects/time-zones/project.yaml
+#   .gnomish/factory/gnomish project show time-zones     # every setting with its origin
+#
+# The sandbox-boundary keys (factory.bindings.*, factory.sandbox.image, egress-allowlist,
+# env-passthrough) are read from this file and nowhere else — not from the command line,
+# not from the environment. To switch binding later, edit the file; the other template shows
+# what the other mode needs. Guide: docs/guides/operator-guide.md in gnomish-factory.
+#
+# Gnome processes run on this machine, as you: your files, your network, no egress guard and
+# no resource limits. Needs the project toolchain on the host — Node, pnpm, gh, jq, a global
+# openspec and Playwright Chromium (README, One-time setup). Without CLAUDE_CODE_OAUTH_TOKEN
+# the agent uses this machine's `claude` login.
+factory:
+  bindings:
+    default: host
+  sandbox:
+    # Every child process gets a positive environment allowlist, host mode included: `gh` in
+    # the deliver stage authenticates with GH_TOKEN, exported by the gnomish wrapper.
+    env-passthrough:
+      - GH_TOKEN

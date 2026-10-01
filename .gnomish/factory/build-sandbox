@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Builds the sandbox image the factory runs gnomes in when bound to `container`.
-# The tag is FACTORY_SANDBOX_IMAGE from gnomish.env (gnomish.local.env and the shell win, as in
-# the gnomish wrapper); every tool version comes from the repository itself:
+# The tag is factory.sandbox.image from ~/.gnomish/projects/time-zones/project.yaml, as the
+# factory itself resolves it (`gnomish project show`); every tool version comes from the
+# repository itself:
 #   pnpm        — packageManager in package.json
 #   openspec    — devDependencies of package.json
 #   playwright  — the version pnpm-lock.yaml resolves (a Chromium build belongs to one release)
-# Re-run it after bumping any of them, and bump the tag in gnomish.env so a running factory
+# Re-run it after bumping any of them, and bump the tag in project.yaml so a running factory
 # never mixes two images under one name.
 #
 #   .gnomish/factory/build-sandbox                 # build
@@ -15,17 +16,18 @@ set -euo pipefail
 factory_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_dir="$(cd "$factory_dir/../.." && pwd)"
 
-image="${FACTORY_SANDBOX_IMAGE:-}"
-if [[ -z "$image" ]]; then
-    image="$(GNOMISH_PROJECT_NAME="$(basename "$project_dir")" bash -c '
-        set -a
-        for env_file in "$1/gnomish.env" "$1/gnomish.local.env"; do
-            [[ -f "$env_file" ]] && source "$env_file"
-        done
-        printf "%s" "${FACTORY_SANDBOX_IMAGE:-}"' _ "$factory_dir")"
-fi
-if [[ -z "$image" ]]; then
-    echo "build-sandbox: FACTORY_SANDBOX_IMAGE is not set in gnomish.env" >&2
+# The value the factory will run, read through the wrapper so the same project name and
+# factory home apply: "  factory.sandbox.image = <tag>  [sandbox-boundary]  <origin>".
+# The project name comes from gnomish.env, gnomish.local.env or your shell, as in the wrapper.
+project_name="${GNOMISH_PROJECT_NAME:-$(bash -c '
+    for env_file in "$1/gnomish.env" "$1/gnomish.local.env"; do
+        [[ -f "$env_file" ]] && source "$env_file"
+    done
+    printf "%s" "${GNOMISH_PROJECT_NAME:-}"' _ "$factory_dir")}"
+image="$("$factory_dir/gnomish" project show "$project_name" 2>/dev/null \
+    | sed -n 's/^ *factory\.sandbox\.image = \([^ ]*\) .*$/\1/p')"
+if [[ -z "$image" || "$image" == "null" ]]; then
+    echo "build-sandbox: factory.sandbox.image is not set — see project.yaml.example.container and run: .gnomish/factory/gnomish project show $project_name" >&2
     exit 1
 fi
 

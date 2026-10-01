@@ -1,0 +1,40 @@
+# Template of this project's file in the Gnomish Factory home, container binding:
+#   ~/.gnomish/projects/time-zones/project.yaml   (mode 600, outside the clone)
+#
+# The template holds only the factory: section — `gnomish project add` writes clones: itself.
+# Register the clone, append the template, check what the factory resolved:
+#   .gnomish/factory/gnomish project add time-zones --dir="$PWD"
+#   cat .gnomish/factory/project.yaml.example.container >> ~/.gnomish/projects/time-zones/project.yaml
+#   .gnomish/factory/gnomish project show time-zones     # every setting with its origin
+#
+# The sandbox-boundary keys (factory.bindings.*, factory.sandbox.image, egress-allowlist,
+# env-passthrough) are read from this file and nowhere else — not from the command line,
+# not from the environment. To switch binding later, edit the file; the other template shows
+# what the other mode needs. Guide: docs/guides/operator-guide.md in gnomish-factory.
+#
+# Each task runs in an ephemeral Docker box behind a default-deny egress guard. Needs Docker,
+# the image (.gnomish/factory/build-sandbox) and CLAUDE_CODE_OAUTH_TOKEN in the secrets folder —
+# a box has no keychain to log in from.
+factory:
+  bindings:
+    default: container
+  sandbox:
+    # Built from sandbox/Dockerfile by build-sandbox, which reads this tag. Bump it whenever
+    # the image changes (a new Node, pnpm, openspec or Playwright in the repository).
+    image: time-zones-gnomish-sandbox:3
+    # The agent's provider, the npm registry (pnpm install in implement) and the GitHub API
+    # (gh in deliver). Every denial is listed by `gnomish status` — add a host only once you
+    # know which tool asked for it.
+    egress-allowlist:
+      - api.anthropic.com
+      - registry.npmjs.org
+      - api.github.com
+    # `gh` in the deliver stage authenticates with GH_TOKEN, exported by the gnomish wrapper.
+    env-passthrough:
+      - GH_TOKEN
+    limits:
+      # Vitest, a vite build and headless Chromium in one box outgrow the 2 CPU / 2g defaults.
+      cpus: 4
+      memory: 4g
+      # Stryker spawns hundreds of processes per run; 512 (the default) ran out mid-round.
+      pids: 2048
