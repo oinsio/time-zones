@@ -36,7 +36,7 @@ New `views/shared/searchShortcut.ts` exports `isSearchShortcutEvent(event: Keybo
 
 1. `event.key === KeyboardKey.SLASH` — the produced character, so layouts that need Shift for `/` work; `shiftKey` is not read (FR4, spec scenario "Shift on layouts that need it").
 2. `!event.ctrlKey && !event.metaKey && !event.altKey` (FR4).
-3. The target is not a text-entry element (FR2): `event.target` is not an `Element`, or it is not inside a `textarea`, not inside an element matched by `CONTENT_EDITABLE_SELECTOR = '[contenteditable]:not([contenteditable="false"])'` (via `Element.closest`), and not an `input` unless its `type` is in `NON_TEXT_INPUT_TYPES` (`button`, `checkbox`, `color`, `file`, `image`, `radio`, `range`, `reset`, `submit`). Matching by attribute with `closest` instead of `HTMLElement.isContentEditable` keeps the check identical in jsdom and browsers. Both constants are module-local, as the house keeps DOM strings (`PAGE_HIDE_EVENT`).
+3. The target is not a text-entry element (FR2): `event.target` is not an `Element`, or it is not inside a `textarea`, not inside an element matched by `CONTENT_EDITABLE_SELECTOR = '[contenteditable]:not([contenteditable="false"])'` (via `Element.closest`), and not an `input` unless its `type` is in `NON_TEXT_INPUT_TYPES` (`button`, `checkbox`, `color`, `file`, `image`, `radio`, `range`, `reset`, `submit`). Matching by attribute with `closest` instead of `HTMLElement.isContentEditable` keeps the check identical in jsdom and browsers. Both constants are module-local to `searchShortcut.ts`, as the house keeps DOM strings (`PAGE_HIDE_EVENT`); they are not added to `constants/`.
 
 `KeyboardKey.SLASH = "/"` is added to the enum in `constants/keyboard.ts` (`.claude/rules/code-style.md`: "if a value is used in a `switch`, `if`, or for branching — it must be an enum").
 
@@ -57,16 +57,21 @@ Both files are internal to the `views/shared` module and are not exported from `
 
 | What | Where | Why |
 |---|---|---|
-| Predicate: `/`, Shift, each ignore case | `views/shared/searchShortcut.test.ts` (Vitest, `it.each`) | pure function, mutation target |
-| Hook: listener on/off, `preventDefault`, unmount | `views/shared/useSearchShortcut.test.tsx` (Vitest, `renderHook`) | DOM event wiring |
-| `aria-keyshortcuts` and accessible name | `views/shared/AddLocationButton.test.tsx` (Vitest) | attribute check as a component test |
-| Open state, ignore cases on the whole app, unreadable list, lazy data | `test/features/locations/locations_search_shortcut_unit.feature` + `steps/locations_search_shortcut_unit.steps.tsx` (vitest-cucumber, `openApp` from `locationsUiWorld.tsx`) | business-visible rules without a browser; no focus assertions |
-| Focus into the query field, add with keyboard, focus return, attribute in a real browser | `test/features/locations/locations_search_shortcut_e2e.feature` + `steps/locations_search_shortcut_e2e.steps.ts` (playwright-bdd, `@view-contract`) | focus and aria need a real browser (ADR-0001) |
-| axe-core and screenshots | existing outlines in `locations_view_contract_e2e.feature` and `locations_ui_e2e.feature`, tagged with this change | no new state; prove nothing regressed |
+| Predicate: `/`, Shift, each ignore case (FR1, FR2, FR4) | `views/shared/searchShortcut.test.ts` (Vitest, `it.each`) | pure function, mutation target |
+| Hook: listener on/off, `preventDefault`, the 3 text-entry targets, unmount (FR2, FR3, UX1) | `views/shared/useSearchShortcut.test.tsx` (Vitest, `renderHook`) | DOM event wiring |
+| `aria-keyshortcuts` and accessible name (NFR-A1) | `views/shared/AddLocationButton.test.tsx` (Vitest) | attribute check as a component test |
+| Opening, lazy data, focus return, already open (FR1, FR3, FR5, NFR-P1) | `views/shared/LocationSearch.shortcut.test.tsx` (Vitest component test) | wiring of the hook into `LocationSearch` |
+| Unreadable list (FR6) | `views/cards/CardsView.shortcut.test.tsx` (Vitest component test, the `renderCards` setup of `CardsView.test.tsx`) | `CardsView` decides whether `LocationSearch` is rendered |
+| Focus into the query field, add with keyboard, focus return, attribute in a real browser (FR1, FR5, NFR-A1, UX1, UX2) | `test/features/locations/locations_search_shortcut_e2e.feature` + `steps/locations_search_shortcut_e2e.steps.ts` (playwright-bdd, `@view-contract`) | focus and aria need a real browser (ADR-0001) |
+| axe-core and screenshots (NFR-A1, NFR-R1) | existing outlines in `locations_view_contract_e2e.feature` and `locations_ui_e2e.feature`, tagged with this change | no new state; prove nothing regressed |
 
-The Vitest component tests of tasks 4.1–4.2 also check the attribute and focus return in jsdom, as `LocationSearchDialog.keyboard.test.tsx` already does for the existing keyboard path; they guard the wiring for mutation testing, while the E2E scenario is the proof for focus and `aria-keyshortcuts`. The unit BDD feature makes no focus or `aria-*` assertions.
+No unit BDD (vitest-cucumber) feature is written. `.claude/rules/bdd-unit.md` marks "Keyboard accessibility" and "aria-labels, focus management" as "no" for unit BDD and "yes" for E2E BDD, and every rule of this change is a keyboard rule; the Gherkin specification of the change is the E2E feature.
 
-In the unit feature the "search already open" case presses `/` while focus is on the dialog's close action, so the query field does not receive the key and the query must stay empty.
+The Vitest tests above are plain unit and component tests — the level `.claude/rules/test-planning.md` asks for ("**Unit tests (Vitest)** — domain logic, utils, hooks via TDD"), as `LocationSearchDialog.keyboard.test.tsx` already does for the existing keyboard path. They guard the wiring for mutation testing; the E2E scenario is the proof for focus and `aria-keyshortcuts` in a real browser.
+
+Text-entry elements a Vitest test creates itself (`<input>`, `<textarea>`, contenteditable `<div>`) are appended to `document.body`, which Testing Library's automatic `cleanup()` does not remove (it unmounts only the containers it rendered). Each such test file removes them explicitly in `afterEach` (`element.remove()`).
+
+In `LocationSearch.shortcut.test.tsx` the "search already open" case presses `/` while focus is on the dialog's close action, so the query field does not receive the key and the query must stay empty.
 
 ## Consequences
 

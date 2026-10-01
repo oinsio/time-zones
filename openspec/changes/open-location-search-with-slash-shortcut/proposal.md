@@ -25,8 +25,8 @@ _None._
 
 ## Impact
 
-- `packages/client/src/`: `views/shared/` (a keyboard shortcut predicate and hook, `LocationSearch.tsx` opens on the shortcut, `AddLocationButton.tsx` gains `aria-keyshortcuts`), `constants/` (the `/` key and DOM constants).
-- Tests: Vitest unit tests under `views/shared/`; `locations_search_shortcut_unit.feature` (vitest-cucumber) and `locations_search_shortcut_e2e.feature` (playwright-bdd) under `src/test/features/locations/`.
+- `packages/client/src/`: `views/shared/` (a keyboard shortcut predicate and hook, with their module-local DOM constants; `LocationSearch.tsx` opens on the shortcut, `AddLocationButton.tsx` gains `aria-keyshortcuts`), `constants/keyboard.ts` (the `/` key added to the existing `KeyboardKey` enum — nothing else in `constants/`).
+- Tests: Vitest unit and component tests under `views/shared/` and `views/cards/`; one new `locations_search_shortcut_e2e.feature` (playwright-bdd) under `src/test/features/locations/`. No unit BDD (vitest-cucumber) feature: every rule of this change is about keyboard handling, which `.claude/rules/bdd-unit.md` puts in E2E BDD, not unit BDD.
 - No new dependencies, no locale keys (the shortcut has no visible text), no storage schema change.
 
 ## Goals
@@ -71,7 +71,7 @@ _None._
 
 #### Responsive
 
-- NFR-R1: No visual change: the 8 approved screenshots of the list and empty states (the states that show the "Add location" action) at 375 px and 1024 px in both themes stay unchanged — no baseline is re-approved.
+- NFR-R1: No visual change: the 16 approved screenshot baselines of the list and empty states (the states that show the "Add location" action) — 8 examples (2 states × 375 px and 1024 px × 2 themes), each with one baseline in the `chromium` and one in the `mobile-chrome` project — stay unchanged; no baseline is re-approved.
 
 ## UX Acceptance Criteria
 
@@ -92,10 +92,11 @@ _None._
 
 ## Behavior
 
-Feature files under `packages/client/src/test/features/locations/`, tagged `@open-location-search-with-slash-shortcut`:
+Feature file under `packages/client/src/test/features/locations/`, tagged `@open-location-search-with-slash-shortcut`:
 
-- `locations_search_shortcut_unit.feature` — `/` opens the search, each ignore case, the unreadable list, lazy data (vitest-cucumber, jsdom);
-- `locations_search_shortcut_e2e.feature` — one scenario: `/` opens the search with focus in the query field, a location is added with the keyboard, and the action announces the shortcut (playwright-bdd, every registered view).
+- `locations_search_shortcut_e2e.feature` — one scenario: `/` opens the search with focus in the query field, a location is added with the keyboard, focus returns to the action, and the action announces the shortcut (playwright-bdd, every registered view).
+
+The ignore cases (FR2–FR4, FR6) and lazy data (NFR-P1) are covered by Vitest unit and component tests, not by a Gherkin feature.
 
 ## Visual Reference
 
@@ -111,7 +112,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M2: 7 of 7 ignore cases — text input, textarea, contenteditable, search already open, Ctrl, Meta, Alt — leave the search state unchanged in the unit tests, and in the 3 text-entry cases the `/` is not default-prevented.
 - M3: Mutation score of the new and changed view code is at least 95% (minimum 90%).
 - M4: The E2E scenario adds a location with 0 pointer actions, in 1 of 1 registered view (Cards).
-- M5: axe-core reports 0 violations in the 4 existing list and empty accessibility examples (2 states × 2 themes) with the shortcut attribute in place; 0 screenshot baselines re-approved for the 8 list and empty screenshot examples (run in both the `chromium` and `mobile-chrome` projects).
+- M5: axe-core reports 0 violations in the 4 existing list and empty accessibility examples (2 states × 2 themes) with the shortcut attribute in place; 0 of the 16 list and empty screenshot baselines re-approved (8 examples × the `chromium` and `mobile-chrome` projects, NFR-R1).
 
 ## Open Questions
 
