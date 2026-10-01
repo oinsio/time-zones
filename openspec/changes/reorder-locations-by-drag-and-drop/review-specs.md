@@ -107,7 +107,8 @@
 - Impact: Implemented as written, the announcement code looks up a missing `over` (index −1). Screen-reader users then hear "Moscow moved to position 0 of 3" or "Moscow dropped at position 0 of 3" for a drop that FR3 says changes nothing (NFR-A3 asks for the real position). No test catches it.
 - Fix: In design.md D5 `useReorderAnnouncements`, add: "when `over` is null, `onDragOver` returns `undefined` (no announcement) and `onDragEnd` returns `locations.reorderCancelled` for the active city, because the list stays as it was (FR3)". In tasks.md 4.2, add the cases "`onDragOver` with no `over` → `undefined`" and "`onDragEnd` with no `over` → "Moving Moscow cancelled"".
 - Fix risk: none — no new locale keys (FR8's key set stays the same), and dnd-kit announcement callbacks may return `undefined`.
-- Status: open
+- Status: fixed
+- Resolution: design.md D5 `useReorderAnnouncements` now says that with a null `over` `onDragOver` returns `undefined` and `onDragEnd` returns `locations.reorderCancelled`; tasks.md 4.2 adds both cases ("Moving Moscow cancelled" for a drop outside the list).
 
 ### R3 — SUGGESTION — `moveLocationInList` signature cannot return the same state object
 - Location: `openspec/changes/reorder-locations-by-drag-and-drop/design.md:26`
