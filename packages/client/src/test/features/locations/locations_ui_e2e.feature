@@ -106,7 +106,7 @@ Feature: Locations in a real browser
     When the user opens the search
     Then the search is a centered dialog
 
-  @add-locations-via-search @NFR-R2 @screenshot
+  @add-locations-via-search @NFR-R2
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the screen is <width> px wide for the locations

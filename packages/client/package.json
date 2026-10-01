@@ -15,7 +15,6 @@
     "test:mutation": "stryker run",
     "test:bdd:gen": "bddgen -c playwright.bdd.config.ts",
     "test:bdd": "bddgen -c playwright.bdd.config.ts && playwright test -c playwright.bdd.config.ts",
-    "test:screenshots": "scripts/test-screenshots.sh",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "typecheck": "tsc -b --noEmit"

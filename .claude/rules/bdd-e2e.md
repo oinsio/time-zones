@@ -29,12 +29,9 @@ Full rationale: docs/adr/0001-bdd-e2e-via-playwright-bdd.md
 ## Scripts
 
 ```
-pnpm test:bdd          — generate + run all BDD e2e tests except @screenshot
-pnpm test:screenshots  — @screenshot scenarios in the pinned Playwright Docker image
-                         (add --update-snapshots to re-approve); the only way to
-                         take or check baselines, on any OS
-pnpm test:bdd:a11y     — accessibility only (NFR-A*)
-pnpm test:all          — unit + BDD e2e + regular e2e
+pnpm test:bdd       — generate + run all BDD e2e tests
+pnpm test:bdd:a11y  — accessibility only (NFR-A*)
+pnpm test:all       — unit + BDD e2e + regular e2e
 ```
 
 ## Dependencies

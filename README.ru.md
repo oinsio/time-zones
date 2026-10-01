@@ -78,17 +78,6 @@ pnpm preflight    # lint + typecheck + тесты
 
 Приложение во всех режимах (dev, preview, production) раздаётся по пути `/time-zones/`, поэтому открывайте `http://localhost:<port>/time-zones/`. Базовый путь задан в одном месте — [`packages/client/app.config.ts`](packages/client/app.config.ts).
 
-### Скриншот-тесты
-
-Chromium рисует текст и рамки фокуса чуть по-разному на macOS, на каждом дистрибутиве Linux и на раннере CI, поэтому эталонные скриншоты в [`packages/client/src/test/features/__screenshots__/`](packages/client/src/test/features/__screenshots__/) снимаются и проверяются только в одном месте: в Docker-образе Playwright той версии `@playwright/test`, что установлена в проекте, с Node и pnpm этого репозитория ([`packages/client/screenshots/Dockerfile`](packages/client/screenshots/Dockerfile)). Это одинаково работает на macOS и Linux, нужен только запущенный Docker:
-
-```bash
-pnpm --filter @time-zones/client test:screenshots                      # проверить эталоны
-pnpm --filter @time-zones/client test:screenshots --update-snapshots   # переутвердить изменившиеся
-```
-
-`pnpm --filter @time-zones/client test:bdd` пропускает сценарии с тегом `@screenshot`; CI запускает и то и другое. После изменения интерфейса переутвердите эталоны командой выше и закоммитьте изменившиеся картинки. Не переутверждайте их обычным `playwright test` на своей машине: такие картинки совпадут только с вашей ОС и упадут в CI.
-
 ### Замена логотипа
 
 Все иконки (favicon, Apple touch icon, иконки манифеста 192/512 px и maskable) генерируются при сборке из одного изображения. Чтобы сменить логотип, замените [`packages/client/assets/app-icon-source.jpg`](packages/client/assets/app-icon-source.jpg) квадратным изображением (не меньше 512×512 px) и запустите `pnpm build` — больше ничего менять не нужно. Отступы и фон maskable-иконки задаются в [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
@@ -97,7 +86,7 @@ pnpm --filter @time-zones/client test:screenshots --update-snapshots   # пер�
 
 ## Деплой
 
-- Каждый pull request запускает [CI](.github/workflows/ci.yml): lint, typecheck, unit-тесты, production-сборку, бюджет начального JS (150 KB gzip), проверку, что сборка не изменила исходники, smoke E2E и [скриншот-тесты](#скриншот-тесты).
+- Каждый pull request запускает [CI](.github/workflows/ci.yml): lint, typecheck, unit-тесты, production-сборку, бюджет начального JS (150 KB gzip), проверку, что сборка не изменила исходники, и smoke E2E.
 - Каждый push в `main` запускает те же проверки и, только если они прошли, [деплоит](.github/workflows/deploy.yml) сборку на GitHub Pages. Упавшая проверка оставляет в работе предыдущую версию; откат — это revert в `main`.
 
 ## Гномская фабрика
