@@ -30,8 +30,8 @@ _None._
 
 ## Goals
 
-- G1: A user sees the current UTC offset of every listed location without leaving the Cards view.
-- G2: The offset is always correct for the instant the list is shown: whole-hour, :30 and :45 zones and DST are handled, with 0 offsets stored.
+- G1: 100% of listed locations whose zone the browser knows show their current UTC offset in the Cards view, with no extra action.
+- G2: The offset is correct for the instant the list is shown in all 6 reference cases of M2 (whole-hour, :30, :45, both sides of a DST switch, zero), with 0 offsets stored.
 
 ## Non-Goals
 
@@ -109,7 +109,7 @@ No changes (no IA documents exist under `docs/ia/`).
 
 - M1: 100% of FR1–FR6, NFR-P1, NFR-A1, NFR-R1, NFR-R2, UX1 and UX2 have at least one automated test tagged or commented with `show-utc-offset-on-location-rows`.
 - M2: The unit BDD scenarios produce exactly these labels with `fakeClock`: Europe/Moscow `UTC+3`, Asia/Kolkata `UTC+5:30`, Asia/Kathmandu `UTC+5:45`, America/New_York `UTC−4` at 2026-07-15T12:00:00Z and `UTC−5` at 2026-01-15T12:00:00Z, UTC `UTC` — 6 of 6.
-- M3: Mutation score of the new model, presenter and constants code is at least 95% (minimum 90%).
+- M3: Mutation score of the new or changed model, presenter, controller and view code is at least 95% (minimum 90%).
 - M4: axe-core reports 0 violations for the list with offsets in 2 themes (2 checks).
 - M5: 0 horizontal scrolling at 320 px and 2560 px (2 checks); 0 hyphen-minus characters in any negative offset label (asserted by the presenter tests).
 
