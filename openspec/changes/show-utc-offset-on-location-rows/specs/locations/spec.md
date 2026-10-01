@@ -35,9 +35,12 @@ Every location row in the Cards view SHALL show the location's UTC offset on its
 - **THEN** the UTC row shows `UTC`
 
 #### Scenario: Offset is computed again when the list changes
-- **GIVEN** the list contains Moscow and the app was opened
-- **WHEN** the user adds Kolkata
-- **THEN** the Moscow row shows `UTC+3` and the Kolkata row shows `UTC+5:30`
+- **GIVEN** the list contains New York (`America/New_York`)
+- **AND** the app was opened at `2026-01-15T12:00:00Z`, so the New York row shows `UTC−5`
+- **WHEN** the current instant is `2026-07-15T12:00:00Z`
+- **AND** the user adds Kolkata
+- **THEN** the New York row shows `UTC−4`
+- **AND** the Kolkata row shows `UTC+5:30`
 
 #### Scenario: Offset that cannot be computed
 - **GIVEN** the list holds Moscow and a location whose zone the browser does not know (for example `Mars/Olympus_Mons`)
