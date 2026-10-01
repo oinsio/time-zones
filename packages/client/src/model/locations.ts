@@ -1,8 +1,10 @@
+import { moveLocationInList } from "./moveLocation";
 import { canonicalizeTimeZoneId } from "./timeZoneId";
 
 /**
  * Locations state, commands and reducer.
- * Implements FR8, FR9, FR10 of add-locations-via-search (D1).
+ * Implements FR8, FR9, FR10 of add-locations-via-search (D1) and FR2 of
+ * reorder-locations-by-drag-and-drop.
  */
 
 export type Location = {
@@ -20,12 +22,14 @@ export enum LocationCommandType {
   ADD_LOCATION = "ADD_LOCATION",
   REMOVE_LOCATION = "REMOVE_LOCATION",
   REPLACE_LOCATIONS = "REPLACE_LOCATIONS",
+  MOVE_LOCATION = "MOVE_LOCATION",
 }
 
 export enum LocationErrorCode {
   DUPLICATE_LOCATION = "DUPLICATE_LOCATION",
   UNKNOWN_TIME_ZONE = "UNKNOWN_TIME_ZONE",
   LOCATION_NOT_FOUND = "LOCATION_NOT_FOUND",
+  LOCATION_POSITION_OUT_OF_RANGE = "LOCATION_POSITION_OUT_OF_RANGE",
 }
 
 export type LocationCommand =
@@ -36,6 +40,12 @@ export type LocationCommand =
       countryCode: string;
     }
   | { type: LocationCommandType.REMOVE_LOCATION; id: string }
+  | {
+      type: LocationCommandType.MOVE_LOCATION;
+      id: string;
+      /** 0-based index in the list after the move. */
+      targetIndex: number;
+    }
   | {
       type: LocationCommandType.REPLACE_LOCATIONS;
       locations: readonly Location[];
@@ -92,5 +102,7 @@ export function reduceLocations(
     }
     case LocationCommandType.REPLACE_LOCATIONS:
       return { ok: true, state: { locations: command.locations } };
+    case LocationCommandType.MOVE_LOCATION:
+      return moveLocationInList(state, command.id, command.targetIndex);
   }
 }
