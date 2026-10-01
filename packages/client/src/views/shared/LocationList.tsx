@@ -1,4 +1,5 @@
 import {
+  closestCenter,
   DndContext,
   KeyboardSensor,
   PointerSensor,
@@ -67,6 +68,7 @@ export function LocationList({ rows, onRemove, onMove }: LocationListProps) {
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={closestCenter}
       modifiers={[restrictToVerticalAxis]}
       accessibility={accessibility}
       onDragEnd={({ active, over }) => {

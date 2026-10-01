@@ -1,4 +1,5 @@
 import type { Announcements, DndContextProps } from "@dnd-kit/core";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { LocationRow } from "@/presenter";
 
@@ -6,6 +7,8 @@ type RowLabel = Pick<LocationRow, "id" | "cityLabel">;
 
 /**
  * Screen-reader instructions and live announcements for moving a card.
+ * The first over-event of a drag is the card over its own slot; it is not
+ * announced, so the pick-up announcement is not replaced at once.
  * Dropping outside the list is announced as cancelled because the list stays
  * as it was.
  * Implements FR8, NFR-A3, FR3 of reorder-locations-by-drag-and-drop (D5).
@@ -15,6 +18,7 @@ export function useReorderAnnouncements(
 ): NonNullable<DndContextProps["accessibility"]> {
   const { t } = useTranslation();
   const total = rows.length;
+  const isAwaitingFirstOver = useRef(false);
   const describe = (
     key: string,
     activeId: string | number,
@@ -28,12 +32,17 @@ export function useReorderAnnouncements(
     describe("locations.reorderCancelled", activeId, activeId);
 
   const announcements: Announcements = {
-    onDragStart: ({ active }) =>
-      describe("locations.reorderPickedUp", active.id, active.id),
-    onDragOver: ({ active, over }) =>
-      over
-        ? describe("locations.reorderMovedOver", active.id, over.id)
-        : undefined,
+    onDragStart: ({ active }) => {
+      isAwaitingFirstOver.current = true;
+      return describe("locations.reorderPickedUp", active.id, active.id);
+    },
+    onDragOver: ({ active, over }) => {
+      const isStillInPlace =
+        isAwaitingFirstOver.current && over?.id === active.id;
+      isAwaitingFirstOver.current = false;
+      if (!over || isStillInPlace) return undefined;
+      return describe("locations.reorderMovedOver", active.id, over.id);
+    },
     onDragEnd: ({ active, over }) =>
       over
         ? describe("locations.reorderDropped", active.id, over.id)

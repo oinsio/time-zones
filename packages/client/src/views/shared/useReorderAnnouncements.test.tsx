@@ -56,6 +56,23 @@ describe("useReorderAnnouncements", () => {
     );
   });
 
+  it("should not announce the first over-event over the picked-up card itself", () => {
+    const { announcements } = renderAnnouncements();
+    announcements?.onDragStart?.({ active: eventOf("Moscow").active });
+    expect(
+      announcements?.onDragOver?.(eventOf("Moscow", "Moscow")),
+    ).toBeUndefined();
+  });
+
+  it("should announce returning over the picked-up card after it moved away", () => {
+    const { announcements } = renderAnnouncements();
+    announcements?.onDragStart?.({ active: eventOf("Moscow").active });
+    announcements?.onDragOver?.(eventOf("Moscow", "Almaty"));
+    expect(announcements?.onDragOver?.(eventOf("Moscow", "Moscow"))).toBe(
+      "Moscow moved to position 1 of 3",
+    );
+  });
+
   it("should announce the drop position", () => {
     const { announcements } = renderAnnouncements();
     expect(announcements?.onDragEnd?.(eventOf("Moscow", "Almaty"))).toBe(

@@ -1,11 +1,12 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { X } from "lucide-react";
-import { forwardRef } from "react";
+import { forwardRef, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { LocationRow as LocationRowModel } from "@/presenter";
 import { DragHandle } from "./DragHandle";
 import { getReorderTransition } from "./reorderTransition";
+import { useDropSettleAnimation } from "./useDropSettleAnimation";
 
 type LocationRowProps = {
   row: LocationRowModel;
@@ -35,17 +36,32 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       transform,
       transition,
       isDragging,
+      isSorting,
     } = useSortable({
       id: row.id,
       transition: getReorderTransition(prefersReducedMotion),
     });
+    const cardRef = useRef<HTMLLIElement | null>(null);
+    const dropSettle = useDropSettleAnimation(
+      cardRef,
+      isDragging,
+      isSorting,
+      prefersReducedMotion,
+    );
     const hasSecondaryLine =
       row.countryName !== "" || row.utcOffsetLabel !== "";
     const draggingClassName = isDragging ? " relative z-10 shadow-lg" : "";
     return (
       <li
-        ref={setNodeRef}
-        style={{ transform: CSS.Transform.toString(transform), transition }}
+        ref={(element) => {
+          cardRef.current = element;
+          setNodeRef(element);
+        }}
+        style={{
+          transform: dropSettle.transform ?? CSS.Transform.toString(transform),
+          transition: dropSettle.transition ?? transition,
+        }}
+        onTransitionEnd={dropSettle.onTransitionEnd}
         className={`flex items-center gap-3 rounded-md border border-border bg-surface px-4 py-3${draggingClassName}`}
       >
         {isReorderable && (
