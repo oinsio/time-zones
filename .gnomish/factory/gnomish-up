@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Starts the factory daemon together with a view of what it is doing. Lives next to the
-# gnomish wrapper and drives the factory only through it, so gnomish.env, gnomish.local.env
-# and the secrets apply exactly as for any other invocation. Callable from any directory.
+# gnomish wrapper and drives the factory only through it, so gnomish.env, gnomish.local.env,
+# project.yaml and the secrets apply exactly as for any other invocation. Callable from any directory.
 #
 # Equivalent to running these three side by side, in three terminals:
 #   .gnomish/factory/gnomish dashboard --watch --out=.gnomish/factory/logs/dashboard.html
-#   tail -F ~/.gnomish/logs/time-zones/gnomish.log
+#   tail -F ~/.gnomish/projects/time-zones/logs/default.log
 #   .gnomish/factory/gnomish serve --slots=1
 #
 # The dashboard renderer and the log follower go to the background, the daemon stays in the
@@ -25,8 +25,6 @@
 set -euo pipefail
 
 factory_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# The project root holds .gnomish/factory/, wherever the script is called from.
-project_dir="$(cd "$factory_dir/../.." && pwd)"
 gnomish="$factory_dir/gnomish"
 
 # The settings this script reads, resolved the way the wrapper resolves them: gnomish.env,
@@ -39,8 +37,6 @@ read_setting() {
         return
     fi
     (
-        # shellcheck disable=SC2034  # read by the env files
-        GNOMISH_PROJECT_NAME="$(basename "$project_dir")"
         for env_file in "$factory_dir/gnomish.env" "$factory_dir/gnomish.local.env"; do
             # shellcheck source=/dev/null
             if [[ -f "$env_file" ]]; then source "$env_file"; fi
@@ -49,11 +45,13 @@ read_setting() {
     )
 }
 
-# Exported, so the follower and the daemon cannot end up on two different files: the wrapper
-# leaves an already-exported value alone.
-GNOMISH_LOG_DIR="$(read_setting GNOMISH_LOG_DIR)"
-export GNOMISH_LOG_DIR
-factory_log="$GNOMISH_LOG_DIR/gnomish.log"
+# The factory writes one log per project and instance into its home:
+# <home>/projects/<project>/logs/<instance>.log. This clone runs the default instance
+# (factory.instance-name is not set in project.yaml); `gnomish project show` prints the path.
+factory_home="${GNOMISH_HOME:-$HOME/.gnomish}"
+project_name="$(read_setting GNOMISH_PROJECT_NAME)"
+factory_log_dir="$factory_home/projects/$project_name/logs"
+factory_log="$factory_log_dir/default.log"
 
 dashboard_dir="$(read_setting GNOMISH_DASHBOARD_DIR)"
 dashboard_out="$dashboard_dir/dashboard.html"
@@ -85,7 +83,7 @@ if [[ $has_slots -eq 0 ]]; then
     serve_args=(--slots="$default_slots" ${serve_args[@]+"${serve_args[@]}"})
 fi
 
-mkdir -p "$dashboard_dir" "$GNOMISH_LOG_DIR"
+mkdir -p "$dashboard_dir" "$factory_log_dir"
 
 "$gnomish" dashboard --watch --out="$dashboard_out" >"$dashboard_log" 2>&1 &
 dashboard_pid=$!

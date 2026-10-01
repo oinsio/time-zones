@@ -4,49 +4,45 @@
 # (config.yaml, pipeline.yaml, stages/) is the project's pipeline, which the factory reads
 # itself. Callable from any directory.
 #
-# Settings live in gnomish.env beside this script, not in it: the instance name, the binding,
-# log and secrets locations, tuning. gnomish.local.env (git-ignored, optional) overrides it.
+# The factory's settings live in its home, not in this repository: this clone is registered
+# once as project time-zones, and ~/.gnomish/projects/time-zones/project.yaml holds the
+# binding, the sandbox image, the egress allowlist and the rest (templates beside this script:
+# project.yaml.example.host, project.yaml.example.container). This wrapper's own settings —
+# the project name, the log level, the Java launcher — live in gnomish.env; gnomish.local.env
+# (git-ignored, optional) overrides it.
 #
 # Adds the one default every invocation needs, then passes the rest through:
 #   --dir=<this project, absolute>     (a relative --dir is not recognised as a git repo in git mode)
 # A --dir=... of your own REPLACES it rather than joining it: Spring joins a repeated
-# command-line option with a comma instead of letting the last one win. factory.* settings
-# need no such care — they arrive as environment variables, which any --factory.*=... flag
-# outranks.
+# command-line option with a comma instead of letting the last one win.
+#
+#   .gnomish/factory/gnomish run --task="..." --mode=in-place --interactive
+#   .gnomish/factory/gnomish status <task-id>
+#   .gnomish/factory/gnomish project show time-zones    # every setting with its origin
 #
 # ---------------------------------------------------------------------------
 # Secrets
 #
-# Secrets use the factory's own file indirection (EnvFileSecretsProvider): for a secret N it
-# reads N_FILE as a path and takes the file's contents, so the token itself never enters this
-# process's environment table. All this script does is point N_FILE at the local file. The
-# files live OUTSIDE the clone — a token in the tree is one you can commit — and they are per
-# project: ~/.gnomish/secrets/<project>, keyed by this clone's directory name, the same way
-# the factory keys ~/.gnomish/worktrees/<project>. One token per project, revocable on its own.
+# The factory reads its own secrets (GNOMISH_GITHUB_TOKEN, GNOMISH_GITHUB_ACTIONS_TOKEN) from
+# ~/.gnomish/projects/time-zones/secrets/<NAME>, then ~/.gnomish/secrets/<NAME> — the file
+# name is the variable name, the file IS the value, and anything wider than 600 is refused:
 #
-#   mkdir -p ~/.gnomish/secrets/time-zones
-#   install -m 600 /dev/null ~/.gnomish/secrets/time-zones/github-token
-#   # paste the token in, no quotes and no KEY= prefix — the file IS the value
+#   install -m 600 /dev/null ~/.gnomish/projects/time-zones/secrets/GNOMISH_GITHUB_TOKEN
 #
-# GNOMISH_SECRETS_DIR (gnomish.env) moves the directory; GNOMISH_GITHUB_TOKEN_FILE names one
-# file directly; an already-exported GNOMISH_GITHUB_TOKEN still works and is left alone.
-#
-#   .gnomish/factory/gnomish run --task="..." --mode=in-place --interactive
-#   .gnomish/factory/gnomish status <task-id>
+# Two more credentials are not factory secrets but plain variables a child process reads from
+# its environment, so this wrapper exports them from the same folders (see below):
+# CLAUDE_CODE_OAUTH_TOKEN and GH_TOKEN.
 set -euo pipefail
 
 factory_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # The project root holds .gnomish/factory/, wherever the script is called from.
 project_dir="$(cd "$factory_dir/../.." && pwd)"
 
-GNOMISH_PROJECT_NAME="$(basename "$project_dir")"
-export GNOMISH_PROJECT_NAME
-
 # Load gnomish.env, then gnomish.local.env, without letting either outrank the caller: every
-# GNOMISH_* and FACTORY_* variable already exported is snapshotted first and re-applied after. At top level
+# GNOMISH_* variable already exported is snapshotted first and re-applied after. At top level
 # on purpose — the re-applying `declare` inside a function would make the variables local.
 caller_settings="$(while read -r name; do
-    [[ "$name" == GNOMISH_* || "$name" == FACTORY_* ]] && declare -p "$name"
+    [[ "$name" == GNOMISH_* ]] && declare -p "$name"
 done < <(compgen -e))" || true
 set -a  # every assignment in the env files is exported, as a .env file implies
 for env_file in "$factory_dir/gnomish.env" "$factory_dir/gnomish.local.env"; do
@@ -59,91 +55,63 @@ set +a
 eval "$caller_settings"
 unset caller_settings env_file
 
-secrets_dir="${GNOMISH_SECRETS_DIR:-$HOME/.gnomish/secrets/$GNOMISH_PROJECT_NAME}"
+if [[ -z "${GNOMISH_PROJECT_NAME:-}" ]]; then
+    echo "gnomish: GNOMISH_PROJECT_NAME is not set — it belongs in $factory_dir/gnomish.env" >&2
+    exit 2
+fi
+factory_home="${GNOMISH_HOME:-$HOME/.gnomish}"
+# Project folder first, host folder second — the order the factory itself resolves secrets in.
+secret_dirs=("$factory_home/projects/$GNOMISH_PROJECT_NAME/secrets" "$factory_home/secrets")
 
-warn_if_group_readable() {
-    local file="$1" perms
-    perms="$(stat -f %Lp "$file" 2>/dev/null || stat -c %a "$file" 2>/dev/null || echo "600")"
-    if [[ "${perms: -2}" != "00" ]]; then
-        echo "gnomish: $file is mode $perms — it holds a token, run: chmod 600 $file" >&2
-    fi
+# The first non-empty file named $1 in the secret folders, printed as a path.
+find_secret_file() {
+    local name="$1" secret_dir
+    for secret_dir in "${secret_dirs[@]}"; do
+        if [[ -s "$secret_dir/$name" ]]; then
+            printf '%s' "$secret_dir/$name"
+            return 0
+        fi
+    done
+    return 1
 }
 
-# Point <SECRET>_FILE at the local file, but only when that file is actually there: the
-# provider is fail-closed, so a _FILE naming a missing path resolves the secret as ABSENT
-# instead of falling back to the plain variable — pointing it at nothing would break an
-# operator who exports the token the old way.
-point_at_file() {
-    local var="$1" file="$2"
-    [[ -f "$file" ]] || return 0
-    if [[ -n "${!var:-}" ]]; then
-        return 0  # an explicit path from the caller wins over the convention
-    fi
-    warn_if_group_readable "$file"
-    export "$var=$file"
+# Exports $1 with the contents of the first secret file among the remaining names, unless the
+# caller already exported it. Only a non-empty value is exported: an empty one would not read
+# as "unset" to the consumer — for the agent CLI it would override this host's keychain login
+# with a credential that cannot authenticate.
+export_from_secret() {
+    local var="$1" name file value
+    shift
+    [[ -z "${!var:-}" ]] || return 0
+    for name in "$@"; do
+        file="$(find_secret_file "$name")" || continue
+        value="$(tr -d '[:space:]' < "$file")"
+        if [[ -n "$value" ]]; then
+            export "$var=$value"
+        fi
+        return 0
+    done
 }
 
-point_at_file GNOMISH_GITHUB_TOKEN_FILE "$secrets_dir/github-token"
-point_at_file GNOMISH_GITHUB_ACTIONS_TOKEN_FILE "$secrets_dir/github-actions-token"
-
-# The agent CLI's credential. On this host the CLI could log in from ~/.claude, but the
-# factory sets this token on agent rounds and judge votes from its own environment, so
-# storing it beside the others keeps the two bindings identical: nothing has to change here
-# when the gnomes move into a box that has no keychain to log in from.
+# The agent CLI's credential. On this host the CLI could log in from ~/.claude, but a box has
+# no keychain to log in from: the factory sets CLAUDE_CODE_OAUTH_TOKEN on agent rounds and
+# judge votes from its OWN environment (its AI seam), not from the secrets folder, so it has to
+# be exported here. It needs no passthrough entry and never reaches a command check.
 #
 #   claude setup-token
-#   install -m 600 /dev/null ~/.gnomish/secrets/time-zones/claude-oauth-token
-#   # paste the token in — the file IS the value
-#
-# Unlike the tracker token this one is exported as a VALUE, not through a _FILE indirection:
-# it is not a factory secret but an ordinary variable the factory reads live from its own
-# environment and sets on agent rounds and judge votes alone (its AI seam) — it needs no
-# passthrough entry and never reaches a command check.
-claude_token_file="$secrets_dir/claude-oauth-token"
-if [[ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" && -s "$claude_token_file" ]]; then
-    warn_if_group_readable "$claude_token_file"
-    token="$(tr -d '[:space:]' < "$claude_token_file")"
-    # Only a non-empty value is exported. An empty one would not read as "unset" to the CLI —
-    # it would override this host's keychain login with a credential that cannot authenticate.
-    if [[ -n "$token" ]]; then
-        CLAUDE_CODE_OAUTH_TOKEN="$token"
-        export CLAUDE_CODE_OAUTH_TOKEN
-    fi
-    unset token
-fi
+#   install -m 600 /dev/null ~/.gnomish/projects/time-zones/secrets/CLAUDE_CODE_OAUTH_TOKEN
+export_from_secret CLAUDE_CODE_OAUTH_TOKEN CLAUDE_CODE_OAUTH_TOKEN
 
 # The deliver stage runs `gh` — in the gnome's round and in that stage's own command checks —
 # and `gh` takes its credential from GH_TOKEN. The tracker's GNOMISH_GITHUB_TOKEN cannot serve
 # it: the factory declares that name a credential, so it is scrubbed from every child
-# environment and refused in the passthrough allowlist by construction. The same token is
-# therefore exported a second time under a name the factory has no reason to treat as one,
-# and gnomish.env allowlists it by name (FACTORY_SANDBOX_ENVPASSTHROUGH).
+# environment and refused in the passthrough allowlist by construction. GH_TOKEN reaches the
+# children through factory.sandbox.env-passthrough in project.yaml, which copies it from this
+# process's environment — hence the export.
 #
-# What that costs, plainly: the gnome's process holds a token with the tracker's own rights —
-# it can write issues and labels as you, and the value sits in this process's environment
-# table, which the *_FILE indirection above exists to avoid. A fine-grained token scoped to
-# Contents + Pull requests in github-pr-token narrows both: it wins over the tracker token
-# here, and nothing else reads it.
-pr_token_file="$secrets_dir/github-pr-token"
-[[ -f "$pr_token_file" ]] || pr_token_file="$secrets_dir/github-token"
-if [[ -z "${GH_TOKEN:-}" && -s "$pr_token_file" ]]; then
-    warn_if_group_readable "$pr_token_file"
-    GH_TOKEN="$(tr -d '[:space:]' < "$pr_token_file")"
-    export GH_TOKEN
-fi
-unset pr_token_file
-
-if [[ -z "${GNOMISH_GITHUB_TOKEN_FILE:-}" && -z "${GNOMISH_GITHUB_TOKEN:-}" \
-      && "${1:-}" != "--help" && "${1:-}" != "-h" ]]; then
-    echo "gnomish: no $secrets_dir/github-token and no GNOMISH_GITHUB_TOKEN — tracker calls will fail" >&2
-fi
-
-# In a box the agent CLI has no keychain to fall back on: without one of these every round and
-# every judge vote fails to authenticate.
-if [[ "${FACTORY_BINDINGS_DEFAULT:-}" == "container" && -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" \
-      && -z "${ANTHROPIC_API_KEY:-}" && "${1:-}" != "--help" && "${1:-}" != "-h" ]]; then
-    echo "gnomish: container binding without $claude_token_file or ANTHROPIC_API_KEY — the agent cannot log in inside the box" >&2
-fi
+# A fine-grained token scoped to Contents + Pull requests in secrets/GH_TOKEN keeps the gnome
+# from holding the tracker's own rights; without it the tracker token is reused.
+export_from_secret GH_TOKEN GH_TOKEN GNOMISH_GITHUB_TOKEN
 
 # --dir, unless the caller passed one — see the note at the top on why it is not simply outranked.
 dir_default=(--dir="$project_dir")

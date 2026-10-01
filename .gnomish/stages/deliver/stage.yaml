@@ -41,8 +41,8 @@ executor:
 # Prompt for the gnome.
 instructions: stages/deliver/instructions.md
 # Run in order after each round (sh -c, POSIX); a failure is fed back and burns an attempt.
-# `gh` authenticates with GH_TOKEN: .gnomish/factory/gnomish exports it and gnomish.env
-# allowlists it through FACTORY_SANDBOX_ENVPASSTHROUGH.
+# `gh` authenticates with GH_TOKEN: .gnomish/factory/gnomish exports it and project.yaml
+# allowlists it through factory.sandbox.env-passthrough.
 verify:
   # An open pull request exists for this branch and targets main. Cheapest check first:
   # everything below is meaningless without it.
@@ -50,7 +50,7 @@ verify:
     command: |
       set -e
       if [ -z "${GH_TOKEN:-}" ]; then
-        echo "GH_TOKEN is absent from the check environment - .gnomish/factory/gnomish exports it from the secrets file and gnomish.env passes it through FACTORY_SANDBOX_ENVPASSTHROUGH; without it no gh call in this stage can work"
+        echo "GH_TOKEN is absent from the check environment - .gnomish/factory/gnomish exports it from the secrets folder and project.yaml passes it through factory.sandbox.env-passthrough; without it no gh call in this stage can work"
         exit 1
       fi
       repo=$(sed -n 's/^[[:space:]]*repo:[[:space:]]*//p' .gnomish/config.yaml | head -1)

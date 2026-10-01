@@ -1,7 +1,8 @@
 # Sandbox image for the time-zones pipeline: the box every gnome round, judge vote and command
-# check runs in when the factory binds `container` (FACTORY_BINDINGS_DEFAULT in gnomish.env).
+# check runs in when the factory binds `container` (factory.bindings.default in
+# ~/.gnomish/projects/time-zones/project.yaml).
 # Build it with .gnomish/factory/build-sandbox, not by hand: the script reads the tag from
-# gnomish.env, the Node version from .nvmrc and every tool version below from package.json and
+# project.yaml (factory.sandbox.image), the Node version from .nvmrc and every tool version below from package.json and
 # pnpm-lock.yaml, so the image cannot drift from what the repository pins.
 #
 # Derived from the factory's reference recipe (gnomish-factory: docs/examples/sandbox-image/),
