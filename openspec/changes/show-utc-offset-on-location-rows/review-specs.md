@@ -75,7 +75,8 @@ None.
 - Impact: an implementation that reads the instant once at provider mount passes every planned test and the Stryker runs of task 4.2 (moving the read is not a mutation Stryker generates), so FR4's "computed when the list is presented" ends up unverified; after a DST switch while the page is open, adding a city would leave stale offsets on every row with no failing test.
 - Fix: in task 4.1, replace the FR4 test with one that uses a switchable test clock built from two `fakeClock` instances (`const january = fakeClock("2026-01-15T12:00:00Z"); const july = fakeClock("2026-07-15T12:00:00Z"); let currentClock = january; const switchableClock: Clock = { instant: () => currentClock.instant(), plainDateISO: () => currentClock.plainDateISO(), timeZoneId: () => currentClock.timeZoneId() };`): with New York stored, the row shows `UTC−5`; set `currentClock = july`, `addLocation` Kolkata; New York now shows `UTC−4` and Kolkata `UTC+5:30`. In `specs/locations/spec.md:37-40` rewrite the scenario as: GIVEN the list contains New York and the app was opened at `2026-01-15T12:00:00Z` (New York shows `UTC−5`); WHEN the current instant is `2026-07-15T12:00:00Z` and the user adds Kolkata; THEN the New York row shows `UTC−4` and the Kolkata row shows `UTC+5:30`; and have task 6.1's steps use the same switchable clock for it.
 - Fix risk: low. The clock still comes only from `fakeClock` instants, so `.claude/rules/tdd-workflow.md` ("Mock current time with `fakeClock`… never use `vi.setSystemTime()` or `vi.useFakeTimers()`") holds; the switch is explicit, not call-count based, so React re-renders do not make it flaky. Task 6.1's steps file needs a small helper for the switchable clock.
-- Status: open
+- Status: fixed
+- Resolution: specs/locations/spec.md scenario "Offset is computed again when the list changes" now opens with New York at `2026-01-15T12:00:00Z` (`UTC−5`), switches the instant to `2026-07-15T12:00:00Z`, adds Kolkata and expects `UTC−4` and `UTC+5:30`; tasks.md 4.1 replaces the fixed-clock FR4 test with a switchable `Clock` delegating to two `fakeClock` instances, task 6.1 uses the same clock for the BDD scenario, and design.md D6 explains why a read-once instant fails.
 
 ### R2 — SUGGESTION — NFR-R2 has no scenario in the delta spec
 - Location: `openspec/changes/show-utc-offset-on-location-rows/specs/locations/spec.md:67`
@@ -84,7 +85,8 @@ None.
 - Impact: after archive, the stable `locations` spec carries an NFR-R2 obligation with no scenario, so the feature outline of task 7.2 traces to no spec scenario and a later change editing that spec has nothing to keep in sync.
 - Fix: add to `specs/locations/spec.md` after line 82: "#### Scenario: List screenshots show the offsets — WHEN the list with Almaty and Moscow is shown at 375 px and 1024 px in each theme — THEN the rows show `UTC+5` and `UTC+3` — AND the screen matches the re-approved screenshot".
 - Fix risk: none — it restates what task 7.2 already builds and tests.
-- Status: open
+- Status: fixed
+- Resolution: added scenario "List screenshots show the offsets" (Almaty `UTC+5`, Moscow `UTC+3` at 375/1024 px in both themes, matching the re-approved screenshot) to the NFR requirement in specs/locations/spec.md; tasks.md 7.2 now names that scenario as the one its `@NFR-R2` outline implements.
 
 ## Verdict
 
