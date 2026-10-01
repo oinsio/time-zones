@@ -110,8 +110,8 @@ _None._
 
 Feature files under `packages/client/src/test/features/locations/`, tagged `@reorder-locations-by-drag-and-drop`:
 
-- `locations_reorder_unit.feature` — moving, errors, cancel and same-position drops writing nothing, persistence, other tab, storage failure, localization, performance (vitest-cucumber, jsdom);
-- `locations_reorder_e2e.feature` — mouse, touch and keyboard drags, announcements, focus, transitions and reduced motion, axe-core, layout, reopen and offline reopen (playwright-bdd).
+- `locations_reorder_unit.feature` — moving, errors, a same-position move writing nothing, persistence, other tab, storage failure, localization, performance (vitest-cucumber, jsdom);
+- `locations_reorder_e2e.feature` — mouse, touch and keyboard drags, a cancelled drag and a click on the handle writing nothing, announcements, focus, transitions and reduced motion, axe-core, layout, reopen, offline reopen, other tab and storage failure through the UI (playwright-bdd).
 
 ## Visual Reference
 
