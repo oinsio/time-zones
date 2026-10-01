@@ -23,7 +23,13 @@ const testDir = defineBddConfig({
 const VIEW_REGISTRY_MODULE_PATH: string = "./src/views/index.ts";
 const { viewRegistry } = await import(VIEW_REGISTRY_MODULE_PATH);
 const VIEW_CONTRACT_TAG_PATTERN = /@view-contract/;
-const SCREENSHOT_MAX_DIFF_PIXEL_RATIO = 0.01;
+/**
+ * One set of baselines serves macOS, Linux and CI. Chromium rasterizes text
+ * and focus rings differently on each; on 2026-10-01 the widest macOS-vs-Linux
+ * gap was 1.31% of the pixels (the suggestions state at 375 px). A broken
+ * layout changes far more than this ratio.
+ */
+const SCREENSHOT_MAX_DIFF_PIXEL_RATIO = 0.025;
 const SCREENSHOT_PATH_TEMPLATE =
   "src/test/features/__screenshots__/{projectName}/{arg}{ext}";
 

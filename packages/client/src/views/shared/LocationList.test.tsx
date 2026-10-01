@@ -6,9 +6,24 @@ import type { LocationRow } from "@/presenter";
 import { LocationList } from "./LocationList";
 
 const rows: LocationRow[] = [
-  { id: "moscow", cityLabel: "Moscow", countryName: "Russia" },
-  { id: "tokyo", cityLabel: "Tokyo", countryName: "Japan" },
-  { id: "kyiv", cityLabel: "Kyiv", countryName: "Ukraine" },
+  {
+    id: "moscow",
+    cityLabel: "Moscow",
+    utcOffsetLabel: "UTC+3",
+    countryName: "Russia",
+  },
+  {
+    id: "tokyo",
+    cityLabel: "Tokyo",
+    utcOffsetLabel: "UTC+9",
+    countryName: "Japan",
+  },
+  {
+    id: "kyiv",
+    cityLabel: "Kyiv",
+    utcOffsetLabel: "UTC+3",
+    countryName: "Ukraine",
+  },
 ];
 
 describe("LocationList", () => {

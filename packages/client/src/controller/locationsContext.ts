@@ -1,4 +1,5 @@
 import { createContext } from "react";
+import type { Clock } from "@/lib/temporal";
 import type {
   LocationCommand,
   LocationErrorCode,
@@ -21,6 +22,7 @@ export type AddLocationInput = {
 
 export type LocationsContextValue = {
   store: Store<LocationsState, LocationCommand, LocationErrorCode>;
+  clock: Clock;
   loadStatus: LocationsStatus;
   hasSaveFailed: boolean;
   addLocation: (input: AddLocationInput) => LocationsReduceResult;

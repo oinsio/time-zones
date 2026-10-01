@@ -5,3 +5,5 @@ export {
   type PresentedSearchResult,
   presentSearchResults,
 } from "./presentSearchResults";
+// Implements FR3 of show-utc-offset-on-location-rows.
+export { formatUtcOffset } from "./utcOffset";
