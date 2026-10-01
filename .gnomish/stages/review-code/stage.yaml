@@ -1,0 +1,134 @@
+# Цель стадии, которую видит гном.
+purpose: review the implementation of this task's OpenSpec change and record every finding worth acting on in the change's review-code.md, changing no code
+# Рабочая копия плюс то, что произвели стадии specify и implement.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+  - kind: internal
+    producerOutputId: implementation-diff
+# Имя того, что производит стадия.
+outputs:
+  - id: code-review-report
+# Кто выполняет работу: агент Claude Code CLI. Opus — независимый ревьюер, более сильный,
+# чем sonnet, который писал код.
+executor:
+  type: agent-cli
+  model: opus
+  # Допускаются только эти четыре ключа.
+  settings:
+    # Ходов агента за раунд. Доказательства по каждому пункту, grep и точечные прогоны Stryker
+    # съедают много ходов; 60 ходов на задаче #18 закончились как раз в момент записи отчёта.
+    maxTurns: 120
+    # По истечении раунд прерывается; это считается сбоем инфраструктуры, а не попыткой.
+    # pnpm install + точечные прогоны Stryker по изменённым продакшен-файлам; 60 ходов на задаче #18
+    # заняли 24 минуты — таймаут удвоен вместе с ходами.
+    roundTimeout: 7200s
+    # Не может расширить то, что запрещает .claude/settings.json. Bash нужен для git, grep, pnpm install
+    # и точечного Stryker; проверка области ниже отклоняет любую правку вне review-code.md.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+    # Без субагентов, без веба, без планирования.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Промпт для гнома.
+instructions: stages/review-code/instructions.md
+# Выполняются по порядку после каждого раунда (sh -c, POSIX); провал возвращается агенту и сжигает попытку.
+verify:
+  # Ровно одно активное изменение, и в нём есть review-code.md с обязательными разделами и
+  # корректно оформленным списком замечаний, которые стадия fix-code сможет закрывать по одному.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      [ "$(printf '%s\n' "$change" | grep -c .)" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found: $change"; exit 1; }
+      review="$change/review-code.md"
+      [ -f "$review" ] || { echo "$review is missing - write the review report there, see stages/review-code/instructions.md"; exit 1; }
+      for section in '## Summary' '## Tasks' '## Requirements' '## Mutation' '## Findings' '## Verdict'; do
+        grep -q "^$section" "$review" || { echo "$review has no '$section' section"; exit 1; }
+      done
+      bad=$(grep -n '^### ' "$review" | grep -vE '^[0-9]+:### R[0-9]+ — (CRITICAL|WARNING|SUGGESTION) — .+' || true)
+      [ -z "$bad" ] || { echo "$bad"; echo "level-3 headings are findings only and read '### R<n> — CRITICAL|WARNING|SUGGESTION — <title>'"; exit 1; }
+      duplicates=$(grep -oE '^### R[0-9]+ ' "$review" | sort | uniq -d)
+      [ -z "$duplicates" ] || { echo "$duplicates"; echo "finding ids must be unique"; exit 1; }
+      findings=$(grep -cE '^### R[0-9]+ — ' "$review" || true)
+      for field in Location Rule Problem Impact Fix 'Fix risk' Status; do
+        count=$(grep -cE "^- $field: " "$review" || true)
+        [ "$count" = "$findings" ] || { echo "$review has $findings findings but $count '- $field:' lines - every finding carries every field exactly once"; exit 1; }
+      done
+      open=$(grep -cE '^- Status: open$' "$review" || true)
+      [ "$open" = "$findings" ] || { echo "every finding must stay at '- Status: open' - only the fix-code stage sets a status"; exit 1; }
+  # Числа в Summary вычислены, а не прикинуты на глаз, и у каждой задачи, id требования и
+  # сценария delta-spec есть своя строка.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-code.md"
+      section() { awk -v heading="## $1" 'index($0, heading) == 1 { inside = 1; next } /^## / { inside = 0 } inside' "$review"; }
+      summary_value() { section Summary | awk -F'|' -v label="$1" '{ cell = $2; gsub(/^[ \t]+|[ \t]+$/, "", cell); if (cell == label) { value = $3; gsub(/^[ \t]+|[ \t]+$/, "", value); print value; exit } }'; }
+      expect() {
+        actual=$(summary_value "$1")
+        [ "$actual" = "$2" ] || { echo "Summary row '| $1 | ... |' reads '$actual' but the report gives $2 - recount from the sections, see stages/review-code/instructions.md"; exit 1; }
+      }
+      task_lines=$(section Tasks | grep -E '^- (✅|❌) ' || true)
+      requirement_lines=$(section Requirements | grep -E '^- (✅|⚠️|❌) ' || true)
+      tasks_total=$(grep -cE '^[[:space:]]*- \[[ xX]\] ' "$change/tasks.md" || true)
+      tasks_listed=$(printf '%s\n' "$task_lines" | grep -c . || true)
+      [ "$tasks_listed" = "$tasks_total" ] || { echo "tasks.md has $tasks_total tasks but the Tasks section has $tasks_listed '- ✅|❌ <task>' lines - one per task"; exit 1; }
+      missing=$(for id in $(grep -oE '^- (FR|NFR-[A-Z]+|UX|M)[0-9]+:' "$change/proposal.md" | sed -E 's/^- //; s/:$//' | sort -u); do
+        printf '%s\n' "$requirement_lines" | grep -qE "^- (✅|⚠️|❌) $id([^0-9]|$)" || echo "$id"
+      done)
+      [ -z "$missing" ] || { echo "$missing"; echo "these ids are defined in proposal.md but have no '- ✅|⚠️|❌ <id>' line in Requirements"; exit 1; }
+      scenarios_total=$(find "$change/specs" -name spec.md -exec grep -hE '^#### Scenario:' {} + 2>/dev/null | grep -c . || true)
+      scenarios_listed=$(printf '%s\n' "$requirement_lines" | grep -cE '^- (✅|⚠️|❌) Scenario: ' || true)
+      [ "$scenarios_listed" = "$scenarios_total" ] || { echo "the spec deltas hold $scenarios_total scenarios but Requirements has $scenarios_listed '- ✅|⚠️|❌ Scenario:' lines - one per scenario"; exit 1; }
+      expect 'Tasks verified' "$(printf '%s\n' "$task_lines" | grep -c '^- ✅' || true)/$tasks_listed"
+      expect 'Requirements traced' "$(printf '%s\n' "$requirement_lines" | grep -c '^- ✅' || true)/$(printf '%s\n' "$requirement_lines" | grep -c . || true)"
+      for severity in CRITICAL WARNING SUGGESTION; do
+        expect "$severity" "$(grep -cE "^### R[0-9]+ — $severity — " "$review" || true)"
+      done
+  # Ревьюер не меняет ничего, кроме review-code.md. Базовая точка стадии — родитель коммита,
+  # который впервые добавил review-code.md (его создаёт только эта стадия); .gnomish-task/ —
+  # служебный учёт самой фабрики.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-code.md"
+      added=$(git log --diff-filter=A --format=%H -- "$review" | tail -1)
+      base=HEAD
+      [ -z "$added" ] || base="$added^"
+      touched=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -vxF "$review" | grep -v '^\.gnomish-task/' || true)
+      [ -z "$touched" ] || { echo "$touched"; echo "the review-code stage writes nothing but $review - restore the files above with: git checkout $base -- <file>"; exit 1; }
+  # LLM-судья оспаривает каждое замечание по acceptance.md; только чтение.
+  - type: judge
+    criteriaFile: stages/review-code/acceptance.md
+    model: opus
+    settings:
+      # Запас, чтобы проверить каждый критерий, а не только первые несколько замечаний. Судья работает
+      # только на чтение (лишь Read/Grep/Glob, жёстко задано фабрикой) и тратит по ходу на каждый
+      # открытый файл; судья стадии implement исчерпал 30 ходов на изменении из 187 файлов и
+      # эскалировал без вердикта.
+      maxTurns: 80
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Число прогонов судьи; должно быть нечётным, побеждает большинство.
+    votes: 1
+# auto = перейти к следующей стадии; manual = ждать человека.
+advancement: auto
