@@ -1,0 +1,134 @@
+# Цель стадии, которую видит гном.
+purpose: triage every finding in the change's review-code.md, fix the ones worth fixing with TDD, reject the rest with evidence, and keep CI green
+# Рабочая копия, а также изменение, его реализация и ревью этой реализации.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: openspec-change
+  - kind: internal
+    producerOutputId: implementation-diff
+  - kind: internal
+    producerOutputId: code-review-report
+# Имя того, что производит стадия.
+outputs:
+  - id: code-review-resolution
+# Кто выполняет работу: агент Claude Code CLI.
+executor:
+  type: agent-cli
+  model: sonnet
+  # Допускаются только эти четыре ключа.
+  settings:
+    # Ходов агента на раунд. TDD, хуки и точечные мутационные прогоны съедают много ходов.
+    maxTurns: 80
+    # По истечении раунд прерывается; это считается сбоем инфраструктуры, а не попыткой.
+    roundTimeout: 3600s
+    # Не может расширить то, что запрещено в .claude/settings.json.
+    allowedTools:
+      - Read
+      - Glob
+      - Grep
+      - Edit
+      - Write
+      - Bash
+      - Skill
+    # Без субагентов, без веба, без планирования.
+    disallowedTools:
+      - Agent
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Промпт для гнома.
+instructions: stages/fix-code/instructions.md
+# Запускаются по порядку после каждого раунда (sh -c, POSIX), от дешёвых к дорогим, по одной.
+# Провал возвращается агенту как обратная связь и сжигает попытку.
+verify:
+  # У каждой находки есть итоговый статус, а у каждого статуса — резолюция.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      review="$change/review-code.md"
+      [ -f "$review" ] || { echo "$review is missing - the review-code stage left it there; restore it from git"; exit 1; }
+      open=$(grep -nE '^- Status: open' "$review" || true)
+      [ -z "$open" ] || { echo "$open"; echo "these findings are still open - fix or reject each one, see stages/fix-code/instructions.md"; exit 1; }
+      bad=$(grep -nE '^- Status: ' "$review" | grep -vE '^[0-9]+:- Status: (fixed|rejected \((false-positive|contradicts-spec|harmful|out-of-scope|not-worth-it)\))$' || true)
+      [ -z "$bad" ] || { echo "$bad"; echo "a status reads 'fixed' or 'rejected (false-positive|contradicts-spec|harmful|out-of-scope|not-worth-it)'"; exit 1; }
+      findings=$(grep -cE '^### R[0-9]+ — ' "$review" || true)
+      resolutions=$(grep -cE '^- Resolution: .{20,}' "$review" || true)
+      [ "$resolutions" = "$findings" ] || { echo "$review has $findings findings but $resolutions '- Resolution:' lines of substance - every finding gets one, right after its Status"; exit 1; }
+  # Worktree стартует без node_modules; команда идемпотентна и после установки выполняется быстро.
+  - type: command
+    command: pnpm install --frozen-lockfile --prefer-offline
+  # Исправление не должно заново открывать задачи.
+  - type: command
+    command: >-
+      if grep -rn '^[[:space:]]*- \[ \]' openspec/changes --include=tasks.md --exclude-dir=archive;
+      then echo "the tasks listed above are open again - the fix-code stage must leave tasks.md as implement left it"; exit 1; fi
+  # Файлы, добавленные или изменённые этой веткой в packages/client/src, не превышают жёсткий лимит в 300 строк.
+  - type: command
+    command: >-
+      base=$(git merge-base HEAD origin/main);
+      oversized=$({ git diff --name-only --diff-filter=AM "$base" -- packages/client/src;
+      git ls-files -o --exclude-standard packages/client/src; } | sort -u |
+      while read -r file; do [ -f "$file" ] && lines=$(wc -l < "$file") && [ "$lines" -gt 300 ] && echo "$file: $lines lines"; done);
+      [ -z "$oversized" ] || { echo "$oversized"; echo "these files exceed the 300-line hard cap - split them, see .claude/rules/process-invariants.md"; exit 1; }
+  - type: command
+    command: pnpm lint
+  - type: command
+    command: pnpm typecheck
+  - type: command
+    command: pnpm test
+  - type: command
+    command: pnpm build
+  - type: command
+    command: pnpm --filter @time-zones/client check:bundle-size
+  # BDD E2E через playwright-bdd; на этом хосте нужен Chromium из `playwright install chromium`.
+  - type: command
+    command: pnpm --filter @time-zones/client test:bdd
+  # Исправляющий агент правит только packages/client/ и резолюции в review-code.md;
+  # контракт и файлы процесса остаются такими, какими были на старте стадии.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-code#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
+      outside=$(printf '%s\n' "$changed" | grep . | grep -v '^packages/client/' | grep -vxF "$change/review-code.md" || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the fix-code stage edits only packages/client/ and the resolutions in $change/review-code.md - restore the files above with: git checkout $since -- <file>"; exit 1; }
+  # review-code.md — запись ревьюера: меняются только его строки Status и добавленные
+  # строки Resolution.
+  - type: command
+    command: |
+      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-code#/ { print $1; exit }')
+      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      review="$change/review-code.md"
+      hunks=$(git diff -U0 "$since" -- "$review" | grep -E '^[-+]' | grep -vE '^(---|\+\+\+) ' || true)
+      removed=$(printf '%s\n' "$hunks" | grep -E '^-' | grep -vxF -- '-- Status: open' || true)
+      added=$(printf '%s\n' "$hunks" | grep -E '^\+' | grep -vE '^\+(- Status: |- Resolution: |  +[^ ])' || true)
+      [ -z "$removed$added" ] || { printf '%s\n' "$removed" "$added" | grep .; echo "only the '- Status:' lines and the new '- Resolution:' lines (continuation lines indented) of $review may change - restore the rest with: git checkout $since -- $review, then re-apply the statuses"; exit 1; }
+  # LLM-судья проверяет каждое исправление и оспаривает каждый отказ; только чтение. Opus, как и
+  # у ревьюера: судья выступает арбитром между ревьюером и исправляющим агентом.
+  - type: judge
+    criteriaFile: stages/fix-code/acceptance.md
+    model: opus
+    settings:
+      # Запас, чтобы проверить каждый критерий, а не только первые несколько находок. Судья только читает
+      # (лишь Read/Grep/Glob, жёстко задано фабрикой) и тратит ход на каждый открытый файл; судья
+      # стадии implement исчерпал лимит в 30 ходов на изменении из 187 файлов и эскалировал без вердикта.
+      maxTurns: 60
+      disallowedTools:
+        - Bash
+        - Agent
+        - ScheduleWakeup
+        - SendMessage
+        - ToolSearch
+        - Edit
+        - Write
+        - WebFetch
+        - WebSearch
+    # Число прогонов судьи; должно быть нечётным, побеждает большинство.
+    votes: 1
+# auto = перейти к следующей стадии; manual = ждать человека.
+advancement: auto
