@@ -67,6 +67,15 @@ describe("present location rows", () => {
     expect(present([buildLocation()])[0]?.utcOffsetLabel).toBe("UTC+3");
   });
 
+  it("should show the prefix alone for a zero offset", () => {
+    const utc = buildLocation({
+      label: "UTC",
+      timeZoneId: "UTC",
+      countryCode: "",
+    });
+    expect(present([utc])[0]?.utcOffsetLabel).toBe("UTC");
+  });
+
   it("should respect daylight saving time for the given instant", () => {
     const newYork = buildLocation({
       label: "New York",

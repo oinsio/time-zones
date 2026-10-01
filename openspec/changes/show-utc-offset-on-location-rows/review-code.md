@@ -84,7 +84,10 @@ Measured in this review with `npx stryker run --mutate …` from `packages/clien
 - Impact: A regression in `presentLocationRows.ts:38-41` that treats a zero offset as missing (e.g. `offsetMinutes ? formatUtcOffset(...) : ""`, a common truthiness refactor) makes a UTC location show no offset — breaking FR3 ("A zero offset is the prefix alone: `UTC`") and user scenario U3 — while every test stays green. M2 claims 6 of 6 labels are verified by the unit BDD, but only 5 are.
 - Fix: (a) In the `f.Scenario("Zero offset", …)` block give the Then step its own callback that asserts the full row text, e.g. `expect(rowOf(city).textContent).toBe(`${city}${offset}`)` (row text is city + country + offset; the UTC location has an empty country and the remove button holds only an `aria-hidden` icon), so the row must read `UTCUTC`. (b) Add to `presenter/presentLocationRows.test.ts` a case `buildLocation({ label: "UTC", timeZoneId: "UTC", countryCode: "" })` → `utcOffsetLabel` `"UTC"`.
 - Fix risk: Low. Each `f.Scenario` in vitest-cucumber takes its own step callbacks, so a dedicated callback in the Zero offset scenario does not change the shared `thenRowShows` used by other scenarios. The exact-text assertion depends on `LocationRow` keeping no visible text in the remove button; if the row later gains more text, that assertion must be updated.
-- Status: open
+- Status: fixed
+- Resolution: the "Zero offset" Then step in locations_utc_offset_unit.steps.tsx now asserts
+  the exact row text (`UTCUTC`), so the city label alone no longer passes; added
+  presentLocationRows.test.ts "should show the prefix alone for a zero offset".
 
 ## Verdict
 

@@ -148,7 +148,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Given("the current instant is {string}", givenInstant);
     And("the list contains {string}", containList);
     When("the user opens the app", openApp);
-    Then("the {string} row shows {string}", thenRowShows);
+    Then(
+      "the {string} row shows {string}",
+      (_ctx, city: string, offset: string) =>
+        // exact text: the city label "UTC" alone must not satisfy the offset check
+        expect(rowOf(city).textContent).toBe(`${city}${offset}`),
+    );
   });
 
   // @show-utc-offset-on-location-rows @FR4
