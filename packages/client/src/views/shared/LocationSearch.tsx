@@ -1,9 +1,10 @@
-import { type RefObject, useRef, useState } from "react";
+import { type RefObject, useCallback, useRef, useState } from "react";
 import { CitySearchStatus, useCitySearch, useLocations } from "@/controller";
 import type { LoadCitySearch } from "@/ports";
 import type { PresentedSearchResult } from "@/presenter";
 import { AddLocationButton } from "./AddLocationButton";
 import { LocationSearchDialog } from "./LocationSearchDialog";
+import { useSearchShortcut } from "./useSearchShortcut";
 
 type LocationSearchProps = {
   /** Only tests set this; production uses the fetch-based loader. */
@@ -63,7 +64,7 @@ function OpenLocationSearch({
  * The "Add location" trigger and its search overlay. The search data is
  * requested only once the overlay opens.
  * Implements FR6, FR8, FR15, FR17, NFR-P2, NFR-A2 of add-locations-via-search
- * (D10).
+ * (D10), and FR1 of open-location-search-with-slash-shortcut (D3).
  */
 export function LocationSearch({
   loadCitySearch,
@@ -73,6 +74,8 @@ export function LocationSearch({
   const ownButtonRef = useRef<HTMLButtonElement>(null);
   const buttonRef = addLocationButtonRef ?? ownButtonRef;
   const [isOpen, setIsOpen] = useState(false);
+  const openSearch = useCallback(() => setIsOpen(true), []);
+  useSearchShortcut({ isEnabled: !isOpen, onShortcut: openSearch });
 
   const handleCloseAutoFocus = (event: Event) => {
     event.preventDefault();
@@ -81,7 +84,7 @@ export function LocationSearch({
 
   return (
     <>
-      <AddLocationButton ref={buttonRef} onClick={() => setIsOpen(true)} />
+      <AddLocationButton ref={buttonRef} onClick={openSearch} />
       {isOpen && (
         <OpenLocationSearch
           loadCitySearch={loadCitySearch}

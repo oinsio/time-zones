@@ -56,6 +56,7 @@ Feature: Locations in every registered view
     When the user removes "Moscow" with the keyboard
     Then focus is on the "Add location" action
 
+  @open-location-search-with-slash-shortcut @NFR-A1 @M5
   @add-locations-via-search @view-contract @NFR-A1 @UX5 @M3
   Scenario Outline: Accessibility in the <state> state in the <theme> theme
     Given the locations screen uses the <theme> theme

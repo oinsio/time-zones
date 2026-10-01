@@ -23,3 +23,14 @@ describe("AddLocationButton", () => {
     expect(buttonRef.current).toBe(screen.getByRole("button"));
   });
 });
+
+describe("AddLocationButton shortcut announcement", () => {
+  // Verifies NFR-A1 of open-location-search-with-slash-shortcut
+  it("should announce the slash shortcut without changing its name", async () => {
+    await i18n.changeLanguage("en");
+    render(<AddLocationButton />);
+    expect(
+      screen.getByRole("button", { name: "Add location" }),
+    ).toHaveAttribute("aria-keyshortcuts", "/");
+  });
+});
