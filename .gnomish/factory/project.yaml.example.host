@@ -1,0 +1,26 @@
+# Шаблон файла этого проекта в домашнем каталоге Gnomish Factory, binding host:
+#   ~/.gnomish/projects/time-zones/project.yaml   (права 600, вне клона)
+#
+# Шаблон содержит только секцию factory: — секцию clones: `gnomish project add` записывает сам.
+# Зарегистрируйте клон, допишите шаблон, проверьте, что разрешила фабрика:
+#   .gnomish/factory/gnomish project add time-zones --dir="$PWD"
+#   cat .gnomish/factory/project.yaml.example.host >> ~/.gnomish/projects/time-zones/project.yaml
+#   .gnomish/factory/gnomish project show time-zones     # все настройки с указанием источника
+#
+# Ключи границы песочницы (factory.bindings.*, factory.sandbox.image, egress-allowlist,
+# env-passthrough) читаются из этого файла и ниоткуда больше — ни из командной строки,
+# ни из окружения. Чтобы потом сменить binding, отредактируйте файл; второй шаблон показывает,
+# что нужно другому режиму. Руководство: docs/guides/operator-guide.md в gnomish-factory.
+#
+# Процессы гномов работают на этой машине от вашего имени: ваши файлы, ваша сеть, никакой
+# защиты egress и никаких ограничений ресурсов. Нужен инструментарий проекта на хосте — Node,
+# pnpm, gh, jq, глобальный openspec и Playwright Chromium (README, One-time setup). Без
+# CLAUDE_CODE_OAUTH_TOKEN агент использует вход `claude` этой машины.
+factory:
+  bindings:
+    default: host
+  sandbox:
+    # Каждый дочерний процесс получает позитивный allowlist окружения, в том числе в режиме host:
+    # `gh` на стадии deliver аутентифицируется через GH_TOKEN, который экспортирует обёртка gnomish.
+    env-passthrough:
+      - GH_TOKEN
