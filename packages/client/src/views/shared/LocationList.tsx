@@ -11,7 +11,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   MIN_LOCATIONS_TO_REORDER,
   REORDER_POINTER_ACTIVATION_DISTANCE_PX,
@@ -42,6 +42,8 @@ export function LocationList({ rows, onRemove, onMove }: LocationListProps) {
   const focusIndexAfterRemoval = useRef<number | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const accessibility = useReorderAnnouncements(rows);
+  // A stable array: a new one on every render makes dnd-kit drop the slide transition.
+  const rowIds = useMemo(() => rows.map((row) => row.id), [rows]);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -80,10 +82,7 @@ export function LocationList({ rows, onRemove, onMove }: LocationListProps) {
         if (targetIndex !== undefined) onMove(String(active.id), targetIndex);
       }}
     >
-      <SortableContext
-        items={rows.map((row) => row.id)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
         <ul className="flex flex-col gap-2">
           {rows.map((row, rowIndex) => (
             <LocationRow

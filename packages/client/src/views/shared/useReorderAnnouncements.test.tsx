@@ -64,6 +64,14 @@ describe("useReorderAnnouncements", () => {
     ).toBeUndefined();
   });
 
+  it("should announce a first over-event over another card", () => {
+    const { announcements } = renderAnnouncements();
+    announcements?.onDragStart?.({ active: eventOf("Moscow").active });
+    expect(announcements?.onDragOver?.(eventOf("Moscow", "Almaty"))).toBe(
+      "Moscow moved to position 2 of 3",
+    );
+  });
+
   it("should announce returning over the picked-up card after it moved away", () => {
     const { announcements } = renderAnnouncements();
     announcements?.onDragStart?.({ active: eventOf("Moscow").active });

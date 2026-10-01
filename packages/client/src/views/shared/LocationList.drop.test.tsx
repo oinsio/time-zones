@@ -7,6 +7,18 @@ import type { LocationRow } from "@/presenter";
 import { LocationList } from "./LocationList";
 
 let dropHandler: DndContextProps["onDragEnd"];
+const sortableItemsSeen: unknown[] = [];
+
+vi.mock("@dnd-kit/sortable", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@dnd-kit/sortable")>();
+  return {
+    ...actual,
+    SortableContext: (props: Parameters<typeof actual.SortableContext>[0]) => {
+      sortableItemsSeen.push(props.items);
+      return <actual.SortableContext {...props} />;
+    },
+  };
+});
 
 vi.mock("@dnd-kit/core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@dnd-kit/core")>();
@@ -48,5 +60,14 @@ describe("LocationList drop", () => {
     render(<LocationList rows={rows} onRemove={vi.fn()} onMove={onMove} />);
     dropOver("tokyo", overId);
     expect(onMove).not.toHaveBeenCalled();
+  });
+
+  it("should hand dnd-kit the same items array while the rows are unchanged", () => {
+    sortableItemsSeen.length = 0;
+    const { rerender } = render(
+      <LocationList rows={rows} onRemove={vi.fn()} onMove={vi.fn()} />,
+    );
+    rerender(<LocationList rows={rows} onRemove={vi.fn()} onMove={vi.fn()} />);
+    expect(sortableItemsSeen[1]).toBe(sortableItemsSeen[0]);
   });
 });
