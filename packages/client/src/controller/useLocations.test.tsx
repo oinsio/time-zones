@@ -26,6 +26,7 @@ describe("useLocations", () => {
         "hasSaveFailed",
         "addLocation",
         "removeLocation",
+        "moveLocation",
         "resetLocations",
       ].sort(),
     );

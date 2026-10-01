@@ -48,6 +48,8 @@ function createLocationsStore(initialResult: LocationsLoadResult) {
  * the user's own changes (debounced, flushed on `pagehide`), applies changes
  * made by other tabs, and reports a failed save.
  * Implements FR11, FR12, FR13, FR14 of add-locations-via-search (D3, D5).
+ * A move writes only when it changed the list (FR3 of
+ * reorder-locations-by-drag-and-drop, D2).
  * Hands the clock to `useLocations` for the UTC offsets (FR4 of
  * show-utc-offset-on-location-rows, D4).
  */
@@ -84,8 +86,9 @@ export function LocationsProvider({
     const dispatchAndSchedule = (
       command: Parameters<typeof store.dispatch>[0],
     ) => {
+      const snapshotBefore = store.getSnapshot();
       const outcome = store.dispatch(command);
-      if (outcome.ok) scheduleWrite();
+      if (outcome.ok && store.getSnapshot() !== snapshotBefore) scheduleWrite();
       return outcome;
     };
     return {
@@ -99,6 +102,12 @@ export function LocationsProvider({
         }),
       removeLocation: (id: string) =>
         dispatchAndSchedule({ type: LocationCommandType.REMOVE_LOCATION, id }),
+      moveLocation: (id: string, targetIndex: number) =>
+        dispatchAndSchedule({
+          type: LocationCommandType.MOVE_LOCATION,
+          id,
+          targetIndex,
+        }),
       resetLocations: () => {
         discardPendingWrite();
         const outcome = repository.clear();
@@ -135,6 +144,7 @@ export function LocationsProvider({
       hasSaveFailed,
       addLocation: actions.addLocation,
       removeLocation: actions.removeLocation,
+      moveLocation: actions.moveLocation,
       resetLocations: actions.resetLocations,
     }),
     [store, clock, loadStatus, hasSaveFailed, actions],
