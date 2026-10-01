@@ -147,6 +147,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         error: LocationErrorCode.LOCATION_NOT_FOUND,
       });
     });
+    And("the list is {string}", (_ctx, labels: string) => expectList(labels));
   });
 
   // @reorder-locations-by-drag-and-drop @FR4

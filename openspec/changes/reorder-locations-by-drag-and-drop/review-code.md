@@ -130,7 +130,8 @@ Every file is at or above the 90% minimum except `src/constants/reorder.ts` (R1)
 - Impact: a typo in the media query (e.g. `prefers-reduce-motion`) makes `matchMedia` never match, so users who asked to reduce motion get the slide and drop animations again (NFR-A4 broken), and the unit suite and mutation gate stay green; only the slower E2E run would notice. The file is below the 90% project minimum.
 - Fix: in `src/controller/usePrefersReducedMotion.test.ts` assert `matchMedia` was called with the literal `"(prefers-reduced-motion: reduce)"`, and in `src/views/shared/reorderTransition.test.ts` assert `{ duration: 200, easing: "ease" }` with literals (the values design D6 and task 4.1 fix). Re-run `npx stryker run --mutate 'src/constants/reorder.ts'`.
 - Fix risk: the tests repeat two spec values as literals; `.claude/rules/code-style.md` allows literals in tests. No production code changes.
-- Status: open
+- Status: fixed
+- Resolution: pinned the literals "(prefers-reduced-motion: reduce)", 200 and "ease" in usePrefersReducedMotion.test.ts and reorderTransition.test.ts; Stryker on constants/reorder.ts now 100% (was 0%).
 
 ### R2 — SUGGESTION — "Location already gone" does not check that the list is unchanged
 - Location: `packages/client/src/test/features/locations/locations_reorder_unit.feature:39`
@@ -139,7 +140,8 @@ Every file is at or above the 90% minimum except `src/constants/reorder.ts` (R1)
 - Impact: a regression where a not-found move still changes or empties the first tab's list (e.g. the reducer returning a new state alongside the error) would pass this scenario; the spec line has no executable check.
 - Fix: add `And the list is "Almaty"` to the scenario in `locations_reorder_unit.feature` and an `And("the list is {string}", (_ctx, labels: string) => expectList(labels))` handler in the `f.Scenario("Location already gone", …)` block (the same helper the other scenarios use; `app` is the first tab).
 - Fix risk: none — the first tab already receives the second tab's removal through the in-memory channel before the move (the scenario's not-found assertion depends on it).
-- Status: open
+- Status: fixed
+- Resolution: added "And the list is \"Almaty\"" to the Location already gone scenario and its step handler; the BDD unit suite passes.
 
 ### R3 — SUGGESTION — design.md D5 describes a drop animation the code does not use
 - Location: `packages/client/src/views/shared/useDropSettleAnimation.ts:29`
@@ -148,7 +150,8 @@ Every file is at or above the 90% minimum except `src/constants/reorder.ts` (R1)
 - Impact: design.md is archived as the record of this change; a later change that touches the sortable list will trust D5, may remove the hook as unexplained, and lose UX1's drop animation, which only the E2E "Dropped card settles into its slot" would catch.
 - Fix: update the D5 bullet in `openspec/changes/reorder-locations-by-drag-and-drop/design.md` to describe `useDropSettleAnimation` (why the default did not settle a card dragged without an overlay, what it measures, that it adds nothing under reduced motion and resets when a new sort starts) and add the file to the D7 test list.
 - Fix risk: none — documentation only; no code or test changes.
-- Status: open
+- Status: rejected (out-of-scope)
+- Resolution: fix-code may edit only packages/client/ and this file; design.md is an upstream planning artifact and stays untouched. The hook is documented in its own JSDoc; the doc update belongs in a new change.
 
 ## Verdict
 

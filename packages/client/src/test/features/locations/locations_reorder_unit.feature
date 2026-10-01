@@ -41,6 +41,7 @@ Feature: Reorder locations
     And "Moscow" was removed in the second tab
     When the user moves "Moscow" to position 2 in the first tab
     Then the move is rejected as location not found
+    And the list is "Almaty"
 
   @reorder-locations-by-drag-and-drop @FR4
   Scenario: Order survives a reload

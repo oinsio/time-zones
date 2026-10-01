@@ -37,6 +37,12 @@ describe("usePrefersReducedMotion", () => {
     expect(matchMedia).toHaveBeenCalledWith(REDUCED_MOTION_MEDIA_QUERY);
   });
 
+  it("should ask for the standard prefers-reduced-motion query", () => {
+    const { matchMedia } = stubMatchMedia(false);
+    renderHook(() => usePrefersReducedMotion());
+    expect(matchMedia).toHaveBeenCalledWith("(prefers-reduced-motion: reduce)");
+  });
+
   it.each([true, false])(
     "should return %s when the query matches %s",
     (matches) => {

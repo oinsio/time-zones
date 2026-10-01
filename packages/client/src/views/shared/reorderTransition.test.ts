@@ -13,6 +13,13 @@ describe("getReorderTransition", () => {
     });
   });
 
+  it("should slide for 200 ms with the ease curve", () => {
+    expect(getReorderTransition(false)).toEqual({
+      duration: 200,
+      easing: "ease",
+    });
+  });
+
   it("should give no transition when motion is reduced", () => {
     expect(getReorderTransition(true)).toBeNull();
   });
