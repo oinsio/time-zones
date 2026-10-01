@@ -72,7 +72,8 @@ None.
 - Impact: A line-based traceability check for add-locations-via-search (`@add-locations-via-search.*@NFR-R1`) now matches the screenshot outline, which does not verify that change's NFR-R1, and a reader cannot tell which change each id belongs to.
 - Fix: In tasks.md 5.7, put this change's tags on their own tag line directly above the existing one (Gherkin allows several tag lines per scenario), e.g. `@open-location-search-with-slash-shortcut @NFR-A1 @M5` above `@add-locations-via-search @view-contract @NFR-A1 @UX5 @M3`, and likewise for the screenshot outline; leave the existing line unchanged.
 - Fix risk: none — tags from all lines still apply to the outline, so `--grep` in 5.7/5.8 is unaffected, and the 6.1 grep (`@open-location-search-with-slash-shortcut.*@${id}`) still matches because the change tag and the id sit on the same new line.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 5.7 now puts `@open-location-search-with-slash-shortcut @NFR-A1 @M5` and `@open-location-search-with-slash-shortcut @NFR-R1 @M5` on new tag lines directly above the existing add-locations-via-search tag lines of the two outlines and leaves those lines unchanged; design.md's test-strategy row says the same. The 5.7/5.8 greps and the 6.1 per-line check still match.
 
 ## Verdict
 
