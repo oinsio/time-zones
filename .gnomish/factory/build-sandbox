@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Собирает образ песочницы, в котором фабрика запускает гномов при binding `container`.
+# Тег — это factory.sandbox.image из ~/.gnomish/projects/time-zones/project.yaml в том виде,
+# в каком его разрешает сама фабрика (`gnomish project show`); все версии инструментов берутся
+# из самого репозитория:
+#   pnpm        — packageManager в package.json
+#   openspec    — devDependencies в package.json
+#   playwright  — версия, которую разрешает pnpm-lock.yaml (сборка Chromium привязана к одному релизу)
+# Перезапускайте скрипт после обновления любой из них и повышайте тег в project.yaml, чтобы
+# работающая фабрика никогда не смешивала два образа под одним именем.
+#
+#   .gnomish/factory/build-sandbox                 # сборка
+#   .gnomish/factory/build-sandbox --no-cache      # дополнительные флаги уходят в `docker build`
+set -euo pipefail
+
+factory_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+project_dir="$(cd "$factory_dir/../.." && pwd)"
+
+# Значение, с которым будет работать фабрика, читается через обёртку, чтобы применялись те же
+# имя проекта и домашний каталог фабрики: "  factory.sandbox.image = <tag>  [sandbox-boundary]  <origin>".
+# Имя проекта берётся из gnomish.env, gnomish.local.env или вашей оболочки, как и в обёртке.
+project_name="${GNOMISH_PROJECT_NAME:-$(bash -c '
+    for env_file in "$1/gnomish.env" "$1/gnomish.local.env"; do
+        [[ -f "$env_file" ]] && source "$env_file"
+    done
+    printf "%s" "${GNOMISH_PROJECT_NAME:-}"' _ "$factory_dir")}"
+image="$("$factory_dir/gnomish" project show "$project_name" 2>/dev/null \
+    | sed -n 's/^ *factory\.sandbox\.image = \([^ ]*\) .*$/\1/p')"
+if [[ -z "$image" || "$image" == "null" ]]; then
+    echo "build-sandbox: factory.sandbox.image is not set — see project.yaml.example.container and run: .gnomish/factory/gnomish project show $project_name" >&2
+    exit 1
+fi
+
+node_version="$(tr -d '[:space:]' < "$project_dir/.nvmrc")"
+pnpm_version="$(jq -r '.packageManager | sub("^pnpm@"; "") | sub("\\+.*$"; "")' "$project_dir/package.json")"
+openspec_version="$(jq -r '.devDependencies["@fission-ai/openspec"]' "$project_dir/package.json")"
+playwright_version="$(sed -n 's/^  playwright@\([0-9][^:]*\):$/\1/p' "$project_dir/pnpm-lock.yaml" | head -1)"
+
+for pair in "node:$node_version" "pnpm:$pnpm_version" "openspec:$openspec_version" "playwright:$playwright_version"; do
+    if [[ -z "${pair#*:}" || "${pair#*:}" == "null" ]]; then
+        echo "build-sandbox: could not read the ${pair%%:*} version from the repository" >&2
+        exit 1
+    fi
+done
+
+echo "build-sandbox: $image (node $node_version, pnpm $pnpm_version, openspec $openspec_version, playwright $playwright_version)" >&2
+exec docker build \
+    --tag "$image" \
+    --build-arg "NODE_VERSION=$node_version" \
+    --build-arg "PNPM_VERSION=$pnpm_version" \
+    --build-arg "OPENSPEC_VERSION=$openspec_version" \
+    --build-arg "PLAYWRIGHT_VERSION=$playwright_version" \
+    "$@" \
+    "$factory_dir/sandbox"

@@ -1,0 +1,40 @@
+# Шаблон файла этого проекта в домашнем каталоге Gnomish Factory, binding container:
+#   ~/.gnomish/projects/time-zones/project.yaml   (права 600, вне клона)
+#
+# Шаблон содержит только секцию factory: — секцию clones: `gnomish project add` записывает сам.
+# Зарегистрируйте клон, допишите шаблон, проверьте, что разрешила фабрика:
+#   .gnomish/factory/gnomish project add time-zones --dir="$PWD"
+#   cat .gnomish/factory/project.yaml.example.container >> ~/.gnomish/projects/time-zones/project.yaml
+#   .gnomish/factory/gnomish project show time-zones     # все настройки с указанием источника
+#
+# Ключи границы песочницы (factory.bindings.*, factory.sandbox.image, egress-allowlist,
+# env-passthrough) читаются из этого файла и ниоткуда больше — ни из командной строки,
+# ни из окружения. Чтобы потом сменить binding, отредактируйте файл; второй шаблон показывает,
+# что нужно другому режиму. Руководство: docs/guides/operator-guide.md в gnomish-factory.
+#
+# Каждая задача выполняется в одноразовом Docker-боксе за egress guard с политикой «запрещено
+# всё, что не разрешено». Нужны Docker, образ (.gnomish/factory/build-sandbox) и
+# CLAUDE_CODE_OAUTH_TOKEN в каталоге секретов — в боксе нет keychain, через который можно войти.
+factory:
+  bindings:
+    default: container
+  sandbox:
+    # Собирается из sandbox/Dockerfile скриптом build-sandbox, который читает этот тег. Повышайте
+    # его при каждом изменении образа (новые Node, pnpm, openspec или Playwright в репозитории).
+    image: time-zones-gnomish-sandbox:3
+    # Провайдер агента, реестр npm (pnpm install на стадии implement) и GitHub API
+    # (gh на стадии deliver). Все отказы перечисляет `gnomish status` — добавляйте хост, только
+    # когда знаете, какой инструмент его запросил.
+    egress-allowlist:
+      - api.anthropic.com
+      - registry.npmjs.org
+      - api.github.com
+    # `gh` на стадии deliver аутентифицируется через GH_TOKEN, который экспортирует обёртка gnomish.
+    env-passthrough:
+      - GH_TOKEN
+    limits:
+      # Vitest, сборка vite и headless Chromium в одном боксе не укладываются в умолчания 2 CPU / 2g.
+      cpus: 4
+      memory: 4g
+      # Stryker за один прогон порождает сотни процессов; 512 (значение по умолчанию) закончились посреди раунда.
+      pids: 2048
