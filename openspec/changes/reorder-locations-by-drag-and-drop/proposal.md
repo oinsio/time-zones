@@ -123,7 +123,7 @@ No changes (no IA documents exist under `docs/ia/`).
 
 ## Success Metrics
 
-- M1: 100% of FR1–FR8, NFR-P1, NFR-P2, NFR-A1–NFR-A5, NFR-R1–NFR-R3 and UX1–UX3 have at least one automated test tagged or commented with `reorder-locations-by-drag-and-drop`.
+- M1: 100% of FR1–FR8, NFR-P1, NFR-P2, NFR-A1–NFR-A5, NFR-R1–NFR-R3 and UX1–UX3 have at least one automated test tagged or commented with `reorder-locations-by-drag-and-drop` (NFR-P2 is verified by `pnpm check:bundle-size` in task 7.1).
 - M2: In the list Almaty, Moscow, Kolkata, Tokyo the model produces exactly these results — 7 of 7: Almaty to position 4 → Moscow, Kolkata, Tokyo, Almaty; Tokyo to 1 → Tokyo, Almaty, Moscow, Kolkata; Moscow to 3 → Almaty, Kolkata, Moscow, Tokyo; Kolkata to 2 → Almaty, Kolkata, Moscow, Tokyo; Moscow to 2 → list unchanged; position 0 and position 5 → position-out-of-range error; an unknown location → location-not-found error.
 - M3: Mutation score of the new or changed model, controller and view code is at least 95% (minimum 90%).
 - M4: axe-core reports 0 violations in 4 checks (at rest and while picked up, light and dark themes).

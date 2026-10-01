@@ -77,7 +77,7 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
 
 ## 7. Verification
 
-- [ ] 7.1 Bundle budget (NFR-P2, M7): verify `pnpm --filter @time-zones/client build`, then `pnpm --filter @time-zones/client check:bundle-size` passes (initial JavaScript ≤ 150 KB gzipped), and `grep -rln "@dnd-kit" src/app src/main.tsx` prints nothing
+- [ ] 7.1 Bundle budget (NFR-P2, M7; spec scenario "Reorder stays out of the initial bundle"): verify `pnpm --filter @time-zones/client build`, then `pnpm --filter @time-zones/client check:bundle-size` passes (initial JavaScript ≤ 150 KB gzipped), and `grep -rln "@dnd-kit" src/app src/main.tsx` prints nothing
 - [ ] 7.2 Domain rule: the stored document is unchanged; verify `npx vitest run src/adapters` (schema version 1, same document shape) and `grep -n "LOCATIONS_SCHEMA_VERSION = 1" src/constants/locations.ts` prints the line
 - [ ] 7.3 Traceability (M1): from the repository root, `for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 NFR-P1 NFR-A1 NFR-A2 NFR-A3 NFR-A4 NFR-A5 NFR-R1 NFR-R2 NFR-R3 UX1 UX2 UX3; do grep -rqE "reorder-locations-by-drag-and-drop.*@?${id}([^0-9]|$)|${id}([^0-9].*)?reorder-locations-by-drag-and-drop" packages/client/src --include='*.test.ts' --include='*.test.tsx' --include='*.feature' --include='*.steps.ts' --include='*.steps.tsx' || echo "missing $id"; done` prints nothing (NFR-P2 is covered by 7.1's script)
 - [ ] 7.4 Full unit suite, lint and build; verify `pnpm --filter @time-zones/client test`, then `pnpm --filter @time-zones/client lint`, then `pnpm --filter @time-zones/client build`

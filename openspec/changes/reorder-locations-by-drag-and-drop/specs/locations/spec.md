@@ -139,7 +139,7 @@ After a move, the new order SHALL be saved on the device in the existing version
 - **AND** the storage warning is shown
 
 ### Requirement: Reorder is accessible and fits every screen
-The list with handles SHALL have no axe-core violations at rest and while a card is picked up with the keyboard, in the light and dark themes. The handle's target size MUST be at least 44 × 44 CSS px. A list of 5 locations with handles MUST NOT scroll horizontally at 320 px and 2560 px, also while a card is dragged. Moving a location in a list of 50 and presenting the rows again MUST take at most 50 ms, with no loading state. The approved "list" screenshots at 375 px and 1024 px in both themes MUST show the handles. <!-- implements NFR-P1, NFR-A1, NFR-A5, NFR-R1, NFR-R3 of reorder-locations-by-drag-and-drop -->
+The list with handles SHALL have no axe-core violations at rest and while a card is picked up with the keyboard, in the light and dark themes. The handle's target size MUST be at least 44 × 44 CSS px. A list of 5 locations with handles MUST NOT scroll horizontally at 320 px and 2560 px, also while a card is dragged. Moving a location in a list of 50 and presenting the rows again MUST take at most 50 ms, with no loading state. The drag-and-drop code MUST NOT be part of the initial JavaScript, which stays at most 150 KB gzipped. The approved "list" screenshots at 375 px and 1024 px in both themes MUST show the handles. <!-- implements NFR-P1, NFR-P2, NFR-A1, NFR-A5, NFR-R1, NFR-R3 of reorder-locations-by-drag-and-drop -->
 
 #### Scenario: No accessibility violations
 - **GIVEN** the list is Moscow, Almaty, New York
@@ -159,6 +159,11 @@ The list with handles SHALL have no axe-core violations at rest and while a card
 - **GIVEN** 50 locations
 - **WHEN** the last one is moved to the top and the rows are presented
 - **THEN** it takes at most 50 ms
+
+#### Scenario: Reorder stays out of the initial bundle
+- **WHEN** the app is built for production
+- **THEN** the initial JavaScript is at most 150 KB gzipped
+- **AND** it contains no drag-and-drop code
 
 #### Scenario: List screenshots show the handles
 - **GIVEN** the list state with Almaty and Moscow

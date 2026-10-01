@@ -137,7 +137,8 @@
 - Impact: After archive, `openspec/specs/locations/spec.md` does not record that the reorder library must stay out of the initial bundle. M1 cannot reach 100% as written.
 - Fix: In the delta "Reorder is accessible and fits every screen" requirement, add the sentence "The drag-and-drop code MUST NOT be part of the initial JavaScript, which stays at most 150 KB gzipped." Add a scenario "Reorder stays out of the initial bundle" (WHEN the app is built, THEN the initial JavaScript is at most 150 KB gzipped AND contains no drag-and-drop code), and add NFR-P2 to its `implements` comment. In proposal.md M1, write "(NFR-P2 is verified by `pnpm check:bundle-size` in task 7.1)".
 - Fix risk: none — this agrees with the existing budget in `openspec/specs/app-delivery/spec.md:53` and with task 7.1.
-- Status: open
+- Status: fixed
+- Resolution: specs/locations/spec.md "Reorder is accessible and fits every screen" now requires the drag-and-drop code to stay out of the initial JavaScript (≤ 150 KB gzipped), adds scenario "Reorder stays out of the initial bundle" and NFR-P2 to its implements comment; proposal.md M1 notes NFR-P2 is verified by `pnpm check:bundle-size` in task 7.1, and tasks.md 7.1 names the scenario.
 
 ## Verdict
 
