@@ -60,7 +60,7 @@ Every rule of this change is keyboard behaviour, which `.claude/rules/bdd-unit.m
 | What | Where |
 |---|---|
 | Every spec scenario: opening, suggestions, the key not reaching the browser, adding with the keyboard, focus return, the announced shortcut, lazy data, the 3 text-entry elements, the open search (query field and close action), Ctrl / Meta / Alt, Shift, unreadable list (FR1–FR6, NFR-P1, NFR-A1, UX1, UX2, M2, M4) | `test/features/locations/locations_search_shortcut_e2e.feature` + `steps/locations_search_shortcut_e2e.steps.ts` (playwright-bdd, `@view-contract`, so it runs in every `view-contract-<id>` project) |
-| axe-core and screenshots (NFR-A1, NFR-R1, M5) | existing outlines in `locations_view_contract_e2e.feature` and `locations_ui_e2e.feature`, tagged with this change; no new state, they prove nothing regressed |
+| axe-core and screenshots (NFR-A1, NFR-R1, M5) | existing outlines in `locations_view_contract_e2e.feature` and `locations_ui_e2e.feature`, tagged with this change; no new state, they prove nothing regressed. The accessibility outline is `@view-contract`, so it runs only in the `view-contract-<id>` projects; the screenshot outline is not, so it runs in `chromium` and `mobile-chrome` (both invert `@view-contract`) |
 | Predicate: `/`, Shift, each ignore case | `views/shared/searchShortcut.test.ts` (Vitest, `it.each`) — TDD and mutation guard |
 | Hook: listener on/off, `preventDefault`, unmount | `views/shared/useSearchShortcut.test.tsx` (Vitest, `renderHook`) — TDD and mutation guard |
 | `aria-keyshortcuts` attribute | `views/shared/AddLocationButton.test.tsx` (Vitest) — TDD and mutation guard |

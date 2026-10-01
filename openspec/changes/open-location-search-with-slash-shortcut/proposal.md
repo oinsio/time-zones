@@ -118,7 +118,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M2: 7 of 7 ignore cases — text input, textarea, contenteditable, search already open (focus on its close action), Ctrl, Meta, Alt — leave the search state unchanged in the E2E feature, and in the 3 text-entry cases the element holds `/` afterwards.
 - M3: Mutation score of the new and changed view code is at least 95% (minimum 90%).
 - M4: The E2E scenario adds a location with 0 pointer actions, in 1 of 1 registered view (Cards).
-- M5: axe-core reports 0 violations in the 4 existing list and empty accessibility examples (2 states × 2 themes) with the shortcut attribute in place; 0 of the 16 list and empty screenshot baselines re-approved (8 examples × the `chromium` and `mobile-chrome` projects, NFR-R1).
+- M5: axe-core reports 0 violations in the 4 existing list and empty accessibility examples (2 states × 2 themes, run in the `view-contract-cards` project) with the shortcut attribute in place; 0 of the 16 list and empty screenshot baselines re-approved (8 examples × the `chromium` and `mobile-chrome` projects, NFR-R1).
 
 ## Open Questions
 
