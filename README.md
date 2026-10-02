@@ -80,7 +80,7 @@ The app is served under `/time-zones/` in every mode (dev, preview, production),
 
 ### Replacing the logo
 
-All icons (favicon, Apple touch icon, 192/512 px and maskable manifest icons) are generated during the build from one image. To change the logo, replace [`packages/client/assets/app-icon-source.jpg`](packages/client/assets/app-icon-source.jpg) with a square image (at least 512×512 px) and run `pnpm build` — no other edits are needed. Padding and background of the maskable icon are set in [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
+All icons (favicon, Apple touch icon, 192/512 px and maskable manifest icons) are generated during the build from one image. To change the logo, replace [`packages/client/assets/app-icon-source.png`](packages/client/assets/app-icon-source.png) with a square PNG with a transparent background (at least 512×512 px) and run `pnpm build` — no other edits are needed. Padding and background of the maskable and Apple icons are set in [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
 
 Features are developed with [OpenSpec](openspec/): `/opsx:propose` → `/opsx:apply` → `/opsx:archive`.
 
@@ -175,11 +175,11 @@ The project file is where the factory's settings live — the binding, the sandb
 
 **4. Put the tokens in place.** Each secret is a file in `~/.gnomish/projects/time-zones/secrets/`, named exactly like the variable, holding only the bare value (no `KEY=`, no quotes), mode 600 — a file readable by others is refused.
 
-| File                           | Needed                                     | What to put in it                                                                                                            | Who uses it                                                                                     |
-|--------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| `GNOMISH_GITHUB_TOKEN`         | yes, for `take` and `serve`                | GitHub token for the tracker repository (`tracker.github.repo` in [`config.yaml`](.gnomish/config.yaml)): Issues read/write  | the factory: claims issues, moves `gnomish:*` labels, posts comments                            |
-| `GH_TOKEN`                     | recommended                                | fine-grained token for the same repository: Contents and Pull requests read/write                                            | `gh` in the `deliver` stage, to open the pull request; exported by the wrapper                  |
-| `CLAUDE_CODE_OAUTH_TOKEN`      | container: yes; host: optional             | the token `claude setup-token` prints                                                                                        | the agent and the judges; exported by the wrapper. On the host, without it, your `claude` login is used |
+| File                      | Needed                         | What to put in it                                                                                                           | Who uses it                                                                                             |
+|---------------------------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| `GNOMISH_GITHUB_TOKEN`    | yes, for `take` and `serve`    | GitHub token for the tracker repository (`tracker.github.repo` in [`config.yaml`](.gnomish/config.yaml)): Issues read/write | the factory: claims issues, moves `gnomish:*` labels, posts comments                                    |
+| `GH_TOKEN`                | recommended                    | fine-grained token for the same repository: Contents and Pull requests read/write                                           | `gh` in the `deliver` stage, to open the pull request; exported by the wrapper                          |
+| `CLAUDE_CODE_OAUTH_TOKEN` | container: yes; host: optional | the token `claude setup-token` prints                                                                                       | the agent and the judges; exported by the wrapper. On the host, without it, your `claude` login is used |
 
 Without `GH_TOKEN` the wrapper hands `gh` the tracker token instead — then it needs Contents and Pull requests too, and the gnome holds its issue rights as well. A plain `run` without the tracker needs no `GNOMISH_GITHUB_TOKEN`.
 

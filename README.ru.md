@@ -80,7 +80,7 @@ pnpm preflight    # lint + typecheck + тесты
 
 ### Замена логотипа
 
-Все иконки (favicon, Apple touch icon, иконки манифеста 192/512 px и maskable) генерируются при сборке из одного изображения. Чтобы сменить логотип, замените [`packages/client/assets/app-icon-source.jpg`](packages/client/assets/app-icon-source.jpg) квадратным изображением (не меньше 512×512 px) и запустите `pnpm build` — больше ничего менять не нужно. Отступы и фон maskable-иконки задаются в [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
+Все иконки (favicon, Apple touch icon, иконки манифеста 192/512 px и maskable) генерируются при сборке из одного изображения. Чтобы сменить логотип, замените [`packages/client/assets/app-icon-source.png`](packages/client/assets/app-icon-source.png) квадратным PNG с прозрачным фоном (не меньше 512×512 px) и запустите `pnpm build` — больше ничего менять не нужно. Отступы и фон maskable- и Apple-иконок задаются в [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
 
 Фичи разрабатываются через [OpenSpec](openspec/): `/opsx:propose` → `/opsx:apply` → `/opsx:archive`.
 
@@ -175,11 +175,11 @@ cat .gnomish/factory/project.yaml.example.host >> ~/.gnomish/projects/time-zones
 
 **4. Положите токены.** Каждый секрет — файл в `~/.gnomish/projects/time-zones/secrets/`. Имя файла точно совпадает с именем переменной, внутри только само значение (без `KEY=` и кавычек), права 600 — файл, доступный другим, фабрика отвергает.
 
-| Файл                      | Нужен                                   | Что положить                                                                                                                    | Кто использует                                                                                         |
-|---------------------------|-----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| `GNOMISH_GITHUB_TOKEN`    | да, для `take` и `serve`                | токен GitHub для репозитория трекера (`tracker.github.repo` в [`config.yaml`](.gnomish/config.yaml)): Issues read/write          | фабрика: берёт issues, переставляет метки `gnomish:*`, пишет комментарии                               |
-| `GH_TOKEN`                | желательно                              | fine-grained токен для того же репозитория: Contents и Pull requests read/write                                                 | `gh` в стадии `deliver`, чтобы открыть pull request; экспортирует обёртка                              |
-| `CLAUDE_CODE_OAUTH_TOKEN` | container: да; host: необязательно      | токен, который печатает `claude setup-token`                                                                                    | агент и судьи; экспортирует обёртка. На хосте без него используется ваш вход в `claude`               |
+| Файл                      | Нужен                              | Что положить                                                                                                            | Кто использует                                                                          |
+|---------------------------|------------------------------------|-------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| `GNOMISH_GITHUB_TOKEN`    | да, для `take` и `serve`           | токен GitHub для репозитория трекера (`tracker.github.repo` в [`config.yaml`](.gnomish/config.yaml)): Issues read/write | фабрика: берёт issues, переставляет метки `gnomish:*`, пишет комментарии                |
+| `GH_TOKEN`                | желательно                         | fine-grained токен для того же репозитория: Contents и Pull requests read/write                                         | `gh` в стадии `deliver`, чтобы открыть pull request; экспортирует обёртка               |
+| `CLAUDE_CODE_OAUTH_TOKEN` | container: да; host: необязательно | токен, который печатает `claude setup-token`                                                                            | агент и судьи; экспортирует обёртка. На хосте без него используется ваш вход в `claude` |
 
 Без `GH_TOKEN` обёртка отдаёт `gh` токен трекера — тогда ему нужны ещё Contents и Pull requests, а у гнома заодно окажутся права на issues. Простому `run` без трекера `GNOMISH_GITHUB_TOKEN` не нужен.
 

@@ -5,6 +5,7 @@ import {
 import {
   APP_ICON_BACKGROUND_COLOR,
   APP_ICON_SOURCE_PATH,
+  APPLE_ICON_PADDING,
   MASKABLE_ICON_PADDING,
 } from "./app.config";
 
@@ -23,6 +24,7 @@ export default defineConfig({
     },
     apple: {
       ...minimal2023Preset.apple,
+      padding: APPLE_ICON_PADDING,
       resizeOptions: { background: APP_ICON_BACKGROUND_COLOR },
     },
   },
