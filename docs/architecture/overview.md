@@ -65,7 +65,7 @@ Target layout inside `packages/client/` (folders marked "exists" are in place; t
 
 ```
 assets/
-  app-icon-source.jpg      single source of every PWA icon (exists)
+  app-icon-source.png      single source of every PWA icon (exists)
 app.config.ts              base path, app name, colors shared by Vite, manifest, E2E (exists)
 src/
   main.tsx                 entry point: mounts AppShell inside AppErrorBoundary (exists)
