@@ -15,8 +15,8 @@ export const BUILD_OUT_DIR = "dist";
 
 export const APP_ICON_SOURCE_DIR = "assets";
 export const APP_ICON_SOURCE_PATH = `${APP_ICON_SOURCE_DIR}/app-icon-source.png`;
-/** Matches the logo's outline, so the rim blends into the opaque icon background. */
-export const APP_ICON_BACKGROUND_COLOR = "#061229";
+/** White margin around the logo on the opaque (maskable and Apple) icons. */
+export const APP_ICON_BACKGROUND_COLOR = "#FFFFFF";
 /**
  * Share of the maskable icon kept free around the logo: the logo spans 85%, so
  * the map content stays inside the 80% safe-zone circle of any launcher mask.
