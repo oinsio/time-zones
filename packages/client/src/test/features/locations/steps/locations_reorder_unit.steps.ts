@@ -9,12 +9,14 @@ import { STORAGE_KEYS } from "@/constants";
 import { fakeClock } from "@/lib/temporal";
 import ru from "@/locales/ru.json";
 import {
+  INITIAL_LOCATIONS_STATE,
   LocationCommandType,
   LocationErrorCode,
   type LocationsReduceResult,
   reduceLocations,
 } from "@/model";
 import { presentLocationRows } from "@/presenter";
+import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
 import { LocationList } from "@/views/shared";
@@ -211,6 +213,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         cityLabel: label,
         countryName: "",
         utcOffsetLabel: "",
+        deviceTimeZoneLabel: "",
       }));
       render(
         createElement(LocationList, {
@@ -246,7 +249,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         const lastLocation = locations[locations.length - 1];
         const startedAt = performance.now();
         const outcome = reduceLocations(
-          { locations },
+          { ...INITIAL_LOCATIONS_STATE, locations },
           {
             type: LocationCommandType.MOVE_LOCATION,
             id: lastLocation?.id ?? "",
@@ -258,6 +261,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             language: "en",
             instant: fakeClock(BUDGET_INSTANT).instant(),
             translate: i18n.t,
+            deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
           });
         }
         elapsedMs = performance.now() - startedAt;

@@ -28,6 +28,7 @@
   },
   "locations": {
     "utcOffsetPrefix": "UTC",
+    "deviceTimeZoneBadge": "Ваш часовой пояс",
     "addLocation": "Добавить место",
     "removeLocation": "Удалить: {{city}}",
     "moveLocation": "Переместить {{city}}",

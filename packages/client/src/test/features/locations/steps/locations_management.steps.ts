@@ -3,6 +3,7 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import {
   createStore,
+  INITIAL_LOCATIONS_STATE,
   LocationCommandType,
   LocationErrorCode,
   type LocationsState,
@@ -12,7 +13,7 @@ import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 
 const feature = await loadFeature("../locations_management.feature");
 
-const EMPTY_STATE: LocationsState = { locations: [] };
+const EMPTY_STATE: LocationsState = INITIAL_LOCATIONS_STATE;
 
 type CommandOutcome = ReturnType<typeof reduceLocations>;
 
@@ -23,6 +24,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   const seed = (...cityLabels: string[]) => {
     store = createStore(reduceLocations, {
+      ...INITIAL_LOCATIONS_STATE,
       locations: cityLabels.map((label) =>
         buildLocation({ label, ...KNOWN_CITIES[label] }),
       ),

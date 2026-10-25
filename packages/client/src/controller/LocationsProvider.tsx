@@ -2,7 +2,12 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { localStorageLocationRepository } from "@/adapters";
 import { LOCATIONS_WRITE_DEBOUNCE_MS } from "@/constants";
 import { type Clock, systemClock } from "@/lib/temporal";
-import { createStore, LocationCommandType, reduceLocations } from "@/model";
+import {
+  createStore,
+  INITIAL_LOCATIONS_STATE,
+  LocationCommandType,
+  reduceLocations,
+} from "@/model";
 import {
   type LocationRepository,
   type LocationsLoadResult,
@@ -34,8 +39,15 @@ const statusOf = (result: LocationsLoadResult): LocationsStatus =>
 const listOf = (result: LocationsLoadResult) =>
   result.status === LocationsLoadStatus.LOADED ? result.locations : [];
 
-function createLocationsStore(initialResult: LocationsLoadResult) {
-  const store = createStore(reduceLocations, { locations: [] });
+function createLocationsStore(
+  initialResult: LocationsLoadResult,
+  deviceTimeZoneId: string,
+) {
+  const store = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+  store.dispatch({
+    type: LocationCommandType.SET_DEVICE_TIME_ZONE,
+    timeZoneId: deviceTimeZoneId,
+  });
   store.dispatch({
     type: LocationCommandType.REPLACE_LOCATIONS,
     locations: listOf(initialResult),
@@ -52,6 +64,8 @@ function createLocationsStore(initialResult: LocationsLoadResult) {
  * reorder-locations-by-drag-and-drop, D2).
  * Hands the clock to `useLocations` for the UTC offsets (FR4 of
  * show-utc-offset-on-location-rows, D4).
+ * Reads the device zone once at store creation: FR3, FR4 of
+ * mark-device-time-zone-in-location-list (D3).
  */
 export function LocationsProvider({
   children,
@@ -60,7 +74,9 @@ export function LocationsProvider({
   clock = systemClock,
 }: LocationsProviderProps) {
   const [initialResult] = useState(() => repository.load());
-  const [store] = useState(() => createLocationsStore(initialResult));
+  const [store] = useState(() =>
+    createLocationsStore(initialResult, clock.timeZoneId()),
+  );
   const [loadStatus, setLoadStatus] = useState(() => statusOf(initialResult));
   const [hasSaveFailed, setHasSaveFailed] = useState(false);
   const cancelPendingWrite = useRef<(() => void) | undefined>(undefined);

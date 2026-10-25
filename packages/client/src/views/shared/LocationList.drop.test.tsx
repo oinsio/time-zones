@@ -36,6 +36,7 @@ const rows: LocationRow[] = ["moscow", "tokyo", "kyiv"].map((id) => ({
   cityLabel: id,
   countryName: "",
   utcOffsetLabel: "",
+  deviceTimeZoneLabel: "",
 }));
 
 const dropOver = (activeId: string, overId: string | null) =>

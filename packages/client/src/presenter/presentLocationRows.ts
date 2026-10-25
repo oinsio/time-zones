@@ -1,7 +1,11 @@
 import type { TFunction } from "i18next";
 import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
-import { getUtcOffsetMinutes, type Location } from "@/model";
+import {
+  getUtcOffsetMinutes,
+  isLocationInDeviceTimeZone,
+  type Location,
+} from "@/model";
 import { presentCountryName } from "./countryName";
 import { formatUtcOffset } from "./utcOffset";
 
@@ -11,12 +15,15 @@ export type LocationRow = {
   countryName: string;
   /** "UTC+3" style label; empty when the offset cannot be computed. */
   utcOffsetLabel: string;
+  /** "Your time zone" badge text; empty when the row is not in the device zone. */
+  deviceTimeZoneLabel: string;
 };
 
 export type LocationRowsContext = {
   language: SupportedLanguage;
   instant: Temporal.Instant;
   translate: TFunction;
+  deviceTimeZoneId: string;
 };
 
 /**
@@ -24,12 +31,14 @@ export type LocationRowsContext = {
  * the UTC offset at the given instant.
  * Implements FR10, UX4 of add-locations-via-search (D9).
  * Implements FR2, FR3, FR5, FR6 of show-utc-offset-on-location-rows (D2).
+ * Implements FR1, FR2, FR5 of mark-device-time-zone-in-location-list (D4).
  */
 export function presentLocationRows(
   locations: readonly Location[],
-  { language, instant, translate }: LocationRowsContext,
+  { language, instant, translate, deviceTimeZoneId }: LocationRowsContext,
 ): LocationRow[] {
   const utcPrefix = translate("locations.utcOffsetPrefix");
+  const deviceTimeZoneBadge = translate("locations.deviceTimeZoneBadge");
   return locations.map((location) => {
     const offsetMinutes = getUtcOffsetMinutes(location.timeZoneId, instant);
     return {
@@ -40,6 +49,12 @@ export function presentLocationRows(
         offsetMinutes === undefined
           ? ""
           : formatUtcOffset(offsetMinutes, utcPrefix),
+      deviceTimeZoneLabel: isLocationInDeviceTimeZone(
+        location,
+        deviceTimeZoneId,
+      )
+        ? deviceTimeZoneBadge
+        : "",
     };
   });
 }

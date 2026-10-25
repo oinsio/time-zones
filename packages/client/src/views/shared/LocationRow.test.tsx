@@ -1,5 +1,6 @@
 // Verifies FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
 // Verifies FR1 of reorder-locations-by-drag-and-drop.
+// Verifies FR1, FR2, UX1, UX2 of mark-device-time-zone-in-location-list (D5).
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
@@ -12,6 +13,7 @@ const row: LocationRowModel = {
   cityLabel: "Kolkata",
   countryName: "India",
   utcOffsetLabel: "UTC+5:30",
+  deviceTimeZoneLabel: "",
 };
 
 const renderRow = (
@@ -74,5 +76,45 @@ describe("LocationRow", () => {
   it("should show no move handle when not reorderable", () => {
     renderRow({}, false);
     expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
+  });
+
+  describe("device time zone badge", () => {
+    const BADGE_TEXT = "Your time zone";
+
+    it("should show the badge on the city line with accent colors", () => {
+      renderRow({ deviceTimeZoneLabel: BADGE_TEXT });
+      const badge = screen.getByText(BADGE_TEXT);
+      expect(badge.previousElementSibling).toHaveTextContent("Kolkata");
+      expect(badge).toHaveClass("bg-accent", "text-accent-foreground");
+    });
+
+    it("should mark the badge icon as decorative", () => {
+      renderRow({ deviceTimeZoneLabel: BADGE_TEXT });
+      expect(screen.getByText(BADGE_TEXT).querySelector("svg")).toHaveAttribute(
+        "aria-hidden",
+        "true",
+      );
+    });
+
+    it("should name the row by the city and the badge", () => {
+      renderRow({ deviceTimeZoneLabel: BADGE_TEXT });
+      expect(
+        screen.getByRole("listitem", { name: `Kolkata ${BADGE_TEXT}` }),
+      ).toBeInTheDocument();
+    });
+
+    it("should name the row by the city alone without the badge", () => {
+      renderRow();
+      expect(
+        screen.getByRole("listitem", { name: "Kolkata" }),
+      ).toBeInTheDocument();
+    });
+
+    it("should render no badge element when the label is empty", () => {
+      renderRow();
+      expect(screen.getByText("Kolkata").parentElement?.children).toHaveLength(
+        1,
+      );
+    });
   });
 });

@@ -1,10 +1,13 @@
 // Verifies FR10, UX4 of add-locations-via-search (D9).
 // Verifies FR2, FR3, FR5, FR6, UX2 of show-utc-offset-on-location-rows (D2).
+// Verifies FR1, FR2, FR5 of mark-device-time-zone-in-location-list (D4).
 import i18n, { type TFunction } from "i18next";
 import { describe, expect, it } from "vitest";
 import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
-import { buildLocation } from "@/test/factories/buildLocation";
+import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
+import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
+
 import { presentLocationRows } from "./presentLocationRows";
 
 const july = fakeClock("2026-07-15T12:00:00Z").instant();
@@ -13,11 +16,16 @@ const january = fakeClock("2026-01-15T12:00:00Z").instant();
 const present = (
   locations: Parameters<typeof presentLocationRows>[0],
   language: SupportedLanguage = "en",
-  options: { instant?: typeof july; translate?: TFunction } = {},
+  options: {
+    instant?: typeof july;
+    translate?: TFunction;
+    deviceTimeZoneId?: string;
+  } = {},
 ) =>
   presentLocationRows(locations, {
     language,
     instant: options.instant ?? july,
+    deviceTimeZoneId: options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,
     translate: options.translate ?? i18n.getFixedT(language),
   });
 
@@ -106,5 +114,43 @@ describe("present location rows", () => {
       "Olympus",
       "Russia",
     ]);
+  });
+});
+
+describe("present the device time zone badge", () => {
+  const cityOf = (label: string) =>
+    buildLocation({ label, ...KNOWN_CITIES[label] });
+  const labelsFor = (
+    cities: string[],
+    deviceTimeZoneId: string,
+    translate?: TFunction,
+  ) =>
+    present(cities.map(cityOf), "en", { deviceTimeZoneId, translate }).map(
+      (row) => row.deviceTimeZoneLabel,
+    );
+
+  it.each([
+    ["match", ["Almaty", "Moscow"], "Asia/Almaty", ["Your time zone", ""]],
+    ["no match", ["Almaty", "Moscow"], "Asia/Tokyo", ["", ""]],
+    [
+      "multiple matches",
+      ["Moscow", "Saint Petersburg", "Almaty"],
+      "Europe/Moscow",
+      ["Your time zone", "Your time zone", ""],
+    ],
+  ])("should label rows for %s", (_case, cities, deviceZone, expected) => {
+    expect(labelsFor(cities, deviceZone)).toEqual(expected);
+  });
+
+  it("should take the label from the translate function", () => {
+    const translate = (() => "XYZ") as unknown as TFunction;
+    expect(labelsFor(["Almaty"], "Asia/Almaty", translate)).toEqual(["XYZ"]);
+  });
+
+  it("should label in Russian", () => {
+    const rows = present([cityOf("Almaty")], "ru", {
+      deviceTimeZoneId: "Asia/Almaty",
+    });
+    expect(rows[0]?.deviceTimeZoneLabel).toBe("Ваш часовой пояс");
   });
 });

@@ -1,3 +1,4 @@
+import { DEVICE_TIME_ZONE_FALLBACK_ID } from "@/constants";
 import { moveLocationInList } from "./moveLocation";
 import { canonicalizeTimeZoneId } from "./timeZoneId";
 
@@ -5,6 +6,7 @@ import { canonicalizeTimeZoneId } from "./timeZoneId";
  * Locations state, commands and reducer.
  * Implements FR8, FR9, FR10 of add-locations-via-search (D1) and FR2 of
  * reorder-locations-by-drag-and-drop.
+ * Implements FR3, FR4 of mark-device-time-zone-in-location-list (D1).
  */
 
 export type Location = {
@@ -16,13 +18,23 @@ export type Location = {
   countryCode: string;
 };
 
-export type LocationsState = { locations: readonly Location[] };
+export type LocationsState = {
+  locations: readonly Location[];
+  /** Canonical IANA ID of the device zone; never persisted (ADR-0007). */
+  deviceTimeZoneId: string;
+};
+
+export const INITIAL_LOCATIONS_STATE: LocationsState = {
+  locations: [],
+  deviceTimeZoneId: DEVICE_TIME_ZONE_FALLBACK_ID,
+};
 
 export enum LocationCommandType {
   ADD_LOCATION = "ADD_LOCATION",
   REMOVE_LOCATION = "REMOVE_LOCATION",
   REPLACE_LOCATIONS = "REPLACE_LOCATIONS",
   MOVE_LOCATION = "MOVE_LOCATION",
+  SET_DEVICE_TIME_ZONE = "SET_DEVICE_TIME_ZONE",
 }
 
 export enum LocationErrorCode {
@@ -49,7 +61,8 @@ export type LocationCommand =
   | {
       type: LocationCommandType.REPLACE_LOCATIONS;
       locations: readonly Location[];
-    };
+    }
+  | { type: LocationCommandType.SET_DEVICE_TIME_ZONE; timeZoneId: string };
 
 export type LocationsReduceResult =
   | { ok: true; state: LocationsState }
@@ -85,7 +98,10 @@ export function reduceLocations(
         label: command.label,
         countryCode: command.countryCode,
       };
-      return { ok: true, state: { locations: [...state.locations, added] } };
+      return {
+        ok: true,
+        state: { ...state, locations: [...state.locations, added] },
+      };
     }
     case LocationCommandType.REMOVE_LOCATION: {
       if (!state.locations.some((location) => location.id === command.id)) {
@@ -94,6 +110,7 @@ export function reduceLocations(
       return {
         ok: true,
         state: {
+          ...state,
           locations: state.locations.filter(
             (location) => location.id !== command.id,
           ),
@@ -101,7 +118,16 @@ export function reduceLocations(
       };
     }
     case LocationCommandType.REPLACE_LOCATIONS:
-      return { ok: true, state: { locations: command.locations } };
+      return { ok: true, state: { ...state, locations: command.locations } };
+    case LocationCommandType.SET_DEVICE_TIME_ZONE: {
+      const deviceTimeZoneId =
+        canonicalizeTimeZoneId(command.timeZoneId) ??
+        DEVICE_TIME_ZONE_FALLBACK_ID;
+      if (deviceTimeZoneId === state.deviceTimeZoneId) {
+        return { ok: true, state };
+      }
+      return { ok: true, state: { ...state, deviceTimeZoneId } };
+    }
     case LocationCommandType.MOVE_LOCATION:
       return moveLocationInList(state, command.id, command.targetIndex);
   }

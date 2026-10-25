@@ -15,12 +15,14 @@ const MISSING_PROVIDER_MESSAGE =
  * Implements FR10, FR12, FR13, FR14 of add-locations-via-search (D3).
  * Reads the instant when the rows are presented: FR2, FR4 of
  * show-utc-offset-on-location-rows (D4).
+ * Passes the device zone to the presenter: FR1, FR2 of
+ * mark-device-time-zone-in-location-list (D3).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
   const { store, clock, ...rest } = context;
-  const { locations } = useSyncExternalStore(
+  const { locations, deviceTimeZoneId } = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
   );
@@ -33,8 +35,9 @@ export function useLocations() {
         language,
         instant: clock.instant(),
         translate: t,
+        deviceTimeZoneId,
       }),
-    [locations, language, t, clock],
+    [locations, deviceTimeZoneId, language, t, clock],
   );
   return { rows, locations, ...rest };
 }
