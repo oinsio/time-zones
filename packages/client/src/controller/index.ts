@@ -1,4 +1,5 @@
 export { LocationsProvider } from "./LocationsProvider";
+export type { TickScheduler } from "./tickScheduler";
 export { CitySearchStatus, useCitySearch } from "./useCitySearch";
 export { useContainerWidth } from "./useContainerWidth";
 export { useDocumentLanguage } from "./useDocumentLanguage";
@@ -9,4 +10,3 @@ export type { PwaUpdateStatus } from "./usePwaUpdateStatus";
 export { usePwaUpdateStatus } from "./usePwaUpdateStatus";
 export { useStorageAvailability } from "./useStorageAvailability";
 export type { WriteScheduler } from "./writeScheduler";
-export type { TickScheduler } from "./tickScheduler";
