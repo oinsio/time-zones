@@ -1,7 +1,13 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
-import { act, cleanup, render, screen } from "@testing-library/react/pure";
+import {
+  act,
+  cleanup,
+  render,
+  screen,
+  within,
+} from "@testing-library/react/pure";
 import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
@@ -36,6 +42,18 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       window.dispatchEvent(new Event(isOnline ? "online" : "offline"));
     });
   const emptyStateText = () => i18n.t("views.cardsEmptyState");
+  const expectBottomBarShowsDateBar = () => {
+    const bottomBar = screen.getByRole("contentinfo");
+    for (const name of [
+      i18n.t("date.previousDay"),
+      /^Choose date|^Выбрать дату/,
+      i18n.t("date.nextDay"),
+    ]) {
+      expect(
+        within(bottomBar).getByRole("button", { name }),
+      ).toBeInTheDocument();
+    }
+  };
 
   f.BeforeEachScenario(async () => {
     cleanup();
@@ -55,7 +73,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     cleanup();
   });
 
-  // @add-main-page-scaffold @FR1
+  // @add-main-page-scaffold @FR1 @select-date-with-calendar-and-now @FR8
   f.Scenario("User opens the app", ({ When, Then, And }) => {
     When("the user opens the app", () => openApp());
     Then("the header shows the app title as the only heading", () => {
@@ -67,10 +85,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the content region shows the active view", async () => {
       expect(await screen.findByText(emptyStateText())).toBeInTheDocument();
     });
+    And("the bottom bar shows the date bar", expectBottomBarShowsDateBar);
   });
 
-  // @add-main-page-scaffold @FR1 @FR8
-  f.Scenario("Notices stay available", ({ Given, When, Then }) => {
+  // @add-main-page-scaffold @FR1 @FR8 @select-date-with-calendar-and-now @FR8
+  f.Scenario("Notices stay available", ({ Given, When, Then, And }) => {
     Given("a new version of the app is waiting", () => {
       fakeServiceWorker.isUpdateAvailable = true;
     });
@@ -84,6 +103,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         );
       },
     );
+    And("the bottom bar still shows the date bar", expectBottomBarShowsDateBar);
   });
 
   // @add-main-page-scaffold @FR1 @UX3
