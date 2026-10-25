@@ -75,12 +75,13 @@ When a date change keeps a wall-clock time that does not exist on the new date i
 - **GIVEN** the device time zone is `America/New_York`
 - **WHEN** the user moves to the next day from the moment `<from>`
 - **THEN** the moment is pinned to `<pinned>` with the status `<status>`
+- **AND** the bar shows `<note>`
 
-| from | pinned | status |
-|---|---|---|
-| `2026-06-01T14:00:00Z` | `2026-06-02T14:00:00Z` | `UNIQUE` |
-| `2026-03-07T07:30:00Z` | `2026-03-08T07:30:00Z` | `GAP` |
-| `2026-10-31T05:30:00Z` | `2026-11-01T05:30:00Z` | `AMBIGUOUS` |
+| from | pinned | status | note |
+|---|---|---|---|
+| `2026-06-01T14:00:00Z` | `2026-06-02T14:00:00Z` | `UNIQUE` | no note |
+| `2026-03-07T07:30:00Z` | `2026-03-08T07:30:00Z` | `GAP` | `02:30 does not exist on this day because of a clock change; showing 03:30.` |
+| `2026-10-31T05:30:00Z` | `2026-11-01T05:30:00Z` | `AMBIGUOUS` | no note |
 
 #### Scenario: A malformed date changes nothing
 - **GIVEN** the moment is live
