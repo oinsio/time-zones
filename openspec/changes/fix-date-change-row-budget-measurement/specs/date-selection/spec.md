@@ -13,4 +13,4 @@ A date change SHALL re-present 50 location rows in at most 50 ms, in the same re
 - **GIVEN** 50 locations
 - **AND** the app is open
 - **WHEN** the user moves to the next day
-- **THEN** the rows show the new date with no loading state
+- **THEN** the rows show the new date at once, without waiting for a later render
