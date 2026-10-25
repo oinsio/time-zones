@@ -195,12 +195,19 @@ The date bar SHALL be shown at the bottom of the main page in every state of the
 - **THEN** the storage warning is above the date bar and does not overlap it
 
 ### Requirement: Date changes are fast
-A date change SHALL re-present 50 location rows in at most 50 ms, in the same render, with no loading state. <!-- implements NFR-P1 of select-date-with-calendar-and-now -->
+A date change SHALL re-present 50 location rows in at most 50 ms, in the same render, with no loading state. The 50 ms budget MUST cover working out the new reference moment and re-presenting every row's labels (local time, local date with its ISO date, UTC offset, device time zone badge) for rows that were already presented once, as they are while the app is open. Drawing the rows into the page is not part of the budget. It MUST still happen in the same render as the date change, with no loading state in between. Inputs: 50 locations with canonical IANA identifiers, the current instant (ISO 8601 with `Z`), the device time zone, a move to the next day. Output: every row carries its local date at the new moment. A date change needs no network and behaves the same offline. <!-- implements NFR-P1 of select-date-with-calendar-and-now; NFR-P1, FR1, UX1 of fix-date-change-row-budget-measurement -->
 
 #### Scenario: 50 rows within the budget
+- **GIVEN** 50 locations whose rows have been presented at the current instant `2026-03-08T07:30:00Z` with the device time zone `UTC`
+- **WHEN** the date moves to the next day and the rows are presented again
+- **THEN** it takes at most 50 ms
+- **AND** every row carries its local date at `2026-03-09T07:30:00Z`
+
+#### Scenario: The new date shows in the same render
 - **GIVEN** 50 locations
+- **AND** the app is open
 - **WHEN** the user moves to the next day
-- **THEN** the rows show the new date within 50 ms
+- **THEN** the rows show the new date at once, without waiting for a later render
 
 ### Requirement: Keyboard-operable date selection
 Tab SHALL reach the previous-day button, the date button, the next-day button and, while shown, the Now button, in that order; Enter and Space MUST activate each. In the open calendar the focus MUST start on the selected day; ArrowLeft / ArrowRight MUST move it by one day, ArrowUp / ArrowDown by one week, Home / End to the first / last day of the week, PageUp / PageDown by one month, and the shown month MUST follow the focused day. Enter or Space MUST pick the focused day; Esc MUST close the calendar without change. When the calendar closes, and after Now is activated, the focus MUST be on the date button. <!-- implements NFR-A2 of select-date-with-calendar-and-now -->
