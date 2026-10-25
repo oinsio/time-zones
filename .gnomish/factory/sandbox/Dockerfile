@@ -10,10 +10,11 @@
 # `gnome` (uid 1000) owning /gnomish/**, the root-owned control surfaces (/etc/gnomish, the agent
 # policy with "allowManagedHooksOnly": true), a root-owned home where only declared directories are
 # the gnome's, the egress guard's proxy, and the helpers gnomish-home-dir, gnomish-trust-ca and
-# gnomish-verify-image. This file adds what the four stages call:
+# gnomish-verify-image. This file adds what the five stages call:
 #   specify, archive  — openspec
 #   implement         — pnpm, jq, Playwright Chromium (test:bdd)
 #   deliver           — gh
+#   usage-report      — jq, gh
 #
 # Consequence of the base's agent policy: hooks run from the managed settings only, so the
 # PostToolUse hooks of the repository's .claude/settings.json do not run in the box; the stages'

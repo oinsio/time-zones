@@ -1,41 +1,63 @@
 #!/usr/bin/env bash
 # The usage-report stage's whole work: renders the task's wall time and tokens per stage and
-# per model from `gnomish usage --json` - the factory's own reconstruction of the task branch's
-# round history, so no number is estimated by a gnome - and writes it as one comment on the
-# task's open pull request, created on the first run and edited on every later one (the
-# comment carries a marker line), so a retried round never posts twice.
+# per model from the task branch's own history - every `gnomish: round <stage>#<n>` commit
+# carries .gnomish-task/state.json with that attempt's executor and judge usage and its check
+# times, written by the factory, so no number is estimated by a gnome - and writes it as one
+# comment on the task's open pull request, created on the first run and edited on every later
+# one (the comment carries a marker line), so a retried round never posts twice.
 #
 # Usage, from the task's worktree:
 #   .gnomish/stages/usage-report/report.sh            render and post
 #   .gnomish/stages/usage-report/report.sh --print    render to stdout only
 #
-# Runs on the host only (factory.bindings.stages.usage-report: host in project.yaml): a box
-# has neither Java nor the clone that `gnomish usage` reads.
+# Needs only git, jq and gh, so it runs in a box as well as on the host.
 #
-# Exit: 0 posted (or printed); 2 not on a task branch or no factory jar; 3 no open pull
-# request from the branch; anything else is a failed command, named on stderr.
+# Exit: 0 posted (or printed); 2 not on a task branch, no round commits or a state.json
+# version this script does not read; 3 no open pull request from the branch; anything else is
+# a failed command, named on stderr.
 set -euo pipefail
 
 MARKER='<!-- gnomish:usage-report -->'
+STATE_FILE='.gnomish-task/state.json'
+# The state.json layouts whose attempts[] this script reads. A new version is added here only
+# after checking that attempts[].startedAt, checks[].durationMillis, executorUsage and
+# judgeUsage.perVote[].tokensByModel still mean the same.
+SUPPORTED_STATE_VERSIONS='1'
 
 branch=$(git branch --show-current)
 case "$branch" in
-  gnomish/*) task=${branch#gnomish/} ;;
+  gnomish/*) ;;
   *) echo "not on a task branch (gnomish/<task>): $branch" >&2; exit 2 ;;
 esac
 
-# The jar is the clone's (git-ignored, so absent from a worktree), and `usage` reads the task
-# branch from the clone that owns it: the worktree's common git directory.
-clone=$(cd "$(git rev-parse --git-common-dir)/.." && pwd)
-jar=${GNOMISH_JAR:-$clone/.gnomish/factory/gnomish.jar}
-[ -f "$jar" ] || { echo "factory jar not found: $jar" >&2; exit 2; }
+# One row per round commit: the attempt whose round number the commit subject names, taken
+# from the state.json that commit wrote. Oldest first, so stages keep pipeline order.
+collect_rows() {
+  git log --reverse --format='%H %s' HEAD \
+    | awk '$2 == "gnomish:" && $3 == "round" { print $1, $4 }' \
+    | while read -r sha round_key; do
+        git show "$sha:$STATE_FILE" | jq -c \
+          --arg stage "${round_key%#*}" --argjson round "${round_key##*#}" '
+          .version as $version
+          | .attempts[] | select(.round == $round)
+          | {stage: $stage, stateVersion: $version, startedAt, checks, executorUsage, judgeUsage}'
+      done \
+    | jq -s '{rows: .}'
+}
+
+rows_json=$(collect_rows)
+[ "$(printf '%s' "$rows_json" | jq '.rows | length')" -gt 0 ] \
+  || { echo "no gnomish round commits on $branch" >&2; exit 2; }
+unsupported=$(printf '%s' "$rows_json" | jq -r --arg supported "$SUPPORTED_STATE_VERSIONS" '
+  ($supported | split(" ")) as $known
+  | [.rows[].stateVersion | tostring | select(. as $v | $known | index($v) | not)] | unique | join(", ")')
+[ -z "$unsupported" ] || {
+  echo "$STATE_FILE version $unsupported is not one this script reads ($SUPPORTED_STATE_VERSIONS)" >&2
+  exit 2
+}
 
 render() {
-raw=$(java -jar "$jar" usage --dir="$clone" "$task" --json)
-# Spring Boot prints its banner on stdout ahead of the document.
-json=$(printf '%s\n' "$raw" | sed -n '/^{/,$p')
-
-printf '%s\n' "$json" | jq -r --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
+printf '%s\n' "$rows_json" | jq -r --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
   def dur: (. / 1000 | floor) as $s
     | if $s >= 3600 then "\($s / 3600 | floor) h \(($s % 3600) / 60 | floor) min"
       elif $s >= 60 then "\($s / 60 | floor) min \($s % 60) s"
@@ -43,12 +65,12 @@ printf '%s\n' "$json" | jq -r --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
   def num: if . >= 1000000 then "\(. / 100000 | floor / 10)M"
     elif . >= 1000 then "\(. / 100 | floor / 10)k"
     else tostring end;
-  def add_tokens(a; b): reduce ((a | keys_unsorted) + (b | keys_unsorted) | unique)[] as $k
+  def add_tokens($a; $b): reduce (($a | keys_unsorted) + ($b | keys_unsorted) | unique)[] as $k
     ({}; .[$k] = {
-      input: ((a[$k].input // 0) + (b[$k].input // 0)),
-      output: ((a[$k].output // 0) + (b[$k].output // 0)),
-      cacheCreation: ((a[$k].cacheCreation // 0) + (b[$k].cacheCreation // 0)),
-      cacheRead: ((a[$k].cacheRead // 0) + (b[$k].cacheRead // 0))});
+      input: (($a[$k].input // 0) + ($b[$k].input // 0)),
+      output: (($a[$k].output // 0) + ($b[$k].output // 0)),
+      cacheCreation: (($a[$k].cacheCreation // 0) + ($b[$k].cacheCreation // 0)),
+      cacheRead: (($a[$k].cacheRead // 0) + ($b[$k].cacheRead // 0))});
   def row_tokens: reduce (.judgeUsage.perVote[]?.tokensByModel) as $v
     ((.executorUsage.tokensByModel // {}); add_tokens(.; $v));
   def tokens_total: [.[] | .input + .output + .cacheCreation + .cacheRead] | add // 0;
@@ -65,6 +87,7 @@ printf '%s\n' "$json" | jq -r --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
   | ($per | reduce .[].tokens as $t ({}; add_tokens(.; $t))) as $total
   | ($rows | map(.startedAt) | min) as $start
   | (($now | fromdateiso8601) - ($start | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601)) as $elapsed
+  | ($rows | map(.stateVersion | tostring) | unique | join(", ")) as $versions
   | "## Factory usage",
     "",
     "Elapsed from the first round to delivery: \($elapsed * 1000 | dur), time parked for a human included; agent time \($per | map(.agent) | add | dur), verification time \($per | map(.checks) | add | dur).",
@@ -77,7 +100,9 @@ printf '%s\n' "$json" | jq -r --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
     "|-------|------:|-------:|------------:|-----------:|------:|",
     ($total | to_entries[] | "| \(.key) | \(.value.input | num) | \(.value.output | num) | \(.value.cacheCreation | num) | \(.value.cacheRead | num) | \([.value] | tokens_total | num) |"),
     "",
-    "Tokens include the judges. Every stage up to and including deliver is counted; the round posting this report is not."
+    "Tokens include the judges. Every stage up to and including deliver is counted; the round posting this report is not.",
+    "",
+    "Source: `.gnomish-task/state.json` version \($versions), read from \($rows | length) round commits of the task branch."
 '
 }
 

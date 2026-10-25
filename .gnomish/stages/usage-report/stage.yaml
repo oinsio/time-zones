@@ -5,17 +5,15 @@ inputs:
   - kind: source
   - kind: internal
     producerOutputId: pull-request
-# The whole work is report.sh beside this manifest: it renders `gnomish usage --json` and
-# creates or edits one marked comment on the open pull request. No gnome counts anything.
+# The whole work is report.sh beside this manifest: it reads the usage the factory wrote into
+# .gnomish-task/state.json of every round commit on the task branch, and creates or edits one
+# marked comment on the open pull request. No gnome counts anything.
 # The comment goes to the pull request, not the issue: the factory reads every plain comment
 # in the issue thread after its last ack as a human's decision, so a report there could be
 # taken for an answer if the task were ever parked again.
 #
-# The stage runs on the host, whatever the default binding: `gnomish usage` needs Java, the
-# factory jar and the clone that owns the task branch, and a box has none of them. The
-# project file carries the override (factory.bindings.stages.usage-report: host, see
-# .gnomish/factory/project.yaml.example.container); the agent may run only Bash, and the
-# instructions name one script.
+# The script needs only git, jq and gh, so the stage runs under the default binding, box or
+# host. The agent may run only Bash, and the instructions name one script.
 #
 # Until the factory has a command executor, a stage needs an agent round, so the cheapest
 # model runs the one script and stops. Once it lands, this executor becomes `type: command`
