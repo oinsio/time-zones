@@ -7,3 +7,5 @@ export {
 } from "./presentSearchResults";
 // Implements FR3 of show-utc-offset-on-location-rows.
 export { formatUtcOffset } from "./utcOffset";
+// Implements FR1, FR2 of show-local-time-and-date-on-location-cards.
+export { formatLocalDate, formatLocalTime } from "./localDateTime";

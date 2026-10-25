@@ -214,6 +214,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         countryName: "",
         utcOffsetLabel: "",
         deviceTimeZoneLabel: "",
+        localTimeLabel: "",
+        localDateLabel: "",
+        localIsoDate: "",
       }));
       render(
         createElement(LocationList, {

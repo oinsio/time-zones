@@ -14,6 +14,9 @@ const row: LocationRowModel = {
   countryName: "India",
   utcOffsetLabel: "UTC+5:30",
   deviceTimeZoneLabel: "",
+  localTimeLabel: "",
+  localDateLabel: "",
+  localIsoDate: "",
 };
 
 const renderRow = (

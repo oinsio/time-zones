@@ -3,8 +3,7 @@ import { describe, expect, it } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import { getLocalDateTime } from "./localDateTime";
 
-const instantOf = (isoTimestamp: string) =>
-  fakeClock(isoTimestamp).instant();
+const instantOf = (isoTimestamp: string) => fakeClock(isoTimestamp).instant();
 
 describe("getLocalDateTime", () => {
   it.each([
