@@ -9,3 +9,4 @@ export type { PwaUpdateStatus } from "./usePwaUpdateStatus";
 export { usePwaUpdateStatus } from "./usePwaUpdateStatus";
 export { useStorageAvailability } from "./useStorageAvailability";
 export type { WriteScheduler } from "./writeScheduler";
+export type { TickScheduler } from "./tickScheduler";
