@@ -55,6 +55,18 @@ describe("useLocations minute tick", () => {
     expect(result.current.rows[0]?.localTimeLabel).toBe("12:01");
   });
 
+  it("should show the following minute after a second tick", () => {
+    const { result, moveClockTo, runTick } = setup(
+      ["UTC"],
+      "2026-07-15T12:00:42.500Z",
+    );
+    moveClockTo("2026-07-15T12:01:00Z");
+    runTick();
+    moveClockTo("2026-07-15T12:02:00Z");
+    runTick();
+    expect(result.current.rows[0]?.localTimeLabel).toBe("12:02");
+  });
+
   it("should show the DST offset change after a tick", () => {
     const { result, moveClockTo, runTick } = setup(
       ["New York"],
