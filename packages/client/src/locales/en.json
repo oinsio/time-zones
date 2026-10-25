@@ -32,6 +32,8 @@
     "addLocation": "Add location",
     "removeLocation": "Remove {{city}}",
     "moveLocation": "Move {{city}}",
+    "timeSliderLabel": "Time in {{city}}",
+    "timeSliderValue": "{{time}}, {{date}}",
     "reorderRoleDescription": "movable item",
     "reorderInstructions": "To move a location, press Space or Enter. Use the Up and Down arrow keys to change its position. Press Space or Enter again to drop it, or Escape to cancel.",
     "reorderPickedUp": "{{city}} picked up at position {{position}} of {{total}}",

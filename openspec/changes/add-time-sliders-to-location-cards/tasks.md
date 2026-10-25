@@ -14,13 +14,13 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Constants and locale keys (no TDD: constants and translations)
 
-- [ ] 1.1 Add the constants of design D2 and D3:
+- [x] 1.1 Add the constants of design D2 and D3:
   - new `constants/timeSelection.ts`: `TRACK_STEP_MINUTES = 15`, `TRACK_HOUR_MOVE_MINUTES = 60`, `HOUR_LABEL_INTERVAL_HOURS = 6`, `TRACK_TOUCH_SLOP_PX = 10` (design D7);
   - new `constants/dayPeriods.ts`: the four `*_START_WALL_TIME` strings, `NIGHT_BOUNDARY_BLEND_MINUTES = 60` and `WORK_BOUNDARY_BLEND_MINUTES = 15`;
   - `HOUR_LABEL_FORMAT_OPTIONS = { hour: "2-digit", hourCycle: "h23" }` in `constants/localDateTime.ts`.
 
   Re-export them all from `constants/index.ts` (FR3, FR4, FR6, FR7). Verify with `pnpm --filter @time-zones/client typecheck`.
-- [ ] 1.2 Add `locations.timeSliderLabel` ("Time in {{city}}" / "Время — {{city}}") and `locations.timeSliderValue` ("{{time}}, {{date}}" in both) to `locales/en.json` and `locales/ru.json` (design D5, FR9). Verify with `npx vitest run src/locales/locales.test.ts` (identical key sets). This task comes before sections 3–5, because their tests translate with the real locale resources loaded by `test/setup.ts`.
+- [x] 1.2 Add `locations.timeSliderLabel` ("Time in {{city}}" / "Время — {{city}}") and `locations.timeSliderValue` ("{{time}}, {{date}}" in both) to `locales/en.json` and `locales/ru.json` (design D5, FR9). Verify with `npx vitest run src/locales/locales.test.ts` (identical key sets). This task comes before sections 3–5, because their tests translate with the real locale resources loaded by `test/setup.ts`.
 
 ## 2. Model (TDD)
 
