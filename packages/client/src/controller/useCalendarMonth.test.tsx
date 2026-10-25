@@ -64,6 +64,12 @@ describe("useCalendarMonth", () => {
     ).toBe("2026-03-02");
   });
 
+  it("should throw outside a LocationsProvider", () => {
+    expect(() => renderHook(() => useCalendarMonth("2026-03-08"))).toThrow(
+      "useCalendarMonth must be used inside a LocationsProvider",
+    );
+  });
+
   it("should select the pinned date", () => {
     const { result } = setup("2026-03-08");
     expect(selectedIsoDateOf(result.current.calendar.month)).toBe("2026-03-08");

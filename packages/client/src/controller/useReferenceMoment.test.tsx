@@ -139,6 +139,37 @@ describe("useReferenceMoment", () => {
     expect(result.current.announcement).toBe("");
   });
 
+  it("should announce nothing when the shown date is selected", () => {
+    const { result } = almatyMarch8();
+
+    act(() => result.current.selectDate("2026-03-08"));
+
+    expect(result.current.announcement).toBe("");
+  });
+
+  it("should announce nothing when the selected date is malformed", () => {
+    const { result } = almatyMarch8();
+
+    act(() => result.current.selectDate("2026-13-01"));
+
+    expect(result.current.announcement).toBe("");
+  });
+
+  it("should announce in the language the interface switched to", async () => {
+    const { result } = almatyMarch8();
+    await act(() => i18n.changeLanguage("ru"));
+
+    act(() => result.current.showNextDay());
+
+    expect(result.current.announcement).toBe("понедельник, 9 марта 2026 г.");
+  });
+
+  it("should throw outside a LocationsProvider", () => {
+    expect(() => renderHook(() => useReferenceMoment())).toThrow(
+      "useReferenceMoment must be used inside a LocationsProvider",
+    );
+  });
+
   it("should write nothing for date actions", () => {
     const { result, writeScheduler } = almatyMarch8();
 

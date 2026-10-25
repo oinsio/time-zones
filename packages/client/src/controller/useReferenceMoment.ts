@@ -27,19 +27,19 @@ function buildDateBar(
   const zone = getReferenceZone(state);
   const effective = getEffectiveInstant(state, now).toZonedDateTimeISO(zone);
   const { reference } = state;
-  const hasGap =
-    reference.mode === ReferenceMode.PINNED &&
-    reference.wallClockStatus === WallClockStatus.GAP;
+  const gap =
+    reference.mode === ReferenceMode.LIVE ||
+    reference.wallClockStatus !== WallClockStatus.GAP
+      ? undefined
+      : {
+          requestedWallTime: reference.requestedWallTime,
+          shownWallTime: effective.toPlainTime(),
+        };
   return presentDateBar({
     effectiveDate: effective.toPlainDate(),
     today: now.toZonedDateTimeISO(zone).toPlainDate(),
     isPinned: reference.mode === ReferenceMode.PINNED,
-    gap: hasGap
-      ? {
-          requestedWallTime: reference.requestedWallTime,
-          shownWallTime: effective.toPlainTime(),
-        }
-      : undefined,
+    gap,
     language,
     translate,
   });
@@ -69,19 +69,12 @@ export function useReferenceMoment() {
   );
 
   const actions = useMemo(() => {
+    const nowTimestamp = () => clock.instant().toString();
     const dispatchAndAnnounce = (
-      command:
-        | { type: LocationCommandType.SET_DATE; date: string }
-        | { type: LocationCommandType.SHIFT_DATE; days: number }
-        | { type: LocationCommandType.RESET_TO_NOW },
+      command: Parameters<typeof store.dispatch>[0],
     ) => {
       const stateBefore = store.getSnapshot();
-      const now = clock.instant().toString();
-      const outcome = store.dispatch(
-        command.type === LocationCommandType.RESET_TO_NOW
-          ? command
-          : { ...command, now },
-      );
+      const outcome = store.dispatch(command);
       if (outcome.ok && store.getSnapshot() !== stateBefore) {
         setAnnouncement(
           buildDateBar(store.getSnapshot(), clock, language, t).fullDateLabel,
@@ -93,16 +86,19 @@ export function useReferenceMoment() {
         dispatchAndAnnounce({
           type: LocationCommandType.SHIFT_DATE,
           days: -ONE_DAY,
+          now: nowTimestamp(),
         }),
       showNextDay: () =>
         dispatchAndAnnounce({
           type: LocationCommandType.SHIFT_DATE,
           days: ONE_DAY,
+          now: nowTimestamp(),
         }),
       selectDate: (isoDate: string) =>
         dispatchAndAnnounce({
           type: LocationCommandType.SET_DATE,
           date: isoDate,
+          now: nowTimestamp(),
         }),
       returnToNow: () =>
         dispatchAndAnnounce({ type: LocationCommandType.RESET_TO_NOW }),
