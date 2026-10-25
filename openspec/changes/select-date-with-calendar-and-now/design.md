@@ -35,7 +35,8 @@ enum ReferenceMode { LIVE = "LIVE", PINNED = "PINNED" }
 enum WallClockStatus { UNIQUE = "UNIQUE", GAP = "GAP", AMBIGUOUS = "AMBIGUOUS" }
 type ReferenceMoment =
   | { mode: ReferenceMode.LIVE }
-  | { mode: ReferenceMode.PINNED; instant: Temporal.Instant; wallClockStatus: WallClockStatus }
+  | { mode: ReferenceMode.PINNED; instant: Temporal.Instant; wallClockStatus: WallClockStatus;
+      requestedWallTime: Temporal.PlainTime }   // the wall time kept from the previous moment
 LIVE_REFERENCE_MOMENT: ReferenceMoment = { mode: LIVE }
 getReferenceZone(state): string                      // state.deviceTimeZoneId (ADR-0007, no home yet)
 getEffectiveInstant(state, now): Temporal.Instant    // now in LIVE, the pinned instant otherwise
@@ -47,21 +48,21 @@ New commands in `LocationCommandType` (one store, as `WorldClockState` in `domai
 
 | Command | Fields | Effect |
 |---|---|---|
-| `SET_DATE` | `date: Temporal.PlainDate`, `now: Temporal.Instant` | date of `getEffectiveInstant(state, now)` in the reference zone equal to `date` → same state object; otherwise pin `resolveWallClock(zone, date + wall time)` |
-| `SHIFT_DATE` | `days: number`, `now: Temporal.Instant` | `SET_DATE` with that date `.add({ days })` |
+| `SET_DATE` | `date: string` (ISO date, `2026-07-15`), `now: string` (ISO 8601 with `Z`, `2026-03-08T07:30:00Z`) | date of `getEffectiveInstant(state, now)` in the reference zone equal to `date` → same state object; otherwise pin `resolveWallClock(zone, date + wall time)` |
+| `SHIFT_DATE` | `days: number`, `now: string` (ISO 8601 with `Z`) | `SET_DATE` with that date `.add({ days })` |
 | `RESET_TO_NOW` | — | `LIVE`; already `LIVE` → same state object |
 
-`now` travels in the command because the reducer is pure and reads no clock (ADR-0002, `architecture.md`: "Read 'now' only through the Clock port"); the controller fills it from `clock.instant()`. Temporal values serialize to ISO strings (`toString()`: `2026-03-08`, `2026-03-08T07:30:00Z`), so commands stay loggable data. Returning the same state object for "nothing changes" (FR3) means `createStore` does not notify.
+Commands carry only JSON values, as ADR-0002 requires ("Commands — serializable objects with a `type` discriminator"; "Commands as data enable logging, undo and deterministic replay in tests"): `JSON.parse(JSON.stringify(command))` is the same command. `now` travels in the command because the reducer is pure and reads no clock (`architecture.md`: "Read 'now' only through the Clock port"); the controller fills it with `clock.instant().toString()`. The reducer parses with `Temporal.PlainDate.from` / `Temporal.Instant.from` (`Instant.from` rejects a timestamp without an offset; the controller always sends the `Z` form of `Instant.toString()`); a `RangeError` while parsing returns the new `LocationErrorCode.INVALID_DATE` and the state unchanged (FR10). Returning the same state object for "nothing changes" (FR3) means `createStore` does not notify.
 
 `reduceLocations` delegates the three cases to `reduceReferenceMoment(state, command)` in `referenceMoment.ts`, keeping `locations.ts` under 200 lines.
 
-New error `LocationErrorCode.DATE_OUT_OF_RANGE`: `PlainDate.add` and `PlainDateTime.toZonedDateTime` throw `RangeError` beyond Temporal's limits; the reducer catches only `RangeError` and returns the error (FR10), as `getLocalDateTime` does.
+New error `LocationErrorCode.DATE_OUT_OF_RANGE`: once the inputs are parsed, `PlainDate.add` and `PlainDateTime.toZonedDateTime` throw `RangeError` beyond Temporal's limits; the reducer catches only `RangeError` and returns the error (FR10), as `getLocalDateTime` does.
 
-Alternatives: a separate reference store — rejected, rows need both values in one snapshot and `domain-model.md` puts both in one state. Reading the clock in the reducer — rejected, impure. ISO strings in commands — rejected, every consumer would parse and handle parse errors that cannot happen.
+Alternatives: a separate reference store — rejected, rows need both values in one snapshot and `domain-model.md` puts both in one state. Reading the clock in the reducer — rejected, impure. `Temporal.PlainDate` / `Temporal.Instant` objects in commands — rejected, they stringify one way only (`toJSON`), so a logged command could not be replayed, which breaks ADR-0002.
 
 ### D2. Model: wall-clock resolution
 
-New `model/wallClock.ts`: `resolveWallClock(timeZoneId, plainDateTime) → { instant, status }`. It converts twice with explicit disambiguation: `earlier = plainDateTime.toZonedDateTime(zone, { disambiguation: "earlier" })`, `later = … "later"`. Equal instants → `UNIQUE`; different and `earlier.toPlainDateTime()` equals the input → `AMBIGUOUS`, result `earlier`; otherwise → `GAP`, result `later`. This is exactly `compatible` (earlier on overlap, later on gap, ADR-0003) and needs no `TimeZone` object, which the current Temporal spec and `temporal-polyfill` 0.3 no longer have. The wall time kept is `getEffectiveInstant(...).toZonedDateTimeISO(zone).toPlainTime()` (FR2, FR4).
+New `model/wallClock.ts`: `resolveWallClock(timeZoneId, plainDateTime) → { instant, status }`. It converts twice with explicit disambiguation: `earlier = plainDateTime.toZonedDateTime(zone, { disambiguation: "earlier" })`, `later = … "later"`. Equal instants → `UNIQUE`; different and `earlier.toPlainDateTime()` equals the input → `AMBIGUOUS`, result `earlier`; otherwise → `GAP`, result `later`. This is exactly `compatible` (earlier on overlap, later on gap, ADR-0003) and needs no `TimeZone` object, which the current Temporal spec and `temporal-polyfill` 0.3 no longer have. The wall time kept is `getEffectiveInstant(...).toZonedDateTimeISO(zone).toPlainTime()` (FR2, FR4); it is stored in the pinned moment as `requestedWallTime`, so the presenter can name it in the gap note (D4). The state is not a command and is never stored or sent, so it may hold Temporal objects.
 
 ### D3. Model: calendar month and focus moves
 
@@ -76,7 +77,7 @@ New `model/calendar.ts` (pure, no language):
 
 New `constants/date.ts` (re-exported from `constants/index.ts`): `DATE_BAR_SHORT_FORMAT_OPTIONS` (`weekday: "short", day: "numeric", month: "long"`), `DATE_BAR_LONG_FORMAT_OPTIONS` (`weekday: "long"`, same rest), `FULL_DATE_FORMAT_OPTIONS` (`weekday: "long", day: "numeric", month: "long", year: "numeric"`), `CALENDAR_MONTH_FORMAT_OPTIONS` (`month: "long", year: "numeric"`), `CALENDAR_WEEKDAY_SHORT_FORMAT_OPTIONS` (`weekday: "short"`), `DAYS_PER_WEEK = 7`, `ONE_DAY = 1`, `FIRST_DAY_OF_WEEK_BY_LANGUAGE: Record<SupportedLanguage, number> = { en: 7, ru: 1 }`.
 
-New `presenter/dateBar.ts`: `presentDateBar({ effectiveDate: Temporal.PlainDate, today: Temporal.PlainDate, isPinned, language, translate }) → { shortLabel, longLabel, isoDate, fullDateLabel, chooseDateLabel, isPinned }`. When `effectiveDate.year !== today.year`, both labels use the options plus `year: "numeric"` (FR7). `chooseDateLabel` = `translate("date.chooseDate", { date: fullDateLabel })`.
+New `presenter/dateBar.ts`: `presentDateBar({ effectiveDate: Temporal.PlainDate, today: Temporal.PlainDate, isPinned, gap: { requestedWallTime: Temporal.PlainTime, shownWallTime: Temporal.PlainTime } | undefined, language, translate }) → { shortLabel, longLabel, isoDate, fullDateLabel, chooseDateLabel, isPinned, gapNote: string | undefined }`. When `effectiveDate.year !== today.year`, both labels use the options plus `year: "numeric"` (FR7). `chooseDateLabel` = `translate("date.chooseDate", { date: fullDateLabel })`. `gapNote` = `translate("date.gapNote", { requestedTime, shownTime })` with both times formatted by `PlainTime.toLocaleString(language, LOCAL_TIME_FORMAT_OPTIONS)` (the rows' existing `HH:mm` options in `constants/localDateTime.ts`); `undefined` when `gap` is absent (FR4). The controller passes `gap` only when the pinned moment's `wallClockStatus` is `GAP`, with `shownWallTime` = the pinned instant's wall time in the reference zone.
 
 New `presenter/calendarMonth.ts`: `presentCalendarMonth({ focusedDate, selectedDate, today, language }) → { heading, weekdays: { shortLabel, fullLabel }[], weeks: (CalendarDayCell | null)[][] }` with `CalendarDayCell = { isoDate, dayNumber, fullLabel, isToday, isSelected, isFocused }`. The heading is formatted from day 1 as a `PlainDate`, never a `PlainYearMonth`: `PlainYearMonth.toLocaleString` throws for the ISO calendar against a Gregorian locale default.
 
@@ -85,7 +86,7 @@ All text is `PlainDate.toLocaleString(language, options)` — no `timeZone` is i
 ### D5. Controller: `useReferenceMoment` and rows at the effective instant
 
 - `useLocations` reads `reference` from the snapshot and presents rows with `instant: getEffectiveInstant(state, clock.instant())`; `reference` joins the memo key. In `PINNED` a tick re-presents the same instant, so rows do not change (FR5); `SET_DEVICE_TIME_ZONE` still runs in the tick.
-- New `controller/useReferenceMoment.ts` reads `store`, `clock`, `minuteTick` from `LocationsContext` and returns `{ dateBar, showPreviousDay, showNextDay, selectDate(isoDate), returnToNow }`. Actions call `store.dispatch` directly with `now: clock.instant()` — never `dispatchAndSchedule` — so no date action schedules a write (FR1, M5). `selectDate` takes the ISO date string from the view and parses it with `Temporal.PlainDate.from`. `minuteTick` is in the memo key of `dateBar`, so a `LIVE` bar changes at local midnight (FR7) and "today" stays current.
+- New `controller/useReferenceMoment.ts` reads `store`, `clock`, `minuteTick` from `LocationsContext` and returns `{ dateBar, showPreviousDay, showNextDay, selectDate(isoDate), returnToNow }`. Actions call `store.dispatch` directly with `now: clock.instant().toString()` — never `dispatchAndSchedule` — so no date action schedules a write (FR1, M5). `selectDate` passes the ISO date string from the view into `SET_DATE` unchanged; the reducer parses it (D1). `dateBar.gapNote` comes from `presentDateBar` with `gap` built from the pinned moment (D4). `minuteTick` is in the memo key of `dateBar`, so a `LIVE` bar changes at local midnight (FR7) and "today" stays current.
 - New `controller/useCalendarMonth.ts`: `useCalendarMonth(focusedIsoDate) → { month, getFocusTarget(move): string }` built on `presentCalendarMonth` and `getCalendarFocusTarget`, with `selectedDate` and `today` from the store and clock and `firstDayOfWeek` from the language. The view never imports the model.
 - Both hooks are exported from `controller/index.ts`, which also re-exports `CalendarMove`, so views import only from `@/controller` and `@/presenter` types, never from `@/model`.
 
@@ -93,9 +94,10 @@ All text is `PlainDate.toLocaleString(language, options)` — no `timeZone` is i
 
 - `views/shared/DateBar.tsx` calls `useReferenceMoment()` and renders a `role="group"` named `t("date.barLabel")`: previous-day icon button (`ChevronLeft`), the date button (`aria-haspopup="dialog"`, `aria-label` = `chooseDateLabel`, text: `<time dateTime={isoDate}>` holding `<span data-date-label="short" class="md:hidden">` and `<span data-date-label="long" class="hidden md:inline">`), next-day icon button (`ChevronRight`), and, only when `isPinned`, Now (`Clock` icon + `t("date.now")`, accent fill). Below `md` the bar is `justify-between` (arrows + date left, Now right); from `md` `justify-center` with a gap (NFR-R2). Controls have `min-h-11 min-w-11` (44 px, UX1). A polite `sr-only` live region shows `fullDateLabel` after a date change made from the bar or calendar — not on mount and not on ticks — so each change is announced once (NFR-A3).
 - After Now, focus moves to the date button (`ref.focus()`), because the focused Now button unmounts (NFR-A2).
-- `views/shared/CalendarDialog.tsx` uses `Dialog` / `DialogContent` / `DialogTitle` (`t("date.calendarTitle")`) from `@/components/ui` with the date button as `DialogTrigger`, so Radix returns focus to it on close and Esc closes (NFR-A2). View state `focusedIsoDate` (ADR-0002: view state stays in the view) starts at the selected date on open. Body: month heading (`aria-live="polite"`), previous / next month icon buttons (moving the focus by a month), and a `<table role="grid">` with `<th scope="col" abbr={fullLabel}>` weekday headers and one `<button>` per day (`aria-label` full date, `aria-selected` on the selected one, `aria-current="date"` on today, roving `tabIndex` 0 only on the focused day). `onKeyDown` maps keys through `views/shared/calendarKeys.ts` (`KeyboardKey` → `CalendarMove`); Enter / Space are native button activation. Picking calls `selectDate` and closes.
+- `views/shared/CalendarDialog.tsx` uses `Dialog` / `DialogContent` / `DialogTitle` (`t("date.calendarTitle")`) from `@/components/ui` with the date button as `DialogTrigger`, so Radix returns focus to it on close and Esc closes (NFR-A2). View state `focusedIsoDate` (ADR-0002: view state stays in the view) starts at the selected date on open. Body: a `DialogClose` icon button named by the existing `locations.close` key, as in `LocationSearchDialog.tsx`; the month heading (`aria-live="polite"`); previous / next month icon buttons (moving the focus by a month), and a `<table role="grid">` with `<th scope="col" abbr={fullLabel}>` weekday headers and one `<button>` per day (`aria-label` full date, `aria-selected` on the selected one, `aria-current="date"` on today, roving `tabIndex` 0 only on the focused day). `onKeyDown` maps keys through `views/shared/calendarKeys.ts` (`KeyboardKey` → `CalendarMove`); Enter / Space are native button activation. Picking calls `selectDate` and closes.
 - `KeyboardKey` gains `ARROW_LEFT`, `ARROW_RIGHT`, `HOME`, `END`, `PAGE_UP`, `PAGE_DOWN`.
-- Locale keys, new namespace `date` in both `en.json` and `ru.json`: `barLabel`, `previousDay`, `nextDay`, `chooseDate` (`"Choose date, {{date}}"`), `now`, `calendarTitle`, `previousMonth`, `nextMonth`.
+- Locale keys, new namespace `date` in both `en.json` and `ru.json`: `barLabel`, `previousDay`, `nextDay`, `chooseDate` (`"Choose date, {{date}}"`), `now`, `calendarTitle`, `previousMonth`, `nextMonth`, `gapNote` (en `"{{requestedTime}} does not exist on this day because of a clock change; showing {{shownTime}}."`, ru `"{{requestedTime}} в этот день нет из-за перевода часов; показано {{shownTime}}."`).
+- When `gapNote` is set, `DateBar` renders it as a line of small muted text under the controls, inside the bar (FR4); it is part of the bar, so it is shown in every page state like the bar.
 
 ### D7. Main page: bottom bar slot
 
@@ -105,7 +107,8 @@ All text is `PlainDate.toLocaleString(language, options)` — no `timeZone` is i
 
 - Pure model and presenter: Vitest with `it.each` (`model/referenceMoment.test.ts`, `model/wallClock.test.ts`, `model/calendar.test.ts`, `presenter/dateBar.test.ts`, `presenter/calendarMonth.test.ts`), time from `fakeClock` only.
 - Behaviour in jsdom: `src/test/features/date_selection/*.feature` with vitest-cucumber steps in `steps/`, rendering `AppShell` or `LocationsProvider` with an in-memory repository, `fakeClock` / a switchable clock, `createManualTickScheduler()` and `createManualWriteScheduler()` (exact strings are asserted here, under Node's ICU).
-- Real browser only (`bdd-unit.md` table: keyboard, aria, focus, layout): `date_selection_e2e.feature` (`chromium`, `mobile-chrome`) and `date_selection_view_contract_e2e.feature` (`@view-contract`, run per registered view). E2E asserts ISO `dateTime` attributes, `data-date-label` visibility, roles and names built from the full date, focus, boxes, axe-core and screenshots — the bar wording itself is asserted in unit features (Risks).
+- jsdom tests (Vitest component tests and unit BDD) assert text, `dateTime` attributes, which controls exist and model state after clicks. They never assert keyboard handling, `aria-*` states, accessible names, focus, live-region announcements, layout or styling classes. Controls are queried by role and name only to act on them.
+- Real browser only (`bdd-unit.md` table: "Keyboard accessibility | no | yes", "aria-labels, focus management | no | yes", "Responsive layout | no | yes"): `date_selection_e2e.feature` (`chromium`, `mobile-chrome`) and `date_selection_view_contract_e2e.feature` (`@view-contract`, run per registered view). E2E asserts ISO `dateTime` attributes, `data-date-label` visibility, roles and names built from the full date, focus, boxes, axe-core and screenshots — the bar wording itself is asserted in unit features (Risks).
 
 ## Consequences
 
@@ -125,7 +128,8 @@ Negative:
 **Native `<input type="date">`**: no grid code, but its picker cannot be styled as the screens, opens differently per browser, cannot be driven by Playwright and does not mark "today" in the reference zone (D6).
 **`react-day-picker` (shadcn Calendar)**: ready-made grid, but a new dependency built on `Date`, which `temporal.md` forbids in production code (D6).
 **Date bar inside `CardsView`**: closer to the view, but hidden while the view loads or fails and duplicated by every later view (D7).
-**Commands carrying ISO strings**: stricter "serializable", but adds parse errors that cannot occur (D1).
+**Commands carrying Temporal objects**: no parsing in the reducer, but the objects stringify one way only, so logged commands cannot be replayed, against ADR-0002 (D1).
+**No gap note (status only in the model)**: less UI, but ADR-0003 says for `GAP` "the view tells the user" (D4).
 
 ## Risks / Trade-offs
 

@@ -28,7 +28,7 @@ The app SHALL keep one reference moment from which every location's time, date a
 - **AND** the Moscow row shows `10:30` and `Mon, Mar 9`
 
 ### Requirement: Previous and next day
-The previous-day and next-day actions SHALL move the reference moment exactly one calendar day back or forward in the reference zone, keeping the wall-clock time the moment has there, and MUST pin the moment. From a live moment they MUST start from the current instant. Inputs: the effective instant, the reference zone, the direction (−1 or +1 day). Output: the pinned instant and its wall-clock status (see "Wall-clock resolution on the new date"). Errors: a move that would leave the range of dates the platform's date arithmetic supports MUST be rejected and MUST change nothing. <!-- implements FR2, FR10 of select-date-with-calendar-and-now -->
+The previous-day and next-day actions SHALL move the reference moment exactly one calendar day back or forward in the reference zone, keeping the wall-clock time the moment has there, and MUST pin the moment. From a live moment they MUST start from the current instant. Inputs: the effective instant, the reference zone, the direction (−1 or +1 day). Output: the pinned instant and its wall-clock status (see "Wall-clock resolution on the new date"). Errors: a move with a malformed current instant MUST be rejected as invalid; a move that would leave the range of dates the platform's date arithmetic supports MUST be rejected and MUST change nothing. <!-- implements FR2, FR10 of select-date-with-calendar-and-now -->
 
 #### Scenario: Next day from live
 - **GIVEN** the device time zone is `Asia/Almaty`
@@ -60,7 +60,16 @@ The previous-day and next-day actions SHALL move the reference moment exactly on
 - **AND** the moment is unchanged
 
 ### Requirement: Wall-clock resolution on the new date
-When a date change keeps a wall-clock time that does not exist on the new date in the reference zone (a DST gap), the moment SHALL move forward by the length of the gap; when the wall-clock time occurs twice (a DST overlap), the moment MUST be the earlier of the two instants. The outcome MUST be reported with the pinned moment as `UNIQUE`, `GAP` or `AMBIGUOUS`. The status is not shown as text in this change. <!-- implements FR4 of select-date-with-calendar-and-now -->
+When a date change keeps a wall-clock time that does not exist on the new date in the reference zone (a DST gap), the moment SHALL move forward by the length of the gap; when the wall-clock time occurs twice (a DST overlap), the moment MUST be the earlier of the two instants. The outcome MUST be reported with the pinned moment as `UNIQUE`, `GAP` or `AMBIGUOUS`. On `GAP` the date bar MUST tell the user, in the interface language, which wall-clock time was kept and which time is shown instead. The note MUST stay until the next date change or Now. `UNIQUE` and `AMBIGUOUS` MUST show no note. <!-- implements FR4 of select-date-with-calendar-and-now -->
+
+#### Scenario: A gap is told in the bar
+- **GIVEN** the device time zone is `America/New_York`
+- **AND** the interface language is English
+- **AND** the current instant is `2026-03-07T07:30:00Z`
+- **WHEN** the user moves to the next day
+- **THEN** the bar shows `02:30 does not exist on this day because of a clock change; showing 03:30.`
+- **WHEN** the user moves to the next day again
+- **THEN** the bar shows no note
 
 #### Scenario: Wall-clock outcomes
 - **GIVEN** the device time zone is `America/New_York`
@@ -73,8 +82,14 @@ When a date change keeps a wall-clock time that does not exist on the new date i
 | `2026-03-07T07:30:00Z` | `2026-03-08T07:30:00Z` | `GAP` |
 | `2026-10-31T05:30:00Z` | `2026-11-01T05:30:00Z` | `AMBIGUOUS` |
 
+#### Scenario: A malformed date changes nothing
+- **GIVEN** the moment is live
+- **WHEN** a date change arrives with the date `2026-13-01`
+- **THEN** the change is rejected as an invalid date
+- **AND** the moment is still live
+
 ### Requirement: Choose a date in the calendar
-Activating the shown date SHALL open a calendar showing the month of the reference moment's date in the reference zone, with that date marked as selected and today's date in the reference zone marked as today. The calendar MUST let the user show the previous and the next month without changing the reference moment. Picking a day MUST move the reference moment to that date, keeping its wall-clock time in the reference zone (with the resolution of "Wall-clock resolution on the new date"), pin it and close the calendar. Picking the date already shown, or closing the calendar without picking, MUST change nothing: a live moment stays live. Inputs: the picked ISO date (`2026-07-15`), the effective instant, the reference zone. Output: the pinned instant. Errors: a date outside the supported range MUST be rejected and change nothing. <!-- implements FR3, FR10 of select-date-with-calendar-and-now -->
+Activating the shown date SHALL open a calendar showing the month of the reference moment's date in the reference zone, with that date marked as selected and today's date in the reference zone marked as today. The calendar MUST let the user show the previous and the next month without changing the reference moment. Picking a day MUST move the reference moment to that date, keeping its wall-clock time in the reference zone (with the resolution of "Wall-clock resolution on the new date"), pin it and close the calendar. Picking the date already shown, or closing the calendar without picking, MUST change nothing: a live moment stays live. Inputs: the picked ISO date (`2026-07-15`), the effective instant, the reference zone. Output: the pinned instant. Errors: a malformed date or a date outside the supported range MUST be rejected and change nothing. <!-- implements FR3, FR10 of select-date-with-calendar-and-now -->
 
 #### Scenario: Pick a date in a later month
 - **GIVEN** the device time zone is `Asia/Almaty`

@@ -12,7 +12,7 @@ The main page SHALL consist of a header with the app title as the only page head
 #### Scenario: Notices stay available
 - **WHEN** a new version becomes available while a view is shown
 - **THEN** the update notice is announced politely in the notices region
-- **AND** the notice is above the bottom bar
+- **AND** the bottom bar still shows the date bar
 
 #### Scenario: Header keeps its position
 - **WHEN** the page shows the update-check-failed note or the storage warning

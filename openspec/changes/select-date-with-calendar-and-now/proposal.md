@@ -10,7 +10,7 @@ Audience: every user, on phones and wide screens. The pinned reference moment in
 
 - ADDED: the reference moment of [ADR-0003](../../../docs/adr/0003-reference-instant-time-model.md): `LIVE` (follows the clock, the start mode on every open) or `PINNED` (a fixed instant chosen by the user). It is never stored.
 - ADDED: a bottom date bar on the main page: previous-day button, the shown date (a button that opens a calendar), next-day button, and a Now button shown only while the moment is pinned.
-- ADDED: previous / next day and a date picked in the calendar move the reference moment to that date, keeping its wall-clock time in the reference zone ([ADR-0007](../../../docs/adr/0007-reference-zone-and-device-time.md); the device time zone, since home locations do not exist yet). Wall-clock times that do not exist or occur twice on the new date are resolved with `compatible` disambiguation and reported as `UNIQUE | GAP | AMBIGUOUS` by the model.
+- ADDED: previous / next day and a date picked in the calendar move the reference moment to that date, keeping its wall-clock time in the reference zone ([ADR-0007](../../../docs/adr/0007-reference-zone-and-device-time.md); the device time zone, since home locations do not exist yet). Wall-clock times that do not exist or occur twice on the new date are resolved with `compatible` disambiguation and reported as `UNIQUE | GAP | AMBIGUOUS` by the model; when a time does not exist on the new date, the bar tells the user which time is shown instead (ADR-0003: "the view tells the user").
 - ADDED: a calendar dialog: month grid in the interface language, today and the shown date marked, previous / next month, full keyboard operation.
 - MODIFIED: location rows show time, date and UTC offset at the reference moment (equal to the current instant in `LIVE`); while pinned, minute updates no longer change them.
 - MODIFIED: the main page's empty bottom bar slot now holds the date bar; the notices region stays above it.
@@ -42,7 +42,7 @@ Audience: every user, on phones and wide screens. The pinned reference moment in
 ## Non-Goals
 
 - NG1: Choosing a time of day (slider, typed time, `SELECT_INSTANT`, `SET_WALL_TIME`, `SHIFT_TIME`) — README MVP feature 5, a later change.
-- NG2: The wall-time hint text in the cards (`views.md` "Wall-time hint") — it belongs to typed time; this change only reports the status from the model (Q1).
+- NG2: The wall-time hint text in the cards (`views.md` "Wall-time hint") and offering the later instant of an `AMBIGUOUS` time. Both belong to typed time (README MVP feature 5), and ADR-0003 makes the offer optional ("the view may offer the later one"). This change shows only the `GAP` note in the bar (FR4, Q1).
 - NG3: Home location and the derived Here entry (ADR-0007): the reference zone is the device time zone, the only one that exists today.
 - NG4: Differences from the reference zone and day-shift hints on rows.
 - NG5: A day strip for wide screens (open-questions Q5: decided with the Grid view).
@@ -64,13 +64,13 @@ Audience: every user, on phones and wide screens. The pinned reference moment in
 - FR1: The reference moment is `LIVE` whenever the app opens; in `LIVE` every row shows the current instant. The reference moment is never written to storage and is never shared between tabs.
 - FR2: Previous day / next day move the reference moment exactly one calendar day back / forward in the reference zone (the device time zone), keeping the wall-clock time it has there, and pin it (`PINNED`); from `LIVE` they start from the current instant.
 - FR3: Tapping the shown date opens a calendar on the month of the shown date, with the shown date marked as selected and today (in the reference zone) marked as today. Previous / next month change the month shown without changing the reference moment. Picking a day moves the reference moment to that date, keeping its wall-clock time in the reference zone, pins it and closes the calendar. Picking the date already shown, or closing the calendar without picking, changes nothing (a `LIVE` moment stays `LIVE`).
-- FR4: A wall-clock time that does not exist on the new date (DST gap) is moved forward by the gap; one that occurs twice resolves to the earlier instant (`compatible` disambiguation, ADR-0003). The model reports the outcome as `UNIQUE`, `GAP` or `AMBIGUOUS` with the pinned moment.
+- FR4: A wall-clock time that does not exist on the new date (DST gap) is moved forward by the gap; one that occurs twice resolves to the earlier instant (`compatible` disambiguation, ADR-0003). The model reports the outcome as `UNIQUE`, `GAP` or `AMBIGUOUS` with the pinned moment. On `GAP` the date bar shows a note naming the requested and the shown wall-clock time (`02:30 does not exist on this day because of a clock change; showing 03:30.`) until the next date change or Now; `UNIQUE` and `AMBIGUOUS` show no note.
 - FR5: While pinned, every row's time, date and UTC offset are those of the pinned instant, so offsets and DST are resolved for the selected date; minute updates and returns to the visible page do not change them (the device time zone is still re-read).
 - FR6: The Now button is shown only while the moment is pinned. It returns the moment to `LIVE`: rows show the current instant at once and follow the clock again, and the Now button disappears.
 - FR7: The date bar shows the date of the reference moment in the reference zone: short weekday, day and month name below 768 px (`Sun, March 8`, `вс, 8 марта`), full weekday from 768 px (`Sunday, March 8`, `воскресенье, 8 марта`), with the year appended when it differs from the current year in the reference zone (`Mon, March 8, 2027`). In `LIVE` it follows the clock, so it changes at local midnight.
 - FR8: The date bar is shown at the bottom of the main page in every state of the page — view loading, view error, empty list, unreadable stored list, storage unavailable, offline — and the notices stay visible above it.
 - FR9: Every date bar and calendar string exists in English and Russian; month and weekday names follow the interface language; the calendar week starts on Sunday in English and on Monday in Russian.
-- FR10: A date change that would leave the range Temporal supports is rejected with a typed error and changes nothing.
+- FR10: A date change whose date or instant is malformed, or that would leave the range Temporal supports is rejected with a typed error and changes nothing.
 
 ### Non-Functional
 
@@ -108,19 +108,20 @@ Audience: every user, on phones and wide screens. The pinned reference moment in
 | any | no locations | empty state unchanged; bar shown and usable |
 | any | stored list unreadable | error with Reset unchanged; bar shown; Reset keeps the reference moment |
 | any | storage unavailable | warning above the bar; the date works as with storage (nothing is stored either way) |
-| any | date out of range | nothing changes (FR10) |
+| any | pinned in a DST gap | bar with the selected date, Now and the gap note (FR4) |
+| any | date out of range or malformed | nothing changes (FR10) |
 | offline | any of the above | same behaviour: date selection needs no network |
 
 ## Behavior
 
 Feature files under `packages/client/src/test/features/date_selection/`, tagged `@select-date-with-calendar-and-now`:
 
-- `date_selection_reference_moment.feature` — `LIVE` on open, previous / next day, DST gap and overlap, Now, pinned rows ignore ticks, nothing stored (vitest-cucumber);
+- `date_selection_reference_moment.feature` — `LIVE` on open, previous / next day, DST gap (with its note) and overlap, Now, pinned rows ignore ticks, nothing stored (vitest-cucumber);
 - `date_selection_calendar_unit.feature` — calendar month, week start, today and selected marks, picking a date, closing without change (vitest-cucumber);
 - `date_selection_date_bar_unit.feature` — bar labels in English and Russian, year, Now visibility, bar in every page state (vitest-cucumber);
 - `date_selection_e2e.feature` — keyboard, focus, accessible names, announcements, axe-core, layout and screenshots (playwright-bdd);
 - view-contract scenarios "Select a date" and "Return to now" tagged `@view-contract` in `date_selection_view_contract_e2e.feature`;
-- "Notice above the bar" added to `main_page/main_page_e2e.feature`, and `pinned` / `calendar` states added to the screenshot outline of `locations/locations_ui_e2e.feature`.
+- "User opens the app" and "Notices stay available" in `main_page/main_page_unit.feature` gain the date bar; "Notice above the bar" added to `main_page/main_page_e2e.feature`, and `pinned` / `calendar` states added to the screenshot outline of `locations/locations_ui_e2e.feature`.
 
 ## Visual Reference
 
@@ -134,7 +135,7 @@ No changes (no IA documents exist under `docs/ia/`).
 
 - M1: 100% of FR1–FR10, NFR-P1, NFR-A1–NFR-A3, NFR-R1–NFR-R3 and UX1–UX3 have at least one automated test tagged or commented with `select-date-with-calendar-and-now`.
 - M2: Device zone `Asia/Almaty`, opened at `2026-03-08T07:30:00Z`, English: next day pins `2026-03-09T07:30:00Z` and rows read Almaty `12:30` / `Mon, Mar 9`, New York `03:30` / `Mon, Mar 9` / `UTC−4`; previous day from the start pins `2026-03-07T07:30:00Z` and New York reads `02:30` / `Sat, Mar 7` / `UTC−5`; picking `2026-07-15` pins `2026-07-15T07:30:00Z` and New York reads `03:30` / `Wed, Jul 15` (3 of 3).
-- M3: Device zone `America/New_York`: next day from `2026-03-07T07:30:00Z` (02:30 local) pins `2026-03-08T07:30:00Z` with `GAP`; next day from `2026-10-31T05:30:00Z` (01:30 local) pins `2026-11-01T05:30:00Z` with `AMBIGUOUS`; next day from `2026-06-01T14:00:00Z` pins `2026-06-02T14:00:00Z` with `UNIQUE` (3 of 3).
+- M3: Device zone `America/New_York`: next day from `2026-03-07T07:30:00Z` (02:30 local) pins `2026-03-08T07:30:00Z` with `GAP`; next day from `2026-10-31T05:30:00Z` (01:30 local) pins `2026-11-01T05:30:00Z` with `AMBIGUOUS`; next day from `2026-06-01T14:00:00Z` pins `2026-06-02T14:00:00Z` with `UNIQUE` (3 of 3); in English only the `GAP` case shows the note `02:30 does not exist on this day because of a clock change; showing 03:30.` (1 of 3).
 - M4: The bar reads `Sun, March 8` at 375 px and `Sunday, March 8` at 1024 px in English, `вс, 8 марта` / `воскресенье, 8 марта` in Russian, and `Mon, March 8, 2027` for `2027-03-08` (5 of 5). The March 2026 calendar has 5 week rows starting with Sunday 1 March in English and 6 week rows starting with Monday (2 March in the second row) in Russian.
 - M5: 0 storage writes caused by 10 date changes and a Now.
 - M6: Mutation score of the new or changed model, presenter, controller and view code ≥ 95% (minimum 90%).
@@ -142,5 +143,5 @@ No changes (no IA documents exist under `docs/ia/`).
 
 ## Open Questions
 
-- Q1: Should a date change that lands in a DST gap or overlap explain itself in the cards? Decided for now: no text (NG2); the model reports `GAP` / `AMBIGUOUS` so the wall-time hint change can show it later.
+- Q1: Should a date change that lands in an overlap offer the later instant? Decided: not in this change (NG2). ADR-0003 says "the view may offer the later one", so the offer is optional. The model already reports `AMBIGUOUS`, so the typed-time change can add it. A gap is always told to the user (FR4), as ADR-0003 requires ("moved forward to 03:30; the view tells the user").
 - Q2: The bar uses the interface language's own `Intl` conventions (`вс, 8 марта`), which differ in case from the screens (`Вс, 8 марта`), as decided in Q2 of the archived `show-local-time-and-date-on-location-cards`. No custom pattern is introduced.
