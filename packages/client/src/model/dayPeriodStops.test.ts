@@ -149,3 +149,96 @@ describe("collectOffsetEdges", () => {
     expect(edges[0].after).toBe(DayPeriod.MORNING);
   });
 });
+
+const NEW_YORK_STATE = {
+  ...INITIAL_LOCATIONS_STATE,
+  deviceTimeZoneId: "America/New_York",
+};
+const instantOf = (iso: string) => Temporal.Instant.from(iso);
+const midnightSchedule = [
+  {
+    wallTime: "00:00",
+    from: DayPeriod.EVENING,
+    to: DayPeriod.NIGHT,
+    blendMinutes: 0,
+  },
+];
+
+describe("collectBlendWindows", () => {
+  it("should use the earlier occurrence of a repeated wall time", () => {
+    const day = getReferenceDay(
+      NEW_YORK_STATE,
+      instantOf("2026-11-01T12:00:00Z"),
+    );
+    const repeatedSchedule = [
+      {
+        wallTime: "01:30",
+        from: DayPeriod.EVENING,
+        to: DayPeriod.NIGHT,
+        blendMinutes: 0,
+      },
+    ];
+
+    const windows = collectBlendWindows(
+      "America/New_York",
+      day,
+      repeatedSchedule,
+    );
+
+    expect(windows.map((window) => window.start.toString())).toEqual([
+      "2026-11-01T05:30:00Z",
+    ]);
+  });
+
+  it("should keep windows that touch the start or the end of the day", () => {
+    const day = getReferenceDay(
+      { ...INITIAL_LOCATIONS_STATE, deviceTimeZoneId: "UTC" },
+      instantOf("2026-07-15T12:00:00Z"),
+    );
+
+    const windows = collectBlendWindows("UTC", day, midnightSchedule);
+
+    expect(windows.map((window) => window.start.toString())).toEqual([
+      "2026-07-15T00:00:00Z",
+      "2026-07-16T00:00:00Z",
+    ]);
+  });
+});
+
+describe("collectOffsetEdges at the end of the day", () => {
+  it("should leave out a change exactly at the end", () => {
+    const day = {
+      start: instantOf("2026-03-08T00:00:00Z"),
+      end: instantOf("2026-03-08T07:00:00Z"),
+      lengthMinutes: 420,
+    };
+    const nightToMorning = [
+      {
+        wallTime: "02:30",
+        from: DayPeriod.NIGHT,
+        to: DayPeriod.MORNING,
+        blendMinutes: 0,
+      },
+    ];
+
+    expect(collectOffsetEdges("America/New_York", day, nightToMorning)).toEqual(
+      [],
+    );
+  });
+});
+
+describe("assembleDayPeriodStops order", () => {
+  it("should sort the stops by position", () => {
+    const edges = [0.75, 0.25].map((fraction) => ({
+      instant: DAY.start.add({ minutes: fraction * DAY.lengthMinutes }),
+      before: DayPeriod.EVENING,
+      after: DayPeriod.NIGHT,
+    }));
+
+    const fractions = assembleDayPeriodStops([], edges, DAY).map(
+      (stop) => stop.fraction,
+    );
+
+    expect(fractions).toEqual([0.25, 0.25, 0.75, 0.75]);
+  });
+});

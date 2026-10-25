@@ -1,5 +1,5 @@
 // Verifies FR1, FR2, FR3, FR4 of add-time-sliders-to-location-cards (D2).
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import {
   getInstantAfterTrackMove,
@@ -8,6 +8,7 @@ import {
   getReferenceDay,
   getTrackFraction,
   getTrackValueMinutes,
+  type ReferenceDay,
   TrackMove,
 } from "./dayTrack";
 import { INITIAL_LOCATIONS_STATE, type LocationsState } from "./locations";
@@ -22,7 +23,10 @@ const instantOf = (iso: string) => Temporal.Instant.from(iso);
 const dayOf = (zone: string, iso: string) =>
   getReferenceDay(stateIn(zone), instantOf(iso));
 
-const ALMATY_DAY = dayOf("Asia/Almaty", "2026-03-08T07:30:00Z");
+let ALMATY_DAY: ReferenceDay;
+beforeAll(() => {
+  ALMATY_DAY = dayOf("Asia/Almaty", "2026-03-08T07:30:00Z");
+});
 
 describe("getReferenceDay", () => {
   it("should span local midnight to local midnight in Almaty", () => {
@@ -128,5 +132,14 @@ describe("getInstantAfterTrackMove", () => {
     expect(
       getInstantAfterTrackMove(ALMATY_DAY, instantOf(from), move).toString(),
     ).toBe(expected);
+  });
+});
+
+describe("getReferenceDay length", () => {
+  it("should end exactly one local day after the start", () => {
+    const day = dayOf("Asia/Almaty", "2026-03-08T07:30:00Z");
+
+    expect(day.start.until(day.end).total({ unit: "hour" })).toBe(24);
+    expect(day.lengthMinutes).toBe(1440);
   });
 });

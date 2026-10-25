@@ -130,3 +130,11 @@ describe("reduceLocations SELECT_INSTANT", () => {
     expect(state.reference).toBe(pinned.reference);
   });
 });
+
+describe("reduceLocations SELECT_INSTANT with a non-string instant", () => {
+  it("should not hide a programming error as an invalid instant", () => {
+    expect(() =>
+      selectInstant(ALMATY_STATE, undefined as unknown as string),
+    ).toThrow(TypeError);
+  });
+});

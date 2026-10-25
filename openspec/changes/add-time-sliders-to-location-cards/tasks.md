@@ -52,7 +52,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - two calls for the same zone and day return the same array (`toBe`); a call for another day returns a new one.
 
   Export from `model/index.ts`. Verify red, then green, with `npx vitest run src/model/dayPeriodStops.test.ts`, then `npx vitest run src/model`.
-- [ ] 2.5 Mutation run (M8). Verify that `npx stryker run --mutate 'src/model/reduceSelectInstant.ts,src/model/dayTrack.ts,src/model/dayPeriods.ts,src/model/dayPeriodStops.ts,src/model/locations.ts'` scores ≥ 95% (minimum 90%).
+- [x] 2.5 Mutation run (M8). Verify that `npx stryker run --mutate 'src/model/reduceSelectInstant.ts,src/model/dayTrack.ts,src/model/dayPeriods.ts,src/model/dayPeriodStops.ts,src/model/locations.ts'` scores ≥ 95% (minimum 90%).
 
 ## 3. Presenter (TDD)
 

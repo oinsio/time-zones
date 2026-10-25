@@ -136,7 +136,7 @@ export function assembleDayPeriodStops(
   return stops.sort((first, second) => first.fraction - second.fraction);
 }
 
-let cachedDayKey = "";
+let cachedDayKey: string | undefined;
 let cachedStopsByZone = new Map<string, readonly DayPeriodStop[]>();
 
 /** Memoized for one reference day: drags and ticks reuse the same array. */
