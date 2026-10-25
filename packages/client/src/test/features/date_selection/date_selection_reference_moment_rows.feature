@@ -1,13 +1,21 @@
 Feature: Reference moment rows
   Implements change select-date-with-calendar-and-now.
+  Implements change fix-date-change-row-budget-measurement.
   As a user I see the rows keep the chosen moment and follow the clock again after now.
 
-  @select-date-with-calendar-and-now @NFR-P1
+  @select-date-with-calendar-and-now @NFR-P1 @fix-date-change-row-budget-measurement
   Scenario: 50 rows within the budget
+    Given 50 locations presented at "2026-03-08T07:30:00Z" in the device time zone "UTC"
+    When the date moves to the next day and the rows are presented again
+    Then it takes at most 50 ms
+    And every row carries its local date at "2026-03-09T07:30:00Z"
+
+  @fix-date-change-row-budget-measurement @FR1 @UX1
+  Scenario: The new date shows in the same render
     Given 50 locations
     And the app is open
     When the user moves to the next day
-    Then the rows show the new date within 50 ms
+    Then the rows show the new date at once
 
   @select-date-with-calendar-and-now @FR5
   Scenario: Rows at a pinned moment

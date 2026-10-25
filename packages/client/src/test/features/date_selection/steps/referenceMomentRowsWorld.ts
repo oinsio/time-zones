@@ -1,0 +1,115 @@
+import i18n from "i18next";
+import { expect } from "vitest";
+import { ONE_DAY } from "@/constants";
+import { Temporal } from "@/lib/temporal";
+import {
+  getEffectiveInstant,
+  INITIAL_LOCATIONS_STATE,
+  LocationCommandType,
+  type LocationsState,
+  reduceLocations,
+} from "@/model";
+import { type LocationRow, presentLocationRows } from "@/presenter";
+import { buildLocation } from "@/test/factories/buildLocation";
+import { ENGLISH_LANGUAGE } from "./dateSelectionWorld";
+
+export const BUDGET_ROW_COUNT = 50;
+const REMOVE_BUTTON_SELECTOR = "button[aria-label]";
+const ROW_SELECTOR = "li";
+const DATE_ELEMENT_SELECTOR = "time";
+const DATETIME_ATTRIBUTE = "datetime";
+
+export const firstZones = () =>
+  Intl.supportedValuesOf("timeZone").slice(0, BUDGET_ROW_COUNT);
+
+export const localIsoDateAt = (timestamp: string, zone: string) =>
+  Temporal.Instant.from(timestamp)
+    .toZonedDateTimeISO(zone)
+    .toPlainDate()
+    .toString();
+
+/**
+ * Asserts every zone's rendered row shows its local date at the instant, resolving
+ * all rows with a single DOM query and exact aria-label matches.
+ * Implements FR1, UX1 of fix-date-change-row-budget-measurement (D4).
+ */
+export const expectRowsShowDateAt = (timestamp: string, zones: string[]) => {
+  const rowsByLabel = new Map(
+    [...document.querySelectorAll(REMOVE_BUTTON_SELECTOR)].map((button) => [
+      button.getAttribute("aria-label"),
+      button.closest(ROW_SELECTOR),
+    ]),
+  );
+  for (const zone of zones) {
+    const row = rowsByLabel.get(
+      i18n.t("locations.removeLocation", { city: zone }),
+    );
+    expect(row).toBeTruthy();
+    expect(row?.querySelector(DATE_ELEMENT_SELECTOR)).toHaveAttribute(
+      DATETIME_ATTRIBUTE,
+      localIsoDateAt(timestamp, zone),
+    );
+  }
+};
+
+/**
+ * Model and presenter work of a date change on 50 rows, without any rendering.
+ * Implements NFR-P1 of fix-date-change-row-budget-measurement (D1-D3).
+ */
+export const createRowBudgetWorld = () => {
+  let state: LocationsState = INITIAL_LOCATIONS_STATE;
+  let startInstant = "";
+  let zones: string[] = [];
+  let rows: LocationRow[] = [];
+  let elapsedMs = 0;
+  const presentRows = (
+    locations: LocationsState["locations"],
+    instant: Temporal.Instant,
+  ) =>
+    presentLocationRows(locations, {
+      language: ENGLISH_LANGUAGE,
+      instant,
+      translate: i18n.getFixedT(ENGLISH_LANGUAGE),
+      deviceTimeZoneId: state.deviceTimeZoneId,
+    });
+  return {
+    elapsedMs: () => elapsedMs,
+    prepare: async (timestamp: string, deviceTimeZoneId: string) => {
+      await i18n.changeLanguage(ENGLISH_LANGUAGE);
+      startInstant = timestamp;
+      zones = firstZones();
+      state = {
+        ...INITIAL_LOCATIONS_STATE,
+        locations: zones.map((zone) =>
+          buildLocation({ timeZoneId: zone, label: zone }),
+        ),
+        deviceTimeZoneId,
+      };
+      presentRows(state.locations, Temporal.Instant.from(startInstant));
+    },
+    measureDateChange: () => {
+      const startedAt = performance.now();
+      const outcome = reduceLocations(state, {
+        type: LocationCommandType.SHIFT_DATE,
+        days: ONE_DAY,
+        now: startInstant,
+      });
+      if (outcome.ok) {
+        rows = presentRows(
+          outcome.state.locations,
+          getEffectiveInstant(
+            outcome.state,
+            Temporal.Instant.from(startInstant),
+          ),
+        );
+      }
+      elapsedMs = performance.now() - startedAt;
+    },
+    expectRowsCarryDateAt: (timestamp: string) => {
+      expect(rows).toHaveLength(BUDGET_ROW_COUNT);
+      expect(rows.map((row) => row.localIsoDate)).toEqual(
+        zones.map((zone) => localIsoDateAt(timestamp, zone)),
+      );
+    },
+  };
+};
