@@ -29,7 +29,7 @@ _None._
 ## Impact
 
 - `packages/client/src/`: `model/` (local date-time of a location at an instant), `constants/` (format options, minute length), `presenter/` (time and date labels on `LocationRow`), `controller/` (minute tick with visibility pause in `LocationsProvider`, re-presentation in `useLocations`), `views/shared/` (time display block on the card, responsive layout of `LocationRow`).
-- Tests: new unit BDD and E2E features under `src/test/features/locations/`; existing scenarios touched: "Device zone is read once" (renamed — still holds between ticks), the exact-text "Zero offset" step, and the screenshot outline in `locations_ui_e2e.feature` (pinned time; the 8 "list" baselines are re-approved).
+- Tests: new unit BDD and E2E features under `src/test/features/locations/`; existing scenarios touched: the exact-text "Zero offset" step of `locations_utc_offset_unit.steps.tsx`, the "Device zone is read once" unit test of `controller/useLocations.deviceTimeZone.test.tsx` (still holds between ticks), and the screenshot outline in `locations_ui_e2e.feature` (pinned time; the 8 "list" baselines are re-approved).
 - No new dependencies, no storage schema change, no network.
 
 ## Goals
