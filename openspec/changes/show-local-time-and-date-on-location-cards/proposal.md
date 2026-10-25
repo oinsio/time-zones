@@ -29,7 +29,7 @@ _None._
 ## Impact
 
 - `packages/client/src/`: `model/` (local date-time of a location at an instant), `constants/` (format options, minute length), `presenter/` (time and date labels on `LocationRow`), `controller/` (minute tick with visibility pause in `LocationsProvider`, re-presentation in `useLocations`), `views/shared/` (time display block on the card, responsive layout of `LocationRow`).
-- Tests: new unit BDD and E2E features under `src/test/features/locations/`; existing scenarios touched: the exact-text "Zero offset" step of `locations_utc_offset_unit.steps.tsx`, the "Device zone is read once" unit test of `controller/useLocations.deviceTimeZone.test.tsx` (still holds between ticks), and the screenshot outline in `locations_ui_e2e.feature` (pinned time; the 8 "list" baselines are re-approved).
+- Tests: new unit BDD and E2E features under `src/test/features/locations/`; existing scenarios touched: the exact-text "Zero offset" step of `locations_utc_offset_unit.steps.tsx`, the test "should read the device zone once across list changes" of `controller/useLocations.deviceTimeZone.test.tsx` and the unit BDD scenario "Device zone is read once" (both still hold between ticks; they now run with a manual tick scheduler), and the screenshot outline in `locations_ui_e2e.feature` (pinned time; the 8 "list" baselines are re-approved).
 - No new dependencies, no storage schema change, no network.
 
 ## Goals
@@ -107,7 +107,8 @@ _None._
 
 Feature files under `packages/client/src/test/features/locations/`, tagged `@show-local-time-and-date-on-location-cards`:
 
-- `locations_local_time_unit.feature` — time and date per zone, day boundary, Russian date, minute updates, hidden page, DST change while open, device zone re-read, list changes, unknown zone, performance (vitest-cucumber, jsdom, `fakeClock` and an injected tick scheduler);
+- `locations_local_time_unit.feature` — time and date per zone, day boundary, Russian date, list changes, unknown zone, performance (vitest-cucumber, jsdom, `fakeClock`);
+- `locations_clock_tick.feature` — minute updates, hidden page, DST change while open, device zone re-read at the tick and on return to the page, no writes (vitest-cucumber, jsdom, a switchable clock and an injected tick scheduler);
 - `locations_local_time_e2e.feature` — layout at 375 px and 1024 px, no horizontal scrolling at 320 px and 2560 px, axe-core in both themes, accessible name and no live region (playwright-bdd);
 - the existing screenshot outline of `locations_ui_e2e.feature` (pinned instant, re-approved "list" baselines).
 

@@ -41,6 +41,8 @@ Alternative: add `reference: { mode: LIVE }` to `LocationsState` now — rejecte
 
 New `presenter/localDateTime.ts`: `formatLocalTime(zonedDateTime, language)` and `formatLocalDate(zonedDateTime, language)` = `zonedDateTime.toLocaleString(language, LOCAL_TIME_FORMAT_OPTIONS | LOCAL_DATE_FORMAT_OPTIONS)` — `Intl` formatting in the zone of the `ZonedDateTime`, no `Date`. `LocationRow` gains `localTimeLabel: string`, `localDateLabel: string` and `localIsoDate: string` (`zonedDateTime.toPlainDate().toString()`, ISO date-only per CLAUDE.md); all three are `""` when `getLocalDateTime` returns `undefined` (the convention of `utcOffsetLabel`). `presentLocationRows` computes the `ZonedDateTime` once per row. Expected strings (Node ICU 78, checked): `12:30` / `Sun, Mar 8` / `вс, 8 мар.` for Almaty at `2026-03-08T07:30:00Z`; `01:00` / `Mon, Mar 9` for Tokyo at `2026-03-08T16:00:00Z`.
 
+If the `temporal-polyfill` typings reject the options object, the fallback with the same output is `new Intl.DateTimeFormat(language, { ...options, timeZone: zonedDateTime.timeZoneId }).format(zonedDateTime.epochMilliseconds)` — still no `Date`.
+
 Alternative: a hand-written date pattern matching `views.md` (`Sun, 8 Mar`) — rejected, it would need per-language patterns and month names in locale files; `Intl` already writes each language correctly (Q2).
 
 ### D4. Controller: minute tick with visibility pause
@@ -99,6 +101,7 @@ Negative:
 - [A tick re-presents every row] → all rows change anyway because the time changes; NFR-P1 bounds 50 rows to 50 ms.
 - [`page.clock.setFixedTime` freezes `Date.now()` for the whole screenshot scenario] → only the screenshot outline and the new E2E feature use it; reorder and other E2E scenarios keep real time.
 - [Long city names at 320 px] → `min-w-0` and `break-words` wrap the name; NFR-R1 checks Kathmandu, New York and Tokyo with the Almaty badge.
+- [Unit tests that render `AppShell` (for example `test/features/locations/steps/locationsUiWorld.tsx`) use the default `timeoutTickScheduler` with the real clock] → a tick can fire during such a test only when it crosses a minute boundary; it re-presents the same rows with the new minute, and none of those tests asserts a time. Hook tests and the time features inject the manual scheduler (task 1.2, 6.1, 6.2).
 - [Re-reading the device zone at each tick changes the existing "read once" behaviour] → intended by ADR-0007; the reducer returns the same state for an unchanged zone, so ticks cause no extra renders from the store.
 
 ## Migration Plan
