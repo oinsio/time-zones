@@ -27,5 +27,6 @@ export const KNOWN_CITIES: Record<
   Kyiv: { timeZoneId: "Europe/Kyiv", countryCode: "UA" },
   Tokyo: { timeZoneId: "Asia/Tokyo", countryCode: "JP" },
   Kathmandu: { timeZoneId: "Asia/Kathmandu", countryCode: "NP" },
+  Apia: { timeZoneId: "Pacific/Apia", countryCode: "WS" },
   UTC: { timeZoneId: "UTC", countryCode: "" },
 };
