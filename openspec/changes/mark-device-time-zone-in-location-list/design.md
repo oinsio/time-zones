@@ -80,7 +80,7 @@ Positive:
 - Every test runner has a fixed device zone, so badges never depend on the developer's machine.
 
 Negative:
-- `presentLocationRows` gets one more context field and `LocationRow` one more field; callers and fixtures (`useLocations.ts`, `presentLocationRows.test.ts`, the whole-row `toEqual` in `controller/useLocations.test.tsx`, the row fixtures in `views/shared/LocationList.test.tsx` and `views/shared/LocationRow.test.tsx`) are updated.
+- `presentLocationRows` gets one more context field and `LocationRow` one more field; callers and fixtures (`useLocations.ts`, `presentLocationRows.test.ts`, the whole-row `toEqual` in `controller/useLocations.test.tsx`, the row fixtures in `views/shared/LocationList.test.tsx`, `views/shared/LocationRow.test.tsx`, `views/shared/LocationRow.dragging.test.tsx`, `views/shared/useReorderAnnouncements.test.tsx`, `views/shared/LocationList.drop.test.tsx` and the row objects in `test/features/locations/steps/locations_reorder_unit.steps.ts`, and the `presentLocationRows` calls in `test/features/locations/steps/locations_reorder_unit.steps.ts` and `test/features/locations/steps/locations_utc_offset_unit.steps.tsx`) are updated. Vitest does not type-check, so the tasks that widen a type also run `typecheck`.
 - The 8 approved "list" screenshots change once and must be re-approved.
 
 ## Alternatives Considered
@@ -95,7 +95,7 @@ Negative:
 - [The user travels with the app open] → the badge stays on the old zone until the next start; accepted by NG3, fixed by the clock-tick change (proposal Q2).
 - [Zones with equal rules] → `Europe/Minsk` does not match a device in `Europe/Moscow`; accepted by ADR-0007 ("Equality is by canonical zone ID").
 - [Pinning `timezoneId` for all E2E] → any existing scenario with Almaty in its list now shows a badge; no existing E2E step compares a row's full text (they filter rows with `hasText` or count them), and the full BDD run in tasks 8.3 proves it.
-- [`LocationsState` gains a required field] → test fixtures that build `{ locations: [] }` (`model/locations.test.ts`, `model/moveLocation.test.ts`, `test/features/locations/steps/locations_management.steps.ts`) switch to `INITIAL_LOCATIONS_STATE`.
+- [`LocationsState` gains a required field] → test fixtures that build `{ locations: [] }` (`model/locations.test.ts`, `model/moveLocation.test.ts`, `test/features/locations/steps/locations_management.steps.ts`, and `reduceLocations({ locations }, …)` in `test/features/locations/steps/locations_reorder_unit.steps.ts` → `{ ...INITIAL_LOCATIONS_STATE, locations }`) switch to `INITIAL_LOCATIONS_STATE`.
 
 ## Migration Plan
 
