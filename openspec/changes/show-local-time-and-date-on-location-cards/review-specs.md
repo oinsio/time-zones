@@ -92,7 +92,8 @@ None.
 - Impact: The scheduler's mutants (function body emptied, cancel turned into a no-op) survive or stay uncovered and pull down the 4.4 score, so M4 can fail at that step. A broken production tick, such as a cancel that does not clear the timeout, would ship with every test green. The implementer also has no task telling them to write the test that TDD requires first.
 - Fix: In task 4.1, add `controller/tickScheduler.test.ts` (header `// Verifies FR3 of show-local-time-and-date-on-location-cards (D4).`). It uses real timers, not `vi.useFakeTimers()`, so it stays within `tdd-workflow.md`. Two cases: `timeoutTickScheduler.schedule(callback, 0)` runs the callback (await a promise that the callback resolves); and calling the returned cancel before a 0 ms delay elapses means the callback has not run after awaiting a second 0 ms timeout. Add `npx vitest run src/controller/tickScheduler.test.ts` to the task's verify commands.
 - Fix risk: Two real 0 ms timers add a few milliseconds to the unit run. No rule is broken: the rules forbid only `vi.setSystemTime()` and `vi.useFakeTimers()`.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 4.1 now TDDs `controller/tickScheduler.ts` in `controller/tickScheduler.test.ts` (FR3 header; real 0 ms timers: the callback runs, and a cancel before the delay keeps it from running) and adds `npx vitest run src/controller/tickScheduler.test.ts` to its verify commands. The Unit bullet of design.md D6 says this is the only test of the production scheduler.
 
 ### R2 — SUGGESTION — The "bolder than the city" part of UX1 is never asserted
 - Location: `openspec/changes/show-local-time-and-date-on-location-cards/tasks.md:139` (task 5.1)
