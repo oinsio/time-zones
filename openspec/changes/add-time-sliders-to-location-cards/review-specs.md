@@ -108,7 +108,8 @@
 - Impact: The change can break the stable "Local time and date layout" (`openspec/specs/locations/spec.md:683`) or the reorder requirements without anyone noticing, and the change would still be reported as verified.
 - Fix: In task 8.2, after the unit run, add one run of the whole E2E suite, alone and not in the background: `pnpm --filter @time-zones/client test:bdd` (bddgen plus all projects, including `view-contract-cards`). Fix any failure it shows before archiving.
 - Fix risk: A long E2E run (it builds and previews the app). CLAUDE.md requires it to run strictly alone, which the task must say. It does not conflict with the Stryker ban, which covers only mutation runs.
-- Status: open
+- Status: fixed
+- Resolution: task 8.2 in tasks.md now runs `pnpm --filter @time-zones/client test:bdd` (the `package.json` script: bddgen plus all Playwright projects, including `view-contract-cards`) once, alone and not in the background, after the unit run and build, and requires every regression in the existing locations / date-selection E2E features to be fixed before archiving.
 
 ### R3 — WARNING — "Labels only on wide screens" and "Colours come from the theme tokens" have no clear home
 - Location: `openspec/changes/add-time-sliders-to-location-cards/tasks.md:123`
