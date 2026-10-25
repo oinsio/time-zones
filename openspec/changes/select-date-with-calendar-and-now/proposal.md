@@ -119,7 +119,8 @@ Feature files under `packages/client/src/test/features/date_selection/`, tagged 
 - `date_selection_calendar_unit.feature` — calendar month, week start, today and selected marks, picking a date, closing without change (vitest-cucumber);
 - `date_selection_date_bar_unit.feature` — bar labels in English and Russian, year, Now visibility, bar in every page state (vitest-cucumber);
 - `date_selection_e2e.feature` — keyboard, focus, accessible names, announcements, axe-core, layout and screenshots (playwright-bdd);
-- view-contract scenarios "Select a date" and "Return to now" tagged `@view-contract` in `date_selection_view_contract_e2e.feature`.
+- view-contract scenarios "Select a date" and "Return to now" tagged `@view-contract` in `date_selection_view_contract_e2e.feature`;
+- "Notice above the bar" added to `main_page/main_page_e2e.feature`, and `pinned` / `calendar` states added to the screenshot outline of `locations/locations_ui_e2e.feature`.
 
 ## Visual Reference
 
@@ -137,7 +138,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M4: The bar reads `Sun, March 8` at 375 px and `Sunday, March 8` at 1024 px in English, `вс, 8 марта` / `воскресенье, 8 марта` in Russian, and `Mon, March 8, 2027` for `2027-03-08` (5 of 5). The March 2026 calendar has 5 week rows starting with Sunday 1 March in English and 6 week rows starting with Monday (2 March in the second row) in Russian.
 - M5: 0 storage writes caused by 10 date changes and a Now.
 - M6: Mutation score of the new or changed model, presenter, controller and view code ≥ 95% (minimum 90%).
-- M7: axe-core reports 0 violations in 3 states × 2 themes; 0 horizontal scrolling at 320 px and 2560 px; the re-approved and new screenshot baselines (375 / 1024 px × light / dark × `chromium` / `mobile-chrome`) pass without `--update-snapshots`.
+- M7: axe-core reports 0 violations in 3 bar states × 2 themes; 0 horizontal scrolling at 320 px and 2560 px; the re-approved and new screenshot baselines (375 / 1024 px × light / dark × `chromium` / `mobile-chrome`) pass without `--update-snapshots`.
 
 ## Open Questions
 
