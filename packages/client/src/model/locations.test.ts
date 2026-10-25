@@ -8,6 +8,7 @@ import {
   type LocationsState,
   reduceLocations,
 } from "./locations";
+import { ReferenceMode } from "./referenceMoment";
 
 const emptyState: LocationsState = INITIAL_LOCATIONS_STATE;
 const moscow = {
@@ -187,6 +188,7 @@ describe("INITIAL_LOCATIONS_STATE", () => {
     expect(INITIAL_LOCATIONS_STATE).toEqual({
       locations: [],
       deviceTimeZoneId: "UTC",
+      reference: { mode: ReferenceMode.LIVE },
     });
   });
 });

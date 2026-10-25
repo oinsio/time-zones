@@ -1,4 +1,8 @@
 import { expect } from "@playwright/test";
+import {
+  openCalendarWithMouse,
+  showNextDay,
+} from "../../date_selection/steps/dateSelectionE2eHelpers";
 import { englishLocale } from "../../main_page/steps/englishTexts";
 import type { LocationsWorld } from "./locations_ui_e2e.fixtures";
 import {
@@ -31,6 +35,8 @@ export enum LocationsState {
   RESULTS = "results",
   NO_MATCHES = "no matches",
   IST_RESULTS = "IST results",
+  PINNED = "pinned",
+  CALENDAR = "calendar",
 }
 
 /**
@@ -38,7 +44,8 @@ export enum LocationsState {
  * the page, because the seed runs before the app starts; the search data
  * routes are set on the page that stays, which the service worker does not
  * control yet (D8).
- * Implements NFR-A1, UX1, FR12, FR13, FR15 of add-locations-via-search.
+ * Implements NFR-A1, UX1, FR12, FR13, FR15 of add-locations-via-search and
+ * NFR-R3 of select-date-with-calendar-and-now (pinned and calendar states).
  */
 export async function enterLocationsState(
   world: LocationsWorld,
@@ -94,6 +101,16 @@ export async function enterLocationsState(
       await openSearch(page);
       await typeQuery(page, ABBREVIATION_QUERY);
       await expect(resultOption(page, "Kolkata")).toBeVisible();
+      break;
+    case LocationsState.PINNED:
+    case LocationsState.CALENDAR:
+      await world.seedList(buildStoredLocations(LIST_CITY_NAMES));
+      await world.reloadIfOpen();
+      await expect(page.getByRole("listitem")).toHaveCount(
+        LIST_CITY_NAMES.length,
+      );
+      await showNextDay(page);
+      if (state === LocationsState.CALENDAR) await openCalendarWithMouse(page);
       break;
   }
 }

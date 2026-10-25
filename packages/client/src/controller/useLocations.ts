@@ -1,6 +1,7 @@
 import { useContext, useMemo, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "@/i18n";
+import { getEffectiveInstant } from "@/model";
 import { presentLocationRows } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
 
@@ -19,15 +20,15 @@ const MISSING_PROVIDER_MESSAGE =
  * mark-device-time-zone-in-location-list (D3).
  * Presents the rows anew at every minute tick: FR3, FR5 of
  * show-local-time-and-date-on-location-cards (D4).
+ * Presents the rows at the effective instant of the reference moment: FR5 of
+ * select-date-with-calendar-and-now (D5).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
   const { store, clock, minuteTick, ...rest } = context;
-  const { locations, deviceTimeZoneId } = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-  );
+  const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  const { locations, deviceTimeZoneId } = state;
   const { i18n, t } = useTranslation();
   const language = (i18n.resolvedLanguage ??
     i18n.language) as SupportedLanguage;
@@ -36,11 +37,11 @@ export function useLocations() {
     () =>
       presentLocationRows(locations, {
         language,
-        instant: clock.instant(),
+        instant: getEffectiveInstant(state, clock.instant()),
         translate: t,
         deviceTimeZoneId,
       }),
-    [locations, deviceTimeZoneId, language, t, clock, minuteTick],
+    [state, locations, deviceTimeZoneId, language, t, clock, minuteTick],
   );
   return { rows, locations, ...rest };
 }

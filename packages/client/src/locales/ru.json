@@ -57,5 +57,16 @@
     "resultCount_few": "{{count}} результата",
     "resultCount_many": "{{count}} результатов",
     "resultCount_other": "{{count}} результата"
+  },
+  "date": {
+    "barLabel": "Дата",
+    "previousDay": "Предыдущий день",
+    "nextDay": "Следующий день",
+    "chooseDate": "Выбрать дату, {{date}}",
+    "now": "Сейчас",
+    "calendarTitle": "Выберите дату",
+    "previousMonth": "Предыдущий месяц",
+    "nextMonth": "Следующий месяц",
+    "gapNote": "{{requestedTime}} в этот день нет из-за перевода часов; показано {{shownTime}}."
   }
 }

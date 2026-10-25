@@ -136,9 +136,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
     And('the "Add location" action is offered', () => {
-      expect(screen.getByRole("button")).toHaveTextContent(
-        i18n.t("locations.addLocation"),
-      );
+      expect(
+        screen.getByRole("button", { name: i18n.t("locations.addLocation") }),
+      ).toBeInTheDocument();
     });
   });
 

@@ -2,17 +2,19 @@ Feature: Main page regions and notices
   Implements change add-main-page-scaffold.
   The main page keeps its regions and stacks notices without moving the header; connectivity and storage problems are told politely.
 
-  @add-main-page-scaffold @FR1
+  @add-main-page-scaffold @FR1 @select-date-with-calendar-and-now @FR8
   Scenario: User opens the app
     When the user opens the app
     Then the header shows the app title as the only heading
     And the content region shows the active view
+    And the bottom bar shows the date bar
 
-  @add-main-page-scaffold @FR1 @FR8
+  @add-main-page-scaffold @FR1 @FR8 @select-date-with-calendar-and-now @FR8
   Scenario: Notices stay available
     Given a new version of the app is waiting
     When the user opens the app
     Then the update notice is announced politely in the notices region
+    And the bottom bar still shows the date bar
 
   @add-main-page-scaffold @FR1 @UX3
   Scenario: Header keeps its position

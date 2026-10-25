@@ -8,6 +8,7 @@ import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
 import { failUpdateCheck, fakeServiceWorker } from "@/test/fakeServiceWorker";
 import { registryOverride } from "@/test/registryOverride";
+import { expectBottomBarShowsDateBar } from "./mainPageDateBarAssertions";
 
 vi.mock(
   "virtual:pwa-register/react",
@@ -55,7 +56,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     cleanup();
   });
 
-  // @add-main-page-scaffold @FR1
+  // @add-main-page-scaffold @FR1 @select-date-with-calendar-and-now @FR8
   f.Scenario("User opens the app", ({ When, Then, And }) => {
     When("the user opens the app", () => openApp());
     Then("the header shows the app title as the only heading", () => {
@@ -67,10 +68,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the content region shows the active view", async () => {
       expect(await screen.findByText(emptyStateText())).toBeInTheDocument();
     });
+    And("the bottom bar shows the date bar", expectBottomBarShowsDateBar);
   });
 
-  // @add-main-page-scaffold @FR1 @FR8
-  f.Scenario("Notices stay available", ({ Given, When, Then }) => {
+  // @add-main-page-scaffold @FR1 @FR8 @select-date-with-calendar-and-now @FR8
+  f.Scenario("Notices stay available", ({ Given, When, Then, And }) => {
     Given("a new version of the app is waiting", () => {
       fakeServiceWorker.isUpdateAvailable = true;
     });
@@ -84,6 +86,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         );
       },
     );
+    And("the bottom bar still shows the date bar", expectBottomBarShowsDateBar);
   });
 
   // @add-main-page-scaffold @FR1 @UX3
@@ -102,7 +105,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(getNoticeRegion()).toHaveTextContent(
         i18n.t("mainPage.storageUnavailable"),
       );
-      expect(getNoticeRegion()).toHaveClass("fixed");
+      expect(getNoticeRegion()).toHaveClass("absolute");
     });
     And("the header is not part of the notices", () => {
       expect(getNoticeRegion()).not.toContainElement(

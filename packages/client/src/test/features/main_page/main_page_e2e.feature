@@ -58,3 +58,8 @@ Feature: Main page in a real browser
     Then the header has not moved
     When storage becomes unavailable
     Then the header has not moved
+
+  @select-date-with-calendar-and-now @FR8
+  Scenario: Notice above the bar
+    Given the main page is in the storage unavailable state
+    Then the storage warning is above the date bar and does not overlap it
