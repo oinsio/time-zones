@@ -5,6 +5,7 @@ import { forwardRef, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { LocationRow as LocationRowModel } from "@/presenter";
 import { DragHandle } from "./DragHandle";
+import { LocalDateTime } from "./LocalDateTime";
 import { getReorderTransition } from "./reorderTransition";
 import { useDropSettleAnimation } from "./useDropSettleAnimation";
 
@@ -23,6 +24,8 @@ type LocationRowProps = {
  * Implements FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
  * Implements FR1, FR2, UX1, UX2 of mark-device-time-zone-in-location-list (D5):
  * the device zone badge names the row together with the city.
+ * Implements FR1, FR2, FR6, UX1, UX2 of show-local-time-and-date-on-location-cards (D5):
+ * the time column sits right of the place column.
  * Implements FR1, UX1, UX2 of reorder-locations-by-drag-and-drop (D5): the
  * card itself is translated while dragged, so it keeps its width and slot.
  */
@@ -82,27 +85,34 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             listeners={listeners}
           />
         )}
-        <span className="flex flex-1 flex-col">
-          <span className="flex flex-wrap items-center gap-x-2">
-            <span id={cityId} className="font-semibold">
-              {row.cityLabel}
+        <span className="flex min-w-0 flex-1 items-start gap-3">
+          <span className="flex min-w-0 flex-1 flex-col break-words md:w-64 md:flex-none">
+            <span className="flex flex-wrap items-center gap-x-2">
+              <span id={cityId} className="font-semibold">
+                {row.cityLabel}
+              </span>
+              {hasDeviceTimeZoneBadge && (
+                <span
+                  id={badgeId}
+                  className="inline-flex items-center gap-1 rounded-full bg-accent px-2 text-xs font-medium text-accent-foreground"
+                >
+                  <Navigation aria-hidden="true" size={BADGE_ICON_SIZE_PX} />
+                  {row.deviceTimeZoneLabel}
+                </span>
+              )}
             </span>
-            {hasDeviceTimeZoneBadge && (
-              <span
-                id={badgeId}
-                className="inline-flex items-center gap-1 rounded-full bg-accent px-2 text-xs font-medium text-accent-foreground"
-              >
-                <Navigation aria-hidden="true" size={BADGE_ICON_SIZE_PX} />
-                {row.deviceTimeZoneLabel}
+            {hasSecondaryLine && (
+              <span className="flex flex-wrap gap-x-2 text-sm text-muted-foreground">
+                {row.countryName !== "" && <span>{row.countryName}</span>}
+                {row.utcOffsetLabel !== "" && <span>{row.utcOffsetLabel}</span>}
               </span>
             )}
           </span>
-          {hasSecondaryLine && (
-            <span className="flex flex-wrap gap-x-2 text-sm text-muted-foreground">
-              {row.countryName !== "" && <span>{row.countryName}</span>}
-              {row.utcOffsetLabel !== "" && <span>{row.utcOffsetLabel}</span>}
-            </span>
-          )}
+          <LocalDateTime
+            localTimeLabel={row.localTimeLabel}
+            localDateLabel={row.localDateLabel}
+            localIsoDate={row.localIsoDate}
+          />
         </span>
         <button
           ref={removeButtonRef}

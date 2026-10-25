@@ -1,4 +1,5 @@
 // Verifies FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
+// Verifies FR2, FR6, UX1, NFR-A2 of show-local-time-and-date-on-location-cards (D5).
 // Verifies FR1 of reorder-locations-by-drag-and-drop.
 // Verifies FR1, FR2, UX1, UX2 of mark-device-time-zone-in-location-list (D5).
 import { DndContext } from "@dnd-kit/core";
@@ -79,6 +80,42 @@ describe("LocationRow", () => {
   it("should show no move handle when not reorderable", () => {
     renderRow({}, false);
     expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
+  });
+
+  describe("local time and date", () => {
+    const withTime = {
+      localTimeLabel: "12:30",
+      localDateLabel: "Sun, Mar 8",
+      localIsoDate: "2026-03-08",
+    };
+
+    it("should read city, country and offset, time, date in that order", () => {
+      renderRow(withTime);
+      expect(screen.getByRole("listitem")).toHaveTextContent(
+        "KolkataIndiaUTC+5:3012:30Sun, Mar 8",
+      );
+    });
+
+    it("should show the time bolder than the semibold city", () => {
+      renderRow(withTime);
+      expect(screen.getByText("12:30")).toHaveClass("font-bold");
+      expect(screen.getByText("Kolkata")).toHaveClass("font-semibold");
+    });
+
+    it("should keep the row name as the city", () => {
+      renderRow(withTime);
+      expect(
+        screen.getByRole("listitem", { name: "Kolkata" }),
+      ).toBeInTheDocument();
+    });
+
+    it("should keep the remove action for a row without time", () => {
+      renderRow();
+      expect(screen.queryByText("12:30")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Remove Kolkata" }),
+      ).toBeInTheDocument();
+    });
   });
 
   describe("device time zone badge", () => {
