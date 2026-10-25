@@ -97,7 +97,7 @@ Activating the shown date SHALL open a calendar showing the month of the referen
 - **AND** the current instant is `2026-03-08T07:30:00Z`
 - **AND** the list contains New York (`America/New_York`)
 - **WHEN** the user opens the calendar
-- **THEN** it shows March 2026 with 8 March selected and marked as today
+- **THEN** it shows March 2026
 - **WHEN** the user shows the next month 4 times and picks the 15th
 - **THEN** the calendar is closed
 - **AND** the moment is pinned to `2026-07-15T07:30:00Z`
