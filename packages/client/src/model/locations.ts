@@ -1,5 +1,7 @@
 import { DEVICE_TIME_ZONE_FALLBACK_ID } from "@/constants";
 import { moveLocationInList } from "./moveLocation";
+import { reduceReferenceMoment } from "./reduceReferenceMoment";
+import { LIVE_REFERENCE_MOMENT, type ReferenceMoment } from "./referenceMoment";
 import { canonicalizeTimeZoneId } from "./timeZoneId";
 
 /**
@@ -7,6 +9,7 @@ import { canonicalizeTimeZoneId } from "./timeZoneId";
  * Implements FR8, FR9, FR10 of add-locations-via-search (D1) and FR2 of
  * reorder-locations-by-drag-and-drop.
  * Implements FR3, FR4 of mark-device-time-zone-in-location-list (D1).
+ * Implements FR1 of select-date-with-calendar-and-now (D1): the reference moment.
  */
 
 export type Location = {
@@ -22,11 +25,14 @@ export type LocationsState = {
   locations: readonly Location[];
   /** Canonical IANA ID of the device zone; never persisted (ADR-0007). */
   deviceTimeZoneId: string;
+  /** Live or pinned; never persisted (ADR-0003). */
+  reference: ReferenceMoment;
 };
 
 export const INITIAL_LOCATIONS_STATE: LocationsState = {
   locations: [],
   deviceTimeZoneId: DEVICE_TIME_ZONE_FALLBACK_ID,
+  reference: LIVE_REFERENCE_MOMENT,
 };
 
 export enum LocationCommandType {
@@ -35,6 +41,9 @@ export enum LocationCommandType {
   REPLACE_LOCATIONS = "REPLACE_LOCATIONS",
   MOVE_LOCATION = "MOVE_LOCATION",
   SET_DEVICE_TIME_ZONE = "SET_DEVICE_TIME_ZONE",
+  SET_DATE = "SET_DATE",
+  SHIFT_DATE = "SHIFT_DATE",
+  RESET_TO_NOW = "RESET_TO_NOW",
 }
 
 export enum LocationErrorCode {
@@ -42,6 +51,8 @@ export enum LocationErrorCode {
   UNKNOWN_TIME_ZONE = "UNKNOWN_TIME_ZONE",
   LOCATION_NOT_FOUND = "LOCATION_NOT_FOUND",
   LOCATION_POSITION_OUT_OF_RANGE = "LOCATION_POSITION_OUT_OF_RANGE",
+  INVALID_DATE = "INVALID_DATE",
+  DATE_OUT_OF_RANGE = "DATE_OUT_OF_RANGE",
 }
 
 export type LocationCommand =
@@ -62,7 +73,11 @@ export type LocationCommand =
       type: LocationCommandType.REPLACE_LOCATIONS;
       locations: readonly Location[];
     }
-  | { type: LocationCommandType.SET_DEVICE_TIME_ZONE; timeZoneId: string };
+  | { type: LocationCommandType.SET_DEVICE_TIME_ZONE; timeZoneId: string }
+  /** `date` is an ISO date, `now` an ISO 8601 timestamp with `Z`. */
+  | { type: LocationCommandType.SET_DATE; date: string; now: string }
+  | { type: LocationCommandType.SHIFT_DATE; days: number; now: string }
+  | { type: LocationCommandType.RESET_TO_NOW };
 
 export type LocationsReduceResult =
   | { ok: true; state: LocationsState }
@@ -130,5 +145,9 @@ export function reduceLocations(
     }
     case LocationCommandType.MOVE_LOCATION:
       return moveLocationInList(state, command.id, command.targetIndex);
+    case LocationCommandType.SET_DATE:
+    case LocationCommandType.SHIFT_DATE:
+    case LocationCommandType.RESET_TO_NOW:
+      return reduceReferenceMoment(state, command);
   }
 }
