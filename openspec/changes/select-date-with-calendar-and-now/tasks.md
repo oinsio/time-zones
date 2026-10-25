@@ -4,8 +4,8 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
 
 ## 1. Constants and locale keys (no TDD: constants and translations)
 
-- [ ] 1.1 Add `constants/date.ts` with the format options, `DAYS_PER_WEEK`, `ONE_DAY` and `FIRST_DAY_OF_WEEK_BY_LANGUAGE` of design D4, re-export them from `constants/index.ts`; add `ARROW_LEFT = "ArrowLeft"`, `ARROW_RIGHT = "ArrowRight"`, `HOME = "Home"`, `END = "End"`, `PAGE_UP = "PageUp"`, `PAGE_DOWN = "PageDown"` to `KeyboardKey` in `constants/keyboard.ts` (FR7, FR9, NFR-A2); verify `pnpm --filter @time-zones/client typecheck`
-- [ ] 1.2 Add the `date` keys of design D6 to `locales/en.json` and `locales/ru.json` (`Сейчас` for `now`, both `gapNote` texts of design D6); verify `npx vitest run src/locales/locales.test.ts` (identical key sets, FR9). It comes before sections 3–5 because the presenter tests of 3.1 and the controller tests of 4.1 translate with the real locale resources (`test/setup.ts`), so their `date.*` texts exist only once these keys do
+- [x] 1.1 Add `constants/date.ts` with the format options, `DAYS_PER_WEEK`, `ONE_DAY` and `FIRST_DAY_OF_WEEK_BY_LANGUAGE` of design D4, re-export them from `constants/index.ts`; add `ARROW_LEFT = "ArrowLeft"`, `ARROW_RIGHT = "ArrowRight"`, `HOME = "Home"`, `END = "End"`, `PAGE_UP = "PageUp"`, `PAGE_DOWN = "PageDown"` to `KeyboardKey` in `constants/keyboard.ts` (FR7, FR9, NFR-A2); verify `pnpm --filter @time-zones/client typecheck`
+- [x] 1.2 Add the `date` keys of design D6 to `locales/en.json` and `locales/ru.json` (`Сейчас` for `now`, both `gapNote` texts of design D6); verify `npx vitest run src/locales/locales.test.ts` (identical key sets, FR9). It comes before sections 3–5 because the presenter tests of 3.1 and the controller tests of 4.1 translate with the real locale resources (`test/setup.ts`), so their `date.*` texts exist only once these keys do
 
 ## 2. Model (TDD)
 

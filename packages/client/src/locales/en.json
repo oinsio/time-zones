@@ -57,5 +57,16 @@
     "resultCount_other": "{{count}} results",
     "resultCount_few": "{{count}} results",
     "resultCount_many": "{{count}} results"
+  },
+  "date": {
+    "barLabel": "Date",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "chooseDate": "Choose date, {{date}}",
+    "now": "Now",
+    "calendarTitle": "Choose a date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "gapNote": "{{requestedTime}} does not exist on this day because of a clock change; showing {{shownTime}}."
   }
 }

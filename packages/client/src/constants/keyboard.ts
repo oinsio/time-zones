@@ -4,5 +4,11 @@ export enum KeyboardKey {
   ARROW_DOWN = "ArrowDown",
   ARROW_UP = "ArrowUp",
   ENTER = "Enter",
+  ARROW_LEFT = "ArrowLeft",
+  ARROW_RIGHT = "ArrowRight",
+  HOME = "Home",
+  END = "End",
+  PAGE_UP = "PageUp",
+  PAGE_DOWN = "PageDown",
   SLASH = "/",
 }
