@@ -118,7 +118,8 @@
 - Impact: The implementer will either (a) write unit scenarios with those titles that assert only presented values, so a scenario named for viewport visibility passes without checking it, or (b) write "Colours come from the theme tokens" in two feature files with different meanings. Either way, the spec scenario "Labels only on wide screens" ends up without a step definition that checks what it states.
 - Fix: In task 6.2, list the unit scenarios by name and leave out "Colours come from the theme tokens" and "Labels only on wide screens" ("these two are E2E, task 7.1"). In task 7.1, under layout, add the named scenario "Labels only on wide screens" (`@FR7 @NFR-R2`): at 375 px no hour label is visible, and at 1024 px every track shows its five labels under it.
 - Fix risk: none. The new E2E scenario reuses the label checks that 7.1 already plans for the narrow and wide layout scenarios.
-- Status: open
+- Status: fixed
+- Resolution: task 6.2 in tasks.md now names its eleven unit scenarios one by one and explicitly leaves out "Colours come from the theme tokens" and "Labels only on wide screens" as E2E-only (jsdom, `bdd-unit.md`); task 7.1 adds the named E2E scenario "Labels only on wide screens" (`@FR7 @NFR-R2`: no label at 375 px, five labels under each bar at 1024 px), and "Colours come from the theme tokens" stays only in 7.1.
 
 ### R4 — SUGGESTION — design.md lacks the "Consequences" and "Alternatives Considered" sections
 - Location: `openspec/changes/add-time-sliders-to-location-cards/design.md:178`
