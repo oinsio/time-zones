@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import { englishLocale } from "./englishTexts";
 import { type MainPageWorld, test } from "./main_page_e2e.fixtures";
 import {
   APP_ROOT_URL,
@@ -18,6 +19,7 @@ const SCREEN_HEIGHT_PX = 800;
 const NOTICE_CARD_SELECTOR = '[role="status"] > div';
 const BUSY_SKELETON_SELECTOR = '[aria-busy="true"]';
 const MAIN_SELECTOR = "main";
+const DATE_BAR_NAME = englishLocale.date.barLabel;
 
 enum MainPageState {
   LOADING = "loading",
@@ -149,5 +151,20 @@ Then(
       clientWidth: document.documentElement.clientWidth,
     }));
     expect(pageWidths.scrollWidth).toBeLessThanOrEqual(pageWidths.clientWidth);
+  },
+);
+
+// Verifies FR8 of select-date-with-calendar-and-now (D7): the notices sit above the bar.
+Then(
+  "the storage warning is above the date bar and does not overlap it",
+  async ({ mainPageWorld }) => {
+    const { page } = mainPageWorld;
+    const warningBox = await page.getByText(STORAGE_WARNING_TEXT).boundingBox();
+    const barBox = await page
+      .getByRole("group", { name: DATE_BAR_NAME })
+      .boundingBox();
+    if (!warningBox || !barBox)
+      throw new Error("The warning or the bar is missing");
+    expect(warningBox.y + warningBox.height).toBeLessThanOrEqual(barBox.y);
   },
 );

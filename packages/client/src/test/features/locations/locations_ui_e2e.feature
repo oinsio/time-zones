@@ -109,6 +109,7 @@ Feature: Locations in a real browser
   @open-location-search-with-slash-shortcut @NFR-R1 @M5
   @add-locations-via-search @NFR-R2
   @show-local-time-and-date-on-location-cards @NFR-R3 @M6
+  @select-date-with-calendar-and-now @NFR-R3 @M7
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme
@@ -135,6 +136,14 @@ Feature: Locations in a real browser
       | IST results | 375   | dark  |
       | IST results | 1024  | light |
       | IST results | 1024  | dark  |
+      | pinned      | 375   | light |
+      | pinned      | 375   | dark  |
+      | pinned      | 1024  | light |
+      | pinned      | 1024  | dark  |
+      | calendar    | 375   | light |
+      | calendar    | 375   | dark  |
+      | calendar    | 1024  | light |
+      | calendar    | 1024  | dark  |
 
   @add-locations-via-search @FR14
   Scenario: Added in another tab
