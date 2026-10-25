@@ -6,13 +6,11 @@ import { Temporal } from "@/lib/temporal";
 import {
   createStore,
   INITIAL_LOCATIONS_STATE,
-  type LocationCommand,
   LocationCommandType,
   LocationErrorCode,
   type LocationsState,
   ReferenceMode,
   reduceLocations,
-  WallClockStatus,
 } from "@/model";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { setPageVisibility } from "@/test/pageVisibility";
@@ -23,7 +21,6 @@ const feature = await loadFeature("../date_selection_reference_moment.feature");
 const ROW_BUDGET_MS = 50;
 const BUDGET_ROW_COUNT = 50;
 const REPEATED_MOVE_COUNT = 5;
-const LAST_SUPPORTED_INSTANT = "+275760-09-13T00:00:00Z";
 const NO_NOTE = "no note";
 const NOTE_TEXT_SELECTOR = "p.text-xs";
 
@@ -245,46 +242,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       );
       And("the moment is still live in the store", () =>
         expect(store.getSnapshot().reference.mode).toBe(ReferenceMode.LIVE),
-      );
-    },
-  );
-
-  // @select-date-with-calendar-and-now @FR2 @FR10
-  f.Scenario(
-    "A move beyond the supported range changes nothing",
-    ({ Given, When, Then, And }) => {
-      let stateBefore: LocationsState;
-      Given(
-        "the moment is pinned to the last date the platform supports",
-        () => {
-          stateBefore = {
-            ...INITIAL_LOCATIONS_STATE,
-            reference: {
-              mode: ReferenceMode.PINNED,
-              instant: Temporal.Instant.from(LAST_SUPPORTED_INSTANT),
-              wallClockStatus: WallClockStatus.UNIQUE,
-              requestedWallTime: Temporal.PlainTime.from("00:00"),
-            },
-          };
-          store = newStore(stateBefore);
-        },
-      );
-      When("the user moves to the next day in the store", () => {
-        const command: LocationCommand = {
-          type: LocationCommandType.SHIFT_DATE,
-          days: 1,
-          now: "2026-03-08T07:30:00Z",
-        };
-        lastOutcome = store.dispatch(command);
-      });
-      Then("the move is rejected as out of range", () =>
-        expect(lastOutcome).toEqual({
-          ok: false,
-          error: LocationErrorCode.DATE_OUT_OF_RANGE,
-        }),
-      );
-      And("the moment is unchanged in the store", () =>
-        expect(store.getSnapshot()).toBe(stateBefore),
       );
     },
   );

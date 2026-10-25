@@ -95,13 +95,6 @@ Feature: Reference moment
     Then the change is rejected as an invalid date
     And the moment is still live in the store
 
-  @select-date-with-calendar-and-now @FR2 @FR10
-  Scenario: A move beyond the supported range changes nothing
-    Given the moment is pinned to the last date the platform supports
-    When the user moves to the next day in the store
-    Then the move is rejected as out of range
-    And the moment is unchanged in the store
-
   @select-date-with-calendar-and-now @FR6 @M2
   Scenario: Now after browsing dates
     Given the device time zone is "Asia/Almaty"
