@@ -45,7 +45,15 @@ describe("LocationList", () => {
   });
 
   it("should show city and country of each row in list order", () => {
-    render(<LocationList rows={rows} onRemove={vi.fn()} onMove={vi.fn()} />);
+    render(
+      <LocationList
+        rows={rows}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
+    );
     const items = screen.getAllByRole("listitem");
     expect(items.map((item) => item.textContent)).toEqual([
       expect.stringContaining("Moscow"),
@@ -57,14 +65,28 @@ describe("LocationList", () => {
 
   it("should emit the row id when its remove action is used", async () => {
     const onRemove = vi.fn();
-    render(<LocationList rows={rows} onRemove={onRemove} onMove={vi.fn()} />);
+    render(
+      <LocationList
+        rows={rows}
+        onRemove={onRemove}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
+    );
     await userEvent.click(screen.getByRole("button", { name: "Remove Tokyo" }));
     expect(onRemove).toHaveBeenCalledWith("tokyo");
   });
 
   it("should move focus to the next remove action after a removal", async () => {
     const { rerender } = render(
-      <LocationList rows={rows} onRemove={vi.fn()} onMove={vi.fn()} />,
+      <LocationList
+        rows={rows}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
     );
     await userEvent.click(screen.getByRole("button", { name: "Remove Tokyo" }));
     rerender(
@@ -72,6 +94,8 @@ describe("LocationList", () => {
         rows={[rows[0], rows[2]]}
         onRemove={vi.fn()}
         onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
       />,
     );
     expect(screen.getByRole("button", { name: "Remove Kyiv" })).toHaveFocus();
@@ -79,7 +103,13 @@ describe("LocationList", () => {
 
   it("should move focus to the previous remove action after removing the last row", async () => {
     const { rerender } = render(
-      <LocationList rows={rows} onRemove={vi.fn()} onMove={vi.fn()} />,
+      <LocationList
+        rows={rows}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
     );
     await userEvent.click(screen.getByRole("button", { name: "Remove Kyiv" }));
     rerender(
@@ -87,25 +117,49 @@ describe("LocationList", () => {
         rows={[rows[0], rows[1]]}
         onRemove={vi.fn()}
         onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
       />,
     );
     expect(screen.getByRole("button", { name: "Remove Tokyo" })).toHaveFocus();
   });
 
   it("should not move focus when the list is first shown", () => {
-    render(<LocationList rows={rows} onRemove={vi.fn()} onMove={vi.fn()} />);
+    render(
+      <LocationList
+        rows={rows}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
+    );
     expect(document.body).toHaveFocus();
   });
 
   it("should leave focus alone when the last remaining row is removed", async () => {
     const singleRow = [rows[0]];
     const { rerender } = render(
-      <LocationList rows={singleRow} onRemove={vi.fn()} onMove={vi.fn()} />,
+      <LocationList
+        rows={singleRow}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
     );
     await userEvent.click(
       screen.getByRole("button", { name: "Remove Moscow" }),
     );
-    rerender(<LocationList rows={[]} onRemove={vi.fn()} onMove={vi.fn()} />);
+    rerender(
+      <LocationList
+        rows={[]}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
+    );
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);
   });
 
@@ -115,6 +169,8 @@ describe("LocationList", () => {
         rows={[rows[0], rows[1]]}
         onRemove={vi.fn()}
         onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
       />,
     );
     const moveHandle = screen.getByRole("button", { name: "Move Moscow" });
@@ -130,7 +186,13 @@ describe("LocationList", () => {
 
   it("should offer no move handle for a single row", () => {
     render(
-      <LocationList rows={[rows[0]]} onRemove={vi.fn()} onMove={vi.fn()} />,
+      <LocationList
+        rows={[rows[0]]}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
     );
     expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
   });

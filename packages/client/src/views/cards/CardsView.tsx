@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LocationsStatus, useLocations } from "@/controller";
+import { LocationsStatus, useLocations, useTimeSelection } from "@/controller";
 import {
   LocationList,
   LocationSearch,
@@ -17,6 +17,7 @@ export default function CardsView() {
   const { t } = useTranslation();
   const { rows, loadStatus, removeLocation, moveLocation, resetLocations } =
     useLocations();
+  const { selectTrackFraction, moveTrack } = useTimeSelection();
   const addLocationButtonRef = useRef<HTMLButtonElement>(null);
   const hasRemovedLastLocation = useRef(false);
   const [announcement, setAnnouncement] = useState("");
@@ -56,6 +57,8 @@ export default function CardsView() {
           rows={rows}
           onRemove={handleRemove}
           onMove={moveLocation}
+          onSelectTrackFraction={selectTrackFraction}
+          onMoveTrack={moveTrack}
         />
       )}
       <LocationSearch

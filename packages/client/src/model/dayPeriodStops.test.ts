@@ -1,13 +1,9 @@
 // Verifies FR6, NFR-P2 of add-time-sliders-to-location-cards (D4).
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
-import {
-  assembleDayPeriodStops,
-  collectBlendWindows,
-  collectOffsetEdges,
-  getDayPeriodStops,
-} from "./dayPeriodStops";
+import { assembleDayPeriodStops, getDayPeriodStops } from "./dayPeriodStops";
 import { DAY_PERIOD_SCHEDULE, DayPeriod, getDayPeriod } from "./dayPeriods";
+import { collectBlendWindows, collectOffsetEdges } from "./dayPeriodWindows";
 import { getReferenceDay } from "./dayTrack";
 import { INITIAL_LOCATIONS_STATE } from "./locations";
 

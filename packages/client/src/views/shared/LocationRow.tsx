@@ -3,7 +3,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { Navigation, X } from "lucide-react";
 import { forwardRef, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import type { TrackMove } from "@/controller";
 import type { LocationRow as LocationRowModel } from "@/presenter";
+import { DayTrack } from "./DayTrack";
 import { DragHandle } from "./DragHandle";
 import { LocalDateTime } from "./LocalDateTime";
 import { getReorderTransition } from "./reorderTransition";
@@ -14,6 +16,8 @@ const BADGE_ICON_SIZE_PX = 12;
 type LocationRowProps = {
   row: LocationRowModel;
   onRemove: (id: string) => void;
+  onSelectTrackFraction: (fraction: number) => void;
+  onMoveTrack: (move: TrackMove) => void;
   isReorderable: boolean;
   prefersReducedMotion: boolean;
 };
@@ -26,12 +30,21 @@ type LocationRowProps = {
  * the device zone badge names the row together with the city.
  * Implements FR1, FR2, FR6, UX1, UX2 of show-local-time-and-date-on-location-cards (D5):
  * the time column sits right of the place column.
+ * Implements FR1, NFR-R2 of add-time-sliders-to-location-cards (D8): the day
+ * track sits under the text below 768 px and right of the time column from it.
  * Implements FR1, UX1, UX2 of reorder-locations-by-drag-and-drop (D5): the
  * card itself is translated while dragged, so it keeps its width and slot.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
-    { row, onRemove, isReorderable, prefersReducedMotion },
+    {
+      row,
+      onRemove,
+      onSelectTrackFraction,
+      onMoveTrack,
+      isReorderable,
+      prefersReducedMotion,
+    },
     removeButtonRef,
   ) {
     const { t } = useTranslation();
@@ -75,7 +88,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
         aria-labelledby={
           hasDeviceTimeZoneBadge ? `${cityId} ${badgeId}` : cityId
         }
-        className={`flex items-center gap-3 rounded-md border border-border bg-surface px-4 py-3${draggingClassName}`}
+        className={`flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-border bg-surface px-4 py-3${draggingClassName}`}
       >
         {isReorderable && (
           <DragHandle
@@ -85,7 +98,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             listeners={listeners}
           />
         )}
-        <span className="flex min-w-0 flex-1 items-start gap-3">
+        <span className="flex min-w-0 flex-1 items-start gap-3 md:flex-none">
           <span className="flex min-w-0 flex-1 flex-col break-words md:w-64 md:flex-none">
             <span className="flex flex-wrap items-center gap-x-2">
               <span id={cityId} className="font-semibold">
@@ -114,6 +127,14 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             localIsoDate={row.localIsoDate}
           />
         </span>
+        {row.dayTrack && (
+          <DayTrack
+            track={row.dayTrack}
+            city={row.cityLabel}
+            onSelectFraction={onSelectTrackFraction}
+            onMoveTrack={onMoveTrack}
+          />
+        )}
         <button
           ref={removeButtonRef}
           type="button"

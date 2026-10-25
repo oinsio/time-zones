@@ -2,6 +2,7 @@ import type { TFunction } from "i18next";
 import {
   HOUR_LABEL_FORMAT_OPTIONS,
   HOUR_LABEL_INTERVAL_HOURS,
+  LOCAL_TIME_FORMAT_OPTIONS,
 } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
@@ -13,7 +14,6 @@ import {
   getTrackValueMinutes,
   type ReferenceDay,
 } from "@/model";
-import { formatLocalTime } from "./localDateTime";
 
 /**
  * Track data of one location row: handle position, slider values, colour
@@ -47,14 +47,37 @@ export type DayTrackContext = {
 
 const LABEL_COUNT = 4;
 
+/** Formatters are costly to build, so one serves every label of a zone and language. */
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
+function getFormatter(
+  language: SupportedLanguage,
+  timeZoneId: string,
+  options: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormat {
+  const formatterKey = `${language}|${timeZoneId}|${options.minute ?? ""}`;
+  const cached = formatters.get(formatterKey);
+  if (cached !== undefined) return cached;
+  const formatter = new Intl.DateTimeFormat(language, {
+    ...options,
+    timeZone: timeZoneId,
+  });
+  formatters.set(formatterKey, formatter);
+  return formatter;
+}
+
 /** Two-digit hours, with minutes when they are not zero. */
 export function formatHourLabel(
   localDateTime: Temporal.ZonedDateTime,
   language: SupportedLanguage,
 ): string {
-  return localDateTime.minute === 0
-    ? localDateTime.toLocaleString(language, HOUR_LABEL_FORMAT_OPTIONS)
-    : formatLocalTime(localDateTime, language);
+  const options =
+    localDateTime.minute === 0
+      ? HOUR_LABEL_FORMAT_OPTIONS
+      : LOCAL_TIME_FORMAT_OPTIONS;
+  return getFormatter(language, localDateTime.timeZoneId, options).format(
+    localDateTime.epochMilliseconds,
+  );
 }
 
 let cachedLabelsKey: string | undefined;

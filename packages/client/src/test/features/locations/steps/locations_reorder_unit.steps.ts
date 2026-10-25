@@ -224,6 +224,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           rows,
           onRemove: vi.fn(),
           onMove: vi.fn(),
+          onSelectTrackFraction: vi.fn(),
+          onMoveTrack: vi.fn(),
         }),
       );
     });

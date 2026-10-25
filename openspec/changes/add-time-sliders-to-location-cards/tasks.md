@@ -92,22 +92,22 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 5. Views (TDD)
 
-- [ ] 5.1 TDD new `views/shared/dayTrackGradient.ts` and its `DAY_PERIOD_COLOR_VARIABLES` (design D7) in `views/shared/dayTrackGradient.test.ts`, header `// Verifies FR6 of add-time-sliders-to-location-cards (D7).`:
+- [x] 5.1 TDD new `views/shared/dayTrackGradient.ts` and its `DAY_PERIOD_COLOR_VARIABLES` (design D7) in `views/shared/dayTrackGradient.test.ts`, header `// Verifies FR6 of add-time-sliders-to-location-cards (D7).`:
   - the Almaty stops of M5 become `linear-gradient(to right, var(--color-day-night) 27.0833%, var(--color-day-morning) 31.25%, …)`;
   - the 4 periods map to `--color-day-night`, `--color-day-morning`, `--color-day-working` and `--color-day-evening`;
   - a stop at `-0.02` becomes `-2%`.
 
   Verify red, then green, with `npx vitest run src/views/shared/dayTrackGradient.test.ts`.
-- [ ] 5.2 TDD new `views/shared/dayTrackKeys.ts` in `views/shared/dayTrackKeys.test.ts` with `it.each` (header `// Verifies FR4 of add-time-sliders-to-location-cards (D7).`). The table is: `ArrowRight` / `ArrowUp` → `NEXT_STEP`, `ArrowLeft` / `ArrowDown` → `PREVIOUS_STEP`, `PageUp` → `HOUR_FORWARD`, `PageDown` → `HOUR_BACK`, `Home` → `DAY_START`, `End` → `DAY_END`, and `Tab` / `Enter` → `undefined`. The test covers the mapping only; 7.1 proves key handling in the browser. Verify red, then green, with `npx vitest run src/views/shared/dayTrackKeys.test.ts`.
+- [x] 5.2 TDD new `views/shared/dayTrackKeys.ts` in `views/shared/dayTrackKeys.test.ts` with `it.each` (header `// Verifies FR4 of add-time-sliders-to-location-cards (D7).`). The table is: `ArrowRight` / `ArrowUp` → `NEXT_STEP`, `ArrowLeft` / `ArrowDown` → `PREVIOUS_STEP`, `PageUp` → `HOUR_FORWARD`, `PageDown` → `HOUR_BACK`, `Home` → `DAY_START`, `End` → `DAY_END`, and `Tab` / `Enter` → `undefined`. The test covers the mapping only; 7.1 proves key handling in the browser. Verify red, then green, with `npx vitest run src/views/shared/dayTrackKeys.test.ts`.
 
   In the same step, TDD new `views/shared/dayTrackTouch.ts` (`TouchGestureDecision`, `getTouchGestureDecision(start, current)`, design D7) in `views/shared/dayTrackTouch.test.ts` with `it.each`, header `// Verifies FR3, NFR-R2 of add-time-sliders-to-location-cards (D7).`: no movement → `WAIT`; 11 px right, 2 px down → `SELECT`; 11 px left → `SELECT`; 2 px right, 11 px down → `ABANDON`; 10 px right (equal to the slop) → `WAIT`; 12 px right, 12 px up → `ABANDON`. Then wire it into `DayTrack.tsx` for `pointerType === "touch"`; 7.1 proves the swipe and the tap in the browser. Verify red, then green, with `npx vitest run src/views/shared/dayTrackTouch.test.ts`.
-- [ ] 5.3 TDD new `views/shared/DayTrack.tsx` (design D7) in `views/shared/DayTrack.test.tsx`, header `// Verifies FR1, FR2, FR7 of add-time-sliders-to-location-cards (D7).`. It is rendered with a presented track. Assert DOM content and attributes only:
+- [x] 5.3 TDD new `views/shared/DayTrack.tsx` (design D7) in `views/shared/DayTrack.test.tsx`, header `// Verifies FR1, FR2, FR7 of add-time-sliders-to-location-cards (D7).`. It is rendered with a presented track. Assert DOM content and attributes only:
   - the coloured bar's `style.backgroundImage` equals the `dayTrackGradient` output;
   - the handle's `style.left` is `52.0833%`;
   - five hour-label elements carry the M6 Almaty texts inside an `aria-hidden="true"` container.
 
   Pointer geometry, keys, focus, roles, names and layout are E2E (7.1). Verify red, then green, with `npx vitest run src/views/shared/DayTrack.test.tsx`.
-- [ ] 5.4 Wire the track (design D8): `LocationRow` renders `DayTrack` when `row.dayTrack` is set and takes `onSelectTrackFraction` and `onMoveTrack`; `LocationList` passes them through; `CardsView` takes them from `useTimeSelection()`. Extend `views/shared/LocationRow.test.tsx` (header line `// Verifies FR1 of add-time-sliders-to-location-cards (D8).`):
+- [x] 5.4 Wire the track (design D8): `LocationRow` renders `DayTrack` when `row.dayTrack` is set and takes `onSelectTrackFraction` and `onMoveTrack`; `LocationList` passes them through; `CardsView` takes them from `useTimeSelection()`. Extend `views/shared/LocationRow.test.tsx` (header line `// Verifies FR1 of add-time-sliders-to-location-cards (D8).`):
   - a row with `dayTrack` renders one `[data-day-track]` element;
   - a row without `dayTrack` renders none.
 

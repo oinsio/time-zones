@@ -10,12 +10,8 @@ export {
 } from "./calendar";
 export {
   assembleDayPeriodStops,
-  type BlendWindow,
-  collectBlendWindows,
-  collectOffsetEdges,
   type DayPeriodStop,
   getDayPeriodStops,
-  type OffsetEdge,
 } from "./dayPeriodStops";
 // Implements FR1-FR6 of add-time-sliders-to-location-cards.
 export {
@@ -24,6 +20,12 @@ export {
   type DayPeriodBoundary,
   getDayPeriod,
 } from "./dayPeriods";
+export {
+  type BlendWindow,
+  collectBlendWindows,
+  collectOffsetEdges,
+  type OffsetEdge,
+} from "./dayPeriodWindows";
 export {
   getInstantAfterTrackMove,
   getInstantAtTrackFraction,

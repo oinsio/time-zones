@@ -54,6 +54,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           rows={latestLocations.rows}
           onRemove={latestLocations.removeLocation}
           onMove={latestLocations.moveLocation}
+          onSelectTrackFraction={() => undefined}
+          onMoveTrack={() => undefined}
         />
       );
     };
@@ -73,6 +75,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   };
 
+  const textWithoutHourLabels = (card: HTMLElement) => {
+    const copy = card.cloneNode(true) as HTMLElement;
+    for (const hourLabel of copy.querySelectorAll("[data-hour-label]")) {
+      hourLabel.remove();
+    }
+    return copy.textContent;
+  };
   const rowOf = (city: string) =>
     screen
       .getByRole("button", {
@@ -158,7 +167,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       "the {string} row shows {string}",
       (_ctx, city: string, offset: string) =>
         // exact text: the city label "UTC" alone must not satisfy the offset check
-        expect(rowOf(city).textContent).toBe(
+        expect(textWithoutHourLabels(rowOf(city))).toBe(
           `${city}${offset}12:00Wed, Jul 15`,
         ),
     );

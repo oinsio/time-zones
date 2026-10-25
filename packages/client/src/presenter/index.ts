@@ -1,6 +1,7 @@
 // Public API of the presenter layer (ADR-0002).
 // Implements FR5, FR8, FR10 of add-locations-via-search (D9).
 
+export { DayPeriod, type DayPeriodStop } from "@/model";
 // Implements FR3, FR4, FR7, FR9 of select-date-with-calendar-and-now.
 export {
   type CalendarDayCell,

@@ -1,12 +1,13 @@
 // Verifies FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
 // Verifies FR2, FR6, UX1, NFR-A2 of show-local-time-and-date-on-location-cards (D5).
 // Verifies FR1 of reorder-locations-by-drag-and-drop.
+// Verifies FR1 of add-time-sliders-to-location-cards (D8).
 // Verifies FR1, FR2, UX1, UX2 of mark-device-time-zone-in-location-list (D5).
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
-import type { LocationRow as LocationRowModel } from "@/presenter";
+import { DayPeriod, type LocationRow as LocationRowModel } from "@/presenter";
 import { LocationRow } from "./LocationRow";
 
 const row: LocationRowModel = {
@@ -31,6 +32,8 @@ const renderRow = (
           <LocationRow
             row={{ ...row, ...overrides }}
             onRemove={vi.fn()}
+            onSelectTrackFraction={vi.fn()}
+            onMoveTrack={vi.fn()}
             isReorderable={isReorderable}
             prefersReducedMotion={false}
           />
@@ -156,5 +159,32 @@ describe("LocationRow", () => {
         1,
       );
     });
+  });
+});
+
+describe("LocationRow day track", () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
+  });
+
+  const dayTrack = {
+    fraction: 0.5,
+    valueMinutes: 720,
+    maxMinutes: 1425,
+    valueText: "12:00, Sun, Mar 8",
+    stops: [{ fraction: 0.3, period: DayPeriod.NIGHT }],
+    hourLabels: [],
+  };
+
+  it("should render one track for a row with a day track", () => {
+    const { container } = renderRow({ dayTrack });
+
+    expect(container.querySelectorAll("[data-day-track]")).toHaveLength(1);
+  });
+
+  it("should render no track for a row without one", () => {
+    const { container } = renderRow();
+
+    expect(container.querySelectorAll("[data-day-track]")).toHaveLength(0);
   });
 });
