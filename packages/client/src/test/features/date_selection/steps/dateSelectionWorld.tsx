@@ -97,7 +97,9 @@ export const createDateSelectionWorld = () => {
       resetPageVisibility();
       await i18n.changeLanguage(RUSSIAN_LANGUAGE);
     },
-    setLanguage: (language: string) => i18n.changeLanguage(language),
+    setLanguage: async (language: string) => {
+      await i18n.changeLanguage(language);
+    },
     setInstant: (timestamp: string) =>
       clock.moveTo(timestamp, clock.timeZoneId()),
     setDeviceZone: (zone: string) =>

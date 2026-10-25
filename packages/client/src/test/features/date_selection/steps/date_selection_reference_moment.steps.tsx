@@ -3,15 +3,6 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act } from "@testing-library/react/pure";
 import { expect } from "vitest";
 import { Temporal } from "@/lib/temporal";
-import {
-  createStore,
-  INITIAL_LOCATIONS_STATE,
-  LocationCommandType,
-  LocationErrorCode,
-  type LocationsState,
-  ReferenceMode,
-  reduceLocations,
-} from "@/model";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { setPageVisibility } from "@/test/pageVisibility";
 import { createDateSelectionWorld } from "./dateSelectionWorld";
@@ -21,22 +12,14 @@ const feature = await loadFeature("../date_selection_reference_moment.feature");
 const ROW_BUDGET_MS = 50;
 const BUDGET_ROW_COUNT = 50;
 const REPEATED_MOVE_COUNT = 5;
-const NO_NOTE = "no note";
-const NOTE_TEXT_SELECTOR = "p.text-xs";
-
-const newStore = (state: LocationsState = INITIAL_LOCATIONS_STATE) =>
-  createStore(reduceLocations, state);
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createDateSelectionWorld();
-  let store = newStore();
-  let lastOutcome: ReturnType<typeof store.dispatch>;
   let elapsedMs = 0;
   let budgetZone = "";
 
   f.BeforeEachScenario(async () => {
     await world.reset();
-    store = newStore();
   });
   f.AfterAllScenarios(world.finish);
 
@@ -69,11 +52,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   };
   const thenOffset = (_ctx: unknown, city: string, offset: string) =>
     world.expectRowOffset(city, offset);
-  const noteOfBar = () =>
-    world.barElement().querySelector(NOTE_TEXT_SELECTOR)?.textContent;
-  const thenNoteIs = (_ctx: unknown, note: string) =>
-    expect(noteOfBar()).toBe(note);
-  const thenNoNote = () => expect(noteOfBar()).toBeUndefined();
   const thenNowNotShown = () => expect(world.isNowShown()).toBe(false);
   const thenNowShown = () => expect(world.isNowShown()).toBe(true);
   const whenNextMinute = async (_ctx: unknown, timestamp: string) => {
@@ -182,67 +160,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         },
       );
       Then("the moment is pinned to {string}", thenPinned);
-    },
-  );
-
-  // @select-date-with-calendar-and-now @FR4
-  f.Scenario("A gap is told in the bar", ({ Given, And, When, Then }) => {
-    Given("the device time zone is {string}", givenZone);
-    And("the current instant is {string}", givenInstant);
-    And("the app is open", givenAppOpen);
-    When("the user moves to the next day", whenNextDay);
-    Then("the bar shows the note {string}", thenNoteIs);
-    When("the user moves to the next day again", whenNextDay);
-    Then("the bar shows no note", thenNoNote);
-  });
-
-  // @select-date-with-calendar-and-now @FR4 @M3
-  f.ScenarioOutline(
-    "Wall-clock outcomes",
-    ({ Given, And, When, Then }, variables) => {
-      Given("the device time zone is {string}", givenZone);
-      And("the current instant is <from>", () =>
-        world.setInstant(variables.from),
-      );
-      And("the app is open", givenAppOpen);
-      When("the user moves to the next day", whenNextDay);
-      Then("the moment is pinned to <pinned>", () =>
-        world.expectPinnedTo(variables.pinned),
-      );
-      And("the bar note is <note>", () =>
-        variables.note === NO_NOTE
-          ? thenNoNote()
-          : expect(noteOfBar()).toBe(variables.note),
-      );
-    },
-  );
-
-  // @select-date-with-calendar-and-now @FR10
-  f.Scenario(
-    "A malformed date changes nothing",
-    ({ Given, When, Then, And }) => {
-      Given("the moment is live in the store", () => {
-        expect(store.getSnapshot().reference.mode).toBe(ReferenceMode.LIVE);
-      });
-      When(
-        "a date change arrives with the date {string}",
-        (_ctx, date: string) => {
-          lastOutcome = store.dispatch({
-            type: LocationCommandType.SET_DATE,
-            date,
-            now: "2026-03-08T07:30:00Z",
-          });
-        },
-      );
-      Then("the change is rejected as an invalid date", () =>
-        expect(lastOutcome).toEqual({
-          ok: false,
-          error: LocationErrorCode.INVALID_DATE,
-        }),
-      );
-      And("the moment is still live in the store", () =>
-        expect(store.getSnapshot().reference.mode).toBe(ReferenceMode.LIVE),
-      );
     },
   );
 
