@@ -1,19 +1,14 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
-import {
-  act,
-  cleanup,
-  render,
-  screen,
-  within,
-} from "@testing-library/react/pure";
+import { act, cleanup, render, screen } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
 import { failUpdateCheck, fakeServiceWorker } from "@/test/fakeServiceWorker";
 import { registryOverride } from "@/test/registryOverride";
+import { expectBottomBarShowsDateBar } from "./mainPageDateBarAssertions";
 
 vi.mock(
   "virtual:pwa-register/react",
@@ -42,18 +37,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       window.dispatchEvent(new Event(isOnline ? "online" : "offline"));
     });
   const emptyStateText = () => i18n.t("views.cardsEmptyState");
-  const expectBottomBarShowsDateBar = () => {
-    const bottomBar = screen.getByRole("contentinfo");
-    for (const name of [
-      i18n.t("date.previousDay"),
-      /^Choose date|^Выбрать дату/,
-      i18n.t("date.nextDay"),
-    ]) {
-      expect(
-        within(bottomBar).getByRole("button", { name }),
-      ).toBeInTheDocument();
-    }
-  };
 
   f.BeforeEachScenario(async () => {
     cleanup();

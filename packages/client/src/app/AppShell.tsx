@@ -17,7 +17,7 @@ import { UpdateNotice } from "./UpdateNotice";
  * page. Renders an empty content region while the registry is empty.
  * Implements FR2, FR6, FR7, FR11, UX2 of setup-app-shell-and-pages-deploy and
  * FR1, FR8, FR9 of add-main-page-scaffold and FR13 of add-locations-via-search
- * (D3).
+ * (D3), and FR8 of select-date-with-calendar-and-now (D7).
  */
 export function AppShell() {
   return (

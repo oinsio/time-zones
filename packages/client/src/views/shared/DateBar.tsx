@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useReferenceMoment } from "@/controller";
 import { CalendarDialog } from "./CalendarDialog";
 
+const NOW_ICON_SIZE_PX = 16;
+
 const arrowButtonClassName =
   "flex min-h-11 min-w-11 items-center justify-center rounded-md text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent";
 
@@ -62,7 +64,7 @@ export function DateBar() {
             className="flex min-h-11 items-center gap-2 rounded-full bg-accent px-4 text-sm font-medium text-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             onClick={handleReturnToNow}
           >
-            <Clock aria-hidden="true" size={16} />
+            <Clock aria-hidden="true" size={NOW_ICON_SIZE_PX} />
             {t("date.now")}
           </button>
         )}
