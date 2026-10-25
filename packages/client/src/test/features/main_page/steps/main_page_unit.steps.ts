@@ -102,7 +102,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(getNoticeRegion()).toHaveTextContent(
         i18n.t("mainPage.storageUnavailable"),
       );
-      expect(getNoticeRegion()).toHaveClass("fixed");
+      expect(getNoticeRegion()).toHaveClass("absolute");
     });
     And("the header is not part of the notices", () => {
       expect(getNoticeRegion()).not.toContainElement(

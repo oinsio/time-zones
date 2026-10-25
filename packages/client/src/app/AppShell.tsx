@@ -5,6 +5,7 @@ import {
   usePwaUpdateStatus,
   useStorageAvailability,
 } from "@/controller";
+import { DateBar } from "@/views/shared";
 import { MainPage } from "./MainPage";
 import { OfflineReadyNotice } from "./OfflineReadyNotice";
 import { StorageWarning } from "./StorageWarning";
@@ -40,6 +41,7 @@ function AppShellContent() {
 
   return (
     <MainPage
+      bottomBar={<DateBar />}
       notices={
         <>
           {isUpdateAvailable ? (

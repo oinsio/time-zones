@@ -1,4 +1,5 @@
 // Verifies FR1, UX3 of add-main-page-scaffold: fixed page regions.
+// Verifies FR8 of select-date-with-calendar-and-now (D7): the bottom bar.
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import type { ReactNode } from "react";
@@ -7,6 +8,7 @@ import { LocationsProvider } from "@/controller";
 import { MainPage } from "./MainPage";
 
 const NOTICE_TEXT = "a notice";
+const BOTTOM_BAR_TEXT = "a bottom bar";
 
 // The hosted Cards view has its own status region inside main.
 const getNoticesRegion = () =>
@@ -17,7 +19,7 @@ const getNoticesRegion = () =>
 const renderMainPage = (notices: ReactNode) =>
   render(
     <LocationsProvider repository={createInMemoryLocationRepository()}>
-      <MainPage notices={notices} />
+      <MainPage notices={notices} bottomBar={<p>{BOTTOM_BAR_TEXT}</p>} />
     </LocationsProvider>,
   );
 
@@ -67,5 +69,23 @@ describe("MainPage", () => {
   it("should render an empty polite region when there are no notices", () => {
     renderMainPage(null);
     expect(getNoticesRegion()).toBeEmptyDOMElement();
+  });
+
+  it("should render the bottom bar in a footer after the main landmark", () => {
+    renderMainPage(null);
+    const footer = screen.getByRole("contentinfo");
+    expect(footer).toContainElement(screen.getByText(BOTTOM_BAR_TEXT));
+    expect(screen.getByRole("main")).not.toContainElement(footer);
+    expect(
+      screen.getByRole("main").compareDocumentPosition(footer) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("should keep the notices region inside the bottom bar", () => {
+    renderMainPage(<p>{NOTICE_TEXT}</p>);
+    expect(screen.getByRole("contentinfo")).toContainElement(
+      screen.getByText(NOTICE_TEXT),
+    );
   });
 });
