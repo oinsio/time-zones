@@ -27,7 +27,7 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
 
 ## 5. View (TDD)
 
-- [ ] 5.1 TDD `views/shared/LocationRow.tsx` (design D5) in `views/shared/LocationRow.test.tsx` (add `deviceTimeZoneLabel: ""` to the fixture row): with `deviceTimeZoneLabel: "Your time zone"` the badge text is rendered on the city line right after the city, inside an element with `bg-accent` and `text-accent-foreground` (UX1) that also holds an `svg` with `aria-hidden="true"` (UX2); with `""` no badge element is rendered and the remove action stays (FR2). Update the row fixtures in `views/shared/LocationList.test.tsx` with `deviceTimeZoneLabel`; verify `npx vitest run src/views/shared/LocationRow.test.tsx`, then `npx vitest run src/views/shared/LocationList.test.tsx`
+- [ ] 5.1 TDD `views/shared/LocationRow.tsx` (design D5) in `views/shared/LocationRow.test.tsx` (add `deviceTimeZoneLabel: ""` to the fixture row and the header comment `// Verifies FR1, FR2, UX1, UX2 of mark-device-time-zone-in-location-list (D5).`): with `deviceTimeZoneLabel: "Your time zone"` the badge text is rendered on the city line right after the city, inside an element with `bg-accent` and `text-accent-foreground` (UX1) that also holds an `svg` with `aria-hidden="true"` (UX2); with `""` no badge element is rendered and the remove action stays (FR2). Update the row fixtures in `views/shared/LocationList.test.tsx` with `deviceTimeZoneLabel`; verify `npx vitest run src/views/shared/LocationRow.test.tsx`, then `npx vitest run src/views/shared/LocationList.test.tsx`
 - [ ] 5.2 Mutation run on the view; verify `npx stryker run --mutate 'src/views/shared/LocationRow.tsx'` ≥ 95% (minimum 90%) (M3)
 
 ## 6. Unit BDD (vitest-cucumber, jsdom)
