@@ -15,6 +15,9 @@ const row = {
   countryName: "India",
   utcOffsetLabel: "UTC+5:30",
   deviceTimeZoneLabel: "",
+  localTimeLabel: "",
+  localDateLabel: "",
+  localIsoDate: "",
 };
 
 const renderWithDragging = (isDragging: boolean) => {

@@ -17,11 +17,13 @@ const MISSING_PROVIDER_MESSAGE =
  * show-utc-offset-on-location-rows (D4).
  * Passes the device zone to the presenter: FR1, FR2 of
  * mark-device-time-zone-in-location-list (D3).
+ * Presents the rows anew at every minute tick: FR3, FR5 of
+ * show-local-time-and-date-on-location-cards (D4).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
-  const { store, clock, ...rest } = context;
+  const { store, clock, minuteTick, ...rest } = context;
   const { locations, deviceTimeZoneId } = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
@@ -29,6 +31,7 @@ export function useLocations() {
   const { i18n, t } = useTranslation();
   const language = (i18n.resolvedLanguage ??
     i18n.language) as SupportedLanguage;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick re-presents the rows at each minute
   const rows = useMemo(
     () =>
       presentLocationRows(locations, {
@@ -37,7 +40,7 @@ export function useLocations() {
         translate: t,
         deviceTimeZoneId,
       }),
-    [locations, deviceTimeZoneId, language, t, clock],
+    [locations, deviceTimeZoneId, language, t, clock, minuteTick],
   );
   return { rows, locations, ...rest };
 }

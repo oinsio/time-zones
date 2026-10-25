@@ -2,11 +2,13 @@ import type { TFunction } from "i18next";
 import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
 import {
+  getLocalDateTime,
   getUtcOffsetMinutes,
   isLocationInDeviceTimeZone,
   type Location,
 } from "@/model";
 import { presentCountryName } from "./countryName";
+import { formatLocalDate, formatLocalTime } from "./localDateTime";
 import { formatUtcOffset } from "./utcOffset";
 
 export type LocationRow = {
@@ -17,6 +19,12 @@ export type LocationRow = {
   utcOffsetLabel: string;
   /** "Your time zone" badge text; empty when the row is not in the device zone. */
   deviceTimeZoneLabel: string;
+  /** "12:30" style label; empty when the zone is unknown. */
+  localTimeLabel: string;
+  /** "Sun, Mar 8" style label; empty when the zone is unknown. */
+  localDateLabel: string;
+  /** ISO date ("2026-03-08") of the local date; empty when the zone is unknown. */
+  localIsoDate: string;
 };
 
 export type LocationRowsContext = {
@@ -32,6 +40,7 @@ export type LocationRowsContext = {
  * Implements FR10, UX4 of add-locations-via-search (D9).
  * Implements FR2, FR3, FR5, FR6 of show-utc-offset-on-location-rows (D2).
  * Implements FR1, FR2, FR5 of mark-device-time-zone-in-location-list (D4).
+ * Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).
  */
 export function presentLocationRows(
   locations: readonly Location[],
@@ -41,6 +50,7 @@ export function presentLocationRows(
   const deviceTimeZoneBadge = translate("locations.deviceTimeZoneBadge");
   return locations.map((location) => {
     const offsetMinutes = getUtcOffsetMinutes(location.timeZoneId, instant);
+    const localDateTime = getLocalDateTime(location.timeZoneId, instant);
     return {
       id: location.id,
       cityLabel: location.label,
@@ -55,6 +65,13 @@ export function presentLocationRows(
       )
         ? deviceTimeZoneBadge
         : "",
+      localTimeLabel: localDateTime
+        ? formatLocalTime(localDateTime, language)
+        : "",
+      localDateLabel: localDateTime
+        ? formatLocalDate(localDateTime, language)
+        : "",
+      localIsoDate: localDateTime ? localDateTime.toPlainDate().toString() : "",
     };
   });
 }

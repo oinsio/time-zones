@@ -20,6 +20,8 @@ import {
   type LocationsContextValue,
   LocationsStatus,
 } from "./locationsContext";
+import { type TickScheduler, timeoutTickScheduler } from "./tickScheduler";
+import { useMinuteTick } from "./useMinuteTick";
 import { timeoutWriteScheduler, type WriteScheduler } from "./writeScheduler";
 
 const PAGE_HIDE_EVENT = "pagehide";
@@ -29,6 +31,7 @@ type LocationsProviderProps = {
   repository?: LocationRepository;
   writeScheduler?: WriteScheduler;
   clock?: Clock;
+  tickScheduler?: TickScheduler;
 };
 
 const statusOf = (result: LocationsLoadResult): LocationsStatus =>
@@ -66,12 +69,16 @@ function createLocationsStore(
  * show-utc-offset-on-location-rows, D4).
  * Reads the device zone once at store creation: FR3, FR4 of
  * mark-device-time-zone-in-location-list (D3).
+ * Ticks at every minute boundary while the page is visible: re-reads the
+ * device zone and re-presents the rows without writing (FR3, FR4 of
+ * show-local-time-and-date-on-location-cards, D4).
  */
 export function LocationsProvider({
   children,
   repository = localStorageLocationRepository,
   writeScheduler = timeoutWriteScheduler,
   clock = systemClock,
+  tickScheduler = timeoutTickScheduler,
 }: LocationsProviderProps) {
   const [initialResult] = useState(() => repository.load());
   const [store] = useState(() =>
@@ -79,6 +86,7 @@ export function LocationsProvider({
   );
   const [loadStatus, setLoadStatus] = useState(() => statusOf(initialResult));
   const [hasSaveFailed, setHasSaveFailed] = useState(false);
+  const [minuteTick, setMinuteTick] = useState(0);
   const cancelPendingWrite = useRef<(() => void) | undefined>(undefined);
 
   const actions = useMemo(() => {
@@ -152,10 +160,23 @@ export function LocationsProvider({
     };
   }, [repository, store, actions]);
 
+  useMinuteTick({
+    clock,
+    tickScheduler,
+    onTick: () => {
+      store.dispatch({
+        type: LocationCommandType.SET_DEVICE_TIME_ZONE,
+        timeZoneId: clock.timeZoneId(),
+      });
+      setMinuteTick((previousTick) => previousTick + 1);
+    },
+  });
+
   const value = useMemo<LocationsContextValue>(
     () => ({
       store,
       clock,
+      minuteTick,
       loadStatus,
       hasSaveFailed,
       addLocation: actions.addLocation,
@@ -163,7 +184,7 @@ export function LocationsProvider({
       moveLocation: actions.moveLocation,
       resetLocations: actions.resetLocations,
     }),
-    [store, clock, loadStatus, hasSaveFailed, actions],
+    [store, clock, minuteTick, loadStatus, hasSaveFailed, actions],
   );
 
   return (

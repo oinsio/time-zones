@@ -12,6 +12,7 @@ import en from "@/locales/en.json";
 import ru from "@/locales/ru.json";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationList } from "@/views/shared";
 import { cityEntry } from "./locationsUiWorld";
@@ -82,6 +83,7 @@ export const createDeviceTimeZoneWorld = () => {
           repository={createInMemoryLocationRepository({ backend })}
           writeScheduler={immediateWriteScheduler}
           clock={clock}
+          tickScheduler={createManualTickScheduler()}
         >
           <Rows />
         </LocationsProvider>,

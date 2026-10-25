@@ -12,6 +12,9 @@ const rows: LocationRow[] = [
     cityLabel: "Moscow",
     utcOffsetLabel: "UTC+3",
     deviceTimeZoneLabel: "",
+    localTimeLabel: "",
+    localDateLabel: "",
+    localIsoDate: "",
     countryName: "Russia",
   },
   {
@@ -19,6 +22,9 @@ const rows: LocationRow[] = [
     cityLabel: "Tokyo",
     utcOffsetLabel: "UTC+9",
     deviceTimeZoneLabel: "",
+    localTimeLabel: "",
+    localDateLabel: "",
+    localIsoDate: "",
     countryName: "Japan",
   },
   {
@@ -26,6 +32,9 @@ const rows: LocationRow[] = [
     cityLabel: "Kyiv",
     utcOffsetLabel: "UTC+3",
     deviceTimeZoneLabel: "",
+    localTimeLabel: "",
+    localDateLabel: "",
+    localIsoDate: "",
     countryName: "Ukraine",
   },
 ];

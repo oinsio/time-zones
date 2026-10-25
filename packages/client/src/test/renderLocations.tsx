@@ -1,10 +1,11 @@
 import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
-import type { WriteScheduler } from "@/controller";
+import type { TickScheduler, WriteScheduler } from "@/controller";
 import { LocationsProvider, useLocations } from "@/controller";
 import type { Clock } from "@/lib/temporal";
 import type { LocationRepository } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 
 export const moscow = buildLocation();
@@ -23,6 +24,7 @@ export const renderLocations = (
   repository: LocationRepository,
   writeScheduler: WriteScheduler = immediateWriteScheduler,
   clock?: Clock,
+  tickScheduler: TickScheduler = createManualTickScheduler(),
 ) =>
   renderHook(() => useLocations(), {
     wrapper: ({ children }: { children: ReactNode }) => (
@@ -30,6 +32,7 @@ export const renderLocations = (
         repository={repository}
         writeScheduler={writeScheduler}
         clock={clock}
+        tickScheduler={tickScheduler}
       >
         {children}
       </LocationsProvider>

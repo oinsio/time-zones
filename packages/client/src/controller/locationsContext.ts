@@ -23,6 +23,8 @@ export type AddLocationInput = {
 export type LocationsContextValue = {
   store: Store<LocationsState, LocationCommand, LocationErrorCode>;
   clock: Clock;
+  /** Counts minute ticks; re-presents the rows. Implements FR3 of show-local-time-and-date-on-location-cards (D4). */
+  minuteTick: number;
   loadStatus: LocationsStatus;
   hasSaveFailed: boolean;
   addLocation: (input: AddLocationInput) => LocationsReduceResult;

@@ -4,6 +4,8 @@
 // Implements FR1-FR4 of mark-device-time-zone-in-location-list.
 
 export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
+// Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards.
+export { getLocalDateTime } from "./localDateTime";
 export {
   buildLocationId,
   INITIAL_LOCATIONS_STATE,

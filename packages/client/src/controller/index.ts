@@ -1,4 +1,5 @@
 export { LocationsProvider } from "./LocationsProvider";
+export type { TickScheduler } from "./tickScheduler";
 export { CitySearchStatus, useCitySearch } from "./useCitySearch";
 export { useContainerWidth } from "./useContainerWidth";
 export { useDocumentLanguage } from "./useDocumentLanguage";

@@ -157,7 +157,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       "the {string} row shows {string}",
       (_ctx, city: string, offset: string) =>
         // exact text: the city label "UTC" alone must not satisfy the offset check
-        expect(rowOf(city).textContent).toBe(`${city}${offset}`),
+        expect(rowOf(city).textContent).toBe(
+          `${city}${offset}12:00Wed, Jul 15`,
+        ),
     );
   });
 

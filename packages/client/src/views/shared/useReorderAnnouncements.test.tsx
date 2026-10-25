@@ -12,6 +12,9 @@ const rows = ["Moscow", "Almaty", "New York"].map((cityLabel) => ({
   countryName: "",
   utcOffsetLabel: "",
   deviceTimeZoneLabel: "",
+  localTimeLabel: "",
+  localDateLabel: "",
+  localIsoDate: "",
 }));
 
 type Event = Parameters<NonNullable<Announcements["onDragOver"]>>[0];
