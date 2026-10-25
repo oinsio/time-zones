@@ -24,6 +24,7 @@ const ACCENT_COLOUR_VARIABLE = "--color-accent";
 const ACCENT_FOREGROUND_VARIABLE = "--color-accent-foreground";
 const FOREGROUND_VARIABLE = "--color-foreground";
 const HALF = 2;
+const LOCATION_COUNT = 12;
 const FULL_SCREEN_TEXT = "full screen";
 
 const footerBox = (page: Page) => requireBox(page.locator(FOOTER_SELECTOR));
@@ -90,39 +91,46 @@ Then(
 );
 
 When("the user scrolls to the end", async ({ locationsWorld }) => {
-  await locationsWorld.page.evaluate(() =>
-    window.scrollTo(0, document.body.scrollHeight),
-  );
+  const { page } = locationsWorld;
+  await expect(page.getByRole("listitem")).toHaveCount(LOCATION_COUNT);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 });
 
 Then("the last card is fully above the bar", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
-  const lastCard = await requireBox(page.getByRole("listitem").last());
-  const bar = await footerBox(page);
-  expect(lastCard.y + lastCard.height).toBeLessThanOrEqual(bar.y + 1);
+  await expect
+    .poll(async () => {
+      const lastCard = await requireBox(page.getByRole("listitem").last());
+      const bar = await footerBox(page);
+      return lastCard.y + lastCard.height - bar.y;
+    })
+    .toBeLessThanOrEqual(1);
 });
 
-Then(/^the calendar is (.+)$/, async ({ locationsWorld }, layout: string) => {
-  const { page } = locationsWorld;
-  const viewport = page.viewportSize() ?? { width: 0, height: 0 };
-  const dialog = await requireBox(calendarOf(page));
-  if (layout === FULL_SCREEN_TEXT) {
-    expect(dialog).toMatchObject({
-      x: 0,
-      y: 0,
-      width: viewport.width,
-      height: viewport.height,
-    });
-    return;
-  }
-  expect(dialog.width).toBeLessThan(viewport.width);
-  expect(
-    Math.abs(dialog.x + dialog.width / HALF - viewport.width / HALF),
-  ).toBeLessThanOrEqual(1);
-  expect(
-    Math.abs(dialog.y + dialog.height / HALF - viewport.height / HALF),
-  ).toBeLessThanOrEqual(1);
-});
+Then(
+  /^the calendar is laid out as (.+)$/,
+  async ({ locationsWorld }, layout: string) => {
+    const { page } = locationsWorld;
+    const viewport = page.viewportSize() ?? { width: 0, height: 0 };
+    const dialog = await requireBox(calendarOf(page));
+    if (layout === FULL_SCREEN_TEXT) {
+      expect(dialog).toMatchObject({
+        x: 0,
+        y: 0,
+        width: viewport.width,
+        height: viewport.height,
+      });
+      return;
+    }
+    expect(dialog.width).toBeLessThan(viewport.width);
+    expect(
+      Math.abs(dialog.x + dialog.width / HALF - viewport.width / HALF),
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(dialog.y + dialog.height / HALF - viewport.height / HALF),
+    ).toBeLessThanOrEqual(1);
+  },
+);
 
 // Verifies UX2 of select-date-with-calendar-and-now.
 Then(

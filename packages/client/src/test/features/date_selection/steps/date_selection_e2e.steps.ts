@@ -228,7 +228,7 @@ Then(
     const { page } = locationsWorld;
     const selectedCell = page
       .getByRole(GRID_CELL_ROLE)
-      .filter({ has: dayButton(page, fullDate) });
+      .filter({ has: page.getByRole("button", { name: fullDate }) });
     await expect(selectedCell).toHaveAttribute("aria-selected", "true");
   },
 );

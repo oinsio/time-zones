@@ -34,7 +34,7 @@ Feature: Date bar layout in a real browser
     And the screen is <width> px wide for the locations
     And the user opens the locations app
     When the user opens the calendar with the mouse
-    Then the calendar is <layout>
+    Then the calendar is laid out as <layout>
 
     Examples:
       | width | layout                                                |
