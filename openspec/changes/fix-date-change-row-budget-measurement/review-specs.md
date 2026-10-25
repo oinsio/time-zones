@@ -76,7 +76,8 @@ None.
 - Impact: Low. Nothing gets built differently. The archived proposal would record a wrong fact about which layers that budget measures, and the reason for excluding it would rest on that wrong fact.
 - Fix: Reword NG3 to: "They already time code without a jsdom render: model and presenter work for the `locations_*` budgets, the city-search adapter for `location_search_performance`."
 - Fix risk: none
-- Status: open
+- Status: fixed
+- Resolution: reworded NG3 in proposal.md:43 to say the excluded scenarios time code without a jsdom render: model and presenter work for the `locations_*` budgets, the city-search adapter for `location_search_performance`.
 
 ## Verdict
 
