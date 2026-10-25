@@ -91,7 +91,8 @@ No file is below 90%; no survivor exposes an untested requirement.
 - Impact: the file breaks the 200-line limit that `CLAUDE.md` sets without the "splitting would hurt clarity" reason, and the steps folder already has the pattern that avoids it (`steps/locationsUiWorld.tsx`, 100 lines, holds the shared world of `locations_ui_unit.steps.tsx`).
 - Fix: move the world into a new `steps/deviceTimeZoneWorld.tsx` that exports a `createDeviceTimeZoneWorld()` factory returning the state accessors, `openApp`, `rowOf`, `badgeText` and the shared step handlers; keep the `loadFeature`, `describeFeature`, hooks and `f.Scenario` bindings (with their `// @mark-device-time-zone-in-location-list @FR-X` comments) in `locations_device_time_zone_unit.steps.tsx`. Re-run `npx vitest run src/test/features/locations/steps/locations_device_time_zone_unit.steps.tsx`.
 - Fix risk: test-only change; the handlers close over per-scenario variables (`deviceZone`, `storedCities`, `backend`, `latestLocations`), so the factory must keep them as mutable fields reset in `BeforeEachScenario` — a slip there leaks state between scenarios. `.claude/rules/bdd-unit.md` "one steps file per feature file" stays satisfied because the world module is a helper, as `locationsUiWorld.tsx` already is. No production code changes.
-- Status: open
+- Status: fixed
+- Resolution: moved the scenario world (state, switchable clock, openApp, rowOf, badge helpers, shared handlers) into steps/deviceTimeZoneWorld.tsx (116 lines); steps file is now 176 lines; all 58 tests of locations_device_time_zone_unit.steps.tsx still pass.
 
 ## Verdict
 
