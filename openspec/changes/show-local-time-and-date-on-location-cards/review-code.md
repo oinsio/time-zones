@@ -125,7 +125,9 @@ Every file is above 95%. The `() => undefined` survivor at `LocationsProvider.ts
 - Impact: FR3 requires the time to change "at the start of every minute" and the spec says "each later one at the following minute boundary". A regression that makes the counter non-incrementing (a constant, a boolean toggle that is reset, the mutant above) freezes every card after its first update while the page stays visible. The whole suite would stay green.
 - Fix: add a test to `packages/client/src/controller/useLocations.tick.test.tsx`, using its existing `setup`, `moveClockTo` and `runTick`: open `["UTC"]` at `2026-07-15T12:00:42.500Z`, `moveClockTo("2026-07-15T12:01:00Z")`, `runTick()`, `moveClockTo("2026-07-15T12:02:00Z")`, `runTick()`, then expect `result.current.rows[0]?.localTimeLabel` to be `"12:02"`. Then re-run `npx stryker run --mutate 'src/controller/LocationsProvider.tsx'` and confirm the `() => undefined` mutant is killed.
 - Fix risk: none — a test-only addition in a 115-line file, using helpers the file already has. Production code does not change, and the manual tick scheduler keeps it free of real timers, as design D6 requires.
-- Status: open
+- Status: fixed
+- Resolution: added "should show the following minute after a second tick" to useLocations.tick.test.tsx;
+  Stryker on LocationsProvider.tsx now 98.44%, the `() => undefined` mutant is killed.
 
 ### R2 — SUGGESTION — presentLocationRows.test.ts grows past the 200-line limit
 - Location: `packages/client/src/presenter/presentLocationRows.test.ts:159`
@@ -134,7 +136,9 @@ Every file is above 95%. The `() => undefined` survivor at `LocationsProvider.ts
 - Impact: the file breaks the project's file-size invariant, and the change's own tasks repeat that invariant. Each further row field (hour format, differences) will push it toward the 300-line hard cap.
 - Fix: move the `describe("present the local time and date")` block to a new `packages/client/src/presenter/presentLocationRows.localDateTime.test.ts`. That follows the existing `<module>.<aspect>.test` split (`controller/useLocations.tick.test.tsx`, `views/shared/LocationRow.dragging.test.tsx`). Give it its own copy of the 17-line `present` helper (lines 17–31) and the header `// Verifies FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).`, and remove that header line from the original file.
 - Fix risk: low — test-only. It duplicates the small `present` helper, unless the helper moves to `packages/client/src/test/`, which touches the other describe blocks. Mutation coverage of `presentLocationRows.ts` is unchanged, because Vitest still runs both files.
-- Status: open
+- Status: fixed
+- Resolution: moved the local time and date describe block into presentLocationRows.localDateTime.test.ts;
+  presentLocationRows.test.ts is 156 lines, the new file 79; both pass.
 
 ## Verdict
 
