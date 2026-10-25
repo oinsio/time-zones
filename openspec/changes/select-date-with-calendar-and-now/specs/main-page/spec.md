@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Main page regions
-The main page SHALL consist of a header with the app title as the only page heading and an empty slot for future controls, a content region hosting the active view, a bottom bar holding the date bar (see the `date-selection` capability) that stays at the bottom of the viewport, and a polite notices region, out of the document flow, that keeps the offline-ready and update notices and stacks the update-check-failed note and the storage warning with them. The notices region MUST sit above the bottom bar and MUST NOT cover it. <!-- implements FR1, UX3 of add-main-page-scaffold; FR8 of select-date-with-calendar-and-now -->
+The main page SHALL consist of a header with the app title as the only page heading and an empty slot for future controls, a content region hosting the active view, a bottom bar holding the date bar (see the `date-selection` capability) that stays at the bottom of the viewport and is the page's footer landmark, and a polite notices region, out of the document flow, that keeps the offline-ready and update notices and stacks the update-check-failed note and the storage warning with them. The notices region MUST sit above the bottom bar and MUST NOT cover it. <!-- implements FR1, UX3 of add-main-page-scaffold; FR8 of select-date-with-calendar-and-now -->
 
 #### Scenario: User opens the app
 - **WHEN** the user opens the app
