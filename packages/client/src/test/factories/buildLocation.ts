@@ -20,6 +20,8 @@ export const KNOWN_CITIES: Record<
 > = {
   Almaty: { timeZoneId: "Asia/Almaty", countryCode: "KZ" },
   Moscow: { timeZoneId: "Europe/Moscow", countryCode: "RU" },
+  "Saint Petersburg": { timeZoneId: "Europe/Moscow", countryCode: "RU" },
+  Minsk: { timeZoneId: "Europe/Minsk", countryCode: "BY" },
   Kolkata: { timeZoneId: "Asia/Kolkata", countryCode: "IN" },
   "New York": { timeZoneId: "America/New_York", countryCode: "US" },
   Kyiv: { timeZoneId: "Europe/Kyiv", countryCode: "UA" },

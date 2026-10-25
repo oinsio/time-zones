@@ -1,13 +1,18 @@
 // FR2, M2 of reorder-locations-by-drag-and-drop: move a location in the list.
 import { describe, expect, it } from "vitest";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { LocationErrorCode, type LocationsState } from "./locations";
+import {
+  INITIAL_LOCATIONS_STATE,
+  LocationErrorCode,
+  type LocationsState,
+} from "./locations";
 import { moveLocationInList } from "./moveLocation";
 
 const buildCity = (label: string) =>
   buildLocation({ label, ...KNOWN_CITIES[label] });
 
 const state: LocationsState = {
+  ...INITIAL_LOCATIONS_STATE,
   locations: ["Almaty", "Moscow", "Kolkata", "Tokyo"].map(buildCity),
 };
 
@@ -69,5 +74,16 @@ describe("moveLocationInList", () => {
       "Kolkata",
       "Tokyo",
     ]);
+  });
+});
+
+describe("moveLocationInList device zone", () => {
+  it("should keep the device zone of the state", () => {
+    const outcome = moveLocationInList(
+      { ...state, deviceTimeZoneId: "Asia/Almaty" },
+      buildCity("Tokyo").id,
+      0,
+    );
+    expect(outcome.ok && outcome.state.deviceTimeZoneId).toBe("Asia/Almaty");
   });
 });

@@ -63,6 +63,7 @@ describe("useLocations", () => {
           cityLabel: "Moscow",
           countryName: "Россия",
           utcOffsetLabel: "UTC+3",
+          deviceTimeZoneLabel: "",
         },
       ]);
     });

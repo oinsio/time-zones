@@ -11,18 +11,21 @@ const rows: LocationRow[] = [
     id: "moscow",
     cityLabel: "Moscow",
     utcOffsetLabel: "UTC+3",
+    deviceTimeZoneLabel: "",
     countryName: "Russia",
   },
   {
     id: "tokyo",
     cityLabel: "Tokyo",
     utcOffsetLabel: "UTC+9",
+    deviceTimeZoneLabel: "",
     countryName: "Japan",
   },
   {
     id: "kyiv",
     cityLabel: "Kyiv",
     utcOffsetLabel: "UTC+3",
+    deviceTimeZoneLabel: "",
     countryName: "Ukraine",
   },
 ];

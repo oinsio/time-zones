@@ -89,7 +89,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.BeforeEachScenario(async () => {
     cleanup();
     storedLocations = [];
-    currentClock = fakeClock("2026-07-15T12:00:00Z", UNIT_TEST_DEVICE_TIME_ZONE);
+    currentClock = fakeClock(
+      "2026-07-15T12:00:00Z",
+      UNIT_TEST_DEVICE_TIME_ZONE,
+    );
     switchableClock = {
       instant: () => currentClock.instant(),
       plainDateISO: () => currentClock.plainDateISO(),
@@ -242,6 +245,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         language: ENGLISH_LANGUAGE,
         instant: currentClock.instant(),
         translate: i18n.getFixedT(ENGLISH_LANGUAGE),
+        deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
       });
       elapsedMs = performance.now() - startedAt;
     });

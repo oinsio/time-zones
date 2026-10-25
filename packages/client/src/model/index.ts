@@ -1,8 +1,12 @@
 // Public API of the model layer (ADR-0002).
 // Implements FR8, FR9, FR10 of add-locations-via-search and FR2 of
 // reorder-locations-by-drag-and-drop.
+// Implements FR1-FR4 of mark-device-time-zone-in-location-list.
+
+export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
 export {
   buildLocationId,
+  INITIAL_LOCATIONS_STATE,
   type Location,
   type LocationCommand,
   LocationCommandType,

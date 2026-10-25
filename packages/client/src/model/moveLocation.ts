@@ -36,5 +36,5 @@ export function moveLocationInList(
   const reordered = [...state.locations];
   const [movedLocation] = reordered.splice(currentIndex, 1);
   reordered.splice(targetIndex, 0, movedLocation);
-  return { ok: true, state: { locations: reordered } };
+  return { ok: true, state: { ...state, locations: reordered } };
 }
