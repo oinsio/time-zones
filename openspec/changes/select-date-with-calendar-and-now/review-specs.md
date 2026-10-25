@@ -96,7 +96,8 @@
 - Impact: Implemented as written, the "No accessibility violations" outline "with the calendar open" (NFR-A1, M7, task 7.1) reports an `aria-allowed-attr` violation in both themes, and the "calendar" screenshot state cannot pass its a11y gate. The implementer finds out only at task 7.1.
 - Fix: In design D6, put `aria-selected="true"` on the `<td>` of the selected day. Inside `<table role="grid">` a `<td>` is a `gridcell`, which supports `aria-selected`. Keep the full-date `aria-label`, `aria-current="date"` (a global attribute) and the roving `tabIndex` on the `<button>`. In `specs/date-selection/spec.md:250`, say "the cell of the selected day carries `aria-selected="true"`". In task 7.1 "Names and marks", read `aria-selected` from the gridcell that contains the button named "Sunday, March 8, 2026".
 - Fix risk: The E2E step must find the enclosing gridcell (`getByRole("gridcell").filter({ has: … })`). Nothing else changes, and no jsdom test asserts the attribute (D8).
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 now puts `aria-selected="true"` on the selected day's `<td>` gridcell and keeps `aria-label`, `aria-current="date"` and the roving `tabIndex` on the `<button>`; specs/date-selection/spec.md "Accessible date selection" and "Names and marks" mark the selected grid cell; task 7.1 reads `aria-selected` from `getByRole("gridcell").filter({ has: dayButton })`.
 
 ### R2 — WARNING — The bottom bar sits outside every landmark
 - Location: `openspec/changes/select-date-with-calendar-and-now/design.md:104`
@@ -105,7 +106,8 @@
 - Impact: Once the bar renders on every page state, the existing axe outlines start reporting `region` violations, undeclared: `main_page_e2e.feature:7` "Main page is accessible in the <state> state" and the locations axe scenarios. The new NFR-A1 outline fails as well.
 - Fix: In design D7 (and `tasks.md:35`, task 5.5), render the bottom bar as a `<footer>` element, as the approved HTML screens do (`docs/design/screens/phone-light.html:561`). It is not inside `article`, `aside`, `main`, `nav` or `section`, so it maps to the `contentinfo` landmark. Keep the `DateBar` `role="group"` inside it.
 - Fix risk: The page gains one `contentinfo` landmark (none exists today, so `landmark-no-duplicate-contentinfo` holds). The notices region moves inside the footer per D7 and stays a polite live region, and `AppShell.notices.test.tsx:56` ("outside main") still holds.
-- Status: open
+- Status: fixed
+- Resolution: design.md D7 renders the bottom bar as a `<footer>` (the page's only `contentinfo` landmark, as in `phone-light.html`), keeping the `DateBar` `role="group"` inside it; specs/main-page/spec.md "Main page regions" says the bottom bar is the page's footer landmark; task 5.4 builds the `<footer>` and asserts `bottomBar` is inside a `<footer>` after `<main>`; task 7.3 keeps the existing axe outlines (default rules, `region` included) green.
 
 ### R3 — WARNING — Locale keys are added after the tasks that assert their text
 - Location: `openspec/changes/select-date-with-calendar-and-now/tasks.md:31`
@@ -114,7 +116,8 @@
 - Impact: Following the task order, 3.1 and 4.1 cannot go green: `t` returns the raw key. The implementer either breaks the order or adds keys out of plan.
 - Fix: Move task 5.1 (both locale files with the `date` keys of D6, verified by `npx vitest run src/locales/locales.test.ts`) into section 1 as task 1.2, before the presenter tasks. Renumber section 5.
 - Fix risk: none. `locales.test.ts` only checks that both files have the same keys, and no other task depends on 5.1 running later.
-- Status: open
+- Status: fixed
+- Resolution: the locale-keys task is now task 1.2 in section 1 (before presenter 3.1 and controller 4.1, with the reason stated); section 5 is renamed "Views" and renumbered 5.1–5.5. No other artifact cites the old numbers.
 
 ### R4 — WARNING — Calendar BDD steps cannot run their scenarios with `renderHook`
 - Location: `openspec/changes/select-date-with-calendar-and-now/tasks.md:41`
@@ -123,7 +126,8 @@
 - Impact: The implementer either cannot write these steps or writes no-op steps. A vacuous "closed" step then hides a broken pick-and-close flow behind green FR3 scenarios.
 - Fix: In task 6.2, render `AppShell` (in-memory repository, `fakeClock`, manual tick and write schedulers, as 6.1 does). Act with `userEvent` on controls found by role and name, which D8 allows for acting. Assert that the calendar is closed with `queryByRole("dialog")` being `null`, and assert the bar's `<time dateTime>` and the rows' text. Keep `renderHook` on `useCalendarMonth` only for "March 2026 in English and Russian" and for the `isSelected` / `isToday` flags of "The calendar opens on the pinned date", seeded through a pinned store.
 - Fix risk: Rendering `AppShell` makes these steps slower and couples them to `CardsView`. The asserted facts (dialog presence, `dateTime`, row text) are on D8's list of what jsdom may assert, so no rule is crossed.
-- Status: open
+- Status: fixed
+- Resolution: task 6.2 now renders `AppShell` (in-memory repository, `fakeClock`, manual tick and write schedulers) for "Pick a date in a later month", "Picking the shown date changes nothing" and "Closing the calendar changes nothing", acts with `userEvent` by role and name, and asserts `queryByRole("dialog")`, the heading, the bar's `<time dateTime>` and the New York row text; `renderHook` stays only for "March 2026 in English and Russian" and "The calendar opens on the pinned date", with both hooks in one provider.
 
 ### R5 — WARNING — "AMBIGUOUS shows no note" is never tested
 - Location: `openspec/changes/select-date-with-calendar-and-now/specs/date-selection/spec.md:74`
@@ -132,7 +136,8 @@
 - Impact: The controller could build the note for every non-`UNIQUE` status (`!== UNIQUE`), showing a false "does not exist" note for 01:30 on 1 November. Every listed test and the M3 metric would still pass, so M3's "1 of 3" stays unverified.
 - Fix: Add a `note` column to the "Wall-clock outcomes" table (`UNIQUE` → none, `GAP` → `02:30 does not exist on this day because of a clock change; showing 03:30.`, `AMBIGUOUS` → none) with a step "And the bar shows `<note>`" asserted in 6.1, which renders `AppShell`. Also add to task 4.1: with `fakeClock("2026-10-31T05:30:00Z", "America/New_York")`, `showNextDay` leaves `dateBar.gapNote` `undefined`.
 - Fix risk: none. The bar text is a jsdom-safe assertion (D8), and the scenario keeps its `@FR4 @M3` tags.
-- Status: open
+- Status: fixed
+- Resolution: specs/date-selection/spec.md "Wall-clock outcomes" gains a `note` column (`UNIQUE` → no note, `GAP` → the M3 note text, `AMBIGUOUS` → no note) and a step "the bar shows `<note>`", asserted in task 6.1, which renders `AppShell`; task 4.1 adds `fakeClock("2026-10-31T05:30:00Z", "America/New_York")` `showNextDay` → `isoDate` `2026-11-01` with `gapNote` `undefined`.
 
 ### R6 — SUGGESTION — The date-change live region must not take `role="status"`
 - Location: `openspec/changes/select-date-with-calendar-and-now/design.md:95`
@@ -141,7 +146,8 @@
 - Impact: A region written as `role="status"` makes every one of those `getByRole("status")` calls throw "multiple elements found". It breaks existing tests that design.md:139 promises stay green.
 - Fix: In D6, state the markup the codebase already uses for its other live regions: `<p aria-live="polite" aria-atomic="true" className="sr-only">` without a role, as `views/cards/CardsView.tsx:65` and `views/shared/LocationSearchDialog.tsx:140` do.
 - Fix risk: none. The E2E check "Date change is announced" can read the region by its `aria-live` attribute.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 specifies the date-change live region as `<p aria-live="polite" aria-atomic="true" className="sr-only">` with no `role`, as `CardsView.tsx:65` and `LocationSearchDialog.tsx:140` do, so the existing `getByRole("status")` lookups stay unique; task 7.1 "Date change is announced" reads the bar's `[aria-live="polite"]` element.
 
 ### R7 — SUGGESTION — 44 px calendar days do not fit a 320 px full-screen dialog
 - Location: `openspec/changes/select-date-with-calendar-and-now/proposal.md:95`
@@ -150,7 +156,8 @@
 - Impact: At 320 px either the day buttons shrink below 44 px, breaking UX1, or the grid overflows and the calendar scrolls sideways inside the dialog. No planned test notices either outcome.
 - Fix: In D6, give the calendar's `DialogContent` a narrower horizontal padding below `sm` (for example `px-1 sm:p-4` through its `className`), with table cells without padding, so 7 × 44 px fits 320 px. Extend the "No horizontal scrolling" scenario (`spec.md:335-342`, task 7.1) so that at 320 px with the calendar open the dialog's `scrollWidth` ≤ `clientWidth` too.
 - Fix risk: The narrow calendar's padding differs from the search dialog's. The new "calendar" baselines are taken at 375 px anyway, so no existing baseline changes.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 gives the calendar's `DialogContent` `className="px-1 sm:p-4"` with unpadded cells, so 7 × 44 px fits 320 px (286 px with the default `p-4`); new scenario "Calendar days fit the narrowest screen" in specs/date-selection/spec.md and its check in task 7.1 (`@NFR-R1 @UX1`: day boxes ≥ 44 × 44 and the dialog's `scrollWidth` ≤ `clientWidth` at 320 px).
 
 ### R8 — SUGGESTION — `renderLocations` cannot pin the store for task 4.2
 - Location: `openspec/changes/select-date-with-calendar-and-now/tasks.md:25`
@@ -159,7 +166,8 @@
 - Impact: The implementer cannot follow the task as written and has to invent a test harness while in the RED step.
 - Fix: In task 4.2, render `renderHook(() => ({ locations: useLocations(), reference: useReferenceMoment() }), { wrapper })` with the same `LocationsProvider` props `renderLocations` passes. Alternatively, extend `renderLocations` with an optional hook argument whose default is `useLocations`.
 - Fix risk: Extending the shared helper touches a file used by six `useLocations.*.test.tsx` suites. The default argument keeps them unchanged.
-- Status: open
+- Status: fixed
+- Resolution: task 4.2 now uses `renderHook(() => ({ locations: useLocations(), reference: useReferenceMoment() }), { wrapper })` with the `LocationsProvider` props `renderLocations` passes, pinning through `result.current.reference`; the shared `renderLocations` helper is left untouched.
 
 ## Verdict
 
