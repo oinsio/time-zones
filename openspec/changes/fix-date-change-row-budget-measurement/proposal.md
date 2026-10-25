@@ -40,7 +40,7 @@ _None._
 
 - NG1: Speeding up rendering, the presenter or the reducer. The production code already meets the budget. Only the measurement is wrong.
 - NG2: Raising the 50 ms budget, adding retries to Vitest, or skipping the scenario on CI.
-- NG3: Changing the other 50-row budget scenarios (`locations_*_unit`, `locations_reorder_unit`, `location_search_performance`). They already time only model and presenter work.
+- NG3: Changing the other 50-row budget scenarios (`locations_*_unit`, `locations_reorder_unit`, `location_search_performance`). They already time code without a jsdom render: model and presenter work for the `locations_*` budgets, the city-search adapter for `location_search_performance`.
 - NG4: A real-browser (Playwright) timing of the date change.
 
 ## Users & Scenarios
