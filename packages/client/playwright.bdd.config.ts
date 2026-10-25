@@ -36,6 +36,7 @@ const SCREENSHOT_PATH_TEMPLATE =
 const E2E_ORIGIN = `http://localhost:${E2E_PORT}`;
 const E2E_APP_URL = `${E2E_ORIGIN}${APP_BASE_PATH}`;
 const E2E_TEST_TIMEOUT_MS = 60_000;
+const E2E_DEVICE_TIME_ZONE = "Asia/Almaty";
 const BUILD_AND_PREVIEW_TIMEOUT_MS = 180_000;
 const CI_RETRY_COUNT = 2;
 const CI_WORKER_COUNT = 1;
@@ -76,6 +77,7 @@ export default defineConfig<ContractViewOptions>({
   },
   use: {
     baseURL: E2E_APP_URL,
+    timezoneId: E2E_DEVICE_TIME_ZONE,
     trace: "on-first-retry",
     launchOptions: chromiumExecutablePath
       ? { executablePath: chromiumExecutablePath }

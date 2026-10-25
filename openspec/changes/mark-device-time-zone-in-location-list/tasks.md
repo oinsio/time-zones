@@ -4,10 +4,10 @@ All source paths are under `packages/client/src/`; commands run from `packages/c
 
 ## 1. Constants, locale key and test determinism (no TDD: constants, strings, test setup)
 
-- [ ] 1.1 Add `constants/deviceTimeZone.ts` with `DEVICE_TIME_ZONE_FALLBACK_ID = UTC_ZONE_ID` (design D2) and export it from `constants/index.ts` (FR3); verify `pnpm --filter @time-zones/client typecheck`
-- [ ] 1.2 Add `locations.deviceTimeZoneBadge` = `"Your time zone"` to `locales/en.json` and `"Ваш часовой пояс"` to `locales/ru.json` (FR5); verify `npx vitest run src/locales/locales.test.ts` (the key-parity test fails if one file lacks the key)
-- [ ] 1.3 Pin the unit-test device zone (design D6): add `test/deviceTimeZone.ts` exporting `UNIT_TEST_DEVICE_TIME_ZONE = "Pacific/Kiritimati"`; in `test/setup.ts` assign `systemClock.timeZoneId = () => UNIT_TEST_DEVICE_TIME_ZONE` (plain assignment, not `vi.spyOn`); in `test/features/locations/steps/locations_utc_offset_unit.steps.tsx` pass `UNIT_TEST_DEVICE_TIME_ZONE` as the second argument of every `fakeClock(...)`; verify `npx vitest run src/test/features/locations/steps/locations_utc_offset_unit.steps.tsx` stays green
-- [ ] 1.4 Pin the E2E device zone (design D6): in `playwright.bdd.config.ts` add `const E2E_DEVICE_TIME_ZONE = "Asia/Almaty"` and `timezoneId: E2E_DEVICE_TIME_ZONE` in the top-level `use`; verify `pnpm --filter @time-zones/client typecheck` (the node project type-checks the config)
+- [x] 1.1 Add `constants/deviceTimeZone.ts` with `DEVICE_TIME_ZONE_FALLBACK_ID = UTC_ZONE_ID` (design D2) and export it from `constants/index.ts` (FR3); verify `pnpm --filter @time-zones/client typecheck`
+- [x] 1.2 Add `locations.deviceTimeZoneBadge` = `"Your time zone"` to `locales/en.json` and `"Ваш часовой пояс"` to `locales/ru.json` (FR5); verify `npx vitest run src/locales/locales.test.ts` (the key-parity test fails if one file lacks the key)
+- [x] 1.3 Pin the unit-test device zone (design D6): add `test/deviceTimeZone.ts` exporting `UNIT_TEST_DEVICE_TIME_ZONE = "Pacific/Kiritimati"`; in `test/setup.ts` assign `systemClock.timeZoneId = () => UNIT_TEST_DEVICE_TIME_ZONE` (plain assignment, not `vi.spyOn`); in `test/features/locations/steps/locations_utc_offset_unit.steps.tsx` pass `UNIT_TEST_DEVICE_TIME_ZONE` as the second argument of every `fakeClock(...)`; verify `npx vitest run src/test/features/locations/steps/locations_utc_offset_unit.steps.tsx` stays green
+- [x] 1.4 Pin the E2E device zone (design D6): in `playwright.bdd.config.ts` add `const E2E_DEVICE_TIME_ZONE = "Asia/Almaty"` and `timezoneId: E2E_DEVICE_TIME_ZONE` in the top-level `use`; verify `pnpm --filter @time-zones/client typecheck` (the node project type-checks the config)
 
 ## 2. Model (TDD)
 

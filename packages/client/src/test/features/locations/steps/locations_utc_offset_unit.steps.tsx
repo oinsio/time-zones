@@ -15,6 +15,7 @@ import { LocationsProvider, useLocations } from "@/controller";
 import { type Clock, fakeClock } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
 import { presentLocationRows } from "@/presenter";
+import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationList } from "@/views/shared";
@@ -41,7 +42,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     buildLocation({ ...cityEntry(label) });
 
   const setInstant = (instant: string) => {
-    currentClock = fakeClock(instant);
+    currentClock = fakeClock(instant, UNIT_TEST_DEVICE_TIME_ZONE);
   };
 
   const openApp = () => {
@@ -88,7 +89,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.BeforeEachScenario(async () => {
     cleanup();
     storedLocations = [];
-    currentClock = fakeClock("2026-07-15T12:00:00Z");
+    currentClock = fakeClock("2026-07-15T12:00:00Z", UNIT_TEST_DEVICE_TIME_ZONE);
     switchableClock = {
       instant: () => currentClock.instant(),
       plainDateISO: () => currentClock.plainDateISO(),
