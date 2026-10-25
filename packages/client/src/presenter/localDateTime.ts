@@ -1,8 +1,8 @@
-import type { SupportedLanguage } from "@/i18n";
 import {
   LOCAL_DATE_FORMAT_OPTIONS,
   LOCAL_TIME_FORMAT_OPTIONS,
 } from "@/constants";
+import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
 
 /**
