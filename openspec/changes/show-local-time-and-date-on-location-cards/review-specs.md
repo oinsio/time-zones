@@ -102,7 +102,8 @@ None.
 - Impact: The time could be rendered in a normal or semibold weight with every test passing, so half of UX1 has no guard. Tasks 3–5 make every other UX/NFR clause testable, so this is the one clause left uncovered.
 - Fix: In task 5.1, add the assertion "the time element has `font-bold` and the city element of `LocationRow` has `font-semibold`" next to the existing size assertion.
 - Fix risk: none. The assertion uses the class names design D5 already fixes, in the same jsdom test that already checks classes.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 5.1 now asserts `font-bold` on the time in `LocalDateTime.test.tsx`. Task 5.2 asserts, in `LocationRow.test.tsx`, that the time element has `font-bold` and the city element `font-semibold` (UX1), because the city lives in `LocationRow` (`LocationRow.tsx:87`) and not in `LocalDateTime`.
 
 ## Verdict
 
