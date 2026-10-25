@@ -49,6 +49,12 @@ export {
   STORAGE_KEYS,
 } from "./storage";
 export {
+  HOUR_LABEL_INTERVAL_HOURS,
+  TRACK_HOUR_MOVE_MINUTES,
+  TRACK_STEP_MINUTES,
+  TRACK_TOUCH_SLOP_PX,
+} from "./timeSelection";
+export {
   MINUTES_PER_HOUR,
   NANOSECONDS_PER_MINUTE,
   UTC_OFFSET_MINUS_SIGN,
@@ -57,9 +63,3 @@ export {
   UTC_OFFSET_MINUTES_SEPARATOR,
   UTC_OFFSET_PLUS_SIGN,
 } from "./utcOffset";
-export {
-  HOUR_LABEL_INTERVAL_HOURS,
-  TRACK_HOUR_MOVE_MINUTES,
-  TRACK_STEP_MINUTES,
-  TRACK_TOUCH_SLOP_PX,
-} from "./timeSelection";

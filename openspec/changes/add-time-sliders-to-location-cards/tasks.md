@@ -24,7 +24,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 2. Model (TDD)
 
-- [ ] 2.1 TDD `SELECT_INSTANT { instant: string }` and `LocationErrorCode.INVALID_INSTANT` (design D1). Add them to `model/locations.ts` and implement them in new `model/reduceSelectInstant.ts`, delegated from `reduceLocations`. Tests in new `model/reduceSelectInstant.test.ts`, header `// Verifies FR3, FR5, FR8 of add-time-sliders-to-location-cards (D1).`:
+- [x] 2.1 TDD `SELECT_INSTANT { instant: string }` and `LocationErrorCode.INVALID_INSTANT` (design D1). Add them to `model/locations.ts` and implement them in new `model/reduceSelectInstant.ts`, delegated from `reduceLocations`. Tests in new `model/reduceSelectInstant.test.ts`, header `// Verifies FR3, FR5, FR8 of add-time-sliders-to-location-cards (D1).`:
   - from `LIVE`, `2026-03-08T13:00:00Z` → `PINNED` with that instant, `UNIQUE`, and `requestedWallTime` `18:00` for device `Asia/Almaty`;
   - the same instant again → the same state object (`toBe`);
   - from a `GAP` pin (device `America/New_York`, pinned `2026-03-08T07:30:00Z` by `SHIFT_DATE`), `2026-03-08T07:45:00Z` → `UNIQUE` (M4);
@@ -34,7 +34,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `REPLACE_LOCATIONS` keeps the pinned moment (FR8).
 
   Verify red, then green, with `npx vitest run src/model/reduceSelectInstant.test.ts`.
-- [ ] 2.2 TDD new `model/dayTrack.ts` (design D2): `ReferenceDay`, `getReferenceDay`, `getTrackFraction`, `getTrackValueMinutes`, `getLastTrackStepMinutes`, `getInstantAtTrackFraction`, `TrackMove`, `getInstantAfterTrackMove`. Tests in new `model/dayTrack.test.ts` with `it.each`, header `// Verifies FR1, FR2, FR3, FR4 of add-time-sliders-to-location-cards (D2).`:
+- [x] 2.2 TDD new `model/dayTrack.ts` (design D2): `ReferenceDay`, `getReferenceDay`, `getTrackFraction`, `getTrackValueMinutes`, `getLastTrackStepMinutes`, `getInstantAtTrackFraction`, `TrackMove`, `getInstantAfterTrackMove`. Tests in new `model/dayTrack.test.ts` with `it.each`, header `// Verifies FR1, FR2, FR3, FR4 of add-time-sliders-to-location-cards (D2).`:
   - `Asia/Almaty` at `2026-03-08T07:30:00Z` → day `2026-03-07T19:00:00Z`–`2026-03-08T19:00:00Z`, 1440 min, fraction `0.520833` (±1e-6), value 750, last step 1425;
   - fractions `0.75` / `0.52` / `1.0` / `0` → `13:00Z` / `07:30Z` / `18:45Z` / `2026-03-07T19:00:00Z` (M2);
   - the 8 moves of M3, including both moves from live `07:37:00Z`, and `NEXT_STEP` from `18:45Z` staying at `18:45Z`;
@@ -42,8 +42,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `UTC` at `12:01:00Z` → fraction `0.500694`.
 
   Export everything from `model/index.ts`. Verify red, then green, with `npx vitest run src/model/dayTrack.test.ts`.
-- [ ] 2.3 TDD new `model/dayPeriods.ts` (design D3): `DayPeriod`, `DayPeriodBoundary`, `DAY_PERIOD_SCHEDULE`, `getDayPeriod`. Tests in `model/dayPeriods.test.ts` with `it.each`, header `// Verifies FR6 of add-time-sliders-to-location-cards (D3).`: `06:59` night, `07:00` morning, `08:59` morning, `09:00` work, `17:59` work, `18:00` evening, `21:59` evening, `22:00` night, `00:00` night. A custom one-boundary schedule passed as the parameter changes the result, which proves the schedule is not read internally. Export from `model/index.ts`. Verify red, then green, with `npx vitest run src/model/dayPeriods.test.ts`.
-- [ ] 2.4 TDD new `model/dayPeriodStops.ts` (design D4): `collectBlendWindows`, `collectOffsetEdges`, `assembleDayPeriodStops`, `getDayPeriodStops`. First write the `collectOffsetEdges` test that calls `ZonedDateTime.prototype.getTimeZoneTransition("next")`, and run `pnpm --filter @time-zones/client typecheck`. If the polyfill does not declare it, implement the sampling fallback of design "Risks". Tests in `model/dayPeriodStops.test.ts`, header `// Verifies FR6, NFR-P2 of add-time-sliders-to-location-cards (D4).`:
+- [x] 2.3 TDD new `model/dayPeriods.ts` (design D3): `DayPeriod`, `DayPeriodBoundary`, `DAY_PERIOD_SCHEDULE`, `getDayPeriod`. Tests in `model/dayPeriods.test.ts` with `it.each`, header `// Verifies FR6 of add-time-sliders-to-location-cards (D3).`: `06:59` night, `07:00` morning, `08:59` morning, `09:00` work, `17:59` work, `18:00` evening, `21:59` evening, `22:00` night, `00:00` night. A custom one-boundary schedule passed as the parameter changes the result, which proves the schedule is not read internally. Export from `model/index.ts`. Verify red, then green, with `npx vitest run src/model/dayPeriods.test.ts`.
+- [x] 2.4 TDD new `model/dayPeriodStops.ts` (design D4): `collectBlendWindows`, `collectOffsetEdges`, `assembleDayPeriodStops`, `getDayPeriodStops`. First write the `collectOffsetEdges` test that calls `ZonedDateTime.prototype.getTimeZoneTransition("next")`, and run `pnpm --filter @time-zones/client typecheck`. If the polyfill does not declare it, implement the sampling fallback of design "Risks". Tests in `model/dayPeriodStops.test.ts`, header `// Verifies FR6, NFR-P2 of add-time-sliders-to-location-cards (D4).`:
   - the Almaty and New York stops of M5 for the M2 day (±1e-6);
   - at every quarter-hour position of that day outside the blend windows, the period of the last stop at or before the position (or of the first stop before it) equals `getDayPeriod` of the local time;
   - `Pacific/Apia` on the `UTC` day `2011-12-30` gives exactly the 8 stops of the spec scenario "Boundaries of a skipped local date are left out";
