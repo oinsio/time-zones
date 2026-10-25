@@ -187,7 +187,7 @@ The list in each of its states (with locations, empty, unreadable stored list, s
 - **THEN** they match the approved screenshots
 
 ### Requirement: UTC offset on location rows
-Every location row in the Cards view SHALL show the location's UTC offset on its secondary line, after the country name. The offset MUST be derived from the location's canonical IANA identifier for the current instant, so daylight saving time is respected; a raw offset MUST NOT be stored or used to identify a location. The offset MUST be computed when the list is presented (the app opens, a location is added or removed, the list changes in another tab, the interface language changes), at the start of every minute while the page is visible, and when the page becomes visible again; it MUST NOT be refreshed while the page is hidden. Inputs: the location's IANA identifier, the current instant (ISO 8601 with `Z`), the interface language. Output: the offset text. Errors: when the offset cannot be computed for the identifier, the row MUST be shown without the offset and the rest of the list MUST be unaffected. The offset needs no network and behaves the same offline. <!-- implements FR1, FR2, FR4, FR6, UX1 of show-utc-offset-on-location-rows; FR4 of show-local-time-and-date-on-location-cards -->
+Every location row in the Cards view SHALL show the location's UTC offset on its secondary line, after the country name. The offset MUST be derived from the location's canonical IANA identifier for the reference moment — the current instant while the moment is live, the pinned instant while it is pinned (see the `date-selection` capability) — so daylight saving time is respected for the shown date; a raw offset MUST NOT be stored or used to identify a location. The offset MUST be computed when the list is presented (the app opens, a location is added or removed, the list changes in another tab, the interface language changes, the reference moment changes), at the start of every minute while the page is visible, and when the page becomes visible again; it MUST NOT be refreshed while the page is hidden. Inputs: the location's IANA identifier, the reference moment (ISO 8601 with `Z`), the interface language. Output: the offset text. Errors: when the offset cannot be computed for the identifier, the row MUST be shown without the offset and the rest of the list MUST be unaffected. The offset needs no network and behaves the same offline. <!-- implements FR1, FR2, FR4, FR6, UX1 of show-utc-offset-on-location-rows; FR4 of show-local-time-and-date-on-location-cards; FR5 of select-date-with-calendar-and-now -->
 
 #### Scenario: Whole-hour zone
 - **GIVEN** the current instant is `2026-07-15T12:00:00Z`
@@ -584,7 +584,7 @@ The accessible name of a row that shows the badge SHALL be its city followed by 
 - **AND** the screen matches the re-approved "list" screenshot
 
 ### Requirement: Local time and date on location rows
-Every location row in the Cards view SHALL show the location's local time and local date at the current instant. The time MUST be hours and minutes in 24-hour form with two-digit hours (`03:30`), without seconds. The date MUST be the short weekday, the day and the short month as written by the interface language's own conventions (English `Sun, Mar 8`, Russian `вс, 8 мар.`) and MUST carry the machine-readable ISO date (`2026-03-08`). Both MUST be derived from the location's canonical IANA identifier at the current instant, so daylight saving time and :30 / :45 offsets are respected; a raw UTC offset MUST NOT be stored or used to compute them. Both MUST be computed whenever the list is presented: the app opens, a location is added, removed or moved, the list changes in another tab, the list is reset, the interface language changes. Inputs: the location's IANA identifier, the current instant (ISO 8601 with `Z`), the interface language. Output: the time text, the date text and its ISO date. Errors: when the identifier is unknown to the browser, the row MUST be shown with its city and remove action but without time and date, and the rest of the list MUST be unaffected. Time and date need no network and behave the same offline; nothing about them is stored. <!-- implements FR1, FR2, FR5, FR6 of show-local-time-and-date-on-location-cards -->
+Every location row in the Cards view SHALL show the location's local time and local date at the reference moment: the current instant while the moment is live, the pinned instant while it is pinned (see the `date-selection` capability). The time MUST be hours and minutes in 24-hour form with two-digit hours (`03:30`), without seconds. The date MUST be the short weekday, the day and the short month as written by the interface language's own conventions (English `Sun, Mar 8`, Russian `вс, 8 мар.`) and MUST carry the machine-readable ISO date (`2026-03-08`). Both MUST be derived from the location's canonical IANA identifier at the reference moment, so daylight saving time and :30 / :45 offsets are respected; a raw UTC offset MUST NOT be stored or used to compute them. Both MUST be computed whenever the list is presented: the app opens, a location is added, removed or moved, the list changes in another tab, the list is reset, the interface language changes, the reference moment changes. Inputs: the location's IANA identifier, the reference moment (ISO 8601 with `Z`), the interface language. Output: the time text, the date text and its ISO date. Errors: when the identifier is unknown to the browser, the row MUST be shown with its city and remove action but without time and date, and the rest of the list MUST be unaffected. Time and date need no network and behave the same offline; nothing about them is stored. <!-- implements FR1, FR2, FR5, FR6 of show-local-time-and-date-on-location-cards; FR5 of select-date-with-calendar-and-now -->
 
 #### Scenario: Time and date of each location
 - **GIVEN** the interface language is English
@@ -623,8 +623,17 @@ Every location row in the Cards view SHALL show the location's local time and lo
 - **THEN** that location's row shows its city and remove action without time and date
 - **AND** the Moscow row shows its time and date
 
+#### Scenario: Rows at a pinned moment
+- **GIVEN** the interface language is English
+- **AND** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Almaty and New York (`America/New_York`)
+- **WHEN** the moment is pinned to `2026-03-07T07:30:00Z`
+- **THEN** the Almaty row shows `12:30` and `Sat, Mar 7` with the ISO date `2026-03-07`
+- **AND** the New York row shows `02:30` and `Sat, Mar 7`
+
 ### Requirement: Local time and date follow the clock
-While the page is visible, the time and the date of every row SHALL change at the start of every minute of the clock: the first update MUST come at the next minute boundary after the app opens (not 60 seconds after opening), and each later one at the following minute boundary. While the page is hidden, no update MUST happen. When the page becomes visible again, every row MUST show the time and date of that instant at once, and the updates MUST resume at the next minute boundary. Every update and every return to the visible page MUST also compute the UTC offset again and read the device time zone again (see "UTC offset on location rows" and "Device time zone badge on location rows"). Updates MUST NOT write anything to storage. <!-- implements FR3, FR4 of show-local-time-and-date-on-location-cards -->
+While the reference moment is live and the page is visible, the time and the date of every row SHALL change at the start of every minute of the clock: the first update MUST come at the next minute boundary after the app opens (not 60 seconds after opening), and each later one at the following minute boundary. While the page is hidden, no update MUST happen. When the page becomes visible again, every row MUST show the time and date of that instant at once, and the updates MUST resume at the next minute boundary. Every update and every return to the visible page MUST also compute the UTC offset again and read the device time zone again (see "UTC offset on location rows" and "Device time zone badge on location rows"). Updates MUST NOT write anything to storage. While the reference moment is pinned, minute updates and returns to the visible page MUST NOT change the time, the date or the UTC offset of any row — they stay those of the pinned instant — but MUST still read the device time zone again; after a return to now, the rows show the current instant at once and the minute updates change them again. <!-- implements FR3, FR4 of show-local-time-and-date-on-location-cards; FR5, FR6 of select-date-with-calendar-and-now -->
 
 #### Scenario: The time changes at the minute boundary
 - **GIVEN** the list contains UTC (`UTC`)
@@ -652,6 +661,24 @@ While the page is visible, the time and the date of every row SHALL change at th
 - **GIVEN** the list contains UTC and the app is open
 - **WHEN** three minute updates happen
 - **THEN** the stored list was not written
+
+#### Scenario: A pinned moment ignores minute updates
+- **GIVEN** the device time zone is `UTC`
+- **AND** the list contains UTC (`UTC`)
+- **AND** the app was opened at `2026-07-15T12:00:42.500Z` and the user moved to the next day, so the UTC row shows `12:00` and `Thu, Jul 16`
+- **WHEN** the next minute starts at `2026-07-15T12:01:00Z`
+- **THEN** the UTC row still shows `12:00` and `Thu, Jul 16`
+- **WHEN** the page becomes hidden and visible again at `2026-07-15T12:10:20Z`
+- **THEN** the UTC row still shows `12:00` and `Thu, Jul 16`
+
+#### Scenario: Rows follow the clock again after now
+- **GIVEN** the device time zone is `UTC`
+- **AND** the list contains UTC (`UTC`)
+- **AND** the app was opened at `2026-07-15T12:00:42.500Z` and the user moved to the next day
+- **WHEN** the current instant is `2026-07-15T12:00:50Z` and the user returns to now
+- **THEN** the UTC row shows `12:00` and `Wed, Jul 15`
+- **WHEN** the next minute starts at `2026-07-15T12:01:00Z`
+- **THEN** the UTC row shows `12:01`
 
 ### Requirement: Local time and date layout
 The time SHALL be the most prominent text of a card — larger and bolder than the city — and MUST use tabular figures; the date MUST be secondary text directly under the time. On screens narrower than 768 px the time MUST be on the city line at the right end of the card's content, before the remove action, with the date right-aligned under it. On screens 768 px and wider the time and the date MUST form a column right after the city and country column, within the left half of the card, with the date left-aligned under the time. A list with times and dates MUST NOT scroll horizontally at 320 px and 2560 px, and the approved "list" screenshots at 375 px and 1024 px in both themes, taken at the pinned instant `2026-03-08T07:30:00Z`, MUST show `12:30` on Almaty and `10:30` on Moscow with their dates. <!-- implements NFR-R1, NFR-R2, NFR-R3, UX1, UX2 of show-local-time-and-date-on-location-cards -->
