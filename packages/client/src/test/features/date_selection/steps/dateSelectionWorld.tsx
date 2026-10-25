@@ -14,7 +14,12 @@ import {
   createInMemoryLocationRepository,
 } from "@/adapters";
 import { MainPage } from "@/app";
-import { LocationsProvider, useReferenceMoment } from "@/controller";
+import {
+  LocationsProvider,
+  TrackMove,
+  useReferenceMoment,
+  useTimeSelection,
+} from "@/controller";
 import { Temporal } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
@@ -32,6 +37,7 @@ const DEFAULT_INSTANT = "2026-03-08T07:30:00Z";
 const DEFAULT_DEVICE_ZONE = "UTC";
 
 type ReferenceHandle = ReturnType<typeof useReferenceMoment>;
+type TimeSelectionHandle = ReturnType<typeof useTimeSelection>;
 
 /**
  * Per-scenario state of the date selection features: an in-memory list, a
@@ -43,11 +49,13 @@ export const createDateSelectionWorld = () => {
   let backend = createInMemoryLocationBackend();
   let storedLocations: ReturnType<typeof buildLocation>[] = [];
   let latestReference: ReferenceHandle;
+  let latestTimeSelection: TimeSelectionHandle;
   let tickScheduler = createManualTickScheduler();
   let writeScheduler = createManualWriteScheduler();
 
   const Probe = () => {
     latestReference = useReferenceMoment();
+    latestTimeSelection = useTimeSelection();
     return null;
   };
 
@@ -136,6 +144,8 @@ export const createDateSelectionWorld = () => {
         otherTab.save([...storedLocations, buildLocation(cityEntry(city))]);
       });
     },
+    moveTrackToNextStep: () =>
+      act(() => latestTimeSelection.moveTrack(TrackMove.NEXT_STEP)),
     showNextDay: () => clickBarButton("date.nextDay"),
     showPreviousDay: () => clickBarButton("date.previousDay"),
     returnToNow: () => clickBarButton("date.now"),

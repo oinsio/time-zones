@@ -2,8 +2,12 @@ import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { ONE_DAY } from "@/constants";
+import { TrackMove } from "@/controller";
 import {
   createStore,
+  getEffectiveInstant,
+  getInstantAfterTrackMove,
+  getReferenceDay,
   INITIAL_LOCATIONS_STATE,
   LocationCommandType,
   LocationErrorCode,
@@ -65,6 +69,61 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the user moves to the next day again", whenNextDay);
     Then("the bar shows no note", thenNoNote);
   });
+
+  // @add-time-sliders-to-location-cards @FR5 @M4
+  f.Scenario(
+    "A time selection ends the gap note",
+    ({ Given, And, When, Then }) => {
+      Given("the device time zone is {string}", givenZone);
+      And("the current instant is {string}", givenInstant);
+      And("the app is open", givenAppOpen);
+      And(
+        "the user moved to the next day, so the bar shows the gap note",
+        async () => {
+          await whenNextDay();
+          expect(noteOfBar()).toBeDefined();
+        },
+      );
+      When("the user moves a day track to the next 15-minute step", () =>
+        world.moveTrackToNextStep(),
+      );
+      Then(
+        "the moment is pinned to {string} with the status {string}",
+        (_ctx, pinned: string, status: string) => {
+          world.expectPinnedTo(pinned);
+          const replayStore = createStore(
+            reduceLocations,
+            INITIAL_LOCATIONS_STATE,
+          );
+          const now = world.clock().instant();
+          replayStore.dispatch({
+            type: LocationCommandType.SET_DEVICE_TIME_ZONE,
+            timeZoneId: world.clock().timeZoneId(),
+          });
+          replayStore.dispatch({
+            type: LocationCommandType.SHIFT_DATE,
+            days: ONE_DAY,
+            now: now.toString(),
+          });
+          const gapState = replayStore.getSnapshot();
+          replayStore.dispatch({
+            type: LocationCommandType.SELECT_INSTANT,
+            instant: getInstantAfterTrackMove(
+              getReferenceDay(gapState, now),
+              getEffectiveInstant(gapState, now),
+              TrackMove.NEXT_STEP,
+            ).toString(),
+          });
+          const { reference } = replayStore.getSnapshot();
+          expect(reference.mode).toBe(ReferenceMode.PINNED);
+          if (reference.mode !== ReferenceMode.PINNED) return;
+          expect(reference.instant.toString()).toBe(pinned);
+          expect(reference.wallClockStatus).toBe(status);
+        },
+      );
+      And("the bar shows no note", thenNoNote);
+    },
+  );
 
   // @select-date-with-calendar-and-now @FR4 @M3
   f.ScenarioOutline(
