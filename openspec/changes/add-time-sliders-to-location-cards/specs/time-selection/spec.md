@@ -54,7 +54,7 @@ The handle of every track SHALL stand at the position of the effective instant w
 - **THEN** the UTC handle still stands at `0.75`
 
 ### Requirement: Select a time on a track
-Pressing a track with the pointer, or dragging its handle, SHALL pin the reference moment to the instant at the pointer's position. That instant MUST be rounded to the nearest 15-minute step counted from the start of the reference day. It MUST be clamped between the start of the day and the last step before the day's end, so a selection never leaves the reference day. Every card's time, date, UTC offset and handle MUST show the new moment in the same render as the selection, with no loading state. Selecting the instant that is already pinned MUST change nothing. A selection is reported with the pinned moment as `UNIQUE`.
+Pressing a track with the pointer, or dragging its handle, SHALL pin the reference moment to the instant at the pointer's position. That instant MUST be rounded to the nearest 15-minute step counted from the start of the reference day. It MUST be clamped between the start of the day and the last step before the day's end, so a selection never leaves the reference day. Every card's time, date, UTC offset and handle MUST show the new moment in the same render as the selection, with no loading state. Selecting the instant that is already pinned MUST change nothing. A selection is reported with the pinned moment as `UNIQUE`. A mouse or pen MUST select on press. A touch MUST select only once the finger has moved horizontally along the track, or when it lifts after a tap that the browser did not cancel. A touch gesture that moves mostly vertically, or that the browser cancels to scroll, MUST select nothing.
 
 Inputs: the pointer's position as a fraction of the track's width, the reference day, and the reference zone. Output: the pinned instant (ISO 8601 with `Z`). Errors: a selection whose instant is malformed (not ISO 8601 with `Z`) MUST be rejected as an invalid instant and MUST change nothing.
 
@@ -290,9 +290,9 @@ The page with tracks SHALL have no axe-core violations in the light and dark the
 ### Requirement: Day track layout
 Below 768 px the track SHALL sit on its own line under the city and time line, spanning the card's content width, 10 px high and without hour labels. From 768 px it MUST sit on the city line, right of the time column, filling the remaining width, 12 px high, with the hour labels under it. The handle's centre MUST be exactly at the effective instant's position, with the start of the day at the track's left edge and its end at the right edge. The visible handle is a circle, 28 px below 768 px and 32 px from 768 px, filled with the surface colour and outlined with the foreground colour. The slider's hit area MUST be at least 44 px high and its handle at least 44 × 44 px. The hour labels are muted text with tabular figures.
 
-A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card in the list. A vertical swipe that starts on a track still scrolls the page. The page with tracks MUST NOT scroll horizontally at 320 px and 2560 px. The approved screenshots at 375 px and 1024 px in both themes MUST show the tracks: the "list", "pinned" and "calendar" states and a new "time-selected" state.
+A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card in the list. A vertical swipe that starts on a track still scrolls the page and MUST NOT select a time; a finger tap on a track selects the time at that position. The page with tracks MUST NOT scroll horizontally at 320 px and 2560 px. The approved screenshots at 375 px and 1024 px in both themes MUST show the tracks: the "list", "pinned" and "calendar" states and a new "time-selected" state.
 
-<!-- implements NFR-R1, NFR-R2, NFR-R3, UX1, UX2, UX3 of add-time-sliders-to-location-cards -->
+<!-- implements FR3, NFR-R1, NFR-R2, NFR-R3, UX1, UX2, UX3 of add-time-sliders-to-location-cards -->
 
 #### Scenario: Track under the text on a narrow screen
 - **GIVEN** the list contains Almaty and Moscow
@@ -317,6 +317,20 @@ A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card
 - **WHEN** the user drags the Moscow handle horizontally to the right end of its track
 - **THEN** the page has not scrolled and the list order is still Almaty, Moscow, New York
 - **AND** every card shows the moment of the last step of the reference day
+
+#### Scenario: A vertical swipe on a track scrolls without selecting a time
+- **GIVEN** the moment is live
+- **AND** the list is long enough to scroll on a 375 px wide screen
+- **WHEN** the user swipes up with a finger starting on the Almaty track
+- **THEN** the page has scrolled
+- **AND** the moment is still live and the Now button is not shown
+
+#### Scenario: A finger tap on a track selects a time
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the current time is `2026-03-08T07:30:00Z`
+- **AND** the list is shown 375 px wide
+- **WHEN** the user taps three quarters of the Almaty track with a finger
+- **THEN** the Almaty card shows `18:00` and the Now button is shown
 
 #### Scenario: Touch targets
 - **WHEN** the list with tracks is shown at 320 px or 1024 px

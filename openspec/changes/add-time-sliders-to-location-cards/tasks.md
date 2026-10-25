@@ -15,7 +15,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 1. Constants and locale keys (no TDD: constants and translations)
 
 - [ ] 1.1 Add the constants of design D2 and D3:
-  - new `constants/timeSelection.ts`: `TRACK_STEP_MINUTES = 15`, `TRACK_HOUR_MOVE_MINUTES = 60`, `HOUR_LABEL_INTERVAL_HOURS = 6`;
+  - new `constants/timeSelection.ts`: `TRACK_STEP_MINUTES = 15`, `TRACK_HOUR_MOVE_MINUTES = 60`, `HOUR_LABEL_INTERVAL_HOURS = 6`, `TRACK_TOUCH_SLOP_PX = 10` (design D7);
   - new `constants/dayPeriods.ts`: the four `*_START_WALL_TIME` strings, `NIGHT_BOUNDARY_BLEND_MINUTES = 60` and `WORK_BOUNDARY_BLEND_MINUTES = 15`;
   - `HOUR_LABEL_FORMAT_OPTIONS = { hour: "2-digit", hourCycle: "h23" }` in `constants/localDateTime.ts`.
 
@@ -99,6 +99,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
   Verify red, then green, with `npx vitest run src/views/shared/dayTrackGradient.test.ts`.
 - [ ] 5.2 TDD new `views/shared/dayTrackKeys.ts` in `views/shared/dayTrackKeys.test.ts` with `it.each` (header `// Verifies FR4 of add-time-sliders-to-location-cards (D7).`). The table is: `ArrowRight` / `ArrowUp` → `NEXT_STEP`, `ArrowLeft` / `ArrowDown` → `PREVIOUS_STEP`, `PageUp` → `HOUR_FORWARD`, `PageDown` → `HOUR_BACK`, `Home` → `DAY_START`, `End` → `DAY_END`, and `Tab` / `Enter` → `undefined`. The test covers the mapping only; 7.1 proves key handling in the browser. Verify red, then green, with `npx vitest run src/views/shared/dayTrackKeys.test.ts`.
+
+  In the same step, TDD new `views/shared/dayTrackTouch.ts` (`TouchGestureDecision`, `getTouchGestureDecision(start, current)`, design D7) in `views/shared/dayTrackTouch.test.ts` with `it.each`, header `// Verifies FR3, NFR-R2 of add-time-sliders-to-location-cards (D7).`: no movement → `WAIT`; 11 px right, 2 px down → `SELECT`; 11 px left → `SELECT`; 2 px right, 11 px down → `ABANDON`; 10 px right (equal to the slop) → `WAIT`; 12 px right, 12 px up → `ABANDON`. Then wire it into `DayTrack.tsx` for `pointerType === "touch"`; 7.1 proves the swipe and the tap in the browser. Verify red, then green, with `npx vitest run src/views/shared/dayTrackTouch.test.ts`.
 - [ ] 5.3 TDD new `views/shared/DayTrack.tsx` (design D7) in `views/shared/DayTrack.test.tsx`, header `// Verifies FR1, FR2, FR7 of add-time-sliders-to-location-cards (D7).`. It is rendered with a presented track. Assert DOM content and attributes only:
   - the coloured bar's `style.backgroundImage` equals the `dayTrackGradient` output;
   - the handle's `style.left` is `52.0833%`;
@@ -110,7 +112,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a row without `dayTrack` renders none.
 
   Keep the existing LocationRow, LocationList and CardsView tests green by adding the new props to their fixtures. Verify with `npx vitest run src/views`, then `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint` and `pnpm run build`.
-- [ ] 5.5 Mutation run (M8). Verify that `npx stryker run --mutate 'src/views/shared/DayTrack.tsx,src/views/shared/dayTrackGradient.ts,src/views/shared/dayTrackKeys.ts,src/views/shared/LocationRow.tsx,src/views/cards/CardsView.tsx'` scores ≥ 95% (minimum 90%).
+- [ ] 5.5 Mutation run (M8). Verify that `npx stryker run --mutate 'src/views/shared/DayTrack.tsx,src/views/shared/dayTrackGradient.ts,src/views/shared/dayTrackKeys.ts,src/views/shared/LocationRow.tsx,src/views/cards/CardsView.tsx'` scores ≥ 95% (minimum 90%). When that run has finished, run `npx stryker run --mutate 'src/views/shared/dayTrackTouch.ts'` alone and verify the same score.
 
 ## 6. Unit BDD (vitest-cucumber)
 
@@ -145,9 +147,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
     - "Handle centre matches the instant" at 375 and 1024 px, within 1 px;
     - "Touch targets": each slider's `boundingBox().height` ≥ 44 and each handle hit box ≥ 44 × 44 at 320 and 1024 px;
     - "Tracks fit narrow and wide screens": `scrollWidth` ≤ `clientWidth` at 320 and 2560 px;
+  - touch (`@FR3 @NFR-R2`), driven with `startTouch` / `dragWithFinger` / `dispatchTouch` of `locations/steps/locationsReorderE2eHelpers.ts` (CDP `Input.dispatchTouchEvent`, since `page.touchscreen` only taps), reusing "the screen is {int} by {int} px for the locations" (`locations_reorder_drag_e2e.steps.ts`), "the page is taller than the screen" and "the page has scrolled down" (`locations_reorder_checks_e2e.steps.ts`):
+    - "A vertical swipe on a track scrolls without selecting a time": at 375 × 300 px with five stored cities, a finger swipe up from the centre of the Almaty bar scrolls the page, and the Now button is absent and the Almaty time still equals the live time;
+    - "A finger tap on a track selects a time": touch start and end at 75% of the Almaty bar → Almaty `18:00` and the Now button shown;
     - the visual handle is filled with `var(--color-surface)` and outlined with `var(--color-foreground)`, compared through probes (`@UX1`).
 
-  Every step function carries `// Verifies <ids> of add-time-sliders-to-location-cards`. Verify with `pnpm --filter @time-zones/client test:bdd:gen`, then `npx playwright test -c playwright.bdd.config.ts --grep @add-time-sliders-to-location-cards --project chromium`.
+  Every step function carries `// Verifies <ids> of add-time-sliders-to-location-cards`. Verify with `pnpm --filter @time-zones/client test:bdd:gen`, then `npx playwright test -c playwright.bdd.config.ts --grep @add-time-sliders-to-location-cards --project chromium`, and after it has finished, the same command with `--project mobile-chrome`.
 - [ ] 7.2 Write `test/features/time_selection/time_selection_view_contract_e2e.feature` with the `@view-contract` scenario "Select a time" (`@add-time-sliders-to-location-cards @view-contract @FR3 @FR5`). It starts with "the view under contract is shown". Put its steps in `steps/time_selection_view_contract_e2e.steps.ts`: "the user moves the time of {string} one hour forward" focuses that city's slider and presses Page Up; the time assertions read the card's time text. Reuse "the user returns to now with the bar" (`date_selection_view_contract_e2e.steps.ts`). Verify with `npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep @add-time-sliders-to-location-cards`.
 - [ ] 7.3 Add the `time-selected` state to `test/features/locations/steps/locationsStates.ts`: `LocationsState.TIME_SELECTED = "time-selected"`, which seeds the list, then clicks the Almaty bar at 75% of its width and waits for Almaty `18:00`. Add its 4 rows (375 / 1024 px × light / dark) to the screenshot outline in `test/features/locations/locations_ui_e2e.feature`, and add the tags `@add-time-sliders-to-location-cards @NFR-R3 @M9` above the outline. Verify with `npx playwright test -c playwright.bdd.config.ts --grep "time-selected state"`, run with `--update-snapshots` once to create its baselines.
 - [ ] 7.4 Re-approve every existing screenshot baseline that shows rows ("list", "pinned", "calendar") and the new "time-selected" ones under `test/features/__screenshots__/{chromium,mobile-chrome}/`, with `--update-snapshots` (NFR-R3). Then verify that `npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without it.
