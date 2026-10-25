@@ -18,14 +18,14 @@ Feature: Wall-clock resolution
     And the current instant is <from>
     And the app is open
     When the user moves to the next day
-    Then the moment is pinned to <pinned>
+    Then the moment is pinned to <pinned> with the status <status>
     And the bar note is <note>
 
     Examples:
-      | from                 | pinned               | note                                                                        |
-      | 2026-06-01T14:00:00Z | 2026-06-02T14:00:00Z | no note                                                                     |
-      | 2026-03-07T07:30:00Z | 2026-03-08T07:30:00Z | 02:30 does not exist on this day because of a clock change; showing 03:30. |
-      | 2026-10-31T05:30:00Z | 2026-11-01T05:30:00Z | no note                                                                     |
+      | from                 | pinned               | status    | note                                                                        |
+      | 2026-06-01T14:00:00Z | 2026-06-02T14:00:00Z | UNIQUE    | no note                                                                     |
+      | 2026-03-07T07:30:00Z | 2026-03-08T07:30:00Z | GAP       | 02:30 does not exist on this day because of a clock change; showing 03:30. |
+      | 2026-10-31T05:30:00Z | 2026-11-01T05:30:00Z | AMBIGUOUS | no note                                                                     |
 
   @select-date-with-calendar-and-now @FR10
   Scenario: A malformed date changes nothing

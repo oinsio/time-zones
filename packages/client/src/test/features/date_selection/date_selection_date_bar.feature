@@ -33,7 +33,7 @@ Feature: Date bar
     When the next minute starts at "2026-03-08T19:00:00Z"
     Then the bar shows "Mon, March 9"
 
-  @select-date-with-calendar-and-now @FR8 @M4
+  @select-date-with-calendar-and-now @FR8
   Scenario Outline: Bar in each state
     When the main page is in the <state> state
     Then the date bar is shown with the previous-day, date and next-day buttons

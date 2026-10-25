@@ -1,6 +1,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
+import { ONE_DAY } from "@/constants";
 import {
   createStore,
   INITIAL_LOCATIONS_STATE,
@@ -32,6 +33,22 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     world.setInstant(timestamp);
   const givenAppOpen = () => world.openApp();
   const whenNextDay = () => world.showNextDay();
+  const statusOfNextDayFrom = (timestamp: string) => {
+    const statusStore = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+    statusStore.dispatch({
+      type: LocationCommandType.SET_DEVICE_TIME_ZONE,
+      timeZoneId: world.clock().timeZoneId(),
+    });
+    statusStore.dispatch({
+      type: LocationCommandType.SHIFT_DATE,
+      days: ONE_DAY,
+      now: timestamp,
+    });
+    const { reference } = statusStore.getSnapshot();
+    return reference.mode === ReferenceMode.PINNED
+      ? reference.wallClockStatus
+      : undefined;
+  };
   const noteOfBar = () =>
     world.barElement().querySelector(NOTE_TEXT_SELECTOR)?.textContent;
   const thenNoteIs = (_ctx: unknown, note: string) =>
@@ -59,9 +76,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       );
       And("the app is open", givenAppOpen);
       When("the user moves to the next day", whenNextDay);
-      Then("the moment is pinned to <pinned>", () =>
-        world.expectPinnedTo(variables.pinned),
-      );
+      Then("the moment is pinned to <pinned> with the status <status>", () => {
+        world.expectPinnedTo(variables.pinned);
+        expect(statusOfNextDayFrom(variables.from)).toBe(variables.status);
+      });
       And("the bar note is <note>", () =>
         variables.note === NO_NOTE
           ? thenNoNote()
