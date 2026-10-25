@@ -11,6 +11,7 @@ import {
 } from "@/model";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { buildReferenceDay } from "@/test/referenceDay";
 import { ENGLISH_LANGUAGE } from "./dateSelectionWorld";
 
 export const BUDGET_ROW_COUNT = 50;
@@ -71,6 +72,7 @@ export const createRowBudgetWorld = () => {
       instant,
       translate: i18n.getFixedT(ENGLISH_LANGUAGE),
       deviceTimeZoneId: state.deviceTimeZoneId,
+      referenceDay: buildReferenceDay(instant, state.deviceTimeZoneId),
     });
   return {
     elapsedMs: () => elapsedMs,

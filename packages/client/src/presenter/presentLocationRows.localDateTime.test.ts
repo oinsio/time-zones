@@ -6,6 +6,7 @@ import { fakeClock } from "@/lib/temporal";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 
+import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
 
 const july = fakeClock("2026-07-15T12:00:00Z").instant();
@@ -23,6 +24,10 @@ const present = (
     language,
     instant: options.instant ?? july,
     deviceTimeZoneId: options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,
+    referenceDay: buildReferenceDay(
+      options.instant ?? july,
+      options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,
+    ),
     translate: options.translate ?? i18n.getFixedT(language),
   });
 

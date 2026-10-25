@@ -5,6 +5,7 @@ import i18n from "i18next";
 import { expect } from "vitest";
 import { presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { buildReferenceDay } from "@/test/referenceDay";
 import {
   badgeText,
   createDeviceTimeZoneWorld,
@@ -167,6 +168,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         instant: world.clock.instant(),
         translate: i18n.getFixedT(ENGLISH_LANGUAGE),
         deviceTimeZoneId: world.getDeviceZone(),
+        referenceDay: buildReferenceDay(
+          world.clock.instant(),
+          world.getDeviceZone(),
+        ),
       });
       elapsedMs = performance.now() - startedAt;
     });

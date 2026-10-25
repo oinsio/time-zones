@@ -8,6 +8,7 @@ import { fakeClock } from "@/lib/temporal";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 
+import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
 
 const july = fakeClock("2026-07-15T12:00:00Z").instant();
@@ -26,6 +27,10 @@ const present = (
     language,
     instant: options.instant ?? july,
     deviceTimeZoneId: options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,
+    referenceDay: buildReferenceDay(
+      options.instant ?? july,
+      options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,
+    ),
     translate: options.translate ?? i18n.getFixedT(language),
   });
 
@@ -152,5 +157,37 @@ describe("present the device time zone badge", () => {
       deviceTimeZoneId: "Asia/Almaty",
     });
     expect(rows[0]?.deviceTimeZoneLabel).toBe("Ваш часовой пояс");
+  });
+});
+
+// Verifies FR1 of add-time-sliders-to-location-cards (D5).
+describe("present the day track of a row", () => {
+  const march = fakeClock("2026-03-08T07:30:00Z").instant();
+
+  it("should give a known zone a track at the shared position", () => {
+    const row = present([buildLocation()], "en", {
+      instant: march,
+      deviceTimeZoneId: "Asia/Almaty",
+    })[0];
+
+    expect(row?.dayTrack?.fraction).toBeCloseTo(0.520833, 6);
+  });
+
+  it("should give an unknown zone no track while a known one has it", () => {
+    const rows = present(
+      [
+        buildLocation({
+          label: "Olympus",
+          timeZoneId: "Mars/Olympus_Mons",
+          countryCode: "",
+        }),
+        buildLocation(),
+      ],
+      "en",
+      { instant: march, deviceTimeZoneId: "Asia/Almaty" },
+    );
+
+    expect(rows[0]?.dayTrack).toBeUndefined();
+    expect(rows[1]?.dayTrack).toBeDefined();
   });
 });

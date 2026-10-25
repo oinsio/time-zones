@@ -1,7 +1,7 @@
 import { useContext, useMemo, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "@/i18n";
-import { getEffectiveInstant } from "@/model";
+import { getEffectiveInstant, getReferenceDay } from "@/model";
 import { presentLocationRows } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
 
@@ -40,6 +40,7 @@ export function useLocations() {
         instant: getEffectiveInstant(state, clock.instant()),
         translate: t,
         deviceTimeZoneId,
+        referenceDay: getReferenceDay(state, clock.instant()),
       }),
     [state, locations, deviceTimeZoneId, language, t, clock, minuteTick],
   );

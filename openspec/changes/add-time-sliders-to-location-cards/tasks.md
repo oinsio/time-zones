@@ -56,7 +56,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 3. Presenter (TDD)
 
-- [ ] 3.1 TDD new `presenter/dayTrack.ts`, `presentDayTrack` and `formatHourLabel` (design D5). Tests in `presenter/dayTrack.test.ts` with `it.each`, header `// Verifies FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).`:
+- [x] 3.1 TDD new `presenter/dayTrack.ts`, `presentDayTrack` and `formatHourLabel` (design D5). Tests in `presenter/dayTrack.test.ts` with `it.each`, header `// Verifies FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).`:
   - the hour labels of M6 for Almaty, Moscow, Kolkata and New York, with fractions `0`, `0.25`, `0.5`, `0.75`, `1`;
   - `Asia/Kathmandu` on the M2 day starts with `00:45`;
   - English value text `12:30, Sun, Mar 8`, Russian `12:30, вс, 8 мар.`;
@@ -64,12 +64,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `stops` is the array from `getDayPeriodStops` (`toBe`).
 
   Verify red, then green, with `npx vitest run src/presenter/dayTrack.test.ts`.
-- [ ] 3.2 TDD the `dayTrack` field in `presenter/presentLocationRows.ts`, with `referenceDay` added to `LocationRowsContext`. Extend `presenter/presentLocationRows.test.ts` with the header line `// Verifies FR1 of add-time-sliders-to-location-cards (D5).`:
+- [x] 3.2 TDD the `dayTrack` field in `presenter/presentLocationRows.ts`, with `referenceDay` added to `LocationRowsContext`. Extend `presenter/presentLocationRows.test.ts` with the header line `// Verifies FR1 of add-time-sliders-to-location-cards (D5).`:
   - a known zone has `dayTrack` with the M2 fraction;
   - `Mars/Olympus_Mons` has `dayTrack` `undefined` while the Moscow row has one.
 
   Add `referenceDay` to every existing call of `presentLocationRows` in tests. Export `PresentedDayTrack` from `presenter/index.ts`. Verify with `npx vitest run src/presenter`, then `pnpm --filter @time-zones/client typecheck`.
-- [ ] 3.3 Mutation run (M8). Verify that `npx stryker run --mutate 'src/presenter/dayTrack.ts,src/presenter/presentLocationRows.ts'` scores ≥ 95% (minimum 90%).
+- [x] 3.3 Mutation run (M8). Verify that `npx stryker run --mutate 'src/presenter/dayTrack.ts,src/presenter/presentLocationRows.ts'` scores ≥ 95% (minimum 90%).
 
 ## 4. Controller (TDD)
 

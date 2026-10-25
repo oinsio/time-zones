@@ -57,7 +57,7 @@ describe("useLocations", () => {
         immediateWriteScheduler,
         fakeClock("2026-07-15T12:00:00Z"),
       );
-      expect(result.current.rows).toEqual([
+      expect(result.current.rows).toMatchObject([
         {
           id: moscow.id,
           cityLabel: "Moscow",

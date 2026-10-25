@@ -13,6 +13,8 @@ export {
   type PresentedDateBar,
   presentDateBar,
 } from "./dateBar";
+// Implements FR1, FR2, FR7, FR9 of add-time-sliders-to-location-cards.
+export type { HourLabel, PresentedDayTrack } from "./dayTrack";
 // Implements FR1, FR2 of show-local-time-and-date-on-location-cards.
 export { formatLocalDate, formatLocalTime } from "./localDateTime";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";

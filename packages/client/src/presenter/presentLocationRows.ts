@@ -6,8 +6,10 @@ import {
   getUtcOffsetMinutes,
   isLocationInDeviceTimeZone,
   type Location,
+  type ReferenceDay,
 } from "@/model";
 import { presentCountryName } from "./countryName";
+import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
 import { formatLocalDate, formatLocalTime } from "./localDateTime";
 import { formatUtcOffset } from "./utcOffset";
 
@@ -25,6 +27,8 @@ export type LocationRow = {
   localDateLabel: string;
   /** ISO date ("2026-03-08") of the local date; empty when the zone is unknown. */
   localIsoDate: string;
+  /** Slider data; `undefined` when the zone is unknown. */
+  dayTrack?: PresentedDayTrack;
 };
 
 export type LocationRowsContext = {
@@ -32,6 +36,7 @@ export type LocationRowsContext = {
   instant: Temporal.Instant;
   translate: TFunction;
   deviceTimeZoneId: string;
+  referenceDay: ReferenceDay;
 };
 
 /**
@@ -41,16 +46,29 @@ export type LocationRowsContext = {
  * Implements FR2, FR3, FR5, FR6 of show-utc-offset-on-location-rows (D2).
  * Implements FR1, FR2, FR5 of mark-device-time-zone-in-location-list (D4).
  * Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).
+ * Implements FR1 of add-time-sliders-to-location-cards (D5): the day track.
  */
 export function presentLocationRows(
   locations: readonly Location[],
-  { language, instant, translate, deviceTimeZoneId }: LocationRowsContext,
+  {
+    language,
+    instant,
+    translate,
+    deviceTimeZoneId,
+    referenceDay,
+  }: LocationRowsContext,
 ): LocationRow[] {
   const utcPrefix = translate("locations.utcOffsetPrefix");
   const deviceTimeZoneBadge = translate("locations.deviceTimeZoneBadge");
   return locations.map((location) => {
     const offsetMinutes = getUtcOffsetMinutes(location.timeZoneId, instant);
     const localDateTime = getLocalDateTime(location.timeZoneId, instant);
+    const localTimeLabel = localDateTime
+      ? formatLocalTime(localDateTime, language)
+      : "";
+    const localDateLabel = localDateTime
+      ? formatLocalDate(localDateTime, language)
+      : "";
     return {
       id: location.id,
       cityLabel: location.label,
@@ -65,13 +83,20 @@ export function presentLocationRows(
       )
         ? deviceTimeZoneBadge
         : "",
-      localTimeLabel: localDateTime
-        ? formatLocalTime(localDateTime, language)
-        : "",
-      localDateLabel: localDateTime
-        ? formatLocalDate(localDateTime, language)
-        : "",
+      localTimeLabel,
+      localDateLabel,
       localIsoDate: localDateTime ? localDateTime.toPlainDate().toString() : "",
+      dayTrack: localDateTime
+        ? presentDayTrack({
+            timeZoneId: location.timeZoneId,
+            instant,
+            day: referenceDay,
+            language,
+            translate,
+            localTimeLabel,
+            localDateLabel,
+          })
+        : undefined,
     };
   });
 }

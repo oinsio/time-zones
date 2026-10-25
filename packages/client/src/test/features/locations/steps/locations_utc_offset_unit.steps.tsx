@@ -17,6 +17,7 @@ import { LocationsLoadStatus } from "@/ports";
 import { presentLocationRows } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
+import { buildReferenceDay } from "@/test/referenceDay";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationList } from "@/views/shared";
 import { cityEntry } from "./locationsUiWorld";
@@ -248,6 +249,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         instant: currentClock.instant(),
         translate: i18n.getFixedT(ENGLISH_LANGUAGE),
         deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
+        referenceDay: buildReferenceDay(currentClock.instant()),
       });
       elapsedMs = performance.now() - startedAt;
     });
