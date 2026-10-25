@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | Tasks verified | 20/20 |
-| Requirements traced | 33/33 |
+| Requirements traced | 32/32 |
 | CRITICAL | 0 |
 | WARNING | 0 |
 | SUGGESTION | 1 |
