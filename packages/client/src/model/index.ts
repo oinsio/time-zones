@@ -24,3 +24,5 @@ export { createStore, type ReduceResult, type Store } from "./store";
 export { canonicalizeTimeZoneId } from "./timeZoneId";
 // Implements FR2, FR6 of show-utc-offset-on-location-rows.
 export { getUtcOffsetMinutes } from "./utcOffset";
+// Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards.
+export { getLocalDateTime } from "./localDateTime";
