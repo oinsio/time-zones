@@ -154,7 +154,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         buildLocation({
           label: `City ${index}`,
           timeZoneId:
-            index < BUDGET_MATCHING_ROW_COUNT ? world.getDeviceZone() : "Asia/Tokyo",
+            index < BUDGET_MATCHING_ROW_COUNT
+              ? world.getDeviceZone()
+              : "Asia/Tokyo",
         }),
       );
     });
