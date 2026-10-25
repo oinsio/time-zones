@@ -334,6 +334,11 @@ The date bar SHALL stay at the bottom of the viewport while the list scrolls, an
 - **WHEN** the bar is pinned and the calendar is open at 375 px
 - **THEN** each bar control and each calendar day is at least 44 × 44 px
 
+#### Scenario: Calendar days fit the narrowest screen
+- **WHEN** the calendar is open on a page 320 px wide
+- **THEN** each calendar day is at least 44 × 44 px
+- **AND** the calendar does not scroll horizontally
+
 #### Scenario: No horizontal scrolling
 - **WHEN** the page is `<width>` px wide with the bar live, pinned, or with the calendar open
 - **THEN** the page does not scroll horizontally
