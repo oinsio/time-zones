@@ -54,6 +54,7 @@ export const CalendarDialog = forwardRef<
   // biome-ignore lint/correctness/useExhaustiveDependencies: runs when the focused day changes by a key
   useEffect(() => {
     if (!shouldFocusDayRef.current) return;
+    // Stryker disable next-line BooleanLiteral: not equivalent — keyboard focus is untested in jsdom by design (D8), covered by date_selection_e2e.feature
     shouldFocusDayRef.current = false;
     focusDay();
   }, [focusedIsoDate]);
@@ -63,6 +64,7 @@ export const CalendarDialog = forwardRef<
     setIsOpen(isNowOpen);
   };
 
+  // Stryker disable all: not equivalent — keyboard handling is untested in jsdom by design (D8), covered by date_selection_e2e.feature
   const handleKeyDown = (event: KeyboardEvent<HTMLTableElement>) => {
     const move = getCalendarMoveForKey(event.key);
     if (move === undefined) return;
@@ -70,6 +72,7 @@ export const CalendarDialog = forwardRef<
     shouldFocusDayRef.current = true;
     setFocusedIsoDate(getFocusTarget(move));
   };
+  // Stryker restore all
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
