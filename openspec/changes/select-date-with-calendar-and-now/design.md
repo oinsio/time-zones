@@ -87,7 +87,7 @@ All text is `PlainDate.toLocaleString(language, options)` — no `timeZone` is i
 - `useLocations` reads `reference` from the snapshot and presents rows with `instant: getEffectiveInstant(state, clock.instant())`; `reference` joins the memo key. In `PINNED` a tick re-presents the same instant, so rows do not change (FR5); `SET_DEVICE_TIME_ZONE` still runs in the tick.
 - New `controller/useReferenceMoment.ts` reads `store`, `clock`, `minuteTick` from `LocationsContext` and returns `{ dateBar, showPreviousDay, showNextDay, selectDate(isoDate), returnToNow }`. Actions call `store.dispatch` directly with `now: clock.instant()` — never `dispatchAndSchedule` — so no date action schedules a write (FR1, M5). `selectDate` takes the ISO date string from the view and parses it with `Temporal.PlainDate.from`. `minuteTick` is in the memo key of `dateBar`, so a `LIVE` bar changes at local midnight (FR7) and "today" stays current.
 - New `controller/useCalendarMonth.ts`: `useCalendarMonth(focusedIsoDate) → { month, getFocusTarget(move): string }` built on `presentCalendarMonth` and `getCalendarFocusTarget`, with `selectedDate` and `today` from the store and clock and `firstDayOfWeek` from the language. The view never imports the model.
-- Both hooks are exported from `controller/index.ts`.
+- Both hooks are exported from `controller/index.ts`, which also re-exports `CalendarMove`, so views import only from `@/controller` and `@/presenter` types, never from `@/model`.
 
 ### D6. Views: `DateBar` and `CalendarDialog` in `views/shared/`
 
