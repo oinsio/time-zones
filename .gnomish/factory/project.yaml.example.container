@@ -18,6 +18,10 @@
 factory:
   bindings:
     default: container
+    # usage-report runs `gnomish usage`, which needs Java, the factory jar and this clone - a
+    # box has none of them. Its agent may run only Bash, and only report.sh.
+    stages:
+      usage-report: host
   sandbox:
     # Built from sandbox/Dockerfile by build-sandbox, which reads this tag. Bump it whenever
     # the image changes (a new Node, pnpm, openspec or Playwright in the repository).

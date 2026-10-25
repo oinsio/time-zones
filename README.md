@@ -114,7 +114,7 @@ Features are developed with [OpenSpec](openspec/): `/opsx:propose` → `/opsx:ap
 | `sandbox/`                       | Dockerfile of the box gnomes run in under the `container` binding                                  |
 | `build-sandbox`                  | builds that image with the tool versions this repository pins                                      |
 
-The pipeline ([`pipeline.yaml`](.gnomish/pipeline.yaml)) takes a task from an idea to a pull request in eight stages. Reviewers and the judges that arbitrate between reviewer and fixer run on Opus; the stages that write run on Sonnet.
+The pipeline ([`pipeline.yaml`](.gnomish/pipeline.yaml)) takes a task from an idea to a pull request in eight stages, then reports what it cost. Reviewers and the judges that arbitrate between reviewer and fixer run on Opus; the stages that write run on Sonnet; the report runs on Haiku.
 
 | # | Stage          | What the gnome does                                                                                                              | Accepted when                                                                                                                            |
 |---|----------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
@@ -126,6 +126,7 @@ The pipeline ([`pipeline.yaml`](.gnomish/pipeline.yaml)) takes a task from an id
 | 6 | `fix-code`     | fixes the findings worth fixing with TDD, rejects the rest with evidence                                                         | no `open` findings, tasks stay ticked, the CI steps again, judge                                                                         |
 | 7 | `archive`      | archives the change under `openspec/changes/archive/YYYY/MM/` and folds its spec deltas into `openspec/specs/`                   | no active change, grouped archive layout, `openspec validate --specs --strict`, judge                                                    |
 | 8 | `deliver`      | opens (or updates) a pull request to `main` and mirrors its body into `pr-body.md`                                               | open PR to `main` with a real title, a body that references the issue and matches `pr-body.md`, judge                                    |
+| 9 | `usage-report` | runs one script that posts the task's agent time, check time and tokens per stage and per model as one comment on the pull request; on the host, never in a box | the pull request carries the marked `## Factory usage` comment, no file touched |
 
 Every stage advances automatically (`advancement: auto`); after `autonomy.attemptLimit` (2) failed attempts the task escalates to a human. The checks compare the branch against `origin/main`, so `.gnomish/` itself has to be on `main` before the factory works tasks — see [Running](#running).
 
