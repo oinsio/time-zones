@@ -170,6 +170,95 @@ describe("DayTrack input", () => {
     expect(onSelectFraction).not.toHaveBeenCalled();
   });
 
+  it("should measure the position from the left edge of the track", () => {
+    const { slider, onSelectFraction } = setup();
+    slider.getBoundingClientRect = () =>
+      ({ left: 100, width: TRACK_WIDTH }) as DOMRect;
+
+    fireEvent.pointerDown(slider, pointer("mouse", 300));
+
+    expect(onSelectFraction).toHaveBeenCalledWith(0.5);
+  });
+
+  it("should select nothing on a track without width", () => {
+    const { slider, onSelectFraction } = setup();
+    slider.getBoundingClientRect = () => ({ left: 0, width: 0 }) as DOMRect;
+
+    fireEvent.pointerDown(slider, pointer("mouse", 300));
+
+    expect(onSelectFraction).not.toHaveBeenCalled();
+  });
+
+  it("should capture the pointer on a mouse press and release it at the end", () => {
+    const { slider } = setup();
+
+    fireEvent.pointerDown(slider, pointer("mouse", 300));
+    fireEvent.pointerUp(slider, pointer("mouse", 300));
+
+    expect(slider.setPointerCapture).toHaveBeenCalledWith(1);
+    expect(slider.releasePointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it("should not release a pointer it does not hold", () => {
+    const { slider } = setup();
+    slider.hasPointerCapture = () => false;
+
+    fireEvent.pointerUp(slider, pointer("mouse", 300));
+
+    expect(slider.releasePointerCapture).not.toHaveBeenCalled();
+  });
+
+  it("should ignore a hover without a press", () => {
+    const { slider, onSelectFraction } = setup();
+    slider.hasPointerCapture = () => false;
+
+    fireEvent.pointerMove(slider, pointer("mouse", 300));
+
+    expect(onSelectFraction).not.toHaveBeenCalled();
+  });
+
+  it("should ignore a second finger while the first one decides", () => {
+    const { slider, onSelectFraction } = setup();
+    slider.hasPointerCapture = () => false;
+    fireEvent.pointerDown(slider, pointer("touch", 100, 0, 1));
+
+    fireEvent.pointerMove(slider, pointer("touch", 300, 0, 2));
+
+    expect(onSelectFraction).not.toHaveBeenCalled();
+  });
+
+  it("should capture the touch only once it drags along the track", () => {
+    const { slider } = setup();
+    fireEvent.pointerDown(slider, pointer("touch", 100));
+    expect(slider.setPointerCapture).not.toHaveBeenCalled();
+
+    fireEvent.pointerMove(slider, pointer("touch", 200));
+
+    expect(slider.setPointerCapture).toHaveBeenCalledWith(1);
+  });
+
+  it("should stay abandoned after a vertical swipe", () => {
+    const { slider, onSelectFraction } = setup();
+    fireEvent.pointerDown(slider, pointer("touch", 100, 0));
+    fireEvent.pointerMove(slider, pointer("touch", 102, 30));
+
+    fireEvent.pointerMove(slider, pointer("touch", 300, 30));
+
+    expect(onSelectFraction).not.toHaveBeenCalled();
+    expect(slider.setPointerCapture).not.toHaveBeenCalled();
+  });
+
+  it("should select once on the lift of a drag, not again", () => {
+    const { slider, onSelectFraction } = setup();
+    fireEvent.pointerDown(slider, pointer("touch", 100));
+    fireEvent.pointerMove(slider, pointer("touch", 200));
+    onSelectFraction.mockClear();
+
+    fireEvent.pointerUp(slider, pointer("touch", 200));
+
+    expect(onSelectFraction).not.toHaveBeenCalled();
+  });
+
   it("should move by a mapped key without scrolling the page", () => {
     const { slider, onMoveTrack } = setup();
 
@@ -186,5 +275,20 @@ describe("DayTrack input", () => {
 
     expect(onMoveTrack).not.toHaveBeenCalled();
     expect(isNotPrevented).toBe(true);
+  });
+});
+
+describe("DayTrack hour label alignment", () => {
+  it("should align the outer labels to the track edges", () => {
+    const { container } = renderTrack();
+
+    const classNames = [...container.querySelectorAll("[data-hour-label]")].map(
+      (label) => label.className,
+    );
+    expect(classNames[0]?.trim()).toBe("absolute top-0");
+    expect(classNames[1]).toContain("-translate-x-1/2");
+    expect(classNames[2]).toContain("-translate-x-1/2");
+    expect(classNames[3]).toContain("-translate-x-1/2");
+    expect(classNames[4]).toContain("-translate-x-full");
   });
 });

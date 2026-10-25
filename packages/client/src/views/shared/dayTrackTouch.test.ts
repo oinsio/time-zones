@@ -16,6 +16,13 @@ describe("getTouchGestureDecision", () => {
     ],
     ["10 px right", { x: 110, y: 100 }, TouchGestureDecision.WAIT],
     ["12 px right, 12 px up", { x: 112, y: 88 }, TouchGestureDecision.ABANDON],
+    ["5 px right", { x: 105, y: 100 }, TouchGestureDecision.WAIT],
+    ["10 px down", { x: 100, y: 110 }, TouchGestureDecision.WAIT],
+    [
+      "20 px right, 11 px down",
+      { x: 120, y: 111 },
+      TouchGestureDecision.SELECT,
+    ],
   ])("should decide %s", (_name, current, expected) => {
     expect(getTouchGestureDecision(START, current)).toBe(expected);
   });

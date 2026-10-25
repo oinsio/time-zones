@@ -112,7 +112,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a row without `dayTrack` renders none.
 
   Keep the existing LocationRow, LocationList and CardsView tests green by adding the new props to their fixtures. Verify with `npx vitest run src/views`, then `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint` and `pnpm run build`.
-- [ ] 5.5 Mutation run (M8). Verify that `npx stryker run --mutate 'src/views/shared/DayTrack.tsx,src/views/shared/dayTrackGradient.ts,src/views/shared/dayTrackKeys.ts,src/views/shared/LocationRow.tsx,src/views/cards/CardsView.tsx'` scores ≥ 95% (minimum 90%). When that run has finished, run `npx stryker run --mutate 'src/views/shared/dayTrackTouch.ts'` alone and verify the same score.
+- [x] 5.5 Mutation run (M8). Verify that `npx stryker run --mutate 'src/views/shared/DayTrack.tsx,src/views/shared/dayTrackGradient.ts,src/views/shared/dayTrackKeys.ts,src/views/shared/LocationRow.tsx,src/views/cards/CardsView.tsx'` scores ≥ 95% (minimum 90%). When that run has finished, run `npx stryker run --mutate 'src/views/shared/dayTrackTouch.ts'` alone and verify the same score.
 
 ## 6. Unit BDD (vitest-cucumber)
 
