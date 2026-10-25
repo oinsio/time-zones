@@ -117,9 +117,10 @@ Audience: every user, on phones and wide screens. The pinned reference moment in
 Feature files under `packages/client/src/test/features/date_selection/`, tagged `@select-date-with-calendar-and-now`:
 
 - `date_selection_reference_moment.feature` — `LIVE` on open, previous / next day, DST gap (with its note) and overlap, Now, pinned rows ignore ticks, nothing stored (vitest-cucumber);
-- `date_selection_calendar_unit.feature` — calendar month, week start, today and selected marks, picking a date, closing without change (vitest-cucumber);
-- `date_selection_date_bar_unit.feature` — bar labels in English and Russian, year, Now visibility, bar in every page state (vitest-cucumber);
-- `date_selection_e2e.feature` — keyboard, focus, accessible names, announcements, axe-core, layout and screenshots (playwright-bdd);
+- `date_selection_calendar.feature` — calendar month, week start, today and selected marks, picking a date, closing without change (vitest-cucumber);
+- `date_selection_date_bar.feature` — bar labels in English and Russian, year, Now visibility, bar in every page state (vitest-cucumber);
+- `date_selection_e2e.feature` — keyboard (Tab order, Enter, Space, calendar keys), focus, accessible names, announcements, axe-core, bar and calendar layout, the look of Now, the arrows and the date (UX2, UX3) (playwright-bdd);
+- the two calendar and date-bar unit features carry no `_unit` suffix: `bdd-unit.md` adds it "only when a paired `_e2e` file exists for the same aspect", and those aspects have no `_e2e` file;
 - view-contract scenarios "Select a date" and "Return to now" tagged `@view-contract` in `date_selection_view_contract_e2e.feature`;
 - "User opens the app" and "Notices stay available" in `main_page/main_page_unit.feature` gain the date bar; "Notice above the bar" added to `main_page/main_page_e2e.feature`, and `pinned` / `calendar` states added to the screenshot outline of `locations/locations_ui_e2e.feature`.
 

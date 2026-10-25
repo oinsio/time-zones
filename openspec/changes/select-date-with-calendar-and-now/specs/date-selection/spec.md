@@ -210,6 +210,20 @@ Tab SHALL reach the previous-day button, the date button, the next-day button an
 - **WHEN** the user tabs to Now and presses Enter
 - **THEN** the shown date is today and the focus is on the date button
 
+#### Scenario: Tab order of the bar
+- **GIVEN** the moment is pinned
+- **WHEN** the user moves the focus to the previous-day button and presses Tab three times
+- **THEN** the focus visits the date button, the next-day button and Now, in that order
+
+#### Scenario: Space activates the bar and the calendar
+- **GIVEN** the current instant is `2026-03-08T07:30:00Z` and the moment is live
+- **WHEN** the user moves the focus to the next-day button and presses Space
+- **THEN** the shown date is 9 March 2026
+- **WHEN** the user moves the focus to the previous-day button and presses Space
+- **THEN** the shown date is 8 March 2026
+- **WHEN** the user opens the calendar with Space, presses ArrowRight and presses Space
+- **THEN** the calendar is closed and the shown date is 9 March 2026
+
 #### Scenario: Pick a date with the keyboard
 - **GIVEN** the current instant is `2026-03-08T07:30:00Z`
 - **WHEN** the user opens the calendar with Enter
@@ -261,7 +275,7 @@ The bar's controls SHALL have accessible names in the interface language: "Previ
 | with the calendar open | dark |
 
 ### Requirement: Date bar layout
-The date bar SHALL stay at the bottom of the viewport while the list scrolls, and the last location card MUST be scrollable fully above it. Below 768 px the day arrows and the date MUST sit at the left of the bar and Now at the right; from 768 px they MUST form one group centred in the bar. The calendar MUST fill the screen below 640 px and be a centred dialog from 640 px. Every control of the bar and every calendar day MUST be at least 44 × 44 px. Now MUST be the accent-filled button with a clock icon and its label; the arrows MUST be icon buttons. The page MUST NOT scroll horizontally at 320 px and 2560 px with the bar live, pinned, or with the calendar open. The approved screenshots at 375 px and 1024 px in both themes MUST show the bar, including new "pinned" and "calendar" states taken at `2026-03-08T07:30:00Z`. <!-- implements NFR-R1, NFR-R2, NFR-R3, UX1, UX2, UX3 of select-date-with-calendar-and-now -->
+The date bar SHALL stay at the bottom of the viewport while the list scrolls, and the last location card MUST be scrollable fully above it. Below 768 px the day arrows and the date MUST sit at the left of the bar and Now at the right; from 768 px they MUST form one group centred in the bar. The calendar MUST fill the screen below 640 px and be a centred dialog from 640 px. Every control of the bar and every calendar day MUST be at least 44 × 44 px. Now MUST be the accent-filled button with a clock icon and its label; the arrows MUST be icon buttons without visible text. The shown date MUST be the most prominent text of the bar — no other text in the bar has a larger font size or a heavier font weight — and MUST use the theme's main foreground colour. The page MUST NOT scroll horizontally at 320 px and 2560 px with the bar live, pinned, or with the calendar open. The approved screenshots at 375 px and 1024 px in both themes MUST show the bar, including new "pinned" and "calendar" states taken at `2026-03-08T07:30:00Z`. <!-- implements NFR-R1, NFR-R2, NFR-R3, UX1, UX2, UX3 of select-date-with-calendar-and-now -->
 
 #### Scenario: Bar on a narrow screen
 - **GIVEN** the moment is pinned
@@ -278,6 +292,41 @@ The date bar SHALL stay at the bottom of the viewport while the list scrolls, an
 - **GIVEN** the list has 12 locations and the page is 375 px wide
 - **WHEN** the user scrolls to the end
 - **THEN** the last card is fully above the bar
+
+#### Scenario: Calendar on a narrow and a wide screen
+- **WHEN** the calendar is open on a page `<width>` px wide
+- **THEN** the calendar is `<layout>`
+
+| width | layout |
+|---|---|
+| 375 | full screen |
+| 639 | full screen |
+| 640 | a dialog centred in the viewport and narrower than it |
+| 1024 | a dialog centred in the viewport and narrower than it |
+
+#### Scenario: Bar controls look as approved
+- **GIVEN** the moment is pinned
+- **WHEN** the bar is shown in the `<theme>` theme
+- **THEN** Now shows a clock icon and the label "Now" in the theme's accent foreground colour on the theme's accent colour
+- **AND** the previous-day and next-day buttons show an icon and no visible text
+
+| theme |
+|---|
+| light |
+| dark |
+
+#### Scenario: The date is the most prominent text of the bar
+- **GIVEN** the moment is pinned
+- **WHEN** the bar is shown in the `<theme>` theme on a page `<width>` px wide
+- **THEN** no other text in the bar has a larger font size or a heavier font weight than the shown date
+- **AND** the shown date uses the theme's main foreground colour
+
+| theme | width |
+|---|---|
+| light | 375 |
+| dark | 375 |
+| light | 1024 |
+| dark | 1024 |
 
 #### Scenario: Touch targets
 - **WHEN** the bar is pinned and the calendar is open at 375 px
