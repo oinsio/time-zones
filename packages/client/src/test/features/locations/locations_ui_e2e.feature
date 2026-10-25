@@ -108,8 +108,10 @@ Feature: Locations in a real browser
 
   @open-location-search-with-slash-shortcut @NFR-R1 @M5
   @add-locations-via-search @NFR-R2
+  @show-local-time-and-date-on-location-cards @NFR-R3 @M6
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
-    Given the locations screen uses the <theme> theme
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the locations screen uses the <theme> theme
     And the screen is <width> px wide for the locations
     And the user opens the locations app
     When the locations are in the <state> state
