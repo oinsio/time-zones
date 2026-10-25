@@ -128,7 +128,8 @@
 - Impact: A reader looking for what was rejected and why has to scan every decision. The archived design of this change would also not match the format the rule requires (the archived `select-date-with-calendar-and-now/design.md` has both sections).
 - Fix: Add `## Consequences` (positive: one command for pointer and keys, stops reused within a day; negative: one Tab stop per card, every screenshot baseline re-approved). Add `## Alternatives Considered` with the native range input (moved from D7) and a separate `SHIFT_TIME` command (moved from D1).
 - Fix risk: none. Text moves between sections and no decision changes.
-- Status: open
+- Status: fixed
+- Resolution: design.md gains "## Consequences" (positive: one command for pointer, touch and keys, stops reused within a day, pure testable helpers; negative: one Tab stop per card, every row screenshot re-approved, custom input handling) and "## Alternatives Considered" (native range input moved out of D7, `SHIFT_TIME` moved out of D1, which now point to it); no decision changed.
 
 ## Verdict
 

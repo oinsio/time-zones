@@ -47,7 +47,7 @@ Add `SELECT_INSTANT` with `{ instant: string }` (ISO 8601 with `Z`) to `Location
 
 The `UNIQUE` status ends the gap note without touching `useReferenceMoment` (FR5, `date-selection` delta). `requestedWallTime` is the wall time that a later `SET_DATE` / `SHIFT_DATE` keeps, because `moveToDate` reads the effective instant's wall time.
 
-The command carries only an ISO string, so `JSON.parse(JSON.stringify(command))` replays it (ADR-0002). It needs no `now`, because it never reads the current instant. Keyboard moves also become `SELECT_INSTANT`: the controller works out the target with D2. No `SHIFT_TIME` command is added, since one command covers pointer and keys.
+The command carries only an ISO string, so `JSON.parse(JSON.stringify(command))` replays it (ADR-0002). It needs no `now`, because it never reads the current instant. Keyboard moves also become `SELECT_INSTANT`: the controller works out the target with D2 (see "Alternatives Considered" for `SHIFT_TIME`).
 
 ### D2. Model: reference day and track arithmetic (FR1–FR4)
 
@@ -156,7 +156,7 @@ New `views/shared/DayTrack.tsx`: a `div` with `role="slider"`, `tabIndex={0}`, `
 - **Colours:** the pure `views/shared/dayTrackGradient.ts` turns stops into `linear-gradient(to right, var(--color-day-night) 27.0833%, …)`. It uses a `DAY_PERIOD_COLOR_VARIABLES: Record<DayPeriod, string>` map. The `style` attribute carries only this computed gradient and the handle's `left` percentage. Both are data, and colours are reached only through the tokens (`ui-states.md`: "No inline styles or magic numbers — use design tokens").
 - **Focus:** `focus-visible` draws an accent outline around the visible handle.
 
-A native range input was rejected for two reasons. Its thumb centre runs from half a thumb width to `width − ½ thumb`, so the handle would not match the gradient position (UX2, the screens put the handle at exactly `left: 52.1%`). And painting a gradient track needs vendor pseudo-elements. Its arrow, Page and Home / End keys also differ by browser.
+Why not a native range input: see "Alternatives Considered".
 
 ### D8. Layout in `LocationRow` (NFR-R1, NFR-R2, UX3)
 
@@ -175,6 +175,24 @@ A native range input was rejected for two reasons. Its thumb centre runs from ha
 - Anything about pointer drag geometry, real key events, focus, `role` / `aria-*`, layout, sizes, computed colours, scrolling and screenshots goes in `time_selection_e2e.feature` (`bdd-unit.md` table: keyboard, aria and focus, and responsive layout are "E2E BDD").
 
 View unit tests in jsdom check only rendering and callback wiring. jsdom returns a zero-size `getBoundingClientRect`, so pointer geometry is proven in the browser.
+
+## Consequences
+
+Positive:
+- One command, `SELECT_INSTANT`, serves pointer, touch and keys, so the model gains one reducer and one error code (D1).
+- Same-step moves keep the same state and the colour stops are reused within a day, so drags and minute ticks cause no extra work (D1, D4).
+- The track arithmetic, period stops, gradient, key map and touch decision are pure functions, testable without a browser (D2–D4, D7).
+
+Negative:
+- Every card adds one Tab stop (D7).
+- Every screenshot baseline that shows rows must be re-approved (task 7.4).
+- A custom slider means the view owns its pointer, touch and key handling instead of the browser (D7).
+
+## Alternatives Considered
+
+**Native `<input type="range">` (D7)**: considered because the browser would supply keys and the slider role. Rejected: its thumb centre runs from half a thumb width to `width − ½ thumb`, so the handle would not match the gradient position (UX2, the screens put the handle at exactly `left: 52.1%`); painting a gradient track needs vendor pseudo-elements; and its arrow, Page and Home / End keys differ by browser.
+
+**A separate `SHIFT_TIME` command for keyboard moves (D1)**: considered to keep "move by a step" in the model. Rejected: the controller already computes the target instant with D2, so `SELECT_INSTANT` covers pointer and keys with one reducer and one replayable command shape.
 
 ## Risks / Trade-offs
 
