@@ -247,14 +247,15 @@ Tab SHALL reach the previous-day button, the date button, the next-day button an
 - **THEN** the calendar is closed, the moment is still live and the focus is on the date button
 
 ### Requirement: Accessible date selection
-The bar's controls SHALL have accessible names in the interface language: "Previous day", "Next day", "Now", and the date button "Choose date, " followed by the full date with weekday and year ("Choose date, Sunday, March 8, 2026"). The calendar MUST be a modal dialog named by its title, each day named by its full date, today carrying `aria-current="date"` and the selected day `aria-selected="true"`. Each change of the shown date MUST be announced once through a polite live region with the full date ("Monday, March 9, 2026"). axe-core MUST report no violations with the bar live, with the bar pinned, and with the calendar open, in the light and the dark theme. <!-- implements NFR-A1, NFR-A3 of select-date-with-calendar-and-now -->
+The bar's controls SHALL have accessible names in the interface language: "Previous day", "Next day", "Now", and the date button "Choose date, " followed by the full date with weekday and year ("Choose date, Sunday, March 8, 2026"). The calendar MUST be a modal dialog named by its title, each day named by its full date, today's day button carrying `aria-current="date"` and the grid cell of the selected day `aria-selected="true"`. Each change of the shown date MUST be announced once through a polite live region with the full date ("Monday, March 9, 2026"). axe-core MUST report no violations with the bar live, with the bar pinned, and with the calendar open, in the light and the dark theme. <!-- implements NFR-A1, NFR-A3 of select-date-with-calendar-and-now -->
 
 #### Scenario: Names and marks
 - **GIVEN** the interface language is English
 - **AND** the current instant is `2026-03-08T07:30:00Z` in `Asia/Almaty`
 - **WHEN** the user opens the calendar
 - **THEN** the date button was named "Choose date, Sunday, March 8, 2026"
-- **AND** the day named "Sunday, March 8, 2026" is marked as today and as selected
+- **AND** the day named "Sunday, March 8, 2026" is marked as today
+- **AND** the grid cell holding that day is marked as selected
 
 #### Scenario: Date change is announced
 - **GIVEN** the current instant is `2026-03-08T07:30:00Z` in `Asia/Almaty`
