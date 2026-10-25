@@ -66,7 +66,8 @@ None.
 - Impact: The fix moves jsdom cost out of the 50 ms budget and into an untimed step that runs under Vitest's default 5 s test timeout (`vitest.config.ts` sets no `testTimeout`). The cost of 50 full-page role queries grows with runner load, which is the same kind of load-dependent failure that caused this task. The step can time out on a loaded CI runner and turn the build red again, which would defeat G1 and M1. It also adds needless seconds to every `pnpm test` run.
 - Fix: In task 2.2 and design D4, resolve the rows with a single DOM query after the `act`, then pick each zone's row from that set by its exact city label (for example, collect the page's `<li>` rows once and match each zone's row by an exact label match, not a substring). Then read that row's `<time>` `datetime`. Keep the rest of D4 as is: still jsdom unit BDD, no `await`, no `waitFor`, no timing and no `aria-*` assertion.
 - Fix risk: The lookup must match labels exactly. Several zone IDs share prefixes, and a derived "Here" row may be present because the device zone `UTC` is not among the 50 stored zones (ADR-0007). Positional or substring matching would check the wrong row. Without that care, the step could pass while the row it read is the wrong one.
-- Status: open
+- Status: fixed
+- Resolution: design.md D4 and tasks.md 2.2 now resolve the rows with one `querySelectorAll("button[aria-label]")` after the `act`, map each exact `aria-label` to its `closest("li")`, and look up each zone by exact equality with `i18n.t("locations.removeLocation", { city: zone })` (no substring/positional match; a missing row fails). No per-zone `world.rowOf`; still jsdom, no await/waitFor/timing, no aria-* assertion.
 
 ### R2 — SUGGESTION — NG3 misdescribes `location_search_performance`
 - Location: `openspec/changes/fix-date-change-row-budget-measurement/proposal.md:43`
