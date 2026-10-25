@@ -73,14 +73,14 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 4. Controller (TDD)
 
-- [ ] 4.1 TDD the reference day in `controller/useLocations.ts` (design D6). Use new `controller/useLocations.dayTrack.test.tsx`, built with the same `LocationsProvider` wrapper as `controller/useLocations.reference.test.tsx`, header `// Verifies FR1, FR2 of add-time-sliders-to-location-cards (D6).`:
+- [x] 4.1 TDD the reference day in `controller/useLocations.ts` (design D6). Use new `controller/useLocations.dayTrack.test.tsx`, built with the same `LocationsProvider` wrapper as `controller/useLocations.reference.test.tsx`, header `// Verifies FR1, FR2 of add-time-sliders-to-location-cards (D6).`:
   - with `fakeClock("2026-03-08T07:30:00Z", "Asia/Almaty")`, every row's `dayTrack.fraction` is `0.520833`;
   - with a switchable clock at `UTC 2026-07-15T12:00:42.500Z`, a tick at `12:01:00Z` gives `0.500694`;
   - pinned at `18:00Z`, a tick leaves `0.75`;
   - live at `2026-03-08T18:59:30Z` in `Asia/Almaty`, a tick at `19:00:00Z` moves the day start to `2026-03-08T19:00:00Z`.
 
   Verify red, then green, with `npx vitest run src/controller/useLocations.dayTrack.test.tsx`.
-- [ ] 4.2 TDD new `controller/useTimeSelection.ts` (design D6) in `controller/useTimeSelection.test.tsx`, with `renderHook(() => ({ locations: useLocations(), reference: useReferenceMoment(), time: useTimeSelection() }), { wrapper })`, header `// Verifies FR3, FR4, FR5, FR8 of add-time-sliders-to-location-cards (D6).`:
+- [x] 4.2 TDD new `controller/useTimeSelection.ts` (design D6) in `controller/useTimeSelection.test.tsx`, with `renderHook(() => ({ locations: useLocations(), reference: useReferenceMoment(), time: useTimeSelection() }), { wrapper })`, header `// Verifies FR3, FR4, FR5, FR8 of add-time-sliders-to-location-cards (D6).`:
   - `selectTrackFraction(0.75)` gives the New York row `09:00` / `UTC−4` and `reference.dateBar.isPinned` true;
   - `moveTrack(TrackMove.HOUR_FORWARD)` twice and then `NEXT_STEP` give Almaty `14:45`;
   - from the NY gap state, `moveTrack(NEXT_STEP)` clears `dateBar.gapNote` (M4);
@@ -88,7 +88,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - 20 selections and a `returnToNow` leave `createManualWriteScheduler().lastDelayMs()` `undefined` (M7).
 
   Export `useTimeSelection` and re-export `TrackMove` from `controller/index.ts`. Verify red, then green, with `npx vitest run src/controller/useTimeSelection.test.tsx`, then `pnpm --filter @time-zones/client lint`.
-- [ ] 4.3 Mutation run (M8). Verify that `npx stryker run --mutate 'src/controller/useLocations.ts,src/controller/useTimeSelection.ts'` scores ≥ 95% (minimum 90%).
+- [x] 4.3 Mutation run (M8). Verify that `npx stryker run --mutate 'src/controller/useLocations.ts,src/controller/useTimeSelection.ts'` scores ≥ 95% (minimum 90%).
 
 ## 5. Views (TDD)
 

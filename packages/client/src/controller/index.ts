@@ -1,4 +1,4 @@
-export { CalendarMove } from "@/model";
+export { CalendarMove, TrackMove } from "@/model";
 export { LocationsProvider } from "./LocationsProvider";
 export type { TickScheduler } from "./tickScheduler";
 export { useCalendarMonth } from "./useCalendarMonth";
@@ -12,4 +12,5 @@ export type { PwaUpdateStatus } from "./usePwaUpdateStatus";
 export { usePwaUpdateStatus } from "./usePwaUpdateStatus";
 export { useReferenceMoment } from "./useReferenceMoment";
 export { useStorageAvailability } from "./useStorageAvailability";
+export { useTimeSelection } from "./useTimeSelection";
 export type { WriteScheduler } from "./writeScheduler";
