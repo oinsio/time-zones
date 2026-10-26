@@ -48,7 +48,7 @@ _None._
 - Production code: `packages/client/src/presenter/localDateTime.ts` and `presenter/dayTrack.ts` start using a new shared formatter cache, `presenter/dateTimeFormatters.ts`. Nothing changes in `model/`, `controller/`, `views/` or `adapters/`.
 - Tests: the eight feature files above and their step definitions, plus `date_selection/steps/referenceMomentRowsWorld.ts`, `time_selection/steps/trackBudgetWorld.ts` and `location_search/steps/searchWorld.ts`. A new shared helper, `src/test/workCounters.ts`.
 - New: `src/test/benchmarks/*.bench.ts`, the scripts `scripts/check-bench-budgets.mjs` and `bench` in `packages/client/package.json`, and a `benchmark` job in `.github/workflows/ci.yml`.
-- Docs and rules: `.claude/rules/test-planning.md`, `docs/adr/0008-performance-budgets-as-work-bounds.md`.
+- Docs and rules: `.claude/rules/test-planning.md`, `docs/adr/0008-performance-budgets-as-work-bounds.md`, and the ADR list in `CLAUDE.md`.
 - No new dependencies (`vitest bench` ships with Vitest 3). No storage, network or UI change.
 
 ## Goals
@@ -83,7 +83,7 @@ _None._
 - FR5: Local time, local date and hour labels stay identical, character for character, in English and Russian, including zones with offsets such as `+5:30` and `+5:45` and days with an offset change.
 - FR6: `pnpm --filter @time-zones/client bench` times each of the eight operations from the "Why" table with warm-up and at least 20 samples, prints each median, and emits a warning (a GitHub `::warning` annotation on CI) for every median above 50 ms. It exits with 0 whatever the medians are.
 - FR7: The PR workflow runs the benchmark in a separate job that never fails the PR check. The unit test step runs no benchmark.
-- FR8: No `*.test.*` or `*.steps.*` file under `packages/client/src/` compares a `performance.now()` duration with a limit. `.claude/rules/test-planning.md` and ADR 0008 state this policy for future changes.
+- FR8: No file under `packages/client/src/` outside `src/test/benchmarks/` calls `performance.now()`, so no unit test, step file or step helper (`*.test.*`, `*.steps.*`, `*World.ts`) compares a measured duration with a limit. `.claude/rules/test-planning.md` and ADR 0008 state this policy for future changes.
 
 ### Non-Functional
 
@@ -115,7 +115,7 @@ No UI state changes. This change re-scopes how the "data present" state of the l
 
 ## Behavior
 
-- The eight feature files in the "Why" table: their budget scenarios are reworded and tagged `@replace-wall-clock-row-budgets-with-deterministic-checks` with the matching FR id. They keep the tags of the change they came from, so earlier traceability stays intact.
+- The eight feature files in the "Why" table: their budget scenarios are reworded and tagged `@replace-wall-clock-row-budgets-with-deterministic-checks` with the matching FR id and `@NFR-P1`. The label scenarios get `@FR5 @UX1` instead. They keep the tags of the change they came from, so earlier traceability stays intact.
 - `packages/client/src/presenter/localDateTime.test.ts` and `presenter/dayTrack.test.ts`: characterization of the labels (FR5).
 
 ## Affected IA
@@ -125,7 +125,7 @@ No changes.
 ## Success Metrics
 
 - M1: The CI job "Lint, test, build, E2E" passes on the PR of this change, with 0 failed tests.
-- M2: `grep -rlE "performance\.now\(\)" packages/client/src --include='*.test.*' --include='*.steps.*'` prints nothing.
+- M2: `grep -rlE "performance\.now\(\)" packages/client/src --exclude-dir=benchmarks` prints nothing. Today it prints 7 files: 4 `*.steps.*` and 3 `*World.ts`.
 - M3: Each work-bound scenario fails when the cache it guards is turned off: the formatter cache, the colour stop cache, the hour label cache, the search record normalization. This is a one-off red check per cache during implementation, reverted afterwards.
 - M4: 100% of FR1–FR8, NFR-P1 and UX1 appear on at least one line under `packages/client/src/`, `.github/`, `.claude/rules/` or `docs/adr/` that also names `replace-wall-clock-row-budgets-with-deterministic-checks`.
 - M5: The benchmark job reports a median for all 8 operations on the PR of this change.
