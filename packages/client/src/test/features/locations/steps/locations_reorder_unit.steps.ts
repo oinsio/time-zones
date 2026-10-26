@@ -6,7 +6,6 @@ import i18n from "i18next";
 import { createElement } from "react";
 import { expect } from "vitest";
 import { STORAGE_KEYS } from "@/constants";
-import { fakeClock } from "@/lib/temporal";
 import ru from "@/locales/ru.json";
 import {
   INITIAL_LOCATIONS_STATE,
@@ -15,11 +14,9 @@ import {
   type LocationsReduceResult,
   reduceLocations,
 } from "@/model";
-import { presentLocationRows } from "@/presenter";
-import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
-import { buildLocation } from "@/test/factories/buildLocation";
+import type { LocationRow } from "@/presenter";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
-import { buildReferenceDay } from "@/test/referenceDay";
+import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import { LocationList } from "@/views/shared";
 import {
   cityEntry,
@@ -33,19 +30,20 @@ import {
   splitLabels,
   spyOnStorageWrites,
 } from "./locationsReorderUnitWorld";
+import {
+  BUDGET_ROW_COUNT,
+  buildBudgetLocations,
+  presentBudgetRows,
+} from "./rowBudgetWorld";
 
 const feature = await loadFeature("../locations_reorder_unit.feature");
-
-const BUDGET_LOCATION_COUNT = 50;
-const BUDGET_MS = 50;
-const BUDGET_INSTANT = "2026-07-15T12:00:00Z";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let app: OpenedApp;
   let secondApp: OpenedApp;
   let moveOutcome: LocationsReduceResult | undefined;
   let locationWrites: ReturnType<typeof vi.spyOn> | undefined;
-  let elapsedMs = 0;
+  let workCount: WorkCount;
 
   const seedAndOpen = (labels: string, createChannel?: () => never) => {
     storeDocument(splitLabels(labels).map(cityEntry));
@@ -67,6 +65,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const locationWriteCount = () =>
     locationWrites?.mock.calls.filter(([key]) => key === STORAGE_KEYS.LOCATIONS)
       .length;
+
+  f.AfterEachScenario(() => workCount?.stop());
 
   f.BeforeEachScenario(() => {
     cleanup();
@@ -241,19 +241,19 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @reorder-locations-by-drag-and-drop @NFR-P1
-  f.Scenario("50 locations within the budget", ({ Given, When, Then }) => {
-    let locations: ReturnType<typeof buildLocation>[] = [];
-    Given("a list of 50 locations", () => {
-      locations = Array.from({ length: BUDGET_LOCATION_COUNT }, (_, index) =>
-        buildLocation({ label: `City ${index}` }),
-      );
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
+  f.Scenario("50 locations within the budget", ({ Given, When, Then, And }) => {
+    let locations: ReturnType<typeof buildBudgetLocations> = [];
+    let presentedRows: LocationRow[] = [];
+    Given("a list of 50 locations whose rows have been presented once", () => {
+      locations = buildBudgetLocations(BUDGET_ROW_COUNT);
+      presentBudgetRows(locations);
     });
     When(
       "the last location is moved to position 1 and the rows are presented",
-      async () => {
-        await i18n.changeLanguage("en");
+      () => {
         const lastLocation = locations[locations.length - 1];
-        const startedAt = performance.now();
+        workCount = startWorkCount();
         const outcome = reduceLocations(
           { ...INITIAL_LOCATIONS_STATE, locations },
           {
@@ -263,21 +263,20 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           },
         );
         if (outcome.ok) {
-          presentLocationRows(outcome.state.locations, {
-            language: "en",
-            instant: fakeClock(BUDGET_INSTANT).instant(),
-            translate: i18n.t,
-            deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
-            referenceDay: buildReferenceDay(
-              fakeClock(BUDGET_INSTANT).instant(),
-            ),
-          });
+          presentedRows = presentBudgetRows(outcome.state.locations);
         }
-        elapsedMs = performance.now() - startedAt;
+        workCount.stop();
       },
     );
-    Then("it takes at most 50 ms", () => {
-      expect(elapsedMs).toBeLessThanOrEqual(BUDGET_MS);
+    Then("no date, time or region name formatter is built", () => {
+      expect(workCount.formatters()).toBe(0);
+      expect(workCount.displayNames()).toBe(0);
+    });
+    And("no time zone transition is looked up", () => {
+      expect(workCount.transitionLookups()).toBe(0);
+    });
+    And("the first row is the location that was last", () => {
+      expect(presentedRows[0]?.cityLabel).toBe(locations.at(-1)?.label);
     });
   });
 });

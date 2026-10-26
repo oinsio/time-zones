@@ -70,8 +70,10 @@ Feature: Reorder locations
     When the list "Moscow, Almaty" is shown
     Then the list offers the Russian move action for "Moscow"
 
-  @reorder-locations-by-drag-and-drop @NFR-P1
+  @reorder-locations-by-drag-and-drop @NFR-P1 @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
   Scenario: 50 locations within the budget
-    Given a list of 50 locations
+    Given a list of 50 locations whose rows have been presented once
     When the last location is moved to position 1 and the rows are presented
-    Then it takes at most 50 ms
+    Then no date, time or region name formatter is built
+    And no time zone transition is looked up
+    And the first row is the location that was last

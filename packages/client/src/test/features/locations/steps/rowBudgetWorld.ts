@@ -3,6 +3,7 @@ import i18n from "i18next";
 import { expect } from "vitest";
 import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
+import type { Location } from "@/model";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
@@ -27,7 +28,7 @@ type BudgetPresenting = {
 };
 
 export function presentBudgetRows(
-  locations: ReturnType<typeof buildBudgetLocations>,
+  locations: readonly Location[],
   {
     timestamp = BUDGET_FIRST_MOMENT,
     language = BUDGET_LANGUAGE,
