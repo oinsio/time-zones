@@ -12,6 +12,8 @@ import {
  * search that adds locations.
  * Implements FR7, UX1 of add-main-page-scaffold and FR10, FR12, FR17, NFR-A2,
  * NFR-A3 of add-locations-via-search (D10).
+ * Implements FR3, FR4 of add-time-sliders-to-location-cards (D8): hands the
+ * track selection and move commands to the list.
  */
 export default function CardsView() {
   const { t } = useTranslation();

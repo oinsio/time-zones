@@ -8,6 +8,14 @@ import { getReferenceDay } from "./dayTrack";
 import { INITIAL_LOCATIONS_STATE } from "./locations";
 
 const PRECISION = 6;
+const customSchedule = [
+  {
+    wallTime: "00:00",
+    from: DayPeriod.EVENING,
+    to: DayPeriod.NIGHT,
+    blendMinutes: 0,
+  },
+];
 const QUARTER_HOURS_PER_DAY = 96;
 const ALMATY_STATE = {
   ...INITIAL_LOCATIONS_STATE,
@@ -91,6 +99,15 @@ describe("getDayPeriodStops", () => {
     expect(getDayPeriodStops("Asia/Almaty", DAY)).toBe(
       getDayPeriodStops("Asia/Almaty", DAY),
     );
+  });
+
+  it("should not mix the stops of a custom schedule with the default ones", () => {
+    const defaultStops = getDayPeriodStops("Asia/Almaty", DAY);
+
+    const customStops = getDayPeriodStops("Asia/Almaty", DAY, customSchedule);
+
+    expect(customStops).not.toEqual(defaultStops);
+    expect(getDayPeriodStops("Asia/Almaty", DAY)).toBe(defaultStops);
   });
 
   it("should return a new array for another day", () => {

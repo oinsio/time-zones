@@ -39,6 +39,8 @@ type LocationListProps = {
  * Implements FR10, NFR-A3 of add-locations-via-search (D10).
  * Implements FR1, FR3, FR7, UX2, UX3 of reorder-locations-by-drag-and-drop
  * (D5): a drop outside the list or on the card itself moves nothing.
+ * Implements FR3, FR4 of add-time-sliders-to-location-cards (D8): passes the
+ * track selection and move handlers to each row.
  */
 export function LocationList({
   rows,

@@ -79,15 +79,16 @@ describe("reduceLocations SELECT_INSTANT", () => {
     });
   });
 
-  it.each(["2026-03-08T07:30:00", "not-an-instant"])(
-    "should reject the malformed instant %s",
-    (instant) => {
-      expect(selectInstant(ALMATY_STATE, instant)).toEqual({
-        ok: false,
-        error: LocationErrorCode.INVALID_INSTANT,
-      });
-    },
-  );
+  it.each([
+    "2026-03-08T07:30:00",
+    "2026-03-08T07:30:00+05:00",
+    "not-an-instant",
+  ])("should reject the malformed instant %s", (instant) => {
+    expect(selectInstant(ALMATY_STATE, instant)).toEqual({
+      ok: false,
+      error: LocationErrorCode.INVALID_INSTANT,
+    });
+  });
 
   it("should replay from JSON", () => {
     const command = {

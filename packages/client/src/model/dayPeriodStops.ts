@@ -52,18 +52,21 @@ export function assembleDayPeriodStops(
 let cachedDayKey: string | undefined;
 let cachedStopsByZone = new Map<string, readonly DayPeriodStop[]>();
 
-/** Memoized for one reference day: drags and ticks reuse the same array. */
+/** Memoized for one reference day and the default schedule; custom schedules are computed afresh. */
 export function getDayPeriodStops(
   timeZoneId: string,
   day: ReferenceDay,
   schedule: readonly DayPeriodBoundary[] = DAY_PERIOD_SCHEDULE,
 ): readonly DayPeriodStop[] {
+  const isDefaultSchedule = schedule === DAY_PERIOD_SCHEDULE;
   const dayKey = `${day.start.toString()}|${day.end.toString()}`;
   if (dayKey !== cachedDayKey) {
     cachedDayKey = dayKey;
     cachedStopsByZone = new Map();
   }
-  const cached = cachedStopsByZone.get(timeZoneId);
+  const cached = isDefaultSchedule
+    ? cachedStopsByZone.get(timeZoneId)
+    : undefined;
   if (cached !== undefined) return cached;
   const transitions = findOffsetTransitions(timeZoneId, day);
   const stops = assembleDayPeriodStops(
@@ -71,6 +74,6 @@ export function getDayPeriodStops(
     collectOffsetEdges(timeZoneId, day, schedule, transitions),
     day,
   );
-  cachedStopsByZone.set(timeZoneId, stops);
+  if (isDefaultSchedule) cachedStopsByZone.set(timeZoneId, stops);
   return stops;
 }

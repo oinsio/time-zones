@@ -22,6 +22,8 @@ const MISSING_PROVIDER_MESSAGE =
  * show-local-time-and-date-on-location-cards (D4).
  * Presents the rows at the effective instant of the reference moment: FR5 of
  * select-date-with-calendar-and-now (D5).
+ * Passes the reference day, read at the same instant, to the presenter:
+ * Implements FR1, FR2 of add-time-sliders-to-location-cards (D6).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
@@ -33,16 +35,15 @@ export function useLocations() {
   const language = (i18n.resolvedLanguage ??
     i18n.language) as SupportedLanguage;
   // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick re-presents the rows at each minute
-  const rows = useMemo(
-    () =>
-      presentLocationRows(locations, {
-        language,
-        instant: getEffectiveInstant(state, clock.instant()),
-        translate: t,
-        deviceTimeZoneId,
-        referenceDay: getReferenceDay(state, clock.instant()),
-      }),
-    [state, locations, deviceTimeZoneId, language, t, clock, minuteTick],
-  );
+  const rows = useMemo(() => {
+    const now = clock.instant();
+    return presentLocationRows(locations, {
+      language,
+      instant: getEffectiveInstant(state, now),
+      translate: t,
+      deviceTimeZoneId,
+      referenceDay: getReferenceDay(state, now),
+    });
+  }, [state, locations, deviceTimeZoneId, language, t, clock, minuteTick]);
   return { rows, locations, ...rest };
 }

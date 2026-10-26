@@ -9,6 +9,8 @@ import {
 import { getReferenceZone, ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
+const UTC_DESIGNATOR = "Z";
+
 type SelectInstantCommand = Extract<
   LocationCommand,
   { type: LocationCommandType.SELECT_INSTANT }
@@ -26,6 +28,9 @@ export function reduceSelectInstant(
 ): LocationsReduceResult {
   let instant: Temporal.Instant;
   try {
+    if (!command.instant.endsWith(UTC_DESIGNATOR)) {
+      throw new RangeError(command.instant);
+    }
     instant = Temporal.Instant.from(command.instant);
   } catch (e) {
     if (e instanceof RangeError) {
