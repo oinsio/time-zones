@@ -57,7 +57,7 @@ Feature: Day track of a location card
     When the next minute starts at "2026-07-15T18:01:00Z"
     Then every handle stands at 0.75
 
-  @add-time-sliders-to-location-cards @NFR-P2 @replace-wall-clock-row-budgets-with-deterministic-checks @FR3
+  @add-time-sliders-to-location-cards @NFR-P2 @replace-wall-clock-row-budgets-with-deterministic-checks @FR3 @NFR-P1
   Scenario: 50 tracks within the date-change budget
     Given 50 locations whose rows have been presented at "2026-03-08T07:30:00Z" with the device time zone "UTC"
     When the date moves to the next day and the rows are presented again
@@ -65,7 +65,7 @@ Feature: Day track of a location card
     And at most 2 time zone transitions are looked up per zone
     And every row carries colour stops and hour labels for the day starting "2026-03-09T00:00:00Z"
 
-  @replace-wall-clock-row-budgets-with-deterministic-checks @FR3
+  @replace-wall-clock-row-budgets-with-deterministic-checks @FR3 @NFR-P1
   Scenario: The new day's tracks are computed once
     Given 50 locations whose rows have been presented for the day starting "2026-03-09T00:00:00Z"
     When their rows are presented again for that day
@@ -75,4 +75,4 @@ Feature: Day track of a location card
   Scenario: Hour labels are unchanged by formatter reuse
     Given the list contains Kolkata, Kathmandu and New York
     When their tracks are presented for the day starting "2026-03-08T00:00:00Z" in English and then in Russian
-    Then each track shows the same hour labels as the platform's own date formatting gives for that zone
+    Then each track shows the same hour labels as the platform's own date formatting gives for that zone, with the hour label's format, in the same language, without the shared formatters

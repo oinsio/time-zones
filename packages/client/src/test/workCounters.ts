@@ -15,6 +15,7 @@ export type WorkCount = {
   displayNames(): number;
   collators(): number;
   transitionLookups(): number;
+  transitionLookupsByZone(): ReadonlyMap<string, number>;
   normalizations(): number;
   stop(): void;
 };
@@ -72,6 +73,7 @@ export function startWorkCount(): WorkCount {
   countConstructor("Collator");
 
   let transitionLookups = 0;
+  const transitionLookupsByZone = new Map<string, number>();
   let normalizations = 0;
   const spies: MockInstance[] = [];
   for (const temporalClass of TEMPORAL_FORMATTING_CLASSES) {
@@ -97,6 +99,10 @@ export function startWorkCount(): WorkCount {
       .spyOn(Temporal.ZonedDateTime.prototype, "getTimeZoneTransition")
       .mockImplementation(function (this: Temporal.ZonedDateTime, ...args) {
         transitionLookups += 1;
+        transitionLookupsByZone.set(
+          this.timeZoneId,
+          (transitionLookupsByZone.get(this.timeZoneId) ?? 0) + 1,
+        );
         return originalGetTimeZoneTransition.apply(this, args);
       }),
   );
@@ -117,6 +123,7 @@ export function startWorkCount(): WorkCount {
     displayNames: () => buildsByConstructor.DisplayNames,
     collators: () => buildsByConstructor.Collator,
     transitionLookups: () => transitionLookups,
+    transitionLookupsByZone: () => transitionLookupsByZone,
     normalizations: () => normalizations,
     stop() {
       for (const restore of restores) restore();

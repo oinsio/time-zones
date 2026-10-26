@@ -7,10 +7,7 @@ import { buildLocation } from "@/test/factories/buildLocation";
 import { MAX_TRANSITION_LOOKUPS_PER_ZONE } from "@/test/workCounters";
 import { cityEntry } from "../../locations/steps/locationsUiWorld";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
-import {
-  createTrackBudgetWorld,
-  TRACK_BUDGET_ROW_COUNT,
-} from "./trackBudgetWorld";
+import { createTrackBudgetWorld } from "./trackBudgetWorld";
 import { createTrackLabelsCheck } from "./trackLabelsCheck";
 
 const feature = await loadFeature("../time_selection_day_track.feature");
@@ -150,7 +147,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @NFR-P2
-  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR3
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR3 @NFR-P1
   f.Scenario(
     "50 tracks within the date-change budget",
     ({ Given, When, Then, And }) => {
@@ -171,9 +168,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "at most {int} time zone transitions are looked up per zone",
         (_ctx, maxLookups: number) => {
           expect(maxLookups).toBe(MAX_TRANSITION_LOOKUPS_PER_ZONE);
-          expect(budget.workCount()?.transitionLookups()).toBeLessThanOrEqual(
-            maxLookups * TRACK_BUDGET_ROW_COUNT,
-          );
+          const lookupsByZone = budget.workCount()?.transitionLookupsByZone();
+          expect(lookupsByZone?.size).toBeGreaterThan(0);
+          for (const lookups of lookupsByZone?.values() ?? []) {
+            expect(lookups).toBeLessThanOrEqual(maxLookups);
+          }
         },
       );
       And(
@@ -184,7 +183,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR3
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR3 @NFR-P1
   f.Scenario(
     "The new day's tracks are computed once",
     ({ Given, When, Then }) => {
@@ -218,7 +217,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         (_ctx, dayStart: string) => labelsCheck.presentDay(dayStart),
       );
       Then(
-        "each track shows the same hour labels as the platform's own date formatting gives for that zone",
+        "each track shows the same hour labels as the platform's own date formatting gives for that zone, with the hour label's format, in the same language, without the shared formatters",
         labelsCheck.expectPlatformLabels,
       );
     },
