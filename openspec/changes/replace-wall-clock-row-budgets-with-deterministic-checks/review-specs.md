@@ -77,7 +77,8 @@
 - Impact: An implementer who follows D4 and keeps the Given/When as they are would count the first, cold presenting in the FR1 scenarios. "No formatter is built" would then fail on a clean run, or pass only because an earlier scenario in the same file happened to warm the same zone and language. The result would depend on scenario order.
 - Fix: In design.md D4, replace "Scenarios keep their names, tags and data, and only their `Then` changes" and "The Given/When steps keep their data and warm-up" with: "Scenarios keep their names and old tags. Their steps follow the spec delta: the FR1 scenarios of the four locations features gain a Given that presents the rows once (the warm-up the date- and time-selection worlds already have), the `When` wraps only the second presenting in `startWorkCount()`, and `Then` asserts the counts." Rename the D4 heading to "Scenarios keep their names and tags; their steps follow the spec delta (NFR-P1)".
 - Fix risk: none. The spec deltas and tasks group 3 already ask for this. Only the design text changes.
-- Status: open
+- Status: fixed
+- Resolution: design.md D4 renamed to "Scenarios keep their names and tags; their steps follow the spec delta (NFR-P1)"; its text now says the FR1 locations scenarios gain a warm-up Given that presents the rows once, the `When` wraps only the second presenting in `startWorkCount()`, and the FR2 scenario stays cold with its existing data (D3).
 
 ### R2 — WARNING — Task 3.3's zone data weakens the FR2 bound
 - Location: `openspec/changes/replace-wall-clock-row-budgets-with-deterministic-checks/tasks.md:24`
@@ -86,7 +87,8 @@
 - Impact: Implemented as written, the cold FR2 scenario still passes if `formatLocalTime`/`formatLocalDate` go back to building a formatter per call. G2 ("formatters rebuilt per row … still fail the PR check") then rests only on the FR1 scenarios.
 - Fix: In tasks.md 3.3, replace "with zones from `Intl.supportedValuesOf("timeZone")`" with "keeping the existing data: `BUDGET_MATCHING_ROW_COUNT` rows in the device time zone and the rest in `Asia/Tokyo`, so that several rows share each zone".
 - Fix risk: Only two zones are covered by the cold count. That is enough for a per-zone bound, and the spec scenario (`specs/locations/spec.md:74`, "50 locations and a device time zone that matches some of them") still holds.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 3.3 now keeps the existing data (`BUDGET_MATCHING_ROW_COUNT` rows in the device time zone, the rest in `Asia/Tokyo`) instead of `Intl.supportedValuesOf("timeZone")`, so a formatter built per row exceeds the per-zone bound; this also matches D4's "keeps its existing data".
 
 ### R3 — WARNING — The search benchmark compares 10 queries with a per-query budget
 - Location: `openspec/changes/replace-wall-clock-row-budgets-with-deterministic-checks/design.md:58`
@@ -95,7 +97,8 @@
 - Impact: The FR6 timing check for search does not check the specified budget. It warns as soon as the average query takes more than 5 ms, while the product still meets its 50 ms budget. The warnings in the benchmark job (U4, M5) are then misleading for that operation.
 - Fix: In design.md D5, replace "`citySearch.bench.ts` (10 sample queries as one operation)" with "`citySearch.bench.ts` (one operation, one query per iteration, rotating through the 10 sample queries of `location_search_performance.steps.ts`), so its median is the time of one query". Mirror the wording in tasks.md 6.1.
 - Fix risk: A median over mixed queries can hide one slow query. That is acceptable for a non-blocking warning (NG4). It keeps the count of 8 operations that FR6, M5 and task 6.2's fixtures rely on.
-- Status: open
+- Status: fixed
+- Resolution: design.md D5 now has `citySearch.bench.ts` run one query per iteration, rotating through the 10 sample queries, so its median is per query and matches the 50 ms per-query budget; tasks.md 6.1 mirrors this and still counts 8 operations.
 
 ### R4 — SUGGESTION — FR6 attributes the warnings to `pnpm bench`
 - Location: `openspec/changes/replace-wall-clock-row-budgets-with-deterministic-checks/proposal.md:84`
@@ -104,7 +107,8 @@
 - Impact: Verified against its own text, FR6 is not met by the tasks: `pnpm bench` alone emits no budget warning. An implementer may instead chain the check into the `bench` script, which would run it twice in CI.
 - Fix: In proposal.md FR6, replace "`pnpm --filter @time-zones/client bench` times each … and emits a warning" with "`pnpm --filter @time-zones/client bench` times each of the eight operations … with warm-up and at least 20 samples and writes their medians to a JSON report. `scripts/check-bench-budgets.mjs` reads that report, prints each median, and emits a warning … for every median above 50 ms. Both exit with 0 whatever the medians are."
 - Fix risk: none. Design and tasks already build this.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md FR6 now says `pnpm --filter @time-zones/client bench` writes the medians to a JSON report and a separate budget check reads it, prints each median and emits the warnings, with both exiting 0. The script path stays out of the proposal (proposal-format.md: no implementation details); design D5 names it.
 
 ### R5 — SUGGESTION — D2 does not name which `Temporal` the counters spy on
 - Location: `openspec/changes/replace-wall-clock-row-budgets-with-deterministic-checks/design.md:39-41`
@@ -113,7 +117,8 @@
 - Impact: A `workCounters.ts` that spies on the global `Temporal` counts no `toLocaleString` and no transition lookup. The FR1/FR3 "no transition is looked up" assertions would then always pass. Task 5.3 (M3) would catch the stops cache, but the `toLocaleString` gap that D2 closes would silently stay open.
 - Fix: In design.md D2, add: "Every Temporal spy targets the classes of `Temporal` imported from `@/lib/temporal`, never `globalThis.Temporal`." In task 2.1, add the case "a `getTimeZoneTransition` call on a `ZonedDateTime` from `@/lib/temporal` is counted".
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: design.md D2 gained a bullet saying every Temporal spy targets the classes of `Temporal` from `@/lib/temporal`, never `globalThis.Temporal`. tasks.md 2.1 adds the cases "`getTimeZoneTransition` and `toLocaleString` on a `ZonedDateTime` from `@/lib/temporal` are counted".
 
 ### R6 — SUGGESTION — The line-count check covers only the time-selection files
 - Location: `openspec/changes/replace-wall-clock-row-budgets-with-deterministic-checks/tasks.md:33`
@@ -122,7 +127,8 @@
 - Impact: Task 3.4 can push the reorder step file past the 300-line hard cap with nothing in the task list catching it.
 - Fix: In tasks.md, move the `wc -l` check from 4.3 into the routine above group 3 (tasks.md:20): "every touched steps or world file stays at most 300 lines and, where it already was, at most 200 (`wc -l`); split a file that would exceed 300."
 - Fix risk: A split of the reorder steps file may be needed, which adds a small task.
-- Status: open
+- Status: fixed
+- Resolution: the `wc -l` check moved from task 4.3 into the routine above group 3 (which group 4 reuses): every touched steps or world file stays ≤ 300 lines, and ≤ 200 where it already was. A file that would exceed 300 gets split into a world file (`locationsReorderUnitWorld.ts`, or a new `utcOffsetBudgetWorld.ts`). Task 5.1 applies the same check.
 
 ### R7 — SUGGESTION — The FR5 scenarios do not name what the labels are compared with
 - Location: `openspec/changes/replace-wall-clock-row-budgets-with-deterministic-checks/specs/locations/spec.md:108`
@@ -131,7 +137,8 @@
 - Impact: The FR5 Gherkin scenarios may end up unable to fail. FR5 would then rest only on the literal characterization cases of task 1.1.
 - Fix: In both scenarios, replace "as the same zone formatted on its own, in the same language" with "as `Temporal.ZonedDateTime#toLocaleString` gives for that zone with the label's format options, in the same language". Mirror this in tasks 3.1 and 4.3.
 - Fix risk: The step calls `toLocaleString` outside the counted block, so it does not touch the work bounds.
-- Status: open
+- Status: fixed
+- Resolution: fixed my own way, keeping the Gherkin at intention level (gherkin.md). Both scenarios in specs/locations/spec.md and specs/time-selection/spec.md now compare with "the platform's own date formatting … with the label's format, … without the shared formatters". Tasks 3.1 and 4.3 name the oracle: `ZonedDateTime#toLocaleString` from `@/lib/temporal`, with `LOCAL_TIME_`/`LOCAL_DATE_`/`HOUR_LABEL_FORMAT_OPTIONS`, called outside the counted block and never through the presenter.
 
 ## Verdict
 
