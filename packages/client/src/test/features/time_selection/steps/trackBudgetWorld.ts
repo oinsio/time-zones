@@ -12,6 +12,11 @@ import {
 } from "@/model";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
+import {
+  MAX_TRANSITION_LOOKUPS_PER_ZONE,
+  startWorkCount,
+  type WorkCount,
+} from "@/test/workCounters";
 import { ENGLISH_LANGUAGE } from "./timeSelectionWorld";
 
 export const TRACK_BUDGET_ROW_COUNT = 50;
@@ -20,13 +25,15 @@ const PRECISION = 6;
 /**
  * Model and presenter work of a time selection and of a date change on 50
  * rows with tracks, without any rendering.
- * Implements NFR-P1, NFR-P2 of add-time-sliders-to-location-cards (D1-D5).
+ * Implements NFR-P1, NFR-P2 of add-time-sliders-to-location-cards (D1-D5);
+ * FR1, FR3 of replace-wall-clock-row-budgets-with-deterministic-checks (D2).
  */
 export const createTrackBudgetWorld = () => {
   let state: LocationsState = INITIAL_LOCATIONS_STATE;
   let startInstant = "";
   let rows: LocationRow[] = [];
-  let elapsedMs = 0;
+  let presentedState: LocationsState = INITIAL_LOCATIONS_STATE;
+  let workCount: WorkCount | undefined;
 
   const presentRows = (next: LocationsState) => {
     const now = Temporal.Instant.from(startInstant);
@@ -38,35 +45,73 @@ export const createTrackBudgetWorld = () => {
       referenceDay: getReferenceDay(next, now),
     });
   };
+  const prepare = async (timestamp: string, deviceTimeZoneId: string) => {
+    await i18n.changeLanguage(ENGLISH_LANGUAGE);
+    startInstant = timestamp;
+    state = {
+      ...INITIAL_LOCATIONS_STATE,
+      locations: Intl.supportedValuesOf("timeZone")
+        .slice(0, TRACK_BUDGET_ROW_COUNT)
+        .map((zone) => buildLocation({ timeZoneId: zone, label: zone })),
+      deviceTimeZoneId,
+    };
+    presentRows(state);
+  };
+  const shiftDateCommand = (days: number) => ({
+    type: LocationCommandType.SHIFT_DATE as const,
+    days,
+    now: startInstant,
+  });
   const measure = (command: Parameters<typeof reduceLocations>[1]) => {
-    const startedAt = performance.now();
     const outcome = reduceLocations(state, command);
-    if (outcome.ok) rows = presentRows(outcome.state);
-    elapsedMs = performance.now() - startedAt;
+    if (!outcome.ok) return;
+    presentedState = outcome.state;
+    workCount = startWorkCount();
+    rows = presentRows(presentedState);
+    workCount.stop();
   };
 
   return {
-    elapsedMs: () => elapsedMs,
-    prepare: async (timestamp: string, deviceTimeZoneId: string) => {
-      await i18n.changeLanguage(ENGLISH_LANGUAGE);
-      startInstant = timestamp;
-      state = {
-        ...INITIAL_LOCATIONS_STATE,
-        locations: Intl.supportedValuesOf("timeZone")
-          .slice(0, TRACK_BUDGET_ROW_COUNT)
-          .map((zone) => buildLocation({ timeZoneId: zone, label: zone })),
-        deviceTimeZoneId,
-      };
-      presentRows(state);
+    workCount: () => workCount,
+    stop: () => workCount?.stop(),
+    presentAgain: () => {
+      workCount = startWorkCount();
+      rows = presentRows(presentedState);
+      workCount.stop();
     },
+    prepare,
     measureSelection: (instant: string) =>
       measure({ type: LocationCommandType.SELECT_INSTANT, instant }),
-    measureDateChange: () =>
-      measure({
-        type: LocationCommandType.SHIFT_DATE,
-        days: ONE_DAY,
-        now: startInstant,
-      }),
+    measureDateChange: () => measure(shiftDateCommand(ONE_DAY)),
+    /** Presents the day `days` away from the prepared one, without the work counters. */
+    presentDateShift: (days: number) => {
+      const outcome = reduceLocations(state, shiftDateCommand(days));
+      if (outcome.ok) rows = presentRows(outcome.state);
+    },
+    /** Prepares rows for the day before `dayStart`, then moves the date onto it. */
+    prepareDayStarting: async (dayStart: string, deviceTimeZoneId: string) => {
+      const previousMoment = Temporal.Instant.from(dayStart)
+        .toZonedDateTimeISO(deviceTimeZoneId)
+        .subtract({ days: ONE_DAY })
+        .toInstant()
+        .toString();
+      await prepare(previousMoment, deviceTimeZoneId);
+      measure(shiftDateCommand(ONE_DAY));
+    },
+    expectNoFormatterBuilt: () => {
+      expect(workCount?.formatters()).toBe(0);
+      expect(workCount?.displayNames()).toBe(0);
+    },
+    expectNoTransitionLookup: () =>
+      expect(workCount?.transitionLookups()).toBe(0),
+    expectLookupsPerZoneAtMost: (maxLookups: number) => {
+      expect(maxLookups).toBe(MAX_TRANSITION_LOOKUPS_PER_ZONE);
+      const lookupsByZone = workCount?.transitionLookupsByZone();
+      expect(lookupsByZone?.size).toBeGreaterThan(0);
+      for (const lookups of lookupsByZone?.values() ?? []) {
+        expect(lookups).toBeLessThanOrEqual(maxLookups);
+      }
+    },
     expectEveryHandleAt: (fraction: number) => {
       expect(rows).toHaveLength(TRACK_BUDGET_ROW_COUNT);
       for (const row of rows) {
@@ -75,11 +120,7 @@ export const createTrackBudgetWorld = () => {
     },
     expectEveryTrackForDayStarting: (dayStart: string) => {
       expect(rows).toHaveLength(TRACK_BUDGET_ROW_COUNT);
-      const nextDay = reduceLocations(state, {
-        type: LocationCommandType.SHIFT_DATE,
-        days: ONE_DAY,
-        now: startInstant,
-      });
+      const nextDay = reduceLocations(state, shiftDateCommand(ONE_DAY));
       if (!nextDay.ok) throw new Error("the date change was rejected");
       expect(
         getReferenceDay(

@@ -12,7 +12,7 @@ IMPORTANT: Read existing code, tests, and patterns before generating new code.
 ## Architecture
 
 - Model / presenter / swappable views — .claude/rules/architecture.md, overview: docs/architecture/overview.md
-- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone)
+- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds)
 - Screen design (docs win on conflict): docs/design/README.md
 
 ## Domain Rules

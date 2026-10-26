@@ -1,9 +1,6 @@
-import {
-  LOCAL_DATE_FORMAT_OPTIONS,
-  LOCAL_TIME_FORMAT_OPTIONS,
-} from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
 
 /**
  * Local time as two-digit 24-hour "HH:mm".
@@ -13,7 +10,11 @@ export function formatLocalTime(
   localDateTime: Temporal.ZonedDateTime,
   language: SupportedLanguage,
 ): string {
-  return localDateTime.toLocaleString(language, LOCAL_TIME_FORMAT_OPTIONS);
+  return getDateTimeFormatter(
+    language,
+    localDateTime.timeZoneId,
+    DateTimeLabelKind.LOCAL_TIME,
+  ).format(localDateTime.epochMilliseconds);
 }
 
 /**
@@ -24,5 +25,9 @@ export function formatLocalDate(
   localDateTime: Temporal.ZonedDateTime,
   language: SupportedLanguage,
 ): string {
-  return localDateTime.toLocaleString(language, LOCAL_DATE_FORMAT_OPTIONS);
+  return getDateTimeFormatter(
+    language,
+    localDateTime.timeZoneId,
+    DateTimeLabelKind.LOCAL_DATE,
+  ).format(localDateTime.epochMilliseconds);
 }

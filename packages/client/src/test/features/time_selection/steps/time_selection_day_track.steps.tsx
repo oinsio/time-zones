@@ -2,43 +2,36 @@ import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { TRACK_STEP_MINUTES } from "@/constants";
-import { buildLocation } from "@/test/factories/buildLocation";
-import { cityEntry } from "../../locations/steps/locationsUiWorld";
+import { createDayTrackSteps, UNKNOWN_ZONE_LABEL } from "./dayTrackSteps";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
 import { createTrackBudgetWorld } from "./trackBudgetWorld";
+import { createTrackLabelsCheck } from "./trackLabelsCheck";
 
 const feature = await loadFeature("../time_selection_day_track.feature");
 
-const PRECISION = 6;
-const ROW_BUDGET_MS = 50;
-const UNKNOWN_ZONE_LABEL = "Olympus Mons";
+const BUDGET_DEVICE_TIME_ZONE = "UTC";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
   const budget = createTrackBudgetWorld();
+  const labelsCheck = createTrackLabelsCheck();
 
   f.BeforeEachScenario(async () => {
     await world.reset();
   });
+  f.AfterEachScenario(budget.stop);
   f.AfterAllScenarios(world.finish);
 
-  const givenZone = (_ctx: unknown, zone: string) => world.setDeviceZone(zone);
-  const givenInstant = (_ctx: unknown, timestamp: string) =>
-    world.setInstant(timestamp);
-  const givenList = (_ctx: unknown, cities: string) =>
-    world.setStoredCities(cities);
-  const givenAppOpen = () => world.open();
-  const givenPinnedHere = () =>
-    world.selectFraction(world.rows()[0]?.dayTrack?.fraction ?? 0);
-  const whenNextMinute = (_ctx: unknown, timestamp: string) => {
-    world.clock().moveTo(timestamp);
-    world.runTick();
-  };
-  const thenEveryHandleAt = (_ctx: unknown, fraction: number) => {
-    for (const row of world.rows()) {
-      expect(row.dayTrack?.fraction).toBeCloseTo(fraction, PRECISION);
-    }
-  };
+  const {
+    givenZone,
+    givenInstant,
+    givenList,
+    givenAppOpen,
+    givenPinnedHere,
+    whenNextMinute,
+    thenEveryHandleAt,
+    givenMoscowAndUnknownZone,
+  } = createDayTrackSteps(world);
 
   // @add-time-sliders-to-location-cards @FR1
   f.Scenario("A 24-hour reference day", ({ Given, And, When, Then }) => {
@@ -83,15 +76,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("No track for an unknown zone", ({ Given, When, Then, And }) => {
     Given(
       "the list holds Moscow and a location whose zone the browser does not know",
-      () =>
-        world.setStoredLocations([
-          buildLocation(cityEntry("Moscow")),
-          buildLocation({
-            label: UNKNOWN_ZONE_LABEL,
-            timeZoneId: "Mars/Olympus_Mons",
-            countryCode: "",
-          }),
-        ]),
+      givenMoscowAndUnknownZone,
     );
     When("the list is presented", givenAppOpen);
     Then("that location's card shows no track", () =>
@@ -142,11 +127,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @NFR-P2
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR3 @NFR-P1
   f.Scenario(
     "50 tracks within the date-change budget",
     ({ Given, When, Then, And }) => {
       Given(
-        "50 locations presented at {string} in the device time zone {string}",
+        "50 locations whose rows have been presented at {string} with the device time zone {string}",
         (_ctx, timestamp: string, zone: string) =>
           budget.prepare(timestamp, zone),
       );
@@ -154,13 +140,54 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "the date moves to the next day and the rows are presented again",
         budget.measureDateChange,
       );
-      Then("it takes at most 50 ms", () =>
-        expect(budget.elapsedMs()).toBeLessThanOrEqual(ROW_BUDGET_MS),
+      Then(
+        "no date, time or region name formatter is built",
+        budget.expectNoFormatterBuilt,
+      );
+      And(
+        "at most {int} time zone transitions are looked up per zone",
+        (_ctx, maxLookups: number) =>
+          budget.expectLookupsPerZoneAtMost(maxLookups),
       );
       And(
         "every row carries colour stops and hour labels for the day starting {string}",
         (_ctx, dayStart: string) =>
           budget.expectEveryTrackForDayStarting(dayStart),
+      );
+    },
+  );
+
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR3 @NFR-P1
+  f.Scenario(
+    "The new day's tracks are computed once",
+    ({ Given, When, Then }) => {
+      Given(
+        "50 locations whose rows have been presented for the day starting {string}",
+        async (_ctx, dayStart: string) => {
+          await budget.prepareDayStarting(dayStart, BUDGET_DEVICE_TIME_ZONE);
+          budget.expectEveryTrackForDayStarting(dayStart);
+        },
+      );
+      When("their rows are presented again for that day", budget.presentAgain);
+      Then(
+        "no time zone transition is looked up",
+        budget.expectNoTransitionLookup,
+      );
+    },
+  );
+
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR5 @UX1
+  f.Scenario(
+    "Hour labels are unchanged by formatter reuse",
+    ({ Given, When, Then }) => {
+      Given("the list contains Kolkata, Kathmandu and New York", () => {});
+      When(
+        "their tracks are presented for the day starting {string} in English and then in Russian",
+        (_ctx, dayStart: string) => labelsCheck.presentDay(dayStart),
+      );
+      Then(
+        "each track shows the same hour labels as the platform's own date formatting gives for that zone, with the hour label's format, in the same language, without the shared formatters",
+        labelsCheck.expectPlatformLabels,
       );
     },
   );

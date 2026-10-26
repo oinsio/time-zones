@@ -67,8 +67,9 @@ Feature: UTC offset on location rows
     When the user opens the app
     Then the "Moscow" row shows the Russian prefix followed by "+3"
 
-  @show-utc-offset-on-location-rows @NFR-P1 @M2
+  @show-utc-offset-on-location-rows @NFR-P1 @M2 @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
   Scenario: 50 rows within the budget
-    Given 50 locations
-    When their rows are presented with offsets
-    Then it takes at most 50 ms
+    Given 50 locations whose rows have been presented with offsets once
+    When their rows are presented with offsets again at another minute of the same day
+    Then no date, time or region name formatter is built
+    And no time zone transition is looked up

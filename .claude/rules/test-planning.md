@@ -23,7 +23,7 @@ When decomposing a change into tasks, always prefer automated tests over manual 
 
 ### For changes with performance requirements
 
-- **Performance tests** — Lighthouse CI for NFR-P metrics, `performance.now()` for operation timing in unit BDD
+- **Performance tests** — Lighthouse CI for NFR-P metrics; work bounds (counts of formatters, lookups, passes) as blocking unit BDD, plus a `*.bench.ts` benchmark reported by the non-blocking CI `benchmark` job. Never assert `performance.now()` durations in unit or BDD tests. <!-- implements FR8 of replace-wall-clock-row-budgets-with-deterministic-checks -->
 
 ## Task decomposition rules
 
@@ -36,10 +36,11 @@ When decomposing a change into tasks, always prefer automated tests over manual 
 ## Bad vs good task examples
 
 ```markdown
-# Bad — manual verification
+# Bad — manual or flaky verification
 - [ ] 5.1 Manually verify keyboard navigation works
 - [ ] 5.2 Check responsive layout on mobile
 - [ ] 5.3 Visually confirm loading states
+- [ ] 5.4 Unit BDD: 50 rows are presented in under 50 ms of wall-clock time <!-- implements FR8 of replace-wall-clock-row-budgets-with-deterministic-checks -->
 
 # Good — automated verification
 - [ ] 5.1 BDD E2E: keyboard navigation scenarios (@NFR-A1)
@@ -47,4 +48,5 @@ When decomposing a change into tasks, always prefer automated tests over manual 
 - [ ] 5.3 Storybook stories for loading/error/empty/offline states
 - [ ] 5.4 axe-core assertions in E2E tests
 - [ ] 5.5 Mutation testing >=95% on new domain code (minimum acceptable >=90%)
+- [ ] 5.6 Unit BDD: presenting 50 rows again builds no formatter (@NFR-P1); `*.bench.ts` benchmark for the timing <!-- implements FR8 of replace-wall-clock-row-budgets-with-deterministic-checks -->
 ```

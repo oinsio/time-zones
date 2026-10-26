@@ -2,20 +2,20 @@ import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { cleanup } from "@testing-library/react/pure";
 import i18n from "i18next";
-import { expect } from "vitest";
-import { presentLocationRows } from "@/presenter";
+import { expect, vi } from "vitest";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
+import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import {
   badgeText,
   createDeviceTimeZoneWorld,
   ENGLISH_LANGUAGE,
   RUSSIAN_LANGUAGE,
 } from "./deviceTimeZoneWorld";
+import { expectFormattersPerZoneAtMost } from "./rowBudgetWorld";
 
 const feature = await loadFeature("../locations_device_time_zone_unit.feature");
 
-const ROW_BUDGET_MS = 50;
 const BUDGET_ROW_COUNT = 50;
 const BUDGET_MATCHING_ROW_COUNT = 10;
 
@@ -34,9 +34,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     expectRowShows,
   } = world;
   let budgetLocations: ReturnType<typeof buildLocation>[];
-  let elapsedMs: number;
+  let workCount: WorkCount;
+  let presentLocationRows: typeof import("@/presenter").presentLocationRows;
 
   f.BeforeEachScenario(world.reset);
+  f.AfterEachScenario(() => workCount?.stop());
   f.AfterAllScenarios(async () => {
     cleanup();
     await i18n.changeLanguage(RUSSIAN_LANGUAGE);
@@ -148,6 +150,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @mark-device-time-zone-in-location-list @NFR-P1
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR2
   f.Scenario("50 rows within the budget", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
     And("50 locations of which some are in the device time zone", () => {
@@ -161,8 +164,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         }),
       );
     });
+    And("no row has been presented yet", async () => {
+      vi.resetModules();
+      ({ presentLocationRows } = await import("@/presenter"));
+    });
     When("their rows are presented", () => {
-      const startedAt = performance.now();
+      workCount = startWorkCount();
       presentLocationRows(budgetLocations, {
         language: ENGLISH_LANGUAGE,
         instant: world.clock.instant(),
@@ -173,11 +180,18 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           world.getDeviceZone(),
         ),
       });
-      elapsedMs = performance.now() - startedAt;
+      workCount.stop();
     });
-    Then("it takes at most {int} ms", (_ctx, budgetMs: number) => {
-      expect(budgetMs).toBe(ROW_BUDGET_MS);
-      expect(elapsedMs).toBeLessThanOrEqual(budgetMs);
-    });
+    Then(
+      "at most {int} date and time formatters are built per distinct time zone",
+      (_ctx, maxFormatters: number) =>
+        expectFormattersPerZoneAtMost(workCount, maxFormatters),
+    );
+    And(
+      "at most {int} region name formatter is built",
+      (_ctx, maxDisplayNames: number) => {
+        expect(workCount.displayNames()).toBeLessThanOrEqual(maxDisplayNames);
+      },
+    );
   });
 });

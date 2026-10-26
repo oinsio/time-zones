@@ -11,6 +11,7 @@
     "check:bundle-size": "node scripts/check-bundle-size.mjs",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
+    "bench": "vitest bench --run --mode test --outputJson reports/bench/bench.json",
     "test:coverage": "vitest run --coverage",
     "test:mutation": "stryker run",
     "test:bdd:gen": "bddgen -c playwright.bdd.config.ts",

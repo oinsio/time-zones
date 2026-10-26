@@ -19,7 +19,6 @@ jobs:
   check:
     name: Lint, test, build, E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     concurrency:
       group: ci-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -50,8 +49,10 @@ jobs:
       - name: Check that the build left sources untouched
         run: git diff --exit-code
 
+      # No --with-deps: the runner image already ships the system libraries
+      # Chromium needs (it has Google Chrome), and apt mirrors can be slow
       - name: Install Playwright Chromium
-        run: pnpm --filter @time-zones/client exec playwright install --with-deps chromium
+        run: pnpm --filter @time-zones/client exec playwright install chromium
 
       - name: Smoke E2E
         run: pnpm --filter @time-zones/client test:bdd
@@ -71,3 +72,35 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: packages/client/dist
+
+  # Real timings with warm-up and medians; over-budget medians only warn.
+  # Runs on its own runner and never fails the pull request check.
+  # implements FR7 of replace-wall-clock-row-budgets-with-deterministic-checks
+  benchmark:
+    name: Benchmark (non-blocking)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    concurrency:
+      group: bench-${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # pnpm version comes from `packageManager` in the root package.json
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run benchmarks
+        run: pnpm --filter @time-zones/client bench
+
+      - name: Report benchmark budgets
+        if: always()
+        run: node packages/client/scripts/check-bench-budgets.mjs packages/client/reports/bench/bench.json

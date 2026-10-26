@@ -259,12 +259,13 @@ The offset text SHALL be the localized prefix followed by a sign and the whole h
 - **THEN** the Moscow row shows the Russian locale's prefix followed by `+3`
 
 ### Requirement: Offsets are fast, accessible and fit every screen
-Presenting 50 locations with their offsets SHALL take at most 50 ms, and the offset MUST appear in the same render as its row, with no loading state. The list with offsets MUST have no axe-core violations in the light and dark themes. A list whose offsets include `UTC+5:30`, `UTC+5:45` and a negative offset MUST NOT scroll horizontally at 320 px and 2560 px, and the approved "list" screenshots at 375 px and 1024 px in both themes MUST show the offsets. <!-- implements NFR-P1, NFR-A1, NFR-R1, NFR-R2 of show-utc-offset-on-location-rows -->
+Presenting 50 locations with their offsets SHALL take at most 50 ms, and the offset MUST appear in the same render as its row, with no loading state. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: presenting 50 rows again, in the same language and for the same reference day, MUST build no date, time or region name formatter and MUST look up no time zone transition. The list with offsets MUST have no axe-core violations in the light and dark themes. A list whose offsets include `UTC+5:30`, `UTC+5:45` and a negative offset MUST NOT scroll horizontally at 320 px and 2560 px, and the approved "list" screenshots at 375 px and 1024 px in both themes MUST show the offsets. <!-- implements NFR-P1, NFR-A1, NFR-R1, NFR-R2 of show-utc-offset-on-location-rows; FR1, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks -->
 
 #### Scenario: 50 rows within the budget
-- **GIVEN** 50 locations
-- **WHEN** their rows are presented with offsets
-- **THEN** it takes at most 50 ms
+- **GIVEN** 50 locations whose rows have been presented with offsets once
+- **WHEN** their rows are presented with offsets again at another minute of the same day
+- **THEN** no date, time or region name formatter is built
+- **AND** no time zone transition is looked up
 
 #### Scenario: No accessibility violations with offsets
 - **GIVEN** the list contains locations with offsets
@@ -421,7 +422,7 @@ After a move, the new order SHALL be saved on the device in the existing version
 - **AND** the storage warning is shown
 
 ### Requirement: Reorder is accessible and fits every screen
-The list with handles SHALL have no axe-core violations at rest and while a card is picked up with the keyboard, in the light and dark themes. The handle's target size MUST be at least 44 × 44 CSS px. A list of 5 locations with handles MUST NOT scroll horizontally at 320 px and 2560 px, also while a card is dragged. Moving a location in a list of 50 and presenting the rows again MUST take at most 50 ms, with no loading state. The drag-and-drop code MUST NOT be part of the initial JavaScript, which stays at most 150 KB gzipped. The approved "list" screenshots at 375 px and 1024 px in both themes MUST show the handles. <!-- implements NFR-P1, NFR-P2, NFR-A1, NFR-A5, NFR-R1, NFR-R3 of reorder-locations-by-drag-and-drop -->
+The list with handles SHALL have no axe-core violations at rest and while a card is picked up with the keyboard, in the light and dark themes. The handle's target size MUST be at least 44 × 44 CSS px. A list of 5 locations with handles MUST NOT scroll horizontally at 320 px and 2560 px, also while a card is dragged. Moving a location in a list of 50 and presenting the rows again MUST take at most 50 ms, with no loading state. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: moving a location and presenting the 50 rows again MUST build no date, time or region name formatter and MUST look up no time zone transition. The drag-and-drop code MUST NOT be part of the initial JavaScript, which stays at most 150 KB gzipped. The approved "list" screenshots at 375 px and 1024 px in both themes MUST show the handles. <!-- implements NFR-P1, NFR-P2, NFR-A1, NFR-A5, NFR-R1, NFR-R3 of reorder-locations-by-drag-and-drop; FR1, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks -->
 
 #### Scenario: No accessibility violations
 - **GIVEN** the list is Moscow, Almaty, New York
@@ -438,9 +439,11 @@ The list with handles SHALL have no axe-core violations at rest and while a card
 - **THEN** the page does not scroll horizontally
 
 #### Scenario: 50 locations within the budget
-- **GIVEN** 50 locations
+- **GIVEN** 50 locations whose rows have been presented once
 - **WHEN** the last one is moved to the top and the rows are presented
-- **THEN** it takes at most 50 ms
+- **THEN** no date, time or region name formatter is built
+- **AND** no time zone transition is looked up
+- **AND** the first row is the location that was last
 
 #### Scenario: Reorder stays out of the initial bundle
 - **WHEN** the app is built for production
@@ -552,7 +555,7 @@ The badge text SHALL come from the locale files and exist in English ("Your time
 - **THEN** the Almaty row shows "Ваш часовой пояс"
 
 ### Requirement: Device time zone badge is accessible and fits every screen
-The accessible name of a row that shows the badge SHALL be its city followed by the badge text; a row without the badge MUST be named by its city alone. Presenting 50 locations with the badge rule MUST take at most 50 ms, and the badge MUST appear in the same render as its row, with no loading state. A list with a badge MUST have no axe-core violations in the light and dark themes, MUST NOT scroll horizontally at 320 px and 2560 px, and the approved "list" screenshots at 375 px and 1024 px in both themes MUST show the badge on the matching row. <!-- implements NFR-P1, NFR-A1, NFR-A2, NFR-R1, NFR-R2 of mark-device-time-zone-in-location-list -->
+The accessible name of a row that shows the badge SHALL be its city followed by the badge text; a row without the badge MUST be named by its city alone. Presenting 50 locations with the badge rule MUST take at most 50 ms, and the badge MUST appear in the same render as its row, with no loading state. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: presenting 50 rows for the first time in a language MUST build at most 3 date and time formatters per distinct time zone and at most 1 region name formatter. A list with a badge MUST have no axe-core violations in the light and dark themes, MUST NOT scroll horizontally at 320 px and 2560 px, and the approved "list" screenshots at 375 px and 1024 px in both themes MUST show the badge on the matching row. <!-- implements NFR-P1, NFR-A1, NFR-A2, NFR-R1, NFR-R2 of mark-device-time-zone-in-location-list; FR2, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks -->
 
 #### Scenario: Row name includes the badge
 - **GIVEN** the device time zone is `Asia/Almaty`
@@ -563,8 +566,10 @@ The accessible name of a row that shows the badge SHALL be its city followed by 
 
 #### Scenario: 50 rows within the budget
 - **GIVEN** 50 locations and a device time zone that matches some of them
+- **AND** no row has been presented yet
 - **WHEN** their rows are presented
-- **THEN** it takes at most 50 ms
+- **THEN** at most 3 date and time formatters are built per distinct time zone
+- **AND** at most 1 region name formatter is built
 
 #### Scenario: No accessibility violations with the badge
 - **GIVEN** the device time zone is `Asia/Almaty` and the list contains Almaty and Moscow
@@ -710,12 +715,17 @@ The time SHALL be the most prominent text of a card — larger and bolder than t
 - **AND** the screen matches the re-approved "list" screenshot
 
 ### Requirement: Local time and date are fast and accessible
-Presenting 50 locations with their time, date, offset and badge SHALL take at most 50 ms, and the time and the date MUST appear in the same render as their row, with no loading state. A list with times and dates MUST have no axe-core violations in the light and dark themes. The time and the date MUST be readable text of the card but MUST NOT be a live region, so minute updates are not announced; a row's accessible name MUST stay its city, followed by the device time zone badge text when the badge is shown. <!-- implements NFR-P1, NFR-A1, NFR-A2 of show-local-time-and-date-on-location-cards -->
+Presenting 50 locations with their time, date, offset and badge SHALL take at most 50 ms, and the time and the date MUST appear in the same render as their row, with no loading state. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: presenting 50 rows again, in the same language and for the same reference day, MUST build no date, time or region name formatter. The time and date labels MUST stay identical, character for character, in English and Russian. A list with times and dates MUST have no axe-core violations in the light and dark themes. The time and the date MUST be readable text of the card but MUST NOT be a live region, so minute updates are not announced; a row's accessible name MUST stay its city, followed by the device time zone badge text when the badge is shown. <!-- implements NFR-P1, NFR-A1, NFR-A2 of show-local-time-and-date-on-location-cards; FR1, FR5, FR6, NFR-P1, UX1 of replace-wall-clock-row-budgets-with-deterministic-checks -->
 
 #### Scenario: 50 rows within the budget
-- **GIVEN** 50 locations
-- **WHEN** their rows are presented with time and date
-- **THEN** it takes at most 50 ms
+- **GIVEN** 50 locations whose rows have been presented with time and date once
+- **WHEN** their rows are presented with time and date again
+- **THEN** no date, time or region name formatter is built
+
+#### Scenario: Labels are unchanged by formatter reuse
+- **GIVEN** the list contains Kolkata, Kathmandu and New York
+- **WHEN** their rows are presented at `2026-07-15T12:00:00Z` in English and then in Russian
+- **THEN** each row shows the same time and date labels as the platform's own date formatting gives for that zone, with each label's format, in the same language, without the shared formatters
 
 #### Scenario: No accessibility violations with times
 - **GIVEN** the list contains locations with times and dates

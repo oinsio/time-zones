@@ -27,7 +27,7 @@ Audience: every contributor (a red PR check blocks every merge) and every user (
 - MODIFIED: local time and local date labels are formatted with cached `Intl.DateTimeFormat` objects, one per language, zone and label kind, shared with the hour labels of the day track. They are no longer formatted through `ZonedDateTime.toLocaleString`. The labels do not change.
 - ADDED: a benchmark suite (`pnpm bench`) times the same eight operations with warm-up and repeated samples. It compares each median with the 50 ms budget and reports misses as warnings. It runs in its own CI job, which never fails the PR check.
 - MODIFIED: the PR check runs that benchmark job alongside the existing steps. A budget miss shows as a warning. The unit test step stays deterministic.
-- MODIFIED: `.claude/rules/test-planning.md` no longer recommends `performance.now()` in unit BDD. It points NFR-P work to deterministic work bounds (blocking) plus a benchmark (non-blocking). The global decision is recorded as `docs/adr/0008-performance-budgets-as-work-bounds.md`.
+- MODIFIED: `.claude/rules/test-planning.md` and `.claude/rules/bdd-unit.md` no longer recommend `performance.now()` in unit BDD. It points NFR-P work to deterministic work bounds (blocking) plus a benchmark (non-blocking). The global decision is recorded as `docs/adr/0008-performance-budgets-as-work-bounds.md`.
 
 ## Capabilities
 
@@ -47,8 +47,8 @@ _None._
 
 - Production code: `packages/client/src/presenter/localDateTime.ts` and `presenter/dayTrack.ts` start using a new shared formatter cache, `presenter/dateTimeFormatters.ts`. Nothing changes in `model/`, `controller/`, `views/` or `adapters/`.
 - Tests: the eight feature files above and their step definitions, plus `date_selection/steps/referenceMomentRowsWorld.ts`, `time_selection/steps/trackBudgetWorld.ts` and `location_search/steps/searchWorld.ts`. A new shared helper, `src/test/workCounters.ts`.
-- New: `src/test/benchmarks/*.bench.ts`, the scripts `scripts/check-bench-budgets.mjs` and `bench` in `packages/client/package.json`, and a `benchmark` job in `.github/workflows/ci.yml`.
-- Docs and rules: `.claude/rules/test-planning.md`, `docs/adr/0008-performance-budgets-as-work-bounds.md`.
+- New: `src/test/benchmarks/*.bench.ts`, the budget evaluation `scripts/benchBudgets.ts` and its command-line wrapper `scripts/check-bench-budgets.mjs` (both tested by `src/test/benchmarks/benchBudgets.test.ts`), the `bench` script in `packages/client/package.json`, and a `benchmark` job in `.github/workflows/ci.yml` (its shape is tested by `src/test/benchmarks/ciBenchmarkJob.test.ts`).
+- Docs and rules: `.claude/rules/test-planning.md`, `.claude/rules/bdd-unit.md` (the "Performance (operation time)" row of "When to Use Unit BDD vs E2E BDD"), `docs/adr/0008-performance-budgets-as-work-bounds.md`, and the ADR list in `CLAUDE.md`.
 - No new dependencies (`vitest bench` ships with Vitest 3). No storage, network or UI change.
 
 ## Goals
@@ -81,9 +81,9 @@ _None._
 - FR3: A date change on 50 rows that were already presented builds 0 `Intl.DateTimeFormat` objects and looks up at most 2 time zone transitions per zone. Presenting the new day a second time looks up 0 transitions.
 - FR4: Computing the results of one non-empty query over the full bundled data normalizes exactly one string, the query, and builds at most 1 `Intl.Collator`.
 - FR5: Local time, local date and hour labels stay identical, character for character, in English and Russian, including zones with offsets such as `+5:30` and `+5:45` and days with an offset change.
-- FR6: `pnpm --filter @time-zones/client bench` times each of the eight operations from the "Why" table with warm-up and at least 20 samples, prints each median, and emits a warning (a GitHub `::warning` annotation on CI) for every median above 50 ms. It exits with 0 whatever the medians are.
+- FR6: `pnpm --filter @time-zones/client bench` times each of the eight operations from the "Why" table with warm-up and at least 20 samples and writes their medians to a JSON report. A separate budget check reads that report, prints each median, and emits a warning (a GitHub `::warning` annotation on CI) for every median above 50 ms. Both exit with 0 whatever the medians are.
 - FR7: The PR workflow runs the benchmark in a separate job that never fails the PR check. The unit test step runs no benchmark.
-- FR8: No `*.test.*` or `*.steps.*` file under `packages/client/src/` compares a `performance.now()` duration with a limit. `.claude/rules/test-planning.md` and ADR 0008 state this policy for future changes.
+- FR8: No file under `packages/client/src/` outside `src/test/benchmarks/` calls `performance.now()`, so no unit test, step file or step helper (`*.test.*`, `*.steps.*`, `*World.ts`) compares a measured duration with a limit. `.claude/rules/test-planning.md`, `.claude/rules/bdd-unit.md` and ADR 0008 state this policy for future changes. No file under `.claude/rules/` recommends `performance.now()` for a test.
 
 ### Non-Functional
 
@@ -115,7 +115,7 @@ No UI state changes. This change re-scopes how the "data present" state of the l
 
 ## Behavior
 
-- The eight feature files in the "Why" table: their budget scenarios are reworded and tagged `@replace-wall-clock-row-budgets-with-deterministic-checks` with the matching FR id. They keep the tags of the change they came from, so earlier traceability stays intact.
+- The eight feature files in the "Why" table: their budget scenarios are reworded and tagged `@replace-wall-clock-row-budgets-with-deterministic-checks` with the matching FR id and `@NFR-P1`. The label scenarios get `@FR5 @UX1` instead. They keep the tags of the change they came from, so earlier traceability stays intact.
 - `packages/client/src/presenter/localDateTime.test.ts` and `presenter/dayTrack.test.ts`: characterization of the labels (FR5).
 
 ## Affected IA
@@ -125,11 +125,11 @@ No changes.
 ## Success Metrics
 
 - M1: The CI job "Lint, test, build, E2E" passes on the PR of this change, with 0 failed tests.
-- M2: `grep -rlE "performance\.now\(\)" packages/client/src --include='*.test.*' --include='*.steps.*'` prints nothing.
-- M3: Each work-bound scenario fails when the cache it guards is turned off: the formatter cache, the colour stop cache, the hour label cache, the search record normalization. This is a one-off red check per cache during implementation, reverted afterwards.
+- M2: `grep -rlE "performance\.now\(\)" packages/client/src --exclude-dir=benchmarks` prints nothing. Today it prints 7 files: 4 `*.steps.*` and 3 `*World.ts`.
+- M3: One Stryker run is scoped to the 3 cache files whose work is counted (`src/presenter/dateTimeFormatters.ts`, `src/model/dayPeriodStops.ts`, `src/presenter/countryName.ts`) with bail disabled. In it, 100% of the mutants on the 3 cache-hit lines (the lines with `return cached…`, 1 per file) are Killed, and each one is killed by at least one test under `src/test/features/`. So turning off the formatter, colour stop or region name cache fails a work-bound scenario. The search bound (FR4) is an exact count of 1, so it fails directly on one extra normalization. The hour label cache of `dayTrack.ts` is not in M3: without it, labels are only re-formatted with cached formatters, which no work bound counts (NG2). Its timing shows in the benchmark (FR6).
 - M4: 100% of FR1–FR8, NFR-P1 and UX1 appear on at least one line under `packages/client/src/`, `.github/`, `.claude/rules/` or `docs/adr/` that also names `replace-wall-clock-row-budgets-with-deterministic-checks`.
 - M5: The benchmark job reports a median for all 8 operations on the PR of this change.
-- M6: Stryker mutation score ≥ 95% on `src/presenter/dateTimeFormatters.ts`, `src/presenter/localDateTime.ts` and `src/presenter/dayTrack.ts` (minimum acceptable ≥ 90%).
+- M6: Stryker mutation score ≥ 95% on `src/presenter/dateTimeFormatters.ts`, `src/presenter/localDateTime.ts`, `src/presenter/dayTrack.ts` and `scripts/benchBudgets.ts` (minimum acceptable ≥ 90%).
 
 ## Open Questions
 

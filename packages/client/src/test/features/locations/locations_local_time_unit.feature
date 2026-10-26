@@ -54,8 +54,14 @@ Feature: Local time and date on location rows
     Then the "Olympus" row shows no time and date but keeps its remove action
     And the "Moscow" row shows the time "15:00" and the date "Wed, Jul 15"
 
-  @show-local-time-and-date-on-location-cards @NFR-P1
+  @show-local-time-and-date-on-location-cards @NFR-P1 @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
   Scenario: 50 rows within the budget
-    Given 50 locations
-    When their rows are presented with time and date
-    Then it takes at most 50 ms
+    Given 50 locations whose rows have been presented with time and date once
+    When their rows are presented with time and date again
+    Then no date, time or region name formatter is built
+
+  @replace-wall-clock-row-budgets-with-deterministic-checks @FR5 @UX1
+  Scenario: Labels are unchanged by formatter reuse
+    Given the list contains Kolkata, Kathmandu and New York
+    When their rows are presented at "2026-07-15T12:00:00Z" in English and then in Russian
+    Then each row shows the same time and date labels as the platform's own date formatting gives for that zone

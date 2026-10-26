@@ -1,0 +1,46 @@
+{
+  "files": [
+    {
+      "filepath": "x.bench.ts",
+      "groups": [
+        {
+          "fullName": "x > g",
+          "benchmarks": [
+            {
+              "name": "op a",
+              "median": 1
+            },
+            {
+              "name": "op b",
+              "median": 2
+            },
+            {
+              "name": "op c",
+              "median": 3
+            },
+            {
+              "name": "op d",
+              "median": 4
+            },
+            {
+              "name": "op e",
+              "median": 5
+            },
+            {
+              "name": "op f",
+              "median": 6
+            },
+            {
+              "name": "op g",
+              "median": 7
+            },
+            {
+              "name": "op h",
+              "median": 80
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
