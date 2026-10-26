@@ -19,7 +19,6 @@ jobs:
   check:
     name: Lint, test, build, E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     concurrency:
       group: ci-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -50,8 +49,10 @@ jobs:
       - name: Check that the build left sources untouched
         run: git diff --exit-code
 
+      # No --with-deps: the runner image already ships the system libraries
+      # Chromium needs (it has Google Chrome), and apt mirrors can be slow
       - name: Install Playwright Chromium
-        run: pnpm --filter @time-zones/client exec playwright install --with-deps chromium
+        run: pnpm --filter @time-zones/client exec playwright install chromium
 
       - name: Smoke E2E
         run: pnpm --filter @time-zones/client test:bdd
