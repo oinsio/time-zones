@@ -54,7 +54,7 @@ Same RED → GREEN routine as group 3.
 ## 8. Integration checks (M1, M4, M5)
 
 - [ ] 8.1 Traceability (M4): `for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 NFR-P1 UX1; do grep -rqE "replace-wall-clock-row-budgets-with-deterministic-checks.*$id([^0-9A-Za-z-]|$)|$id([^0-9A-Za-z-]|$).*replace-wall-clock-row-budgets-with-deterministic-checks" src scripts ../../.github ../../.claude/rules ../../docs/adr || echo "missing $id"; done` prints nothing.
-- [ ] 8.2 `pnpm run build` succeeds. Then `pnpm test` passes with 0 failed tests, and `pnpm --filter @time-zones/client test:bdd` passes with no screenshot re-approval (UX1).
+- [x] 8.2 `pnpm run build` succeeds. Then `pnpm test` passes with 0 failed tests, and `pnpm --filter @time-zones/client test:bdd` passes with no screenshot re-approval (UX1).
 - [ ] 8.3 Ask the user to push and confirm on the PR (M1, M5): "Lint, test, build, E2E" is green, and the `benchmark` job summary lists 8 medians.
 
 ## Workflow follow-up
