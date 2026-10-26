@@ -42,6 +42,11 @@ Steps:
      in the archived change: for each, how many findings per severity were
      fixed and rejected, and every rejected finding by id with its reason in
      one line — the human decides whether they agree;
+   - if the archived change has a `handoff/` folder, a "Human follow-up"
+     section. For each `H<n>` item in its `README.md`, give the title, the
+     requirement ids, the `Why manual:` reason, and the exact apply and
+     verify commands, with paths pointing at the archived folder. These are
+     changes the factory prepared but was not allowed to make itself;
    - a pointer to the archived OpenSpec change;
    - a final `Refs #<issue>` line. Use `Refs`, not `Closes` — this project
      closes its issues itself.

@@ -36,6 +36,18 @@ spec delta — but only when the task genuinely changes no behaviour.
   implementer can follow, each task independently verifiable and naming the
   automated test that proves it under `packages/client/src/`. A task whose
   verification is a manual check fails this criterion.
+- Every `- [ ]` task fits inside the implement stage's limits in
+  `stages/specify/handoff.md`. A checkbox task that edits a forbidden path,
+  asks the user for something, or depends on a handoff item fails this
+  criterion.
+- Human steps are automated as far as possible. Each `## Human follow-up`
+  item has an `H<n>` id, a requirement id, a checkbox task that writes its
+  patch and README section under `handoff/`, a `Why manual:` reason that holds,
+  and an `Automated part:`. An item that the "Automate first" order in
+  `handoff.md` could still replace fails this criterion: a scoped Stryker run
+  instead of a full one, local CI commands instead of "CI is green", or
+  leaving the push and the PR to the deliver stage. So does an item whose
+  reason is missing or does not hold.
 - The change is scoped to the task and nothing beyond it.
 
 Start from the change directory: `proposal.md` and `tasks.md` name the

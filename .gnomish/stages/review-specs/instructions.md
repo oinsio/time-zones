@@ -87,6 +87,17 @@ Severity is about impact:
    follows `gherkin.md` (intentions, not clicks; tags). `design.md` follows
    `design-decisions.md` and links its decisions to requirement ids.
    `tasks.md` names an automated test for every task (`test-planning.md`).
+   Read `.gnomish/stages/specify/handoff.md` and check `tasks.md` against it:
+   - every `- [ ]` task fits inside the implement stage's limits and does not
+     depend on a handoff item;
+   - every human step that the "Automate first" order could replace has been
+     replaced;
+   - every `## Human follow-up` item has a `Why manual:` reason that really
+     holds, and a checkbox task that writes its patch under `handoff/`.
+
+   A checkbox task outside the limits blocks the implement stage. A human step
+   that could have been automated, or one with no valid reason, leaves work
+   untested. Each of these is a WARNING at least.
 4. **Coverage matrix.** For every requirement id: proposal → delta spec →
    task. A gap in any column is a finding.
 5. **Internal consistency.** No two artifacts disagree (proposal says A,

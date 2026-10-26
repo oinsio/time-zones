@@ -13,8 +13,9 @@ Install it before anything else — nothing below runs without it:
     pnpm install --frozen-lockfile --prefer-offline
 
 Never edit `package.json` or `pnpm-lock.yaml` to make an install or a test pass.
-If the change genuinely needs a new dependency, `tasks.md` says so; otherwise
-say in your closing summary what was missing instead of adding it.
+If the change genuinely needs a new dependency or a new script, a task in
+`tasks.md` says so; otherwise say in your closing summary what was missing
+instead of adding it.
 
 ## Check the baseline before you change anything
 
@@ -115,6 +116,15 @@ the only thing under `openspec/` you may edit: the proposal, the specs and the
 design are the contract you implement, not yours to rewrite. Do not touch
 `.gnomish/`, `.github/`, `.claude/`, `docs/adr/` or anything under
 `openspec/specs/` or `openspec/changes/archive/`.
+
+**Handoff.** A change that needs one of those paths plans it as handoff items
+(`H1`, `H2`, …). Write each item as `.gnomish/stages/specify/handoff.md`
+describes: a patch and a README section under the change's `handoff/` folder,
+which is the only other place under `openspec/` you may write. Edit the target
+files only to produce the diff, then restore them. The stage checks that every
+patch applies and that the target paths are unchanged. The plain bullets under
+`## Human follow-up` in `tasks.md` are for the human. Leave them as they are,
+and do not turn them into checkboxes.
 
 ## Before you stop
 

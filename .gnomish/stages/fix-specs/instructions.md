@@ -49,7 +49,9 @@ say so.
 ## Revising the change
 
 Read `CLAUDE.md` first — it wins over these instructions where they disagree.
-Revise with the repository's own skill, so the artifacts stay coherent with
+When a finding touches a human step, a forbidden path or `## Human follow-up`,
+also read `.gnomish/stages/specify/handoff.md` and revise `tasks.md` to match
+it. Revise with the repository's own skill, so the artifacts stay coherent with
 one another:
 
     Skill(skill="openspec-update-change", args="<change name>: <the accepted findings, in your own words>")

@@ -28,7 +28,10 @@ change on its strength.
   wrong thing, misses the task, breaks existing behaviour undeclared, or breaks
   a domain rule or an ADR. Inflated severities fail this criterion.
 - Nothing material is missed: no requirement without a scenario or a task,
-  no task without an automated test, no missing required proposal section, no
+  no task without an automated test, no `- [ ]` task outside the implement
+  stage's limits in `stages/specify/handoff.md`, no human step that could have
+  been automated or that lacks a valid `Why manual:` reason, no missing
+  required proposal section, no
   contradiction between artifacts or with the existing code, no design that
   breaks `.claude/rules/architecture.md` or an ADR, no stored raw UTC offset
   or non-Temporal date math in the specs, no named file or module that does
