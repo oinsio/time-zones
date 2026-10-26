@@ -86,9 +86,11 @@ Feature: Device time zone badge on location rows
     When the user opens the app
     Then the "Almaty" row shows the Russian badge text
 
-  @mark-device-time-zone-in-location-list @NFR-P1
+  @mark-device-time-zone-in-location-list @NFR-P1 @replace-wall-clock-row-budgets-with-deterministic-checks @FR2
   Scenario: 50 rows within the budget
     Given the device time zone is "Asia/Almaty"
     And 50 locations of which some are in the device time zone
+    And no row has been presented yet
     When their rows are presented
-    Then it takes at most 50 ms
+    Then at most 3 date and time formatters are built per distinct time zone
+    And at most 1 region name formatter is built

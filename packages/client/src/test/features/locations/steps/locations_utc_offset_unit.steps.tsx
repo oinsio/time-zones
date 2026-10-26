@@ -14,18 +14,21 @@ import { createInMemoryLocationRepository } from "@/adapters";
 import { LocationsProvider, useLocations } from "@/controller";
 import { type Clock, fakeClock } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
-import { presentLocationRows } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { buildReferenceDay } from "@/test/referenceDay";
+import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationList } from "@/views/shared";
 import { cityEntry } from "./locationsUiWorld";
+import {
+  BUDGET_ROW_COUNT,
+  BUDGET_SECOND_MOMENT,
+  buildBudgetLocations,
+  presentBudgetRows,
+} from "./rowBudgetWorld";
 
 const feature = await loadFeature("../locations_utc_offset_unit.feature");
 
-const ROW_BUDGET_MS = 50;
-const BUDGET_ROW_COUNT = 50;
 const UNKNOWN_ZONE_LABEL = "Olympus";
 const RUSSIAN_LANGUAGE = "ru";
 const ENGLISH_LANGUAGE = "en";
@@ -37,7 +40,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let switchableClock: Clock;
   let latestLocations: LocationsHandle;
   let storedLocations: ReturnType<typeof buildLocation>[];
-  let elapsedMs: number;
+  let workCount: WorkCount;
 
   const buildKnownLocation = (label: string) =>
     buildLocation({ ...cityEntry(label) });
@@ -95,6 +98,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const containList = (_ctx: unknown, ...cities: string[]) => {
     storedLocations = cities.map(buildKnownLocation);
   };
+
+  f.AfterEachScenario(() => workCount?.stop());
 
   f.BeforeEachScenario(async () => {
     cleanup();
@@ -244,27 +249,30 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @show-utc-offset-on-location-rows @NFR-P1
-  f.Scenario("50 rows within the budget", ({ Given, When, Then }) => {
-    Given("{int} locations", (_ctx, count: number) => {
-      storedLocations = Array.from({ length: count }, (_, index) =>
-        buildLocation({ label: `City ${index}` }),
-      );
-      expect(storedLocations).toHaveLength(BUDGET_ROW_COUNT);
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
+  f.Scenario("50 rows within the budget", ({ Given, When, Then, And }) => {
+    Given(
+      "{int} locations whose rows have been presented with offsets once",
+      (_ctx, count: number) => {
+        expect(count).toBe(BUDGET_ROW_COUNT);
+        storedLocations = buildBudgetLocations(count);
+        presentBudgetRows(storedLocations);
+      },
+    );
+    When(
+      "their rows are presented with offsets again at another minute of the same day",
+      () => {
+        workCount = startWorkCount();
+        presentBudgetRows(storedLocations, { timestamp: BUDGET_SECOND_MOMENT });
+        workCount.stop();
+      },
+    );
+    Then("no date, time or region name formatter is built", () => {
+      expect(workCount.formatters()).toBe(0);
+      expect(workCount.displayNames()).toBe(0);
     });
-    When("their rows are presented with offsets", () => {
-      const startedAt = performance.now();
-      presentLocationRows(storedLocations, {
-        language: ENGLISH_LANGUAGE,
-        instant: currentClock.instant(),
-        translate: i18n.getFixedT(ENGLISH_LANGUAGE),
-        deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
-        referenceDay: buildReferenceDay(currentClock.instant()),
-      });
-      elapsedMs = performance.now() - startedAt;
-    });
-    Then("it takes at most {int} ms", (_ctx, budgetMs: number) => {
-      expect(budgetMs).toBe(ROW_BUDGET_MS);
-      expect(elapsedMs).toBeLessThanOrEqual(budgetMs);
+    And("no time zone transition is looked up", () => {
+      expect(workCount.transitionLookups()).toBe(0);
     });
   });
 });
