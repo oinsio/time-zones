@@ -113,12 +113,14 @@ Vitest picks up steps files via the pattern `src/**/*.steps.{ts,tsx}` in `vitest
 |-------------------------------|----------------------------|--------------------------|
 | Business logic (TZ math, DST) | yes                        | no                       |
 | Data operations (storage)     | yes                        | no                       |
-| Performance (operation time)  | yes (performance.now)      | no                       |
+| Performance (work bounds: formatters, lookups, passes) | yes (counted, never performance.now) | no |
 | Keyboard accessibility        | no                         | yes                      |
 | aria-labels, focus management | no                         | yes                      |
 | Responsive layout             | no                         | yes                      |
 | CSS animations, transitions   | no                         | yes                      |
 | Navigation (URL, routing)     | partially (mock)           | yes                      |
+
+Timing is never asserted in unit or BDD tests: real durations come from a `*.bench.ts` benchmark (`pnpm bench`), reported by the non-blocking CI `benchmark` job (ADR-0008). <!-- implements FR8 of replace-wall-clock-row-budgets-with-deterministic-checks -->
 
 ## Dependencies
 
