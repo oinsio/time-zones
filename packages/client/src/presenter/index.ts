@@ -1,6 +1,7 @@
 // Public API of the presenter layer (ADR-0002).
 // Implements FR5, FR8, FR10 of add-locations-via-search (D9).
 
+export { DayPeriod, type DayPeriodStop } from "@/model";
 // Implements FR3, FR4, FR7, FR9 of select-date-with-calendar-and-now.
 export {
   type CalendarDayCell,
@@ -13,6 +14,8 @@ export {
   type PresentedDateBar,
   presentDateBar,
 } from "./dateBar";
+// Implements FR1, FR2, FR7, FR9 of add-time-sliders-to-location-cards.
+export type { HourLabel, PresentedDayTrack } from "./dayTrack";
 // Implements FR1, FR2 of show-local-time-and-date-on-location-cards.
 export { formatLocalDate, formatLocalTime } from "./localDateTime";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";

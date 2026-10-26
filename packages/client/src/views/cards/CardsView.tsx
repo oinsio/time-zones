@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LocationsStatus, useLocations } from "@/controller";
+import { LocationsStatus, useLocations, useTimeSelection } from "@/controller";
 import {
   LocationList,
   LocationSearch,
@@ -12,11 +12,14 @@ import {
  * search that adds locations.
  * Implements FR7, UX1 of add-main-page-scaffold and FR10, FR12, FR17, NFR-A2,
  * NFR-A3 of add-locations-via-search (D10).
+ * Implements FR3, FR4 of add-time-sliders-to-location-cards (D8): hands the
+ * track selection and move commands to the list.
  */
 export default function CardsView() {
   const { t } = useTranslation();
   const { rows, loadStatus, removeLocation, moveLocation, resetLocations } =
     useLocations();
+  const { selectTrackFraction, moveTrack } = useTimeSelection();
   const addLocationButtonRef = useRef<HTMLButtonElement>(null);
   const hasRemovedLastLocation = useRef(false);
   const [announcement, setAnnouncement] = useState("");
@@ -56,6 +59,8 @@ export default function CardsView() {
           rows={rows}
           onRemove={handleRemove}
           onMove={moveLocation}
+          onSelectTrackFraction={selectTrackFraction}
+          onMoveTrack={moveTrack}
         />
       )}
       <LocationSearch

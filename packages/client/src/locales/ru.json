@@ -32,6 +32,8 @@
     "addLocation": "Добавить место",
     "removeLocation": "Удалить: {{city}}",
     "moveLocation": "Переместить {{city}}",
+    "timeSliderLabel": "Время — {{city}}",
+    "timeSliderValue": "{{time}}, {{date}}",
     "reorderRoleDescription": "перемещаемый элемент",
     "reorderInstructions": "Чтобы переместить место, нажмите Пробел или Enter. Меняйте позицию стрелками вверх и вниз. Нажмите Пробел или Enter ещё раз, чтобы отпустить, или Escape для отмены.",
     "reorderPickedUp": "{{city}}: взято, позиция {{position}} из {{total}}",

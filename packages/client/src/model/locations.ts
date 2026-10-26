@@ -1,6 +1,7 @@
 import { DEVICE_TIME_ZONE_FALLBACK_ID } from "@/constants";
 import { moveLocationInList } from "./moveLocation";
 import { reduceReferenceMoment } from "./reduceReferenceMoment";
+import { reduceSelectInstant } from "./reduceSelectInstant";
 import { LIVE_REFERENCE_MOMENT, type ReferenceMoment } from "./referenceMoment";
 import { canonicalizeTimeZoneId } from "./timeZoneId";
 
@@ -10,6 +11,7 @@ import { canonicalizeTimeZoneId } from "./timeZoneId";
  * reorder-locations-by-drag-and-drop.
  * Implements FR3, FR4 of mark-device-time-zone-in-location-list (D1).
  * Implements FR1 of select-date-with-calendar-and-now (D1): the reference moment.
+ * Implements FR3, FR8 of add-time-sliders-to-location-cards (D1): SELECT_INSTANT.
  */
 
 export type Location = {
@@ -44,6 +46,7 @@ export enum LocationCommandType {
   SET_DATE = "SET_DATE",
   SHIFT_DATE = "SHIFT_DATE",
   RESET_TO_NOW = "RESET_TO_NOW",
+  SELECT_INSTANT = "SELECT_INSTANT",
 }
 
 export enum LocationErrorCode {
@@ -53,6 +56,7 @@ export enum LocationErrorCode {
   LOCATION_POSITION_OUT_OF_RANGE = "LOCATION_POSITION_OUT_OF_RANGE",
   INVALID_DATE = "INVALID_DATE",
   DATE_OUT_OF_RANGE = "DATE_OUT_OF_RANGE",
+  INVALID_INSTANT = "INVALID_INSTANT",
 }
 
 export type LocationCommand =
@@ -77,7 +81,9 @@ export type LocationCommand =
   /** `date` is an ISO date, `now` an ISO 8601 timestamp with `Z`. */
   | { type: LocationCommandType.SET_DATE; date: string; now: string }
   | { type: LocationCommandType.SHIFT_DATE; days: number; now: string }
-  | { type: LocationCommandType.RESET_TO_NOW };
+  | { type: LocationCommandType.RESET_TO_NOW }
+  /** `instant` is an ISO 8601 timestamp with `Z`. */
+  | { type: LocationCommandType.SELECT_INSTANT; instant: string };
 
 export type LocationsReduceResult =
   | { ok: true; state: LocationsState }
@@ -149,5 +155,7 @@ export function reduceLocations(
     case LocationCommandType.SHIFT_DATE:
     case LocationCommandType.RESET_TO_NOW:
       return reduceReferenceMoment(state, command);
+    case LocationCommandType.SELECT_INSTANT:
+      return reduceSelectInstant(state, command);
   }
 }

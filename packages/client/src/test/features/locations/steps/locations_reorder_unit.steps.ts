@@ -19,6 +19,7 @@ import { presentLocationRows } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
+import { buildReferenceDay } from "@/test/referenceDay";
 import { LocationList } from "@/views/shared";
 import {
   cityEntry,
@@ -223,6 +224,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           rows,
           onRemove: vi.fn(),
           onMove: vi.fn(),
+          onSelectTrackFraction: vi.fn(),
+          onMoveTrack: vi.fn(),
         }),
       );
     });
@@ -265,6 +268,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             instant: fakeClock(BUDGET_INSTANT).instant(),
             translate: i18n.t,
             deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
+            referenceDay: buildReferenceDay(
+              fakeClock(BUDGET_INSTANT).instant(),
+            ),
           });
         }
         elapsedMs = performance.now() - startedAt;

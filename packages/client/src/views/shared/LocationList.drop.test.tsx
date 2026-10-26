@@ -51,7 +51,15 @@ const dropOver = (activeId: string, overId: string | null) =>
 describe("LocationList drop", () => {
   it("should emit the moved id and the index of the row it is dropped over", () => {
     const onMove = vi.fn();
-    render(<LocationList rows={rows} onRemove={vi.fn()} onMove={onMove} />);
+    render(
+      <LocationList
+        rows={rows}
+        onRemove={vi.fn()}
+        onMove={onMove}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
+    );
     dropOver("moscow", "kyiv");
     expect(onMove).toHaveBeenCalledExactlyOnceWith("moscow", 2);
   });
@@ -61,7 +69,15 @@ describe("LocationList drop", () => {
     ["on itself", "tokyo"],
   ])("should emit nothing when dropped %s", (_case, overId) => {
     const onMove = vi.fn();
-    render(<LocationList rows={rows} onRemove={vi.fn()} onMove={onMove} />);
+    render(
+      <LocationList
+        rows={rows}
+        onRemove={vi.fn()}
+        onMove={onMove}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
+    );
     dropOver("tokyo", overId);
     expect(onMove).not.toHaveBeenCalled();
   });
@@ -69,9 +85,23 @@ describe("LocationList drop", () => {
   it("should hand dnd-kit the same items array while the rows are unchanged", () => {
     sortableItemsSeen.length = 0;
     const { rerender } = render(
-      <LocationList rows={rows} onRemove={vi.fn()} onMove={vi.fn()} />,
+      <LocationList
+        rows={rows}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
     );
-    rerender(<LocationList rows={rows} onRemove={vi.fn()} onMove={vi.fn()} />);
+    rerender(
+      <LocationList
+        rows={rows}
+        onRemove={vi.fn()}
+        onMove={vi.fn()}
+        onSelectTrackFraction={() => undefined}
+        onMoveTrack={() => undefined}
+      />,
+    );
     expect(sortableItemsSeen[1]).toBe(sortableItemsSeen[0]);
   });
 });

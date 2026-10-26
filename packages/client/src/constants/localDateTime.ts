@@ -10,3 +10,9 @@ export const LOCAL_DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   day: "numeric",
   month: "short",
 };
+
+// Implements FR7 of add-time-sliders-to-location-cards (D5).
+export const HOUR_LABEL_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  hour: "2-digit",
+  hourCycle: "h23",
+};

@@ -12,6 +12,16 @@ Feature: Wall-clock resolution
     When the user moves to the next day again
     Then the bar shows no note
 
+  @add-time-sliders-to-location-cards @FR5 @M4
+  Scenario: A time selection ends the gap note
+    Given the device time zone is "America/New_York"
+    And the current instant is "2026-03-07T07:30:00Z"
+    And the app is open
+    And the user moved to the next day, so the bar shows the gap note
+    When the user moves a day track to the next 15-minute step
+    Then the moment is pinned to "2026-03-08T07:45:00Z" with the status "UNIQUE"
+    And the bar shows no note
+
   @select-date-with-calendar-and-now @FR4 @M3
   Scenario Outline: Wall-clock outcomes
     Given the device time zone is "America/New_York"

@@ -75,6 +75,8 @@ export const createDeviceTimeZoneWorld = () => {
             rows={latestLocations.rows}
             onRemove={latestLocations.removeLocation}
             onMove={latestLocations.moveLocation}
+            onSelectTrackFraction={() => undefined}
+            onMoveTrack={() => undefined}
           />
         );
       };

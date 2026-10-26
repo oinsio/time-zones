@@ -16,6 +16,7 @@ import {
   MIN_LOCATIONS_TO_REORDER,
   REORDER_POINTER_ACTIVATION_DISTANCE_PX,
 } from "@/constants";
+import type { TrackMove } from "@/controller";
 import { usePrefersReducedMotion } from "@/controller";
 import type { LocationRow as LocationRowModel } from "@/presenter";
 import { LocationRow } from "./LocationRow";
@@ -27,6 +28,8 @@ type LocationListProps = {
   rows: readonly LocationRowModel[];
   onRemove: (id: string) => void;
   onMove: (id: string, targetIndex: number) => void;
+  onSelectTrackFraction: (fraction: number) => void;
+  onMoveTrack: (move: TrackMove) => void;
 };
 
 /**
@@ -36,8 +39,16 @@ type LocationListProps = {
  * Implements FR10, NFR-A3 of add-locations-via-search (D10).
  * Implements FR1, FR3, FR7, UX2, UX3 of reorder-locations-by-drag-and-drop
  * (D5): a drop outside the list or on the card itself moves nothing.
+ * Implements FR3, FR4 of add-time-sliders-to-location-cards (D8): passes the
+ * track selection and move handlers to each row.
  */
-export function LocationList({ rows, onRemove, onMove }: LocationListProps) {
+export function LocationList({
+  rows,
+  onRemove,
+  onMove,
+  onSelectTrackFraction,
+  onMoveTrack,
+}: LocationListProps) {
   const removeButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const focusIndexAfterRemoval = useRef<number | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -91,6 +102,8 @@ export function LocationList({ rows, onRemove, onMove }: LocationListProps) {
                 removeButtons.current[rowIndex] = button;
               }}
               row={row}
+              onSelectTrackFraction={onSelectTrackFraction}
+              onMoveTrack={onMoveTrack}
               onRemove={(id) => handleRemove(rowIndex, id)}
               isReorderable={rows.length >= MIN_LOCATIONS_TO_REORDER}
               prefersReducedMotion={prefersReducedMotion}

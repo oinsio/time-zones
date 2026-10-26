@@ -7,6 +7,7 @@ import { fakeClock } from "@/lib/temporal";
 import { presentLocationRows } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { buildReferenceDay } from "@/test/referenceDay";
 import {
   createLocalTimeWorld,
   ENGLISH_LANGUAGE,
@@ -185,6 +186,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         instant: fakeClock(budgetInstant).instant(),
         translate: i18n.getFixedT(ENGLISH_LANGUAGE),
         deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
+        referenceDay: buildReferenceDay(fakeClock(budgetInstant).instant()),
       });
       elapsedMs = performance.now() - startedAt;
     });

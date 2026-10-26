@@ -4,6 +4,10 @@ import {
   showNextDay,
 } from "../../date_selection/steps/dateSelectionE2eHelpers";
 import { englishLocale } from "../../main_page/steps/englishTexts";
+import {
+  selectTrackFraction,
+  timeTextOf,
+} from "../../time_selection/steps/timeSelectionE2eHelpers";
 import type { LocationsWorld } from "./locations_ui_e2e.fixtures";
 import {
   buildStoredLocations,
@@ -22,6 +26,9 @@ const RESULTS_QUERY = "Mos";
 const NO_MATCHES_QUERY = "qqqq";
 const ABBREVIATION_QUERY = "IST";
 const LIST_CITY_NAMES = ["Almaty", "Moscow"];
+const TIME_SELECTED_CITY = "Almaty";
+const TIME_SELECTED_PERCENT = 75;
+const TIME_SELECTED_LABEL = "18:00";
 
 /** The UI states of the locations screen that have a screen of their own. */
 export enum LocationsState {
@@ -37,6 +44,7 @@ export enum LocationsState {
   IST_RESULTS = "IST results",
   PINNED = "pinned",
   CALENDAR = "calendar",
+  TIME_SELECTED = "time-selected",
 }
 
 /**
@@ -101,6 +109,21 @@ export async function enterLocationsState(
       await openSearch(page);
       await typeQuery(page, ABBREVIATION_QUERY);
       await expect(resultOption(page, "Kolkata")).toBeVisible();
+      break;
+    case LocationsState.TIME_SELECTED:
+      await world.seedList(buildStoredLocations(LIST_CITY_NAMES));
+      await world.reloadIfOpen();
+      await expect(page.getByRole("listitem")).toHaveCount(
+        LIST_CITY_NAMES.length,
+      );
+      await selectTrackFraction(
+        page,
+        TIME_SELECTED_CITY,
+        TIME_SELECTED_PERCENT,
+      );
+      await expect(timeTextOf(page, TIME_SELECTED_CITY)).toHaveText(
+        TIME_SELECTED_LABEL,
+      );
       break;
     case LocationsState.PINNED:
     case LocationsState.CALENDAR:

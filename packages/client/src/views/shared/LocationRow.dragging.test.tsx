@@ -35,6 +35,8 @@ const renderWithDragging = (isDragging: boolean) => {
       <LocationRow
         row={row}
         onRemove={vi.fn()}
+        onSelectTrackFraction={vi.fn()}
+        onMoveTrack={vi.fn()}
         isReorderable
         prefersReducedMotion={false}
       />
