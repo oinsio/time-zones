@@ -49,12 +49,21 @@ Then(
       const labels = row.locator("[data-hour-label]");
       await expect(labels).toHaveCount(labelCount);
       const bar = await requireBox(row.locator("[data-day-track-bar]"));
+      const labelBoxes = [];
       for (const label of await labels.all()) {
         await expect(label).toBeVisible();
-        expect((await requireBox(label)).y).toBeGreaterThanOrEqual(
+        const labelBox = await requireBox(label);
+        expect(labelBox.y).toBeGreaterThanOrEqual(
           bar.y + bar.height - TOLERANCE_PX,
         );
+        labelBoxes.push(labelBox);
       }
+      const firstBox = labelBoxes[0];
+      const lastBox = labelBoxes[labelBoxes.length - 1];
+      expect(firstBox.x).toBeGreaterThanOrEqual(bar.x - TOLERANCE_PX);
+      expect(lastBox.x + lastBox.width).toBeLessThanOrEqual(
+        bar.x + bar.width + TOLERANCE_PX,
+      );
     }
   },
 );

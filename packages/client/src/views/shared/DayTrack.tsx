@@ -30,6 +30,7 @@ type TouchGesture = {
   decision: TouchGestureDecision;
 };
 
+// Stryker disable all: not equivalent — label alignment is layout, untested in jsdom by design (D9), covered by time_selection_layout_e2e.feature
 const LABEL_ALIGNMENT_CLASS_NAMES = [
   "",
   "-translate-x-1/2",
@@ -37,6 +38,7 @@ const LABEL_ALIGNMENT_CLASS_NAMES = [
   "-translate-x-1/2",
   "-translate-x-full",
 ];
+// Stryker restore all
 
 /**
  * The day track of one card: a slider coloured by the local day periods,
@@ -156,6 +158,7 @@ export function DayTrack({
           <span
             key={hourLabel.fraction}
             data-hour-label
+            // Stryker disable next-line StringLiteral: equivalent — every label index has a class
             className={`absolute top-0 ${LABEL_ALIGNMENT_CLASS_NAMES[labelIndex] ?? ""}`}
             style={{ left: formatPercent(hourLabel.fraction) }}
           >
