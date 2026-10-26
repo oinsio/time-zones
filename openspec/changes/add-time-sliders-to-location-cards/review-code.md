@@ -152,7 +152,10 @@ Constants files hold no logic and were not mutated.
 - Impact: NFR-R3 ("The approved screenshots at 375 px and 1024 px … show the tracks. The existing "list", "pinned" and "calendar" baselines are re-approved") and the spec scenario "Screenshots show the tracks" are not met, and a ticked task is not done. The wide-screen baselines approve a screen without the feature: a regression that drops or breaks the tracks at 1024 px in those states (e.g. the track hidden by a layout change) would still pass the visual check.
 - Fix: Re-run the screenshot outline for those states with `--update-snapshots`, one project at a time: `npx playwright test -c playwright.bdd.config.ts --grep "Screenshot of the (list|pinned|calendar) state at 1024" --project chromium --update-snapshots`, then the same with `--project mobile-chrome`. Open the 12 new PNGs and check that each card shows its gradient track, handle and five hour labels (rows dimmed behind the dialog in "calendar"). Then run the `--grep Screenshot` command of task 7.4 without `--update-snapshots`, and commit the 12 updated baselines.
 - Fix risk: The baselines are re-approved from the current implementation, so a layout defect would become the new baseline unless the PNGs are looked at. Nothing in code changes. The 2.5% tolerance stays as it is; changing it would affect every other screenshot and is outside this change.
-- Status: open
+- Status: fixed
+- Resolution: re-generated the 12 baselines of "list", "pinned" and "calendar" at 1024 px
+  with `--update-snapshots=all` in both projects (the default mode skips them within the 2.5%
+  tolerance); opened them and each card shows its track, handle and five hour labels.
 
 ### R2 — WARNING — DayTrack.tsx mutation score below 90%: hour-label edge alignment is tested nowhere
 - Location: `packages/client/src/views/shared/DayTrack.tsx:33`
@@ -161,7 +164,10 @@ Constants files hold no logic and were not mutated.
 - Impact: The file is under the project's minimum mutation score, and dropping the alignment classes (for example in a later refactor of the label row) passes every test, although the first label then sticks out half its width past the left end of the track and the last one past the right end, unlike the approved tablet screen.
 - Fix: In the step "every track shows {int} hour labels under its bar" (`steps/time_selection_labels_e2e.steps.ts:44`), also assert that the first label's box `x` is at least the bar's `x` − 1 and that the last label's `x + width` is at most the bar's `x + width` + 1 (that step already reads label boxes with `requireBox`). Then mark the layout-only lines for Stryker the way `views/shared/CalendarDialog.tsx:57,67` already does: `// Stryker disable all: not equivalent — label alignment is layout, untested in jsdom by design (D9), covered by time_selection_layout_e2e.feature` before line 33 with a `// Stryker restore all` after line 39, and `// Stryker disable next-line StringLiteral: equivalent — every label index has a class` above line 159. Re-run `npx stryker run --mutate 'src/views/shared/DayTrack.tsx'` and check it is ≥ 90%.
 - Fix risk: The disable comments hide any future mutant on those lines from Stryker, so the E2E assertion becomes their only guard. A 1 px tolerance on label boxes could be flaky with sub-pixel layout; widen it to 2 px if needed. The E2E runs in both `chromium` and `mobile-chrome` at 1024 px, where the labels are visible.
-- Status: open
+- Status: fixed
+- Resolution: the step "every track shows {int} hour labels under its bar" now asserts the first
+  label starts at the bar left edge and the last ends at its right edge (1 px tolerance); layout-only
+  lines carry Stryker disable comments as in CalendarDialog.tsx. DayTrack.tsx now scores 100%.
 
 ### R3 — SUGGESTION — Redundant clause in the touch decision leaves two equivalent mutants
 - Location: `packages/client/src/views/shared/dayTrackTouch.ts:30`
@@ -170,7 +176,9 @@ Constants files hold no logic and were not mutated.
 - Impact: Low: behaviour is correct, but the dead clause costs 4–5 points of mutation score on a new file and suggests a case that does not exist.
 - Fix: Reduce the condition to `horizontalDistance > TRACK_TOUCH_SLOP_PX`, with a one-line comment that the vertical case was decided above. Keep `dayTrackTouch.test.ts` as it is; it should stay green. Re-run `npx stryker run --mutate 'src/views/shared/dayTrackTouch.ts'`.
 - Fix risk: Behaviour stays exactly what design D7 describes ("`SELECT` when the horizontal distance exceeds `TRACK_TOUCH_SLOP_PX` and the vertical one"), but the `SELECT` branch then depends on staying below the `ABANDON` branch; the existing `it.each` case "12 px right, 12 px up → `ABANDON`" in `dayTrackTouch.test.ts` catches a reordering.
-- Status: open
+- Status: fixed
+- Resolution: reduced the SELECT condition to the slop check with a comment; dayTrackTouch.test.ts
+  stays green and dayTrackTouch.ts scores 100% in Stryker.
 
 ## Verdict
 
