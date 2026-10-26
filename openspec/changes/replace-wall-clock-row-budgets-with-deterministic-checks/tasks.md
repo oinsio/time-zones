@@ -21,7 +21,7 @@ For each task: first change the feature file to the spec delta's steps and tags 
 
 - [ ] 3.1 `src/test/features/locations/locations_local_time_unit.feature` + `steps/locations_local_time_unit.steps.tsx`: "50 rows within the budget" (FR1) and the new "Labels are unchanged by formatter reuse" (FR5). Verify: `npx vitest run src/test/features/locations/steps/locations_local_time_unit.steps.tsx`.
 - [ ] 3.2 `locations_utc_offset_unit.feature` + steps: "50 rows within the budget" (FR1). Verify: `npx vitest run src/test/features/locations/steps/locations_utc_offset_unit.steps.tsx`.
-- [ ] 3.3 `locations_device_time_zone_unit.feature` + steps: "50 rows within the budget" as the cold bound (FR2, D3: `vi.resetModules()` and dynamic `import("@/presenter")` in the Given step, with zones from `Intl.supportedValuesOf("timeZone")`). Verify: `npx vitest run src/test/features/locations/steps/locations_device_time_zone_unit.steps.tsx`.
+- [ ] 3.3 `locations_device_time_zone_unit.feature` + steps: "50 rows within the budget" as the cold bound (FR2, D3: `vi.resetModules()` and dynamic `import("@/presenter")` in the Given step, keeping the existing data: `BUDGET_MATCHING_ROW_COUNT` rows in the device time zone and the rest in `Asia/Tokyo`, so that several rows share each zone and a formatter built per row exceeds the per-zone bound). Verify: `npx vitest run src/test/features/locations/steps/locations_device_time_zone_unit.steps.tsx`.
 - [ ] 3.4 `locations_reorder_unit.feature` + steps: "50 locations within the budget" (FR1), plus the order assertion from the spec delta. Verify: `npx vitest run src/test/features/locations/steps/locations_reorder_unit.steps.ts`.
 
 ## 4. Date-change and time-selection scenarios (FR1, FR3, FR5, NFR-P1, design D4)
