@@ -3,30 +3,46 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen, within } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
-import { fakeClock } from "@/lib/temporal";
-import { presentLocationRows } from "@/presenter";
-import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
-import { buildLocation } from "@/test/factories/buildLocation";
-import { buildReferenceDay } from "@/test/referenceDay";
+import {
+  LOCAL_DATE_FORMAT_OPTIONS,
+  LOCAL_TIME_FORMAT_OPTIONS,
+} from "@/constants";
+import type { SupportedLanguage } from "@/i18n";
+import { Temporal } from "@/lib/temporal";
+import type { LocationRow } from "@/presenter";
+import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
+import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import {
   createLocalTimeWorld,
   ENGLISH_LANGUAGE,
   RUSSIAN_LANGUAGE,
 } from "./localTimeWorld";
+import {
+  BUDGET_ROW_COUNT,
+  BUDGET_SECOND_MOMENT,
+  buildBudgetLocations,
+  expectNoWarmWork,
+  presentBudgetRows,
+} from "./rowBudgetWorld";
 
 const feature = await loadFeature("../locations_local_time_unit.feature");
 
-const ROW_BUDGET_MS = 50;
-const BUDGET_ROW_COUNT = 50;
+const LABEL_CITIES = ["Kolkata", "Kathmandu", "New York"];
+const LABEL_LANGUAGES: SupportedLanguage[] = [
+  ENGLISH_LANGUAGE,
+  RUSSIAN_LANGUAGE,
+];
 const UNKNOWN_ZONE_LABEL = "Olympus";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createLocalTimeWorld();
   let budgetLocations: ReturnType<typeof buildLocation>[];
   let budgetInstant: string;
-  let elapsedMs: number;
+  let workCount: WorkCount;
+  let presentedByLanguage: [SupportedLanguage, LocationRow[]][];
 
   f.BeforeEachScenario(world.reset);
+  f.AfterEachScenario(() => workCount?.stop());
   f.AfterAllScenarios(world.finish);
 
   const givenInstant = (_ctx: unknown, timestamp: string) => {
@@ -171,28 +187,69 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @show-local-time-and-date-on-location-cards @NFR-P1
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
   f.Scenario("50 rows within the budget", ({ Given, When, Then }) => {
-    Given("{int} locations", (_ctx, count: number) => {
-      budgetInstant = "2026-07-15T12:00:00Z";
-      budgetLocations = Array.from({ length: count }, (_, index) =>
-        buildLocation({ label: `City ${index}` }),
-      );
-      expect(budgetLocations).toHaveLength(BUDGET_ROW_COUNT);
+    Given(
+      "{int} locations whose rows have been presented with time and date once",
+      (_ctx, count: number) => {
+        expect(count).toBe(BUDGET_ROW_COUNT);
+        budgetLocations = buildBudgetLocations(count);
+        presentBudgetRows(budgetLocations);
+      },
+    );
+    When("their rows are presented with time and date again", () => {
+      workCount = startWorkCount();
+      presentBudgetRows(budgetLocations, { timestamp: BUDGET_SECOND_MOMENT });
+      workCount.stop();
     });
-    When("their rows are presented with time and date", () => {
-      const startedAt = performance.now();
-      presentLocationRows(budgetLocations, {
-        language: ENGLISH_LANGUAGE,
-        instant: fakeClock(budgetInstant).instant(),
-        translate: i18n.getFixedT(ENGLISH_LANGUAGE),
-        deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
-        referenceDay: buildReferenceDay(fakeClock(budgetInstant).instant()),
-      });
-      elapsedMs = performance.now() - startedAt;
-    });
-    Then("it takes at most {int} ms", (_ctx, budgetMs: number) => {
-      expect(budgetMs).toBe(ROW_BUDGET_MS);
-      expect(elapsedMs).toBeLessThanOrEqual(budgetMs);
+    Then("no date, time or region name formatter is built", () => {
+      expectNoWarmWork(workCount);
     });
   });
+
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR5 @UX1
+  f.Scenario(
+    "Labels are unchanged by formatter reuse",
+    ({ Given, When, Then }) => {
+      Given("the list contains Kolkata, Kathmandu and New York", () => {
+        budgetLocations = LABEL_CITIES.map((label) =>
+          buildLocation({ label, ...KNOWN_CITIES[label] }),
+        );
+      });
+      When(
+        "their rows are presented at {string} in English and then in Russian",
+        (_ctx, timestamp: string) => {
+          budgetInstant = timestamp;
+          presentedByLanguage = LABEL_LANGUAGES.map((language) => [
+            language,
+            presentBudgetRows(budgetLocations, { timestamp, language }),
+          ]);
+        },
+      );
+      Then(
+        "each row shows the same time and date labels as the platform's own date formatting gives for that zone",
+        () => {
+          for (const [language, rows] of presentedByLanguage) {
+            rows.forEach((row, index) => {
+              const platformDateTime = Temporal.Instant.from(
+                budgetInstant,
+              ).toZonedDateTimeISO(budgetLocations[index].timeZoneId);
+              expect(row.localTimeLabel).toBe(
+                platformDateTime.toLocaleString(
+                  language,
+                  LOCAL_TIME_FORMAT_OPTIONS,
+                ),
+              );
+              expect(row.localDateLabel).toBe(
+                platformDateTime.toLocaleString(
+                  language,
+                  LOCAL_DATE_FORMAT_OPTIONS,
+                ),
+              );
+            });
+          }
+        },
+      );
+    },
+  );
 });
