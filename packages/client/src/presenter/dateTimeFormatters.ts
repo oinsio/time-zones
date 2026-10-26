@@ -20,6 +20,7 @@ const FORMAT_OPTIONS_BY_KIND: Record<
   [DateTimeLabelKind.HOUR]: HOUR_LABEL_FORMAT_OPTIONS,
 };
 
+// Stryker disable next-line StringLiteral: equivalent — no language, zone and kind combine to the same joined text
 const CACHE_KEY_SEPARATOR = "|";
 
 const formattersByKey = new Map<string, Intl.DateTimeFormat>();
