@@ -12,7 +12,11 @@ import {
 } from "@/model";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
-import { startWorkCount, type WorkCount } from "@/test/workCounters";
+import {
+  MAX_TRANSITION_LOOKUPS_PER_ZONE,
+  startWorkCount,
+  type WorkCount,
+} from "@/test/workCounters";
 import { ENGLISH_LANGUAGE } from "./timeSelectionWorld";
 
 export const TRACK_BUDGET_ROW_COUNT = 50;
@@ -41,6 +45,23 @@ export const createTrackBudgetWorld = () => {
       referenceDay: getReferenceDay(next, now),
     });
   };
+  const prepare = async (timestamp: string, deviceTimeZoneId: string) => {
+    await i18n.changeLanguage(ENGLISH_LANGUAGE);
+    startInstant = timestamp;
+    state = {
+      ...INITIAL_LOCATIONS_STATE,
+      locations: Intl.supportedValuesOf("timeZone")
+        .slice(0, TRACK_BUDGET_ROW_COUNT)
+        .map((zone) => buildLocation({ timeZoneId: zone, label: zone })),
+      deviceTimeZoneId,
+    };
+    presentRows(state);
+  };
+  const shiftDateCommand = (days: number) => ({
+    type: LocationCommandType.SHIFT_DATE as const,
+    days,
+    now: startInstant,
+  });
   const measure = (command: Parameters<typeof reduceLocations>[1]) => {
     const outcome = reduceLocations(state, command);
     if (!outcome.ok) return;
@@ -58,26 +79,39 @@ export const createTrackBudgetWorld = () => {
       rows = presentRows(presentedState);
       workCount.stop();
     },
-    prepare: async (timestamp: string, deviceTimeZoneId: string) => {
-      await i18n.changeLanguage(ENGLISH_LANGUAGE);
-      startInstant = timestamp;
-      state = {
-        ...INITIAL_LOCATIONS_STATE,
-        locations: Intl.supportedValuesOf("timeZone")
-          .slice(0, TRACK_BUDGET_ROW_COUNT)
-          .map((zone) => buildLocation({ timeZoneId: zone, label: zone })),
-        deviceTimeZoneId,
-      };
-      presentRows(state);
-    },
+    prepare,
     measureSelection: (instant: string) =>
       measure({ type: LocationCommandType.SELECT_INSTANT, instant }),
-    measureDateChange: () =>
-      measure({
-        type: LocationCommandType.SHIFT_DATE,
-        days: ONE_DAY,
-        now: startInstant,
-      }),
+    measureDateChange: () => measure(shiftDateCommand(ONE_DAY)),
+    /** Presents the day `days` away from the prepared one, without the work counters. */
+    presentDateShift: (days: number) => {
+      const outcome = reduceLocations(state, shiftDateCommand(days));
+      if (outcome.ok) rows = presentRows(outcome.state);
+    },
+    /** Prepares rows for the day before `dayStart`, then moves the date onto it. */
+    prepareDayStarting: async (dayStart: string, deviceTimeZoneId: string) => {
+      const previousMoment = Temporal.Instant.from(dayStart)
+        .toZonedDateTimeISO(deviceTimeZoneId)
+        .subtract({ days: ONE_DAY })
+        .toInstant()
+        .toString();
+      await prepare(previousMoment, deviceTimeZoneId);
+      measure(shiftDateCommand(ONE_DAY));
+    },
+    expectNoFormatterBuilt: () => {
+      expect(workCount?.formatters()).toBe(0);
+      expect(workCount?.displayNames()).toBe(0);
+    },
+    expectNoTransitionLookup: () =>
+      expect(workCount?.transitionLookups()).toBe(0),
+    expectLookupsPerZoneAtMost: (maxLookups: number) => {
+      expect(maxLookups).toBe(MAX_TRANSITION_LOOKUPS_PER_ZONE);
+      const lookupsByZone = workCount?.transitionLookupsByZone();
+      expect(lookupsByZone?.size).toBeGreaterThan(0);
+      for (const lookups of lookupsByZone?.values() ?? []) {
+        expect(lookups).toBeLessThanOrEqual(maxLookups);
+      }
+    },
     expectEveryHandleAt: (fraction: number) => {
       expect(rows).toHaveLength(TRACK_BUDGET_ROW_COUNT);
       for (const row of rows) {
@@ -86,11 +120,7 @@ export const createTrackBudgetWorld = () => {
     },
     expectEveryTrackForDayStarting: (dayStart: string) => {
       expect(rows).toHaveLength(TRACK_BUDGET_ROW_COUNT);
-      const nextDay = reduceLocations(state, {
-        type: LocationCommandType.SHIFT_DATE,
-        days: ONE_DAY,
-        now: startInstant,
-      });
+      const nextDay = reduceLocations(state, shiftDateCommand(ONE_DAY));
       if (!nextDay.ok) throw new Error("the date change was rejected");
       expect(
         getReferenceDay(

@@ -76,6 +76,19 @@ export const createRowBudgetWorld = () => {
       deviceTimeZoneId: state.deviceTimeZoneId,
       referenceDay: buildReferenceDay(instant, state.deviceTimeZoneId),
     });
+  const presentDateShift = (days: number) => {
+    const outcome = reduceLocations(state, {
+      type: LocationCommandType.SHIFT_DATE,
+      days,
+      now: startInstant,
+    });
+    if (!outcome.ok) return;
+    rows = presentRows(
+      outcome.state.locations,
+      getEffectiveInstant(outcome.state, Temporal.Instant.from(startInstant)),
+    );
+  };
+
   return {
     workCount: () => workCount,
     stop: () => workCount?.stop(),
@@ -94,22 +107,11 @@ export const createRowBudgetWorld = () => {
     },
     measureDateChange: () => {
       workCount = startWorkCount();
-      const outcome = reduceLocations(state, {
-        type: LocationCommandType.SHIFT_DATE,
-        days: ONE_DAY,
-        now: startInstant,
-      });
-      if (outcome.ok) {
-        rows = presentRows(
-          outcome.state.locations,
-          getEffectiveInstant(
-            outcome.state,
-            Temporal.Instant.from(startInstant),
-          ),
-        );
-      }
+      presentDateShift(ONE_DAY);
       workCount.stop();
     },
+    /** Presents the day `days` away from the prepared one, without the work counters. */
+    presentDateShift,
     expectRowsCarryDateAt: (timestamp: string) => {
       expect(rows).toHaveLength(BUDGET_ROW_COUNT);
       expect(rows.map((row) => row.localIsoDate)).toEqual(

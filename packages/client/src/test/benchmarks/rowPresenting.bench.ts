@@ -1,5 +1,6 @@
 // Implements FR6, verifies NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D5).
 import { bench, describe } from "vitest";
+import { ONE_DAY } from "@/constants";
 import {
   INITIAL_LOCATIONS_STATE,
   LocationCommandType,
@@ -42,6 +43,8 @@ await dateChangeWorld.prepare(
   DATE_CHANGE_START_MOMENT,
   DATE_CHANGE_DEVICE_TIME_ZONE,
 );
+// Alternating days keep every sample on a day the stop cache does not hold.
+let dateShiftDays = -ONE_DAY;
 
 describe("row presenting", () => {
   bench(
@@ -85,7 +88,8 @@ describe("row presenting", () => {
   bench(
     "date change on 50 rows",
     () => {
-      dateChangeWorld.measureDateChange();
+      dateShiftDays = -dateShiftDays;
+      dateChangeWorld.presentDateShift(dateShiftDays);
     },
     options,
   );

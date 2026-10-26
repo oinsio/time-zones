@@ -5,17 +5,14 @@ import i18n from "i18next";
 import { expect, vi } from "vitest";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
-import {
-  MAX_FORMATTERS_PER_ZONE,
-  startWorkCount,
-  type WorkCount,
-} from "@/test/workCounters";
+import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import {
   badgeText,
   createDeviceTimeZoneWorld,
   ENGLISH_LANGUAGE,
   RUSSIAN_LANGUAGE,
 } from "./deviceTimeZoneWorld";
+import { expectFormattersPerZoneAtMost } from "./rowBudgetWorld";
 
 const feature = await loadFeature("../locations_device_time_zone_unit.feature");
 
@@ -153,6 +150,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @mark-device-time-zone-in-location-list @NFR-P1
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR2
   f.Scenario("50 rows within the budget", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
     And("50 locations of which some are in the device time zone", () => {
@@ -186,13 +184,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
     Then(
       "at most {int} date and time formatters are built per distinct time zone",
-      (_ctx, maxFormatters: number) => {
-        expect(maxFormatters).toBe(MAX_FORMATTERS_PER_ZONE);
-        expect(workCount.formattersByZone().size).toBeGreaterThan(1);
-        for (const formatterCount of workCount.formattersByZone().values()) {
-          expect(formatterCount).toBeLessThanOrEqual(maxFormatters);
-        }
-      },
+      (_ctx, maxFormatters: number) =>
+        expectFormattersPerZoneAtMost(workCount, maxFormatters),
     );
     And(
       "at most {int} region name formatter is built",

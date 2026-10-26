@@ -145,7 +145,8 @@ All runs were from `packages/client/`, one at a time, never in the background.
   - `rowBudgetWorld.ts` and `trackBudgetWorld.ts` are also imported by `rowPresenting.bench.ts` and `timeSelection.bench.ts`. Both worlds already import `expect` (`expectNoWarmWork`, `expectEveryHandleAt`), so new assertion helpers add no new kind of dependency to the benchmarks.
 
   R3 adds one line to the device steps file, so the move must leave room for it.
-- Status: open
+- Status: fixed
+- Resolution: moved the new scenario logic out of the three steps files: localTimeLabelsCheck.ts and createWarmRowsCheck (rowBudgetWorld.ts) for the local-time steps (now 200 lines), expectFormattersPerZoneAtMost (rowBudgetWorld.ts) for the device steps (now 197), and prepareDayStarting, expectLookupsPerZoneAtMost, expectNoFormatterBuilt (trackBudgetWorld.ts) plus the shared givens in dayTrackSteps.ts for the day-track steps (now 194). Step text unchanged, the cold import stays in the Given step; the three step files pass alone.
 
 ### R2 — WARNING — Date-change benchmarks time a cached day, not a date change
 - Location: `packages/client/src/test/benchmarks/timeSelection.bench.ts:29`
@@ -164,7 +165,8 @@ All runs were from `packages/client/`, one at a time, never in the background.
   3. In the two date-change benches, call `presentDateShift` with `days` alternating between `ONE_DAY` and `-ONE_DAY` on each iteration. Each sample then presents a day other than the cached one and computes its stops, without the counters.
   4. Optionally, add an uncounted selection function in the same way for "time selection on 50 rows", so that median also excludes the counter overhead.
 - Fix risk: Only tests and benchmarks change. The BDD scenarios keep calling `measureDateChange()` with the same counted work. Both worlds stay under 200 lines (107 and 120 now). `SHIFT_DATE` with negative days is the "previous day" command `reduceReferenceMoment` already supports. The date-change medians will rise to the real cost, about 20 ms locally per the probe. On a slow CI runner they may cross 50 ms and print a non-blocking warning, which is the signal FR6 asks for. Some samples may differ slightly because the days around `2026-03-08` include a DST day.
-- Status: open
+- Status: fixed
+- Resolution: added an uncounted presentDateShift(days) to trackBudgetWorld.ts and referenceMomentRowsWorld.ts; measureDateChange() still wraps it in startWorkCount(), so the BDD scenarios are unchanged. Both date-change benches alternate the sign of the shift, so each sample presents an uncached day. Date-change medians moved from about 2.4 ms to about 15 ms in pnpm bench.
 
 ### R3 — SUGGESTION — FR2 budget scenario steps lack this change's tag comment
 - Location: `packages/client/src/test/features/locations/steps/locations_device_time_zone_unit.steps.tsx:155`
@@ -173,7 +175,8 @@ All runs were from `packages/client/`, one at a time, never in the background.
 - Impact: A `grep` for this change's FR2 across step files finds no scenario, only the helpers. FR2 itself is still traced (`rowBudgetWorld.ts:1`, `dateTimeFormatters.ts:31`), so the cost is low.
 - Fix: Add `// @replace-wall-clock-row-budgets-with-deterministic-checks @FR2` on the line after `:155`, as `locations_local_time_unit.steps.tsx:189-190` does.
 - Fix risk: It adds one line to a file already over 200 lines. Apply it together with the R1 move.
-- Status: open
+- Status: fixed
+- Resolution: added the // @replace-wall-clock-row-budgets-with-deterministic-checks @FR2 tag comment before the 50-rows scenario in locations_device_time_zone_unit.steps.tsx.
 
 ## Verdict
 

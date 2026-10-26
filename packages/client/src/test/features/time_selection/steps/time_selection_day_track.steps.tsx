@@ -1,20 +1,15 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { ONE_DAY, TRACK_STEP_MINUTES } from "@/constants";
-import { Temporal } from "@/lib/temporal";
-import { buildLocation } from "@/test/factories/buildLocation";
-import { MAX_TRANSITION_LOOKUPS_PER_ZONE } from "@/test/workCounters";
-import { cityEntry } from "../../locations/steps/locationsUiWorld";
+import { TRACK_STEP_MINUTES } from "@/constants";
+import { createDayTrackSteps, UNKNOWN_ZONE_LABEL } from "./dayTrackSteps";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
 import { createTrackBudgetWorld } from "./trackBudgetWorld";
 import { createTrackLabelsCheck } from "./trackLabelsCheck";
 
 const feature = await loadFeature("../time_selection_day_track.feature");
 
-const PRECISION = 6;
 const BUDGET_DEVICE_TIME_ZONE = "UTC";
-const UNKNOWN_ZONE_LABEL = "Olympus Mons";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
@@ -27,23 +22,16 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.AfterEachScenario(budget.stop);
   f.AfterAllScenarios(world.finish);
 
-  const givenZone = (_ctx: unknown, zone: string) => world.setDeviceZone(zone);
-  const givenInstant = (_ctx: unknown, timestamp: string) =>
-    world.setInstant(timestamp);
-  const givenList = (_ctx: unknown, cities: string) =>
-    world.setStoredCities(cities);
-  const givenAppOpen = () => world.open();
-  const givenPinnedHere = () =>
-    world.selectFraction(world.rows()[0]?.dayTrack?.fraction ?? 0);
-  const whenNextMinute = (_ctx: unknown, timestamp: string) => {
-    world.clock().moveTo(timestamp);
-    world.runTick();
-  };
-  const thenEveryHandleAt = (_ctx: unknown, fraction: number) => {
-    for (const row of world.rows()) {
-      expect(row.dayTrack?.fraction).toBeCloseTo(fraction, PRECISION);
-    }
-  };
+  const {
+    givenZone,
+    givenInstant,
+    givenList,
+    givenAppOpen,
+    givenPinnedHere,
+    whenNextMinute,
+    thenEveryHandleAt,
+    givenMoscowAndUnknownZone,
+  } = createDayTrackSteps(world);
 
   // @add-time-sliders-to-location-cards @FR1
   f.Scenario("A 24-hour reference day", ({ Given, And, When, Then }) => {
@@ -88,15 +76,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("No track for an unknown zone", ({ Given, When, Then, And }) => {
     Given(
       "the list holds Moscow and a location whose zone the browser does not know",
-      () =>
-        world.setStoredLocations([
-          buildLocation(cityEntry("Moscow")),
-          buildLocation({
-            label: UNKNOWN_ZONE_LABEL,
-            timeZoneId: "Mars/Olympus_Mons",
-            countryCode: "",
-          }),
-        ]),
+      givenMoscowAndUnknownZone,
     );
     When("the list is presented", givenAppOpen);
     Then("that location's card shows no track", () =>
@@ -160,20 +140,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "the date moves to the next day and the rows are presented again",
         budget.measureDateChange,
       );
-      Then("no date, time or region name formatter is built", () => {
-        expect(budget.workCount()?.formatters()).toBe(0);
-        expect(budget.workCount()?.displayNames()).toBe(0);
-      });
+      Then(
+        "no date, time or region name formatter is built",
+        budget.expectNoFormatterBuilt,
+      );
       And(
         "at most {int} time zone transitions are looked up per zone",
-        (_ctx, maxLookups: number) => {
-          expect(maxLookups).toBe(MAX_TRANSITION_LOOKUPS_PER_ZONE);
-          const lookupsByZone = budget.workCount()?.transitionLookupsByZone();
-          expect(lookupsByZone?.size).toBeGreaterThan(0);
-          for (const lookups of lookupsByZone?.values() ?? []) {
-            expect(lookups).toBeLessThanOrEqual(maxLookups);
-          }
-        },
+        (_ctx, maxLookups: number) =>
+          budget.expectLookupsPerZoneAtMost(maxLookups),
       );
       And(
         "every row carries colour stops and hour labels for the day starting {string}",
@@ -190,20 +164,15 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Given(
         "50 locations whose rows have been presented for the day starting {string}",
         async (_ctx, dayStart: string) => {
-          const previousMoment = Temporal.Instant.from(dayStart)
-            .toZonedDateTimeISO(BUDGET_DEVICE_TIME_ZONE)
-            .subtract({ days: ONE_DAY })
-            .toInstant()
-            .toString();
-          await budget.prepare(previousMoment, BUDGET_DEVICE_TIME_ZONE);
-          budget.measureDateChange();
+          await budget.prepareDayStarting(dayStart, BUDGET_DEVICE_TIME_ZONE);
           budget.expectEveryTrackForDayStarting(dayStart);
         },
       );
       When("their rows are presented again for that day", budget.presentAgain);
-      Then("no time zone transition is looked up", () => {
-        expect(budget.workCount()?.transitionLookups()).toBe(0);
-      });
+      Then(
+        "no time zone transition is looked up",
+        budget.expectNoTransitionLookup,
+      );
     },
   );
 

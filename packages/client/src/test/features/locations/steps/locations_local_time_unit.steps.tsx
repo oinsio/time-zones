@@ -3,51 +3,30 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen, within } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
-import {
-  LOCAL_DATE_FORMAT_OPTIONS,
-  LOCAL_TIME_FORMAT_OPTIONS,
-} from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
-import { Temporal } from "@/lib/temporal";
-import type { LocationRow } from "@/presenter";
-import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { startWorkCount, type WorkCount } from "@/test/workCounters";
+import { buildLocation } from "@/test/factories/buildLocation";
+import { createLocalTimeLabelsCheck } from "./localTimeLabelsCheck";
 import {
   createLocalTimeWorld,
   ENGLISH_LANGUAGE,
   RUSSIAN_LANGUAGE,
 } from "./localTimeWorld";
-import {
-  BUDGET_ROW_COUNT,
-  BUDGET_SECOND_MOMENT,
-  buildBudgetLocations,
-  expectNoWarmWork,
-  presentBudgetRows,
-} from "./rowBudgetWorld";
+import { createWarmRowsCheck } from "./rowBudgetWorld";
 
 const feature = await loadFeature("../locations_local_time_unit.feature");
 
-const LABEL_CITIES = ["Kolkata", "Kathmandu", "New York"];
-const LABEL_LANGUAGES: SupportedLanguage[] = [
-  ENGLISH_LANGUAGE,
-  RUSSIAN_LANGUAGE,
-];
 const UNKNOWN_ZONE_LABEL = "Olympus";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createLocalTimeWorld();
-  let budgetLocations: ReturnType<typeof buildLocation>[];
-  let budgetInstant: string;
-  let workCount: WorkCount;
-  let presentedByLanguage: [SupportedLanguage, LocationRow[]][];
+  let labelsCheck: ReturnType<typeof createLocalTimeLabelsCheck>;
+  const warmRowsCheck = createWarmRowsCheck();
 
   f.BeforeEachScenario(world.reset);
-  f.AfterEachScenario(() => workCount?.stop());
+  f.AfterEachScenario(warmRowsCheck.stop);
   f.AfterAllScenarios(world.finish);
 
   const givenInstant = (_ctx: unknown, timestamp: string) => {
     world.setInstant(timestamp);
-    budgetInstant = timestamp;
   };
   const givenList = (_ctx: unknown, cities: string) =>
     world.setStoredCities(cities);
@@ -191,20 +170,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("50 rows within the budget", ({ Given, When, Then }) => {
     Given(
       "{int} locations whose rows have been presented with time and date once",
-      (_ctx, count: number) => {
-        expect(count).toBe(BUDGET_ROW_COUNT);
-        budgetLocations = buildBudgetLocations(count);
-        presentBudgetRows(budgetLocations);
-      },
+      (_ctx, count: number) => warmRowsCheck.presentOnce(count),
     );
-    When("their rows are presented with time and date again", () => {
-      workCount = startWorkCount();
-      presentBudgetRows(budgetLocations, { timestamp: BUDGET_SECOND_MOMENT });
-      workCount.stop();
-    });
-    Then("no date, time or region name formatter is built", () => {
-      expectNoWarmWork(workCount);
-    });
+    When("their rows are presented with time and date again", () =>
+      warmRowsCheck.presentAgain(),
+    );
+    Then("no date, time or region name formatter is built", () =>
+      warmRowsCheck.expectNoWarmWork(),
+    );
   });
 
   // @replace-wall-clock-row-budgets-with-deterministic-checks @FR5 @UX1
@@ -212,43 +185,15 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "Labels are unchanged by formatter reuse",
     ({ Given, When, Then }) => {
       Given("the list contains Kolkata, Kathmandu and New York", () => {
-        budgetLocations = LABEL_CITIES.map((label) =>
-          buildLocation({ label, ...KNOWN_CITIES[label] }),
-        );
+        labelsCheck = createLocalTimeLabelsCheck();
       });
       When(
         "their rows are presented at {string} in English and then in Russian",
-        (_ctx, timestamp: string) => {
-          budgetInstant = timestamp;
-          presentedByLanguage = LABEL_LANGUAGES.map((language) => [
-            language,
-            presentBudgetRows(budgetLocations, { timestamp, language }),
-          ]);
-        },
+        (_ctx, timestamp: string) => labelsCheck.presentAt(timestamp),
       );
       Then(
         "each row shows the same time and date labels as the platform's own date formatting gives for that zone",
-        () => {
-          for (const [language, rows] of presentedByLanguage) {
-            rows.forEach((row, index) => {
-              const platformDateTime = Temporal.Instant.from(
-                budgetInstant,
-              ).toZonedDateTimeISO(budgetLocations[index].timeZoneId);
-              expect(row.localTimeLabel).toBe(
-                platformDateTime.toLocaleString(
-                  language,
-                  LOCAL_TIME_FORMAT_OPTIONS,
-                ),
-              );
-              expect(row.localDateLabel).toBe(
-                platformDateTime.toLocaleString(
-                  language,
-                  LOCAL_DATE_FORMAT_OPTIONS,
-                ),
-              );
-            });
-          }
-        },
+        () => labelsCheck.expectPlatformLabels(),
       );
     },
   );

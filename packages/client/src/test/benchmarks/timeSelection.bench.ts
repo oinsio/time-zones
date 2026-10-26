@@ -1,5 +1,6 @@
 // Implements FR6, verifies NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D5).
 import { bench, describe } from "vitest";
+import { ONE_DAY } from "@/constants";
 import { createTrackBudgetWorld } from "../features/time_selection/steps/trackBudgetWorld";
 
 const WARMUP_ITERATIONS = 5;
@@ -14,6 +15,8 @@ const DEVICE_TIME_ZONE = "UTC";
 
 const trackWorld = createTrackBudgetWorld();
 await trackWorld.prepare(START_MOMENT, DEVICE_TIME_ZONE);
+// Alternating days keep every sample on a day the stop cache does not hold.
+let dateShiftDays = -ONE_DAY;
 
 describe("time selection", () => {
   bench(
@@ -26,7 +29,8 @@ describe("time selection", () => {
   bench(
     "date change on 50 tracks",
     () => {
-      trackWorld.measureDateChange();
+      dateShiftDays = -dateShiftDays;
+      trackWorld.presentDateShift(dateShiftDays);
     },
     options,
   );
