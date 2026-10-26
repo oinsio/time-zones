@@ -38,6 +38,7 @@ Add `src/test/workCounters.ts`. `startWorkCount()` installs counters and returns
 - `Intl.DateTimeFormat`, `Intl.DisplayNames` and `Intl.Collator` are replaced by a `Proxy` with a `construct` trap that counts and records the `timeZone` option, then constructs the original. Statics and `instanceof` pass through. A `Proxy` does not depend on how `vi.spyOn` handles `new`.
 - Every `toLocaleString` call on `Temporal.ZonedDateTime`, `Instant`, `PlainDate`, `PlainTime` and `PlainDateTime` prototypes counts as one formatter build, through `vi.spyOn(prototype, "toLocaleString")`. The polyfill builds those formatters through its private reference, which the `Proxy` cannot see. This closes the gap, so "no formatter is built" stays true to the spec.
 - `Temporal.ZonedDateTime.prototype.getTimeZoneTransition` is a method spy (transition lookups).
+- Every Temporal spy targets the classes of the `Temporal` imported from `@/lib/temporal` (the `temporal-polyfill` the app uses), never `globalThis.Temporal`: Node 26 has a native global `Temporal` with different classes, and spies on it would count nothing.
 - `String.prototype.normalize` is a method spy (normalizations).
 - `stop()` restores every original. The worlds call it in `AfterEachScenario`, and the counter starts right before the counted block, as `performance.now()` did.
 
