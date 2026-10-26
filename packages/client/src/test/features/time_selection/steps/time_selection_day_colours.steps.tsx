@@ -2,35 +2,17 @@ import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
 import { expect } from "vitest";
-import { NANOSECONDS_PER_MINUTE, TRACK_STEP_MINUTES } from "@/constants";
+import { assembleDayPeriodStops, DayPeriod, type DayPeriodStop } from "@/model";
 import {
-  assembleDayPeriodStops,
-  DAY_PERIOD_SCHEDULE,
-  DayPeriod,
-  type DayPeriodStop,
-  getDayPeriod,
-} from "@/model";
-import { KNOWN_CITIES } from "@/test/factories/buildLocation";
+  expectLabels,
+  expectPeriodColoursOutsideBlends,
+  expectStops,
+} from "./dayColourChecks";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
 
 const feature = await loadFeature("../time_selection_day_colours.feature");
 
-const PRECISION = 6;
-const STOP_SEPARATOR = ", ";
-const LABEL_SEPARATOR = " ";
 const HARD_EDGE_FRACTION = 0.5;
-const PERIOD_BY_NAME: Record<string, DayPeriod> = {
-  night: DayPeriod.NIGHT,
-  morning: DayPeriod.MORNING,
-  working: DayPeriod.WORK,
-  evening: DayPeriod.EVENING,
-};
-
-const parseStops = (text: string): DayPeriodStop[] =>
-  text.split(STOP_SEPARATOR).map((stopText) => {
-    const [fraction, periodName] = stopText.split(LABEL_SEPARATOR);
-    return { fraction: Number(fraction), period: PERIOD_BY_NAME[periodName] };
-  });
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
@@ -49,19 +31,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const givenAppOpen = () => world.open();
   const givenPinnedHere = () =>
     world.selectFraction(world.rows()[0]?.dayTrack?.fraction ?? 0);
-  const expectStops = (city: string, stopsText: string) => {
-    const actual = world.trackOf(city).stops;
-    const expected = parseStops(stopsText);
-    expect(actual).toHaveLength(expected.length);
-    expected.forEach((stop, index) => {
-      expect(actual[index]?.fraction).toBeCloseTo(stop.fraction, PRECISION);
-      expect(actual[index]?.period).toBe(stop.period);
-    });
-  };
-  const expectLabels = (city: string, labelsText: string) =>
-    expect(world.trackOf(city).hourLabels.map(({ label }) => label)).toEqual(
-      labelsText.split(LABEL_SEPARATOR),
-    );
+  const expectCityStops = (city: string, stopsText: string) =>
+    expectStops(world, city, stopsText);
+  const expectCityLabels = (city: string, labelsText: string) =>
+    expectLabels(world, city, labelsText);
 
   // @add-time-sliders-to-location-cards @FR6 @M5
   f.ScenarioOutline(
@@ -72,7 +45,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the list contains {string}", givenList);
       When("the user opens the app", givenAppOpen);
       Then("the colour stops of <city> are <stops>", () =>
-        expectStops(variables.city, variables.stops),
+        expectCityStops(variables.city, variables.stops),
       );
     },
   );
@@ -85,45 +58,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the current instant is {string}", givenInstant);
       And("the list contains {string}", givenList);
       And("the app is open", givenAppOpen);
-      let checkedPositions = 0;
       When(
         "the colour of the tracks is read at each quarter-hour position outside a blend window",
-        () => {
-          checkedPositions = 0;
-        },
+        () => undefined,
       );
       Then(
         "it is the colour of the period of that location's local time at that instant",
         () => {
-          for (const row of world.rows()) {
-            const day = world.dayBoundsOf(row.cityLabel);
-            const stops = world.trackOf(row.cityLabel).stops;
-            const zone = KNOWN_CITIES[row.cityLabel].timeZoneId;
-            for (
-              let minute = 0;
-              minute < day.lengthMinutes;
-              minute += TRACK_STEP_MINUTES
-            ) {
-              const fraction = minute / day.lengthMinutes;
-              const previous = stops
-                .filter((stop) => stop.fraction <= fraction)
-                .at(-1);
-              const next = stops.find((stop) => stop.fraction > fraction);
-              const isInsideBlend =
-                previous !== undefined &&
-                next !== undefined &&
-                previous.period !== next.period;
-              if (isInsideBlend) continue;
-              const shown = (previous ?? next)?.period;
-              const localTime = day.start
-                .add({ nanoseconds: minute * NANOSECONDS_PER_MINUTE })
-                .toZonedDateTimeISO(zone)
-                .toPlainTime();
-              expect(shown).toBe(getDayPeriod(localTime, DAY_PERIOD_SCHEDULE));
-              checkedPositions += 1;
-            }
-          }
-          expect(checkedPositions).toBeGreaterThan(0);
+          expect(expectPeriodColoursOutsideBlends(world)).toBeGreaterThan(0);
         },
       );
     },
@@ -143,7 +85,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       );
       Then(
         "the colour stops of {string} are {string}",
-        (_ctx, city: string, stops: string) => expectStops(city, stops),
+        (_ctx, city: string, stops: string) => expectCityStops(city, stops),
       );
     },
   );
@@ -203,7 +145,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the list contains {string}", givenList);
       When("the list is presented", givenAppOpen);
       Then("the hour labels of <city> are <labels>", () =>
-        expectLabels(variables.city, variables.labels),
+        expectCityLabels(variables.city, variables.labels),
       );
     },
   );

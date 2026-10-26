@@ -1,7 +1,6 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { TrackMove } from "@/controller";
 import {
   createStore,
   INITIAL_LOCATIONS_STATE,
@@ -10,6 +9,7 @@ import {
   ReferenceMode,
   reduceLocations,
 } from "@/model";
+import { type CardTable, MOVE_BY_KEY_NAME } from "./selectTimeTables";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
 
 const feature = await loadFeature("../time_selection_select_time.feature");
@@ -17,21 +17,6 @@ const feature = await loadFeature("../time_selection_select_time.feature");
 const PRECISION = 6;
 const QUARTER = 0.75;
 const MIDDLE = 0.5;
-const MOVE_BY_KEY_NAME: Record<string, TrackMove> = {
-  "next step": TrackMove.NEXT_STEP,
-  "previous step": TrackMove.PREVIOUS_STEP,
-  "one hour forward": TrackMove.HOUR_FORWARD,
-  "one hour back": TrackMove.HOUR_BACK,
-  "start of day": TrackMove.DAY_START,
-  "end of day": TrackMove.DAY_END,
-};
-
-type CardTable = {
-  city: string;
-  time: string;
-  date: string;
-  offset: string;
-}[];
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
