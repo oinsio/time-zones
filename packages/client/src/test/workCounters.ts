@@ -1,4 +1,4 @@
-// Implements FR1–FR4 of replace-wall-clock-row-budgets-with-deterministic-checks (D2).
+// Implements FR1–FR4, FR8 of replace-wall-clock-row-budgets-with-deterministic-checks (D2).
 // Counts the work our code asks for, so budgets fail on extra work, never on a slow runner.
 import { type MockInstance, vi } from "vitest";
 import { Temporal } from "@/lib/temporal";
