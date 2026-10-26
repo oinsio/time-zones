@@ -25,4 +25,4 @@ One time selection SHALL work out the new reference moment and re-present 50 loc
 #### Scenario: Hour labels are unchanged by formatter reuse
 - **GIVEN** the list contains Kolkata, Kathmandu and New York
 - **WHEN** their tracks are presented for the day starting `2026-03-08T00:00:00Z` in English and then in Russian
-- **THEN** each track shows the same hour labels as the same zone formatted on its own, in the same language
+- **THEN** each track shows the same hour labels as the platform's own date formatting gives for that zone, with the hour label's format, in the same language, without the shared formatters

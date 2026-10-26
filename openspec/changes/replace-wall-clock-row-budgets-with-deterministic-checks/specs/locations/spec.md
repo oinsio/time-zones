@@ -105,7 +105,7 @@ Presenting 50 locations with their time, date, offset and badge SHALL take at mo
 #### Scenario: Labels are unchanged by formatter reuse
 - **GIVEN** the list contains Kolkata, Kathmandu and New York
 - **WHEN** their rows are presented at `2026-07-15T12:00:00Z` in English and then in Russian
-- **THEN** each row shows the same time and date labels as the same zone formatted on its own, in the same language
+- **THEN** each row shows the same time and date labels as the platform's own date formatting gives for that zone, with each label's format, in the same language, without the shared formatters
 
 #### Scenario: No accessibility violations with times
 - **GIVEN** the list contains locations with times and dates
