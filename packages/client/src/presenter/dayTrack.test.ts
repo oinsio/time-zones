@@ -8,7 +8,7 @@ import {
   getReferenceDay,
   INITIAL_LOCATIONS_STATE,
 } from "@/model";
-import { presentDayTrack } from "./dayTrack";
+import { formatHourLabel, presentDayTrack } from "./dayTrack";
 
 const INSTANT = Temporal.Instant.from("2026-03-08T07:30:00Z");
 const PRECISION = 6;
@@ -87,4 +87,28 @@ describe("presentDayTrack", () => {
 
     expect(present("Asia/Almaty", "ru").hourLabels).not.toBe(english);
   });
+});
+
+// FR5, UX1 of replace-wall-clock-row-budgets-with-deterministic-checks
+describe("formatHourLabel (characterization)", () => {
+  it.each([
+    ["en", "Asia/Kolkata", "2026-07-15T12:00:00Z", "17:30"],
+    ["en", "Asia/Kathmandu", "2026-07-15T12:00:00Z", "17:45"],
+    ["en", "America/New_York", "2026-07-15T12:00:00Z", "08"],
+    ["en", "America/New_York", "2026-03-08T06:59:00Z", "01:59"],
+    ["en", "America/New_York", "2026-03-08T07:00:00Z", "03"],
+    ["ru", "Asia/Kolkata", "2026-07-15T12:00:00Z", "17:30"],
+    ["ru", "Asia/Kathmandu", "2026-07-15T12:00:00Z", "17:45"],
+    ["ru", "America/New_York", "2026-07-15T12:00:00Z", "08"],
+    ["ru", "America/New_York", "2026-03-08T06:59:00Z", "01:59"],
+    ["ru", "America/New_York", "2026-03-08T07:00:00Z", "03"],
+  ] as const)(
+    "should label %s %s at %s as %s",
+    (language, zone, timestamp, expected) => {
+      const localDateTime =
+        Temporal.Instant.from(timestamp).toZonedDateTimeISO(zone);
+
+      expect(formatHourLabel(localDateTime, language)).toBe(expected);
+    },
+  );
 });
