@@ -3,11 +3,11 @@ Feature: Reference moment rows
   Implements change fix-date-change-row-budget-measurement.
   As a user I see the rows keep the chosen moment and follow the clock again after now.
 
-  @select-date-with-calendar-and-now @NFR-P1 @fix-date-change-row-budget-measurement
+  @select-date-with-calendar-and-now @NFR-P1 @fix-date-change-row-budget-measurement @replace-wall-clock-row-budgets-with-deterministic-checks @FR3
   Scenario: 50 rows within the budget
-    Given 50 locations presented at "2026-03-08T07:30:00Z" in the device time zone "UTC"
+    Given 50 locations whose rows have been presented at the current instant "2026-03-08T07:30:00Z" with the device time zone "UTC"
     When the date moves to the next day and the rows are presented again
-    Then it takes at most 50 ms
+    Then no date, time or region name formatter is built
     And every row carries its local date at "2026-03-09T07:30:00Z"
 
   @fix-date-change-row-budget-measurement @FR1 @UX1

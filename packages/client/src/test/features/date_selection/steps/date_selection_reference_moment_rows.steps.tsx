@@ -16,7 +16,6 @@ const feature = await loadFeature(
   "../date_selection_reference_moment_rows.feature",
 );
 
-const ROW_BUDGET_MS = 50;
 const SAME_RENDER_INSTANT = "2026-03-09T07:30:00Z";
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createDateSelectionWorld();
@@ -25,6 +24,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.BeforeEachScenario(async () => {
     await world.reset();
   });
+  f.AfterEachScenario(budget.stop);
   f.AfterAllScenarios(world.finish);
 
   const {
@@ -40,9 +40,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   } = createReferenceMomentSteps(world);
 
   // @select-date-with-calendar-and-now @fix-date-change-row-budget-measurement @NFR-P1
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR3
   f.Scenario("50 rows within the budget", ({ Given, When, Then, And }) => {
     Given(
-      "50 locations presented at {string} in the device time zone {string}",
+      "50 locations whose rows have been presented at the current instant {string} with the device time zone {string}",
       (_ctx, timestamp: string, zone: string) =>
         budget.prepare(timestamp, zone),
     );
@@ -50,8 +51,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       "the date moves to the next day and the rows are presented again",
       budget.measureDateChange,
     );
-    Then("it takes at most 50 ms", () => {
-      expect(budget.elapsedMs()).toBeLessThanOrEqual(ROW_BUDGET_MS);
+    Then("no date, time or region name formatter is built", () => {
+      expect(budget.workCount()?.formatters()).toBe(0);
+      expect(budget.workCount()?.displayNames()).toBe(0);
     });
     And(
       "every row carries its local date at {string}",
