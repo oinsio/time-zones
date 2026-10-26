@@ -9,7 +9,6 @@ const feature = await loadFeature("../time_selection_moment.feature");
 const PRECISION = 6;
 const QUARTER = 0.75;
 const SELECTION_COUNT = 20;
-const ROW_BUDGET_MS = 50;
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
   const budget = createTrackBudgetWorld();
@@ -17,6 +16,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.BeforeEachScenario(async () => {
     await world.reset();
   });
+  f.AfterEachScenario(budget.stop);
   f.AfterAllScenarios(world.finish);
 
   const givenZone = (_ctx: unknown, zone: string) => world.setDeviceZone(zone);
@@ -105,11 +105,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @NFR-P1
+  // @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
   f.Scenario(
     "50 rows within the time-selection budget",
     ({ Given, When, Then, And }) => {
       Given(
-        "50 locations presented at {string} in the device time zone {string}",
+        "50 locations whose rows have been presented at {string} with the device time zone {string}",
         (_ctx, timestamp: string, zone: string) =>
           budget.prepare(timestamp, zone),
       );
@@ -117,8 +118,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "a time selection pins {string} and the rows are presented again",
         (_ctx, instant: string) => budget.measureSelection(instant),
       );
-      Then("it takes at most 50 ms", () =>
-        expect(budget.elapsedMs()).toBeLessThanOrEqual(ROW_BUDGET_MS),
+      Then("no date, time or region name formatter is built", () => {
+        expect(budget.workCount()?.formatters()).toBe(0);
+        expect(budget.workCount()?.displayNames()).toBe(0);
+      });
+      And("no time zone transition is looked up", () =>
+        expect(budget.workCount()?.transitionLookups()).toBe(0),
       );
       And("every row's handle stands at {number}", (_ctx, fraction: number) =>
         budget.expectEveryHandleAt(fraction),

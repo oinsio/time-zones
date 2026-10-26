@@ -12,6 +12,7 @@ import {
 } from "@/model";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import { ENGLISH_LANGUAGE } from "./timeSelectionWorld";
 
 export const TRACK_BUDGET_ROW_COUNT = 50;
@@ -20,13 +21,15 @@ const PRECISION = 6;
 /**
  * Model and presenter work of a time selection and of a date change on 50
  * rows with tracks, without any rendering.
- * Implements NFR-P1, NFR-P2 of add-time-sliders-to-location-cards (D1-D5).
+ * Implements NFR-P1, NFR-P2 of add-time-sliders-to-location-cards (D1-D5);
+ * FR1, FR3 of replace-wall-clock-row-budgets-with-deterministic-checks (D2).
  */
 export const createTrackBudgetWorld = () => {
   let state: LocationsState = INITIAL_LOCATIONS_STATE;
   let startInstant = "";
   let rows: LocationRow[] = [];
-  let elapsedMs = 0;
+  let presentedState: LocationsState = INITIAL_LOCATIONS_STATE;
+  let workCount: WorkCount | undefined;
 
   const presentRows = (next: LocationsState) => {
     const now = Temporal.Instant.from(startInstant);
@@ -39,14 +42,22 @@ export const createTrackBudgetWorld = () => {
     });
   };
   const measure = (command: Parameters<typeof reduceLocations>[1]) => {
-    const startedAt = performance.now();
     const outcome = reduceLocations(state, command);
-    if (outcome.ok) rows = presentRows(outcome.state);
-    elapsedMs = performance.now() - startedAt;
+    if (!outcome.ok) return;
+    presentedState = outcome.state;
+    workCount = startWorkCount();
+    rows = presentRows(presentedState);
+    workCount.stop();
   };
 
   return {
-    elapsedMs: () => elapsedMs,
+    workCount: () => workCount,
+    stop: () => workCount?.stop(),
+    presentAgain: () => {
+      workCount = startWorkCount();
+      rows = presentRows(presentedState);
+      workCount.stop();
+    },
     prepare: async (timestamp: string, deviceTimeZoneId: string) => {
       await i18n.changeLanguage(ENGLISH_LANGUAGE);
       startInstant = timestamp;
