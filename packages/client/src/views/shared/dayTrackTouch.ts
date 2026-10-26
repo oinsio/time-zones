@@ -25,10 +25,8 @@ export function getTouchGestureDecision(
   ) {
     return TouchGestureDecision.ABANDON;
   }
-  if (
-    horizontalDistance > TRACK_TOUCH_SLOP_PX &&
-    horizontalDistance > verticalDistance
-  ) {
+  // The vertical case was decided above, so only the slop is left to check.
+  if (horizontalDistance > TRACK_TOUCH_SLOP_PX) {
     return TouchGestureDecision.SELECT;
   }
   return TouchGestureDecision.WAIT;
