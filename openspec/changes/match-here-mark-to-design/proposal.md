@@ -23,7 +23,7 @@ _None._
 
 ### Modified Capabilities
 
-- `locations`: the requirements "Device time zone badge on location rows", "Device time zone badge text" and "Device time zone badge is accessible and fits every screen" are renamed to the "here" mark and changed. "Local time and date are fast and accessible" changes the row name it expects. A new requirement, "One leading mark per row", is added.
+- `locations`: the requirements "Device time zone badge on location rows", "Device time zone badge text" and "Device time zone badge is accessible and fits every screen" are renamed to the "here" mark and changed. "Local time and date are fast and accessible" changes the row name it expects. "Local time and date follow the clock" points its cross-reference at "Here mark on location rows", with no behaviour change. A new requirement, "One leading mark per row", is added.
 
 ## Impact
 

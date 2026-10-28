@@ -84,7 +84,8 @@ None.
 - Impact: After `/opsx:archive` the stable `locations` spec carries a dangling cross-reference; a reader following it finds no such requirement. No code is affected.
 - Fix: In `specs/locations/spec.md`, under `## MODIFIED Requirements`, add `### Requirement: Local time and date follow the clock`, copying the stable text and all 7 scenarios (`openspec/specs/locations/spec.md:640-687`) verbatim, with only "Device time zone badge on location rows" replaced by "Here mark on location rows", and append `FR5 of match-here-mark-to-design` to its implements comment. Add the requirement's name to the "Modified Capabilities" line of `proposal.md:26`.
 - Fix risk: The MODIFIED block replaces the whole requirement on archive, so any scenario or sentence not copied verbatim is silently lost; the copy must be checked line by line against `openspec/specs/locations/spec.md:640-687`.
-- Status: open
+- Status: fixed
+- Resolution: added `### Requirement: Local time and date follow the clock` under `## MODIFIED Requirements` in `specs/locations/spec.md`, a verbatim copy of stable lines 640-686 with its 6 scenarios (diffed: only the cross-reference now reads "Here mark on location rows" and the comment gains `FR5 of match-here-mark-to-design`); named in proposal.md "Modified Capabilities".
 
 ### R2 — SUGGESTION — Scenario "Every mark kind is fully defined" asserts an icon that task 5.2 does not check
 - Location: `openspec/changes/match-here-mark-to-design/tasks.md:194`

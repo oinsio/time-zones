@@ -174,6 +174,54 @@ Presenting 50 locations with their time, date, offset and here mark SHALL take a
 - **THEN** the Almaty row is named "Almaty You are here" and the Moscow row is named "Moscow"
 - **AND** the time of Almaty is not inside a live region
 
+### Requirement: Local time and date follow the clock
+While the reference moment is live and the page is visible, the time and the date of every row SHALL change at the start of every minute of the clock: the first update MUST come at the next minute boundary after the app opens (not 60 seconds after opening), and each later one at the following minute boundary. While the page is hidden, no update MUST happen. When the page becomes visible again, every row MUST show the time and date of that instant at once, and the updates MUST resume at the next minute boundary. Every update and every return to the visible page MUST also compute the UTC offset again and read the device time zone again (see "UTC offset on location rows" and "Here mark on location rows"). Updates MUST NOT write anything to storage. While the reference moment is pinned, minute updates and returns to the visible page MUST NOT change the time, the date or the UTC offset of any row — they stay those of the pinned instant — but MUST still read the device time zone again; after a return to now, the rows show the current instant at once and the minute updates change them again. <!-- implements FR3, FR4 of show-local-time-and-date-on-location-cards; FR5, FR6 of select-date-with-calendar-and-now; FR5 of match-here-mark-to-design -->
+
+#### Scenario: The time changes at the minute boundary
+- **GIVEN** the list contains UTC (`UTC`)
+- **AND** the app was opened at `2026-07-15T12:00:42.500Z`, so the UTC row shows `12:00`
+- **THEN** the next update is due in 17 500 ms
+- **WHEN** the next minute starts at `2026-07-15T12:01:00Z`
+- **THEN** the UTC row shows `12:01`
+- **AND** the next update is due in 60 000 ms
+
+#### Scenario: No updates while the page is hidden
+- **GIVEN** the list contains UTC (`UTC`) and the app was opened at `2026-07-15T12:00:42.500Z`
+- **WHEN** the page becomes hidden
+- **THEN** no update is due
+- **WHEN** the page becomes visible at `2026-07-15T12:10:20Z`
+- **THEN** the UTC row shows `12:10` at once
+- **AND** the next update is due in 40 000 ms
+
+#### Scenario: The offset follows a DST change while the app is open
+- **GIVEN** the list contains New York (`America/New_York`)
+- **AND** the app was opened at `2026-03-08T06:59:30Z`, so the New York row shows `01:59` and `UTC−5`
+- **WHEN** the next minute starts at `2026-03-08T07:00:00Z`
+- **THEN** the New York row shows `03:00` and `UTC−4`
+
+#### Scenario: Updates write nothing
+- **GIVEN** the list contains UTC and the app is open
+- **WHEN** three minute updates happen
+- **THEN** the stored list was not written
+
+#### Scenario: A pinned moment ignores minute updates
+- **GIVEN** the device time zone is `UTC`
+- **AND** the list contains UTC (`UTC`)
+- **AND** the app was opened at `2026-07-15T12:00:42.500Z` and the user moved to the next day, so the UTC row shows `12:00` and `Thu, Jul 16`
+- **WHEN** the next minute starts at `2026-07-15T12:01:00Z`
+- **THEN** the UTC row still shows `12:00` and `Thu, Jul 16`
+- **WHEN** the page becomes hidden and visible again at `2026-07-15T12:10:20Z`
+- **THEN** the UTC row still shows `12:00` and `Thu, Jul 16`
+
+#### Scenario: Rows follow the clock again after now
+- **GIVEN** the device time zone is `UTC`
+- **AND** the list contains UTC (`UTC`)
+- **AND** the app was opened at `2026-07-15T12:00:42.500Z` and the user moved to the next day
+- **WHEN** the current instant is `2026-07-15T12:00:50Z` and the user returns to now
+- **THEN** the UTC row shows `12:00` and `Wed, Jul 15`
+- **WHEN** the next minute starts at `2026-07-15T12:01:00Z`
+- **THEN** the UTC row shows `12:01`
+
 ## ADDED Requirements
 
 ### Requirement: One leading mark per row
