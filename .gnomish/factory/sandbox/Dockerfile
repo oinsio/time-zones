@@ -25,13 +25,9 @@
 # fetched in a stage of their own and copied in; the one apt step in the final stage runs with the
 # proxy variables unset.
 #
-# GNOMISH_BASE_IMAGE: a locally built base until the first release publishes
-# ghcr.io/oinsio/gnomish-sandbox-base:<X.Y>; build it from a gnomish-factory checkout with
-#   docker build --build-context scripts=scripts \
-#     $(sh scripts/image-contract-build-args.sh | sed 's/^/--build-arg /') \
-#     --build-arg IMAGE_VERSION=0.0.0-dev --build-arg IMAGE_REVISION=$(git rev-parse HEAD) \
-#     -t gnomish-sandbox-base:local sandbox-image
-ARG GNOMISH_BASE_IMAGE=gnomish-sandbox-base:local
+# GNOMISH_BASE_IMAGE: the published base of the factory release in use (GNOMISH_VERSION in
+# gnomish.env); its MAJOR.MINOR tag follows the release's patch updates of the base.
+ARG GNOMISH_BASE_IMAGE=ghcr.io/oinsio/gnomish-sandbox-base:0.1
 ARG NODE_VERSION=26
 
 FROM node:${NODE_VERSION}-bookworm-slim AS node-dist
