@@ -63,7 +63,6 @@ describe("useLocations", () => {
           cityLabel: "Moscow",
           countryName: "Россия",
           utcOffsetLabel: "UTC+3",
-          deviceTimeZoneLabel: "",
           localTimeLabel: "15:00",
           localDateLabel: "ср, 15 июл.",
           localIsoDate: "2026-07-15",

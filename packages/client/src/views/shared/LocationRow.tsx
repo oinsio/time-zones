@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Navigation, X } from "lucide-react";
+import { X } from "lucide-react";
 import { forwardRef, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { TrackMove } from "@/controller";
@@ -8,10 +8,9 @@ import type { LocationRow as LocationRowModel } from "@/presenter";
 import { DayTrack } from "./DayTrack";
 import { DragHandle } from "./DragHandle";
 import { LocalDateTime } from "./LocalDateTime";
+import { LocationMarkIcon } from "./LocationMarkIcon";
 import { getReorderTransition } from "./reorderTransition";
 import { useDropSettleAnimation } from "./useDropSettleAnimation";
-
-const BADGE_ICON_SIZE_PX = 12;
 
 type LocationRowProps = {
   row: LocationRowModel;
@@ -27,7 +26,9 @@ type LocationRowProps = {
  * Implements FR10, UX4 of add-locations-via-search (D10).
  * Implements FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
  * Implements FR1, FR2, UX1, UX2 of mark-device-time-zone-in-location-list (D5):
- * the device zone badge names the row together with the city.
+ * the mark names the row together with the city.
+ * Implements FR1, FR2, FR4, UX1, UX2, UX3, NFR-A1 of match-here-mark-to-design (D3):
+ * an icon slot before the city and an accent caption after it.
  * Implements FR1, FR2, FR6, UX1, UX2 of show-local-time-and-date-on-location-cards (D5):
  * the time column sits right of the place column.
  * Implements FR1, NFR-R2 of add-time-sliders-to-location-cards (D8): the day
@@ -62,8 +63,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       transition: getReorderTransition(prefersReducedMotion),
     });
     const cityId = useId();
-    const badgeId = useId();
-    const hasDeviceTimeZoneBadge = row.deviceTimeZoneLabel !== "";
+    const markId = useId();
     const cardRef = useRef<HTMLLIElement | null>(null);
     const dropSettle = useDropSettleAnimation(
       cardRef,
@@ -85,9 +85,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           transition: dropSettle.transition ?? transition,
         }}
         onTransitionEnd={dropSettle.onTransitionEnd}
-        aria-labelledby={
-          hasDeviceTimeZoneBadge ? `${cityId} ${badgeId}` : cityId
-        }
+        aria-labelledby={row.mark ? `${cityId} ${markId}` : cityId}
         className={`flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-border bg-surface px-4 py-3${draggingClassName}`}
       >
         {isReorderable && (
@@ -101,16 +99,16 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
         <span className="flex min-w-0 flex-1 items-start gap-3 md:flex-none">
           <span className="flex min-w-0 flex-1 flex-col break-words md:w-64 md:flex-none">
             <span className="flex flex-wrap items-center gap-x-2">
+              {row.mark && <LocationMarkIcon mark={row.mark} id={markId} />}
               <span id={cityId} className="font-semibold">
                 {row.cityLabel}
               </span>
-              {hasDeviceTimeZoneBadge && (
+              {row.mark?.caption && (
                 <span
-                  id={badgeId}
-                  className="inline-flex items-center gap-1 rounded-full bg-accent px-2 text-xs font-medium text-accent-foreground"
+                  aria-hidden="true"
+                  className="text-xs font-bold text-accent"
                 >
-                  <Navigation aria-hidden="true" size={BADGE_ICON_SIZE_PX} />
-                  {row.deviceTimeZoneLabel}
+                  {row.mark.caption}
                 </span>
               )}
             </span>

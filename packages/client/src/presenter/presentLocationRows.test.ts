@@ -1,6 +1,7 @@
 // Verifies FR10, UX4 of add-locations-via-search (D9).
 // Verifies FR2, FR3, FR5, FR6, UX2 of show-utc-offset-on-location-rows (D2).
 // Verifies FR1, FR2, FR5 of mark-device-time-zone-in-location-list (D4).
+// Verifies FR1, FR4 of match-here-mark-to-design (D2).
 import i18n, { type TFunction } from "i18next";
 import { describe, expect, it } from "vitest";
 import type { SupportedLanguage } from "@/i18n";
@@ -122,7 +123,7 @@ describe("present location rows", () => {
   });
 });
 
-describe("present the device time zone badge", () => {
+describe("present the here mark", () => {
   const cityOf = (label: string) =>
     buildLocation({ label, ...KNOWN_CITIES[label] });
   const labelsFor = (
@@ -131,32 +132,32 @@ describe("present the device time zone badge", () => {
     translate?: TFunction,
   ) =>
     present(cities.map(cityOf), "en", { deviceTimeZoneId, translate }).map(
-      (row) => row.deviceTimeZoneLabel,
+      (row) => row.mark?.caption ?? "",
     );
 
   it.each([
-    ["match", ["Almaty", "Moscow"], "Asia/Almaty", ["Your time zone", ""]],
+    ["match", ["Almaty", "Moscow"], "Asia/Almaty", ["here", ""]],
     ["no match", ["Almaty", "Moscow"], "Asia/Tokyo", ["", ""]],
     [
       "multiple matches",
       ["Moscow", "Saint Petersburg", "Almaty"],
       "Europe/Moscow",
-      ["Your time zone", "Your time zone", ""],
+      ["here", "here", ""],
     ],
-  ])("should label rows for %s", (_case, cities, deviceZone, expected) => {
+  ])("should mark rows for %s", (_case, cities, deviceZone, expected) => {
     expect(labelsFor(cities, deviceZone)).toEqual(expected);
   });
 
-  it("should take the label from the translate function", () => {
+  it("should take the caption from the translate function", () => {
     const translate = (() => "XYZ") as unknown as TFunction;
     expect(labelsFor(["Almaty"], "Asia/Almaty", translate)).toEqual(["XYZ"]);
   });
 
-  it("should label in Russian", () => {
+  it("should mark in Russian", () => {
     const rows = present([cityOf("Almaty")], "ru", {
       deviceTimeZoneId: "Asia/Almaty",
     });
-    expect(rows[0]?.deviceTimeZoneLabel).toBe("Ваш часовой пояс");
+    expect(rows[0]?.mark?.caption).toBe("здесь");
   });
 });
 

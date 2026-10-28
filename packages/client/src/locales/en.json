@@ -28,7 +28,8 @@
   },
   "locations": {
     "utcOffsetPrefix": "UTC",
-    "deviceTimeZoneBadge": "Your time zone",
+    "hereMarkLabel": "You are here",
+    "hereMarkCaption": "here",
     "addLocation": "Add location",
     "removeLocation": "Remove {{city}}",
     "moveLocation": "Move {{city}}",

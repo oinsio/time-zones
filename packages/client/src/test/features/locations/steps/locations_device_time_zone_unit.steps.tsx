@@ -1,3 +1,4 @@
+// Verifies FR5 of match-here-mark-to-design.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { cleanup } from "@testing-library/react/pure";
@@ -7,9 +8,9 @@ import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import {
-  badgeText,
   createDeviceTimeZoneWorld,
   ENGLISH_LANGUAGE,
+  hereCaption,
   RUSSIAN_LANGUAGE,
 } from "./deviceTimeZoneWorld";
 import { expectFormattersPerZoneAtMost } from "./rowBudgetWorld";
@@ -26,9 +27,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     givenDeviceZone,
     givenList,
     givenLanguage,
-    thenShowsBadge,
-    thenShowsNoBadge,
-    thenNoBadgeAnywhere,
+    thenShowsHereMark,
+    thenShowsNoHereMark,
+    thenNoHereMarkAnywhere,
     whenAdds,
     whenRemoves,
     expectRowShows,
@@ -44,51 +45,57 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     await i18n.changeLanguage(RUSSIAN_LANGUAGE);
   });
 
+  // @match-here-mark-to-design @FR1
   // @mark-device-time-zone-in-location-list @FR1
   f.Scenario("One row matches", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
-    Then("the {string} row shows the badge", thenShowsBadge);
-    And("the {string} row shows no badge", thenShowsNoBadge);
+    Then("the {string} row shows the here mark", thenShowsHereMark);
+    And("the {string} row shows no here mark", thenShowsNoHereMark);
   });
 
+  // @match-here-mark-to-design @FR1
   // @mark-device-time-zone-in-location-list @FR2
   f.Scenario("No row matches", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
-    Then("no row shows the badge", thenNoBadgeAnywhere);
+    Then("no row shows the here mark", thenNoHereMarkAnywhere);
   });
 
+  // @match-here-mark-to-design @FR1
   // @mark-device-time-zone-in-location-list @FR2
   f.Scenario("Several rows match", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
-    Then("the {string} row shows the badge", thenShowsBadge);
-    And("the {string} row shows the badge", thenShowsBadge);
-    And("the {string} row shows no badge", thenShowsNoBadge);
+    Then("the {string} row shows the here mark", thenShowsHereMark);
+    And("the {string} row shows the here mark", thenShowsHereMark);
+    And("the {string} row shows no here mark", thenShowsNoHereMark);
   });
 
+  // @match-here-mark-to-design @FR1
   // @mark-device-time-zone-in-location-list @FR3
   f.Scenario("Legacy device identifier", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
-    Then("the {string} row shows the badge", thenShowsBadge);
-    And("the {string} row shows no badge", thenShowsNoBadge);
+    Then("the {string} row shows the here mark", thenShowsHereMark);
+    And("the {string} row shows no here mark", thenShowsNoHereMark);
   });
 
+  // @match-here-mark-to-design @FR1
   // @mark-device-time-zone-in-location-list @FR3
   f.Scenario("Unknown device identifier", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
-    Then("the {string} row shows the badge", thenShowsBadge);
-    And("the {string} row shows no badge", thenShowsNoBadge);
+    Then("the {string} row shows the here mark", thenShowsHereMark);
+    And("the {string} row shows no here mark", thenShowsNoHereMark);
   });
 
+  // @match-here-mark-to-design @FR5
   // @mark-device-time-zone-in-location-list @FR4
   f.Scenario("Badge follows changes of the list", (steps) => {
     const { Given, And, When, Then } = steps;
@@ -96,11 +103,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
     And("the user adds {string}", whenAdds);
-    Then("the {string} row shows the badge", thenShowsBadge);
+    Then("the {string} row shows the here mark", thenShowsHereMark);
     When("the user removes {string}", whenRemoves);
-    Then("no row shows the badge", thenNoBadgeAnywhere);
+    Then("no row shows the here mark", thenNoHereMarkAnywhere);
   });
 
+  // @match-here-mark-to-design @FR5
   // @mark-device-time-zone-in-location-list @FR3
   f.Scenario("Device zone is read once", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
@@ -108,10 +116,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the user opens the app", openApp);
     And("the device time zone becomes {string}", givenDeviceZone);
     And("the user adds {string}", whenAdds);
-    Then("the {string} row shows the badge", thenShowsBadge);
-    And("the {string} row shows no badge", thenShowsNoBadge);
+    Then("the {string} row shows the here mark", thenShowsHereMark);
+    And("the {string} row shows no here mark", thenShowsNoHereMark);
   });
 
+  // @match-here-mark-to-design @FR5
   // @mark-device-time-zone-in-location-list @FR3
   f.Scenario("Device zone is not stored", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenDeviceZone);
@@ -126,17 +135,20 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
+  // @match-here-mark-to-design @FR3
   // @mark-device-time-zone-in-location-list @FR5
   f.Scenario("English interface", ({ Given, And, When, Then }) => {
     Given("the interface language is {string}", givenLanguage);
     And("the device time zone is {string}", givenDeviceZone);
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
-    Then("the {string} row shows {string}", (_ctx, city: string, text) =>
-      expectRowShows(city, text),
+    Then(
+      "the {string} row shows the caption {string}",
+      (_ctx, city: string, text) => expectRowShows(city, text),
     );
   });
 
+  // @match-here-mark-to-design @FR3
   // @mark-device-time-zone-in-location-list @FR5
   f.Scenario("Russian interface", ({ Given, And, When, Then }) => {
     Given("the interface language is {string}", givenLanguage);
@@ -144,11 +156,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
     Then(
-      "the {string} row shows the Russian badge text",
-      (_ctx, city: string) => expectRowShows(city, badgeText(RUSSIAN_LANGUAGE)),
+      "the {string} row shows the Russian here caption",
+      (_ctx, city: string) =>
+        expectRowShows(city, hereCaption(RUSSIAN_LANGUAGE)),
     );
   });
 
+  // @match-here-mark-to-design @NFR-P1
   // @mark-device-time-zone-in-location-list @NFR-P1
   // @replace-wall-clock-row-budgets-with-deterministic-checks @FR2
   f.Scenario("50 rows within the budget", ({ Given, And, When, Then }) => {

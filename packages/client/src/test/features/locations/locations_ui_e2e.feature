@@ -111,6 +111,7 @@ Feature: Locations in a real browser
   @show-local-time-and-date-on-location-cards @NFR-R3 @M6
   @select-date-with-calendar-and-now @NFR-R3 @M7
   @add-time-sliders-to-location-cards @NFR-R3 @M9
+  @match-here-mark-to-design @NFR-R2 @M5
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme

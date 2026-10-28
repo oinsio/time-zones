@@ -26,6 +26,7 @@ export {
   LOCAL_TIME_FORMAT_OPTIONS,
 } from "./localDateTime";
 export {
+  LOCATION_MARK_ICON_SIZE_PX,
   LOCATIONS_SCHEMA_VERSION,
   LOCATIONS_WRITE_DEBOUNCE_MS,
 } from "./locations";

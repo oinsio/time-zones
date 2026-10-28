@@ -1,7 +1,8 @@
 // Public API of the presenter layer (ADR-0002).
 // Implements FR5, FR8, FR10 of add-locations-via-search (D9).
 
-export { DayPeriod, type DayPeriodStop } from "@/model";
+// Implements FR1, FR3, FR4 of match-here-mark-to-design.
+export { DayPeriod, type DayPeriodStop, LocationMarkKind } from "@/model";
 // Implements FR3, FR4, FR7, FR9 of select-date-with-calendar-and-now.
 export {
   type CalendarDayCell,
@@ -18,6 +19,11 @@ export {
 export type { HourLabel, PresentedDayTrack } from "./dayTrack";
 // Implements FR1, FR2 of show-local-time-and-date-on-location-cards.
 export { formatLocalDate, formatLocalTime } from "./localDateTime";
+export {
+  LOCATION_MARK_TEXT_KEYS,
+  type PresentedLocationMark,
+  presentLocationMarks,
+} from "./locationMark";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";
 export {
   type PresentedSearchResult,
