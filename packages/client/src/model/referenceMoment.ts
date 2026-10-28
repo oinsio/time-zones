@@ -1,5 +1,5 @@
 import type { Temporal } from "@/lib/temporal";
-import type { LocationsState } from "./locations";
+import type { WorldClockState } from "./locations";
 import type { WallClockStatus } from "./wallClock";
 
 /** Whether the reference moment follows the clock or is fixed by the user. */
@@ -28,13 +28,13 @@ export const LIVE_REFERENCE_MOMENT: ReferenceMoment = {
 };
 
 /** Zone the reference date is read in: the device zone until a home exists (ADR-0007). */
-export function getReferenceZone(state: LocationsState): string {
+export function getReferenceZone(state: WorldClockState): string {
   return state.deviceTimeZoneId;
 }
 
 /** `now` while live, the pinned instant otherwise. Implements FR1, FR5. */
 export function getEffectiveInstant(
-  state: LocationsState,
+  state: WorldClockState,
   now: Temporal.Instant,
 ): Temporal.Instant {
   return state.reference.mode === ReferenceMode.PINNED

@@ -2,7 +2,7 @@
 import { bench, describe } from "vitest";
 import { ONE_DAY } from "@/constants";
 import {
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   reduceLocations,
 } from "@/model";
@@ -74,7 +74,7 @@ describe("row presenting", () => {
     "reorder 50 locations and present",
     () => {
       const outcome = reduceLocations(
-        { ...INITIAL_LOCATIONS_STATE, locations },
+        { ...INITIAL_WORLD_CLOCK_STATE, locations },
         {
           type: LocationCommandType.MOVE_LOCATION,
           id: locations[locations.length - 1].id,

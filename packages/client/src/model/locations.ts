@@ -23,7 +23,7 @@ export type Location = {
   countryCode: string;
 };
 
-export type LocationsState = {
+export type WorldClockState = {
   locations: readonly Location[];
   /** Canonical IANA ID of the device zone; never persisted (ADR-0007). */
   deviceTimeZoneId: string;
@@ -31,7 +31,7 @@ export type LocationsState = {
   reference: ReferenceMoment;
 };
 
-export const INITIAL_LOCATIONS_STATE: LocationsState = {
+export const INITIAL_WORLD_CLOCK_STATE: WorldClockState = {
   locations: [],
   deviceTimeZoneId: DEVICE_TIME_ZONE_FALLBACK_ID,
   reference: LIVE_REFERENCE_MOMENT,
@@ -86,7 +86,7 @@ export type LocationCommand =
   | { type: LocationCommandType.SELECT_INSTANT; instant: string };
 
 export type LocationsReduceResult =
-  | { ok: true; state: LocationsState }
+  | { ok: true; state: WorldClockState }
   | { ok: false; error: LocationErrorCode };
 
 const ID_SEPARATOR = "|";
@@ -100,7 +100,7 @@ function failWith(error: LocationErrorCode): LocationsReduceResult {
 }
 
 export function reduceLocations(
-  state: LocationsState,
+  state: WorldClockState,
   command: LocationCommand,
 ): LocationsReduceResult {
   switch (command.type) {

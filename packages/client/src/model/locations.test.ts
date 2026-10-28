@@ -2,15 +2,15 @@
 // FR3, FR4 of mark-device-time-zone-in-location-list: device zone in the state.
 import { describe, expect, it } from "vitest";
 import {
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   LocationErrorCode,
-  type LocationsState,
   reduceLocations,
+  type WorldClockState,
 } from "./locations";
 import { ReferenceMode } from "./referenceMoment";
 
-const emptyState: LocationsState = INITIAL_LOCATIONS_STATE;
+const emptyState: WorldClockState = INITIAL_WORLD_CLOCK_STATE;
 const moscow = {
   timeZoneId: "Europe/Moscow",
   label: "Moscow",
@@ -22,7 +22,7 @@ const almaty = {
   countryCode: "KZ",
 };
 
-const add = (state: LocationsState, location: typeof moscow) =>
+const add = (state: WorldClockState, location: typeof moscow) =>
   reduceLocations(state, {
     type: LocationCommandType.ADD_LOCATION,
     ...location,
@@ -87,7 +87,7 @@ describe("reduceLocations ADD_LOCATION", () => {
 });
 
 describe("reduceLocations REMOVE_LOCATION", () => {
-  const remove = (state: LocationsState, id: string) =>
+  const remove = (state: WorldClockState, id: string) =>
     reduceLocations(state, { type: LocationCommandType.REMOVE_LOCATION, id });
 
   it("should remove from the middle and keep the order", () => {
@@ -183,9 +183,9 @@ describe("reduceLocations MOVE_LOCATION", () => {
   });
 });
 
-describe("INITIAL_LOCATIONS_STATE", () => {
+describe("INITIAL_WORLD_CLOCK_STATE", () => {
   it("should start without locations and with the UTC device zone", () => {
-    expect(INITIAL_LOCATIONS_STATE).toEqual({
+    expect(INITIAL_WORLD_CLOCK_STATE).toEqual({
       locations: [],
       deviceTimeZoneId: "UTC",
       reference: { mode: ReferenceMode.LIVE },
@@ -194,7 +194,7 @@ describe("INITIAL_LOCATIONS_STATE", () => {
 });
 
 describe("reduceLocations SET_DEVICE_TIME_ZONE", () => {
-  const setDeviceZone = (state: LocationsState, timeZoneId: string) =>
+  const setDeviceZone = (state: WorldClockState, timeZoneId: string) =>
     reduceLocations(state, {
       type: LocationCommandType.SET_DEVICE_TIME_ZONE,
       timeZoneId,

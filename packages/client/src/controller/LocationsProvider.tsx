@@ -4,7 +4,7 @@ import { LOCATIONS_WRITE_DEBOUNCE_MS } from "@/constants";
 import { type Clock, systemClock } from "@/lib/temporal";
 import {
   createStore,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   reduceLocations,
 } from "@/model";
@@ -46,7 +46,7 @@ function createLocationsStore(
   initialResult: LocationsLoadResult,
   deviceTimeZoneId: string,
 ) {
-  const store = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+  const store = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
   store.dispatch({
     type: LocationCommandType.SET_DEVICE_TIME_ZONE,
     timeZoneId: deviceTimeZoneId,

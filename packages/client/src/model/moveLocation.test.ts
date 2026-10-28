@@ -2,17 +2,17 @@
 import { describe, expect, it } from "vitest";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import {
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationErrorCode,
-  type LocationsState,
+  type WorldClockState,
 } from "./locations";
 import { moveLocationInList } from "./moveLocation";
 
 const buildCity = (label: string) =>
   buildLocation({ label, ...KNOWN_CITIES[label] });
 
-const state: LocationsState = {
-  ...INITIAL_LOCATIONS_STATE,
+const state: WorldClockState = {
+  ...INITIAL_WORLD_CLOCK_STATE,
   locations: ["Almaty", "Moscow", "Kolkata", "Tokyo"].map(buildCity),
 };
 

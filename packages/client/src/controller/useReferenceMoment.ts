@@ -7,9 +7,9 @@ import {
   getEffectiveInstant,
   getReferenceZone,
   LocationCommandType,
-  type LocationsState,
   ReferenceMode,
   WallClockStatus,
+  type WorldClockState,
 } from "@/model";
 import { type PresentedDateBar, presentDateBar } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
@@ -18,7 +18,7 @@ const MISSING_PROVIDER_MESSAGE =
   "useReferenceMoment must be used inside a LocationsProvider";
 
 function buildDateBar(
-  state: LocationsState,
+  state: WorldClockState,
   clock: Clock,
   language: SupportedLanguage,
   translate: Parameters<typeof presentDateBar>[0]["translate"],

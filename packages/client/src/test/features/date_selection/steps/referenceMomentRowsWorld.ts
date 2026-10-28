@@ -4,10 +4,10 @@ import { ONE_DAY } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import {
   getEffectiveInstant,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
-  type LocationsState,
   reduceLocations,
+  type WorldClockState,
 } from "@/model";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
@@ -60,13 +60,13 @@ export const expectRowsShowDateAt = (timestamp: string, zones: string[]) => {
  * FR3 of replace-wall-clock-row-budgets-with-deterministic-checks (D2).
  */
 export const createRowBudgetWorld = () => {
-  let state: LocationsState = INITIAL_LOCATIONS_STATE;
+  let state: WorldClockState = INITIAL_WORLD_CLOCK_STATE;
   let startInstant = "";
   let zones: string[] = [];
   let rows: LocationRow[] = [];
   let workCount: WorkCount | undefined;
   const presentRows = (
-    locations: LocationsState["locations"],
+    locations: WorldClockState["locations"],
     instant: Temporal.Instant,
   ) =>
     presentLocationRows(locations, {
@@ -97,7 +97,7 @@ export const createRowBudgetWorld = () => {
       startInstant = timestamp;
       zones = firstZones();
       state = {
-        ...INITIAL_LOCATIONS_STATE,
+        ...INITIAL_WORLD_CLOCK_STATE,
         locations: zones.map((zone) =>
           buildLocation({ timeZoneId: zone, label: zone }),
         ),

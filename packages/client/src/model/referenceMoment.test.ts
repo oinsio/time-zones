@@ -11,7 +11,7 @@ import {
   shift,
 } from "@/test/referenceMomentSupport";
 import {
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   type LocationCommand,
   LocationCommandType,
   LocationErrorCode,
@@ -27,7 +27,7 @@ import { WallClockStatus } from "./wallClock";
 
 describe("reference moment state", () => {
   it("should start live", () => {
-    expect(INITIAL_LOCATIONS_STATE.reference).toEqual(LIVE_REFERENCE_MOMENT);
+    expect(INITIAL_WORLD_CLOCK_STATE.reference).toEqual(LIVE_REFERENCE_MOMENT);
   });
 
   it("should use the clock instant while live", () => {

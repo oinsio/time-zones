@@ -4,7 +4,7 @@ import {
   LocationCommandType,
   LocationErrorCode,
   type LocationsReduceResult,
-  type LocationsState,
+  type WorldClockState,
 } from "./locations";
 import {
   getEffectiveInstant,
@@ -33,7 +33,7 @@ type DatePicker = (current: Temporal.PlainDate) => Temporal.PlainDate;
 
 /** Pins the moment to `date` at the wall time the moment has now. */
 function moveToDate(
-  state: LocationsState,
+  state: WorldClockState,
   now: Temporal.Instant,
   pickDate: DatePicker,
 ): LocationsReduceResult {
@@ -84,7 +84,7 @@ function buildDatePicker(
  * Implements FR1, FR2, FR3, FR4, FR6, FR10 of select-date-with-calendar-and-now (D1).
  */
 export function reduceReferenceMoment(
-  state: LocationsState,
+  state: WorldClockState,
   command: DateCommand,
 ): LocationsReduceResult {
   if (command.type === LocationCommandType.RESET_TO_NOW) {

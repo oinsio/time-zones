@@ -13,13 +13,13 @@ import {
 import { Temporal } from "@/lib/temporal";
 import {
   createStore,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   LocationErrorCode,
-  type LocationsState,
   ReferenceMode,
   reduceLocations,
   WallClockStatus,
+  type WorldClockState,
 } from "@/model";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
@@ -36,7 +36,7 @@ const STORE_NOW = "2026-03-08T07:30:00Z";
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createDateSelectionWorld();
   let calendarHook: ReturnType<typeof renderCalendarHook>;
-  let store = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+  let store = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
   let lastOutcome: ReturnType<typeof store.dispatch>;
 
   const renderCalendarHook = (initialFocusedIsoDate: string) =>
@@ -62,7 +62,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   f.BeforeEachScenario(async () => {
     await world.reset();
-    store = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+    store = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
   });
   f.AfterAllScenarios(world.finish);
 
@@ -144,12 +144,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario(
     "A move beyond the supported range changes nothing",
     ({ Given, When, Then, And }) => {
-      let stateBefore: LocationsState;
+      let stateBefore: WorldClockState;
       Given(
         "the moment is pinned to the last date the platform supports",
         () => {
           stateBefore = {
-            ...INITIAL_LOCATIONS_STATE,
+            ...INITIAL_WORLD_CLOCK_STATE,
             reference: {
               mode: ReferenceMode.PINNED,
               instant: Temporal.Instant.from(LAST_SUPPORTED_INSTANT),

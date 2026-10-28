@@ -3,28 +3,28 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import {
   createStore,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   LocationErrorCode,
-  type LocationsState,
   reduceLocations,
+  type WorldClockState,
 } from "@/model";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 
 const feature = await loadFeature("../locations_management.feature");
 
-const EMPTY_STATE: LocationsState = INITIAL_LOCATIONS_STATE;
+const EMPTY_STATE: WorldClockState = INITIAL_WORLD_CLOCK_STATE;
 
 type CommandOutcome = ReturnType<typeof reduceLocations>;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let store = createStore(reduceLocations, EMPTY_STATE);
-  let snapshotBefore: LocationsState = EMPTY_STATE;
+  let snapshotBefore: WorldClockState = EMPTY_STATE;
   let outcome: CommandOutcome | undefined;
 
   const seed = (...cityLabels: string[]) => {
     store = createStore(reduceLocations, {
-      ...INITIAL_LOCATIONS_STATE,
+      ...INITIAL_WORLD_CLOCK_STATE,
       locations: cityLabels.map((label) =>
         buildLocation({ label, ...KNOWN_CITIES[label] }),
       ),

@@ -8,7 +8,7 @@ import {
   getEffectiveInstant,
   getInstantAfterTrackMove,
   getReferenceDay,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   LocationErrorCode,
   ReferenceMode,
@@ -23,12 +23,12 @@ const NOTE_TEXT_SELECTOR = "p.text-xs";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createDateSelectionWorld();
-  let store = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+  let store = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
   let lastOutcome: ReturnType<typeof store.dispatch>;
 
   f.BeforeEachScenario(async () => {
     await world.reset();
-    store = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+    store = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
   });
   f.AfterAllScenarios(world.finish);
 
@@ -38,7 +38,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const givenAppOpen = () => world.openApp();
   const whenNextDay = () => world.showNextDay();
   const statusOfNextDayFrom = (timestamp: string) => {
-    const statusStore = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+    const statusStore = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
     statusStore.dispatch({
       type: LocationCommandType.SET_DEVICE_TIME_ZONE,
       timeZoneId: world.clock().timeZoneId(),
@@ -93,7 +93,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           world.expectPinnedTo(pinned);
           const replayStore = createStore(
             reduceLocations,
-            INITIAL_LOCATIONS_STATE,
+            INITIAL_WORLD_CLOCK_STATE,
           );
           const now = world.clock().instant();
           replayStore.dispatch({
