@@ -68,6 +68,8 @@ Russian and English are supported from the start. The locale system is built to 
 
 Requires Node.js >= 26 (the exact major is in `.nvmrc`) and pnpm >= 9.
 
+The project's ubiquitous language — every domain term, the code that owns it and its Russian name — is defined in the [glossary](docs/glossary/README.md). Start there before changing domain code.
+
 ```bash
 pnpm install
 pnpm dev          # start dev server

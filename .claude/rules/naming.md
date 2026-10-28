@@ -2,6 +2,10 @@
 
 This rule applies when writing ANY new code and when refactoring existing code.
 
+## Domain names come from the glossary
+
+This file governs the *form* of a name. Its *word* for a domain concept comes from `docs/glossary/` (`.claude/rules/glossary.md`): use the glossary term, never a word listed under *Never:*, and add an entry before naming a new concept.
+
 ## Core principle
 
 Every name must be understandable without surrounding context. A reader should never need to scroll up or check another file to understand what a variable holds.

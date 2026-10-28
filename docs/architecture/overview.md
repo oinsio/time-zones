@@ -6,6 +6,7 @@ Time Zones is a client-only, offline-first PWA. The architecture separates a vie
 
 | Document | What it covers |
 |---|---|
+| [Glossary](../glossary/README.md) | Ubiquitous language: every domain term, its owner in code and its Russian name; start here |
 | [domain-model.md](domain-model.md) | State, invariants, commands, errors, selectors |
 | [views.md](views.md) | View catalog, view contract, UX building blocks |
 | [open-questions.md](open-questions.md) | Decisions not made yet |
