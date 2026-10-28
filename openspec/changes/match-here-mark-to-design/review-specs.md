@@ -104,7 +104,8 @@ None.
 - Impact: If the icon were dropped from Moscow / Saint Petersburg rows while the caption stayed, the M2 test would still pass, so the metric is not measured as written.
 - Fix: In task 5.2, "The former pill is gone" also asserts that exactly 2 rows have an `svg` before their city span on the city line (the same DOM count used by "A marked row has exactly one leading mark").
 - Fix risk: none — a DOM count in jsdom, no accessible-name assertion.
-- Status: open
+- Status: fixed
+- Resolution: task 5.2 "The former pill is gone" (`@FR2 @M2`) now also asserts that exactly 2 rows have an `svg` before their city span on the city line, so M2's arrow-icon count is measured alongside the caption count.
 
 ## Verdict
 
