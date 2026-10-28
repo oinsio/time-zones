@@ -158,7 +158,7 @@ No changes (no IA documents exist under `docs/ia/`).
 
 ## Success Metrics
 
-- M1: 100% of FR1–FR13, NFR-P1, NFR-P2, NFR-A1, NFR-A2, NFR-R1 and UX1–UX3 have at least one automated test, Gherkin scenario or build check that names `support-legacy-ios-12-safari` together with the id. FR1 on a real device is covered by M7.
+- M1: 100% of FR1–FR13, NFR-P1, NFR-P2, NFR-A1, NFR-A2 and UX1–UX3 (20 of 20 ids) have at least one automated test, Gherkin scenario or build check that names `support-legacy-ios-12-safari` together with the id. NFR-R1 is proven by the existing screenshot scenarios passing with 0 updated baselines. FR1 on a real device is covered by M7.
 - M2: The legacy build check reports 0 issues on `dist/assets/*.js`, `dist/sw.js` and `dist/workbox-*.js` at the Safari 12 level, and 0 `inset:` declarations in `dist/assets/*.css`.
 - M3: With `Europe/Kyiv` rejected and `Europe/Kiev` accepted by the stubbed engine, adding Kyiv succeeds, the stored id is `Europe/Kyiv`, and the row shows the same time and offset as `Europe/Kiev` at `2026-03-08T07:30:00Z` (`09:30`, `UTC+2`). The wall-clock time `03:30` on `2026-03-29` in `Europe/Kyiv` resolves to `2026-03-29T01:30:00Z` with status gap, as it does for `Europe/Kiev`.
 - M4: With `Intl.DisplayNames`, `ResizeObserver` and `MediaQueryList.addEventListener` removed from the test environment, the main page renders with 0 uncaught errors (3 of 3 cases).
