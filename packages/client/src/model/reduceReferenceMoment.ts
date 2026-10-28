@@ -29,18 +29,18 @@ const fail = (error: LocationErrorCode): LocationsReduceResult => ({
   error,
 });
 
-type DatePicker = (current: Temporal.PlainDate) => Temporal.PlainDate;
+type TargetDateResolver = (current: Temporal.PlainDate) => Temporal.PlainDate;
 
 /** Pins the moment to `date` at the wall time the moment has now. */
 function moveToDate(
   state: WorldClockState,
   now: Temporal.Instant,
-  pickDate: DatePicker,
+  resolveTargetDate: TargetDateResolver,
 ): LocationsReduceResult {
   const zone = getReferenceZone(state);
   try {
     const current = getEffectiveInstant(state, now).toZonedDateTimeISO(zone);
-    const date = pickDate(current.toPlainDate());
+    const date = resolveTargetDate(current.toPlainDate());
     if (date.equals(current.toPlainDate())) return { ok: true, state };
     const requestedWallTime = current.toPlainTime();
     const { instant, status } = resolveWallClock(
@@ -67,9 +67,9 @@ function moveToDate(
 }
 
 /** @throws RangeError for a malformed ISO date. */
-function buildDatePicker(
+function buildTargetDateResolver(
   command: Exclude<DateCommand, { type: LocationCommandType.RESET_TO_NOW }>,
-): DatePicker {
+): TargetDateResolver {
   if (command.type === LocationCommandType.SHIFT_DATE) {
     return (current) => current.add({ days: command.days });
   }
@@ -78,7 +78,7 @@ function buildDatePicker(
 }
 
 /**
- * Reduces the date commands of the locations state: the previous and next
+ * Reduces the date commands of the world clock state: the previous and next
  * day, a picked date and the return to now. The commands carry ISO strings
  * only, so they replay deterministically (ADR-0002).
  * Implements FR1, FR2, FR3, FR4, FR6, FR10 of select-date-with-calendar-and-now (D1).
@@ -93,7 +93,7 @@ export function reduceReferenceMoment(
   }
   try {
     const now = Temporal.Instant.from(command.now);
-    return moveToDate(state, now, buildDatePicker(command));
+    return moveToDate(state, now, buildTargetDateResolver(command));
   } catch (e) {
     if (e instanceof RangeError) return fail(LocationErrorCode.INVALID_DATE);
     throw e;

@@ -44,7 +44,7 @@ describe("CardsView", () => {
 
   it.each([
     { language: "en", explanation: "No locations added yet." },
-    { language: "ru", explanation: "Локации пока не добавлены." },
+    { language: "ru", explanation: "Места пока не добавлены." },
   ])(
     "should explain in $language that no locations are added",
     async ({ language, explanation }) => {

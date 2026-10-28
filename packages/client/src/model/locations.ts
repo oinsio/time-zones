@@ -6,7 +6,7 @@ import { LIVE_REFERENCE_MOMENT, type ReferenceMoment } from "./referenceMoment";
 import { canonicalizeTimeZoneId } from "./timeZoneId";
 
 /**
- * Locations state, commands and reducer.
+ * World clock state, commands and reducer.
  * Implements FR8, FR9, FR10 of add-locations-via-search (D1) and FR2 of
  * reorder-locations-by-drag-and-drop.
  * Implements FR3, FR4 of mark-device-time-zone-in-location-list (D1).
