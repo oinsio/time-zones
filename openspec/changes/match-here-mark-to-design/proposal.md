@@ -28,7 +28,7 @@ _None._
 ## Impact
 
 - `packages/client/src/`: `model/` (mark kind enum and the selector picking a row's mark), `presenter/presentLocationRows.ts` and `presenter/index.ts` (a presented mark replaces `deviceTimeZoneLabel`), `views/shared/LocationRow.tsx` and a new `views/shared/LocationMarkIcon.tsx` (leading slot and caption), `constants/` (icon size), `locales/en.json` and `locales/ru.json` (two new keys replace `locations.deviceTimeZoneBadge`).
-- Tests: unit tests and fixtures that use `deviceTimeZoneLabel` or "Your time zone"; the unit BDD features `locations_device_time_zone_unit.feature` and `locations_clock_tick.feature`; the E2E features `locations_device_time_zone_e2e.feature` and `locations_local_time_e2e.feature`; new `locations_here_mark_unit.feature` and `locations_here_mark_e2e.feature`; 32 screenshot baselines re-approved (the list, pinned, calendar and time-selected states × 375 / 1024 px × light / dark × `chromium` / `mobile-chrome`).
+- Tests: unit tests and fixtures that use `deviceTimeZoneLabel` or "Your time zone"; the unit BDD features `locations_device_time_zone_unit.feature` and `locations_clock_tick.feature`; the E2E features `locations_device_time_zone_e2e.feature` and `locations_local_time_e2e.feature`; a new `locations_here_mark_unit.feature`; 32 screenshot baselines re-approved (the list, pinned, calendar and time-selected states × 375 / 1024 px × light / dark × `chromium` / `mobile-chrome`).
 - No new dependencies (`lucide-react` already provides `Navigation`), no storage schema change, no network.
 
 ## Goals
@@ -100,9 +100,10 @@ _None._
 
 Feature files under `packages/client/src/test/features/locations/`, tagged `@match-here-mark-to-design`:
 
-- `locations_here_mark_unit.feature`: icon before the city, caption after it, no pill, unmarked rows without the slot, English and Russian captions, and every mark kind defined (vitest-cucumber, jsdom).
-- `locations_here_mark_e2e.feature`: row accessible name, axe-core in both themes, layout at 320 px and 2560 px (playwright-bdd).
-- Existing `locations_device_time_zone_unit.feature`, `locations_clock_tick.feature`, `locations_device_time_zone_e2e.feature` and `locations_local_time_e2e.feature` switch their wording and expected texts from the badge to the "here" mark.
+- New `locations_here_mark_unit.feature` (vitest-cucumber, jsdom) covers: icon before the city and caption after it, no pill, one leading mark per row, unmarked rows without the slot, and every mark kind defined in both locales.
+- Existing `locations_device_time_zone_unit.feature` and `locations_clock_tick.feature` switch their steps and expected texts from the badge to the "here" mark. Their match, list-change, re-read, language and budget scenarios gain `@match-here-mark-to-design` tags.
+- Existing `locations_device_time_zone_e2e.feature` (playwright-bdd) switches to the here mark and gains `@match-here-mark-to-design` tags. It covers the row accessible name, a new scenario for the icon image name with the hidden caption, axe-core in both themes, and layout at 320 px and 2560 px.
+- Existing `locations_local_time_e2e.feature` expects the new row name. The screenshot outline in `locations_ui_e2e.feature` is re-approved.
 
 ## Visual Reference
 
