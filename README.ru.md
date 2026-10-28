@@ -106,11 +106,11 @@ pnpm preflight    # lint + typecheck + тесты
 |----------------------------------|-------------------------------------------------------------------------------------------|
 | `gnomish`                        | скрипт-обёртка — единственный способ запускать фабрику здесь                              |
 | `gnomish-up`                     | `serve` вместе с живым дашбордом и INFO-логом в одном терминале, через обёртку            |
-| `gnomish.env`                    | собственные настройки обёртки: имя проекта, уровень логов, Java, `gnomish-up`             |
+| `gnomish.env`                    | собственные настройки обёртки: имя проекта, уровень логов, версия фабрики, `gnomish-up`   |
 | `gnomish.local.env`              | необязательные личные переопределения `gnomish.env`, в git не попадает                    |
 | `project.yaml.example.host`      | шаблон файла проекта фабрики `~/.gnomish/projects/time-zones/project.yaml`, привязка host |
 | `project.yaml.example.container` | тот же шаблон для привязки `container`                                                    |
-| `gnomish.jar`                    | сборка фабрики, в git не попадает, кладётся вручную                                       |
+| `gnomish-<version>/`             | распакованный релиз фабрики, в git не попадает, кладётся вручную                          |
 | `sandbox/`                       | Dockerfile контейнера, в котором работают гномы при привязке `container`                  |
 | `build-sandbox`                  | собирает этот образ с версиями инструментов, зафиксированными в репозитории               |
 
@@ -137,6 +137,7 @@ pnpm preflight    # lint + typecheck + тесты
 **1. Установите инструменты.**
 
 - Java 25+ и Claude Code CLI (`claude`) в `PATH`; один раз войдите, запустив `claude`.
+- git 2.56.0 или новее в `PATH`: со старым git фабрика не запускается (macOS: `brew install git`).
 - OpenSpec CLI, установленный глобально, той версии, что зафиксирована в `package.json` (`1.13.2`). Гном работает в worktree вне этого клона (`~/.gnomish/projects/time-zones/worktrees/time-zones/<task>`), где `node_modules` нет до первого `pnpm install` в стадии:
 
   ```bash
@@ -153,11 +154,17 @@ pnpm preflight    # lint + typecheck + тесты
 
 - Для привязки container: запущенный Docker. Инструменты уже есть в образе (шаг 6).
 
-**2. Соберите jar фабрики** в клоне [gnomish-factory](https://github.com/oinsio/gnomish-factory) и скопируйте его сюда (в git он не попадает). Повторяйте после каждого обновления фабрики:
+**2. Распакуйте релиз фабрики** рядом с обёрткой (в git он не попадает). Версия задаётся в `GNOMISH_VERSION` в [`gnomish.env`](.gnomish/factory/gnomish.env); для обновления поменяйте её там и повторите:
 
 ```bash
-./gradlew :bootstrap:bootJar   # в клоне gnomish-factory
-cp bootstrap/build/libs/bootstrap-0.1.0-SNAPSHOT.jar <time-zones>/.gnomish/factory/gnomish.jar
+cd .gnomish/factory
+VERSION=0.1.0
+BASE=https://github.com/oinsio/gnomish-factory/releases/download/v$VERSION
+curl -fL -O "$BASE/gnomish-$VERSION.tar.gz" -O "$BASE/SHA256SUMS"
+shasum -a 256 -c --ignore-missing SHA256SUMS   # Linux: sha256sum -c --ignore-missing SHA256SUMS
+tar -xzf "gnomish-$VERSION.tar.gz"
+gnomish-$VERSION/bin/gnomish --version         # печатает 0.1.0
+cd -
 ```
 
 **3. Зарегистрируйте клон и выберите, где работают гномы.** В незарегистрированном каталоге фабрика не запускается. Регистрация создаёт файл проекта `~/.gnomish/projects/time-zones/project.yaml`; затем допишите в него шаблон одной из двух привязок:
@@ -228,9 +235,6 @@ $EDITOR "$secrets/GNOMISH_GITHUB_TOKEN"         # вставьте каждый 
 # Разовая задача без трекера: ветка gnomish/<task-id> в worktree, клон не трогается
 .gnomish/factory/gnomish run --task="Add a meeting planner view"
 
-# То же, но гнома и судью играете вы — пробный прогон стадии, которую вы правите
-.gnomish/factory/gnomish run --task="..." --mode=in-place --interactive
-
 # Задачи из GitHub issues: повесьте на issue метку gnomish:ready, затем
 .gnomish/factory/gnomish take 42          # взять этот issue
 .gnomish/factory/gnomish serve --drain    # отработать всю очередь ready и выйти
@@ -271,7 +275,7 @@ factory:
 
 Что нужно каждому режиму, видно по двум шаблонам: `container` дополнительно задаёт образ, egress-список и лимиты ресурсов. Все стадии конвейера работают в одном режиме — фабрика отказывается смешивать `host` и `container` по стадиям.
 
-Java 25 и jar остаются на хосте: сама фабрика работает там и управляет контейнерами через Docker. Хост, который нужен инструменту, но запрещён фильтром, появляется строкой `egress denial:` в `gnomish status`; добавляйте его в `factory.sandbox.egress-allowlist` в `project.yaml`, только когда знаете, какой инструмент его запросил.
+Java 25 и релиз фабрики остаются на хосте: сама фабрика работает там и управляет контейнерами через Docker. Хост, который нужен инструменту, но запрещён фильтром, появляется строкой `egress denial:` в `gnomish status`; добавляйте его в `factory.sandbox.egress-allowlist` в `project.yaml`, только когда знаете, какой инструмент его запросил.
 
 Полная документация — [руководства оператора](https://github.com/oinsio/gnomish-factory/tree/main/docs/guides) фабрики (`operator-guide.md` — трекер, `-run.md` — `run`, `-serve.md` — `serve`).
 

@@ -106,11 +106,11 @@ Features are developed with [OpenSpec](openspec/): `/opsx:propose` → `/opsx:ap
 |----------------------------------|----------------------------------------------------------------------------------------------------|
 | `gnomish`                        | wrapper script — the only way to run the factory here                                              |
 | `gnomish-up`                     | `serve` plus a live dashboard and the INFO log in one terminal, via the wrapper                    |
-| `gnomish.env`                    | the wrapper's own settings: project name, log level, Java launcher, `gnomish-up`                   |
+| `gnomish.env`                    | the wrapper's own settings: project name, log level, factory version, `gnomish-up`                 |
 | `gnomish.local.env`              | optional personal overrides of `gnomish.env`, git-ignored                                          |
 | `project.yaml.example.host`      | template of the factory's project file `~/.gnomish/projects/time-zones/project.yaml`, host binding |
 | `project.yaml.example.container` | the same template for the `container` binding                                                      |
-| `gnomish.jar`                    | the factory build, git-ignored, you put it there yourself                                          |
+| `gnomish-<version>/`             | the unpacked factory release, git-ignored, you put it there yourself                               |
 | `sandbox/`                       | Dockerfile of the box gnomes run in under the `container` binding                                  |
 | `build-sandbox`                  | builds that image with the tool versions this repository pins                                      |
 
@@ -137,6 +137,7 @@ Do this once per machine, from the root of your clone. The factory keeps everyth
 **1. Install the tools.**
 
 - Java 25+ and the Claude Code CLI (`claude`) on `PATH`, logged in once with `claude`.
+- git 2.56.0 or newer on `PATH`: the factory refuses an older one at startup (macOS: `brew install git`).
 - The OpenSpec CLI, installed globally, at the version pinned in `package.json` (`1.13.2`). The gnome works in a worktree outside this clone (`~/.gnomish/projects/time-zones/worktrees/time-zones/<task>`), where `node_modules` does not exist until the stage's first `pnpm install`:
 
   ```bash
@@ -153,11 +154,17 @@ Do this once per machine, from the root of your clone. The factory keeps everyth
 
 - For the container binding: Docker, running. The image carries the toolchain itself (step 6).
 
-**2. Build the factory jar** in a clone of [gnomish-factory](https://github.com/oinsio/gnomish-factory) and copy it in (it is git-ignored). Repeat after pulling factory updates:
+**2. Unpack the factory release** next to the wrapper (it is git-ignored). The version is `GNOMISH_VERSION` in [`gnomish.env`](.gnomish/factory/gnomish.env); to upgrade, change it there and repeat:
 
 ```bash
-./gradlew :bootstrap:bootJar   # in the gnomish-factory clone
-cp bootstrap/build/libs/bootstrap-0.1.0-SNAPSHOT.jar <time-zones>/.gnomish/factory/gnomish.jar
+cd .gnomish/factory
+VERSION=0.1.0
+BASE=https://github.com/oinsio/gnomish-factory/releases/download/v$VERSION
+curl -fL -O "$BASE/gnomish-$VERSION.tar.gz" -O "$BASE/SHA256SUMS"
+shasum -a 256 -c --ignore-missing SHA256SUMS   # Linux: sha256sum -c --ignore-missing SHA256SUMS
+tar -xzf "gnomish-$VERSION.tar.gz"
+gnomish-$VERSION/bin/gnomish --version         # prints 0.1.0
+cd -
 ```
 
 **3. Register the clone and choose where gnomes run.** Every factory command refuses an unregistered directory. Registering creates the project file `~/.gnomish/projects/time-zones/project.yaml`; then append the template for one of the two bindings:
@@ -228,9 +235,6 @@ The wrapper adds `--dir` (this project), loads [`gnomish.env`](.gnomish/factory/
 # One ad-hoc task, no tracker: branch gnomish/<task-id> in a worktree, the clone is not touched
 .gnomish/factory/gnomish run --task="Add a meeting planner view"
 
-# The same, but you play the gnome and the judge — a dry run of a stage you are editing
-.gnomish/factory/gnomish run --task="..." --mode=in-place --interactive
-
 # Tasks from GitHub issues: label an issue gnomish:ready, then
 .gnomish/factory/gnomish take 42          # work that issue
 .gnomish/factory/gnomish serve --drain    # work the whole ready queue, then exit
@@ -271,7 +275,7 @@ factory:
 
 The two templates show what each mode needs: `container` also sets the image, the egress allowlist and the resource limits. Every stage of the pipeline runs in the same mode — the factory refuses a per-stage mix of `host` and `container`.
 
-The Java 25 runtime and the jar stay on the host: the factory itself runs there and drives the boxes through Docker. A host a tool needs but the guard denies shows up as an `egress denial:` line in `gnomish status`; add it to `factory.sandbox.egress-allowlist` in `project.yaml` only once you know which tool asked for it.
+The Java 25 runtime and the factory release stay on the host: the factory itself runs there and drives the boxes through Docker. A host a tool needs but the guard denies shows up as an `egress denial:` line in `gnomish status`; add it to `factory.sandbox.egress-allowlist` in `project.yaml` only once you know which tool asked for it.
 
 Full reference: the factory's [operator guides](https://github.com/oinsio/gnomish-factory/tree/main/docs/guides) (`operator-guide.md` for the tracker, `-run.md` for `run`, `-serve.md` for `serve`).
 
