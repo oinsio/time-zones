@@ -94,7 +94,8 @@ None.
 - Impact: The implementer either writes a step whose text promises an icon check it does not make, or rewords the scenario away from the spec; the executable Gherkin then does not verify the icon half of the THEN.
 - Fix: In task 5.2, extend "Every mark kind is fully defined" so that, for each `Object.values(LocationMarkKind)`, the step also renders `<LocationMarkIcon mark={presentLocationMarks(translate)[kind]} id="mark" />` and asserts it contains an `svg`; in task 4.1, add "export `LocationMarkIcon` from `views/shared/index.ts`" so the step imports it from `@/views/shared`, as `deviceTimeZoneWorld.tsx:17` already does for `LocationList`.
 - Fix risk: One more public export from `views/shared/index.ts`; no layer rule is affected (steps already import `@/views/shared`). The step checks DOM presence only, no accessible name, so it stays within `.claude/rules/bdd-unit.md`.
-- Status: open
+- Status: fixed
+- Resolution: task 5.2 "Every mark kind is fully defined" now also renders `<LocationMarkIcon mark={presentLocationMarks(translate)[kind]} id="mark" />` per kind and asserts it contains an `svg`; task 4.1 and design D3 add the `LocationMarkIcon` export from `views/shared/index.ts` so the step imports it from `@/views/shared`.
 
 ### R3 — SUGGESTION — M2's icon count is not asserted
 - Location: `openspec/changes/match-here-mark-to-design/tasks.md:192`

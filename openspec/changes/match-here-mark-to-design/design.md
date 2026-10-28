@@ -56,6 +56,7 @@ New `views/shared/LocationMarkIcon.tsx`:
 
 - `LOCATION_MARK_ICONS: Record<LocationMarkKind, { Icon: LucideIcon; isFilled: boolean }>`, with `HERE → { Navigation, isFilled: true }`. The exhaustive `Record` makes a new kind fail to compile without an icon. The house for home becomes `{ House, isFilled: false }` later, matching the outline house in `phone-travel.html`.
 - `LocationMarkIcon({ mark, id })` renders `<span id={id} role="img" aria-label={mark.accessibleLabel} className="inline-flex shrink-0 text-accent">` around the icon. The icon gets `aria-hidden="true"`, `size={LOCATION_MARK_ICON_SIZE_PX}`, and `fill="currentColor"` when `isFilled`. The accessible name sits on the wrapper `span`, not on the `svg`. That way it does not depend on how `lucide-react` treats `aria-*` props on its icons.
+- `views/shared/index.ts` exports `LocationMarkIcon`, so the unit BDD step that checks every kind's icon imports it through the module's index.
 
 In `LocationRow.tsx`, the city line becomes:
 

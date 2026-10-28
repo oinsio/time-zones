@@ -60,7 +60,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - the inner `svg` has `aria-hidden="true"`, `width="18"` and `fill="currentColor"`;
   - an `it.each` over `Object.values(LocationMarkKind)` asserts that every kind has a `LOCATION_MARK_ICONS` entry that renders an `svg` (M3, FR4, UX1).
 
-  Verify red, then green, with `npx vitest run src/views/shared/LocationMarkIcon.test.tsx`.
+  Export `LocationMarkIcon` from `views/shared/index.ts`, so the unit BDD step of task 5.2 imports it from `@/views/shared`, as `deviceTimeZoneWorld.tsx` already does for `LocationList`. Verify red, then green, with `npx vitest run src/views/shared/LocationMarkIcon.test.tsx`.
 - [ ] 4.2 TDD the slot in `views/shared/LocationRow.tsx`. In `views/shared/LocationRow.test.tsx`, replace the "device time zone badge" block with "here mark", using a row with `mark: { kind: HERE, accessibleLabel: "You are here", caption: "here" }`:
   - the city line's first child is the mark image and the city span is its next sibling;
   - the caption `"here"` is the city span's next sibling, has `aria-hidden="true"` and classes `text-accent font-bold`, and has no `bg-accent`, `rounded-full` or `border` class (UX2);
@@ -83,7 +83,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Icon before the city, caption after it" (`@FR1 @UX1 @UX2 @UX3`): device `Asia/Almaty`, list Almaty and Moscow. On Almaty's city line the mark image precedes the city and the caption `here` follows it. Moscow's city line starts with the city.
   - "The former pill is gone" (`@FR2 @M2`): device `Europe/Moscow`, list Moscow, Saint Petersburg, Almaty. Exactly 2 rows show the here mark, and `screen.queryByText(/Your time zone/)` is null.
   - "A marked row has exactly one leading mark" (`@FR4`): Almaty has exactly 1 `svg` before its city span on the city line, Moscow has 0 (DOM count, no accessible-name assertion; names are checked in task 6.1).
-  - "Every mark kind is fully defined" (`@FR4 @FR3 @M3`): for each `Object.values(LocationMarkKind)` in `en` and `ru`, `presentLocationMarks` (from `@/presenter`) gives a non-empty accessible label, and a non-empty caption where the kind has one.
+  - "Every mark kind is fully defined" (`@FR4 @FR3 @M3`): for each `Object.values(LocationMarkKind)` in `en` and `ru`, `presentLocationMarks` (from `@/presenter`) gives a non-empty accessible label, and a non-empty caption where the kind has one; and `<LocationMarkIcon mark={presentLocationMarks(translate)[kind]} id="mark" />` (from `@/views/shared`) renders an element containing an `svg` (DOM presence only, no accessible-name assertion).
 
   Verify with `npx vitest run src/test/features/locations/steps/locations_here_mark_unit.steps.tsx`.
 - [ ] 5.3 Run the whole unit suite once, to catch other features that rendered the badge. Verify with `pnpm --filter @time-zones/client test`.
