@@ -10,7 +10,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 1. Constant and locale keys (no TDD: constants and strings)
 
 - [ ] 1.1 Add `LOCATION_MARK_ICON_SIZE_PX = 18` to `constants/locations.ts` with a JSDoc that names the design screens and `Implements UX1 of match-here-mark-to-design`, and export it from `constants/index.ts` (design D3). Verify with `pnpm --filter @time-zones/client typecheck`.
-- [ ] 1.2 Add `locations.hereMarkLabel` (en "You are here", ru "Вы здесь") and `locations.hereMarkCaption` (en "here", ru "здесь") to `locales/en.json` and `locales/ru.json` (design D4, FR3). Keep `locations.deviceTimeZoneBadge` for now; task 5.3 removes it. Verify with `npx vitest run src/locales/locales.test.ts` (key parity).
+- [ ] 1.2 Add `locations.hereMarkLabel` (en "You are here", ru "Вы здесь") and `locations.hereMarkCaption` (en "here", ru "здесь") to `locales/en.json` and `locales/ru.json` (design D4, FR3). Keep `locations.deviceTimeZoneBadge` for now; task 6.2 removes it, after task 6.1 rewrites the last step file that reads it. Verify with `npx vitest run src/locales/locales.test.ts` (key parity).
 
 ## 2. Model (TDD)
 
@@ -43,9 +43,15 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - Moscow + Saint Petersburg + Almaty with `Europe/Moscow` → `["here", "here", ""]`;
   - Russian → `"здесь"`.
 
-  Update every other `LocationRow` fixture or expectation that names `deviceTimeZoneLabel`, by removing the key or expecting the mark: `controller/useLocations.test.tsx`, `controller/useLocations.deviceTimeZone.test.tsx` (`BADGE_RU` becomes the caption `"здесь"`, read from `row.mark?.caption`), `controller/useLocations.tick.test.tsx`, `views/shared/LocationRow.dragging.test.tsx`, `views/shared/LocationList.test.tsx`, `views/shared/useReorderAnnouncements.test.tsx`, `views/shared/LocationList.drop.test.tsx`, `test/features/locations/steps/locations_reorder_unit.steps.ts`. `LocationRow.tsx` is changed in task 4.2; until then it may read `row.mark?.caption` in place of `row.deviceTimeZoneLabel` so the build compiles.
+  Update every other `LocationRow` fixture or expectation that names `deviceTimeZoneLabel`, by removing the key or expecting the mark. `typecheck` compiles all of them, because `tsconfig.app.json` has `"include": ["src"]`. With `presentLocationRows.test.ts` these are the 10 test files of design "Consequences":
+  - `controller/useLocations.test.tsx`: drop `deviceTimeZoneLabel: ""`;
+  - `controller/useLocations.deviceTimeZone.test.tsx` and `controller/useLocations.tick.test.tsx`: `BADGE_RU` becomes the caption `"здесь"`, read from `row.mark?.caption ?? ""`;
+  - `views/shared/LocationRow.dragging.test.tsx`, `views/shared/LocationList.test.tsx`, `views/shared/useReorderAnnouncements.test.tsx`, `views/shared/LocationList.drop.test.tsx`, `test/features/locations/steps/locations_reorder_unit.steps.ts`: drop `deviceTimeZoneLabel: ""`;
+  - `views/shared/LocationRow.test.tsx`: drop `deviceTimeZoneLabel: ""` from the `row` fixture, and in the "device time zone badge" block replace every `renderRow({ deviceTimeZoneLabel: BADGE_TEXT })` with `renderRow({ mark: { kind: LocationMarkKind.HERE, accessibleLabel: BADGE_TEXT, caption: BADGE_TEXT } })` (`LocationMarkKind` from `@/presenter`). The block keeps its assertions until task 4.2 rewrites it.
 
-  Verify with `npx vitest run src/presenter`, then `npx vitest run src/controller`, then `pnpm --filter @time-zones/client typecheck`.
+  `LocationRow.tsx` is changed in task 4.2. Until then it reads `row.mark?.caption ?? ""` in place of `row.deviceTimeZoneLabel`, so the build compiles and the interim badge tests above still pass.
+
+  Verify with `npx vitest run src/presenter`, then `npx vitest run src/controller`, then `npx vitest run src/views/shared`, then `pnpm --filter @time-zones/client typecheck`.
 
 ## 4. View (TDD, jsdom component tests)
 
@@ -80,17 +86,13 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Every mark kind is fully defined" (`@FR4 @FR3 @M3`): for each `Object.values(LocationMarkKind)` in `en` and `ru`, `presentLocationMarks` (from `@/presenter`) gives a non-empty accessible label, and a non-empty caption where the kind has one.
 
   Verify with `npx vitest run src/test/features/locations/steps/locations_here_mark_unit.steps.tsx`.
-- [ ] 5.3 Remove `locations.deviceTimeZoneBadge` from `locales/en.json` and `locales/ru.json`, and remove every remaining reference (FR2). Verify:
-  - from the repository root, `grep -rn "deviceTimeZoneBadge\|deviceTimeZoneLabel\|Your time zone\|Ваш часовой пояс" packages/client/src --include='*.ts' --include='*.tsx' --include='*.json'` prints only lines of `locations_here_mark_unit.steps.tsx` and `LocationRow.test.tsx` that assert the text's absence;
-  - then `npx vitest run src/locales/locales.test.ts`;
-  - then `pnpm --filter @time-zones/client typecheck`.
-- [ ] 5.4 Run the whole unit suite once, to catch other features that rendered the badge. Verify with `pnpm --filter @time-zones/client test`.
+- [ ] 5.3 Run the whole unit suite once, to catch other features that rendered the badge. Verify with `pnpm --filter @time-zones/client test`.
 
 ## 6. E2E BDD (playwright-bdd, real browser; device zone `Asia/Almaty` from `playwright.bdd.config.ts`)
 
 - [ ] 6.1 Update `test/features/locations/locations_device_time_zone_e2e.feature` and `steps/locations_device_time_zone_e2e.steps.ts`:
   - "Row name includes the badge" expects `the row of "Almaty" is named "Almaty You are here"` and gains `@match-here-mark-to-design @NFR-A1`.
-  - The steps "shows the device time zone badge" / "shows no device time zone badge" become "shows the here mark" / "shows no here mark". The row contains / does not contain `getByText(englishLocale.locations.hereMarkCaption, { exact: true })`.
+  - The steps "shows the device time zone badge" / "shows no device time zone badge" become "shows the here mark" / "shows no here mark". The row contains / does not contain `getByText(englishLocale.locations.hereMarkCaption, { exact: true })`; the `BADGE_TEXT = englishLocale.locations.deviceTimeZoneBadge` constant is replaced by that caption.
   - The axe outline gains `@match-here-mark-to-design @NFR-A2 @M4`, and the 320 / 2560 px outline gains `@match-here-mark-to-design @NFR-R1 @M4`.
   - The list-state outline gains `@match-here-mark-to-design @NFR-R2`.
   - Add the scenario "The mark icon is named and the caption is not announced" (`@match-here-mark-to-design @NFR-A1 @FR1`). In the Almaty row, `getByRole("img", { name: "You are here", exact: true })` is visible, and the caption element has `aria-hidden="true"`.
@@ -99,7 +101,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   Then in `locations_local_time_e2e.feature`, "Time does not change the row name" expects `"Almaty You are here"` and gains `@match-here-mark-to-design @NFR-A1`.
 
   Verify with `pnpm test:bdd --grep "[Bb]adge|here mark|mark icon|row name"`. Every example must pass in the `chromium` and `mobile-chrome` projects.
-- [ ] 6.2 NFR-R2 / M5: re-approve the 32 baselines of the outline "Screenshot of the <state> state at <width> px in the <theme> theme" (`locations_ui_e2e.feature`) for the states list, pinned, calendar and time-selected, under `test/features/__screenshots__/chromium/` and `mobile-chrome/`. Add `@match-here-mark-to-design @NFR-R2 @M5` to the outline's tags.
+- [ ] 6.2 Remove `locations.deviceTimeZoneBadge` from `locales/en.json` and `locales/ru.json`, and remove every remaining reference (FR2, FR3). Tasks 3.2 and 4.2 have removed `deviceTimeZoneLabel`, and tasks 5.1 and 6.1 have rewritten every step file and feature that read the key or the text (`deviceTimeZoneWorld.tsx`, `locations_clock_tick.steps.tsx`, `locations_device_time_zone_e2e.steps.ts`, the unit and E2E features). Verify:
+  - from the repository root, `grep -rn "deviceTimeZoneBadge\|deviceTimeZoneLabel\|Your time zone\|Ваш часовой пояс" packages/client/src --include='*.ts' --include='*.tsx' --include='*.json' --include='*.feature'` prints only lines of `locations_here_mark_unit.feature`, `locations_here_mark_unit.steps.tsx` and `LocationRow.test.tsx` that assert the text's absence;
+  - then `npx vitest run src/locales/locales.test.ts`;
+  - then `pnpm --filter @time-zones/client typecheck`;
+  - then `pnpm --filter @time-zones/client test`.
+- [ ] 6.3 NFR-R2 / M5: re-approve the 32 baselines of the outline "Screenshot of the <state> state at <width> px in the <theme> theme" (`locations_ui_e2e.feature`) for the states list, pinned, calendar and time-selected, under `test/features/__screenshots__/chromium/` and `mobile-chrome/`. Add `@match-here-mark-to-design @NFR-R2 @M5` to the outline's tags.
   - Run `pnpm test:bdd --grep "Screenshot of the (list|pinned|calendar|time-selected) state" --update-snapshots` once.
   - Verify that `git status --short src/test/features/__screenshots__` lists only files of those four states.
   - Then verify that `pnpm test:bdd --grep "Screenshot of the"` passes without the flag.
