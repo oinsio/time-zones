@@ -119,17 +119,17 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 
 ## UI States Matrix
 
-| Network | Data | UI |
-|---|---|---|
-| any | modern engine | unchanged |
-| any | iOS 12.5, list with locations | rows with time, date, offset and track; no country names (FR5) |
-| any | iOS 12.5, stored zone renamed after the device's zone data (`Europe/Kyiv`) | row works through the legacy name (FR4) |
-| any | iOS 12.5, zone unknown under every name | today's unknown-zone row |
-| any | iOS 12.5, no locations | empty state unchanged |
-| online | page visible again after ≥ 15 min, new version | update notice (FR10) |
-| offline | page visible again after ≥ 15 min | update-check failure note, as today (FR10) |
-| any | iOS 12.5, storage unavailable | today's warning; everything else works |
-| offline | iOS 12.5, installed, cache intact | app opens offline; Cache Storage loss is NG3 |
+| Network | Data                                                                       | UI                                                             |
+|---------|----------------------------------------------------------------------------|----------------------------------------------------------------|
+| any     | modern engine                                                              | unchanged                                                      |
+| any     | iOS 12.5, list with locations                                              | rows with time, date, offset and track; no country names (FR5) |
+| any     | iOS 12.5, stored zone renamed after the device's zone data (`Europe/Kyiv`) | row works through the legacy name (FR4)                        |
+| any     | iOS 12.5, zone unknown under every name                                    | today's unknown-zone row                                       |
+| any     | iOS 12.5, no locations                                                     | empty state unchanged                                          |
+| online  | page visible again after ≥ 15 min, new version                             | update notice (FR10)                                           |
+| offline | page visible again after ≥ 15 min                                          | update-check failure note, as today (FR10)                     |
+| any     | iOS 12.5, storage unavailable                                              | today's warning; everything else works                         |
+| offline | iOS 12.5, installed, cache intact                                          | app opens offline; Cache Storage loss is NG3                   |
 
 ## Behavior
 
