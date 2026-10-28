@@ -108,7 +108,8 @@ One run: `cd packages/client && npx stryker run --mutate 'src/model/locationMark
 - Impact: The task is ticked but not done, and NFR-R2 / M5 are unmet: 24 approved reference images contradict FR2 ("No row shows the 'Your time zone' pill"). A later change that brings back a pill-sized badge at 1024 px or in the pinned / calendar states passes these screenshot checks, because the baselines already contain it. Anyone reviewing the baselines as the visual source of truth sees the old design.
 - Fix: From `packages/client/`, run `pnpm test:bdd --grep "Screenshot of the (list|pinned|calendar|time-selected) state" --update-snapshots=all` once. Check that `git status --short src/test/features/__screenshots__` lists the 24 remaining files of those four states and nothing else, and that the regenerated images show the arrow and "here" on Almaty. Then run `pnpm test:bdd --grep "Screenshot of the"` without the flag and confirm it passes.
 - Fix risk: `--update-snapshots=all` rewrites every baseline the grep matches, including the 8 already re-approved ones. Those come out identical or differ only by anti-aliasing noise. The grep keeps the `empty`, `suggestions` and `IST results` baselines untouched. No code or test changes.
-- Status: open
+- Status: fixed
+- Resolution: re-approved the baselines with `--update-snapshots=all` for the four states; 21 more PNGs changed (pinned 375 px, all four states at 1024 px, both themes and projects). The `calendar` 375 px baselines stay unchanged on purpose: the calendar sheet covers the list, so no Almaty row is visible in them.
 
 ## Verdict
 
