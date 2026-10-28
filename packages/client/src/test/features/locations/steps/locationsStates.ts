@@ -31,7 +31,7 @@ const TIME_SELECTED_PERCENT = 75;
 const TIME_SELECTED_LABEL = "18:00";
 
 /** The UI states of the locations screen that have a screen of their own. */
-export enum LocationsState {
+export enum WorldClockState {
   LIST = "list",
   EMPTY = "empty",
   UNREADABLE = "unreadable",
@@ -57,60 +57,60 @@ export enum LocationsState {
  */
 export async function enterLocationsState(
   world: LocationsWorld,
-  state: LocationsState,
+  state: WorldClockState,
 ) {
   const { page } = world;
   switch (state) {
-    case LocationsState.LIST:
+    case WorldClockState.LIST:
       await world.seedList(buildStoredLocations(LIST_CITY_NAMES));
       await world.reloadIfOpen();
       await expect(page.getByRole("listitem")).toHaveCount(2);
       break;
-    case LocationsState.EMPTY:
+    case WorldClockState.EMPTY:
       await expect(
         page.getByText(englishLocale.views.cardsEmptyState),
       ).toBeVisible();
       break;
-    case LocationsState.UNREADABLE:
+    case WorldClockState.UNREADABLE:
       await world.seedDocument(UNREADABLE_DOCUMENT_TEXT);
       await world.reloadIfOpen();
       await expect(page.getByRole("alert")).toBeVisible();
       break;
-    case LocationsState.STORAGE_UNAVAILABLE:
+    case WorldClockState.STORAGE_UNAVAILABLE:
       await world.failAllStorageWrites();
       await world.reloadIfOpen();
       await expect(page.getByText(STORAGE_WARNING_TEXT)).toBeVisible();
       break;
-    case LocationsState.SEARCH_LOADING:
+    case WorldClockState.SEARCH_LOADING:
       await world.holdSearchData();
       await openSearch(page);
       await expect(page.getByText(SEARCH_LOADING_TEXT)).toBeVisible();
       break;
-    case LocationsState.SEARCH_ERROR:
+    case WorldClockState.SEARCH_ERROR:
       await world.failSearchData();
       await openSearch(page);
       await expect(page.getByText(SEARCH_LOAD_ERROR_TEXT)).toBeVisible();
       break;
-    case LocationsState.SUGGESTIONS:
+    case WorldClockState.SUGGESTIONS:
       await openSearch(page);
       await expect(page.getByText(SUGGESTIONS_HEADING)).toBeVisible();
       break;
-    case LocationsState.RESULTS:
+    case WorldClockState.RESULTS:
       await openSearch(page);
       await typeQuery(page, RESULTS_QUERY);
       await expect(resultOption(page, "Moscow")).toBeVisible();
       break;
-    case LocationsState.NO_MATCHES:
+    case WorldClockState.NO_MATCHES:
       await openSearch(page);
       await typeQuery(page, NO_MATCHES_QUERY);
       await expect(page.getByText(NO_RESULTS_TEXT)).toBeVisible();
       break;
-    case LocationsState.IST_RESULTS:
+    case WorldClockState.IST_RESULTS:
       await openSearch(page);
       await typeQuery(page, ABBREVIATION_QUERY);
       await expect(resultOption(page, "Kolkata")).toBeVisible();
       break;
-    case LocationsState.TIME_SELECTED:
+    case WorldClockState.TIME_SELECTED:
       await world.seedList(buildStoredLocations(LIST_CITY_NAMES));
       await world.reloadIfOpen();
       await expect(page.getByRole("listitem")).toHaveCount(
@@ -125,15 +125,15 @@ export async function enterLocationsState(
         TIME_SELECTED_LABEL,
       );
       break;
-    case LocationsState.PINNED:
-    case LocationsState.CALENDAR:
+    case WorldClockState.PINNED:
+    case WorldClockState.CALENDAR:
       await world.seedList(buildStoredLocations(LIST_CITY_NAMES));
       await world.reloadIfOpen();
       await expect(page.getByRole("listitem")).toHaveCount(
         LIST_CITY_NAMES.length,
       );
       await showNextDay(page);
-      if (state === LocationsState.CALENDAR) await openCalendarWithMouse(page);
+      if (state === WorldClockState.CALENDAR) await openCalendarWithMouse(page);
       break;
   }
 }

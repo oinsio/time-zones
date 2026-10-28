@@ -6,14 +6,14 @@ import { Temporal } from "@/lib/temporal";
 import {
   getDayPeriodStops,
   getReferenceDay,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
 } from "@/model";
 import { formatHourLabel, presentDayTrack } from "./dayTrack";
 
 const INSTANT = Temporal.Instant.from("2026-03-08T07:30:00Z");
 const PRECISION = 6;
 const DAY = getReferenceDay(
-  { ...INITIAL_LOCATIONS_STATE, deviceTimeZoneId: "Asia/Almaty" },
+  { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "Asia/Almaty" },
   INSTANT,
 );
 

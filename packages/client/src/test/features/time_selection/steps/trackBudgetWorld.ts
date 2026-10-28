@@ -5,10 +5,10 @@ import { Temporal } from "@/lib/temporal";
 import {
   getEffectiveInstant,
   getReferenceDay,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
-  type LocationsState,
   reduceLocations,
+  type WorldClockState,
 } from "@/model";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
@@ -29,13 +29,13 @@ const PRECISION = 6;
  * FR1, FR3 of replace-wall-clock-row-budgets-with-deterministic-checks (D2).
  */
 export const createTrackBudgetWorld = () => {
-  let state: LocationsState = INITIAL_LOCATIONS_STATE;
+  let state: WorldClockState = INITIAL_WORLD_CLOCK_STATE;
   let startInstant = "";
   let rows: LocationRow[] = [];
-  let presentedState: LocationsState = INITIAL_LOCATIONS_STATE;
+  let presentedState: WorldClockState = INITIAL_WORLD_CLOCK_STATE;
   let workCount: WorkCount | undefined;
 
-  const presentRows = (next: LocationsState) => {
+  const presentRows = (next: WorldClockState) => {
     const now = Temporal.Instant.from(startInstant);
     return presentLocationRows(next.locations, {
       language: ENGLISH_LANGUAGE,
@@ -49,7 +49,7 @@ export const createTrackBudgetWorld = () => {
     await i18n.changeLanguage(ENGLISH_LANGUAGE);
     startInstant = timestamp;
     state = {
-      ...INITIAL_LOCATIONS_STATE,
+      ...INITIAL_WORLD_CLOCK_STATE,
       locations: Intl.supportedValuesOf("timeZone")
         .slice(0, TRACK_BUDGET_ROW_COUNT)
         .map((zone) => buildLocation({ timeZoneId: zone, label: zone })),

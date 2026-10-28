@@ -1,25 +1,25 @@
 // Verifies FR3, FR5, FR8 of add-time-sliders-to-location-cards (D1).
 import { describe, expect, it } from "vitest";
 import {
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   LocationErrorCode,
-  type LocationsState,
   reduceLocations,
+  type WorldClockState,
 } from "./locations";
 import { ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
-const ALMATY_STATE: LocationsState = {
-  ...INITIAL_LOCATIONS_STATE,
+const ALMATY_STATE: WorldClockState = {
+  ...INITIAL_WORLD_CLOCK_STATE,
   deviceTimeZoneId: "Asia/Almaty",
 };
-const NEW_YORK_STATE: LocationsState = {
-  ...INITIAL_LOCATIONS_STATE,
+const NEW_YORK_STATE: WorldClockState = {
+  ...INITIAL_WORLD_CLOCK_STATE,
   deviceTimeZoneId: "America/New_York",
 };
 
-const selectInstant = (state: LocationsState, instant: string) =>
+const selectInstant = (state: WorldClockState, instant: string) =>
   reduceLocations(state, {
     type: LocationCommandType.SELECT_INSTANT,
     instant,

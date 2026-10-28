@@ -5,7 +5,7 @@ import { assembleDayPeriodStops, getDayPeriodStops } from "./dayPeriodStops";
 import { DAY_PERIOD_SCHEDULE, DayPeriod, getDayPeriod } from "./dayPeriods";
 import { collectBlendWindows } from "./dayPeriodWindows";
 import { getReferenceDay } from "./dayTrack";
-import { INITIAL_LOCATIONS_STATE } from "./locations";
+import { INITIAL_WORLD_CLOCK_STATE } from "./locations";
 
 const PRECISION = 6;
 const customSchedule = [
@@ -18,7 +18,7 @@ const customSchedule = [
 ];
 const QUARTER_HOURS_PER_DAY = 96;
 const ALMATY_STATE = {
-  ...INITIAL_LOCATIONS_STATE,
+  ...INITIAL_WORLD_CLOCK_STATE,
   deviceTimeZoneId: "Asia/Almaty",
 };
 const DAY = getReferenceDay(
@@ -86,7 +86,7 @@ describe("getDayPeriodStops", () => {
 
   it("should leave out the boundaries of a skipped local date", () => {
     const apiaDay = getReferenceDay(
-      { ...INITIAL_LOCATIONS_STATE, deviceTimeZoneId: "UTC" },
+      { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "UTC" },
       Temporal.Instant.from("2011-12-30T12:00:00Z"),
     );
 

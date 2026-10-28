@@ -8,6 +8,8 @@ paths:
 
 Source of truth: `docs/architecture/overview.md`, ADR-0002, ADR-0003, ADR-0004, ADR-0007.
 
+**One owner per concept:** every domain concept has one owner, named by the *Code:* part of its entry in `docs/glossary/`. Before adding logic, find the owner and call or extend it; never recompute the concept in another module or layer (`.claude/rules/glossary.md`).
+
 **Model (`src/model/`, `src/preferences/`):**
 - Pure TypeScript — never import React, the DOM, i18next, the presenter or adapters
 - State changes only through command objects with a `type` enum and a pure reducer

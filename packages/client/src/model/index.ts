@@ -43,14 +43,14 @@ export { getLocalDateTime } from "./localDateTime";
 export { getLocationMarkKind, LocationMarkKind } from "./locationMark";
 export {
   buildLocationId,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   type Location,
   type LocationCommand,
   LocationCommandType,
   LocationErrorCode,
   type LocationsReduceResult,
-  type LocationsState,
   reduceLocations,
+  type WorldClockState,
 } from "./locations";
 export { moveLocationInList } from "./moveLocation";
 export {

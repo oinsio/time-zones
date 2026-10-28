@@ -4,10 +4,13 @@ Cross-device PWA for world clock, time zone conversion and meeting planning. Cli
 
 IMPORTANT: Read existing code, tests, and patterns before generating new code.
 
+IMPORTANT: Before naming or writing any domain type, function, constant, i18n key or spec text, look the concept up in the glossary `docs/glossary/` and reuse its *Code:* owner instead of writing a second one — .claude/rules/glossary.md. New concepts get a glossary entry in the same change.
+
 ## Code Style
 
 - No hardcoded values — .claude/rules/code-style.md
 - Descriptive naming — .claude/rules/naming.md
+- Domain names come from the glossary — .claude/rules/glossary.md, dictionary: docs/glossary/README.md
 
 ## Architecture
 
@@ -78,6 +81,7 @@ Active changes: `openspec/changes/`. Archived: `openspec/changes/archive/`. Stab
 |-------------------------|-----------------------------------------|-----------------------------------------------------------|
 | `traceability.md`       | global                                  | Requirement IDs and traceability links in all artifacts   |
 | `process-invariants.md` | global                                  | Immutability, file size, module boundaries, change naming |
+| `glossary.md`           | global                                  | Ubiquitous language: look up, reuse owners, no synonyms   |
 | `antipatterns.md`       | global                                  | Common mistakes to avoid (process, code, UI)              |
 | `test-planning.md`      | global                                  | Maximize automated tests in task decomposition            |
 | `tdd-workflow.md`       | global                                  | Red-Green-Refactor cycle, mutation testing thresholds     |

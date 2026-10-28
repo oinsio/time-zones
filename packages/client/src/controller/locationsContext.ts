@@ -4,8 +4,8 @@ import type {
   LocationCommand,
   LocationErrorCode,
   LocationsReduceResult,
-  LocationsState,
   Store,
+  WorldClockState,
 } from "@/model";
 
 /** Whether the stored list could be read. Implements FR12 of add-locations-via-search (D5). */
@@ -21,7 +21,7 @@ export type AddLocationInput = {
 };
 
 export type LocationsContextValue = {
-  store: Store<LocationsState, LocationCommand, LocationErrorCode>;
+  store: Store<WorldClockState, LocationCommand, LocationErrorCode>;
   clock: Clock;
   /** Counts minute ticks; re-presents the rows. Implements FR3 of show-local-time-and-date-on-location-cards (D4). */
   minuteTick: number;

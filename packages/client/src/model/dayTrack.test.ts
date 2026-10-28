@@ -11,12 +11,12 @@ import {
   type ReferenceDay,
   TrackMove,
 } from "./dayTrack";
-import { INITIAL_LOCATIONS_STATE, type LocationsState } from "./locations";
+import { INITIAL_WORLD_CLOCK_STATE, type WorldClockState } from "./locations";
 import { ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
-const stateIn = (deviceTimeZoneId: string): LocationsState => ({
-  ...INITIAL_LOCATIONS_STATE,
+const stateIn = (deviceTimeZoneId: string): WorldClockState => ({
+  ...INITIAL_WORLD_CLOCK_STATE,
   deviceTimeZoneId,
 });
 const instantOf = (iso: string) => Temporal.Instant.from(iso);
@@ -44,7 +44,7 @@ describe("getReferenceDay", () => {
   });
 
   it("should read the pinned instant instead of now", () => {
-    const state: LocationsState = {
+    const state: WorldClockState = {
       ...stateIn("Asia/Almaty"),
       reference: {
         mode: ReferenceMode.PINNED,

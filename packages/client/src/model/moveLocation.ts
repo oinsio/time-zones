@@ -1,7 +1,7 @@
 import {
   LocationErrorCode,
   type LocationsReduceResult,
-  type LocationsState,
+  type WorldClockState,
 } from "./locations";
 
 /**
@@ -10,7 +10,7 @@ import {
  * Implements FR2 of reorder-locations-by-drag-and-drop (D1).
  */
 export function moveLocationInList(
-  state: LocationsState,
+  state: WorldClockState,
   id: string,
   targetIndex: number,
 ): LocationsReduceResult {

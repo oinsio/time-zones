@@ -4,7 +4,7 @@ import {
   TRACK_STEP_MINUTES,
 } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
-import type { LocationsState } from "./locations";
+import type { WorldClockState } from "./locations";
 import { getEffectiveInstant, getReferenceZone } from "./referenceMoment";
 
 /**
@@ -31,7 +31,7 @@ export enum TrackMove {
 
 /** The day of the effective instant in the reference zone. */
 export function getReferenceDay(
-  state: LocationsState,
+  state: WorldClockState,
   now: Temporal.Instant,
 ): ReferenceDay {
   const zoned = getEffectiveInstant(state, now).toZonedDateTimeISO(

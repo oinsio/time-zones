@@ -33,6 +33,7 @@ rules:
     - Always include Goals, Non-Goals, Requirements (FR/NFR/UX with IDs), Success Metrics
     - Include UI States Matrix for features with lists or complex state
     - Reference behavior specs in features/*.feature
+    - Use only terms from docs/glossary/ (.claude/rules/glossary.md); list every new or changed domain term under What Changes
     - |
       Proposal structure:
         # <Change name>
@@ -59,12 +60,15 @@ rules:
     - Only for non-trivial local decisions within a change
     - Global architectural decisions go to docs/adr/
     - Reference FR/NFR from proposal.md
+    - Name the existing glossary Code owner of every concept the design touches (docs/glossary/) and extend it; a second owner of a concept needs an explicit rejected-alternative argument
   tasks:
     - Follow domain → application → infrastructure → UI layer order
     - Each task references FR/NFR it implements
     - Include verification tasks (tests, a11y, visual regression)
     - Break tasks into chunks of max 2 hours
+    - Add a task for docs/glossary/ entries when the change introduces or changes a domain term
   specs:
     - "Use delta format: ADDED/MODIFIED/REMOVED"
     - Mark invariants with "# implements FR-X of <change-name>"
     - Include use cases with inputs, effects, and errors
+    - Use glossary terms (docs/glossary/) for every domain concept; never a word listed under Never

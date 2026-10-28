@@ -4,7 +4,7 @@ import {
   type LocationCommandType,
   LocationErrorCode,
   type LocationsReduceResult,
-  type LocationsState,
+  type WorldClockState,
 } from "./locations";
 import { getReferenceZone, ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
@@ -23,7 +23,7 @@ type SelectInstantCommand = Extract<
  * Implements FR3, FR5, FR8 of add-time-sliders-to-location-cards (D1).
  */
 export function reduceSelectInstant(
-  state: LocationsState,
+  state: WorldClockState,
   command: SelectInstantCommand,
 ): LocationsReduceResult {
   let instant: Temporal.Instant;

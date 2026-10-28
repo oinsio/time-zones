@@ -6,7 +6,7 @@ import {
   type Theme,
 } from "../../main_page/steps/themeTokens";
 import { test } from "./locations_ui_e2e.fixtures";
-import { enterLocationsState, type LocationsState } from "./locationsStates";
+import { enterLocationsState, type WorldClockState } from "./locationsStates";
 
 const { Given, When, Then } = createBdd(test);
 
@@ -25,7 +25,7 @@ Given(
 When(
   /^the locations are in the (.+) state$/,
   async ({ locationsWorld }, state: string) => {
-    await enterLocationsState(locationsWorld, state as LocationsState);
+    await enterLocationsState(locationsWorld, state as WorldClockState);
   },
 );
 

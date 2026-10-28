@@ -179,7 +179,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the user opens the app with no locations", () => openApp());
     Then("the empty state explanation is shown in Russian", async () => {
       expect(
-        await screen.findByText("Локации пока не добавлены."),
+        await screen.findByText("Места пока не добавлены."),
       ).toBeInTheDocument();
     });
   });

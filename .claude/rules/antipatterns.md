@@ -10,6 +10,8 @@
 
 ## Code antipatterns
 
+- **Second owner of a concept** — a new function, type or constant that computes what a glossary *Code:* owner already computes, or the same rule split over several layers. Look the concept up in `docs/glossary/` and reuse its owner.
+- **Synonym names** — naming a glossary concept with another word (or a *Never:* word), in code or in translations.
 - **Direct imports from sibling module internals** — only through `index.ts`. Enforce with linter.
 - **Files over 200 lines** — bad for AI context. Split into smaller units.
 

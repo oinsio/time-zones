@@ -24,7 +24,7 @@
   },
   "views": {
     "cardsTitle": "Карточки",
-    "cardsEmptyState": "Локации пока не добавлены."
+    "cardsEmptyState": "Места пока не добавлены."
   },
   "locations": {
     "utcOffsetPrefix": "UTC",

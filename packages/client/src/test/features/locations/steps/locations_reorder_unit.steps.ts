@@ -8,7 +8,7 @@ import { expect } from "vitest";
 import { STORAGE_KEYS } from "@/constants";
 import ru from "@/locales/ru.json";
 import {
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   LocationErrorCode,
   type LocationsReduceResult,
@@ -254,7 +254,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         const lastLocation = locations[locations.length - 1];
         workCount = startWorkCount();
         const outcome = reduceLocations(
-          { ...INITIAL_LOCATIONS_STATE, locations },
+          { ...INITIAL_WORLD_CLOCK_STATE, locations },
           {
             type: LocationCommandType.MOVE_LOCATION,
             id: lastLocation?.id ?? "",

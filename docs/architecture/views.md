@@ -78,12 +78,12 @@ Used by every view, implemented once in `views/shared/`:
 |---|---|
 | Row header | home icon, "here" icon (location arrow) or difference from the reference zone (`-2`, `-2:30`); city; country and zone abbreviation or `GMT+N`; date with a day-shift hint |
 | Here entry | derived row for the device zone, shown first when no location matches it; not removable; meta line "Device time · GMT+5" ([ADR-0007](../adr/0007-reference-zone-and-device-time.md)) |
-| Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — the Now control signals a pinned moment |
+| Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — the Now button signals a pinned moment |
 | Day-period colors | four pastel bands: night, morning, working hours, evening — from design tokens. Soft gradient transitions: 1 hour around night boundaries, 15 minutes around working hours, so 09:00 and 18:00 stay readable. Colors also differ in lightness, not only in hue |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
-| Now control | returns to `LIVE`; visible only when the moment is pinned |
+| Now button | returns to `LIVE`; visible only when the moment is pinned |
 | Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 doesn't exist on this day — clocks moved forward. Showing 03:30" / "01:30 occurs twice — showing the first (GMT-4)"; stays until the next change; announced via `aria-live="polite"`; text comes from the presenter |
-| Date control | bottom bar `[<] Mon, 28 Sep [>]  [Now]`: arrows switch to the previous / next day, tapping the date opens a calendar for distant dates; placed at the bottom for thumb reach. Grid may reuse it or replace it with a day strip |
+| Date bar | bottom bar `[<] Mon, 28 Sep [>]  [Now]`: arrows switch to the previous / next day, tapping the date opens a calendar for distant dates; placed at the bottom for thumb reach. Grid may reuse it or replace it with a day strip |
 
 ## Visual style
 

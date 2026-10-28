@@ -4,10 +4,10 @@ import { Temporal } from "@/lib/temporal";
 import { DayPeriod } from "./dayPeriods";
 import { collectBlendWindows, collectOffsetEdges } from "./dayPeriodWindows";
 import { getReferenceDay } from "./dayTrack";
-import { INITIAL_LOCATIONS_STATE } from "./locations";
+import { INITIAL_WORLD_CLOCK_STATE } from "./locations";
 
 const DAY = getReferenceDay(
-  { ...INITIAL_LOCATIONS_STATE, deviceTimeZoneId: "Asia/Almaty" },
+  { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "Asia/Almaty" },
   Temporal.Instant.from("2026-03-08T07:30:00Z"),
 );
 
@@ -18,7 +18,7 @@ describe("collectOffsetEdges", () => {
 
   it("should find an edge when the offset change moves the period", () => {
     const day = getReferenceDay(
-      { ...INITIAL_LOCATIONS_STATE, deviceTimeZoneId: "America/New_York" },
+      { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "America/New_York" },
       Temporal.Instant.from("2026-03-08T12:00:00Z"),
     );
     const morningSchedule = [
@@ -39,7 +39,7 @@ describe("collectOffsetEdges", () => {
 });
 
 const NEW_YORK_STATE = {
-  ...INITIAL_LOCATIONS_STATE,
+  ...INITIAL_WORLD_CLOCK_STATE,
   deviceTimeZoneId: "America/New_York",
 };
 const instantOf = (iso: string) => Temporal.Instant.from(iso);
@@ -80,7 +80,7 @@ describe("collectBlendWindows", () => {
 
   it("should keep windows that touch the start or the end of the day", () => {
     const day = getReferenceDay(
-      { ...INITIAL_LOCATIONS_STATE, deviceTimeZoneId: "UTC" },
+      { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "UTC" },
       instantOf("2026-07-15T12:00:00Z"),
     );
 

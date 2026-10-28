@@ -1,7 +1,7 @@
 import type { Temporal } from "@/lib/temporal";
 import {
   getReferenceDay,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   type ReferenceDay,
 } from "@/model";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "./deviceTimeZone";
@@ -16,7 +16,7 @@ export function buildReferenceDay(
   deviceTimeZoneId: string = UNIT_TEST_DEVICE_TIME_ZONE,
 ): ReferenceDay {
   return getReferenceDay(
-    { ...INITIAL_LOCATIONS_STATE, deviceTimeZoneId },
+    { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId },
     instant,
   );
 }

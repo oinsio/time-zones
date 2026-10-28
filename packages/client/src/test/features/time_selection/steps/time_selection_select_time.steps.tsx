@@ -3,7 +3,7 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import {
   createStore,
-  INITIAL_LOCATIONS_STATE,
+  INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   LocationErrorCode,
   ReferenceMode,
@@ -20,12 +20,12 @@ const MIDDLE = 0.5;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
-  let store = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+  let store = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
   let lastOutcome: ReturnType<typeof store.dispatch>;
 
   f.BeforeEachScenario(async () => {
     await world.reset();
-    store = createStore(reduceLocations, INITIAL_LOCATIONS_STATE);
+    store = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
   });
   f.AfterAllScenarios(world.finish);
 
