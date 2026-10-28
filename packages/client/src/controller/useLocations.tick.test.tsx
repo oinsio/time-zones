@@ -8,7 +8,7 @@ import { renderLocations } from "@/test/renderLocations";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 
-const BADGE_RU = "Ваш часовой пояс";
+const BADGE_RU = "здесь";
 
 const cityOf = (label: string) =>
   buildLocation({ label, ...KNOWN_CITIES[label] });
@@ -92,7 +92,7 @@ describe("useLocations minute tick", () => {
     );
     moveClockTo("2026-07-15T12:01:00Z", "Europe/Moscow");
     runTick();
-    expect(result.current.rows.map((row) => row.deviceTimeZoneLabel)).toEqual([
+    expect(result.current.rows.map((row) => row.mark?.caption ?? "")).toEqual([
       "",
       BADGE_RU,
     ]);
@@ -118,7 +118,7 @@ describe("useLocations minute tick", () => {
     );
     expect([
       result.current.rows.map((row) => row.localTimeLabel),
-      result.current.rows.map((row) => row.deviceTimeZoneLabel),
+      result.current.rows.map((row) => row.mark?.caption ?? ""),
     ]).toEqual([
       ["12:05", "15:05"],
       ["", ""],

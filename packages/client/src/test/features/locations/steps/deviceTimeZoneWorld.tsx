@@ -1,5 +1,11 @@
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
-import { act, cleanup, render, screen } from "@testing-library/react/pure";
+import {
+  act,
+  cleanup,
+  render,
+  screen,
+  within,
+} from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
 import {
@@ -25,10 +31,14 @@ const DEFAULT_DEVICE_ZONE = "UTC";
 
 type LocationsHandle = ReturnType<typeof useLocations>;
 
-export const badgeText = (language: string) =>
+export const hereCaption = (language: string) =>
   language === RUSSIAN_LANGUAGE
-    ? ru.locations.deviceTimeZoneBadge
-    : en.locations.deviceTimeZoneBadge;
+    ? ru.locations.hereMarkCaption
+    : en.locations.hereMarkCaption;
+
+/** True when the row holds an element whose whole text is the caption. */
+export const rowHasHereMark = (row: HTMLElement, caption: string) =>
+  within(row).queryByText(caption, { exact: true }) !== null;
 
 /** Per-scenario state and the step handlers shared by the device time zone feature. */
 export const createDeviceTimeZoneWorld = () => {
@@ -49,11 +59,12 @@ export const createDeviceTimeZoneWorld = () => {
       })
       .closest("li") as HTMLElement;
 
-  const expectRowShows = (city: string, text: string) =>
-    expect(rowOf(city)).toHaveTextContent(text);
+  const expectRowShows = (city: string, caption: string) =>
+    expect(rowHasHereMark(rowOf(city), caption)).toBe(true);
 
   return {
     clock,
+    rowOf,
     getDeviceZone: () => deviceZone,
     getBackend: () => backend,
     expectRowShows,
@@ -100,12 +111,16 @@ export const createDeviceTimeZoneWorld = () => {
     givenLanguage: async (_ctx: unknown, language: string) => {
       await i18n.changeLanguage(language);
     },
-    thenShowsBadge: (_ctx: unknown, city: string) =>
-      expectRowShows(city, badgeText(ENGLISH_LANGUAGE)),
-    thenShowsNoBadge: (_ctx: unknown, city: string) =>
-      expect(rowOf(city)).not.toHaveTextContent(badgeText(ENGLISH_LANGUAGE)),
-    thenNoBadgeAnywhere: () =>
-      expect(screen.queryByText(badgeText(ENGLISH_LANGUAGE))).toBeNull(),
+    thenShowsHereMark: (_ctx: unknown, city: string) =>
+      expect(rowHasHereMark(rowOf(city), hereCaption(ENGLISH_LANGUAGE))).toBe(
+        true,
+      ),
+    thenShowsNoHereMark: (_ctx: unknown, city: string) =>
+      expect(rowHasHereMark(rowOf(city), hereCaption(ENGLISH_LANGUAGE))).toBe(
+        false,
+      ),
+    thenNoHereMarkAnywhere: () =>
+      expect(screen.queryByText(hereCaption(ENGLISH_LANGUAGE))).toBeNull(),
     whenAdds: (_ctx: unknown, city: string) => {
       act(() => {
         latestLocations.addLocation(cityEntry(city));

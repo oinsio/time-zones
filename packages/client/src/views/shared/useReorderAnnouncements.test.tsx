@@ -11,7 +11,6 @@ const rows = ["Moscow", "Almaty", "New York"].map((cityLabel) => ({
   cityLabel,
   countryName: "",
   utcOffsetLabel: "",
-  deviceTimeZoneLabel: "",
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",

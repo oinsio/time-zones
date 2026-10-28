@@ -1,14 +1,18 @@
+// Verifies FR5 of match-here-mark-to-design.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act } from "@testing-library/react/pure";
 import { expect } from "vitest";
-import en from "@/locales/en.json";
 import { setPageVisibility } from "@/test/pageVisibility";
+import {
+  ENGLISH_LANGUAGE,
+  hereCaption,
+  rowHasHereMark,
+} from "./deviceTimeZoneWorld";
 import { createLocalTimeWorld } from "./localTimeWorld";
 
 const feature = await loadFeature("../locations_clock_tick.feature");
 
-const BADGE_TEXT = en.locations.deviceTimeZoneBadge;
 const MINUTE_UPDATES_COUNT = 3;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
@@ -47,10 +51,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   };
   const thenNextUpdateDueIn = (_ctx: unknown, delayMs: number) =>
     expect(world.getTickScheduler().lastDelayMs()).toBe(delayMs);
-  const thenShowsBadge = (_ctx: unknown, city: string) =>
-    expect(world.rowOf(city)).toHaveTextContent(BADGE_TEXT);
-  const thenShowsNoBadge = (_ctx: unknown, city: string) =>
-    expect(world.rowOf(city)).not.toHaveTextContent(BADGE_TEXT);
+  const thenShowsHereMark = (_ctx: unknown, city: string) =>
+    expect(
+      rowHasHereMark(world.rowOf(city), hereCaption(ENGLISH_LANGUAGE)),
+    ).toBe(true);
+  const thenShowsNoHereMark = (_ctx: unknown, city: string) =>
+    expect(
+      rowHasHereMark(world.rowOf(city), hereCaption(ENGLISH_LANGUAGE)),
+    ).toBe(false);
 
   // @show-local-time-and-date-on-location-cards @FR3 @M3
   f.Scenario(
@@ -137,6 +145,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @match-here-mark-to-design @FR5
   // @show-local-time-and-date-on-location-cards @FR4
   f.Scenario(
     "Device zone is read again at the minute boundary",
@@ -146,11 +155,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       When("the user opens the app", whenOpens);
       And("the device time zone becomes {string}", whenDeviceZoneBecomes);
       And("the next minute starts at {string}", whenNextMinuteStarts);
-      Then("the {string} row shows the badge", thenShowsBadge);
-      And("the {string} row shows no badge", thenShowsNoBadge);
+      Then("the {string} row shows the here mark", thenShowsHereMark);
+      And("the {string} row shows no here mark", thenShowsNoHereMark);
     },
   );
 
+  // @match-here-mark-to-design @FR5
   // @show-local-time-and-date-on-location-cards @FR4
   f.Scenario(
     "Device zone is read again when the page becomes visible",
@@ -161,8 +171,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the page becomes hidden", whenPageHidden);
       And("the device time zone becomes {string}", whenDeviceZoneBecomes);
       And("the page becomes visible", whenPageVisible);
-      Then("the {string} row shows the badge", thenShowsBadge);
-      And("the {string} row shows no badge", thenShowsNoBadge);
+      Then("the {string} row shows the here mark", thenShowsHereMark);
+      And("the {string} row shows no here mark", thenShowsNoHereMark);
     },
   );
 });

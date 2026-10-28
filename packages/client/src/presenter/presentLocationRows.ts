@@ -3,14 +3,18 @@ import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
 import {
   getLocalDateTime,
+  getLocationMarkKind,
   getUtcOffsetMinutes,
-  isLocationInDeviceTimeZone,
   type Location,
   type ReferenceDay,
 } from "@/model";
 import { presentCountryName } from "./countryName";
 import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
 import { formatLocalDate, formatLocalTime } from "./localDateTime";
+import {
+  type PresentedLocationMark,
+  presentLocationMarks,
+} from "./locationMark";
 import { formatUtcOffset } from "./utcOffset";
 
 export type LocationRow = {
@@ -19,8 +23,8 @@ export type LocationRow = {
   countryName: string;
   /** "UTC+3" style label; empty when the offset cannot be computed. */
   utcOffsetLabel: string;
-  /** "Your time zone" badge text; empty when the row is not in the device zone. */
-  deviceTimeZoneLabel: string;
+  /** Leading mark of the row ("here"); `undefined` when the row has none. */
+  mark?: PresentedLocationMark;
   /** "12:30" style label; empty when the zone is unknown. */
   localTimeLabel: string;
   /** "Sun, Mar 8" style label; empty when the zone is unknown. */
@@ -45,6 +49,7 @@ export type LocationRowsContext = {
  * Implements FR10, UX4 of add-locations-via-search (D9).
  * Implements FR2, FR3, FR5, FR6 of show-utc-offset-on-location-rows (D2).
  * Implements FR1, FR2, FR5 of mark-device-time-zone-in-location-list (D4).
+ * Implements FR1, FR4 of match-here-mark-to-design (D2): the row's mark.
  * Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).
  * Implements FR1 of add-time-sliders-to-location-cards (D5): the day track.
  */
@@ -59,9 +64,10 @@ export function presentLocationRows(
   }: LocationRowsContext,
 ): LocationRow[] {
   const utcPrefix = translate("locations.utcOffsetPrefix");
-  const deviceTimeZoneBadge = translate("locations.deviceTimeZoneBadge");
+  const marks = presentLocationMarks(translate);
   return locations.map((location) => {
     const offsetMinutes = getUtcOffsetMinutes(location.timeZoneId, instant);
+    const markKind = getLocationMarkKind(location, deviceTimeZoneId);
     const localDateTime = getLocalDateTime(location.timeZoneId, instant);
     const localTimeLabel = localDateTime
       ? formatLocalTime(localDateTime, language)
@@ -77,12 +83,7 @@ export function presentLocationRows(
         offsetMinutes === undefined
           ? ""
           : formatUtcOffset(offsetMinutes, utcPrefix),
-      deviceTimeZoneLabel: isLocationInDeviceTimeZone(
-        location,
-        deviceTimeZoneId,
-      )
-        ? deviceTimeZoneBadge
-        : "",
+      mark: markKind === undefined ? undefined : marks[markKind],
       localTimeLabel,
       localDateLabel,
       localIsoDate: localDateTime ? localDateTime.toPlainDate().toString() : "",

@@ -28,7 +28,8 @@
   },
   "locations": {
     "utcOffsetPrefix": "UTC",
-    "deviceTimeZoneBadge": "Ваш часовой пояс",
+    "hereMarkLabel": "Вы здесь",
+    "hereMarkCaption": "здесь",
     "addLocation": "Добавить место",
     "removeLocation": "Удалить: {{city}}",
     "moveLocation": "Переместить {{city}}",

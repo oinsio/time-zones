@@ -2,6 +2,7 @@
 // Implements FR8, FR9, FR10 of add-locations-via-search and FR2 of
 // reorder-locations-by-drag-and-drop.
 // Implements FR1-FR4 of mark-device-time-zone-in-location-list.
+// Implements FR1, FR4 of match-here-mark-to-design.
 
 export {
   CalendarMove,
@@ -39,6 +40,7 @@ export {
 export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
 // Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards.
 export { getLocalDateTime } from "./localDateTime";
+export { getLocationMarkKind, LocationMarkKind } from "./locationMark";
 export {
   buildLocationId,
   INITIAL_LOCATIONS_STATE,

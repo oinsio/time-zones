@@ -50,6 +50,7 @@ Feature: Location rows follow the clock
     When the next minute starts at "2026-03-08T07:00:00Z"
     Then the "New York" row now shows the offset "UTC−4"
 
+  @match-here-mark-to-design @FR5
   @show-local-time-and-date-on-location-cards @FR4
   Scenario: Device zone is read again at the minute boundary
     Given the device time zone is "Asia/Almaty"
@@ -57,9 +58,10 @@ Feature: Location rows follow the clock
     When the user opens the app
     And the device time zone becomes "Europe/Moscow"
     And the next minute starts at "2026-07-15T12:01:00Z"
-    Then the "Moscow" row shows the badge
-    And the "Almaty" row shows no badge
+    Then the "Moscow" row shows the here mark
+    And the "Almaty" row shows no here mark
 
+  @match-here-mark-to-design @FR5
   @show-local-time-and-date-on-location-cards @FR4
   Scenario: Device zone is read again when the page becomes visible
     Given the device time zone is "Asia/Almaty"
@@ -68,5 +70,5 @@ Feature: Location rows follow the clock
     And the page becomes hidden
     And the device time zone becomes "Europe/Moscow"
     And the page becomes visible
-    Then the "Moscow" row shows the badge
-    And the "Almaty" row shows no badge
+    Then the "Moscow" row shows the here mark
+    And the "Almaty" row shows no here mark
