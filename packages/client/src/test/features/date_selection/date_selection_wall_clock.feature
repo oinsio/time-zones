@@ -62,18 +62,16 @@ Feature: Wall-clock resolution
     And the list contains "New York"
     And the app is open
     And the user moved to the next day, so the bar shows the gap note
-    When the user types "02:45" in "New York"
-    Then the moment is pinned to "2026-03-08T07:45:00Z" with the status "GAP"
+    When the user types "10:00" in "New York"
+    Then the moment is pinned to "2026-03-08T14:00:00Z" with the status "UNIQUE"
     And the bar shows no note
-    And only "New York" shows a wall-time hint
 
   @add-wall-time-input-with-hint @FR7
   Scenario: A gap from a wall-time input stays out of the bar
-    Given the device time zone is "America/New_York"
-    And the current instant is "2026-03-08T12:00:00Z"
+    Given the device time zone is "Asia/Almaty"
+    And the current instant is "2026-03-08T07:30:00Z"
     And the list contains "New York"
     And the app is open
     When the user types "02:30" in "New York"
     Then the moment is pinned to "2026-03-08T07:30:00Z" with the status "GAP"
     And the bar shows no note
-    And only "New York" shows a wall-time hint

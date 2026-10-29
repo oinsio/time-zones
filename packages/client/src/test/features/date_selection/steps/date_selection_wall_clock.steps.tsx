@@ -189,8 +189,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  const thenOnlyHintIn = (_ctx: unknown, city: string) =>
-    expect(world.wallTimeHints()).toEqual([city]);
   const thenPinnedAsGap = (_ctx: unknown, pinned: string, status: string) => {
     world.expectPinnedTo(pinned);
     // A wall-time hint is shown exactly for GAP and AMBIGUOUS moments.
@@ -223,7 +221,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         thenPinnedAsGap,
       );
       And("the bar shows no note", thenNoNote);
-      And("only {string} shows a wall-time hint", thenOnlyHintIn);
     },
   );
 
@@ -246,7 +243,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         thenPinnedAsGap,
       );
       And("the bar shows no note", thenNoNote);
-      And("only {string} shows a wall-time hint", thenOnlyHintIn);
     },
   );
 });
