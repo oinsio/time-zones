@@ -60,7 +60,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a dangling id → `null`.
 
   Covers FR8, FR9. Verify with `npx vitest run src/model/parseStoredLocations.test.ts`.
-- [ ] 2.6 Mutation run (M6): `npx stryker run --mutate 'src/model/locations.ts,src/model/reduceHomeLocation.ts,src/model/referenceMoment.ts,src/model/locationMark.ts,src/model/offsetDifference.ts'` scores ≥ 95% (minimum 90%). Add tests for the survivors and run it again. Then run `npx stryker run --mutate 'src/model/followReferenceZone.ts'` alone, with the same target.
+- [x] 2.6 Mutation run (M6): `npx stryker run --mutate 'src/model/locations.ts,src/model/reduceHomeLocation.ts,src/model/referenceMoment.ts,src/model/locationMark.ts,src/model/offsetDifference.ts'` scores ≥ 95% (minimum 90%). Add tests for the survivors and run it again. Then run `npx stryker run --mutate 'src/model/followReferenceZone.ts'` alone, with the same target.
 
 ## 3. Ports and adapters (TDD)
 
@@ -71,7 +71,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a v3 document stays `UNREADABLE`.
 
   Verify with `npx vitest run src/adapters/localStorageLocationRepository.defaults.test.ts`.
-- [ ] 3.3 Mutation run: `npx stryker run --mutate 'src/adapters/locationsDocument.ts,src/adapters/localStorageLocationRepository.ts,src/adapters/inMemoryLocationRepository.ts,src/model/parseStoredLocations.ts'` scores ≥ 95%.
+- [x] 3.3 Mutation run: `npx stryker run --mutate 'src/adapters/locationsDocument.ts,src/adapters/localStorageLocationRepository.ts,src/adapters/inMemoryLocationRepository.ts,src/model/parseStoredLocations.ts'` scores ≥ 95%.
 
 ## 4. Presenter (TDD)
 
@@ -82,7 +82,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - travelling: Moscow has the Here mark and `−2 h`.
 
   Covers FR5, FR7. Verify with `npx vitest run src/presenter/presentLocationRows.home.test.ts src/presenter/presentLocationRows.test.ts src/presenter/locationMark.test.ts`.
-- [ ] 4.3 Mutation run: `npx stryker run --mutate 'src/presenter/utcOffset.ts,src/presenter/offsetDifference.ts,src/presenter/presentLocationRows.ts,src/presenter/locationMark.ts'` scores ≥ 95%.
+- [x] 4.3 Mutation run: `npx stryker run --mutate 'src/presenter/utcOffset.ts,src/presenter/offsetDifference.ts,src/presenter/presentLocationRows.ts,src/presenter/locationMark.ts'` scores ≥ 95%.
 
 ## 5. Controller (TDD)
 
@@ -95,12 +95,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a home change keeps a pinned instant (`useReferenceMoment`).
 
   Covers FR3, FR4, FR8, FR10. Verify with `npx vitest run src/controller/useLocations.home.test.tsx src/controller/useLocations.test.tsx`.
-- [ ] 5.2 Mutation run: `npx stryker run --mutate 'src/controller/LocationsProvider.tsx,src/controller/createLocationsActions.ts,src/controller/useLocations.ts'` scores ≥ 95%.
+- [x] 5.2 Mutation run: `npx stryker run --mutate 'src/controller/LocationsProvider.tsx,src/controller/createLocationsActions.ts,src/controller/useLocations.ts'` scores ≥ 95%.
 
 ## 6. Views (TDD)
 
-- [ ] 6.1 TDD new `views/shared/locationMenuKeys.ts` with `it.each` over the WAI-ARIA menu button keys of D7: Enter, Space, ArrowDown, ArrowUp, Home, End, Esc, Tab, and any other key → `undefined` (NFR-A2). Verify with `npx vitest run src/views/shared/locationMenuKeys.test.ts`.
-- [ ] 6.2 TDD new `views/shared/LocationMenu.tsx` (D7) in `views/shared/LocationMenu.test.tsx`:
+- [x] 6.1 TDD new `views/shared/locationMenuKeys.ts` with `it.each` over the WAI-ARIA menu button keys of D7: Enter, Space, ArrowDown, ArrowUp, Home, End, Esc, Tab, and any other key → `undefined` (NFR-A2). Verify with `npx vitest run src/views/shared/locationMenuKeys.test.ts`.
+- [x] 6.2 TDD new `views/shared/LocationMenu.tsx` (D7) in `views/shared/LocationMenu.test.tsx`:
   - roles and `aria-expanded`;
   - a click opens it;
   - Enter opens it on the first item;
@@ -109,14 +109,14 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `pointerdown` outside closes it.
 
   Add a second file, `views/shared/LocationMenu.legacy.test.tsx`. It removes `PointerEvent` with `vi.stubGlobal("PointerEvent", undefined)`, calls `vi.resetModules()` and imports the module again, as `views/shared/DayTrack.legacy.test.tsx` does. There, a click opens the menu, "Remove" calls remove, and `touchstart` outside closes it. A `focusout` with `relatedTarget: null` fired on the focused item, followed by a click on "Remove", keeps the menu open and still calls remove, as WebKit does on a tap. A `focusout` whose `relatedTarget` is outside the menu closes it, and the menu container has `tabIndex` -1 (FR14, M5). Verify with `npx vitest run src/views/shared/LocationMenu.test.tsx src/views/shared/LocationMenu.legacy.test.tsx`.
-- [ ] 6.3 TDD the row changes (D3, D8) in new `views/shared/LocationRow.home.test.tsx`. The former remove button stays in this task, so the existing remove tests keep passing; 6.4 removes it.
+- [x] 6.3 TDD the row changes (D3, D8) in new `views/shared/LocationRow.home.test.tsx`. The former remove button stays in this task, so the existing remove tests keep passing; 6.4 removes it.
   - the row has the location menu "Actions for {city}", and its "Remove" item calls `onRemove`;
   - "Make home" / "Clear home", and no home item for an unknown zone;
   - the difference after the city and before the caption, with `aria-hidden`;
   - `aria-labelledby` lists the city, mark and difference ids.
 
   Extend `views/shared/LocationMarkIcon.test.tsx`: test that `HOME` renders the house icon in the accent colour at `LOCATION_MARK_ICON_SIZE_PX`. Covers FR7, FR11, NFR-A3, UX1, UX2. Verify with `npx vitest run src/views/shared/LocationRow.home.test.tsx src/views/shared/LocationMarkIcon.test.tsx`.
-- [ ] 6.4 Retire the former remove button in one step (D8). Its key `locations.removeLocation` ("Remove {{city}}" / «Удалить: {{city}}») goes now, and so does every use of the button name, so that `typecheck` and the remove tests stay green after this task:
+- [x] 6.4 Retire the former remove button in one step (D8). Its key `locations.removeLocation` ("Remove {{city}}" / «Удалить: {{city}}») goes now, and so does every use of the button name, so that `typecheck` and the remove tests stay green after this task:
   - delete the × button from `views/shared/LocationRow.tsx` (lines 136–144), so the menu replaces it. Add the test "the row has no remove button outside its menu" to `views/shared/LocationRow.home.test.tsx`;
   - delete `locations.removeLocation` from `locales/en.json` and `locales/ru.json`;
   - in `views/shared/LocationRow.tsx` the `removeButtonRef` prop becomes `menuButtonRef` on the menu trigger, and in `views/shared/LocationList.tsx` the `removeButtons` refs become `menuButtons`, so that focus after a removal goes to the next row's menu button;
@@ -142,18 +142,18 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
     - under `test/features/date_selection/steps/`: `date_selection_date_bar`, `date_selection_calendar`, `date_selection_calendar_month`, `date_selection_wall_clock`, `date_selection_reference_moment` and `date_selection_reference_moment_rows`.
 
   The E2E helpers are run in 8.4.
-- [ ] 6.5 TDD focus and announcements in new `views/shared/LocationList.menu.test.tsx` and in `views/cards/CardsView.test.tsx`:
+- [x] 6.5 TDD focus and announcements in new `views/shared/LocationList.menu.test.tsx` and in `views/cards/CardsView.test.tsx`:
   - after a removal through the menu, focus goes to the next row's menu button;
   - after a home change, focus stays on the same row's menu button;
   - "Almaty is now home" and "Home cleared" are announced politely.
 
   Covers FR11, NFR-A2. Verify with `npx vitest run src/views/shared/LocationList.menu.test.tsx src/views/cards/CardsView.test.tsx`.
-- [ ] 6.6 Write new `test/locationMenuDependencies.test.ts` (`// Verifies NFR-P2 of set-home-location-and-show-differences`). It reads `package.json` and `src/views/shared/LocationMenu.tsx` as text. It asserts that no `@radix-ui/react-dropdown-menu` or other menu package is a dependency, and that the menu imports only `react`, `react-i18next`, `lucide-react` and `@/` modules (D7). The spec scenario "Bundle budget" itself is verified by `check:bundle-size` in 10.2. Verify with `npx vitest run src/test/locationMenuDependencies.test.ts`.
-- [ ] 6.7 Mutation run: `npx stryker run --mutate 'src/views/shared/LocationMenu.tsx,src/views/shared/locationMenuKeys.ts,src/views/shared/LocationRow.tsx,src/views/shared/LocationList.tsx,src/views/cards/CardsView.tsx'` scores ≥ 95%. Then run `npx stryker run --mutate 'src/views/shared/LocationMarkIcon.tsx'` alone.
+- [x] 6.6 Write new `test/locationMenuDependencies.test.ts` (`// Verifies NFR-P2 of set-home-location-and-show-differences`). It reads `package.json` and `src/views/shared/LocationMenu.tsx` as text. It asserts that no `@radix-ui/react-dropdown-menu` or other menu package is a dependency, and that the menu imports only `react`, `react-i18next`, `lucide-react` and `@/` modules (D7). The spec scenario "Bundle budget" itself is verified by `check:bundle-size` in 10.2. Verify with `npx vitest run src/test/locationMenuDependencies.test.ts`.
+- [x] 6.7 Mutation run: `npx stryker run --mutate 'src/views/shared/LocationMenu.tsx,src/views/shared/locationMenuKeys.ts,src/views/shared/LocationRow.tsx,src/views/shared/LocationList.tsx,src/views/cards/CardsView.tsx'` scores ≥ 95%. Then run `npx stryker run --mutate 'src/views/shared/LocationMarkIcon.tsx'` alone.
 
 ## 7. Unit BDD (vitest-cucumber)
 
-- [ ] 7.1 Write `test/features/home_location/home_location_unit.feature` and `steps/home_location_unit.steps.tsx` with the `home-location` scenarios that need no browser:
+- [x] 7.1 Write `test/features/home_location/home_location_unit.feature` and `steps/home_location_unit.steps.tsx` with the `home-location` scenarios that need no browser:
   - "Make Almaty home", "Home moves to another location", "Location already gone", "Clear home";
   - "Removing home clears it", "The first added location is not home", "Reorder keeps home in place";
   - "The day follows home while travelling", "Clearing home returns to the device day", "A pinned moment keeps its instant", "A home change drops the gap note";
@@ -162,15 +162,15 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Menu of a row that is not home", "Menu of the home row", "No home item for an unknown zone".
 
   Tag each scenario with `@set-home-location-and-show-differences` and its FR. Covers FR1–FR4, FR7–FR11. Verify with `npx vitest run src/test/features/home_location/steps/home_location_unit.steps.tsx`.
-- [ ] 7.2 Write `test/features/locations/locations_offset_difference_unit.feature` and its steps with these `locations` delta scenarios:
+- [x] 7.2 Write `test/features/locations/locations_offset_difference_unit.feature` and its steps with these `locations` delta scenarios:
   - "Differences from home", "DST changes the difference", "Differences from the device time zone without home", "Same offset, another zone", "Unknown zone";
   - "A home change updates the differences at once";
   - "Texts in both languages", "Accessible texts";
   - "50 rows within the work bound": `startWorkCount()` (ADR-0008) plus the per-zone `toZonedDateTimeISO` count of D4: the home row alone in `Asia/Almaty`, one other row alone in `Europe/Moscow`, the reference day computed before counting, and Almaty lookups exceeding Moscow lookups by at most 1. The spy is test-scoped, in `src/test/`.
 
   Covers FR5, FR6, NFR-A3, NFR-P1. Extend `test/benchmarks/rowPresenting.bench.ts` with a home set. Verify with `npx vitest run src/test/features/locations/steps/locations_offset_difference_unit.steps.tsx`, then run the benchmark once with `npx vitest bench --run --mode test src/test/benchmarks/rowPresenting.bench.ts` (it reports the timing and does not fail on it, ADR-0008).
-- [ ] 7.3 Write `test/features/home_location/home_location_menu_unit.feature` and its steps with "Remove without Pointer Events" and "Close by tapping outside" (FR14). The steps use the legacy setup of 6.2. Verify with `npx vitest run src/test/features/home_location/steps/home_location_menu_unit.steps.tsx`.
-- [ ] 7.4 Add the modified scenarios of the deltas to their existing unit features and steps, one feature file per run:
+- [x] 7.3 Write `test/features/home_location/home_location_menu_unit.feature` and its steps with "Remove without Pointer Events" and "Close by tapping outside" (FR14). The steps use the legacy setup of 6.2. Verify with `npx vitest run src/test/features/home_location/steps/home_location_menu_unit.steps.tsx`.
+- [x] 7.4 Add the modified scenarios of the deltas to their existing unit features and steps, one feature file per run:
   - "Remove the home location" → `locations/locations_management.feature`;
   - "Previous document version is migrated" → `locations/locations_persistence.feature`;
   - "Home of the wrong type" → `locations/locations_storage_ui_unit.feature`;
@@ -183,7 +183,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 8. E2E BDD (playwright-bdd) and screenshots
 
-- [ ] 8.1 Write `test/features/home_location/home_location_e2e.feature` and `steps/home_location_e2e.steps.ts`. It covers:
+- [x] 8.1 Write `test/features/home_location/home_location_e2e.feature` and `steps/home_location_e2e.steps.ts`. It covers:
   - the menu by pointer and keyboard ("Keyboard", "The menu does not start a reorder");
   - "Setting home is announced" (the announcement and the focus);
   - "Russian interface" (menu and mark names);
@@ -193,9 +193,9 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a hit area of 44 px or more (UX3).
 
   Covers FR11, FR12, NFR-A1, NFR-A2, NFR-R1, UX1, UX3. Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "@set-home-location-and-show-differences"`.
-- [ ] 8.2 Write `test/features/home_location/home_location_legacy_e2e.feature` and its steps. With `emulateEngineWithoutPointerEvents(page)` (`src/test/e2e/withoutPointerEvents.ts`) and taps through `startTouch` / `dispatchTouch`, it runs "Remove without Pointer Events" and "Close by tapping outside" in Chromium (FR14). Verify with the command of 8.1.
-- [ ] 8.3 Write `test/features/home_location/home_location_view_contract_e2e.feature` with the `@view-contract` scenario "Set and clear home" (FR13). Verify with `npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep "@set-home-location-and-show-differences"`.
-- [ ] 8.4 Update the existing E2E features and steps to the modified scenarios:
+- [x] 8.2 Write `test/features/home_location/home_location_legacy_e2e.feature` and its steps. With `emulateEngineWithoutPointerEvents(page)` (`src/test/e2e/withoutPointerEvents.ts`) and taps through `startTouch` / `dispatchTouch`, it runs "Remove without Pointer Events" and "Close by tapping outside" in Chromium (FR14). Verify with the command of 8.1.
+- [x] 8.3 Write `test/features/home_location/home_location_view_contract_e2e.feature` with the `@view-contract` scenario "Set and clear home" (FR13). Verify with `npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep "@set-home-location-and-show-differences"`.
+- [x] 8.4 Update the existing E2E features and steps to the modified scenarios:
   - "Row name includes the badge" in `locations_device_time_zone_e2e.feature`: Moscow is named "Moscow 2 hours behind";
   - "Time does not change the row name" in `locations_local_time_e2e.feature`: the same;
   - "Remove action names the city" in `locations_ui_e2e.feature` (line 43, "Remove Moscow" today): the list offers the menu button "Actions for Moscow", and the open menu offers the menu item "Remove". The step "the list offers the action {string}" in `locations_ui_e2e.steps.ts:109` looks for a `button`, so add a step for the menu item;
@@ -203,35 +203,35 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - the E2E helpers changed in 6.4 are proved here: `menuButton` and `removeThroughMenu` in `locationsE2eHelpers.ts` (used by `locations_view_contract_e2e.steps.ts`), and `readListOrder` in `locationsReorderE2eHelpers.ts` (used by `locations_reorder_drag_e2e.steps.ts` and `locations_reorder_checks_e2e.steps.ts`).
 
   Tag each changed scenario with `@set-home-location-and-show-differences @NFR-A3` or `@FR11`. Covers NFR-A3, FR11. Verify with `npx playwright test -c playwright.bdd.config.ts --grep "Row name includes|Time does not change the row name|Remove action names|Focus after"`. Then run `npx playwright test -c playwright.bdd.config.ts --grep "Reorder locations"` once, alone, to rerun the reorder features that read the list order through the menu buttons.
-- [ ] 8.5 Add the `home` and `travelling` states to `test/features/locations/steps/locationsStates.ts`, and add them to the screenshot outline of `locations_ui_e2e.feature` (375 / 1024 px × light / dark). Re-approve every existing baseline with rows under `test/features/__screenshots__/{chromium,mobile-chrome}/` with `--update-snapshots` (NFR-R2). Then check that `npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without that flag.
+- [x] 8.5 Add the `home` and `travelling` states to `test/features/locations/steps/locationsStates.ts`, and add them to the screenshot outline of `locations_ui_e2e.feature` (375 / 1024 px × light / dark). Re-approve every existing baseline with rows under `test/features/__screenshots__/{chromium,mobile-chrome}/` with `--update-snapshots` (NFR-R2). Then check that `npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without that flag.
 
 ## 9. Handoff patches (files the implement stage may not edit)
 
-- [ ] 9.1 Handoff H1: write `handoff/H1-glossary-home-location.patch` and its README section (`.gnomish/stages/specify/handoff.md`, "Handoff items"). The patch updates `docs/glossary/`:
+- [x] 9.1 Handoff H1: write `handoff/H1-glossary-home-location.patch` and its README section (`.gnomish/stages/specify/handoff.md`, "Handoff items"). The patch updates `docs/glossary/`:
   - `time.md`: Home location and Offset difference lose *(planned)* and get *RU:* and *Code:* (`homeLocationId`, `SET_HOME_LOCATION`; `getOffsetDifferenceMinutes`, `formatOffsetDifference`). The examples become `−2 h` / `+0:30`. The *Code:* of Reference zone notes that it reads the home location;
   - `locations.md`: new Home mark (`LocationMarkKind.HOME`) and Location menu (`LocationMenu`, *Never:* context menu, kebab). World clock state holds home. Location list is schema version 2 and stores home. Unreadable stored list gets the *Not:* for a dangling home;
   - `views.md`: Shared block lists the location menu and the home mark icon.
 
   Verify from the repository root with `git apply --check openspec/changes/set-home-location-and-show-differences/handoff/H1-glossary-home-location.patch` and `git status --short docs` (it must print nothing).
-- [ ] 9.2 Handoff H2: write `handoff/H2-architecture-docs-home-location.patch` and its README section. The patch updates:
+- [x] 9.2 Handoff H2: write `handoff/H2-architecture-docs-home-location.patch` and its README section. The patch updates:
   - `docs/architecture/views.md`: in "Row header", the difference format `−2 h` / `+0:30` / `0 h`, with home over here; in "Shared building blocks", the location menu;
   - `docs/architecture/domain-model.md`: `REPLACE_LOCATIONS(locations, homeLocationId)`, the mark priority home > here, and the load normalization next to invariant 1;
   - `docs/adr/0004-local-persistence-strategy.md`: a note under "Versioned schema from day one" on the load normalization of a dangling reference (D6).
 
   Verify from the repository root with `git apply --check openspec/changes/set-home-location-and-show-differences/handoff/H2-architecture-docs-home-location.patch` and `git status --short docs` (it must print nothing).
-- [ ] 9.3 Handoff H3: write the README section "H3: Device acceptance on iOS 12.5.7" (no patch). Its steps: open a location menu by tap, make a location home, clear home, remove a location, and tap outside an open menu. Verify from the repository root with `grep -c "^## H" openspec/changes/set-home-location-and-show-differences/handoff/README.md` (it must print 3).
+- [x] 9.3 Handoff H3: write the README section "H3: Device acceptance on iOS 12.5.7" (no patch). Its steps: open a location menu by tap, make a location home, clear home, remove a location, and tap outside an open menu. Verify from the repository root with `grep -c "^## H" openspec/changes/set-home-location-and-show-differences/handoff/README.md` (it must print 3).
 
 ## 10. Final verification
 
-- [ ] 10.1 Traceability (M1): this loop must print nothing.
+- [x] 10.1 Traceability (M1): this loop must print nothing.
 
   ```
   for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 FR9 FR10 FR11 FR12 FR13 FR14 NFR-P1 NFR-P2 NFR-A1 NFR-A2 NFR-A3 NFR-R1 NFR-R2 UX1 UX2 UX3; do
     grep -rqE "set-home-location-and-show-differences.*(^|[^A-Za-z0-9-])@?$id([^0-9]|$)|(^|[^A-Za-z0-9-])@?$id([^0-9]|$).*set-home-location-and-show-differences" src || echo "missing $id"
   done
   ```
-- [ ] 10.2 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build`, then `pnpm --filter @time-zones/client check:bundle-size` (initial JavaScript ≤ 150 KB gzipped, NFR-P2, M5) and `pnpm --filter @time-zones/client check:legacy-build`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone, and fix any existing feature that still used the former remove button.
-- [ ] 10.3 Check the glossary (`.claude/rules/glossary.md`, "Review checklist"). `grep -rniE "локаци" src/locales`, `grep -rn "GMT" src/locales` and `grep -rniE "context menu|kebab" src` print nothing.
+- [x] 10.2 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build`, then `pnpm --filter @time-zones/client check:bundle-size` (initial JavaScript ≤ 150 KB gzipped, NFR-P2, M5) and `pnpm --filter @time-zones/client check:legacy-build`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone, and fix any existing feature that still used the former remove button.
+- [x] 10.3 Check the glossary (`.claude/rules/glossary.md`, "Review checklist"). `grep -rniE "локаци" src/locales`, `grep -rn "GMT" src/locales` and `grep -rniE "context menu|kebab" src` print nothing.
 
 ## Human follow-up
 
