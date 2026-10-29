@@ -49,8 +49,8 @@ verify:
         echo "$change is still active - archive it with: openspec archive $change_name --yes, then move it under openspec/changes/archive/YYYY/MM/"
         exit 1
       fi
-      # Measured from the merge base, so an earlier archive of the same name does not count.
-      base=$(git merge-base origin/main HEAD 2>/dev/null || git rev-parse HEAD)
+      # Measured from where the task branch started, so an earlier archive of the same name does not count.
+      . .gnomish/lib/task-base.sh
       targets=$({ git diff --name-only "$base"; git ls-files --others --exclude-standard; } \
         | grep -E "^openspec/changes/archive/[0-9]{4}/[0-9]{2}/[0-9]{4}-[0-9]{2}-[0-9]{2}-$change_name/proposal\.md$" \
         | sort -u | sed 's|/proposal\.md$||')
@@ -75,7 +75,7 @@ verify:
   - type: command
     command: |
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^archive#/ { print $1; exit }')
-      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      [ -n "$since" ] || { . .gnomish/lib/task-base.sh; since=$base; }
       changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
       outside=$(printf '%s\n' "$changed" | grep . | grep -v '^openspec/' || true)
       [ -z "$outside" ] || { echo "$outside"; echo "the archive stage changes nothing outside openspec/ - restore the files above with: git checkout $since -- <file>"; exit 1; }

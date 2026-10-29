@@ -56,7 +56,7 @@ verify:
   # Files this branch added or changed under packages/client/src stay under the 300-line hard cap.
   - type: command
     command: >-
-      base=$(git merge-base HEAD origin/main);
+      . .gnomish/lib/task-base.sh;
       oversized=$({ git diff --name-only --diff-filter=AM "$base" -- packages/client/src;
       git ls-files -o --exclude-standard packages/client/src; } | sort -u |
       while read -r file; do [ -f "$file" ] && lines=$(wc -l < "$file") && [ "$lines" -gt 300 ] && echo "$file: $lines lines"; done);
@@ -81,7 +81,7 @@ verify:
     command: |
       . .gnomish/lib/task-change.sh
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^implement#/ { print $1; exit }')
-      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      [ -n "$since" ] || { . .gnomish/lib/task-base.sh; since=$base; }
       changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
       forbidden=$(printf '%s\n' "$changed" | grep -E '^(openspec/|temporary-docs/|\.gnomish/|\.github/|\.claude/|docs/adr/|CLAUDE\.md$)' | grep -vxF "$change/tasks.md" | grep -v "^$change/handoff/" || true)
       [ -z "$forbidden" ] || { echo "$forbidden"; echo "the implement stage edits only packages/, the checkboxes of $change/tasks.md and $change/handoff/ - put changes to these paths into a handoff patch (see .gnomish/stages/specify/handoff.md) and restore the files above with: git checkout $since -- <file>"; exit 1; }

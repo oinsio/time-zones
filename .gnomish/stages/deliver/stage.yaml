@@ -106,7 +106,7 @@ verify:
   - type: command
     command: |
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^deliver#/ { print $1; exit }')
-      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      [ -n "$since" ] || { . .gnomish/lib/task-base.sh; since=$base; }
       dirty=$(git status --porcelain | grep -v ' \.gnomish-task/' || true)
       [ -z "$dirty" ] || { echo "$dirty"; echo "the deliver stage writes only pr-body.md - restore the files above with: git checkout -- <file>"; exit 1; }
       commits=$(git log --format='%h %s' "$since"..HEAD | grep -v ' gnomish: ' || true)

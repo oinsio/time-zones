@@ -11,7 +11,8 @@ The change record `temporary-docs/gnomish/<task>/change.md` names this task's ch
 Other active changes under `openspec/changes/` are someone else's — leave them alone.
 Read `CLAUDE.md` first, then the change's `proposal.md`, `design.md`,
 `tasks.md` and `specs/`, then the diff:
-`git diff $(git merge-base HEAD origin/main) --stat`, and the specific hunks you
+`. .gnomish/lib/task-base.sh && git diff "$base" --stat` (the checkout has no
+`origin`; `$base` is where the task branch started), and the specific hunks you
 need. The rules you review against are in `.claude/rules/`; ADRs in `docs/adr/`.
 
 **A retry is a full review.** If `review-code.md` already exists, a previous

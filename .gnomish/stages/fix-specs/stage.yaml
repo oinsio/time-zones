@@ -60,7 +60,7 @@ verify:
   - type: command
     command: |
       . .gnomish/lib/task-change.sh
-      base=$(git merge-base HEAD origin/main)
+      . .gnomish/lib/task-base.sh
       outside=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -v "^$change/" | grep -vxF "$record" | grep -vxF "$reports/review-specs.md" | grep -v '^\.gnomish-task/' || true)
       [ -z "$outside" ] || { echo "$outside"; echo "the fix-specs stage revises only files under $change/ and the resolutions in $reports/review-specs.md - if you made the edits above, undo each of them yourself with: git checkout $base -- <file>; other active changes are someone else's work and stay exactly as they are"; exit 1; }
   # OpenSpec's own strict validation of this task's change, as after specify.
@@ -84,7 +84,7 @@ verify:
     command: |
       . .gnomish/lib/task-change.sh
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-specs#/ { print $1; exit }')
-      [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
+      [ -n "$since" ] || { . .gnomish/lib/task-base.sh; since=$base; }
       review="$reports/review-specs.md"
       hunks=$(git diff -U0 "$since" -- "$review" | grep -E '^[-+]' | grep -vE '^(---|\+\+\+) ' || true)
       removed=$(printf '%s\n' "$hunks" | grep -E '^-' | grep -vxF -- '-- Status: open' || true)
