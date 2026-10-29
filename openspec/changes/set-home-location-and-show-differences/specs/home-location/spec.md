@@ -72,6 +72,7 @@ The reference zone SHALL be the home location's canonical time zone ID when home
 #### Scenario: A pinned moment keeps its instant
 - **GIVEN** the device time zone is `Europe/Moscow`
 - **AND** the moment is pinned to `2026-03-08T20:30:00Z`
+- **AND** the list contains Almaty and Moscow
 - **WHEN** the user makes Almaty home
 - **THEN** the moment is still pinned to `2026-03-08T20:30:00Z`
 - **AND** the date bar shows the date `2026-03-09`
