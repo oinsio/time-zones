@@ -2,7 +2,7 @@
 
 ## Why
 
-The owner wants to use the app on an old phone and tablet that cannot update past iOS 12.5.7 (iPhone 5s/6, iPad Air / mini 2–3). Today the app does not start there at all. The build targets Safari 14, so the bundle contains syntax Safari 12 cannot parse (46 `??` operators in `dist/assets/index-*.js`). Three model modules use BigInt (`src/model/timeZoneId.ts`, `dayPeriodStops.ts`, `dayPeriodWindows.ts`), which iOS 12 lacks and no polyfill can provide. Past the start, `Intl.DisplayNames`, `ResizeObserver` and `MediaQueryList.addEventListener` are missing, and an unguarded call to any of them throws. Pointer Events do not exist before iOS 13, so the day track and drag reorder ignore every touch. The device's zone data predates IANA 2022b, so renamed zones such as `Europe/Kyiv` throw `RangeError`.
+The owner wants to use the app on an old phone and tablet that cannot update past iOS 12.5.7 (iPhone 5s/6, iPad Air / mini 2–3). Today the app does not start there at all. The build sets no target, so Vite builds for Safari 14 and keeps syntax Safari 12 cannot parse, such as the `??` operator the sources use (`src/controller/useCitySearch.ts:25`). Three model modules use BigInt (`src/model/timeZoneId.ts`, `dayPeriodStops.ts`, `dayPeriodWindows.ts`), which iOS 12 lacks and no polyfill can provide. Past the start, `Intl.DisplayNames`, `ResizeObserver` and `MediaQueryList.addEventListener` are missing, and an unguarded call to any of them throws. Pointer Events do not exist before iOS 13, so the day track and drag reorder ignore every touch. The device's zone data predates IANA 2022b, so renamed zones such as `Europe/Kyiv` throw `RangeError`.
 
 Audience: users of iOS 12.5 devices, which the owner uses as a second screen. The work is a bounded "it starts and the main jobs work" level. Visual parity is out of scope (see Non-Goals).
 
@@ -12,7 +12,7 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 
 - ADDED: the production build lowers syntax to the Safari 12 level. Missing built-ins are polyfilled only on engines that lack them, before any application module runs. Modern browsers download no polyfill at start.
 - ADDED: production code never uses BigInt at run time. Instants are compared and measured in milliseconds.
-- ADDED: on an engine whose zone data predates an IANA rename, the renamed zone still works through its legacy name. This covers adding it, reading it from storage, and formatting its time and offset. The stored identifier stays canonical. This is a stopgap until the app ships its own time zone database (NG2).
+- ADDED: on an engine whose zone data predates an IANA rename, the renamed zone still works through its legacy name. This covers adding it, reading it from storage, formatting its time and offset, and resolving a wall-clock time in it (selecting a date). The stored identifier stays canonical. This is a stopgap until the app ships its own time zone database (NG2).
 - ADDED: on engines without `Intl.DisplayNames` the app works without country names. On engines without `ResizeObserver` the polyfill measures widths. On engines whose `MediaQueryList` lacks `addEventListener`, the reduced-motion preference is followed through `addListener`.
 - MODIFIED: on engines without Pointer Events, a tap on a day track selects the time at the tapped position.
 - MODIFIED: on engines without Pointer Events, cards are reordered by dragging the handle with a finger (touch events).
@@ -20,7 +20,7 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 - MODIFIED: the page declares itself as a home-screen web app for iOS (`apple-mobile-web-app-capable`).
 - ADDED: the dialog and its overlay keep their position, and the main page keeps its full height, on engines without the `inset` shorthand and the `dvh` unit.
 - MODIFIED: every pull request checks that the built JavaScript parses at the Safari 12 level and that the built CSS has no `inset` shorthand. A unit test checks that production sources contain no BigInt.
-- Glossary (`docs/glossary/`): new context `browser-compatibility` with the terms supported engine, legacy engine, legacy support and legacy zone shim; **update recheck** added to the app shell context; **time selection** extended with a tap.
+- Glossary (`docs/glossary/`): new context `browser-compatibility` with the terms supported engine, legacy engine, legacy support and legacy zone shim; **update recheck** added to the app shell context. **Time selection** already names the tap, so it is unchanged. The glossary, the new ADR and the CI step sit outside the implement stage's paths, so they ship as handoff patches (`tasks.md`, "Human follow-up").
 - No storage schema change, no new network calls. The stored list stays ADR-0004 schema version 1.
 
 ## Capabilities
@@ -39,16 +39,19 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 
 ## Impact
 
-- `packages/client/vite.config.ts`: build and CSS targets.
-- `packages/client/src/main.tsx` and a new boot module: polyfills load before the app.
-- New `src/lib/legacy/` (or similar, see design): feature detection, the polyfill bundle, the `Intl.DateTimeFormat` legacy-zone shim.
+All paths are under `packages/client/` unless stated otherwise.
+
+- `vite.config.ts`: build and CSS targets, two new build plugins. `tailwind.config.ts`: the `dvh` fallback.
+- `index.html` and a new `src/boot.ts`: polyfills load before `src/main.tsx`, which stays the app entry.
+- New `src/lib/legacy/`: feature detection, the polyfill loader, the `Intl.DateTimeFormat` legacy zone shim.
 - `src/model/timeZoneId.ts`, `dayPeriodStops.ts`, `dayPeriodWindows.ts`: BigInt removed.
 - `src/presenter/countryName.ts`, `src/adapters/city-search/zoneCitiesSource.ts`: `Intl.DisplayNames` guarded.
-- `src/controller/usePrefersReducedMotion.ts`, `src/controller/usePwaUpdateStatus.ts`.
+- `src/controller/usePrefersReducedMotion.ts`, `src/controller/usePwaUpdateStatus.ts`, new `src/controller/useUpdateRecheckOnReturn.ts`.
 - `src/views/shared/DayTrack.tsx`, `src/views/shared/LocationList.tsx`.
-- `index.html`, `.github/workflows/ci.yml`, `scripts/` (legacy syntax and CSS checks).
-- New dependencies: `core-js` (polyfills, loaded only on legacy engines), `@juggle/resize-observer`, a syntax checker for CI (`es-check` or equivalent, decided in design).
-- Tests: a new unit BDD feature under `src/test/features/browser_compatibility/`. Existing time-selection, locations and app-shell features gain scenarios.
+- `scripts/`: the legacy syntax and CSS check, the core-js list builder.
+- New dependencies: `core-js` and `@juggle/resize-observer` (loaded only on legacy engines); dev `core-js-compat` and `acorn` (both already in the lockfile as transitive dependencies).
+- Tests: new unit and E2E BDD features under `src/test/features/browser_compatibility/`. Existing time-selection, locations and app-shell features gain scenarios.
+- Outside `packages/` (handoff patches): `.github/workflows/ci.yml` (the CI step), `docs/adr/0009-supported-browser-engines.md` with links in `CLAUDE.md` and `docs/architecture/overview.md`, `docs/glossary/`.
 
 ## Goals
 
@@ -84,7 +87,7 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 - FR1: The supported engines are the latest Chrome, Firefox, Edge and Safari, and iOS Safari 12.5. On iOS Safari 12.5 the production build MUST start without a syntax error or a missing built-in, and MUST show the main page.
 - FR2: Built-ins missing on a legacy engine MUST be installed before any application module or library runs. An engine that has them all MUST download no polyfill at start.
 - FR3: Production code MUST NOT create, read or compare BigInt values at run time. That includes BigInt literals, `BigInt()` and `epochNanoseconds`.
-- FR4: When the engine rejects a canonical IANA zone that has a legacy name it accepts, every date and time operation on that zone MUST use the legacy name. This covers adding a location, reading the stored list, local time, date, UTC offset, day track and hour labels. Stored and compared identifiers MUST stay canonical. A zone the engine rejects under every name MUST behave as today's unknown zone.
+- FR4: When the engine rejects a canonical IANA zone that has a legacy name it accepts, every date and time operation on that zone MUST use the legacy name. This covers adding a location, reading the stored list, local time, date, UTC offset, day track, hour labels, and resolving a wall-clock time in that zone with every disambiguation (`UNIQUE`, `GAP`, `AMBIGUOUS` as in ADR-0003). Stored and compared identifiers MUST stay canonical. A zone the engine rejects under every name MUST behave as today's unknown zone.
 - FR5: On an engine without `Intl.DisplayNames`, presenting a country MUST yield an empty name and MUST NOT throw. Search by country MUST match nothing. Search by city and abbreviation MUST work as before.
 - FR6: On an engine without `ResizeObserver`, container widths MUST be measured by a polyfill, so view selection by width works.
 - FR7: On an engine whose `MediaQueryList` lacks `addEventListener`, the reduced-motion preference MUST be read and its changes followed through `addListener` / `removeListener`.
@@ -99,7 +102,7 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 
 #### Performance
 
-- NFR-P1: The initial JavaScript of the modern build stays within 150 KB gzipped (140.0 KB before this change). Polyfills are a separate chunk and are not part of the initial JavaScript.
+- NFR-P1: The initial JavaScript of the modern build stays within the existing 150 KB gzipped budget of `scripts/check-bundle-size.mjs`. Polyfills are a separate chunk and are not part of the initial JavaScript.
 - NFR-P2: On engines with every built-in, the boot step makes no extra network request before the app starts, apart from chunks the browser already preloads.
 
 #### Accessibility
@@ -135,9 +138,10 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 
 Feature files tagged `@support-legacy-ios-12-safari`:
 
-- `src/test/features/browser_compatibility/browser_compatibility_legacy_engine.feature` (vitest-cucumber): polyfills installed only when missing, legacy zone names, missing `Intl.DisplayNames`, `ResizeObserver` and `addEventListener` on `MediaQueryList`, no BigInt in sources.
-- New scenarios in `time_selection_select_time.feature` (tap without Pointer Events), the locations reorder feature (finger drag without Pointer Events), and the app-shell update feature (check on return to the screen).
-- The build checks (FR12, FR13) run as CI scripts. Their behaviour is covered by unit tests of the scripts.
+- `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_unit.feature` (vitest-cucumber): polyfills installed only when missing, legacy zone names (including wall-clock resolution), missing `Intl.DisplayNames`, `ResizeObserver` and `addEventListener` on `MediaQueryList`, zone checks without BigInt.
+- `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_e2e.feature` (playwright-bdd): no polyfill request in Chromium, axe-core on the main page and the search dialog with Pointer Events emulated away.
+- New scenarios in `time_selection_select_time.feature` (tap and click logic, unit), `time_selection_touch_e2e.feature` (real tap without Pointer Events, slider name and keys), `locations_reorder_e2e.feature` (finger drag without Pointer Events, no page scroll), `app_shell_notices.feature` (check on return to the screen) and `app_shell_smoke_e2e.feature` (iOS home-screen meta tag).
+- The build checks (FR12, FR13) run as a script. Its rules are covered by unit tests under `src/test/legacyBuild/`.
 
 ## Visual Reference
 
@@ -150,15 +154,15 @@ No changes (no IA documents exist under `docs/ia/`).
 ## Success Metrics
 
 - M1: 100% of FR1–FR13, NFR-P1, NFR-P2, NFR-A1, NFR-A2, NFR-R1 and UX1–UX3 have at least one automated test or CI check that names `support-legacy-ios-12-safari` together with the id. The exception is FR1 on a real device (M7).
-- M2: The CI syntax check passes on `dist/assets/*.js` at the Safari 12 level, and the CSS check finds 0 `inset:` declarations in `dist/assets/*.css`.
+- M2: The legacy build check (`check:legacy-build`, run locally by the implement stage and in CI once H1 is applied) reports 0 syntax issues in `dist/assets/*.js` at the Safari 12 level and 0 `inset:` declarations in `dist/assets/*.css`.
 - M3: With `Europe/Kyiv` rejected and `Europe/Kiev` accepted by the stubbed engine, adding Kyiv succeeds, the stored id is `Europe/Kyiv`, and the row shows the same time and offset as `Europe/Kiev` at `2026-03-08T07:30:00Z` (`09:30`, `UTC+2`).
 - M4: With `Intl.DisplayNames`, `ResizeObserver` and `MediaQueryList.addEventListener` removed from the test environment, the main page renders with 0 uncaught errors (3 of 3 cases).
 - M5: Initial JS of the modern build ≤ 150 KB gzipped. On an engine with every built-in, 0 requests for the polyfill chunk.
 - M6: Mutation score of the new or changed code ≥ 95% (minimum 90%).
-- M7: Manual acceptance on the owner's iOS 12.5.7 device. This is the one check that cannot be automated (NG9). The app starts, U1–U5 pass, and the Web Inspector console shows 0 errors.
+- M7: Manual acceptance on the owner's iOS 12.5.7 device. This is the one check that cannot be automated (NG9), and it is handoff item H4 in `tasks.md`. The app starts, U1–U5 pass (5 of 5), and the Web Inspector console shows 0 errors.
 
 ## Open Questions
 
 - Q1: Interval between update checks on return. Decided: 15 minutes (FR10). That is often enough for daily use without a request on every app switch.
-- Q2: Does `temporal-polyfill` accept a legacy zone name and keep it, or normalize it through `resolvedOptions()`? This decides whether FR4 can be a pure `Intl.DateTimeFormat` shim. Answered by the spike in tasks (design D3).
+- Q2: Does `temporal-polyfill` accept a legacy zone name and keep it, or normalize it through `resolvedOptions()`? And does `PlainDateTime#toZonedDateTime(zone, { disambiguation })` reach the same shimmed constructor? `resolveWallClock` (`src/model/wallClock.ts`) and `dayPeriodWindows.ts` use it, and the later change `add-wall-time-input-with-hint` depends on the answer. This decides whether FR4 can be a pure `Intl.DateTimeFormat` shim. Answered by the spike in task 1.1 (design D4).
 - Q3: Which minimum hold starts a finger drag (UX2)? Proposed: dnd-kit's typical 250 ms delay with 5 px tolerance. To be confirmed on the device.

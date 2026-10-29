@@ -38,9 +38,11 @@ When the list holds at least 2 locations, every card in the Cards view SHALL hav
 - **AND** the list is Moscow, Almaty, New York
 - **WHEN** the user holds the New York handle with a finger and drags it above Moscow
 - **THEN** the list is New York, Moscow, Almaty in that order
+- **AND** the page did not scroll during the drag
 
-#### Scenario: Sensors depend on Pointer Events
-- **WHEN** the Cards view sets up dragging
-- **THEN** it listens to touch events on an engine without Pointer Events
-- **AND** it listens to pointer events on an engine with them
-- **AND** it listens to the keyboard on both
+#### Scenario: A quick swipe over the handle scrolls without Pointer Events
+- **GIVEN** the engine has no Pointer Events
+- **AND** the list is Almaty, Moscow, Kolkata, Tokyo, New York on a touch screen too short to show the whole page
+- **WHEN** the user swipes up over the Almaty handle without holding it first
+- **THEN** the page scrolls down
+- **AND** the list is Almaty, Moscow, Kolkata, Tokyo, New York in that order

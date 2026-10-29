@@ -55,7 +55,7 @@ Production code SHALL NOT create, read or compare BigInt values at run time. Tha
 - **AND** the colour stops equal those computed with `BigInt` present
 
 ### Requirement: Renamed zones on outdated zone data
-When the engine rejects a canonical IANA zone but accepts one of its legacy names, every date and time operation on that zone SHALL use the legacy name. Stored and compared identifiers MUST stay canonical. A zone the engine rejects under every name MUST behave as an unknown zone. <!-- implements FR4 of support-legacy-ios-12-safari -->
+When the engine rejects a canonical IANA zone but accepts one of its legacy names, every date and time operation on that zone SHALL use the legacy name, including resolving a wall-clock time with an explicit disambiguation. Stored and compared identifiers MUST stay canonical. A zone the engine rejects under every name MUST behave as an unknown zone. <!-- implements FR4 of support-legacy-ios-12-safari -->
 
 #### Scenario: Adding a renamed zone
 - **GIVEN** the engine rejects `Europe/Kyiv` and accepts `Europe/Kiev`
@@ -70,6 +70,16 @@ When the engine rejects a canonical IANA zone but accepts one of its legacy name
 - **WHEN** the app starts
 - **THEN** the Kyiv card shows `09:30` and `UTC+2`
 - **AND** the stored list is read without error
+
+#### Scenario: A wall-clock time in a renamed zone
+- **GIVEN** the engine rejects `Europe/Kyiv` and accepts `Europe/Kiev`
+- **WHEN** the wall-clock time `<wall clock>` in `Europe/Kyiv` is resolved
+- **THEN** it resolves to `<instant>` with the status `<status>`
+
+| wall clock | instant | status |
+|---|---|---|
+| `2026-03-08T10:00` | `2026-03-08T08:00:00Z` | `UNIQUE` |
+| `2026-03-29T03:30` | `2026-03-29T01:30:00Z` | `GAP` |
 
 #### Scenario: A zone rejected under every name
 - **GIVEN** the engine rejects `America/Ciudad_Juarez` and has no legacy name for it

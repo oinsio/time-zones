@@ -42,4 +42,4 @@ When a new version of the app is available, the shell SHALL show a non-blocking 
 - **GIVEN** the network is unreachable
 - **AND** the app last checked for a new version 16 minutes ago
 - **WHEN** the page becomes visible
-- **THEN** the note that the latest version could not be fetched is announced politely
+- **THEN** the note that the latest version could not be fetched is shown
