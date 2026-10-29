@@ -175,4 +175,33 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       );
     },
   );
+
+  // @set-home-location-and-show-differences @FR4
+  f.Scenario(
+    "A device time zone change drops the gap note",
+    ({ Given, And, When, Then }) => {
+      Given("no home is set", () => undefined);
+      And("the device time zone is {string}", givenZone);
+      And("the current instant is {string}", givenInstant);
+      And("the app is open", givenAppOpen);
+      And(
+        "the user moved to the next day, so the bar shows the gap note",
+        async () => {
+          await whenNextDay();
+          expect(noteOfBar()).toBeDefined();
+        },
+      );
+      When(
+        "the device time zone changes to {string}",
+        async (_ctx, zone: string) => {
+          world.setDeviceZone(zone);
+          await world.runTick();
+        },
+      );
+      Then("the moment is pinned to {string}", (_ctx, pinned: string) =>
+        world.expectPinnedTo(pinned),
+      );
+      And("the bar shows no note", thenNoNote);
+    },
+  );
 });

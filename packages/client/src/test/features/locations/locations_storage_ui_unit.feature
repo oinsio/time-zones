@@ -40,3 +40,9 @@ Feature: Locations storage states in the Cards view
     When the user opens the app
     Then the row shows "Россия"
     And the "Add location" action reads in Russian
+
+  @set-home-location-and-show-differences @FR9
+  Scenario: Home of the wrong type
+    Given the stored list holds "Almaty" and its home is the number 5
+    When the user opens the app
+    Then an error message with a reset action is shown
