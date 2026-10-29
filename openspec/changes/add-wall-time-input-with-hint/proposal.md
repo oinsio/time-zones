@@ -33,6 +33,7 @@ Glossary terms (`docs/glossary/`):
 
 - NEW **Wall-time input** (`time-selection.md`) — typing an exact wall-clock time in a location card or the Here entry. *RU:* «Ввести время». *Not:* a time selection, which is a choice on a day track in track steps. *Never:* time picker, time edit. *Code:* `SET_WALL_TIME`, `parseWallTimeInput`, `useWallTimeInput`, `WallTimeInput`.
 - NEW **Wall-time target** (`time-selection.md`) — the row a wall-time input was typed in: a location or the Here entry. It decides where the wall-time hint is shown. *Code:* `WallTimeTarget`.
+- NEW **Wall-clock note** (`date-selection.md`) — the one note about a wall-clock time on screen: the gap note in the date bar or the wall-time hint in a row, never both. *Code:* `getWallClockNote`, `WallClockNote`, `WallClockNotePlacement`.
 - CHANGED **Wall-time hint** (`date-selection.md`) — no longer *(planned)*. *RU:* the texts of FR7. *Code:* `getWallClockNote`, `presentWallTimeHint`, `WallTimeHint`.
 - CHANGED **Gap note** (`date-selection.md`) — also disappears after a wall-time input and after a change of the reference zone. *Code:* adds `getWallClockNote`.
 - Used as they are: wall-clock time, wall-clock status, DST gap, DST overlap, UTC offset, reference moment, reference zone, pinned, Now button, Here entry, time selection.
