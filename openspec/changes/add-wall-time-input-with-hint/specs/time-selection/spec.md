@@ -281,6 +281,13 @@ Keys typed in the field SHALL NOT start a card reorder and SHALL NOT scroll the 
 - **AND** focus is on the time of New York
 - **AND** the order of the cards is unchanged
 
+#### Scenario: Tab confirms the field
+- **GIVEN** the list contains Almaty and New York
+- **AND** the user opened the wall-time input of New York
+- **WHEN** the user types `1040` and presses Tab
+- **THEN** New York shows `10:40`
+- **AND** the moment is pinned
+
 ### Requirement: Wall-time input layout
 With the field open or a hint shown, the page SHALL NOT scroll horizontally at 320 px and 2560 px. The open field MUST take the place of the time and MUST NOT change the card's size. The hint MUST sit between the country line and the day track, wrap inside the card and take colours from design tokens. Screenshots at 375 and 1024 px, in both themes, MUST include an open field and a hint. <!-- implements NFR-R1, NFR-R2, UX2, UX3 of add-wall-time-input-with-hint -->
 

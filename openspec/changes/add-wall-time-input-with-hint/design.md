@@ -145,7 +145,7 @@ Negative:
 
 - **Legacy zone names.** Covered on `main` (Context, proposal Q5). Task 2.2 adds a `SET_WALL_TIME` case with the same engine stub. If it ever fails, the fix belongs to `lib/legacy/zoneShim.ts`, not to a second path in `resolveWallClock`.
 - **BigInt.** Temporal's `epochNanoseconds` is tempting for equality checks; the source scan fails on it. All comparisons use `Instant#equals`.
-- **Blur on iOS 12.** Closing the numeric keyboard on iOS blurs the field; blur with changed text confirms (FR3), so typing then tapping elsewhere commits. The E2E scenario with `emulateEngineWithoutPointerEvents` covers the tap; blur-confirms is covered by the Tab case.
+- **Blur on iOS 12.** Closing the numeric keyboard on iOS blurs the field; blur with changed text confirms (FR3), so typing then tapping elsewhere commits. The E2E scenario with `emulateEngineWithoutPointerEvents` covers the tap; blur-confirms is covered by the jsdom blur cases of task 5.1 (commit on change, close without change, error kept) and by the E2E scenario "Tab confirms the field" (task 6.4).
 
 ## Migration Plan
 
