@@ -26,6 +26,13 @@ Feature: Locations in every registered view
     And the locations list holds 1 location
     And focus is on the "Add location" action
 
+  @show-here-entry-for-device-time @view-contract @FR11
+  Scenario: See the Here entry without home
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the stored locations are "Moscow"
+    Then the first row is the Here entry showing "12:30"
+    And the card of "Moscow" shows the time "10:30"
+
   @add-locations-via-search @view-contract @NFR-A2
   Scenario: Close with Esc
     When the user opens the search with Enter and presses Esc

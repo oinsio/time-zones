@@ -21,6 +21,11 @@ import {
   typeQuery,
   UNREADABLE_DOCUMENT_TEXT,
 } from "./locationsE2eHelpers";
+import {
+  seedHereEntryState,
+  seedHomeList,
+  storeDeviceCity,
+} from "./locationsSeedHelpers";
 
 const STORAGE_WARNING_TEXT = englishLocale.mainPage.storageUnavailable;
 const RESULTS_QUERY = "Mos";
@@ -53,18 +58,8 @@ export enum WorldClockState {
   HOME = "home",
   TRAVELLING = "travelling",
   MENU_OPEN = "menu open",
-}
-
-/** Seeds a list with a home location and shows it. */
-async function seedHomeList(
-  world: LocationsWorld,
-  cityNames: string[],
-  homeCityName: string,
-) {
-  const [homeLocation] = buildStoredLocations([homeCityName]);
-  await world.seedList(buildStoredLocations(cityNames), homeLocation);
-  await world.reloadIfOpen();
-  await expect(world.page.getByRole("listitem")).toHaveCount(cityNames.length);
+  HERE_ENTRY = "here-entry",
+  HERE_ENTRY_TRAVEL = "here-entry-travel",
 }
 
 /**
@@ -75,7 +70,8 @@ async function seedHomeList(
  * Implements NFR-A1, UX1, FR12, FR13, FR15 of add-locations-via-search and
  * NFR-R3 of select-date-with-calendar-and-now (pinned and calendar states);
  * NFR-A1, NFR-R2 of set-home-location-and-show-differences (home, travelling
- * and menu open states).
+ * and menu open states); FR1, FR7, NFR-A1 of show-here-entry-for-device-time
+ * (here-entry and here-entry-travel states).
  */
 export async function enterLocationsState(
   world: LocationsWorld,
@@ -104,11 +100,13 @@ export async function enterLocationsState(
       await expect(page.getByText(STORAGE_WARNING_TEXT)).toBeVisible();
       break;
     case WorldClockState.SEARCH_LOADING:
+      await storeDeviceCity(world);
       await world.holdSearchData();
       await openSearch(page);
       await expect(page.getByText(SEARCH_LOADING_TEXT)).toBeVisible();
       break;
     case WorldClockState.SEARCH_ERROR:
+      await storeDeviceCity(world);
       await world.failSearchData();
       await openSearch(page);
       await expect(page.getByText(SEARCH_LOAD_ERROR_TEXT)).toBeVisible();
@@ -154,6 +152,13 @@ export async function enterLocationsState(
         await menuButton(page, MENU_OPEN_CITY_NAME).click();
         await expect(page.getByRole("menu")).toBeVisible();
       }
+      break;
+    case WorldClockState.HERE_ENTRY:
+    case WorldClockState.HERE_ENTRY_TRAVEL:
+      await seedHereEntryState(
+        world,
+        state === WorldClockState.HERE_ENTRY_TRAVEL,
+      );
       break;
     case WorldClockState.TRAVELLING:
       await seedHomeList(world, LIST_CITY_NAMES, TRAVELLING_HOME_CITY_NAME);

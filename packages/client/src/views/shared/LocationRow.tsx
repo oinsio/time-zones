@@ -7,13 +7,11 @@ import {
   LocationMarkKind,
   type LocationRow as LocationRowModel,
 } from "@/presenter";
-import { DayTrack } from "./DayTrack";
 import { DragHandle } from "./DragHandle";
-import { LocalDateTime } from "./LocalDateTime";
-import { LocationMarkIcon } from "./LocationMarkIcon";
 import { LocationMenu, type LocationMenuItem } from "./LocationMenu";
 import { getReorderTransition } from "./reorderTransition";
 import { useDropSettleAnimation } from "./useDropSettleAnimation";
+import { ZoneRowContent } from "./ZoneRowContent";
 
 type LocationRowProps = {
   row: LocationRowModel;
@@ -44,6 +42,8 @@ type LocationRowProps = {
  * set-home-location-and-show-differences (D3, D5, D7, D8): the offset difference
  * after the city, the home mark, and the location menu in place of the
  * remove button.
+ * Implements FR2, FR4 of show-here-entry-for-device-time (D5): the place
+ * column, time and day track live in `ZoneRowContent`.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -82,8 +82,6 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       isSorting,
       prefersReducedMotion,
     );
-    const hasSecondaryLine =
-      row.countryName !== "" || row.utcOffsetLabel !== "";
     const hasDifference = row.offsetDifferenceLabel !== "";
     const isHome = row.mark?.kind === LocationMarkKind.HOME;
     const menuItems: LocationMenuItem[] = [];
@@ -131,61 +129,22 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             listeners={listeners}
           />
         )}
-        <span className="flex min-w-0 flex-1 items-start gap-3 md:flex-none">
-          <span className="flex min-w-0 flex-1 flex-col break-words md:w-64 md:flex-none">
-            <span className="flex flex-wrap items-center gap-x-2">
-              {row.mark && <LocationMarkIcon mark={row.mark} id={markId} />}
-              <span id={cityId} className="font-semibold">
-                {row.cityLabel}
-              </span>
-              {hasDifference && (
-                <>
-                  <span
-                    aria-hidden="true"
-                    data-offset-difference
-                    className="text-sm font-semibold text-muted-foreground"
-                  >
-                    {row.offsetDifferenceLabel}
-                  </span>
-                  <span
-                    id={differenceId}
-                    data-offset-difference
-                    className="sr-only"
-                  >
-                    {row.offsetDifferenceAccessibleLabel}
-                  </span>
-                </>
-              )}
-              {row.mark?.caption && (
-                <span
-                  aria-hidden="true"
-                  className="text-xs font-bold text-accent"
-                >
-                  {row.mark.caption}
-                </span>
-              )}
-            </span>
-            {hasSecondaryLine && (
-              <span className="flex flex-wrap gap-x-2 text-sm text-muted-foreground">
-                {row.countryName !== "" && <span>{row.countryName}</span>}
-                {row.utcOffsetLabel !== "" && <span>{row.utcOffsetLabel}</span>}
-              </span>
-            )}
-          </span>
-          <LocalDateTime
-            localTimeLabel={row.localTimeLabel}
-            localDateLabel={row.localDateLabel}
-            localIsoDate={row.localIsoDate}
-          />
-        </span>
-        {row.dayTrack && (
-          <DayTrack
-            track={row.dayTrack}
-            city={row.cityLabel}
-            onSelectFraction={onSelectTrackFraction}
-            onMoveTrack={onMoveTrack}
-          />
-        )}
+        <ZoneRowContent
+          cityLabel={row.cityLabel}
+          ids={{ city: cityId, mark: markId, difference: differenceId }}
+          mark={row.mark}
+          offsetDifferenceLabel={row.offsetDifferenceLabel}
+          offsetDifferenceAccessibleLabel={row.offsetDifferenceAccessibleLabel}
+          secondaryTexts={[row.countryName, row.utcOffsetLabel].filter(
+            (text) => text !== "",
+          )}
+          localTimeLabel={row.localTimeLabel}
+          localDateLabel={row.localDateLabel}
+          localIsoDate={row.localIsoDate}
+          dayTrack={row.dayTrack}
+          onSelectTrackFraction={onSelectTrackFraction}
+          onMoveTrack={onMoveTrack}
+        />
         <LocationMenu
           ref={menuButtonRef}
           city={row.cityLabel}

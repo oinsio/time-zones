@@ -7,6 +7,7 @@ import {
 } from "@/ports";
 import { createAbbreviationSource } from "./abbreviationSource";
 import type { ZoneCityData } from "./citySource";
+import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
 import { normalizeSearchText } from "./normalizeSearchText";
 import { createZoneCitiesSource } from "./zoneCitiesSource";
 
@@ -79,6 +80,9 @@ export function createCompositeCitySearch(
       });
       return orderedResults.slice(0, MAX_SEARCH_RESULTS);
     },
+    getExemplarCity: (timeZoneId, language) =>
+      recordsById.get(timeZoneId)?.names[language] ??
+      deriveCityNameFromTimeZoneId(timeZoneId),
     suggest: () =>
       POPULAR_TIME_ZONE_IDS.flatMap((zoneId) => {
         const record = recordsById.get(zoneId);

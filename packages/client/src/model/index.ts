@@ -39,6 +39,8 @@ export {
   TrackMove,
 } from "./dayTrack";
 export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
+// Implements FR1, FR6 of show-here-entry-for-device-time.
+export { getHereEntry, type HereEntry } from "./hereEntry";
 // Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards.
 export { getLocalDateTime } from "./localDateTime";
 export { getLocationMarkKind, LocationMarkKind } from "./locationMark";

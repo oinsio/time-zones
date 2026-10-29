@@ -42,9 +42,27 @@ export class LocationsWorld {
    */
   async reloadIfOpen() {
     if (this.page.url() === BLANK_PAGE_URL) return;
+    // The reloaded app is the one that reads the seed: count its requests only.
+    this.searchDataRequestUrls.length = 0;
     await this.page.evaluate(async () => {
       await navigator.serviceWorker.ready;
     });
+    await this.page.reload();
+  }
+
+  /**
+   * Reloads the open app as a first visit: no service worker or cache serves
+   * the search data, so the routes of this world can hold or fail it.
+   */
+  async reloadWithoutServiceWorker() {
+    await this.page.evaluate(async () => {
+      for (const registration of await navigator.serviceWorker.getRegistrations()) {
+        await registration.unregister();
+      }
+      for (const cacheName of await caches.keys())
+        await caches.delete(cacheName);
+    });
+    this.searchDataRequestUrls.length = 0;
     await this.page.reload();
   }
 

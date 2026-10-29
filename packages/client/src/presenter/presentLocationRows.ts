@@ -1,55 +1,23 @@
-import type { TFunction } from "i18next";
-import type { SupportedLanguage } from "@/i18n";
-import type { Temporal } from "@/lib/temporal";
-import {
-  getLocalDateTime,
-  getLocationMarkKind,
-  getOffsetDifferenceMinutes,
-  getUtcOffsetMinutes,
-  type Location,
-  type ReferenceDay,
-} from "@/model";
+import { getLocationMarkKind, type Location } from "@/model";
 import { presentCountryName } from "./countryName";
-import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
-import { formatLocalDate, formatLocalTime } from "./localDateTime";
 import {
   type PresentedLocationMark,
   presentLocationMarks,
 } from "./locationMark";
-import { formatOffsetDifference } from "./offsetDifference";
-import { formatUtcOffset } from "./utcOffset";
+import {
+  type LocationRowsContext,
+  type PresentedZoneMoment,
+  presentZoneMoment,
+} from "./presentZoneMoment";
 
-export type LocationRow = {
+export type { LocationRowsContext };
+
+export type LocationRow = PresentedZoneMoment & {
   id: string;
   cityLabel: string;
   countryName: string;
-  /** "UTC+3" style label; empty when the offset cannot be computed. */
-  utcOffsetLabel: string;
-  /** "−2 h" style label; empty when the row has no offset difference. */
-  offsetDifferenceLabel: string;
-  /** "2 hours behind" style text read in the row name; empty without a difference. */
-  offsetDifferenceAccessibleLabel: string;
   /** Leading mark of the row ("home" or "here"); `undefined` when the row has none. */
   mark?: PresentedLocationMark;
-  /** "12:30" style label; empty when the zone is unknown. */
-  localTimeLabel: string;
-  /** "Sun, Mar 8" style label; empty when the zone is unknown. */
-  localDateLabel: string;
-  /** ISO date ("2026-03-08") of the local date; empty when the zone is unknown. */
-  localIsoDate: string;
-  /** Slider data; `undefined` when the zone is unknown. */
-  dayTrack?: PresentedDayTrack;
-};
-
-export type LocationRowsContext = {
-  language: SupportedLanguage;
-  instant: Temporal.Instant;
-  translate: TFunction;
-  deviceTimeZoneId: string;
-  homeLocationId: string | null;
-  /** Offset of the reference zone, read once per presentation (NFR-P1). */
-  referenceOffsetMinutes: number | undefined;
-  referenceDay: ReferenceDay;
 };
 
 /**
@@ -62,70 +30,27 @@ export type LocationRowsContext = {
  * Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).
  * Implements FR1 of add-time-sliders-to-location-cards (D5): the day track.
  * Implements FR5, FR6, FR7 of set-home-location-and-show-differences (D3-D5).
+ * Implements FR2, FR3 of show-here-entry-for-device-time (D2): the zone part
+ * comes from `presentZoneMoment`.
  */
 export function presentLocationRows(
   locations: readonly Location[],
-  {
-    language,
-    instant,
-    translate,
-    deviceTimeZoneId,
-    homeLocationId,
-    referenceOffsetMinutes,
-    referenceDay,
-  }: LocationRowsContext,
+  context: LocationRowsContext,
 ): LocationRow[] {
-  const utcPrefix = translate("locations.utcOffsetPrefix");
+  const { language, translate, deviceTimeZoneId, homeLocationId } = context;
   const marks = presentLocationMarks(translate);
   return locations.map((location) => {
-    const offsetMinutes = getUtcOffsetMinutes(location.timeZoneId, instant);
     const markKind = getLocationMarkKind(
       location,
       deviceTimeZoneId,
       homeLocationId,
     );
-    const differenceMinutes = getOffsetDifferenceMinutes(
-      location,
-      offsetMinutes,
-      referenceOffsetMinutes,
-      { deviceTimeZoneId, homeLocationId },
-    );
-    const difference =
-      differenceMinutes === undefined
-        ? undefined
-        : formatOffsetDifference(differenceMinutes, translate);
-    const localDateTime = getLocalDateTime(location.timeZoneId, instant);
-    const localTimeLabel = localDateTime
-      ? formatLocalTime(localDateTime, language)
-      : "";
-    const localDateLabel = localDateTime
-      ? formatLocalDate(localDateTime, language)
-      : "";
     return {
       id: location.id,
       cityLabel: location.label,
       countryName: presentCountryName(location.countryCode, language),
-      utcOffsetLabel:
-        offsetMinutes === undefined
-          ? ""
-          : formatUtcOffset(offsetMinutes, utcPrefix),
-      offsetDifferenceLabel: difference?.label ?? "",
-      offsetDifferenceAccessibleLabel: difference?.accessibleLabel ?? "",
       mark: markKind === undefined ? undefined : marks[markKind],
-      localTimeLabel,
-      localDateLabel,
-      localIsoDate: localDateTime ? localDateTime.toPlainDate().toString() : "",
-      dayTrack: localDateTime
-        ? presentDayTrack({
-            timeZoneId: location.timeZoneId,
-            instant,
-            day: referenceDay,
-            language,
-            translate,
-            localTimeLabel,
-            localDateLabel,
-          })
-        : undefined,
+      ...presentZoneMoment(location, context),
     };
   });
 }

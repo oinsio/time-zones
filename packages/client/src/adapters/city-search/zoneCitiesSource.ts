@@ -12,6 +12,7 @@ import {
   SearchMatchKind,
 } from "@/ports";
 import type { CitySource, ZoneCityData } from "./citySource";
+import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
 import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
 import { findAbbreviationsOfZone } from "./timeZoneAbbreviations";
 
@@ -20,9 +21,6 @@ import { findAbbreviationsOfZone } from "./timeZoneAbbreviations";
  * city names.
  * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
  */
-
-const ZONE_ID_SEPARATOR = "/";
-const UNDERSCORES = /_/g;
 
 /** Zones the browser knows, or `undefined` when it cannot list them. */
 export type ListTimeZones = () => readonly string[] | undefined;
@@ -43,12 +41,6 @@ const startsWithQuery = (text: SearchableText, query: string): boolean =>
   text.normalized.startsWith(query);
 const hasWordStartingWithQuery = (text: SearchableText, query: string) =>
   text.words.some((word) => word.startsWith(query));
-
-const deriveNameFromZoneId = (timeZoneId: string): string =>
-  (timeZoneId.split(ZONE_ID_SEPARATOR).at(-1) ?? timeZoneId).replace(
-    UNDERSCORES,
-    " ",
-  );
 
 const calculateRank = (timeZoneId: string): number => {
   const popularIndex = POPULAR_TIME_ZONE_IDS.indexOf(timeZoneId);
@@ -74,7 +66,7 @@ function buildRecord(
   dataByZoneId: Map<string, ZoneCityData>,
 ): CityRecord {
   const data = dataByZoneId.get(timeZoneId);
-  const derivedName = deriveNameFromZoneId(timeZoneId);
+  const derivedName = deriveCityNameFromTimeZoneId(timeZoneId);
   return {
     id: timeZoneId,
     timeZoneId,

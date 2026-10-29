@@ -30,6 +30,8 @@
     "utcOffsetPrefix": "UTC",
     "hereMarkLabel": "You are here",
     "hereMarkCaption": "here",
+    "deviceTimeMeta": "Device time · {{utcOffset}}",
+    "hereEntryName": "{{city}}, {{hereMark}}, Device time",
     "addLocation": "Add location",
     "homeMarkLabel": "Home location",
     "locationMenu": "Actions for {{city}}",

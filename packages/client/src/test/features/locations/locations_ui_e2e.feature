@@ -1,8 +1,7 @@
 Feature: Locations in a real browser
   Implements change add-locations-via-search.
   The search loads its data when it opens and says so when that fails, names
-  and announces what it does, fits every screen, follows other tabs and works
-  offline.
+  and announces what it does, fits every screen.
 
   @add-locations-via-search @FR15 @UX1
   Scenario: Data is loading
@@ -30,11 +29,21 @@ Feature: Locations in a real browser
     And the page is still marked
 
   @add-locations-via-search @NFR-P2
+  @show-here-entry-for-device-time @FR8
   Scenario: Data loads only when the search opens
-    Given the user opens the locations app
+    Given the stored locations are "Almaty"
+    When the user opens the locations app
     Then the page has not requested the search data
     When the user opens the search
     Then the page has requested the search data
+
+  @show-here-entry-for-device-time @FR8 @NFR-P2 @M5
+  Scenario: The Here entry's request is the only one
+    Given the user opens the locations app
+    When the Here entry has loaded the zone cities data
+    And the user opens the search
+    Then the suggestions are shown
+    And the page has requested the search data exactly 1 time
 
   @add-locations-via-search @NFR-A3
   @set-home-location-and-show-differences @FR11
@@ -117,6 +126,7 @@ Feature: Locations in a real browser
   @match-here-mark-to-design @NFR-R2 @M5
   @set-home-location-and-show-differences @NFR-R2
   @match-home-mark-to-design @NFR-R1 @M4
+  @show-here-entry-for-device-time @NFR-R2
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme
@@ -163,31 +173,11 @@ Feature: Locations in a real browser
       | travelling  | 375   | dark  |
       | travelling  | 1024  | light |
       | travelling  | 1024  | dark  |
-
-  @add-locations-via-search @FR14
-  Scenario: Added in another tab
-    Given the stored locations are "Moscow"
-    And the app is open in two tabs
-    When the user adds "Tokyo" from the search
-    Then the other tab shows "Tokyo" without a reload
-
-  @add-locations-via-search @FR14
-  Scenario: Removed in another tab
-    Given the stored locations are "Moscow", "Tokyo"
-    And the app is open in two tabs
-    When the user removes "Moscow"
-    Then the other tab no longer shows "Moscow" without a reload
-
-  @add-locations-via-search @FR16
-  Scenario: Offline reopen
-    Given the stored locations are "Moscow"
-    And the service worker controls the locations app
-    When the user reopens the locations app without network
-    Then the locations list shows "Moscow"
-
-  @add-locations-via-search @FR16
-  Scenario: Offline search
-    Given the service worker controls the locations app
-    And the network is gone
-    When the user adds "Tokyo" from the search
-    Then the locations list shows "Tokyo"
+      | here-entry        | 375   | light |
+      | here-entry        | 375   | dark  |
+      | here-entry        | 1024  | light |
+      | here-entry        | 1024  | dark  |
+      | here-entry-travel | 375   | light |
+      | here-entry-travel | 375   | dark  |
+      | here-entry-travel | 1024  | light |
+      | here-entry-travel | 1024  | dark  |

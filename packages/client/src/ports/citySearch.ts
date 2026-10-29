@@ -41,6 +41,12 @@ export interface CitySearch {
     query: string,
     language: SupportedLanguage,
   ): readonly CitySearchResult[];
+  /**
+   * The city a time zone stands for, in the interface language; the name
+   * derived from the zone ID when the data has none.
+   * Implements FR8, FR12 of show-here-entry-for-device-time.
+   */
+  getExemplarCity(timeZoneId: string, language: SupportedLanguage): string;
   /** Popular locations, shown for an empty query. */
   suggest(): readonly CitySearchResult[];
 }

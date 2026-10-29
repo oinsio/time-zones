@@ -30,6 +30,8 @@
     "utcOffsetPrefix": "UTC",
     "hereMarkLabel": "Вы здесь",
     "hereMarkCaption": "здесь",
+    "deviceTimeMeta": "Время устройства · {{utcOffset}}",
+    "hereEntryName": "{{city}}, {{hereMark}}, Время устройства",
     "addLocation": "Добавить место",
     "homeMarkLabel": "Домашнее место",
     "locationMenu": "Действия: {{city}}",

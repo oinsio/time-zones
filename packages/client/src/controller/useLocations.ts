@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "@/i18n";
 import {
   getEffectiveInstant,
+  getHereEntry,
   getReferenceDay,
   getReferenceOffsetMinutes,
 } from "@/model";
-import { presentLocationRows } from "@/presenter";
-import { LocationsContext } from "./locationsContext";
+import { type LocationRowsContext, presentLocationRows } from "@/presenter";
+import { LocationsContext, LocationsStatus } from "./locationsContext";
 
 export { LocationsStatus } from "./locationsContext";
 
@@ -30,6 +31,8 @@ const MISSING_PROVIDER_MESSAGE =
  * Implements FR1, FR2 of add-time-sliders-to-location-cards (D6).
  * Passes the home location and the reference offset, read once per
  * presentation: Implements FR5, FR7 of set-home-location-and-show-differences (D4).
+ * Returns the rows context and the Here entry, none while the stored list is
+ * unreadable: Implements FR1, FR9 of show-here-entry-for-device-time (D4).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
@@ -41,10 +44,10 @@ export function useLocations() {
   const language = (i18n.resolvedLanguage ??
     i18n.language) as SupportedLanguage;
   // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick re-presents the rows at each minute
-  const rows = useMemo(() => {
+  const { rows, rowsContext } = useMemo(() => {
     const now = clock.instant();
     const instant = getEffectiveInstant(state, now);
-    return presentLocationRows(locations, {
+    const context: LocationRowsContext = {
       language,
       instant,
       translate: t,
@@ -52,7 +55,15 @@ export function useLocations() {
       homeLocationId,
       referenceOffsetMinutes: getReferenceOffsetMinutes(state, instant),
       referenceDay: getReferenceDay(state, now),
-    });
+    };
+    return {
+      rows: presentLocationRows(locations, context),
+      rowsContext: context,
+    };
   }, [state, locations, deviceTimeZoneId, language, t, clock, minuteTick]);
-  return { rows, locations, ...rest };
+  const hereEntry =
+    rest.loadStatus === LocationsStatus.UNREADABLE
+      ? undefined
+      : getHereEntry(state);
+  return { rows, rowsContext, hereEntry, locations, ...rest };
 }

@@ -105,6 +105,25 @@ Then("the page has requested the search data", async ({ locationsWorld }) => {
     .toBeGreaterThan(0);
 });
 
+// Verifies FR8, NFR-P2 of show-here-entry-for-device-time (D4): the Here entry loads the data once.
+When(
+  "the Here entry has loaded the zone cities data",
+  async ({ locationsWorld }) => {
+    await expect
+      .poll(() => locationsWorld.searchDataRequestUrls.length)
+      .toBe(1);
+    await locationsWorld.page.waitForLoadState("networkidle");
+  },
+);
+
+Then(
+  "the page has requested the search data exactly {int} time",
+  async ({ locationsWorld }, requestCount: number) => {
+    await locationsWorld.page.waitForLoadState("networkidle");
+    expect(locationsWorld.searchDataRequestUrls).toHaveLength(requestCount);
+  },
+);
+
 // Verifies NFR-A3 of add-locations-via-search.
 Then(
   "the list offers the action {string}",

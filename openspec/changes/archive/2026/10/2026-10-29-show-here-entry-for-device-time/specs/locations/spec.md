@@ -17,6 +17,14 @@ The Cards view SHALL show a Here entry for the device time zone before the first
 - **THEN** no Here entry is shown
 - **AND** Almaty shows the Here mark
 
+#### Scenario: The home location matches
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list is Almaty (`Asia/Almaty`), Moscow
+- **AND** Almaty is the home location
+- **WHEN** the user opens the app
+- **THEN** no Here entry is shown
+- **AND** Almaty shows the Home mark
+
 #### Scenario: Matching is by time zone ID, not by offset
 - **GIVEN** the device time zone is `Europe/Minsk`
 - **AND** the list is Moscow (`Europe/Moscow`)
@@ -29,6 +37,7 @@ The Here entry SHALL show the Here mark with its "here" caption, the city of the
 #### Scenario: Here entry on the design sample
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the interface language is Russian
+- **AND** the zone cities data is loaded
 - **AND** the current instant is `2026-03-08T07:30:00Z`
 - **AND** the list is Moscow, Kolkata, New York
 - **WHEN** the user opens the app
@@ -59,6 +68,7 @@ The Here entry SHALL show an offset difference by the same rule as a location ro
 - **GIVEN** the home location is Almaty
 - **AND** the device time zone is `Europe/Moscow`
 - **AND** the interface language is Russian
+- **AND** the zone cities data is loaded
 - **AND** the current instant is `2026-03-08T07:30:00Z`
 - **AND** the list is Almaty, Kolkata, New York
 - **WHEN** the user opens the app
@@ -130,7 +140,7 @@ The Here entry SHALL appear, change or disappear in the same render as the Here 
 - **THEN** the Here entry shows `UTC`, the caption `here` and the meta line `Device time · UTC`
 
 ### Requirement: Exemplar city of the Here entry
-The Here entry SHALL name the device time zone by its exemplar city in the interface language. The zone cities data MUST be loaded in the background only while the Here entry is shown, and showing the Here entry MUST NOT wait for it. Until the data is loaded, or when loading fails, the city MUST be derived from the time zone ID, with no error shown. <!-- implements FR8, NFR-P2, UX3 of show-here-entry-for-device-time -->
+The Here entry SHALL name the device time zone by its exemplar city in the interface language. The zone cities data MUST be loaded in the background only while the Here entry is shown, and showing the Here entry MUST NOT wait for it. Until the data is loaded, or when loading fails, the city MUST be derived from the time zone ID, with no error shown. The search MUST reuse data the Here entry loaded, so the page requests the data at most once while no load fails. <!-- implements FR8, NFR-P2, UX3 of show-here-entry-for-device-time -->
 
 #### Scenario: Derived city first, exemplar city after loading
 - **GIVEN** the device time zone is `Asia/Almaty`
@@ -154,14 +164,22 @@ The Here entry SHALL name the device time zone by its exemplar city in the inter
 - **WHEN** the user opens the app and does not open the search
 - **THEN** the zone cities data is not requested
 
+#### Scenario: The search reuses the Here entry's data
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list is Moscow
+- **WHEN** the user opens the app, the zone cities data finishes loading, and the user opens the search
+- **THEN** the suggestions are shown
+- **AND** the zone cities data was requested exactly once
+
 ### Requirement: Here entry in other page states
-The load error of an unreadable stored list SHALL show no Here entry. The view skeleton MUST stay unchanged, and the Here entry MUST appear together with the location rows. With storage unavailable, the Here entry MUST be shown as usual. <!-- implements FR9 of show-here-entry-for-device-time -->
+The load error of an unreadable stored list SHALL show no Here entry and MUST NOT request the zone cities data. The view skeleton MUST stay unchanged, and the Here entry MUST appear together with the location rows. With storage unavailable, the Here entry MUST be shown as usual. <!-- implements FR9 of show-here-entry-for-device-time -->
 
 #### Scenario: Unreadable stored list
 - **GIVEN** the stored location list is unreadable
 - **WHEN** the user opens the app
 - **THEN** the load error with Reset is shown
 - **AND** no Here entry is shown
+- **AND** the zone cities data is not requested
 
 #### Scenario: Storage unavailable
 - **GIVEN** storage is unavailable
@@ -227,11 +245,20 @@ The Here entry SHALL be outside the numbered location list, so assistive technol
 #### Scenario: Name and list size
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the interface language is Russian
+- **AND** the zone cities data is loaded
 - **AND** the list is Moscow, New York
 - **WHEN** the user opens the app
 - **THEN** the Here entry is named `Алматы, Вы здесь, Время устройства`
 - **AND** the location list has 2 items
 - **AND** the Here entry's slider is named `Время — Алматы`
+
+#### Scenario: One Tab stop on the Here entry
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the interface language is Russian
+- **AND** the list is Moscow
+- **WHEN** the user moves the focus through the page with Tab
+- **THEN** exactly one element of the Here entry takes the focus: the slider named `Время — Алматы`
+- **AND** the next Tab moves the focus out of the Here entry
 
 #### Scenario: No violations
 - **GIVEN** the Here entry is shown above a list, in the empty state, or while travelling with home set
@@ -247,7 +274,18 @@ The Here entry SHALL use the card layout: text above the day track below 768 px,
 - **THEN** the page does not scroll horizontally
 - **AND** the Here entry's layout matches the Moscow card's layout
 
+#### Scenario: The exemplar city keeps the height
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the interface language is Russian
+- **AND** the zone cities data is held back
+- **AND** the list is Moscow
+- **WHEN** the user opens the app and the Here entry shows `Almaty`
+- **AND** the zone cities data finishes loading and the Here entry shows `Алматы`
+- **THEN** the Here entry's height is the same as before the load
+- **AND** the Moscow card has not moved
+
 #### Scenario: Approved screenshots
-- **GIVEN** the states "here-entry", "here-entry-empty" and "here-entry-travel"
-- **WHEN** they are rendered at 375 px and 1024 px in the light and dark themes
-- **THEN** they match the approved screenshots
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the state is "here-entry" (list Moscow, Kolkata, New York), "here-entry-travel" (the same list with Moscow as home) or "empty"
+- **WHEN** it is rendered at 375 px and 1024 px in the light and dark themes
+- **THEN** it matches the approved screenshot

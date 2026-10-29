@@ -1,0 +1,26 @@
+diff --git a/docs/glossary/locations.md b/docs/glossary/locations.md
+index a6f2f81..28ea01a 100644
+--- a/docs/glossary/locations.md
++++ b/docs/glossary/locations.md
+@@ -13,3 +13,3 @@ The user's list of places and how each place is shown. Decisions: ADR-0004 (loca
+ - **Here mark** — the mark on a location whose time zone ID equals the device time zone: "You are here". *Code:* `LocationMarkKind.HERE`. *RU:* «Вы здесь», подпись «здесь». *Not:* the Here entry. *Never:* current location, my location.
+-- **Here entry** *(planned)* — a derived row for the device time zone, shown first when no location has the Here mark. It is not stored, cannot be removed and is not a location. *Never:* default location, auto-added location.
++- **Here entry** — a derived entry for the device time zone, shown first, outside the numbered list, when no location has the Here mark. It is not stored, cannot be removed, reordered or made home, and is not a location. Its meta line reads "Device time · UTC+5". *Code:* `getHereEntry`, `presentHereEntry`, `useHereEntry`, `HereEntryRow`. *RU:* строка «Здесь», мета «Время устройства». *Never:* default location, auto-added location.
+ - **Reorder** — moving a location to another position in the location list, by dragging its drag handle or by the keyboard. *Code:* `MOVE_LOCATION`. *RU:* переместить. *Never:* sort (the list has no sort key).
+diff --git a/docs/glossary/search.md b/docs/glossary/search.md
+index a15f2b0..14ea13b 100644
+--- a/docs/glossary/search.md
++++ b/docs/glossary/search.md
+@@ -8,3 +8,3 @@ Finding a city, country or zone abbreviation and adding it as a location. Decisi
+ - **Zone cities source** — the city source with one record per IANA zone, named by its exemplar city. *Code:* `createZoneCitiesSource`.
+-- **Exemplar city** — the city CLDR uses to name a time zone (`Almaty` for `Asia/Almaty`), in English and Russian.
++- **Exemplar city** — the city CLDR uses to name a time zone (`Almaty` for `Asia/Almaty`), in English and Russian. *Code:* `CitySearch.getExemplarCity`, `deriveCityNameFromTimeZoneId`.
+ - **Abbreviation source** — the city source that maps common zone abbreviations (`EST`, `IST`, `MSK`) to zones. An ambiguous abbreviation returns every match. *Code:* `timeZoneAbbreviations`.
+diff --git a/docs/glossary/views.md b/docs/glossary/views.md
+index c09a11d..333df6a 100644
+--- a/docs/glossary/views.md
++++ b/docs/glossary/views.md
+@@ -11,2 +11,2 @@ Interchangeable interfaces over the same model. Decisions: ADR-0002 (model, pres
+ - **Shared block** — a building block every view reuses, implemented once in `views/shared/`: the date bar, the day track, the Here mark icon, the search. *Never:* common component (for these blocks).
+-- **View contract** — the BDD E2E scenarios every registered view must pass: select a time, select a date, return to now, add and remove a location, the Here mark, and all UI states. *Code:* `@view-contract` features.
++- **View contract** — the BDD E2E scenarios every registered view must pass: select a time, select a date, return to now, add and remove a location, the Here mark, the Here entry, and all UI states. *Code:* `@view-contract` features.

@@ -23,11 +23,14 @@ Feature: Main page view states
     Then the view is shown
 
   @add-main-page-scaffold @FR7 @UX1
+  @show-here-entry-for-device-time @FR7 @UX2
   Scenario: First launch
     Given the active UI language is en
     When the user opens the app with no locations
-    Then the empty state explanation is shown in the current language
-    And the "Add location" action is offered
+    Then the Here entry for the device time zone is shown first
+    And the empty state explanation is shown in the current language below it
+    And the "Add location" action is offered below it
+    And no location list is stored
 
   @add-locations-via-search @FR17
   Scenario: Add location from the empty state

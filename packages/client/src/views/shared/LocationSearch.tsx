@@ -7,7 +7,7 @@ import { LocationSearchDialog } from "./LocationSearchDialog";
 import { useSearchShortcut } from "./useSearchShortcut";
 
 type LocationSearchProps = {
-  /** Only tests set this; production uses the fetch-based loader. */
+  /** Only tests set this; production uses the loader of the `LocationsProvider`. */
   loadCitySearch?: LoadCitySearch;
   /** Receives the trigger; focus returns to it when the search closes. */
   addLocationButtonRef?: RefObject<HTMLButtonElement>;
@@ -27,8 +27,14 @@ function OpenLocationSearch({
   onClose,
   onCloseAutoFocus,
 }: OpenLocationSearchProps) {
-  const { status, presentResults, retry } = useCitySearch(loadCitySearch);
-  const { locations, addLocation } = useLocations();
+  const {
+    locations,
+    addLocation,
+    loadCitySearch: providerLoadCitySearch,
+  } = useLocations();
+  const { status, presentResults, retry } = useCitySearch(
+    loadCitySearch ?? providerLoadCitySearch,
+  );
   const [query, setQuery] = useState("");
 
   const handleChoose = (result: PresentedSearchResult) => {
@@ -65,6 +71,8 @@ function OpenLocationSearch({
  * requested only once the overlay opens.
  * Implements FR6, FR8, FR15, FR17, NFR-P2, NFR-A2 of add-locations-via-search
  * (D10), and FR1 of open-location-search-with-slash-shortcut (D3).
+ * Implements FR8 of show-here-entry-for-device-time (D4): the search loads
+ * through the loader of the provider, shared with the Here entry.
  */
 export function LocationSearch({
   loadCitySearch,

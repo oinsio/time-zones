@@ -1,5 +1,8 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { localStorageLocationRepository } from "@/adapters";
+import {
+  loadCitySearch as defaultLoadCitySearch,
+  localStorageLocationRepository,
+} from "@/adapters";
 import { type Clock, systemClock } from "@/lib/temporal";
 import {
   createStore,
@@ -8,6 +11,7 @@ import {
   reduceLocations,
 } from "@/model";
 import {
+  type LoadCitySearch,
   type LocationRepository,
   type LocationsLoadResult,
   LocationsLoadStatus,
@@ -31,6 +35,7 @@ type LocationsProviderProps = {
   writeScheduler?: WriteScheduler;
   clock?: Clock;
   tickScheduler?: TickScheduler;
+  loadCitySearch?: LoadCitySearch;
 };
 
 const statusOf = (result: LocationsLoadResult): LocationsStatus =>
@@ -75,6 +80,8 @@ function createLocationsStore(
  * show-local-time-and-date-on-location-cards, D4).
  * Loads, applies and writes the home location with the list: FR8, FR10 of
  * set-home-location-and-show-differences (D6).
+ * Hands the city data loader to the Here entry and the search: FR8 of
+ * show-here-entry-for-device-time (D4).
  */
 export function LocationsProvider({
   children,
@@ -82,6 +89,7 @@ export function LocationsProvider({
   writeScheduler = timeoutWriteScheduler,
   clock = systemClock,
   tickScheduler = timeoutTickScheduler,
+  loadCitySearch = defaultLoadCitySearch,
 }: LocationsProviderProps) {
   const [initialResult] = useState(() => repository.load());
   const [store] = useState(() =>
@@ -138,6 +146,7 @@ export function LocationsProvider({
       clock,
       minuteTick,
       loadStatus,
+      loadCitySearch,
       hasSaveFailed,
       addLocation: actions.addLocation,
       removeLocation: actions.removeLocation,
@@ -145,7 +154,15 @@ export function LocationsProvider({
       setHomeLocation: actions.setHomeLocation,
       resetLocations: actions.resetLocations,
     }),
-    [store, clock, minuteTick, loadStatus, hasSaveFailed, actions],
+    [
+      store,
+      clock,
+      minuteTick,
+      loadStatus,
+      loadCitySearch,
+      hasSaveFailed,
+      actions,
+    ],
   );
 
   return (
