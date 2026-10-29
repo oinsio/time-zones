@@ -71,7 +71,7 @@ export const createDateSelectionWorld = () => {
   const rowOf = (city: string) =>
     screen
       .getByRole("button", {
-        name: i18n.t("locations.removeLocation", { city }),
+        name: i18n.t("locations.locationMenu", { city }),
       })
       .closest("li") as HTMLElement;
   const shownIsoDate = () =>

@@ -154,7 +154,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         expect(row.querySelector("time")).toBeNull();
         expect(
           within(row).getByRole("button", {
-            name: i18n.t("locations.removeLocation", { city }),
+            name: i18n.t("locations.locationMenu", { city }),
           }),
         ).toBeVisible();
       },

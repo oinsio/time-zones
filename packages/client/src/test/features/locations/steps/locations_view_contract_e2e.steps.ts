@@ -5,10 +5,11 @@ import {
   addLocationButton,
   buildStoredLocations,
   listRow,
+  menuButton,
   openSearch,
   parseCityNames,
   queryField,
-  removeButton,
+  removeThroughMenu,
   resultOption,
   typeQuery,
 } from "./locationsE2eHelpers";
@@ -70,7 +71,7 @@ When(
 When(
   "the user removes {string}",
   async ({ locationsWorld }, cityName: string) => {
-    await removeButton(locationsWorld.page, cityName).click();
+    await removeThroughMenu(locationsWorld.page, cityName);
   },
 );
 
@@ -79,7 +80,9 @@ When(
   "the user removes {string} with the keyboard",
   async ({ locationsWorld }, cityName: string) => {
     const { page } = locationsWorld;
-    await removeButton(page, cityName).focus();
+    await menuButton(page, cityName).focus();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("End");
     await page.keyboard.press("Enter");
   },
 );
@@ -122,9 +125,9 @@ Then('focus is on the "Add location" action', async ({ locationsWorld }) => {
 
 // Verifies NFR-A3 of add-locations-via-search.
 Then(
-  "focus is on the remove action of {string}",
+  "focus is on the location menu button of {string}",
   async ({ locationsWorld }, cityName: string) => {
-    await expect(removeButton(locationsWorld.page, cityName)).toBeFocused();
+    await expect(menuButton(locationsWorld.page, cityName)).toBeFocused();
   },
 );
 

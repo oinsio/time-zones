@@ -37,10 +37,13 @@ Feature: Locations in a real browser
     Then the page has requested the search data
 
   @add-locations-via-search @NFR-A3
+  @set-home-location-and-show-differences @FR11
   Scenario: Remove action names the city
     Given the stored locations are "Moscow"
     When the user opens the locations app
-    Then the list offers the action "Remove Moscow"
+    Then the list offers the action "Actions for Moscow"
+    When the user opens the location menu of "Moscow"
+    Then the menu offers the item "Remove"
 
   @add-locations-via-search @NFR-A3
   Scenario: Adding and removing are announced politely

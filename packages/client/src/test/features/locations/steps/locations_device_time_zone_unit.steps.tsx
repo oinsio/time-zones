@@ -129,6 +129,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the user adds {string}", whenAdds);
     Then("the stored list document holds only the locations", () => {
       expect(Object.keys(world.getBackend().document).sort()).toEqual([
+        "homeLocationId",
         "locations",
         "status",
       ]);

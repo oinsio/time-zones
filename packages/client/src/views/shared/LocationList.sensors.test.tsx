@@ -21,6 +21,7 @@ async function renderListWithSensors() {
       rows={[]}
       onMove={vi.fn()}
       onRemove={vi.fn()}
+      onSetHome={() => undefined}
       onSelectTrackFraction={vi.fn()}
       onMoveTrack={vi.fn()}
     />,

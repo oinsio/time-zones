@@ -4,6 +4,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import type { LocationRow } from "@/presenter";
+import { removeLocationThroughMenu } from "@/test/removeLocationThroughMenu";
 import { LocationList } from "./LocationList";
 
 const rows: LocationRow[] = [
@@ -52,6 +53,7 @@ describe("LocationList", () => {
       <LocationList
         rows={rows}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
@@ -72,12 +74,13 @@ describe("LocationList", () => {
       <LocationList
         rows={rows}
         onRemove={onRemove}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
       />,
     );
-    await userEvent.click(screen.getByRole("button", { name: "Remove Tokyo" }));
+    await removeLocationThroughMenu("Tokyo");
     expect(onRemove).toHaveBeenCalledWith("tokyo");
   });
 
@@ -86,22 +89,26 @@ describe("LocationList", () => {
       <LocationList
         rows={rows}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
       />,
     );
-    await userEvent.click(screen.getByRole("button", { name: "Remove Tokyo" }));
+    await removeLocationThroughMenu("Tokyo");
     rerender(
       <LocationList
         rows={[rows[0], rows[2]]}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
       />,
     );
-    expect(screen.getByRole("button", { name: "Remove Kyiv" })).toHaveFocus();
+    expect(
+      screen.getByRole("button", { name: "Actions for Kyiv" }),
+    ).toHaveFocus();
   });
 
   it("should move focus to the previous remove action after removing the last row", async () => {
@@ -109,22 +116,26 @@ describe("LocationList", () => {
       <LocationList
         rows={rows}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
       />,
     );
-    await userEvent.click(screen.getByRole("button", { name: "Remove Kyiv" }));
+    await removeLocationThroughMenu("Kyiv");
     rerender(
       <LocationList
         rows={[rows[0], rows[1]]}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
       />,
     );
-    expect(screen.getByRole("button", { name: "Remove Tokyo" })).toHaveFocus();
+    expect(
+      screen.getByRole("button", { name: "Actions for Tokyo" }),
+    ).toHaveFocus();
   });
 
   it("should not move focus when the list is first shown", () => {
@@ -132,6 +143,7 @@ describe("LocationList", () => {
       <LocationList
         rows={rows}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
@@ -146,18 +158,20 @@ describe("LocationList", () => {
       <LocationList
         rows={singleRow}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
       />,
     );
     await userEvent.click(
-      screen.getByRole("button", { name: "Remove Moscow" }),
+      screen.getByRole("button", { name: "Actions for Moscow" }),
     );
     rerender(
       <LocationList
         rows={[]}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
@@ -171,13 +185,16 @@ describe("LocationList", () => {
       <LocationList
         rows={[rows[0], rows[1]]}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
       />,
     );
     const moveHandle = screen.getByRole("button", { name: "Move Moscow" });
-    const removeButton = screen.getByRole("button", { name: "Remove Moscow" });
+    const removeButton = screen.getByRole("button", {
+      name: "Actions for Moscow",
+    });
     expect(
       moveHandle.compareDocumentPosition(removeButton) &
         Node.DOCUMENT_POSITION_FOLLOWING,
@@ -192,6 +209,7 @@ describe("LocationList", () => {
       <LocationList
         rows={[rows[0]]}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}

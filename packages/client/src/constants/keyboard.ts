@@ -11,4 +11,6 @@ export enum KeyboardKey {
   PAGE_UP = "PageUp",
   PAGE_DOWN = "PageDown",
   SLASH = "/",
+  SPACE = " ",
+  TAB = "Tab",
 }

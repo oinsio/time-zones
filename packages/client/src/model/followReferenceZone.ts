@@ -1,6 +1,6 @@
-import { WallClockStatus } from "./wallClock";
 import type { WorldClockState } from "./locations";
 import { getReferenceZone, ReferenceMode } from "./referenceMoment";
+import { WallClockStatus } from "./wallClock";
 
 /**
  * Ends a gap note when the reference zone changed: the pinned instant stays,

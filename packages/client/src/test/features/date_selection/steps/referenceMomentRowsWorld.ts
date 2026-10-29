@@ -45,7 +45,7 @@ export const expectRowsShowDateAt = (timestamp: string, zones: string[]) => {
   );
   for (const zone of zones) {
     const row = rowsByLabel.get(
-      i18n.t("locations.removeLocation", { city: zone }),
+      i18n.t("locations.locationMenu", { city: zone }),
     );
     expect(row).toBeTruthy();
     expect(row?.querySelector(DATE_ELEMENT_SELECTOR)).toHaveAttribute(

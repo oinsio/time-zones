@@ -14,11 +14,19 @@ import {
  * NFR-A3 of add-locations-via-search (D10).
  * Implements FR3, FR4 of add-time-sliders-to-location-cards (D8): hands the
  * track selection and move commands to the list.
+ * Implements FR3, FR11, NFR-A2 of set-home-location-and-show-differences (D8):
+ * announces a home change politely.
  */
 export default function CardsView() {
   const { t } = useTranslation();
-  const { rows, loadStatus, removeLocation, moveLocation, resetLocations } =
-    useLocations();
+  const {
+    rows,
+    loadStatus,
+    removeLocation,
+    moveLocation,
+    setHomeLocation,
+    resetLocations,
+  } = useLocations();
   const { selectTrackFraction, moveTrack } = useTimeSelection();
   const addLocationButtonRef = useRef<HTMLButtonElement>(null);
   const hasRemovedLastLocation = useRef(false);
@@ -45,6 +53,17 @@ export default function CardsView() {
     }
   };
 
+  const handleSetHome = (id: string | null) => {
+    const outcome = setHomeLocation(id);
+    if (!outcome.ok) return;
+    const homeRow = rows.find((row) => row.id === id);
+    setAnnouncement(
+      homeRow
+        ? t("locations.homeSetAnnouncement", { city: homeRow.cityLabel })
+        : t("locations.homeClearedAnnouncement"),
+    );
+  };
+
   const handleAdded = (cityName: string) =>
     setAnnouncement(t("locations.addedAnnouncement", { city: cityName }));
 
@@ -58,6 +77,7 @@ export default function CardsView() {
         <LocationList
           rows={rows}
           onRemove={handleRemove}
+          onSetHome={handleSetHome}
           onMove={moveLocation}
           onSelectTrackFraction={selectTrackFraction}
           onMoveTrack={moveTrack}

@@ -38,6 +38,7 @@ const renderRow = (
           <LocationRow
             row={{ ...row, ...overrides }}
             onRemove={vi.fn()}
+            onSetHome={() => undefined}
             onSelectTrackFraction={vi.fn()}
             onMoveTrack={vi.fn()}
             isReorderable={isReorderable}
@@ -70,13 +71,13 @@ describe("LocationRow", () => {
     renderRow({ utcOffsetLabel: "" });
     expect(screen.queryByText(/UTC/)).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Remove Kolkata" }),
+      screen.getByRole("button", { name: "Actions for Kolkata" }),
     ).toBeInTheDocument();
   });
 
   it("should show no secondary line when both country and offset are empty", () => {
     renderRow({ countryName: "", utcOffsetLabel: "" });
-    expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata$/);
+    expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata⋯$/);
   });
 
   it("should show the move handle when reorderable", () => {
@@ -122,7 +123,7 @@ describe("LocationRow", () => {
       renderRow();
       expect(screen.queryByText("12:30")).not.toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: "Remove Kolkata" }),
+        screen.getByRole("button", { name: "Actions for Kolkata" }),
       ).toBeInTheDocument();
     });
   });

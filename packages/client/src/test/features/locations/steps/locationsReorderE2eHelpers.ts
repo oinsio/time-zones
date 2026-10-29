@@ -21,7 +21,7 @@ const MOVE_PREFIX = englishLocale.locations.moveLocation.replace(
   "{{city}}",
   "",
 );
-const REMOVE_PREFIX = englishLocale.locations.removeLocation.replace(
+const MENU_PREFIX = englishLocale.locations.locationMenu.replace(
   "{{city}}",
   "",
 );
@@ -34,7 +34,7 @@ export type TransitionRun = {
 
 export type Point = { x: number; y: number };
 
-/** The handle of a city's card; `exact` because "Move Moscow" is a substring of "Remove Moscow". */
+/** The handle of a city's card; `exact` so a card's handle never matches another button of the card. */
 export const moveHandle = (page: Page, cityName: string) =>
   page.getByRole("button", { name: `${MOVE_PREFIX}${cityName}`, exact: true });
 
@@ -48,11 +48,11 @@ export const allMoveHandles = (page: Page) =>
 /** City names in list order, read from the remove buttons in DOM order. */
 export async function readListOrder(page: Page): Promise<string[]> {
   const removeNames = await page
-    .getByRole("button", { name: new RegExp(`^${REMOVE_PREFIX}`) })
+    .getByRole("button", { name: new RegExp(`^${MENU_PREFIX}`) })
     .evaluateAll((buttons) =>
       buttons.map((button) => button.getAttribute("aria-label") ?? ""),
     );
-  return removeNames.map((name) => name.slice(REMOVE_PREFIX.length));
+  return removeNames.map((name) => name.slice(MENU_PREFIX.length));
 }
 
 export async function centreOf(locator: Locator): Promise<Point> {

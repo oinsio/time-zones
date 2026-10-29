@@ -64,5 +64,11 @@ export const resultOption = (page: Page, cityName: string) =>
 export const listRow = (page: Page, cityName: string) =>
   page.getByRole("listitem").filter({ hasText: cityName });
 
-export const removeButton = (page: Page, cityName: string) =>
-  page.getByRole("button", { name: `Remove ${cityName}` });
+export const menuButton = (page: Page, cityName: string) =>
+  page.getByRole("button", { name: `Actions for ${cityName}` });
+
+/** Removes a location the way a user does: the menu of its card, then "Remove". */
+export async function removeThroughMenu(page: Page, cityName: string) {
+  await menuButton(page, cityName).click();
+  await page.getByRole("menuitem", { name: "Remove" }).click();
+}

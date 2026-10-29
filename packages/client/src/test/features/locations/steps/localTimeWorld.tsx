@@ -47,7 +47,7 @@ export const createLocalTimeWorld = () => {
   const rowOf = (city: string) =>
     screen
       .getByRole("button", {
-        name: i18n.t("locations.removeLocation", { city }),
+        name: i18n.t("locations.locationMenu", { city }),
       })
       .closest("li") as HTMLElement;
 
@@ -99,6 +99,7 @@ export const createLocalTimeWorld = () => {
           <LocationList
             rows={latestLocations.rows}
             onRemove={latestLocations.removeLocation}
+            onSetHome={latestLocations.setHomeLocation}
             onMove={latestLocations.moveLocation}
             onSelectTrackFraction={() => undefined}
             onMoveTrack={() => undefined}

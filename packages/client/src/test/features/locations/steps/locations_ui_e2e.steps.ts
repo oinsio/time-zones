@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "./locations_ui_e2e.fixtures";
 import {
+  menuButton,
   openSearch,
   parseCityNames,
   queryField,
@@ -136,5 +137,23 @@ Then(
         new RegExp(`^${cityName}`),
       );
     }
+  },
+);
+
+// Verifies FR11 of set-home-location-and-show-differences.
+When(
+  "the user opens the location menu of {string}",
+  async ({ locationsWorld }, cityName: string) => {
+    await menuButton(locationsWorld.page, cityName).click();
+  },
+);
+
+// Verifies FR11 of set-home-location-and-show-differences.
+Then(
+  "the menu offers the item {string}",
+  async ({ locationsWorld }, itemName: string) => {
+    await expect(
+      locationsWorld.page.getByRole("menuitem", { name: itemName }),
+    ).toBeVisible();
   },
 );

@@ -31,6 +31,7 @@ describe("LocationRow without a country name", () => {
             <LocationRow
               row={countrylessRow}
               onRemove={vi.fn()}
+              onSetHome={() => undefined}
               onSelectTrackFraction={vi.fn()}
               onMoveTrack={vi.fn()}
               isReorderable

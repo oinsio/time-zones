@@ -10,3 +10,9 @@ export const LOCATIONS_WRITE_DEBOUNCE_MS = 300;
  * Implements UX1 of match-here-mark-to-design.
  */
 export const LOCATION_MARK_ICON_SIZE_PX = 18;
+
+/**
+ * The glyph on the location menu button.
+ * Implements FR11 of set-home-location-and-show-differences (D7).
+ */
+export const LOCATION_MENU_TRIGGER_GLYPH = "⋯";
