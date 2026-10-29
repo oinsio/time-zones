@@ -1,11 +1,14 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { LocationsLoadStatus, SaveOutcome } from "@/ports";
 import {
+  addLocationTo,
   checkAlmatyDayStops,
+  expectZoneRejectedNatively,
   type FreshModules,
+  loadStoredZoneIds,
   restoreZoneData,
+  saveAndLoadStoredZoneIds,
   seedStoredLocation,
   startOnOutdatedZoneData,
 } from "./legacyZoneWorld";
@@ -16,7 +19,6 @@ const feature = await loadFeature(
 
 const UTC_PREFIX = "UTC";
 const LANGUAGE = "en";
-const NO_COUNTRY = "";
 const MINUTE_PRECISION = 6;
 
 type DayStops = Awaited<ReturnType<typeof checkAlmatyDayStops>>;
@@ -29,30 +31,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let withoutBigInt: DayStops;
 
   const addLocation = (label: string, timeZoneId: string) => {
-    const { model } = engine.modules;
-    addOutcome = model.reduceLocations(model.INITIAL_WORLD_CLOCK_STATE, {
-      type: model.LocationCommandType.ADD_LOCATION,
-      label,
-      timeZoneId,
-      countryCode: NO_COUNTRY,
-    });
+    addOutcome = addLocationTo(engine.modules, label, timeZoneId);
   };
   const givenOutdatedZoneData = async () => {
     engine = await startOnOutdatedZoneData();
   };
-  const loadStoredZoneIds = () => {
-    const loaded =
-      engine.modules.adapters.localStorageLocationRepository.load();
-    expect(loaded.status).toBe(LocationsLoadStatus.LOADED);
-    return loaded.status === LocationsLoadStatus.LOADED
-      ? loaded.locations.map((location) => location.timeZoneId)
-      : [];
-  };
-  const expectNativeRejectedKyiv = () => {
-    expect(engine.rejectedZones.map((zone) => zone.toLowerCase())).toContain(
-      "europe/kyiv",
-    );
-  };
+  const expectNativeRejectedKyiv = () =>
+    expectZoneRejectedNatively(engine.rejectedZones, "europe/kyiv");
 
   f.AfterEachScenario(restoreZoneData);
 
@@ -113,13 +98,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     And("the stored list holds {string}", (_ctx, zone: string) => {
       if (!addOutcome.ok) throw new Error("the location was not added");
-      const { adapters } = engine.modules;
       expect(
-        adapters.localStorageLocationRepository.save(
-          addOutcome.state.locations,
-        ),
-      ).toBe(SaveOutcome.SAVED);
-      expect(loadStoredZoneIds()).toEqual([zone]);
+        saveAndLoadStoredZoneIds(engine.modules, addOutcome.state.locations),
+      ).toEqual([zone]);
     });
   });
 
@@ -139,7 +120,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     let card = { time: "", offset: "" };
     When("the app starts", () => {
       const { model, presenter, temporal } = engine.modules;
-      const [zone] = loadStoredZoneIds();
+      const [zone] = loadStoredZoneIds(engine.modules);
       const instant = temporal.Temporal.Instant.from(instantText);
       const local = model.getLocalDateTime(zone, instant);
       const offsetMinutes = model.getUtcOffsetMinutes(zone, instant);
@@ -159,7 +140,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
     And("the stored list is read without error", () => {
-      expect(loadStoredZoneIds()).toEqual(["Europe/Kyiv"]);
+      expect(loadStoredZoneIds(engine.modules)).toEqual(["Europe/Kyiv"]);
     });
   });
 

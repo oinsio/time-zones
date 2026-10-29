@@ -1,6 +1,7 @@
-import { vi } from "vitest";
+import { expect, vi } from "vitest";
 import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import { loadLegacySupport } from "@/lib/legacy";
+import { LocationsLoadStatus, SaveOutcome } from "@/ports";
 
 type DateTimeFormatConstructor = typeof Intl.DateTimeFormat;
 
@@ -93,3 +94,48 @@ export const seedStoredLocation = (label: string, timeZoneId: string) =>
       payload: { locations: [{ label, timeZoneId, countryCode: "" }] },
     }),
   );
+
+/** Zone ids of the stored list, read back through the repository of the fresh modules. */
+export const loadStoredZoneIds = (modules: FreshModules) => {
+  const loaded = modules.adapters.localStorageLocationRepository.load();
+  expect(loaded.status).toBe(LocationsLoadStatus.LOADED);
+  return loaded.status === LocationsLoadStatus.LOADED
+    ? loaded.locations.map((location) => location.timeZoneId)
+    : [];
+};
+
+/** Saves the locations, then returns the zone ids the stored list holds. */
+export const saveAndLoadStoredZoneIds = (
+  modules: FreshModules,
+  locations: Parameters<
+    FreshModules["adapters"]["localStorageLocationRepository"]["save"]
+  >[0],
+) => {
+  expect(modules.adapters.localStorageLocationRepository.save(locations)).toBe(
+    SaveOutcome.SAVED,
+  );
+  return loadStoredZoneIds(modules);
+};
+
+/** The outdated engine was asked for the zone (compared in lower case). */
+export const expectZoneRejectedNatively = (
+  rejectedZones: string[],
+  lowerCaseZone: string,
+) => {
+  expect(rejectedZones.map((zone) => zone.toLowerCase())).toContain(
+    lowerCaseZone,
+  );
+};
+
+/** Adds a location with no country to an empty world clock. */
+export const addLocationTo = (
+  modules: FreshModules,
+  label: string,
+  timeZoneId: string,
+) =>
+  modules.model.reduceLocations(modules.model.INITIAL_WORLD_CLOCK_STATE, {
+    type: modules.model.LocationCommandType.ADD_LOCATION,
+    label,
+    timeZoneId,
+    countryCode: "",
+  });
