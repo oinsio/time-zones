@@ -122,8 +122,9 @@ All source paths are under `packages/client/`. Commands run from `packages/clien
 
 ## 9. Legacy build check
 
-- [ ] 9.1 TDD the pure module `scripts/legacyBuild/findLegacySyntaxIssues.ts` (design D9, FR13). Input: file name and source. Output: a list of `{ file, construct }`. It parses with `acorn` (`ecmaVersion: 2020`, module), walks the AST and reports parse errors, `ChainExpression`, `??`, BigInt literals and regex lookbehind. `findInsetShorthand(css)` reports `inset:` declarations, and `findDvhWithoutFallback(css)` reports every rule with a `dvh` declaration that has no declaration of the same property with a `vh` value before it in that rule (FR12, design D7, D9). Tests in `src/test/legacyBuild/findLegacySyntaxIssues.test.ts` with `it.each`, header `// FR12, FR13 of support-legacy-ios-12-safari`:
+- [ ] 9.1 TDD the pure module `scripts/legacyBuild/findLegacySyntaxIssues.ts` (design D9, FR13). Input: file name and source. Output: a list of `{ file, construct }`. It parses with `acorn` (`ecmaVersion: 2020`, module), walks the AST and reports parse errors, `ChainExpression`, `??`, BigInt literals and regex lookbehind, both in regex literals and in `new RegExp(…)` / `RegExp(…)` calls whose first argument is a string literal (design D9). `findInsetShorthand(css)` reports `inset:` declarations, and `findDvhWithoutFallback(css)` reports every rule with a `dvh` declaration that has no declaration of the same property with a `vh` value before it in that rule (FR12, design D7, D9). Tests in `src/test/legacyBuild/findLegacySyntaxIssues.test.ts` with `it.each`, header `// FR12, FR13 of support-legacy-ios-12-safari`:
   - one snippet per construct is reported, including `a ??= b` and `1_000`;
+  - `new RegExp("(?<=a)b")` and `RegExp("(?<!a)b")` are reported as `regex lookbehind`, and `new RegExp("(?:a)b")` is not;
   - `import()`, `import.meta` and `catch {}` are allowed;
   - `top:0;inset-inline:0` is not reported as `inset:`;
   - `.min-h-dvh{min-height:100dvh}`, `.h-dvh{height:100dvh}` and `.x{min-height:100dvh;min-height:100vh}` (fallback after) are reported by `findDvhWithoutFallback`;

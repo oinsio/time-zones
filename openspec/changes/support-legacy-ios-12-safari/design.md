@@ -117,6 +117,7 @@ A new `scripts/check-legacy-build.mjs` (package script `check:legacy-build`) run
 
 - It parses every `dist/assets/*.js`, `dist/sw.js` and `dist/workbox-*.js` with `acorn` (`ecmaVersion: 2020`, module). That rejects ES2021+ syntax such as `??=`, numeric separators, class fields and top-level `await`.
 - It walks the AST and rejects `ChainExpression`, `??`, BigInt literals and regex literals with `(?<=` / `(?<!`. Those are ES2020 or ES2018 syntax that Safari 12 lacks, while `import()` and `import.meta` stay allowed.
+- It also rejects every `NewExpression` or `CallExpression` whose callee is `RegExp` and whose first argument is a string literal containing `(?<=` or `(?<!`. When the target lacks a regex feature, esbuild rewrites the literal into a `new RegExp("…")` call so the file still parses, and a dependency may build the pattern from a string itself. Either way Safari 12 throws when the line runs. A dependency that builds such a pattern only inside a feature-detection `try`/`catch` gets a named allow-list entry in the script, visible in review.
 - It scans `dist/assets/*.css` for `inset:` declarations, and for any rule whose `dvh` declaration (for example `min-height:100dvh`) has no declaration of the same property with a `vh` value before it in that rule (FR12).
 - It exits non-zero and names the file and the construct.
 
