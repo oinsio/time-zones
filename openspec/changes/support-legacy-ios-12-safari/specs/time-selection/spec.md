@@ -52,7 +52,12 @@ Inputs: the pointer's position as a fraction of the track's width, the reference
 - **WHEN** the user taps three quarters of the New York track
 - **THEN** the moment is pinned to `2026-03-08T13:00:00Z`
 - **AND** the Almaty card shows `18:00`
-- **AND** the slider keeps its name, value range and keys
+
+#### Scenario: The tap fallback keeps the slider accessible
+- **GIVEN** the engine has no Pointer Events
+- **WHEN** the user reaches a day track
+- **THEN** it is a slider with the same accessible name, value range and value text as with Pointer Events
+- **AND** the arrow keys still move its handle
 
 #### Scenario: A click adds nothing where Pointer Events exist
 - **GIVEN** the engine has Pointer Events

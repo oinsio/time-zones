@@ -71,6 +71,12 @@ When the engine rejects a canonical IANA zone but accepts one of its legacy name
 - **THEN** the Kyiv card shows `09:30` and `UTC+2`
 - **AND** the stored list is read without error
 
+#### Scenario: A wall-clock time in a renamed zone
+- **GIVEN** the engine rejects `Europe/Kyiv` and accepts `Europe/Kiev`
+- **WHEN** the wall-clock time `03:30` on `2026-03-29` in `Europe/Kyiv` is turned into an instant
+- **THEN** the instant is `2026-03-29T01:30:00Z` with the status `GAP`
+- **AND** it equals the result for `Europe/Kiev`
+
 #### Scenario: A zone rejected under every name
 - **GIVEN** the engine rejects `America/Ciudad_Juarez` and has no legacy name for it
 - **WHEN** a location with that zone is added

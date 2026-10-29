@@ -7,13 +7,13 @@ Driven by FR1–FR13, NFR-P1, NFR-P2, NFR-A2 and UX1–UX3 of `proposal.md` (see
 - `vite.config.ts` sets `build: { outDir }` only, with no `build.target`, so Vite 6 (6.4.3 in the lockfile) builds for its default `es2020, edge88, firefox78, chrome87, safari14`. Its plugins are `react()`, `zoneDataPlugin()` and `VitePWA` (`registerType: "prompt"`, Workbox `globPatterns` `**/*.{js,mjs,css,html,ico,png,svg,json,woff2}`). `vitest.config.ts` registers `react()` and `zoneDataPlugin()` and includes only `src/**/*.{test,steps}.{ts,tsx}`, so tests of `scripts/` code live under `src/test/` (as `src/test/benchmarks/benchBudgets.test.ts` tests `scripts/benchBudgets.ts`).
 - `scripts/check-bundle-size.mjs` counts as initial JS the `<script type="module">` of `dist/index.html` plus its `modulepreload` links, against `INITIAL_JS_BUDGET_KB = 150`. `index.html` loads `/src/main.tsx`, which imports fonts, CSS and i18n and mounts `AppShell` inside `AppErrorBoundary`.
 - BigInt in production code: `src/model/timeZoneId.ts:5` (`const EPOCH_NANOSECONDS = 0n`, passed to `new Temporal.ZonedDateTime`), `src/model/dayPeriodStops.ts:27` (`epochNanoseconds` difference divided by `NANOSECONDS_PER_MINUTE`), `src/model/dayPeriodWindows.ts:103-104` (`epochNanoseconds - BigInt(localStart.offsetNanoseconds)`). esbuild refuses a BigInt literal for a `safari12` target, so the build would fail. The two run-time uses would throw on iOS 12.
-- `temporal-polyfill` is 0.3.2 in the lockfile. Its README states iOS 11.3+ support and that BigInt is needed only by BigInt-returning members. It formats and resolves zones through `Intl.DateTimeFormat`. Whether it captures that constructor once at load, and whether every zone path goes through it, is what the spike (task 1.1) proves before section 5.
+- `temporal-polyfill` is 0.3.2 in the lockfile, imported only through `src/lib/temporal.ts`. It is expected to need BigInt only for BigInt-returning members (`epochNanoseconds`, `fromEpochNanoseconds`) and to resolve zones through `Intl.DateTimeFormat` (ADR-0003: "`temporal-polyfill` uses `Intl`"). Its package is not installed in the planning worktree, so these are not taken on trust: the spike (task 1.1) loads it with `BigInt` removed, searches its files for BigInt literals, and proves whether every zone path goes through a constructor captured at load, before section 5.
 - Zones: `canonicalizeTimeZoneId` (`src/model/timeZoneId.ts`) builds a `Temporal.ZonedDateTime` and maps its `timeZoneId` through `virtual:time-zone-aliases`. That map is legacy → canonical (`Europe/Kiev` → `Europe/Kyiv`), built from CLDR `bcp47` by `scripts/zoneData/extractZoneData.ts`. `parseStoredLocations` rejects the whole stored list when one zone fails to canonicalize. `ADD_LOCATION` fails with `UNKNOWN_TIME_ZONE`. `SET_DEVICE_TIME_ZONE` canonicalizes the device zone too (`src/model/locations.ts:145`). `resolveWallClock` (`src/model/wallClock.ts`) calls `PlainDateTime#toZonedDateTime` with `compatible`, `earlier` and `later`; `dayPeriodWindows.ts` calls it with `earlier`.
-- Unguarded APIs: `new Intl.DisplayNames` in `src/presenter/countryName.ts:9` and `src/adapters/city-search/zoneCitiesSource.ts:91` (`readCountryTexts`). `new ResizeObserver` in `src/controller/useContainerWidth.ts:18`, used by `app/ViewHost.tsx`. `queryList.addEventListener` in `src/controller/usePrefersReducedMotion.ts:13`. `Intl.supportedValuesOf` appears only in test steps. The views already hide an empty country name: `LocationRow.tsx:117` and `LocationSearchResults.tsx:51` render it only when it is not `""`.
-- Input: `src/views/shared/DayTrack.tsx` listens only to `onPointerDown/Move/Up/Cancel` with `setPointerCapture`; `selectAt` takes a `PointerEvent` and reads `clientX` and the track's `getBoundingClientRect`. `src/views/shared/LocationList.tsx:58-67` uses `PointerSensor` (activation `distance: REORDER_POINTER_ACTIVATION_DISTANCE_PX`, 4 px) and `KeyboardSensor`.
+- Unguarded APIs: `new Intl.DisplayNames` in `src/presenter/countryName.ts:9` and `src/adapters/city-search/zoneCitiesSource.ts:91` (`readCountryTexts`). `new ResizeObserver` in `src/controller/useContainerWidth.ts:18`, used by `app/ViewHost.tsx`. `queryList.addEventListener` in `src/controller/usePrefersReducedMotion.ts:13`. `Intl.supportedValuesOf` is already guarded (`listBrowserTimeZones` in `zoneCitiesSource.ts:30-33` falls back to `undefined`). The views already hide an empty country name: `LocationRow.tsx:117` and `LocationSearchResults.tsx:51` render it only when it is not `""`.
+- Input: `src/views/shared/DayTrack.tsx` listens only to `onPointerDown/Move/Up/Cancel` with `setPointerCapture`. A mouse or pen selects on press; a touch pointer waits for `getTouchGestureDecision` (`dayTrackTouch.ts`) to tell a horizontal drag from a vertical swipe, and selects on lift after a tap. `selectAt` takes a `PointerEvent` and reads `clientX` and the track's `getBoundingClientRect`. jsdom 25 has no `PointerEvent`; `dayTrackFixture.tsx` says so and stubs one. `src/views/shared/LocationList.tsx:58-67` uses `PointerSensor` (activation `distance: REORDER_POINTER_ACTIVATION_DISTANCE_PX`, 4 px) and `KeyboardSensor`.
 - Updates: `src/controller/usePwaUpdateStatus.ts` takes no arguments and calls `registration?.update()` once, in `onRegisteredSW`; a rejection sets `isUpdateCheckFailed`. `AppShell.tsx` calls `usePwaUpdateStatus()`. `src/controller/useMinuteTick.ts` shows the pattern for an injected `Clock` and `visibilitychange`. Tests have `fakeClock` (`@/lib/temporal`), `createSwitchableClock` (`src/test/switchableClock.ts`), `setPageVisibility` / `resetPageVisibility` (`src/test/pageVisibility.ts`) and `fakeServiceWorker` (`src/test/fakeServiceWorker.ts`).
 - CSS: Tailwind 3.4 emits `inset: 0px` for `inset-0` and `inset: auto` for `sm:inset-auto` (`src/components/ui/dialog.tsx:23,26,27`). `inset-x-0` (`DayTrack.tsx:142`, `MainPage.tsx:35`) emits `left` and `right` and needs nothing. `min-h-dvh` (`MainPage.tsx:23`, `RecoveryScreen.tsx:16`) emits `min-height: 100dvh`. `tailwind.config.ts` has no `minHeight` entry.
-- CI (`.github/workflows/ci.yml`): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, "Check initial JS budget", "Check that the build left sources untouched", smoke E2E (`test:bdd`, against `vite preview` of the production build), and a non-blocking `benchmark` job. `deploy.yml` builds too.
+- CI (`.github/workflows/ci.yml`): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, "Check initial JS budget", "Check that the build left sources untouched", smoke E2E (`test:bdd`, whose `webServer` runs `pnpm build && pnpm preview`), and a non-blocking `benchmark` job. `deploy.yml` reuses `ci.yml` (`uses: ./.github/workflows/ci.yml`) and publishes its `dist`, so a failing CI build also stops the deploy.
 - TypeScript: `tsconfig.app.json` has `target` ES2020 and `lib` `ES2020, ES2022.Intl, DOM, DOM.Iterable`, so `Array.prototype.at` is not declared. Virtual modules are declared in `src/vite-env.d.ts`.
 
 Binding decisions followed: ADR-0002 (layers; the model stays pure, the controller owns side effects), ADR-0003 (Temporal for all time math; canonical ids; "we do not ship our own tzdata"), ADR-0004 (storage schema unchanged; validation of canonical ids on load), ADR-0001 (real-browser checks in playwright-bdd), ADR-0008 (no wall-clock assertions in unit tests). Which engines are supported, and that legacy engines get polyfills at boot, is a global decision: it goes to ADR-0009 (handoff H1), not into this design.
@@ -34,13 +34,15 @@ Binding decisions followed: ADR-0002 (layers; the model stays pure, the controll
 
 ### D2. Boot module loads legacy support, then the app (FR2, NFR-P2)
 
-`index.html` points at a new `src/boot.ts`. It statically imports only `@/lib/legacy` (light: no Temporal, no React) and does three things in order:
+`index.html` points at a new `src/boot.ts`. It statically imports only `@/lib/legacy` (light: no Temporal, no React; `@/constants` has no runtime imports besides its own files) and calls `bootApp`, which does three things in order:
 
 1. It runs `needsLegacySupport()`. The check is true when any of these holds: `"at" in Array.prototype` is false (marks Safari < 15.4 and covers the core-js gap; the `in` form compiles under the ES2020 `lib`), `ResizeObserver` is missing, or `new Intl.DateTimeFormat("en", { timeZone: LEGACY_ZONE_PROBE_ID })` throws.
 2. When the check is true, it awaits `import("@/lib/legacy/polyfills")`.
 3. It awaits `import("./main")`, which stays the current module and mounts the app.
 
 A rejected polyfill import is logged and the app still loads, so the error boundary can show the recovery screen instead of a blank page. `@/lib/legacy` must not import `@/lib/temporal`, because the shim must be in place before `temporal-polyfill` is evaluated.
+
+`bootApp({ needsLegacySupport, loadLegacySupport, loadApp })` lives in `src/lib/legacy/bootApp.ts` and takes its steps as arguments, so it is unit-tested without loading the app. `src/boot.ts` only calls it with the real steps. Importing `boot.ts` would mount the app, so, like `src/main.tsx`, it has no unit test and is excluded in `stryker.config.mjs`. The E2E scenarios of task 10.2 cover its wiring.
 
 To avoid a request waterfall on modern browsers, a small Vite plugin (`transformIndexHtml`, `enforce: "post"`, in `scripts/legacyBuild/mainPreloadPlugin.ts`) adds `<link rel="modulepreload">` for the `main` chunk and its static imports. `check-bundle-size.mjs` already counts those links, so the budget measures exactly what a modern browser fetches at start. The polyfill chunk gets no preload link and stays outside the budget. `build.rollupOptions.output.manualChunks` puts `src/lib/legacy/polyfills/`, `core-js` and `@juggle/resize-observer` into one chunk named by `LEGACY_POLYFILLS_CHUNK_NAME` (`app.config.ts`), so the build check and the E2E request check find it by name.
 
@@ -50,7 +52,7 @@ To avoid a request waterfall on modern browsers, a small Vite plugin (`transform
 
 `src/lib/legacy/polyfills/index.ts` exports `installLegacySupport()`. Importing the module installs, in this order:
 
-1. The core-js `stable` modules that `core-js-compat` reports as needed for `ios_saf 12.2`. A build-time virtual module (`virtual:legacy-core-js`, plugin in `scripts/legacyCoreJs/`) lists them, and `core-js-compat` is pinned to the same minor as `core-js`. Both `vite.config.ts` and `vitest.config.ts` register the plugin; `src/vite-env.d.ts` declares the module.
+1. The core-js `stable` modules that `core-js-compat` reports as needed for `ios_saf 12.2`. A build-time virtual module (`virtual:legacy-core-js`, plugin in `scripts/legacyCoreJs/`) lists them, and `core-js-compat` is pinned to the same minor as `core-js`. Both `vite.config.ts` and `vitest.config.ts` register the plugin. `src/vite-env.d.ts` declares the module (`declare module "virtual:legacy-core-js" {}`), which the side-effect import needs under `noUncheckedSideEffectImports` (`tsconfig.app.json`).
 2. `@juggle/resize-observer`, assigned to `globalThis.ResizeObserver` only when it is absent.
 3. The zone shim of D4, when the probe of D2 fails.
 
@@ -81,7 +83,7 @@ Effects on the existing code:
 - `dayPeriodStops.ts`: `(instant.epochMilliseconds - day.start.epochMilliseconds) / (day.lengthMinutes * MILLISECONDS_PER_MINUTE)`, with the existing `MILLISECONDS_PER_MINUTE` of `constants/clock.ts`. Every instant on a track is minute-aligned, so millisecond precision is exact.
 - `dayPeriodWindows.ts`: `Temporal.Instant.fromEpochMilliseconds(wanted.toZonedDateTime(UTC_ZONE_ID).epochMilliseconds - localStart.offsetNanoseconds / NANOSECONDS_PER_MILLISECOND)`, with a new `NANOSECONDS_PER_MILLISECOND` next to `NANOSECONDS_PER_MINUTE` in `constants/utcOffset.ts`. Zone offsets are whole seconds.
 
-A unit test (`src/test/noBigIntInSources.test.ts`) scans `src/**/*.{ts,tsx}`, excluding `*.test.*`, `*.steps.*`, `*.bench.*` and `src/test/`, for `/\b\d[\d_]*n\b/`, `BigInt(` and `epochNanoseconds`. It reads files with `node:fs`, as `src/locales/locales.test.ts` and `src/test/benchmarks/ciBenchmarkJob.test.ts` read files. Together with esbuild refusing literals (D1), this keeps BigInt out, and the existing CI `pnpm test` step runs it.
+A unit test (`src/test/noBigIntInSources.test.ts`) scans `src/**/*.{ts,tsx}`, excluding `*.test.*`, `*.steps.*`, `*.bench.*` and `src/test/`, for `/\b\d[\d_]*n\b/`, `BigInt(` and `epochNanoseconds`. It reads files with `node:fs`, as `src/styles/tokens.test.ts` and `src/test/benchmarks/ciBenchmarkJob.test.ts` read files. Together with esbuild refusing literals (D1), this keeps BigInt out, and the existing CI `pnpm test` step runs it.
 
 ### D6. API guards where the API is used (FR5, FR6, FR7)
 
@@ -109,11 +111,12 @@ A guard in place is chosen over a polyfill for `Intl.DisplayNames`. `@formatjs/i
 
 ### D9. Legacy build check inside `pnpm build` (FR13)
 
-A new `scripts/check-legacy-build.mjs` (script `check:legacy-build`) runs at the end of `build` (`tsc -b && vite build && node scripts/check-legacy-build.mjs`). CI's existing `pnpm build` step and the deploy build therefore fail on a legacy issue, with no `.github/` change:
+A new `scripts/check-legacy-build.mjs` (script `check:legacy-build`) runs at the end of `build` (`tsc -b && vite build && node scripts/check-legacy-build.mjs`). CI's existing `pnpm build` step (root `build` = `pnpm --filter @time-zones/client build`), the E2E `webServer` and the deploy that reuses `ci.yml` therefore fail on a legacy issue, with no `.github/` change:
 
 - It parses every `dist/assets/*.js`, `dist/sw.js` and `dist/workbox-*.js` with `acorn` (`ecmaVersion: 2020`, module). That rejects ES2021+ syntax such as `??=`, class fields and top-level `await`.
-- It then walks the AST and rejects `ChainExpression`, `??`, BigInt literals and regex literals with `(?<=` / `(?<!`. Those are ES2018–ES2020 syntax that Safari 12 lacks, while `import()`, `import.meta` and optional catch binding stay allowed.
-- It scans `dist/assets/*.css` for `inset:` declarations.
+- It then walks the AST and rejects `ChainExpression`, `??`, BigInt literals, and regex lookbehind (`(?<=` / `(?<!`) both in regex literals and in a string literal passed to `RegExp(...)` / `new RegExp(...)`, because esbuild turns a regex literal its target cannot parse into a `new RegExp` call that would still throw on Safari 12. Those are ES2018–ES2020 features that Safari 12 lacks, while `import()`, `import.meta` and optional catch binding stay allowed.
+- It scans `dist/assets/*.css` for `inset:` declarations and for a `100dvh` declaration with no `100vh` before it in the same rule (FR12).
+- It checks that `dist/index.html` has a `modulepreload` link for the `main` chunk and none for the polyfill chunk (NFR-P2).
 - It exits non-zero and names the file and the construct.
 
 Its rules live in a pure module (`scripts/legacyBuild/findLegacySyntaxIssues.ts`) with unit tests under `src/test/legacyBuild/`, as `scripts/benchBudgets.ts` is tested from `src/test/benchmarks/`. The script runs with Node 26 (`.nvmrc`), which imports `.ts` directly, as `check-bench-budgets.mjs` does.
@@ -142,7 +145,25 @@ Build-level facts are the legacy build check (D9) plus the existing bundle-size 
 - [esbuild may not expand `inset` for the given target] → The legacy build check fails the build at once. The fallback is a small PostCSS plugin in `postcss.config.js` that expands `inset` declarations.
 - [dnd-kit `TouchSensor` on iOS 12 may still let the page scroll] → Checked in M7. The fallback is a non-passive `touchmove` listener on the drag handle while a drag is active.
 - [The probe in D2 uses `Europe/Kyiv` as a marker of outdated zone data] → An engine with old data that already knows Kyiv would skip the shim, and other renames would still fail there as unknown zones. Accepted for the stopgap.
+- [`dist/sw.js` is generated by Workbox, not lowered by Vite] → The legacy build check parses it too. Workbox's `generateSW` compiles it for `babelPresetEnvTargets` (default `chrome >= 56`, older than Safari 12's syntax level), so it should pass; if not, set that option in the `workbox` block of `vite.config.ts`.
+- [A dependency ships a BigInt literal] → esbuild stops the `safari12` build at task 5.6 and names the file. The spike searches `temporal-polyfill` for literals first, because it is the dependency most likely to have one.
 - [Boot adds one tiny module and an `await import` on modern browsers] → The `modulepreload` links of D2 remove the waterfall. The bundle check and the E2E request check measure the result.
+
+## Consequences
+
+Positive:
+- iOS 12.5 devices run the app with no change to domain types, the stored schema or the views' markup.
+- Modern browsers fetch no polyfill; the only cost to them is the boot module and lowered syntax, both measured by the bundle-size check.
+- Every rule (syntax level, no BigInt, no `inset`, `vh` fallback) is enforced by `pnpm test` or `pnpm build`, so a later change cannot silently break iOS 12.
+
+Negative:
+- Two input paths in `DayTrack` and two sensor setups in `LocationList`, chosen by `IS_POINTER_EVENTS_SUPPORTED`.
+- The legacy zone shim is a stopgap that patches a global; it only knows renames in the CLDR alias map.
+- The real iOS 12 engine is checked only manually (H3).
+
+## Alternatives Considered
+
+Each decision above lists its rejected alternatives. In short: `@vitejs/plugin-legacy` (puts polyfills into every browser's initial JavaScript, D1); a static polyfill import or `document.write` (D2); a hand-written or usage-based polyfill list (D3); an explicit legacy-name resolver at every zone call site, kept as the spike's fallback (D4); an `Intl.DisplayNames` polyfill (D6); `postcss-preset-env` or Lightning CSS (D7); the PEP polyfill or both dnd-kit sensors at once (D8); `es-check` or a separate CI step (D9); polling or `autoUpdate` (D10).
 
 ## Migration Plan
 

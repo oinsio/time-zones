@@ -41,12 +41,13 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 ## Impact
 
 - `packages/client/vite.config.ts`, `vitest.config.ts`, `tailwind.config.ts`, `index.html`, `src/vite-env.d.ts`: build and CSS targets, two new Vite plugins, the virtual-module type, the `vh` fallback, the iOS meta tag and the new entry.
-- New `src/boot.ts`: the entry that loads legacy support before `src/main.tsx`.
+- New `src/boot.ts`: the entry that loads legacy support before `src/main.tsx`. It only wires `bootApp` (new `src/lib/legacy/bootApp.ts`), and `stryker.config.mjs` excludes it from mutation as it excludes `src/main.tsx`.
 - New `src/lib/legacy/` (feature detection and the `Intl.DateTimeFormat` legacy zone shim) and `src/lib/legacy/polyfills/` (the chunk only legacy engines load).
 - `src/model/timeZoneId.ts`, `dayPeriodStops.ts`, `dayPeriodWindows.ts`: BigInt removed.
 - `src/presenter/countryName.ts`, `src/adapters/city-search/zoneCitiesSource.ts`: `Intl.DisplayNames` guarded.
 - `src/controller/usePrefersReducedMotion.ts`, `src/controller/usePwaUpdateStatus.ts`, new `src/controller/useUpdateRecheckOnReturn.ts`.
 - `src/views/shared/DayTrack.tsx`, `src/views/shared/LocationList.tsx`.
+- `src/test/setup.ts` and new `src/test/fakePointerEvent.ts`: the default test environment keeps Pointer Events, because jsdom has none.
 - `src/constants/`: constants for the update recheck, the touch drag, the zone probe and the nanosecond conversion.
 - `packages/client/package.json` and `scripts/legacyBuild/`: the legacy build check, run at the end of `build`. No `.github/` change is needed.
 - New dependencies: `core-js` and `@juggle/resize-observer` (runtime, loaded only on legacy engines), `core-js-compat` and `acorn` (dev).
@@ -141,7 +142,7 @@ Loading: there is no new loading state. The boot step awaits the polyfill chunk 
 
 Feature files tagged `@support-legacy-ios-12-safari`:
 
-- `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_unit.feature` (vitest-cucumber): main page without the missing APIs, polyfills installed only when missing, legacy zone names, missing `Intl.DisplayNames`, `ResizeObserver` and `addEventListener` on `MediaQueryList`, no BigInt.
+- `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_unit.feature` (vitest-cucumber): main page without the missing APIs, polyfills installed only when missing, legacy zone names (adding, reading, a wall-clock time in a renamed zone, a zone unknown under every name), missing `Intl.DisplayNames`, `ResizeObserver` and `addEventListener` on `MediaQueryList`, no BigInt.
 - `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_e2e.feature` (playwright-bdd): no polyfill request on a modern engine, polyfills loaded on an engine without `Array.prototype.at`, the iOS meta tag, axe-core on the main page and the search dialog.
 - `time_selection/time_selection_legacy_tap_unit.feature` and `time_selection_legacy_tap_e2e.feature`: tap without Pointer Events, a click with Pointer Events, the slider's role, name, value and keys.
 - `locations/locations_reorder_legacy_unit.feature` and `locations_reorder_legacy_e2e.feature`: sensors by Pointer Events support, finger drag without Pointer Events.
@@ -162,7 +163,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M2: The legacy build check reports 0 issues on `dist/assets/*.js`, `dist/sw.js` and `dist/workbox-*.js` at the Safari 12 level, and 0 `inset:` declarations in `dist/assets/*.css`.
 - M3: With `Europe/Kyiv` rejected and `Europe/Kiev` accepted by the stubbed engine, adding Kyiv succeeds, the stored id is `Europe/Kyiv`, and the row shows the same time and offset as `Europe/Kiev` at `2026-03-08T07:30:00Z` (`09:30`, `UTC+2`). The wall-clock time `03:30` on `2026-03-29` in `Europe/Kyiv` resolves to `2026-03-29T01:30:00Z` with status gap, as it does for `Europe/Kiev`.
 - M4: With `Intl.DisplayNames`, `ResizeObserver` and `MediaQueryList.addEventListener` removed from the test environment, the main page renders with 0 uncaught errors (3 of 3 cases).
-- M5: Initial JS of the modern build ≤ 150 KB gzipped. On an engine with every built-in, 0 requests for the polyfill chunk.
+- M5: Initial JS of the modern build ≤ 150 KB gzipped. On an engine with every built-in, the page makes 0 requests for the polyfill chunk. The service worker's precache downloads are not page requests and are not counted.
 - M6: Mutation score of the new or changed code ≥ 95% (minimum 90%), from Stryker runs scoped to at most 5 files each.
 - M7: Manual acceptance on the owner's iOS 12.5.7 device (handoff H3). This is the one check that cannot be automated (NG9). The app starts, U1–U5 pass, and the Web Inspector console shows 0 errors.
 
