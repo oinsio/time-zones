@@ -98,7 +98,8 @@
 - Impact: In the unit BDD of task 7.1, the scenario "The search reuses the Here entry's data … requested exactly once" (`specs/locations/spec.md:159-164`) cannot pass as tasked: the Here entry calls the injected loader and the opened search calls the fetch-based default, so it makes a second, different request. The implementer either cannot write the scenario or wires a second injection path. Nothing in the code then guarantees FR8's "the search reuses data the Here entry loaded" beyond a default-value coincidence.
 - Fix: In design D4, add: "`OpenLocationSearch` takes its loader from `useLocations().loadCitySearch` (the provider's) when the `loadCitySearch` prop is not set, so the page has one loader and one cache entry." In task 5.2 or 6.3, add a case: "with a deferred loader on `LocationsProvider`, the Here entry and a search opened after the load call it exactly once (FR8, M5)." Add `src/views/shared/LocationSearch.tsx` to the files the change touches (proposal Impact, `views/shared/`).
 - Fix risk: Low. `LocationSearch` already calls `useLocations` (`LocationSearch.tsx:2`), so it is always inside the provider. Existing `LocationSearch*.test.tsx` that pass the prop keep their behaviour. `useCitySearch`'s own default stays for any caller without a provider.
-- Status: open
+- Status: fixed
+- Resolution: confirmed (`LocationSearch.tsx:11,30` and `useCitySearch.ts:23` never read the provider loader). design.md D4 now has `OpenLocationSearch` pass `loadCitySearch ?? useLocations().loadCitySearch` to `useCitySearch`; proposal.md Impact (`views/shared/`) names the `LocationSearch` change; tasks.md 6.3 adds the case "deferred loader on `LocationsProvider`, Here entry and a later search call it exactly once (FR8, M5)", and 6.4 mutates `LocationSearch.tsx`.
 
 ### R2 — WARNING — "Nothing is written to storage" is false for the running app
 - Location: `openspec/changes/show-here-entry-for-device-time/specs/main-page/spec.md:94`
@@ -107,7 +108,8 @@
 - Impact: An implementer who tests M5 or the MODIFIED SHALL literally (spy on `Storage.prototype.setItem`, or assert an empty `localStorage` in E2E) gets a red test caused by code outside this change. Archived as written, the stable `main-page` spec would state a rule the app breaks on every start.
 - Fix: Reword to the location list: `specs/main-page/spec.md:94` "… and it MUST NOT store a location list."; FR7 "No location list is written."; G3 "… and no location list is written."; M5 "First launch: 0 writes of the location list (none scheduled by the location repository), …".
 - Fix risk: none. The scenarios and task 5.2 already measure exactly the location-list writes; the reworded text matches them and ADR-0004 (only repositories write).
-- Status: open
+- Status: fixed
+- Resolution: confirmed (`src/i18n.ts:33`, `localStorageAvailability.ts:16-17` write on start). Reworded to the location list: `specs/main-page/spec.md` "MUST NOT store a location list", proposal.md FR7 "No location list is written", G3 "no location list is written", M5 "0 writes of the location list (none scheduled by the location repository)".
 
 ### R3 — WARNING — The city clamp for UX3 contradicts the shared row layout
 - Location: `openspec/changes/show-here-entry-for-device-time/design.md:62`
@@ -116,7 +118,8 @@
 - Impact: The implementer cannot tell whether to put `truncate` on the shared city slot, which silently changes every location card from wrapping long names to cutting them (undeclared behaviour change, possibly re-baselining screenshots), or only on the Here entry, which needs a `ZoneRowContent` option the design does not define. If they do neither, UX3 rests on `Almaty`/`Алматы` in one E2E case, and a device zone whose exemplar city is longer than its derived name can wrap and grow the row.
 - Fix: Replace design.md:62 with: "Today the city wraps (`LocationRow.tsx:135`, `break-words`). `ZoneRowContent` takes a boolean option for a one-line city; `HereEntryRow` sets it, so its city is one `truncate` line, and location cards keep wrapping, so task 6.1 stays behaviour-free. A real browser measures the height: the E2E scenario 'The exemplar city keeps the height' (task 8.1)." In task 6.2, name the option among the props `HereEntryRow` passes.
 - Fix risk: Low. A very long exemplar city on the Here entry ends with an ellipsis where a card would wrap, which is a small difference from UX1 ("differs only by the meta line"). D5 should say so. No existing test or screenshot changes, because location cards keep their layout.
-- Status: open
+- Status: fixed
+- Resolution: confirmed (`LocationRow.tsx:135-140` wraps, no clamp). design.md D5 replaces the clamp line: `ZoneRowContent` takes `isCityOneLine`, set only by `HereEntryRow` (one `truncate` line), so cards keep wrapping and task 6.1 stays behaviour-free; D5 states the ellipsis trade-off against UX1. tasks.md 6.2 names the option.
 
 ### R4 — SUGGESTION — FR1's reason does not hold when the matching location is home
 - Location: `openspec/changes/show-here-entry-for-device-time/proposal.md:95`
@@ -125,7 +128,8 @@
 - Impact: Low. `getHereEntry` (design D1) uses `isLocationInDeviceTimeZone`, so it behaves correctly, but the case is left untested and the stated reason misleads.
 - Fix: Change FR1's reason to "because that location already shows the device time". Add a scenario to "Here entry when no location matches": home Almaty, device `Asia/Almaty` → no Here entry, Almaty shows the Home mark. Add the matching case to task 2.2's `it.each`.
 - Fix risk: none. It matches the existing mark priority and ADR-0007.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md FR1 reason now reads "already shows the device time (with the Here mark, or the Home mark when it is the home location)", and its UI States Matrix row matches; added scenario "The home location matches" to `specs/locations/spec.md` (Here entry when no location matches), the home Almaty case to task 2.2 and the scenario to task 7.1.
 
 ## Verdict
 
