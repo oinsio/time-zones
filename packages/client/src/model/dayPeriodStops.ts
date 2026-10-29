@@ -1,4 +1,4 @@
-import { NANOSECONDS_PER_MINUTE } from "@/constants";
+import { MILLISECONDS_PER_MINUTE } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
 import {
   DAY_PERIOD_SCHEDULE,
@@ -18,14 +18,15 @@ import type { ReferenceDay } from "./dayTrack";
  * Colour stops of a day track: two per blend window (soft boundaries) and
  * two at one position per offset edge (hard edges). Assembly is pure on
  * plain data; the stops of one reference day are memoized.
- * Implements FR6, NFR-P2 of add-time-sliders-to-location-cards (D4).
+ * Implements FR6, NFR-P2 of add-time-sliders-to-location-cards (D4),
+ * FR3 of support-legacy-ios-12-safari (milliseconds, no BigInt).
  */
 
 export type DayPeriodStop = { fraction: number; period: DayPeriod };
 
 const getFractionOf = (day: ReferenceDay, instant: Temporal.Instant) =>
-  Number(instant.epochNanoseconds - day.start.epochNanoseconds) /
-  (day.lengthMinutes * NANOSECONDS_PER_MINUTE);
+  (instant.epochMilliseconds - day.start.epochMilliseconds) /
+  (day.lengthMinutes * MILLISECONDS_PER_MINUTE);
 
 /** Sorted stops: two per blend window, two at the same position per hard edge. */
 export function assembleDayPeriodStops(

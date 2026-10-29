@@ -13,6 +13,7 @@ const config = {
     "!src/types/**/*.ts",
     "!src/test/**",
     "!src/main.tsx",
+    "!src/boot.ts",
     "!src/vite-env.d.ts",
   ],
   reporters: ["html", "json", "clear-text", "progress"],

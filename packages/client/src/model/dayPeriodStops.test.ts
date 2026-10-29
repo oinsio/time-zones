@@ -1,5 +1,5 @@
 // Verifies FR6, NFR-P2 of add-time-sliders-to-location-cards (D4).
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { assembleDayPeriodStops, getDayPeriodStops } from "./dayPeriodStops";
 import { DAY_PERIOD_SCHEDULE, DayPeriod, getDayPeriod } from "./dayPeriods";
@@ -149,5 +149,33 @@ describe("assembleDayPeriodStops order", () => {
     );
 
     expect(fractions).toEqual([0.25, 0.25, 0.75, 0.75]);
+  });
+});
+
+// FR3 of support-legacy-ios-12-safari: no BigInt at run time.
+describe("getDayPeriodStops without BigInt", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it.each([
+    ["Asia/Almaty", ALMATY_STOPS],
+    ["America/New_York", NEW_YORK_STOPS],
+  ])("should give the same stops of %s", (zone, expected) => {
+    vi.stubGlobal("BigInt", undefined);
+
+    const freshDay = getReferenceDay(
+      ALMATY_STATE,
+      Temporal.Instant.from("2026-03-08T07:30:00Z"),
+    );
+
+    const actual = getDayPeriodStops(zone, freshDay);
+
+    expect(actual.map((stop) => stop.period)).toEqual(
+      expected.map(([, period]) => period),
+    );
+    actual.forEach((stop, index) => {
+      expect(stop.fraction).toBeCloseTo(expected[index][0], PRECISION);
+    });
   });
 });

@@ -27,3 +27,17 @@ export const APPLE_ICON_PADDING = 0.08;
 
 /** Port of the production preview server that the E2E tests run against. */
 export const E2E_PORT = 4173;
+
+/**
+ * Syntax level of the production build and its CSS: the esbuild default with
+ * Safari 12 (iOS 12.5) in place of Safari 14. Implements FR1, FR12 of
+ * support-legacy-ios-12-safari (D1, D7).
+ */
+export const BUILD_TARGETS = [
+  "es2020",
+  "edge88",
+  "firefox78",
+  "chrome87",
+  "safari12",
+  "ios12",
+];

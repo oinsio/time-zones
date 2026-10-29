@@ -7,9 +7,14 @@ import { startWorkCount } from "@/test/workCounters";
 /** The real search over the real extracted data, built once per test file. */
 const citySearch = createCompositeCitySearch(zoneCities);
 
+/** A search built now: it reads country names at construction, so build it after changing `Intl`. */
+export const buildCitySearch = () => createCompositeCitySearch(zoneCities);
+
 export type SearchWorld = {
   language: SupportedLanguage;
   results: readonly CitySearchResult[];
+  /** Replaces the shared search, e.g. one built on an engine without `Intl.DisplayNames`. */
+  citySearch?: ReturnType<typeof buildCitySearch>;
 };
 
 export const createSearchWorld = (): SearchWorld => ({
@@ -18,7 +23,10 @@ export const createSearchWorld = (): SearchWorld => ({
 });
 
 export const runSearch = (world: SearchWorld, query: string) => {
-  world.results = citySearch.search(query, world.language);
+  world.results = (world.citySearch ?? citySearch).search(
+    query,
+    world.language,
+  );
 };
 
 export const openSuggestions = (world: SearchWorld) => {

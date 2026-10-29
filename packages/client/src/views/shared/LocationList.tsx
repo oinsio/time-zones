@@ -3,6 +3,7 @@ import {
   DndContext,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -15,14 +16,30 @@ import { useEffect, useMemo, useRef } from "react";
 import {
   MIN_LOCATIONS_TO_REORDER,
   REORDER_POINTER_ACTIVATION_DISTANCE_PX,
+  REORDER_TOUCH_ACTIVATION_DELAY_MS,
+  REORDER_TOUCH_ACTIVATION_TOLERANCE_PX,
 } from "@/constants";
 import type { TrackMove } from "@/controller";
 import { usePrefersReducedMotion } from "@/controller";
+import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import type { LocationRow as LocationRowModel } from "@/presenter";
 import { LocationRow } from "./LocationRow";
 import { restrictToVerticalAxis } from "./reorderModifiers";
 import { getMoveTargetIndex } from "./reorderTarget";
 import { useReorderAnnouncements } from "./useReorderAnnouncements";
+
+// Engines without Pointer Events (iOS Safari before 13) drag by finger through touch events.
+const FINGER_OR_POINTER_SENSOR = IS_POINTER_EVENTS_SUPPORTED
+  ? PointerSensor
+  : TouchSensor;
+const FINGER_OR_POINTER_OPTIONS = {
+  activationConstraint: IS_POINTER_EVENTS_SUPPORTED
+    ? { distance: REORDER_POINTER_ACTIVATION_DISTANCE_PX }
+    : {
+        delay: REORDER_TOUCH_ACTIVATION_DELAY_MS,
+        tolerance: REORDER_TOUCH_ACTIVATION_TOLERANCE_PX,
+      },
+};
 
 type LocationListProps = {
   rows: readonly LocationRowModel[];
@@ -41,6 +58,8 @@ type LocationListProps = {
  * (D5): a drop outside the list or on the card itself moves nothing.
  * Implements FR3, FR4 of add-time-sliders-to-location-cards (D8): passes the
  * track selection and move handlers to each row.
+ * Implements FR9, UX2 of support-legacy-ios-12-safari (D8): TouchSensor where
+ * Pointer Events are missing.
  */
 export function LocationList({
   rows,
@@ -56,11 +75,7 @@ export function LocationList({
   // A stable array: a new one on every render makes dnd-kit drop the slide transition.
   const rowIds = useMemo(() => rows.map((row) => row.id), [rows]);
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: REORDER_POINTER_ACTIVATION_DISTANCE_PX,
-      },
-    }),
+    useSensor(FINGER_OR_POINTER_SENSOR, FINGER_OR_POINTER_OPTIONS),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),

@@ -22,3 +22,7 @@ declare module "virtual:zone-cities" {
   }[];
   export default zoneCities;
 }
+
+declare module "virtual:legacy-core-js" {
+  // Side-effect module: installs the core-js polyfills a legacy engine lacks.
+}

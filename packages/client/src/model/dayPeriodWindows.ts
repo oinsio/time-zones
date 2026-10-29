@@ -1,4 +1,5 @@
 import {
+  NANOSECONDS_PER_MILLISECOND,
   NANOSECONDS_PER_MINUTE,
   OFFSET_CHANGE_MARGIN_HOURS,
   UTC_ZONE_ID,
@@ -62,6 +63,7 @@ export function findOffsetTransitions(
  * time is skipped by a gap is left out; one repeated by an overlap uses its
  * earlier occurrence. Without an offset change near the day, the boundary
  * instants are plain arithmetic on the day's offset.
+ * Implements FR3 of support-legacy-ios-12-safari (milliseconds, no BigInt).
  */
 export function collectBlendWindows(
   timeZoneId: string,
@@ -99,9 +101,9 @@ export function collectBlendWindows(
       }
       let boundaryInstant: Temporal.Instant;
       if (hasFixedOffset) {
-        boundaryInstant = Temporal.Instant.fromEpochNanoseconds(
-          wanted.toZonedDateTime(UTC_ZONE_ID).epochNanoseconds -
-            BigInt(localStart.offsetNanoseconds),
+        boundaryInstant = Temporal.Instant.fromEpochMilliseconds(
+          wanted.toZonedDateTime(UTC_ZONE_ID).epochMilliseconds -
+            localStart.offsetNanoseconds / NANOSECONDS_PER_MILLISECOND,
         );
       } else {
         const zoned = wanted.toZonedDateTime(timeZoneId, {

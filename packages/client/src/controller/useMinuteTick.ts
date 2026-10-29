@@ -1,10 +1,8 @@
 import { useEffect, useRef } from "react";
+import { VISIBILITY_CHANGE_EVENT, VISIBLE_STATE } from "@/constants";
 import type { Clock } from "@/lib/temporal";
 import { getMillisecondsUntilNextMinute } from "./minuteBoundary";
 import type { TickScheduler } from "./tickScheduler";
-
-const VISIBILITY_CHANGE_EVENT = "visibilitychange";
-const VISIBLE_STATE: DocumentVisibilityState = "visible";
 
 type MinuteTickOptions = {
   clock: Clock;

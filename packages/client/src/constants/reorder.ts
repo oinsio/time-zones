@@ -10,3 +10,13 @@ export const REORDER_POINTER_ACTIVATION_DISTANCE_PX = 4;
 export const MIN_LOCATIONS_TO_REORDER = 2;
 
 export const REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)";
+
+/**
+ * Hold before a finger press on the handle becomes a drag, so a swipe that
+ * starts scrolling still scrolls the page.
+ * Implements FR9 of support-legacy-ios-12-safari.
+ */
+export const REORDER_TOUCH_ACTIVATION_DELAY_MS = 250;
+
+/** Finger travel allowed during the hold before the drag is cancelled. */
+export const REORDER_TOUCH_ACTIVATION_TOLERANCE_PX = 5;

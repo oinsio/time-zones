@@ -1,14 +1,9 @@
 // Verifies FR3, FR4 of add-time-sliders-to-location-cards (D7).
 import { fireEvent } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import {
-  setupInteractiveTrack as setup,
-  TRACK_WIDTH,
-  useFakePointerEvents,
-} from "./dayTrackFixture";
+import { setupInteractiveTrack as setup, TRACK_WIDTH } from "./dayTrackFixture";
 
 describe("DayTrack input", () => {
-  useFakePointerEvents();
   const pointer = (
     pointerType: string,
     clientX: number,

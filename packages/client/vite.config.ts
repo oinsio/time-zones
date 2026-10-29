@@ -10,15 +10,24 @@ import {
   APP_SHORT_NAME,
   APP_THEME_COLOR,
   BUILD_OUT_DIR,
+  BUILD_TARGETS,
 } from "./app.config";
+import { mainChunkPreloadPlugin } from "./scripts/legacyBoot/mainChunkPreloadPlugin";
+import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 
 export default defineConfig({
   base: APP_BASE_PATH,
-  build: { outDir: BUILD_OUT_DIR },
+  build: {
+    outDir: BUILD_OUT_DIR,
+    target: BUILD_TARGETS,
+    cssTarget: BUILD_TARGETS,
+  },
   plugins: [
     react(),
     zoneDataPlugin(),
+    legacyCoreJsPlugin(),
+    mainChunkPreloadPlugin(),
     VitePWA({
       registerType: "prompt",
       pwaAssets: {

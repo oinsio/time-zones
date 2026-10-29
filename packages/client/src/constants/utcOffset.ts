@@ -6,3 +6,4 @@ export const UTC_OFFSET_MINUS_SIGN = "−";
 export const UTC_OFFSET_MINUTES_SEPARATOR = ":";
 export const UTC_OFFSET_MINUTES_DIGITS = 2;
 export const UTC_OFFSET_MINUTES_PAD = "0";
+export const NANOSECONDS_PER_MILLISECOND = 1_000_000;

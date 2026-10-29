@@ -16,12 +16,13 @@ function getDisplayNames(language: SupportedLanguage): Intl.DisplayNames {
 
 /**
  * Country name in the interface language; empty for an empty or unknown code.
- * Implements FR5, FR10 of add-locations-via-search (D9).
+ * Implements FR5, FR10 of add-locations-via-search (D9),
+ * FR5 of support-legacy-ios-12-safari (empty without Intl.DisplayNames).
  */
 export function presentCountryName(
   countryCode: string,
   language: SupportedLanguage,
 ): string {
-  if (countryCode === "") return "";
+  if (countryCode === "" || typeof Intl.DisplayNames !== "function") return "";
   return getDisplayNames(language).of(countryCode) ?? "";
 }

@@ -1,4 +1,4 @@
-import type { KeyboardEvent, PointerEvent } from "react";
+import type { KeyboardEvent, MouseEvent, PointerEvent } from "react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -8,6 +8,7 @@ import {
   TRACK_VALUE_MIN_MINUTES,
 } from "@/constants";
 import type { TrackMove } from "@/controller";
+import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import type { PresentedDayTrack } from "@/presenter";
 import { buildDayTrackGradient, formatPercent } from "./dayTrackGradient";
 import { getTrackMoveForKey } from "./dayTrackKeys";
@@ -46,7 +47,8 @@ const LABEL_ALIGNMENT_CLASS_NAMES = [
  * It selects by pointer and touch and moves by keys; the page keeps scrolling
  * for a vertical swipe that starts on it.
  * Implements FR1, FR2, FR3, FR4, FR6, FR7, FR9, UX1, UX2, UX3, NFR-A2, NFR-A3,
- * NFR-R2 of add-time-sliders-to-location-cards (D7).
+ * NFR-R2 of add-time-sliders-to-location-cards (D7), FR8, NFR-A2, UX1 of
+ * support-legacy-ios-12-safari (a click selects where Pointer Events are missing).
  */
 export function DayTrack({
   track,
@@ -57,7 +59,7 @@ export function DayTrack({
   const { t } = useTranslation();
   const touchGesture = useRef<TouchGesture | null>(null);
 
-  const selectAt = (event: PointerEvent<HTMLDivElement>) => {
+  const selectAt = (event: MouseEvent<HTMLDivElement>) => {
     const { left, width } = event.currentTarget.getBoundingClientRect();
     if (width <= 0) return;
     const fraction = (event.clientX - left) / width;
@@ -128,6 +130,7 @@ export function DayTrack({
         aria-valuemax={track.maxMinutes}
         aria-valuenow={track.valueMinutes}
         aria-valuetext={track.valueText}
+        onClick={IS_POINTER_EVENTS_SUPPORTED ? undefined : selectAt}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}

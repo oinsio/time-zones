@@ -65,6 +65,7 @@ Then(
     const screenshotName = $test
       .info()
       .title.replace(/[^A-Za-z0-9]+/g, SCREENSHOT_NAME_SEPARATOR);
+    // Verifies NFR-R1 of support-legacy-ios-12-safari: approved baselines pass unchanged with the legacy CSS fallbacks
     await expect(locationsWorld.page).toHaveScreenshot(`${screenshotName}.png`);
   },
 );
