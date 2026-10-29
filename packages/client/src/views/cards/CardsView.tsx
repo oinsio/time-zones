@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LocationsStatus, useLocations, useTimeSelection } from "@/controller";
 import {
+  LocationsStatus,
+  useHereEntry,
+  useLocations,
+  useTimeSelection,
+} from "@/controller";
+import {
+  HereEntryRow,
   LocationList,
   LocationSearch,
   LocationsLoadError,
@@ -16,6 +22,8 @@ import {
  * track selection and move commands to the list.
  * Implements FR3, FR11, NFR-A2 of set-home-location-and-show-differences (D8):
  * announces a home change politely.
+ * Implements FR1, FR7, FR9, UX2 of show-here-entry-for-device-time (D5, D6):
+ * the Here entry comes first, outside the list, and also in the empty state.
  */
 export default function CardsView() {
   const { t } = useTranslation();
@@ -27,6 +35,7 @@ export default function CardsView() {
     setHomeLocation,
     resetLocations,
   } = useLocations();
+  const hereEntry = useHereEntry();
   const { selectTrackFraction, moveTrack } = useTimeSelection();
   const addLocationButtonRef = useRef<HTMLButtonElement>(null);
   const hasRemovedLastLocation = useRef(false);
@@ -69,6 +78,13 @@ export default function CardsView() {
 
   return (
     <div className="flex flex-col gap-4">
+      {hereEntry && (
+        <HereEntryRow
+          entry={hereEntry}
+          onSelectTrackFraction={selectTrackFraction}
+          onMoveTrack={moveTrack}
+        />
+      )}
       {rows.length === 0 ? (
         <p className="py-8 text-center text-muted-foreground">
           {t("views.cardsEmptyState")}

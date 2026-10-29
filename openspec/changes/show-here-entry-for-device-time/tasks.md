@@ -103,8 +103,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 6. Views (TDD)
 
-- [ ] 6.1 Refactor without behaviour change: extract the place column, `LocalDateTime` and `DayTrack` layout of `LocationRow` into `views/shared/ZoneRowContent.tsx` (design D5). Verify that `npx vitest run src/views/shared` passes unchanged.
-- [ ] 6.2 TDD `views/shared/HereEntryRow.tsx`, exported from `views/shared/index.ts` (design D5; FR2, FR4, FR5, UX1). It is a `<section>` named by `accessibleName`, with the Here mark, city, caption, meta line, time and date, and a day track wired to the track handlers. It has no drag handle, no Location menu and no remove action. It passes `isCityOneLine` to `ZoneRowContent`, so its city is one `truncate` line; `LocationRow` never sets it, so cards keep wrapping (design D5, UX3). Tests in `HereEntryRow.test.tsx` with M2 data:
+- [x] 6.1 Refactor without behaviour change: extract the place column, `LocalDateTime` and `DayTrack` layout of `LocationRow` into `views/shared/ZoneRowContent.tsx` (design D5). Verify that `npx vitest run src/views/shared` passes unchanged.
+- [x] 6.2 TDD `views/shared/HereEntryRow.tsx`, exported from `views/shared/index.ts` (design D5; FR2, FR4, FR5, UX1). It is a `<section>` named by `accessibleName`, with the Here mark, city, caption, meta line, time and date, and a day track wired to the track handlers. It has no drag handle, no Location menu and no remove action. It passes `isCityOneLine` to `ZoneRowContent`, so its city is one `truncate` line; `LocationRow` never sets it, so cards keep wrapping (design D5, UX3). Tests in `HereEntryRow.test.tsx` with M2 data:
   - the content;
   - no `button` (no drag handle, menu or remove action);
   - the slider named `Время — Алматы`.
@@ -112,7 +112,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   The kept height (UX3) and the Tab order (NFR-A2) are layout and keyboard checks, so they are E2E scenarios in task 8.1, not jsdom tests.
 
   Verify `npx vitest run src/views/shared/HereEntryRow.test.tsx`.
-- [ ] 6.3 TDD `CardsView` (design D5, D6; FR1, FR7, FR9, UX2). Tests in new `views/cards/CardsView.hereEntry.test.tsx`, with a loader passed to `LocationsProvider`:
+- [x] 6.3 TDD `CardsView` (design D5, D6; FR1, FR7, FR9, UX2). Tests in new `views/cards/CardsView.hereEntry.test.tsx`, with a loader passed to `LocationsProvider`:
   - the Here entry first, outside the `<ul>`;
   - in the empty state, the Here entry, then the explanation, then "Add location";
   - no Here entry and no loader call on the load error;
@@ -120,7 +120,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - focus after removing the last location still goes to "Add location".
 
   Then fix existing `CardsView*.test.tsx` and other view tests that count sliders or times page-wide (design D9). Verify `npx vitest run src/views`.
-- [ ] 6.4 Run `npx stryker run --mutate 'src/views/shared/HereEntryRow.tsx,src/views/shared/ZoneRowContent.tsx,src/views/cards/CardsView.tsx,src/views/shared/LocationSearch.tsx'`. Verify a score ≥ 95% (minimum 90%).
+- [x] 6.4 Run `npx stryker run --mutate 'src/views/shared/HereEntryRow.tsx,src/views/shared/ZoneRowContent.tsx,src/views/cards/CardsView.tsx,src/views/shared/LocationSearch.tsx'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 7. Unit BDD (vitest-cucumber)
 
