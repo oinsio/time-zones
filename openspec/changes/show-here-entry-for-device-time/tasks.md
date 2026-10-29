@@ -6,6 +6,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 - **Running tests:** one command at a time, never in the background. Stryker runs only with `--mutate`, at most 5 files per run, and its report is in `reports/mutation/mutation-report.json`.
 - **Time in tests:** only `fakeClock(instant, timeZone)` of `@/lib/temporal` or `createSwitchableClock` (`test/switchableClock.ts`). Never `vi.setSystemTime()` or `vi.useFakeTimers()`. Ticks come from `createManualTickScheduler()` (`test/tickSchedulers.ts`), and writes are observed with `createManualWriteScheduler()` (`test/writeSchedulers.ts`).
+- **E2E runs:** Playwright runs the specs that `bddgen` generates from the `.feature` files, so every Playwright command after a `.feature` edit starts with `npx bddgen -c playwright.bdd.config.ts && ` (the order of the `test:bdd` script).
 - **Traceability:** every new or changed test, step file and feature carries `show-here-entry-for-device-time`:
   - `@show-here-entry-for-device-time @FR-X` tags above scenarios, and `// @show-here-entry-for-device-time @FR-X` before `f.Scenario`;
   - `// Verifies NFR-X of show-here-entry-for-device-time` in E2E steps;
@@ -148,14 +149,14 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Narrow and wide screens", with no horizontal scrolling and the same layout as the Moscow card (NFR-R1, UX1).
 
   Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "@show-here-entry-for-device-time"`.
-- [ ] 8.2 Add the `@view-contract` scenario "See the Here entry without home" to `locations/locations_view_contract_e2e.feature` (FR11). Verify with `npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep "See the Here entry without home"`.
+- [ ] 8.2 Add the `@view-contract` scenario "See the Here entry without home" to `locations/locations_view_contract_e2e.feature` (FR11). Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep "See the Here entry without home"`.
 - [ ] 8.3 Update the lazy-data scenarios to the MODIFIED `location-search` delta (design D9, FR8):
   - "Data loads only when the search opens" in `locations_ui_e2e.feature` and "The slash key loads the search data only when it opens the search" in `locations_search_shortcut_e2e.feature` first store a location in `Asia/Almaty`;
   - add "The Here entry's request is the only one" to `locations_ui_e2e.feature`: the empty list, the data loaded, then the search opened, exactly 1 request (M5);
   - in `steps/locationsStates.ts`, the `search loading` and `search error` states store Almaty before they hold or fail the data.
 
-  Tag each with `@show-here-entry-for-device-time @FR8`. Verify with `npx playwright test -c playwright.bdd.config.ts --grep "search data|search loading|search error|slash key loads"`.
-- [ ] 8.4 Add the states `here-entry` (list Moscow, Kolkata, New York) and `here-entry-travel` (the same list, Moscow home) to `WorldClockState` in `steps/locationsStates.ts`. Add them to the screenshot outline of `locations_ui_e2e.feature` at 375 / 1024 px × light / dark, tagged `@show-here-entry-for-device-time @NFR-R2`. Re-approve `empty`, `suggestions` and `IST results` under `test/features/__screenshots__/{chromium,mobile-chrome}/` with `--update-snapshots`. Then verify that `npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without that flag.
+  Tag each with `@show-here-entry-for-device-time @FR8`. Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "Data loads only when the search opens|The Here entry's request is the only one|loads the search data|search loading|search error"`.
+- [ ] 8.4 Add the states `here-entry` (list Moscow, Kolkata, New York) and `here-entry-travel` (the same list, Moscow home) to `WorldClockState` in `steps/locationsStates.ts`. Add them to the screenshot outline of `locations_ui_e2e.feature` at 375 / 1024 px × light / dark, tagged `@show-here-entry-for-device-time @NFR-R2`. Re-approve `empty`, `suggestions` and `IST results` under `test/features/__screenshots__/{chromium,mobile-chrome}/` with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep Screenshot --update-snapshots`. Then verify that `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without that flag.
 
 ## 9. Handoff patches (files the implement stage may not edit)
 
