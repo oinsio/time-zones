@@ -143,7 +143,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 8. E2E, accessibility and screenshots (playwright-bdd)
 
-- [ ] 8.1 Write `test/features/locations/locations_here_entry_e2e.feature` and `steps/locations_here_entry_e2e.steps.ts`. The E2E device time zone is `Asia/Almaty`, so the Here entry is shown whenever Almaty is not stored. It holds these `locations` delta scenarios:
+- [x] 8.1 Write `test/features/locations/locations_here_entry_e2e.feature` and `steps/locations_here_entry_e2e.steps.ts`. The E2E device time zone is `Asia/Almaty`, so the Here entry is shown whenever Almaty is not stored. It holds these `locations` delta scenarios:
   - "Reorder keeps the Here entry first", with the announcement (FR4);
   - a keyboard variant of "Time selection from the Here entry": arrow keys on its slider (FR5);
   - "Tap on the Here entry's day track without Pointer Events", with `emulateEngineWithoutPointerEvents` (FR12);
@@ -154,14 +154,14 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "The exemplar city keeps the height" (UX3): hold the data with `holdSearchData()` (`steps/locations_ui_e2e.fixtures.ts`), read the Here entry's `boundingBox()` height and the Moscow card's `y` while it shows `Almaty`, call `releaseHeldRequests()`, wait for `Алматы`, and assert both values are equal at 375 px and 1024 px.
 
   Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "@show-here-entry-for-device-time"`.
-- [ ] 8.2 Add the `@view-contract` scenario "See the Here entry without home" to `locations/locations_view_contract_e2e.feature` (FR11). Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep "See the Here entry without home"`.
-- [ ] 8.3 Update the lazy-data scenarios to the MODIFIED `location-search` delta (design D9, FR8):
+- [x] 8.2 Add the `@view-contract` scenario "See the Here entry without home" to `locations/locations_view_contract_e2e.feature` (FR11). Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep "See the Here entry without home"`.
+- [x] 8.3 Update the lazy-data scenarios to the MODIFIED `location-search` delta (design D9, FR8):
   - "Data loads only when the search opens" in `locations_ui_e2e.feature` and "The slash key loads the search data only when it opens the search" in `locations_search_shortcut_e2e.feature` first store a location in `Asia/Almaty`;
   - add "The Here entry's request is the only one" to `locations_ui_e2e.feature`: the empty list, the data loaded, then the search opened, exactly 1 request (M5);
   - in `steps/locationsStates.ts`, the `search loading` and `search error` states store Almaty before they hold or fail the data.
 
   Tag each with `@show-here-entry-for-device-time @FR8`. Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "Data loads only when the search opens|The Here entry's request is the only one|loads the search data|search loading|search error"`.
-- [ ] 8.4 Add the states `here-entry` (list Moscow, Kolkata, New York) and `here-entry-travel` (the same list, Moscow home) to `WorldClockState` in `steps/locationsStates.ts`. Add them to the screenshot outline of `locations_ui_e2e.feature` at 375 / 1024 px × light / dark, tagged `@show-here-entry-for-device-time @NFR-R2`. Re-approve `empty`, `suggestions` and `IST results` under `test/features/__screenshots__/{chromium,mobile-chrome}/` with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep Screenshot --update-snapshots`. Then verify that `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without that flag.
+- [x] 8.4 Add the states `here-entry` (list Moscow, Kolkata, New York) and `here-entry-travel` (the same list, Moscow home) to `WorldClockState` in `steps/locationsStates.ts`. Add them to the screenshot outline of `locations_ui_e2e.feature` at 375 / 1024 px × light / dark, tagged `@show-here-entry-for-device-time @NFR-R2`. Re-approve `empty`, `suggestions` and `IST results` under `test/features/__screenshots__/{chromium,mobile-chrome}/` with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep Screenshot --update-snapshots`. Then verify that `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without that flag.
 
 ## 9. Handoff patches (files the implement stage may not edit)
 
@@ -180,7 +180,7 @@ scratch=$(mktemp -d) && git archive HEAD docs | tar -x -C "$scratch"
 (cd "$scratch" && git apply "$OLDPWD/$pred/H1-glossary-home-location.patch" "$OLDPWD/$pred/H2-architecture-docs-home-location.patch" && git apply -C0 "$OLDPWD/<patch>")
 ```
 
-- [ ] 9.1 Handoff H1: write `openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch` and its README section (`.gnomish/stages/specify/handoff.md`, "In `openspec/changes/<name>/handoff/`"). The patch updates `docs/glossary/`:
+- [x] 9.1 Handoff H1: write `openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch` and its README section (`.gnomish/stages/specify/handoff.md`, "In `openspec/changes/<name>/handoff/`"). The patch updates `docs/glossary/`:
   - `locations.md`: Here entry drops *(planned)*, adds *RU:* строка «Здесь», мета «Время устройства» and *Code:* `getHereEntry`, `presentHereEntry`, `useHereEntry`, `HereEntryRow`. Location row adds `presentZoneMoment` to *Code:* and "*Not:* the Here entry";
   - `search.md`: Exemplar city gets *Code:* `CitySearch.getExemplarCity`, `deriveCityNameFromTimeZoneId`;
   - `views.md`: View contract adds the Here entry.
@@ -189,7 +189,7 @@ scratch=$(mktemp -d) && git archive HEAD docs | tar -x -C "$scratch"
   - `git apply --check openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch`;
   - the scratch check with this patch exits 0, and then `grep -c "useHereEntry" "$scratch/docs/glossary/locations.md"` ≥ 1 and `grep -c "Location menu" "$scratch/docs/glossary/locations.md"` ≥ 1, so both changes' entries are there;
   - `git status --short docs` prints nothing.
-- [ ] 9.2 Handoff H2: write `openspec/changes/show-here-entry-for-device-time/handoff/H2-architecture-here-entry.patch` and its README section. The patch updates:
+- [x] 9.2 Handoff H2: write `openspec/changes/show-here-entry-for-device-time/handoff/H2-architecture-here-entry.patch` and its README section. The patch updates:
   - `docs/architecture/views.md`, "Here entry" (line 80): outside the numbered list, shown in the empty state, meta "Device time · UTC+5";
   - `docs/architecture/domain-model.md`, "Selectors" (lines 89–90). Today the `getRows(state)` row says the display rows put "the derived Here entry first", and `getLocationSnapshot` lists an "is-derived" flag. The patch makes `getRows` return `locations` only, adds a `getHereEntry(state)` row (the Here entry's time zone when no location matches the device time zone, otherwise nothing; design D1), and drops "is-derived", because the Here entry is not a row (design D2, D5).
 
@@ -200,15 +200,15 @@ scratch=$(mktemp -d) && git archive HEAD docs | tar -x -C "$scratch"
 
 ## 10. Final verification
 
-- [ ] 10.1 Traceability (M1): this loop, run from `packages/client/`, must print nothing.
+- [x] 10.1 Traceability (M1): this loop, run from `packages/client/`, must print nothing.
 
   ```
   for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 FR9 FR10 FR11 FR12 NFR-P1 NFR-P2 NFR-A1 NFR-A2 NFR-R1 NFR-R2 UX1 UX2 UX3; do
     grep -rqE "show-here-entry-for-device-time.*(^|[^A-Za-z0-9-])@?$id([^0-9]|$)|(^|[^A-Za-z0-9-])@?$id([^0-9]|$).*show-here-entry-for-device-time" src || echo "missing $id"
   done
   ```
-- [ ] 10.2 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build`, `pnpm --filter @time-zones/client check:bundle-size` and `pnpm --filter @time-zones/client check:legacy-build`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone. Fix every existing feature that counts sliders, times or requests page-wide and now meets the Here entry (design D9).
-- [ ] 10.3 Check the glossary (`.claude/rules/glossary.md`, "Review checklist"). `grep -rniE "default location|auto-added location" src` and `grep -rn "GMT" src/locales` print nothing.
+- [x] 10.2 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build`, `pnpm --filter @time-zones/client check:bundle-size` and `pnpm --filter @time-zones/client check:legacy-build`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone. Fix every existing feature that counts sliders, times or requests page-wide and now meets the Here entry (design D9).
+- [x] 10.3 Check the glossary (`.claude/rules/glossary.md`, "Review checklist"). `grep -rniE "default location|auto-added location" src` and `grep -rn "GMT" src/locales` print nothing.
 
 ## Human follow-up
 

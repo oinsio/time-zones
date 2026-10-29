@@ -1,0 +1,9 @@
+diff --git a/docs/glossary/locations.md b/docs/glossary/locations.md
+index a6f2f81..815c3e8 100644
+--- a/docs/glossary/locations.md
++++ b/docs/glossary/locations.md
+@@ -11,3 +11,3 @@ The user's list of places and how each place is shown. Decisions: ADR-0004 (loca
+ - **Unreadable stored list** — a stored location list that cannot be parsed or holds an invalid entry. The app shows the load error with Reset and never overwrites the stored value by itself. *Code:* `LocationsLoadStatus.UNREADABLE`.
+-- **Location row** — the presented, view-agnostic data of one location at the effective instant: city label, country name, UTC offset, local time and date, day track, marks. *Code:* `LocationRow`, `presentLocationRows`. *Not:* a card or a grid row, which are view elements built from it.
++- **Location row** — the presented, view-agnostic data of one location at the effective instant: city label, country name, UTC offset, local time and date, day track, marks. *Code:* `LocationRow`, `presentLocationRows`, `presentZoneMoment`. *Not:* a card or a grid row, which are view elements built from it; the Here entry.
+ - **Here mark** — the mark on a location whose time zone ID equals the device time zone: "You are here". *Code:* `LocationMarkKind.HERE`. *RU:* «Вы здесь», подпись «здесь». *Not:* the Here entry. *Never:* current location, my location.

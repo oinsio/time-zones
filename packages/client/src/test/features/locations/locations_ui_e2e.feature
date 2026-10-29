@@ -127,6 +127,7 @@ Feature: Locations in a real browser
   @match-here-mark-to-design @NFR-R2 @M5
   @set-home-location-and-show-differences @NFR-R2
   @match-home-mark-to-design @NFR-R1 @M4
+  @show-here-entry-for-device-time @NFR-R2
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme
@@ -173,6 +174,14 @@ Feature: Locations in a real browser
       | travelling  | 375   | dark  |
       | travelling  | 1024  | light |
       | travelling  | 1024  | dark  |
+      | here-entry        | 375   | light |
+      | here-entry        | 375   | dark  |
+      | here-entry        | 1024  | light |
+      | here-entry        | 1024  | dark  |
+      | here-entry-travel | 375   | light |
+      | here-entry-travel | 375   | dark  |
+      | here-entry-travel | 1024  | light |
+      | here-entry-travel | 1024  | dark  |
 
   @add-locations-via-search @FR14
   Scenario: Added in another tab
