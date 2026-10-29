@@ -1,106 +1,104 @@
 # Tasks
 
-All source paths are under `packages/client/src/`. Commands run from `packages/client/` unless they start with `pnpm --filter`.
+All source paths are under `packages/client/`. Commands run from `packages/client/` unless they start with `pnpm --filter` or `git`, which run from the repository root.
 
-- **Running tests:** one command at a time, never in the background. Mutation runs take at most 5 files per run. The report is in `reports/mutation/mutation-report.json`.
-- **Time in tests:** only `fakeClock(instant, timeZone)` of `@/lib/temporal` or `createSwitchableClock` (`test/switchableClock.ts`). Never `vi.setSystemTime()` or `vi.useFakeTimers()`. Page visibility comes from `setPageVisibility` / `resetPageVisibility` (`test/pageVisibility.ts`).
-- **Missing APIs in tests:** remove the API with `vi.stubGlobal(...)` (or delete the property), and restore it with `vi.unstubAllGlobals()`. Modules that read support at load time are re-imported after `vi.resetModules()` (design D11).
+- **Running tests:** one command at a time, never in the background. Vitest collects only `src/**/*.{test,steps}.{ts,tsx}`, so every test below sits under `src/`, and a feature runs through its steps file. Mutation runs take at most 5 files per run. The report is in `reports/mutation/mutation-report.json`.
+- **Time in tests:** only `fakeClock(instant, timeZone)` of `@/lib/temporal` or `createSwitchableClock` (`src/test/switchableClock.ts`). Never `vi.setSystemTime()` or `vi.useFakeTimers()`. Page visibility comes from `setPageVisibility` / `resetPageVisibility` (`src/test/pageVisibility.ts`).
+- **Missing APIs in tests:** remove the API with `vi.stubGlobal(...)` (or delete the property), and restore it with `vi.unstubAllGlobals()`. Modules that read support at load time are re-imported after `vi.resetModules()` (design D11). Temporal is always imported from `@/lib/temporal`.
 - **Traceability:** every new test, step file and feature carries `support-legacy-ios-12-safari`:
   - `@support-legacy-ios-12-safari @FR-X` tags above scenarios;
-  - `// @support-legacy-ios-12-safari @FR-X` before `f.Scenario`;
+  - `// @support-legacy-ios-12-safari @FR-X` before `f.Scenario`, `// Verifies NFR-X of support-legacy-ios-12-safari` in E2E steps;
   - `Implements FR-X of support-legacy-ios-12-safari` in the JSDoc of new or changed production code.
 - **File size:** every file stays under 200 lines.
 - **Design references:** "design Dn" refers to `design.md`.
 
 ## 1. Spike: zone shim against temporal-polyfill (blocks section 5)
 
-- [ ] 1.1 Throwaway test `lib/legacy/zoneShim.spike.test.ts` (design D4, proposal Q2). Install a fake `Intl.DateTimeFormat` that throws `RangeError` for `Europe/Kyiv` and delegates otherwise. Wrap it with a minimal retry on `Europe/Kiev`. Then `vi.resetModules()` and import `temporal-polyfill` fresh. Check three things:
-  - `Temporal.Instant.from("2026-03-08T07:30:00Z").toZonedDateTimeISO("Europe/Kyiv")` gives `09:30` and offset `+02:00`;
-  - what `.timeZoneId` returns;
-  - that no other `Intl` / `Date` path throws.
+- [ ] 1.1 Spike test `src/lib/legacy/zoneShim.temporal.test.ts` (design D4, proposal Q2, FR4), header `// FR4 of support-legacy-ios-12-safari: the shim reaches temporal-polyfill`. Install a fake `Intl.DateTimeFormat` that throws `RangeError` for `Europe/Kyiv` and delegates otherwise. Wrap it with a minimal retry on `Europe/Kiev`. Then call `vi.resetModules()` and import `@/lib/temporal` and `@/model` fresh. Check:
+  - `Temporal.Instant.from("2026-03-08T07:30:00Z").toZonedDateTimeISO("Europe/Kyiv")` gives `09:30` and offset `+02:00`, and record what `.timeZoneId` returns;
+  - `resolveWallClock("Europe/Kyiv", Temporal.PlainDateTime.from("2026-03-08T10:00"))` gives `2026-03-08T08:00:00Z` with `WallClockStatus.UNIQUE`;
+  - `resolveWallClock("Europe/Kyiv", Temporal.PlainDateTime.from("2026-03-29T03:30"))` gives `2026-03-29T01:30:00Z` with `WallClockStatus.GAP`;
+  - no other `Intl` / `Date` path throws.
 
-  Record the result in a short note at the end of `design.md` "Risks". If the shim does not work, switch D4 to the explicit resolver before section 5. Delete the spike file. Verify with `npx vitest run src/lib/legacy/zoneShim.spike.test.ts`.
+  If every check passes, keep the file: after task 5.1 it switches from the minimal retry to `createLegacyZoneDateTimeFormat`, and it stays as the regression test for the path `add-wall-time-input-with-hint` relies on. If any check fails, follow the fallback of design D4 (explicit resolver) before section 5, and keep the failing checks as the tests of that resolver. Verify with `npx vitest run src/lib/legacy/zoneShim.temporal.test.ts`.
 
 ## 2. Dependencies and constants (no TDD: setup and constants)
 
-- [ ] 2.1 Add the dependencies of design D3 and D9 to `packages/client/package.json`:
-  - runtime `core-js` and `@juggle/resize-observer`;
-  - dev `core-js-compat` (same minor as `core-js`) and `acorn`.
-
-  Verify with `pnpm install` and `pnpm --filter @time-zones/client typecheck`.
-- [ ] 2.2 Add the constants and re-export them from `constants/index.ts`:
-  - `UPDATE_RECHECK_INTERVAL_MS = 15 * 60 * 1000` (design D10, FR10);
-  - `REORDER_TOUCH_ACTIVATION_DELAY_MS = 250` and `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX = 5` (design D8, FR9);
-  - `LEGACY_ZONE_PROBE_ID = "Europe/Kyiv"` (design D2);
-  - `NANOSECONDS_PER_MILLISECOND` (design D5), unless an equivalent constant exists.
+- [ ] 2.1 Add the dependencies of design D3 and D9: `pnpm --filter @time-zones/client add core-js @juggle/resize-observer`, then `pnpm --filter @time-zones/client add -D core-js-compat acorn` (`core-js-compat` at the same minor as `core-js`). Verify with `pnpm --filter @time-zones/client typecheck`.
+- [ ] 2.2 Add the constants and re-export them from `src/constants/index.ts`:
+  - `UPDATE_RECHECK_INTERVAL_MS = 15 * MILLISECONDS_PER_MINUTE` in new `src/constants/update.ts` (design D10, FR10);
+  - `REORDER_TOUCH_ACTIVATION_DELAY_MS = 250` and `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX = 5` in `src/constants/reorder.ts` (design D8, FR9);
+  - `LEGACY_ZONE_PROBE_ID = "Europe/Kyiv"` in new `src/constants/legacy.ts` (design D2);
+  - `NANOSECONDS_PER_MILLISECOND = 1_000_000` in `src/constants/utcOffset.ts` (design D5).
 
   Verify with `pnpm --filter @time-zones/client typecheck`.
 
 ## 3. Model: no BigInt (TDD)
 
-- [ ] 3.1 Add the source-scan test `test/noBigIntInSources.test.ts` (design D5, FR3, FR13). It reads `src/**/*.{ts,tsx}`, excluding `*.test.*`, `*.steps.*`, `*.bench.*` and `src/test/`. It asserts that no file matches a BigInt literal, `BigInt(` or `epochNanoseconds`. Verify red with `npx vitest run src/test/noBigIntInSources.test.ts`: it lists `timeZoneId.ts`, `dayPeriodStops.ts` and `dayPeriodWindows.ts`.
-- [ ] 3.2 TDD in `model/timeZoneId.ts`: build the probe from `Temporal.Instant.fromEpochMilliseconds(0)`. In `model/timeZoneId.test.ts`, add a case with `vi.stubGlobal("BigInt", undefined)`: `canonicalizeTimeZoneId("Asia/Almaty")` → `"Asia/Almaty"` and `canonicalizeTimeZoneId("Europe/Kiev")` → `"Europe/Kyiv"`. Verify red, then green, with `npx vitest run src/model/timeZoneId.test.ts`.
-- [ ] 3.3 TDD in `model/dayPeriodStops.ts` and `model/dayPeriodWindows.ts`: millisecond arithmetic (design D5). Keep the existing M5 stop tests of `add-time-sliders-to-location-cards` green. Add a case that computes the Almaty and New York stops for the `2026-03-08` reference day with `BigInt` stubbed out and expects the same arrays. Verify with `npx vitest run src/model/dayPeriodStops.test.ts`, then `npx vitest run src/model/dayPeriodWindows.test.ts`, then `npx vitest run src/test/noBigIntInSources.test.ts` (now green).
+- [ ] 3.1 Add the source-scan test `src/test/noBigIntInSources.test.ts` (design D5, FR3, FR13). It reads `src/**/*.{ts,tsx}`, excluding `*.test.*`, `*.steps.*`, `*.bench.*` and `src/test/`. It asserts that no file matches a BigInt literal, `BigInt(` or `epochNanoseconds`. Verify red with `npx vitest run src/test/noBigIntInSources.test.ts`: it lists `timeZoneId.ts`, `dayPeriodStops.ts` and `dayPeriodWindows.ts`.
+- [ ] 3.2 TDD in `src/model/timeZoneId.ts`: build the probe from `Temporal.Instant.fromEpochMilliseconds(0)` (design D5). In `src/model/timeZoneId.test.ts`, add a case with `vi.stubGlobal("BigInt", undefined)`: `canonicalizeTimeZoneId("Asia/Almaty")` → `"Asia/Almaty"` and `canonicalizeTimeZoneId("Europe/Kiev")` → `"Europe/Kyiv"`. Verify red, then green, with `npx vitest run src/model/timeZoneId.test.ts`.
+- [ ] 3.3 TDD in `src/model/dayPeriodStops.ts` and `src/model/dayPeriodWindows.ts`: millisecond arithmetic (design D5). Keep the existing stop tests green. Add a case that computes the Almaty and New York stops for the `2026-03-08` reference day with `BigInt` stubbed out and expects the same arrays as with `BigInt` present. Verify with `npx vitest run src/model/dayPeriodStops.test.ts`, then `npx vitest run src/model/dayPeriodWindows.test.ts`, then `npx vitest run src/test/noBigIntInSources.test.ts` (now green).
 - [ ] 3.4 Mutation run. Verify that `npx stryker run --mutate 'src/model/timeZoneId.ts,src/model/dayPeriodStops.ts,src/model/dayPeriodWindows.ts'` scores ≥ 95% (minimum 90%).
 
 ## 4. API guards (TDD)
 
-- [ ] 4.1 TDD `presenter/countryName.ts`: return `""` when `Intl.DisplayNames` is not a function (design D6, FR5). Tests in `presenter/countryName.test.ts`, with the global removed and the module re-imported: `presentCountryName("KZ", "en")` → `""` with no throw. With the global present, `"Kazakhstan"` stays. Verify red, then green, with `npx vitest run src/presenter/countryName.test.ts`.
-- [ ] 4.2 TDD `adapters/city-search/zoneCitiesSource.ts`: `readCountryTexts` → `[]` without `Intl.DisplayNames` (FR5). In its tests, with the global removed:
-  - "Kazakhstan" matches no record by country;
-  - "Almaty" still matches.
-
-  Also check UX3: in `views/shared/LocationRow.test.tsx` and the search results test, a row and a result with `countryName: ""` render no separator text. Verify with `npx vitest run src/adapters/city-search/zoneCitiesSource.test.ts`, then each view test file.
-- [ ] 4.3 TDD `controller/usePrefersReducedMotion.ts`: `addListener` / `removeListener` fallback (design D6, FR7). Tests in `controller/usePrefersReducedMotion.test.tsx` with a `MediaQueryList` stub that has only `addListener`:
+- [ ] 4.1 TDD `src/presenter/countryName.ts`: return `""` when `Intl.DisplayNames` is not a function (design D6, FR5). Tests in new `src/presenter/countryName.test.ts`, with the global removed and the module re-imported: `presentCountryName("KZ", "en")` → `""` with no throw. With the global present, `"Kazakhstan"` stays. Verify red, then green, with `npx vitest run src/presenter/countryName.test.ts`.
+- [ ] 4.2 TDD `readCountryTexts` in `src/adapters/city-search/zoneCitiesSource.ts`: `[]` without `Intl.DisplayNames` (FR5). In `src/adapters/city-search/zoneCitiesSource.test.ts`, with the global removed: "Kazakhstan" matches no record by country, and "Almaty" still matches. Verify red, then green, with `npx vitest run src/adapters/city-search/zoneCitiesSource.test.ts`.
+- [ ] 4.3 UX3 tests: in `src/views/shared/LocationRow.test.tsx`, a row with `countryName: ""` and an offset label renders the offset and no empty country element. In `src/views/shared/LocationSearchDialog.test.tsx`, a result with `countryName: ""` renders the city and no empty country element. Tag both `// UX3 of support-legacy-ios-12-safari`. Verify with `npx vitest run src/views/shared/LocationRow.test.tsx`, then `npx vitest run src/views/shared/LocationSearchDialog.test.tsx`.
+- [ ] 4.4 TDD `src/controller/usePrefersReducedMotion.ts`: `addListener` / `removeListener` fallback (design D6, FR7). Tests in `src/controller/usePrefersReducedMotion.test.ts` with a `MediaQueryList` stub that has only `addListener`:
   - the preference turns on → the hook returns `true`;
   - unmount → `removeListener` is called with the same listener;
   - the modern path still uses `addEventListener`.
 
-  Verify red, then green, with `npx vitest run src/controller/usePrefersReducedMotion.test.tsx`.
-- [ ] 4.4 Mutation run. Verify that `npx stryker run --mutate 'src/presenter/countryName.ts,src/adapters/city-search/zoneCitiesSource.ts,src/controller/usePrefersReducedMotion.ts'` scores ≥ 95% (minimum 90%).
+  Verify red, then green, with `npx vitest run src/controller/usePrefersReducedMotion.test.ts`.
+- [ ] 4.5 Mutation run. Verify that `npx stryker run --mutate 'src/presenter/countryName.ts,src/adapters/city-search/zoneCitiesSource.ts,src/controller/usePrefersReducedMotion.ts'` scores ≥ 95% (minimum 90%).
 
 ## 5. Legacy support and boot (TDD)
 
-- [ ] 5.1 TDD new `lib/legacy/zoneShim.ts` (design D4, FR4): `createLegacyZoneDateTimeFormat(nativeDateTimeFormat, legacyNamesByCanonicalId)` and `installLegacyZoneShim()`. Use the inverse of `virtual:time-zone-aliases`, built by `getLegacyZoneNames`. Tests in `lib/legacy/zoneShim.test.ts` with a fake native that rejects `Europe/Kyiv`:
+- [ ] 5.1 TDD new `src/lib/legacy/zoneShim.ts` (design D4, FR4): `getLegacyZoneNames(timeZoneAliases)` (canonical → legacy names), `createLegacyZoneDateTimeFormat(nativeDateTimeFormat, legacyNamesByCanonicalId)` and `installLegacyZoneShim()`. Tests in `src/lib/legacy/zoneShim.test.ts` with a fake native that rejects `Europe/Kyiv`:
+  - `getLegacyZoneNames` maps `Europe/Kyiv` to a list containing `Europe/Kiev`;
   - retries `Europe/Kiev` and formats `09:30` at `2026-03-08T07:30:00Z`;
   - rethrows the original `RangeError` when no legacy name is accepted (`America/Ciudad_Juarez`);
   - passes calls without `timeZone` through unchanged;
   - keeps `supportedLocalesOf` and `instanceof`.
 
   Verify red, then green, with `npx vitest run src/lib/legacy/zoneShim.test.ts`.
-- [ ] 5.2 TDD new `lib/legacy/needsLegacySupport.ts` (design D2, FR2): true when `Array.prototype.at` is missing, when `ResizeObserver` is missing, or when the `LEGACY_ZONE_PROBE_ID` probe throws. False otherwise. Use `it.each` over the 4 cases. Verify with `npx vitest run src/lib/legacy/needsLegacySupport.test.ts`.
-- [ ] 5.3 Add `scripts/legacyCoreJs/legacyCoreJsPlugin.ts` (design D3). It is a Vite plugin serving `virtual:legacy-core-js`: the `import "core-js/modules/<name>.js"` lines for the modules that `core-js-compat` reports for `{ targets: "ios_saf 12.2", modules: "core-js/stable" }`. Split the pure list builder into its own file and unit-test it: the list contains `es.array.at` and `es.object.from-entries`, and does not contain `es.promise` (present in iOS 12). Verify with `npx vitest run scripts/legacyCoreJs`.
-- [ ] 5.4 Add `lib/legacy/installLegacySupport.ts`. It imports `virtual:legacy-core-js`, installs `@juggle/resize-observer` on `globalThis` when it is absent, and calls `installLegacyZoneShim()` when the probe fails (design D3, FR2, FR4, FR6). Add `lib/legacy/index.ts` exporting `needsLegacySupport`, `IS_POINTER_EVENTS_SUPPORTED` (design D8) and the shim types. Test in `lib/legacy/installLegacySupport.test.ts` with `ResizeObserver` removed: after the import, `globalThis.ResizeObserver` is a function. Verify with `npx vitest run src/lib/legacy/installLegacySupport.test.ts`.
-- [ ] 5.5 TDD new `boot.ts` (design D2). It exports `bootApp({ needsLegacySupport, loadLegacySupport, loadApp })` and runs it with the real imports. Tests in `boot.test.ts`:
+- [ ] 5.2 TDD new `src/lib/legacy/needsLegacySupport.ts` (design D2, FR2): true when `"at" in Array.prototype` is false, when `ResizeObserver` is missing, or when the `LEGACY_ZONE_PROBE_ID` probe throws. False otherwise. Use `it.each` over the 4 cases in `src/lib/legacy/needsLegacySupport.test.ts`. Verify with `npx vitest run src/lib/legacy/needsLegacySupport.test.ts`.
+- [ ] 5.3 Add the pure list builder `scripts/legacyCoreJs/buildLegacyCoreJsModules.ts` and the Vite plugin `scripts/legacyCoreJs/legacyCoreJsPlugin.ts` serving `virtual:legacy-core-js` (design D3): one `import "core-js/modules/<name>.js"` line per module that `core-js-compat` reports for `{ targets: "ios_saf 12.2", modules: "core-js/stable" }`. Declare the virtual module in `src/vite-env.d.ts`. Test in `src/test/legacyCoreJs/buildLegacyCoreJsModules.test.ts`: the list contains `es.array.at` and `es.object.from-entries`, and does not contain `es.promise` (present in iOS 12). Verify with `npx vitest run src/test/legacyCoreJs`.
+- [ ] 5.4 Add `src/lib/legacy/pointerEvents.ts` (`IS_POINTER_EVENTS_SUPPORTED`, design D8), `src/lib/legacy/installLegacySupport.ts` and `src/lib/legacy/index.ts`. `installLegacySupport` imports `virtual:legacy-core-js`, installs `@juggle/resize-observer` on `globalThis` when it is absent, and calls `installLegacyZoneShim()` when the probe fails (design D3, FR2, FR4, FR6). `index.ts` exports `needsLegacySupport`, `loadLegacySupport = () => import("./installLegacySupport")`, `IS_POINTER_EVENTS_SUPPORTED` and the shim types. Test in `src/lib/legacy/installLegacySupport.test.ts` with `ResizeObserver` removed: after `await loadLegacySupport()`, `globalThis.ResizeObserver` is a function. Verify with `npx vitest run src/lib/legacy/installLegacySupport.test.ts`.
+- [ ] 5.5 TDD new `src/boot.ts` (design D2). It exports `bootApp({ needsLegacySupport, loadLegacySupport, loadApp })` and runs it with `@/lib/legacy` and `() => import("./main")`. Tests in `src/boot.test.ts`:
   - with `needsLegacySupport` false, `loadLegacySupport` is never called and `loadApp` is called once;
   - with true, `loadLegacySupport` resolves before `loadApp` starts (order recorded by a log array);
-  - a rejected `loadLegacySupport` still calls `loadApp`, so the app shows its recovery screen instead of a blank page.
+  - a rejected `loadLegacySupport` still calls `loadApp`, so the app shows its recovery screen instead of a blank page;
+  - a source scan of `src/boot.ts` and `src/lib/legacy/*.ts` (tests excluded) finds no static import of `@/lib/temporal`, `temporal-polyfill`, `react` or `./main`.
 
   Point `index.html` at `/src/boot.ts`. Verify red, then green, with `npx vitest run src/boot.test.ts`.
-- [ ] 5.6 Add the `modulepreload` plugin for the `main` chunk (design D2, NFR-P2) and register both plugins in `vite.config.ts`. Set `build.target` and `build.cssTarget` (design D1, D7). Verify with `pnpm run build`:
-  - `dist/index.html` has a `modulepreload` for the main chunk and none for the legacy chunk;
-  - `pnpm --filter @time-zones/client check:bundle-size` reports initial JS ≤ 150 KB (NFR-P1, M5).
-- [ ] 5.7 Mutation run. Verify that `npx stryker run --mutate 'src/lib/legacy/zoneShim.ts,src/lib/legacy/needsLegacySupport.ts,src/boot.ts'` scores ≥ 95% (minimum 90%).
+- [ ] 5.6 Add the `modulepreload` plugin for the `main` chunk under `scripts/legacyBoot/` (design D2, NFR-P2), and register it and the plugin of 5.3 in `vite.config.ts`. Set `build.target` and `build.cssTarget` (design D1, D7). The plugin's JSDoc says `Implements NFR-P1, NFR-P2 of support-legacy-ios-12-safari`, and the header of `scripts/check-bundle-size.mjs` gains `NFR-P1 of support-legacy-ios-12-safari`. Verify with `pnpm run build`, then `pnpm --filter @time-zones/client check:bundle-size`:
+  - `dist/index.html` has a `modulepreload` for the main chunk and none for the chunk holding `installLegacySupport` (`grep -c modulepreload dist/index.html`, then `grep -L installLegacySupport` on each preloaded file);
+  - the bundle-size check reports initial JS ≤ 150 KB and passes (NFR-P1, M5).
+- [ ] 5.7 Mutation run. Verify that `npx stryker run --mutate 'src/lib/legacy/zoneShim.ts,src/lib/legacy/needsLegacySupport.ts,src/lib/legacy/installLegacySupport.ts,src/boot.ts'` scores ≥ 95% (minimum 90%).
 
 ## 6. Input fallbacks (TDD)
 
-- [ ] 6.1 TDD `views/shared/DayTrack.tsx`: `onClick` → `selectAt` only when `IS_POINTER_EVENTS_SUPPORTED` is false (design D8, FR8, NFR-A2, UX1). Tests in new `views/shared/DayTrack.legacy.test.tsx`, using `dayTrackFixture.tsx` and a re-imported module with `PointerEvent` removed:
+- [ ] 6.1 In `src/test/setup.ts`, define a minimal `PointerEvent` class extending `MouseEvent` when `typeof globalThis.PointerEvent !== "function"`, so existing tests keep the modern path (design D8). Verify that `npx vitest run src/views/shared/DayTrack.test.tsx` and then `npx vitest run src/views/shared/LocationList.test.tsx` stay green.
+- [ ] 6.2 TDD `src/views/shared/DayTrack.tsx`: `onClick` → `selectAt` only when `IS_POINTER_EVENTS_SUPPORTED` is false (design D8, FR8, NFR-A2, UX1). Tests in new `src/views/shared/DayTrack.legacy.test.tsx`, using `dayTrackFixture.tsx` and a re-imported module with `PointerEvent` removed:
   - a click at `clientX` = three quarters of the track calls `onSelectFraction(0.75)`;
-  - role, name, value and keys are unchanged.
+  - role, name, value and key handling are unchanged.
 
   With `PointerEvent` present, a click without a press calls nothing. Verify red, then green, with `npx vitest run src/views/shared/DayTrack.legacy.test.tsx`, then `npx vitest run src/views/shared/DayTrack.test.tsx`.
-- [ ] 6.2 Add the scenarios "A tap selects a time without Pointer Events" and "A click adds nothing where Pointer Events exist" to `test/features/time_selection/time_selection_select_time.feature`, with step definitions, tagged `@support-legacy-ios-12-safari @FR8`. Verify with `npx vitest run src/test/features/time_selection`.
-- [ ] 6.3 TDD `views/shared/LocationList.tsx`: the sensor class from `IS_POINTER_EVENTS_SUPPORTED`, with `TouchSensor` options `{ delay: REORDER_TOUCH_ACTIVATION_DELAY_MS, tolerance: REORDER_TOUCH_ACTIVATION_TOLERANCE_PX }` (design D8, FR9, UX2). In `views/shared/LocationList.test.tsx`, spy on dnd-kit `useSensor` through `vi.mock` and check:
+- [ ] 6.3 Add the scenarios "A tap selects a time without Pointer Events" and "A click adds nothing where Pointer Events exist" to `src/test/features/time_selection/time_selection_select_time.feature`, with step definitions in `steps/time_selection_select_time.steps.tsx`, tagged `@support-legacy-ios-12-safari @FR8` (the tap one also `@UX1`). Verify with `npx vitest run src/test/features/time_selection/steps/time_selection_select_time.steps.tsx`.
+- [ ] 6.4 TDD `src/views/shared/LocationList.tsx`: the sensor class from `IS_POINTER_EVENTS_SUPPORTED`, with `TouchSensor` options `{ delay: REORDER_TOUCH_ACTIVATION_DELAY_MS, tolerance: REORDER_TOUCH_ACTIVATION_TOLERANCE_PX }` (design D8, FR9, UX2). In `src/views/shared/LocationList.test.tsx`, spy on dnd-kit `useSensor` through `vi.mock` and check:
   - without `PointerEvent`: `TouchSensor` with those options plus `KeyboardSensor`;
   - with it: `PointerSensor` with the distance constraint plus `KeyboardSensor`.
 
   Verify red, then green, with `npx vitest run src/views/shared/LocationList.test.tsx`.
-- [ ] 6.4 Add the scenarios "Drag by finger without Pointer Events" and "Sensors depend on Pointer Events" to `test/features/locations/locations_reorder_unit.feature`, with step definitions, tagged `@support-legacy-ios-12-safari @FR9`. The drag scenario fires `touchstart`, waits out the delay through the dnd-kit test pattern already in use, then fires `touchmove` / `touchend`, and checks the order. Verify with `npx vitest run src/test/features/locations/locations_reorder_unit.feature`.
-- [ ] 6.5 Mutation run. Verify that `npx stryker run --mutate 'src/views/shared/DayTrack.tsx,src/views/shared/LocationList.tsx'` scores ≥ 95% (minimum 90%).
+- [ ] 6.5 Add `emulateEngineWithoutPointerEvents(page)` to `src/test/features/locations/steps/locationsReorderE2eHelpers.ts` (design D11). Add the scenarios "Drag by finger without Pointer Events" (order changes, `window.scrollY` unchanged during the drag) and "A quick swipe over the handle scrolls without Pointer Events" to `src/test/features/locations/locations_reorder_e2e.feature`, with steps in `steps/locations_reorder_drag_e2e.steps.ts` built on `startTouch` / `dispatchTouch`, tagged `@support-legacy-ios-12-safari @FR9 @UX2`. Verify with `pnpm --filter @time-zones/client test:bdd -- --grep "without Pointer Events"`.
+- [ ] 6.6 Add the scenario "A finger tap keeps the slider accessible without Pointer Events" to `src/test/features/time_selection/time_selection_touch_e2e.feature`, with steps in `steps/time_selection_pointer_e2e.steps.ts`, tagged `@support-legacy-ios-12-safari @FR8 @NFR-A2 @UX1`. It uses `emulateEngineWithoutPointerEvents`, taps through CDP, and checks the pinned time, the slider's role, accessible name, `aria-valuemin` / `aria-valuemax`, and that ArrowRight moves one track step. Verify with `pnpm --filter @time-zones/client test:bdd -- --grep "keeps the slider accessible"`.
+- [ ] 6.7 Mutation run. Verify that `npx stryker run --mutate 'src/views/shared/DayTrack.tsx,src/views/shared/LocationList.tsx,src/lib/legacy/pointerEvents.ts'` scores ≥ 95% (minimum 90%).
 
 ## 7. Update check on return (TDD)
 
-- [ ] 7.1 TDD new `controller/useUpdateRecheckOnReturn.ts` (design D10, FR10). Tests in `controller/useUpdateRecheckOnReturn.test.tsx` with a fake registration (`update: vi.fn()`), `createSwitchableClock` and `setPageVisibility`:
+- [ ] 7.1 TDD new `src/controller/useUpdateRecheckOnReturn.ts` (design D10, FR10). Tests in `src/controller/useUpdateRecheckOnReturn.test.tsx` with a fake registration (`update: vi.fn()`), `createSwitchableClock` and `setPageVisibility`:
   - visible after 16 min → `update` called once;
   - visible after 5 min → not called;
   - hidden after 16 min → not called;
@@ -109,59 +107,63 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - unmount removes the listener.
 
   Verify red, then green, with `npx vitest run src/controller/useUpdateRecheckOnReturn.test.tsx`.
-- [ ] 7.2 Wire the hook into `controller/usePwaUpdateStatus.ts`: keep the registration from `onRegisteredSW` in state, and pass the app's clock and `setIsUpdateCheckFailed(true)`. Keep `controller/usePwaUpdateStatus.test.tsx` green, and add a case: after `onRegisteredSW` and a visible event 16 min later, a second `update` call happens. Verify with `npx vitest run src/controller/usePwaUpdateStatus.test.tsx`.
-- [ ] 7.3 Add the scenarios "Returning to the app checks again", "Returning soon after a check does not check", "Hiding the page does not check" and "A check on return fails offline" to `test/features/app_shell/app_shell_notices.feature`, with step definitions, tagged `@support-legacy-ios-12-safari @FR10`. Verify with `npx vitest run src/test/features/app_shell/app_shell_notices.feature`.
+- [ ] 7.2 Wire the hook into `src/controller/usePwaUpdateStatus.ts`: add `clock: Clock = systemClock`, keep the registration from `onRegisteredSW` in state, and pass `setIsUpdateCheckFailed(true)` as `onCheckFailed`. Keep `src/controller/usePwaUpdateStatus.test.ts` green and add a case: after `onRegisteredSW` and a visible event 16 min later, a second `update` call happens. Verify with `npx vitest run src/controller/usePwaUpdateStatus.test.ts`.
+- [ ] 7.3 Add the scenarios "Returning to the app checks again", "Returning soon after a check does not check", "Hiding the page does not check" and "A check on return fails offline" to `src/test/features/app_shell/app_shell_notices.feature`, with step definitions in `steps/app_shell_notices.steps.ts` (its fake `useRegisterSW` gains an `onRegisteredSW` call with a fake registration), tagged `@support-legacy-ios-12-safari @FR10`. Verify with `npx vitest run src/test/features/app_shell/steps/app_shell_notices.steps.ts`.
 - [ ] 7.4 Mutation run. Verify that `npx stryker run --mutate 'src/controller/useUpdateRecheckOnReturn.ts,src/controller/usePwaUpdateStatus.ts'` scores ≥ 95% (minimum 90%).
 
 ## 8. CSS and page head
 
-- [ ] 8.1 Extend `theme.minHeight.dvh` in `tailwind.config.ts` to `["100vh", "100dvh"]` (design D7, FR12). Add `<meta name="apple-mobile-web-app-capable" content="yes">` to `index.html` (FR11). Verify with `pnpm run build`: the `min-h-dvh` rule in `dist/assets/index-*.css` declares `100vh` before `100dvh`, and `dist/index.html` contains the meta tag.
-- [ ] 8.2 Extend the existing app-delivery manifest/head E2E step (`app_shell_smoke_e2e.feature`) with the scenario "Page declares an iOS home-screen web app", tagged `@support-legacy-ios-12-safari @FR11`. Verify with `pnpm --filter @time-zones/client test:bdd -- --grep "iOS home-screen"`.
+- [ ] 8.1 Set `theme.extend.minHeight.dvh` in `tailwind.config.ts` to `["100vh", "100dvh"]` (design D7, FR12). Add `<meta name="apple-mobile-web-app-capable" content="yes">` to `index.html` (FR11). Verify with `pnpm run build`: the `min-h-dvh` rule in `dist/assets/index-*.css` declares `100vh` before `100dvh`, and `dist/index.html` contains the meta tag.
+- [ ] 8.2 Add the scenario "Page declares an iOS home-screen web app" to `src/test/features/app_shell/app_shell_smoke_e2e.feature`, with steps in `steps/app_shell_smoke_e2e.steps.ts`, tagged `@support-legacy-ios-12-safari @FR11`. Verify with `pnpm --filter @time-zones/client test:bdd -- --grep "iOS home-screen"`.
 
-## 9. Legacy build checks in CI
+## 9. Legacy build check
 
-- [ ] 9.1 TDD the pure module `scripts/legacyBuild/findLegacySyntaxIssues.ts` (design D9, FR13). Input: file name and source. Output: a list of `{ file, construct }`. It parses with `acorn` (`ecmaVersion: 2020`, module), walks the AST and reports parse errors, `ChainExpression`, `??`, BigInt literals and regex lookbehind. `findInsetShorthand(css)` reports `inset:` declarations. Tests in `scripts/legacyBuild/findLegacySyntaxIssues.test.ts` with `it.each`:
-  - one snippet per construct is reported;
+- [ ] 9.1 TDD the pure module `scripts/legacyBuild/findLegacySyntaxIssues.ts` (design D9, FR13). Input: file name and source. Output: a list of `{ file, construct }`. It parses with `acorn` (`ecmaVersion: 2020`, module), walks the AST and reports parse errors, `ChainExpression`, `??`, BigInt literals and regex lookbehind. `findInsetShorthand(css)` reports `inset:` declarations (FR12). Tests in `src/test/legacyBuild/findLegacySyntaxIssues.test.ts` with `it.each`, header `// FR12, FR13 of support-legacy-ios-12-safari`:
+  - one snippet per construct is reported, including `a ??= b` and `1_000`;
   - `import()`, `import.meta` and `catch {}` are allowed;
   - `top:0;inset-inline:0` is not reported as `inset:`.
 
-  Verify red, then green, with `npx vitest run scripts/legacyBuild`.
-- [ ] 9.2 Add `scripts/check-legacy-build.mjs` and the script `check:legacy-build` in `package.json`. It reads `dist/assets/*.{js,css}`, `dist/sw.js` and `dist/workbox-*.js`, prints every issue and exits non-zero on any. Add the step "Check legacy build" after "Check initial JS budget" in `.github/workflows/ci.yml`. Verify that `pnpm run build` then `pnpm --filter @time-zones/client check:legacy-build` exits 0 with no issues (M2). Verify that it exits non-zero when one source temporarily uses `inset` in raw CSS. Revert that edit.
+  Verify red, then green, with `npx vitest run src/test/legacyBuild`.
+- [ ] 9.2 Add `scripts/check-legacy-build.mjs` and the script `"check:legacy-build": "node scripts/check-legacy-build.mjs"` in `packages/client/package.json`. It reads `dist/assets/*.{js,css}`, `dist/sw.js` and `dist/workbox-*.js`, prints every issue and exits non-zero on any. Add a test in `src/test/legacyBuild/checkLegacyBuild.test.ts` that runs the script with `execFileSync` against a temporary fixture directory (as `src/test/benchmarks/benchBudgets.test.ts` does): a fixture with `inset:0` in CSS exits non-zero and names the file; a clean fixture exits 0. Verify with `npx vitest run src/test/legacyBuild`, then `pnpm run build`, then `pnpm --filter @time-zones/client check:legacy-build` exits 0 with no issues (M2).
 
-## 10. Behavior feature and docs
+## 10. Behavior features
 
-- [ ] 10.1 Write `test/features/browser_compatibility/browser_compatibility_legacy_engine.feature` (vitest-cucumber) with step definitions under `steps/`. It covers the `browser-compatibility` scenarios that are not build checks: main page on a legacy engine, modern engine skips polyfills, legacy engine installs polyfills first, zone checks without BigInt, the three renamed-zone scenarios (M3), the two country-name scenarios, view selection without `ResizeObserver`, and the two reduced-motion scenarios. Tags: `@support-legacy-ios-12-safari @FR-X`. Verify with `npx vitest run src/test/features/browser_compatibility` (M4).
-- [ ] 10.2 Write `docs/adr/0009-supported-browser-engines.md` (status Accepted). It covers:
-  - the supported engines (latest evergreen and iOS Safari 12.5);
-  - the boot-time conditional polyfill strategy;
-  - the BigInt ban;
-  - the legacy zone shim as a stopgap until the app's own zone database.
+- [ ] 10.1 Write `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_unit.feature` (vitest-cucumber) with steps in `steps/browser_compatibility_legacy_engine_unit.steps.tsx`. It covers the `browser-compatibility` scenarios that need no real browser: main page on a legacy engine (FR1), modern engine skips the polyfills and legacy engine installs them first (FR2, through `bootApp` with recorded loaders), zone checks without BigInt (FR3), the four renamed-zone scenarios including the wall-clock outline (FR4, M3), the two country-name scenarios (FR5, UX3), view selection without `ResizeObserver` (FR6), and the two reduced-motion scenarios (FR7). The search scenarios of the `location-search` delta go into `src/test/features/location_search/location_search_by_country.feature` and its steps. Tags: `@support-legacy-ios-12-safari @FR-X`. Verify with `npx vitest run src/test/features/browser_compatibility`, then `npx vitest run src/test/features/location_search/steps` (M4).
+- [ ] 10.2 Write `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_e2e.feature` (playwright-bdd) with steps in `steps/browser_compatibility_legacy_engine_e2e.steps.ts`:
+  - "Modern engine requests no polyfills" (`@NFR-P2 @M5`): the request log of a Chromium page load holds no request for the chunk that contains `installLegacySupport`;
+  - "No accessibility violations without Pointer Events" (`@NFR-A1`): with `emulateEngineWithoutPointerEvents`, axe-core reports no violations on the main page and in the open search dialog;
+  - "Modern screenshots unchanged" (`@NFR-R1 @FR12`) is proven by the existing screenshot scenarios, whose baselines under `src/test/features/__screenshots__/` must pass unchanged (task 12.2). A new scenario would need new baselines, so instead add `// Verifies NFR-R1 of support-legacy-ios-12-safari: approved baselines pass unchanged with the legacy CSS fallbacks` above the `toHaveScreenshot` step in `src/test/features/locations/steps/locations_layout_e2e.steps.ts`.
 
-  Link it from `CLAUDE.md` "ADRs" and `docs/architecture/overview.md`. Verify that `grep -n "0009" CLAUDE.md docs/architecture/overview.md` finds both links.
+  Verify with `pnpm --filter @time-zones/client test:bdd -- --grep "@support-legacy-ios-12-safari"`.
 
-- [ ] 10.3 Add the new terms of this change to `docs/glossary/` (`.claude/rules/glossary.md`):
-  - new context file `browser-compatibility.md`: **Supported engine**, **Legacy engine** (*Never:* old browser, legacy browser), **Legacy support** (the boot-time polyfills and shims, *Code:* `src/lib/legacy/`, `boot.ts`), **Legacy zone shim** (*Code:* `zoneShim.ts`; *Not:* the legacy zone name);
-  - `time-selection.md`: add "tap" to **Time selection** for engines without Pointer Events;
-  - `app-shell.md`: **Update recheck** (*Code:* `useUpdateRecheckOnReturn`, `UPDATE_RECHECK_INTERVAL_MS`).
+## 11. Handoff patches (files the implement stage may not edit)
 
-  Add the new file to the context table in `docs/glossary/README.md`. Verify with `grep -rn "Legacy engine\|Update recheck" docs/glossary`.
+- [ ] 11.1 Handoff H1: write `openspec/changes/support-legacy-ios-12-safari/handoff/H1-ci-legacy-build-step.patch` and its README section. The patch adds the step "Check legacy build" (`pnpm --filter @time-zones/client check:legacy-build`, comment `# implements FR13 of support-legacy-ios-12-safari`) after "Check initial JS budget" in `.github/workflows/ci.yml`. Verify with `git apply --check openspec/changes/support-legacy-ios-12-safari/handoff/H1-ci-legacy-build-step.patch` and `git diff --exit-code -- .github`.
+- [ ] 11.2 Handoff H2: write `handoff/H2-adr-supported-browser-engines.patch` and its README section. The patch adds `docs/adr/0009-supported-browser-engines.md` (status Accepted, format of `.claude/rules/adr.md`, naming `support-legacy-ios-12-safari`) covering the supported engines (latest evergreen and iOS Safari 12.5), the boot-time conditional polyfills, the BigInt ban, and the legacy zone shim as a stopgap under ADR-0003's known limitation. It links the ADR from the ADR list in `CLAUDE.md` and the table in `docs/architecture/overview.md`. Verify with `git apply --check` on the patch, `git diff --exit-code -- docs CLAUDE.md`, and `grep -c "0009" openspec/changes/support-legacy-ios-12-safari/handoff/H2-adr-supported-browser-engines.patch` ≥ 3.
+- [ ] 11.3 Handoff H3: write `handoff/H3-glossary-browser-compatibility.patch` and its README section. The patch adds `docs/glossary/browser-compatibility.md` with **Supported engine**, **Legacy engine** (*Never:* old browser, legacy browser), **Legacy support** (*Code:* `src/lib/legacy/`, `src/boot.ts`) and **Legacy zone shim** (*Code:* `src/lib/legacy/zoneShim.ts`; *Not:* the legacy zone name), adds **Update recheck** (*Code:* `useUpdateRecheckOnReturn`, `UPDATE_RECHECK_INTERVAL_MS`) to `docs/glossary/app-shell.md`, and adds the new file to the context table of `docs/glossary/README.md`. Verify with `git apply --check` on the patch, `git diff --exit-code -- docs`, and `grep -c "Legacy engine\|Update recheck" openspec/changes/support-legacy-ios-12-safari/handoff/H3-glossary-browser-compatibility.patch` ≥ 2.
+- [ ] 11.4 Handoff H4: write the README section for the device acceptance (M7), with no patch. It lists the steps: deploy, open in Safari on iOS 12.5.7, add to the home screen, open the installed app online once, then U1 (cards shown, Kyiv included), U2 (tap the track), U3 (finger reorder without page scroll), U5 (search and add Kyiv), and after a later deploy U4 (notice on return); the Safari Web Inspector console shows 0 errors; any tuning of `REORDER_TOUCH_ACTIVATION_DELAY_MS` is recorded on the PR. Verify with `grep -c "^## H[1-4]:" openspec/changes/support-legacy-ios-12-safari/handoff/README.md` = 4.
 
-## 11. Integration verification
+## 12. Integration verification
 
-- [ ] 11.1 Run `pnpm lint`, then `pnpm typecheck`, then `pnpm run build`, then `pnpm --filter @time-zones/client check:bundle-size`, then `pnpm --filter @time-zones/client check:legacy-build`, one at a time. All must pass (NFR-P1, M2, M5).
-- [ ] 11.2 Run the smoke E2E and the screenshot suite once: `pnpm --filter @time-zones/client test:bdd`. All baselines pass without `--update-snapshots` (NFR-R1), and axe-core reports no new violations (NFR-A1). Also check that the network log of the smoke run in Chromium shows no request for the legacy chunk (M5).
-- [ ] 11.3 Traceability check (M1): `grep -rn "support-legacy-ios-12-safari" packages/client/src packages/client/scripts` finds at least one reference for each of FR1–FR13, NFR-P1, NFR-P2, NFR-A1, NFR-A2, NFR-R1 and UX1–UX3. FR1 on a device is left to 11.4.
-- [ ] 11.4 Manual acceptance on the owner's iOS 12.5.7 device (M7, NG9: the only check that cannot be automated). Deploy, open in Safari, add to the home screen, open the installed app online once, then:
-  - U1 (cards shown, Kyiv included);
-  - U2 (tap the track);
-  - U3 (finger reorder without page scroll);
-  - U5 (search and add Kyiv);
-  - after a later deploy, U4 (notice on return).
+- [ ] 12.1 Run `pnpm lint`, then `pnpm typecheck`, then `pnpm test`, then `pnpm run build`, then `pnpm --filter @time-zones/client check:bundle-size`, then `pnpm --filter @time-zones/client check:legacy-build`, one at a time: the CI job's commands plus the new check. All must pass (NFR-P1, M2, M5).
+- [ ] 12.2 Run the BDD E2E suite once: `pnpm --filter @time-zones/client test:bdd`. All screenshot baselines pass without `--update-snapshots` (NFR-R1), and the axe-core scenarios report no violations (NFR-A1).
+- [ ] 12.3 Traceability check (M1). From the repository root, this loop prints nothing:
+  `for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 FR9 FR10 FR11 FR12 FR13 NFR-P1 NFR-P2 NFR-A1 NFR-A2 NFR-R1 UX1 UX2 UX3; do grep -rlE "support-legacy-ios-12-safari.*[@ ,]$id([^0-9]|$)|[@ ,]$id([^0-9]|$).*support-legacy-ios-12-safari" packages/client/src packages/client/scripts packages/client/vite.config.ts packages/client/index.html >/dev/null || echo "missing $id"; done`.
+  It matches the change name and the id on one line, so references left by earlier changes cannot satisfy it.
 
-  The Safari Web Inspector console must show 0 errors. Record the result, and any tuning of `REORDER_TOUCH_ACTIVATION_DELAY_MS`, in the PR.
+## Human follow-up
 
-## Workflow follow-up
+The operator reviews these on the PR that the deliver stage opens, then applies the patches.
 
-- Ask the user for a full mutation run (`pnpm test:mutation`) before archive, as the project rules require.
-- Archive with `/opsx:archive` once 11.4 has passed.
-- Future changes noted in proposal Non-Goals: theme choice in settings (NG1), the app's own time zone database (NG2, retires design D4), and possibly smooth track drag, CLDR country names, flex `gap` and `:focus-visible` fallbacks (NG4–NG7).
+- H1 (FR13, M2): apply `handoff/H1-ci-legacy-build-step.patch` — adds the "Check legacy build" step to `.github/workflows/ci.yml`.
+  Why manual: the factory may not edit `.github/`.
+  Automated part: `check:legacy-build`, its rule tests in `src/test/legacyBuild/` and the BigInt source scan run in `pnpm test` and in task 12.1.
+- H2 (FR1, FR2, FR3, FR4): apply `handoff/H2-adr-supported-browser-engines.patch` — adds ADR-0009 and links it from `CLAUDE.md` and `docs/architecture/overview.md`.
+  Why manual: the factory may not write `docs/adr/` or `CLAUDE.md`, and the implement stage writes only under `packages/`.
+  Automated part: the behaviour the ADR records is covered by the unit and E2E features of sections 3–10.
+- H3 (FR4, FR10): apply `handoff/H3-glossary-browser-compatibility.patch` — adds the `browser-compatibility` glossary context and **Update recheck**.
+  Why manual: the implement stage writes only under `packages/`, and the glossary lives in `docs/glossary/`.
+  Automated part: none; `git apply --check` in task 11.3 proves the patch applies.
+- H4 (FR1, M7): run the device acceptance in the `handoff/README.md` section H4 on the owner's iOS 12.5.7 device.
+  Why manual: no automated runner provides iOS Safari 12 (NG9), and the check needs the owner's physical device.
+  Automated part: every fallback is tested with the API removed in jsdom, and the touch paths run in Chromium with Pointer Events suppressed (tasks 6.5, 6.6, 10.2).

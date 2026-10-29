@@ -78,7 +78,7 @@ Effects on the existing code:
 - `resolveWallClock("Europe/Kyiv", …)` gives `2026-03-08T08:00:00Z` `UNIQUE` for `2026-03-08T10:00`, and `GAP` (`2026-03-29T01:30:00Z`) for `2026-03-29T03:30`, the DST start in Kyiv. That is the case the later change `add-wall-time-input-with-hint` relies on;
 - no other `Intl` or `Date` path throws.
 
-If any check fails, D4 switches to the explicit resolver below before section 5 of `tasks.md`. The result is recorded at the end of "Risks".
+If any check fails, D4 switches to the explicit resolver below before section 5 of `tasks.md`. Either way the spike stays as a permanent test (`src/lib/legacy/zoneShim.temporal.test.ts`), so the result is recorded in code, not in this document.
 
 The shim is a stopgap. The future change that ships its own zone database removes it together with the probe in D2.
 

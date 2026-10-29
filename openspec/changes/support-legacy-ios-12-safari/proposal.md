@@ -140,7 +140,7 @@ Feature files tagged `@support-legacy-ios-12-safari`:
 
 - `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_unit.feature` (vitest-cucumber): polyfills installed only when missing, legacy zone names (including wall-clock resolution), missing `Intl.DisplayNames`, `ResizeObserver` and `addEventListener` on `MediaQueryList`, zone checks without BigInt.
 - `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_e2e.feature` (playwright-bdd): no polyfill request in Chromium, axe-core on the main page and the search dialog with Pointer Events emulated away.
-- New scenarios in `time_selection_select_time.feature` (tap and click logic, unit), `time_selection_touch_e2e.feature` (real tap without Pointer Events, slider name and keys), `locations_reorder_e2e.feature` (finger drag without Pointer Events, no page scroll), `app_shell_notices.feature` (check on return to the screen) and `app_shell_smoke_e2e.feature` (iOS home-screen meta tag).
+- New scenarios in `time_selection_select_time.feature` (tap and click logic, unit), `time_selection_touch_e2e.feature` (real tap without Pointer Events, slider name and keys), `locations_reorder_e2e.feature` (finger drag without Pointer Events, no page scroll), `location_search_by_country.feature` (country search without `Intl.DisplayNames`), `app_shell_notices.feature` (check on return to the screen) and `app_shell_smoke_e2e.feature` (iOS home-screen meta tag).
 - The build checks (FR12, FR13) run as a script. Its rules are covered by unit tests under `src/test/legacyBuild/`.
 
 ## Visual Reference
