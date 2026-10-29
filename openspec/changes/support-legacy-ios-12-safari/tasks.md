@@ -10,6 +10,7 @@ All source paths are under `packages/client/`. Commands run from `packages/clien
   - `// @support-legacy-ios-12-safari @FR-X` before `f.Scenario`, `// Verifies NFR-X of support-legacy-ios-12-safari` in E2E steps;
   - `Implements FR-X of support-legacy-ios-12-safari` in the JSDoc of new or changed production code.
 - **File size:** every new or changed file stays under 200 lines (`.claude/rules/process-invariants.md`: "Target 100–200 lines per file; 300 is a hard cap"). Existing test files at or near the limit (`app_shell_notices.steps.ts` 273, `LocationRow.test.tsx` 224, `app_shell_smoke_e2e.steps.ts` 199, `LocationList.test.tsx` 196, `locationsReorderE2eHelpers.ts` 196, `time_selection_select_time.steps.tsx` 190, `locations_reorder_drag_e2e.steps.ts` 188, `locations_reorder_e2e.feature` 237) get no new code: the tasks below put the new tests into new files. Each task's verification includes `wc -l` on the files it creates or changes, every count < 200.
+- **E2E step texts:** playwright-bdd loads every `src/test/features/**/steps/*_e2e.{steps,fixtures}.ts` for every feature (`playwright.bdd.config.ts`), and today each step text is defined once. New E2E steps reuse an existing definition where the text matches and never define a text that already exists, or the run fails on duplicate matches.
 - **Design references:** "design Dn" refers to `design.md`.
 
 ## 1. Spike: zone shim against temporal-polyfill (blocks section 5)
@@ -22,7 +23,7 @@ All source paths are under `packages/client/`. Commands run from `packages/clien
   - `resolveWallClock("Europe/Kyiv", Temporal.PlainDateTime.from("2026-10-25T03:30"))` gives `2026-10-25T00:30:00Z` with `WallClockStatus.AMBIGUOUS` (DST end: the `earlier` and `later` paths differ);
   - no other `Intl` / `Date` path throws.
 
-  If every check passes, keep the file: after task 5.1 it switches from the minimal retry to `createLegacyZoneDateTimeFormat`, and it stays as the regression test for the path `add-wall-time-input-with-hint` relies on. If any check fails, follow the fallback of design D4 (explicit resolver) before section 5, and keep the failing checks as the tests of that resolver. Verify with `npx vitest run src/lib/legacy/zoneShim.temporal.test.ts`, then that the inline entry breaks nothing with `npx vitest run src/model/wallClock.test.ts`.
+  If every check passes, keep the file: after task 5.1 it switches from the minimal retry to `createLegacyZoneDateTimeFormat`, and it stays as the regression test for the path `add-wall-time-input-with-hint` relies on. If any check fails, follow the fallback of design D4 (explicit resolver) before section 5, and keep the failing checks as the tests of that resolver. Verify with `npx vitest run src/lib/legacy/zoneShim.temporal.test.ts`, then that the inline entry breaks nothing with `npx vitest run src/model/wallClock.test.ts`, then `npx vitest run src/test/features/locations/steps/locations_device_time_zone_unit.steps.tsx` (today the only test that calls `vi.resetModules()`; with the polyfill inlined, its fresh imports re-evaluate `temporal-polyfill`).
 
 ## 2. Dependencies and constants (no TDD: setup and constants)
 
@@ -31,9 +32,10 @@ All source paths are under `packages/client/`. Commands run from `packages/clien
   - `UPDATE_RECHECK_INTERVAL_MS = 15 * MILLISECONDS_PER_MINUTE` in new `src/constants/update.ts` (design D10, FR10);
   - `REORDER_TOUCH_ACTIVATION_DELAY_MS = 250` and `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX = 5` in `src/constants/reorder.ts` (design D8, FR9);
   - `LEGACY_ZONE_PROBE_ID = "Europe/Kyiv"` in new `src/constants/legacy.ts` (design D2);
-  - `NANOSECONDS_PER_MILLISECOND = 1_000_000` in `src/constants/utcOffset.ts` (design D5).
+  - `NANOSECONDS_PER_MILLISECOND = 1_000_000` in `src/constants/utcOffset.ts` (design D5);
+  - `VISIBILITY_CHANGE_EVENT` and `VISIBLE_STATE`, moved from module constants of `src/controller/useMinuteTick.ts` into new `src/constants/pageVisibility.ts`, so `useMinuteTick` and the hook of task 7.1 share them (design D10; `.claude/rules/code-style.md`: "Is any value repeated in 2+ places? → Must be a constant"). `useMinuteTick` imports them from `@/constants`; its behaviour does not change.
 
-  Verify with `pnpm --filter @time-zones/client typecheck`.
+  Verify with `pnpm --filter @time-zones/client typecheck`, then `npx vitest run src/controller/useMinuteTick.test.tsx`.
 
 ## 3. Model: no BigInt (TDD)
 
@@ -115,7 +117,7 @@ All source paths are under `packages/client/`. Commands run from `packages/clien
 
 ## 8. CSS and page head
 
-- [ ] 8.1 Set `theme.extend.minHeight.dvh` in `tailwind.config.ts` to `["100vh", "100dvh"]` (design D7, FR12). Add `<meta name="apple-mobile-web-app-capable" content="yes">` to `index.html` (FR11). Verify with `pnpm run build`: the `min-h-dvh` rule in `dist/assets/index-*.css` declares `100vh` before `100dvh`, and `dist/index.html` contains the meta tag. The lasting check of the fallback is the `dvh` rule of tasks 9.1–9.2, which `check:legacy-build` runs on every build (and in CI after H1).
+- [ ] 8.1 Set `theme.extend.minHeight.dvh` in `tailwind.config.ts` to `["100vh", "100dvh"]` (design D7, FR12). Add `<meta name="apple-mobile-web-app-capable" content="yes">` to `index.html` (FR11). Verify with `pnpm run build`: the `min-h-dvh` rule in the built CSS under `dist/assets/*.css` (the stylesheet is imported by `src/main.tsx`, which becomes a dynamic chunk after task 5.5, so its file name follows that chunk) declares `100vh` before `100dvh`, and `dist/index.html` contains the meta tag. The lasting check of the fallback is the `dvh` rule of tasks 9.1–9.2, which `check:legacy-build` runs on every build (and in CI after H1).
 - [ ] 8.2 Write new `src/test/features/app_shell/app_shell_ios_home_screen_e2e.feature` with the scenario "Page declares an iOS home-screen web app", and its steps in new `steps/app_shell_ios_home_screen_e2e.steps.ts` (using the `test` of `app_shell_smoke_e2e.fixtures.ts`; `app_shell_smoke_e2e.steps.ts`, 199 lines, stays untouched), tagged `@support-legacy-ios-12-safari @FR11`. Verify with `pnpm --filter @time-zones/client test:bdd -- --grep "iOS home-screen"`.
 
 ## 9. Legacy build check

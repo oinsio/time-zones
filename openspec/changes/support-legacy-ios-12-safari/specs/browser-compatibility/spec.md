@@ -42,7 +42,7 @@ Built-ins missing on a legacy engine SHALL be installed before any application m
 - **AND** the polyfills are not part of it
 
 ### Requirement: No BigInt at run time
-Production code SHALL NOT create, read or compare BigInt values at run time. That covers BigInt literals, the `BigInt` function and nanosecond epoch values. Instants MUST be compared and measured in milliseconds. <!-- implements FR3 of support-legacy-ios-12-safari -->
+Production code SHALL NOT create, read or compare BigInt values at run time. That covers BigInt literals, the `BigInt` function and the nanosecond values of an instant (`epochNanoseconds`). Instants MUST be compared and measured in milliseconds. <!-- implements FR3 of support-legacy-ios-12-safari -->
 
 #### Scenario: Sources contain no BigInt
 - **WHEN** the production sources are searched for BigInt literals, `BigInt(` and `epochNanoseconds`

@@ -25,13 +25,12 @@ Binding decisions followed: ADR-0002 (layers: side effects in the controller, vi
 
 **Non-Goals:** a `nomodule` legacy bundle (NG8). Babel. Any change to domain types or the stored schema.
 
-## Decisions
+## Decision
 
 ### D1. Build: lower syntax with esbuild targets, not `@vitejs/plugin-legacy` (FR1, NFR-P1)
 
 `build.target` becomes `["es2020", "edge88", "firefox78", "chrome87", "safari12", "ios12"]` (the Vite default with `safari12` and `ios12` in place of `safari14`), kept in one exported constant. `build.cssTarget` uses the same list (D7). esbuild lowers `??`, `?.`, numeric separators, class fields and the other post-2018 syntax. It stops the build on what it cannot lower, such as a BigInt literal.
 
-**Alternatives:** `@vitejs/plugin-legacy` with `modernPolyfills: true`. Its modern-polyfill chunk is a static `<script type="module">` in `index.html`, so every browser downloads it and it counts as initial JS. That breaks NFR-P1 and G3, and it adds Babel to the build. Rejected. `renderLegacyChunks: true` (the SystemJS bundle) targets engines without modules. iOS 12 has them, so it only adds build time. Rejected.
 
 ### D2. Boot module loads legacy support, then the app (FR2, NFR-P2)
 
@@ -41,11 +40,10 @@ Binding decisions followed: ADR-0002 (layers: side effects in the controller, vi
 2. When the check is true, it awaits `loadLegacySupport()`, which `lib/legacy/index.ts` defines as `() => import("./installLegacySupport")`. The dynamic import lives inside the module, so `boot.ts` imports only through `@/lib/legacy` (module boundary rule) and the polyfills stay in their own chunk.
 3. It awaits `import("./main")`. `main.tsx` stays the app entry and mounts the app. A rejected legacy load still loads the app, so the user sees the app or its recovery screen, never a blank page.
 
-The static import graph of `boot.ts` holds only `lib/legacy/` and `@/constants` (plain values; its only import is type-only). `lib/legacy/` must not import `@/lib/temporal`, React or any app module statically, so nothing evaluates `temporal-polyfill` before the shim (task 5.5 checks it with a source scan).
+The static import graph of `boot.ts` holds only `lib/legacy/` and `@/constants` (plain values; apart from imports between its own files, its only import is the type-only `SupportedLanguage` from `@/i18n` in `src/constants/date.ts`, which the build erases). `lib/legacy/` must not import `@/lib/temporal`, React or any app module statically, so nothing evaluates `temporal-polyfill` before the shim (task 5.5 checks it with a source scan).
 
 To avoid a request waterfall on modern browsers, a small Vite plugin (`transformIndexHtml`, `enforce: "post"`) adds `<link rel="modulepreload">` for the `main` chunk and its static imports. `check-bundle-size.mjs` already counts those links, so the budget measures exactly what a modern browser fetches at start. The legacy chunk gets no preload link and stays outside the budget.
 
-**Alternatives:** a classic inline script that writes a synchronous polyfill `<script>` with `document.write` before the module scripts. That needs a second IIFE build and an API the platform discourages. Rejected. A static import of polyfills in `main.tsx`: they would be in the initial JS for everyone. Rejected. Top-level `await` in a polyfill module: unsupported before Safari 15. Rejected.
 
 ### D3. Polyfill set: everything core-js reports as missing in iOS 12.5 (FR2, FR6)
 
@@ -59,7 +57,6 @@ This is a target-based set, not a usage-based one. It also covers built-ins used
 
 The `Array#reverse` bug of Safari 12.0 is fixed in 12.1+, so the target 12.5 needs no fix for it (NG8).
 
-**Alternatives:** usage-based detection with Babel `preset-env` (`useBuiltIns: "usage"`). It needs a Babel pass over `node_modules`. Rejected. A hand-written list: it silently misses what dependencies use. Rejected. All of `core-js/stable`: larger, with no benefit over the target-based list. Rejected.
 
 ### D4. Legacy zone names through an `Intl.DateTimeFormat` shim (FR4)
 
@@ -79,11 +76,10 @@ Effects on the existing code:
 - `resolveWallClock("Europe/Kyiv", …)` gives `2026-03-08T08:00:00Z` `UNIQUE` for `2026-03-08T10:00`, `2026-03-29T01:30:00Z` `GAP` for `2026-03-29T03:30` (DST start in Kyiv), and `2026-10-25T00:30:00Z` `AMBIGUOUS` for `2026-10-25T03:30` (DST end; `compatible` picks the earlier `+03:00` instant). These are the `compatible`, `earlier` and `later` paths of `src/model/wallClock.ts`, which the later change `add-wall-time-input-with-hint` relies on;
 - no other `Intl` or `Date` path throws.
 
-If any check fails, D4 switches to the explicit resolver below before section 5 of `tasks.md`. Either way the spike stays as a permanent test (`src/lib/legacy/zoneShim.temporal.test.ts`), so the result is recorded in code, not in this document.
+If any check fails, D4 switches to the explicit resolver (Alternatives Considered, D4) before section 5 of `tasks.md`. Either way the spike stays as a permanent test (`src/lib/legacy/zoneShim.temporal.test.ts`), so the result is recorded in code, not in this document.
 
 The shim is a stopgap. The future change that ships its own zone database removes it together with the probe in D2.
 
-**Alternatives:** an explicit `toEngineTimeZoneId(id)` at every call site that hands a zone to Temporal or `Intl`. That is about 20 edits across `model/`, `presenter/` and `controller/`, and new code easily misses it. Kept as the fallback if the spike fails. Storing the legacy name on legacy devices: breaks "IANA canonical ids are the source of truth". Rejected.
 
 ### D5. Milliseconds instead of BigInt (FR3)
 
@@ -106,7 +102,6 @@ A guard is chosen over a polyfill for `Intl.DisplayNames`. `@formatjs/intl-displ
 - `build.cssTarget` with `safari12`: esbuild expands `inset` into `top/right/bottom/left` for that target. The CSS check (D9) proves it on every build.
 - `min-h-dvh`: set `theme.extend.minHeight.dvh` in `tailwind.config.ts` to the fallback array `["100vh", "100dvh"]`. Tailwind emits both declarations in that order, so an engine without `dvh` keeps `100vh`. The CSS check (D9) fails any `dvh` declaration without that fallback, so a later `h-dvh` or arbitrary `[100dvh]` class cannot regress it.
 
-**Alternatives:** `postcss-preset-env`: a new PostCSS dependency for one property. Rejected. `css.transformer: "lightningcss"`: replaces the PostCSS pipeline Tailwind 3 needs. Rejected. Rewriting `inset-*` classes by hand: easy to regress in new components. Rejected.
 
 ### D8. Input fallbacks chosen once from Pointer Events support (FR8, FR9, NFR-A2, UX1, UX2)
 
@@ -115,7 +110,6 @@ A guard is chosen over a polyfill for `Intl.DisplayNames`. `@formatjs/intl-displ
 - `DayTrack`: when Pointer Events are missing, the slider gets `onClick` that calls the existing `selectAt`. Its parameter widens from `PointerEvent` to `MouseEvent`, which has `clientX` and `currentTarget`. With Pointer Events, no `onClick` is attached, so a click never adds a selection (`time-selection` delta). iOS sends `click` only after a tap, never after a scroll, so the vertical-swipe rule holds. The slider's role, name, value and keys are untouched (NFR-A2).
 - `LocationList`: `useSensor(IS_POINTER_EVENTS_SUPPORTED ? PointerSensor : TouchSensor, options)`. The options are the current distance constraint for pointers, or `{ delay: REORDER_TOUCH_ACTIVATION_DELAY_MS (250), tolerance: REORDER_TOUCH_ACTIVATION_TOLERANCE_PX (5) }` for touch (both in `src/constants/reorder.ts`). The hook is called unconditionally and the sensor class is a module constant, so the hook order is stable. During a drag, dnd-kit's `TouchSensor` blocks `touchmove` with a non-passive listener, which replaces the `touch-action: none` iOS 12 ignores.
 
-**Alternatives:** registering `PointerSensor` and `TouchSensor` together. Both react to one finger on modern browsers, and dnd-kit advises against it. Rejected. A Pointer Events polyfill (PEP): unmaintained, with partial `setPointerCapture` support. Rejected. `touchstart/move/end` on `DayTrack`: gives smooth dragging, but that is NG4.
 
 ### D9. Legacy build check (FR12, FR13)
 
@@ -128,13 +122,11 @@ A new `scripts/check-legacy-build.mjs` (package script `check:legacy-build`) run
 
 Its rules live in a pure module (`scripts/legacyBuild/findLegacySyntaxIssues.ts`) tested from `src/test/legacyBuild/`, as `scripts/benchBudgets.ts` is tested from `src/test/benchmarks/`. The CI step that runs the script goes into `.github/workflows/ci.yml`, after "Check initial JS budget", through handoff H1, because the implement stage may not edit `.github/`.
 
-**Alternatives:** `es-check es2018`. It rejects optional catch binding (ES2019, supported by Safari 12) and `import()` (supported since Safari 11.1), which the build legitimately emits, and it misses lookbehind. Rejected.
 
 ### D10. Re-check for updates when the page becomes visible (FR10)
 
-A new `src/controller/useUpdateRecheckOnReturn.ts` takes the `ServiceWorkerRegistration` (or `undefined` before registration), a `Clock` and an `onCheckFailed` callback. It records the instant of the start-up check. On `visibilitychange` with `document.visibilityState === "visible"`, if at least `UPDATE_RECHECK_INTERVAL_MS` (15 min, new `src/constants/update.ts`) have passed, it calls `registration.update()` and records the instant. A rejection calls `onCheckFailed`, which is the existing `setIsUpdateCheckFailed(true)`. `usePwaUpdateStatus(clock: Clock = systemClock)` keeps the registration in state and uses the hook, so its file stays small. A found worker flows through the existing `needRefresh` path and the existing notice. `applyUpdate` already reloads, which answers the "iOS never restarts the PWA" half of WebKit bug 199110.
+A new `src/controller/useUpdateRecheckOnReturn.ts` takes the `ServiceWorkerRegistration` (or `undefined` before registration), a `Clock` and an `onCheckFailed` callback. It records the instant of the start-up check. On `visibilitychange` with `document.visibilityState === "visible"` (the event and state constants move from `useMinuteTick.ts` to `src/constants/pageVisibility.ts`, so both hooks share them), if at least `UPDATE_RECHECK_INTERVAL_MS` (15 min, new `src/constants/update.ts`) have passed, it calls `registration.update()` and records the instant. A rejection calls `onCheckFailed`, which is the existing `setIsUpdateCheckFailed(true)`. `usePwaUpdateStatus(clock: Clock = systemClock)` keeps the registration in state and uses the hook, so its file stays small. A found worker flows through the existing `needRefresh` path and the existing notice. `applyUpdate` already reloads, which answers the "iOS never restarts the PWA" half of WebKit bug 199110.
 
-**Alternatives:** `setInterval` polling: wakes hidden pages, and iOS suspends timers in the background anyway. Rejected. `registerType: "autoUpdate"`: the app would reload by itself, which `app-shell` forbids. Rejected.
 
 ### D11. Tests without a real iOS 12 engine (NG9)
 
@@ -146,7 +138,15 @@ Real-browser behaviour runs in playwright-bdd on Chromium. A shared E2E helper `
 
 Build-level facts are checked over `dist/` (D9) plus the existing bundle-size script. The only manual step is M7 on the owner's device (handoff H4).
 
-## Risks / Trade-offs
+## Consequences
+
+Positive:
+
+- Modern browsers keep their initial JavaScript and download no polyfill. Only the boot module and the `modulepreload` links are new for them (D2).
+- Every legacy accommodation is driven by a missing API, so jsdom tests can remove the API and check it (D11).
+- Stored data and domain types do not change. Stored ids stay canonical, so rollback is a plain revert.
+
+Negative (risks, each with its mitigation):
 
 - [The polyfill may resolve zones in a way that bypasses the captured constructor, for example through `Date.prototype.toLocaleString`, or only on the `PlainDateTime#toZonedDateTime` path] → Task 1.1 is a spike that runs the shim against `temporal-polyfill` 0.3.2 in jsdom, covering `resolveWallClock`. If it fails, switch to the explicit resolver of D4 before any other zone task.
 - [Initial JS grows slightly from lowered syntax (helpers for `?.` and `??`)] → The bundle-size check runs in task 5.6 and on every PR. If it fails, the next lever is to move `CardsView` dependencies behind the existing lazy view, not to raise the budget.
@@ -156,6 +156,24 @@ Build-level facts are checked over `dist/` (D9) plus the existing bundle-size sc
 - [The E2E emulation is Chromium with pointer events suppressed, not WebKit 12] → Accepted (NG9). It proves our code paths; M7 proves the engine.
 - [The probe in D2 uses `Europe/Kyiv` as the marker of outdated zone data] → An engine with old data that already knows Kyiv would skip the shim, and other renames would still fail there as unknown zones. Accepted for the stopgap. The own zone database (NG2) replaces it.
 - [Boot adds one tiny module and an `await import` on modern browsers] → The `modulepreload` links of D2 remove the waterfall. The bundle check measures the result.
+
+## Alternatives Considered
+
+**D1 — Build: lower syntax with esbuild targets, not `@vitejs/plugin-legacy`.** `@vitejs/plugin-legacy` with `modernPolyfills: true`. Its modern-polyfill chunk is a static `<script type="module">` in `index.html`, so every browser downloads it and it counts as initial JS. That breaks NFR-P1 and G3, and it adds Babel to the build. Rejected. `renderLegacyChunks: true` (the SystemJS bundle) targets engines without modules. iOS 12 has them, so it only adds build time. Rejected.
+
+**D2 — Boot module loads legacy support, then the app.** A classic inline script that writes a synchronous polyfill `<script>` with `document.write` before the module scripts. That needs a second IIFE build and an API the platform discourages. Rejected. A static import of polyfills in `main.tsx`: they would be in the initial JS for everyone. Rejected. Top-level `await` in a polyfill module: unsupported before Safari 15. Rejected.
+
+**D3 — Polyfill set: everything core-js reports as missing in iOS 12.5.** Usage-based detection with Babel `preset-env` (`useBuiltIns: "usage"`). It needs a Babel pass over `node_modules`. Rejected. A hand-written list: it silently misses what dependencies use. Rejected. All of `core-js/stable`: larger, with no benefit over the target-based list. Rejected.
+
+**D4 — Legacy zone names through an `Intl.DateTimeFormat` shim.** An explicit `toEngineTimeZoneId(id)` at every call site that hands a zone to Temporal or `Intl`. That is about 20 edits across `model/`, `presenter/` and `controller/`, and new code easily misses it. Kept as the fallback if the spike fails. Storing the legacy name on legacy devices: breaks "IANA canonical ids are the source of truth". Rejected.
+
+**D7 — CSS fallbacks through esbuild's CSS target and a Tailwind fallback value.** `postcss-preset-env`: a new PostCSS dependency for one property. Rejected. `css.transformer: "lightningcss"`: replaces the PostCSS pipeline Tailwind 3 needs. Rejected. Rewriting `inset-*` classes by hand: easy to regress in new components. Rejected.
+
+**D8 — Input fallbacks chosen once from Pointer Events support.** Registering `PointerSensor` and `TouchSensor` together. Both react to one finger on modern browsers, and dnd-kit advises against it. Rejected. A Pointer Events polyfill (PEP): unmaintained, with partial `setPointerCapture` support. Rejected. `touchstart/move/end` on `DayTrack`: gives smooth dragging, but that is NG4.
+
+**D9 — Legacy build check.** `es-check es2018`. It rejects optional catch binding (ES2019, supported by Safari 12) and `import()` (supported since Safari 11.1), which the build legitimately emits, and it misses lookbehind. Rejected.
+
+**D10 — Re-check for updates when the page becomes visible.** A repeating `setInterval` check: wakes hidden pages, and iOS suspends timers in the background anyway. Rejected. `registerType: "autoUpdate"`: the app would reload by itself, which `app-shell` forbids. Rejected.
 
 ## Migration Plan
 
