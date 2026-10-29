@@ -8,11 +8,15 @@ import { LOCATION_MARK_ICON_SIZE_PX } from "@/constants";
 import { LocationMarkKind, type PresentedLocationMark } from "@/presenter";
 
 const FILLED_ICON_FILL = "currentColor";
+/**
+ * Outline kinds pass "none" explicitly: undefined would drop lucide's default
+ * fill and the browser would paint the glyph black.
+ */
 const OUTLINE_ICON_FILL = "none";
 
 /** The house path drawn by docs/design/screens/phone-light.html. */
 const HOME_MARK_HOUSE_ICON_NODE: IconNode = [
-  ["path", { d: "M4 11l8-7 8 7v9H4z" }],
+  ["path", { d: "M4 11l8-7 8 7v9H4z", key: "home-mark-house" }],
 ];
 const HomeMarkHouse = createLucideIcon(
   "home-mark-house",
@@ -21,7 +25,7 @@ const HomeMarkHouse = createLucideIcon(
 
 type LocationMarkIconDefinition = {
   Icon: LucideIcon;
-  /** Filled glyph (arrow) or outline glyph (house, once home exists). */
+  /** Filled glyph (arrow) or outline glyph (house). */
   isFilled: boolean;
 };
 

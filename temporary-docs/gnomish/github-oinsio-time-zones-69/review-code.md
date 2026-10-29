@@ -60,7 +60,8 @@ This is the only production file the branch changed.
 - Impact: Every render of a home mark logs `Warning: Each child in a list should have a unique "key" prop. Check the render method of ForwardRef.` I saw this warning when I ran `npx vitest run src/views/shared/LocationMarkIcon.test.tsx`, and it shows up in every dev session and every unit/BDD test that renders a home row. The noise hides real key warnings, and the code departs from the design decision it claims to implement.
 - Fix: Change line 15 to `["path", { d: "M4 11l8-7 8 7v9H4z", key: "home-mark-house" }]`, as design D1 shows.
 - Fix risk: none. React takes `key` out of the props and never renders it as a DOM attribute, so the `d`/path-count assertions in `LocationMarkIcon.test.tsx` and the unit BDD step, and the screenshots, are unaffected.
-- Status: open
+- Status: fixed
+- Resolution: added `key: "home-mark-house"` to the house icon node as design D1 shows; the React key warning no longer appears in LocationMarkIcon.test.tsx output.
 
 ### R2 — SUGGESTION — Outline-fill constants lack the D2 explanation, and the stale "(house, once home exists)" comment remains
 - Location: `packages/client/src/views/shared/LocationMarkIcon.tsx:10-11,24`
@@ -69,7 +70,8 @@ This is the only production file the branch changed.
 - Impact: Low. A maintainer who "simplifies" `OUTLINE_ICON_FILL` back to `undefined` gets no warning from the source, and only the tests catch the regression. The stale comment wrongly says home is a future feature.
 - Fix: Add `/** Outline kinds pass "none" explicitly: undefined would drop lucide's default fill and the browser would paint the glyph black. */` above `OUTLINE_ICON_FILL`, and change line 24 to `Filled glyph (arrow) or outline glyph (house).`
 - Fix risk: none (comments only; the file stays well under 100 lines).
-- Status: open
+- Status: fixed
+- Resolution: added the JSDoc on OUTLINE_ICON_FILL explaining why "none" is explicit and corrected the stale "(house)" comment; comment-only, LocationMarkIcon.test.tsx stays green.
 
 ## Verdict
 
