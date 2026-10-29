@@ -50,7 +50,9 @@ verify:
         exit 1
       fi
       # Measured from where the task branch started, so an earlier archive of the same name does not count.
-      . .gnomish/lib/task-base.sh
+      # Where the task branch started: the box has no origin, so never origin/main.
+      start=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "task" && $4 == "started" { print $1; exit }')
+      base=$(git rev-parse "$start^" 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null) || { echo "cannot tell where this task branch started: no 'gnomish: task started' commit and no origin/main"; exit 1; }
       targets=$({ git diff --name-only "$base"; git ls-files --others --exclude-standard; } \
         | grep -E "^openspec/changes/archive/[0-9]{4}/[0-9]{2}/[0-9]{4}-[0-9]{2}-[0-9]{2}-$change_name/proposal\.md$" \
         | sort -u | sed 's|/proposal\.md$||')
@@ -75,7 +77,8 @@ verify:
   - type: command
     command: |
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^archive#/ { print $1; exit }')
-      [ -n "$since" ] || { . .gnomish/lib/task-base.sh; since=$base; }
+      start=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "task" && $4 == "started" { print $1; exit }')
+      [ -n "$since" ] || since=$(git rev-parse "$start^" 2>/dev/null || git merge-base HEAD origin/main)
       changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
       outside=$(printf '%s\n' "$changed" | grep . | grep -v '^openspec/' || true)
       [ -z "$outside" ] || { echo "$outside"; echo "the archive stage changes nothing outside openspec/ - restore the files above with: git checkout $since -- <file>"; exit 1; }
