@@ -118,7 +118,6 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
     };
 
     return (
-      // biome-ignore lint/a11y/noStaticElementInteractions: keys and focus are handled for the menu button pattern inside
       <span
         ref={rootRef}
         className="relative inline-flex"
