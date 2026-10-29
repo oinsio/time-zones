@@ -30,6 +30,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - empty list → `{ timeZoneId }` of the device time zone;
   - list Moscow with device `Asia/Almaty` → `Asia/Almaty`;
   - list Almaty, Moscow → `undefined`;
+  - list Almaty, Moscow with home Almaty → `undefined` (the home location shows the device time);
   - device `Europe/Minsk` with Moscow → `Europe/Minsk` (NG4);
   - the device time zone after `SET_DEVICE_TIME_ZONE` with `Mars/Olympus_Mons` → `UTC`.
 
@@ -124,7 +125,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 7. Unit BDD (vitest-cucumber)
 
 - [ ] 7.1 Write `test/features/locations/locations_here_entry_unit.feature` and `steps/locations_here_entry_unit.steps.ts`, reusing the existing worlds and steps. It holds these scenarios of the `locations` delta:
-  - "No location matches", "A location matches", "Matching is by time zone ID, not by offset" (FR1);
+  - "No location matches", "A location matches", "The home location matches", "Matching is by time zone ID, not by offset" (FR1);
   - "Here entry on the design sample", "English meta line" (FR2, UX1);
   - "No home", "Travelling with home set" (FR3);
   - "Nothing to remove or move", "Nothing is stored for the Here entry" (FR4);

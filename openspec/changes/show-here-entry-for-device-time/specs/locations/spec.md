@@ -17,6 +17,14 @@ The Cards view SHALL show a Here entry for the device time zone before the first
 - **THEN** no Here entry is shown
 - **AND** Almaty shows the Here mark
 
+#### Scenario: The home location matches
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list is Almaty (`Asia/Almaty`), Moscow
+- **AND** Almaty is the home location
+- **WHEN** the user opens the app
+- **THEN** no Here entry is shown
+- **AND** Almaty shows the Home mark
+
 #### Scenario: Matching is by time zone ID, not by offset
 - **GIVEN** the device time zone is `Europe/Minsk`
 - **AND** the list is Moscow (`Europe/Moscow`)

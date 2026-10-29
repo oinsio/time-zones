@@ -92,7 +92,7 @@ None. The Here entry belongs to the Locations context.
 
 ### Functional
 
-- FR1: When no location in the location list has a time zone ID equal to the device time zone (canonical IANA IDs), a Here entry is shown before the first location. When at least one location matches, no Here entry is shown, because that location already has the Here mark.
+- FR1: When no location in the location list has a time zone ID equal to the device time zone (canonical IANA IDs), a Here entry is shown before the first location. When at least one location matches, no Here entry is shown, because that location already shows the device time (with the Here mark, or the Home mark when it is the home location).
 - FR2: The Here entry shows:
   - the Here mark in the leading slot;
   - the exemplar city of the device time zone (FR8);
@@ -140,7 +140,7 @@ None. The Here entry belongs to the Locations context.
 |---|---|---|
 | any | empty location list | Here entry, then the explanation and "Add location" (FR7) |
 | any | no location in the device time zone | Here entry first, then the locations (FR1) |
-| any | a location in the device time zone | no Here entry; that location has the Here mark (FR1) |
+| any | a location in the device time zone | no Here entry; that location has the Here mark, or the Home mark when it is home (FR1) |
 | any | home set, device time zone not in the list | Here entry with the offset difference from home (FR3) |
 | any | zone cities data loading or failed | Here entry with the derived city, no error (FR8) |
 | any | unknown device time zone | Here entry for `UTC` (FR6) |
