@@ -92,12 +92,29 @@ describe("WallTimeInput", () => {
     expect(field).toHaveAttribute("aria-invalid", "true");
   });
 
-  it.each([" ", "{Enter}", "{ArrowLeft}", "{ArrowUp}", "{Escape}"])(
-    "keeps the key %s from reaching a parent listener",
-    async (key) => {
-      const { field, onParentKeyDown } = renderField();
-      await userEvent.type(field, key);
-      expect(onParentKeyDown).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    " ",
+    "{Enter}",
+    "{ArrowLeft}",
+    "{ArrowRight}",
+    "{ArrowUp}",
+    "{ArrowDown}",
+    "{Escape}",
+  ])("keeps the key %s from reaching a parent listener", async (key) => {
+    const { field, onParentKeyDown } = renderField();
+    await userEvent.type(field, key);
+    expect(onParentKeyDown).not.toHaveBeenCalled();
+  });
+
+  it("lets Tab reach the page so the focus can leave the field", async () => {
+    const { field, onParentKeyDown } = renderField();
+    await userEvent.type(field, "{Tab}");
+    expect(onParentKeyDown).toHaveBeenCalled();
+  });
+
+  it("starts without an error", () => {
+    const { field } = renderField();
+    expect(field).toHaveAttribute("aria-invalid", "false");
+    expect(field).not.toHaveAttribute("aria-describedby");
+  });
 });
