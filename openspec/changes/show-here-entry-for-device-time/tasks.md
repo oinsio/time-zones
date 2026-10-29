@@ -115,10 +115,11 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - the Here entry first, outside the `<ul>`;
   - in the empty state, the Here entry, then the explanation, then "Add location";
   - no Here entry and no loader call on the load error;
+  - with a deferred loader on `LocationsProvider` and no loader prop on `LocationSearch`, the Here entry and a search opened after the load call it exactly once (FR8, M5). To make it pass, `OpenLocationSearch` in `views/shared/LocationSearch.tsx` falls back to `useLocations().loadCitySearch` (design D4);
   - focus after removing the last location still goes to "Add location".
 
   Then fix existing `CardsView*.test.tsx` and other view tests that count sliders or times page-wide (design D9). Verify `npx vitest run src/views`.
-- [ ] 6.4 Run `npx stryker run --mutate 'src/views/shared/HereEntryRow.tsx,src/views/shared/ZoneRowContent.tsx,src/views/cards/CardsView.tsx'`. Verify a score ≥ 95% (minimum 90%).
+- [ ] 6.4 Run `npx stryker run --mutate 'src/views/shared/HereEntryRow.tsx,src/views/shared/ZoneRowContent.tsx,src/views/cards/CardsView.tsx,src/views/shared/LocationSearch.tsx'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 7. Unit BDD (vitest-cucumber)
 

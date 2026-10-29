@@ -50,7 +50,7 @@ None. The Here entry belongs to the Locations context.
   - `presenter/`: `presentZoneMoment`, shared by location rows and the Here entry, and `presentHereEntry`;
   - `ports/` and `adapters/city-search/`: `CitySearch.getExemplarCity`, a `CitySearch` contract suite, and `deriveCityNameFromTimeZoneId` moved out of `zoneCitiesSource.ts`;
   - `controller/`: a shared city data cache, `useExemplarCity`, `useHereEntry`. `useLocations` returns the Here entry zone and its presentation context. `LocationsProvider` takes the city data loader;
-  - `views/shared/`: `HereEntryRow` and `ZoneRowContent`, the row layout shared with `LocationRow`;
+  - `views/shared/`: `HereEntryRow` and `ZoneRowContent`, the row layout shared with `LocationRow`; `LocationSearch` uses the provider's city data loader when no loader is passed to it;
   - `views/cards/`: `CardsView`;
   - `locales/en.json`, `locales/ru.json`.
 - Tests:
