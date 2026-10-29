@@ -50,7 +50,7 @@ export function presentLocationRows(
       cityLabel: location.label,
       countryName: presentCountryName(location.countryCode, language),
       mark: markKind === undefined ? undefined : marks[markKind],
-      ...presentZoneMoment(location, context),
+      ...presentZoneMoment({ ...location, cityLabel: location.label }, context),
     };
   });
 }

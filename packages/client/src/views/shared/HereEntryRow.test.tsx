@@ -19,6 +19,7 @@ const almatyEntry: PresentedHereEntry = {
   localTimeLabel: "12:30",
   localDateLabel: "вс, 8 мар.",
   localIsoDate: "2026-03-08",
+  wallTimeInputLabel: "",
   dayTrack: ALMATY_TRACK,
 };
 

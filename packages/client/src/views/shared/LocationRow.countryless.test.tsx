@@ -16,6 +16,7 @@ const countrylessRow: LocationRowModel = {
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
+  wallTimeInputLabel: "",
 };
 
 describe("LocationRow without a country name", () => {

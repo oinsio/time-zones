@@ -19,6 +19,7 @@ const row = {
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
+  wallTimeInputLabel: "",
 };
 
 const renderWithDragging = (isDragging: boolean) => {

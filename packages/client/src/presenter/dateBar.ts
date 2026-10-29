@@ -3,10 +3,10 @@ import {
   DATE_BAR_LONG_FORMAT_OPTIONS,
   DATE_BAR_SHORT_FORMAT_OPTIONS,
   FULL_DATE_FORMAT_OPTIONS,
-  LOCAL_TIME_FORMAT_OPTIONS,
 } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import { formatWallClockTime } from "./localDateTime";
 
 export type DateBarGap = {
   requestedWallTime: Temporal.PlainTime;
@@ -57,7 +57,7 @@ export function presentDateBar({
     FULL_DATE_FORMAT_OPTIONS,
   );
   const formatTime = (time: Temporal.PlainTime) =>
-    time.toLocaleString(language, LOCAL_TIME_FORMAT_OPTIONS);
+    formatWallClockTime(time, language);
   return {
     shortLabel: effectiveDate.toLocaleString(language, {
       ...DATE_BAR_SHORT_FORMAT_OPTIONS,

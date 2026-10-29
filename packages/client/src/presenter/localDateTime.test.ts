@@ -1,7 +1,12 @@
 // Verifies FR1, FR2 of show-local-time-and-date-on-location-cards (D3).
 import { describe, expect, it } from "vitest";
-import { fakeClock } from "@/lib/temporal";
-import { formatLocalDate, formatLocalTime } from "./localDateTime";
+import { fakeClock, Temporal } from "@/lib/temporal";
+import { startWorkCount } from "@/test/workCounters";
+import {
+  formatLocalDate,
+  formatLocalTime,
+  formatWallClockTime,
+} from "./localDateTime";
 
 const localDateTimeOf = (zone: string, timestamp: string) =>
   fakeClock(timestamp).instant().toZonedDateTimeISO(zone);
@@ -62,4 +67,27 @@ describe("local labels (characterization)", () => {
       ]).toEqual([expectedTime, expectedDate]);
     },
   );
+});
+
+// Verifies NFR-P1 of add-wall-time-input-with-hint (D4).
+describe("formatWallClockTime", () => {
+  it.each([
+    ["en", "02:30", "02:30"],
+    ["ru", "02:30", "02:30"],
+    ["en", "00:00", "00:00"],
+    ["en", "23:59", "23:59"],
+  ] as const)("should write %s %s as %s", (language, time, expected) => {
+    expect(formatWallClockTime(Temporal.PlainTime.from(time), language)).toBe(
+      expected,
+    );
+  });
+
+  it("should build one formatter for repeated formatting", () => {
+    formatWallClockTime(Temporal.PlainTime.from("04:10"), "en");
+    const workCount = startWorkCount();
+    formatWallClockTime(Temporal.PlainTime.from("02:30"), "en");
+    formatWallClockTime(Temporal.PlainTime.from("03:30"), "en");
+    workCount.stop();
+    expect(workCount.formatters()).toBe(0);
+  });
 });

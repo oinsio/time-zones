@@ -21,6 +21,7 @@ const row: LocationRowModel = {
   localTimeLabel: "10:30",
   localDateLabel: "Sun, Mar 8",
   localIsoDate: "2026-03-08",
+  wallTimeInputLabel: "",
   dayTrack: ALMATY_TRACK,
 };
 const homeMark = {

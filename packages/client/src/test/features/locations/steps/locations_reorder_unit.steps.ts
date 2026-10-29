@@ -219,6 +219,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         localTimeLabel: "",
         localDateLabel: "",
         localIsoDate: "",
+        wallTimeInputLabel: "",
       }));
       render(
         createElement(LocationList, {

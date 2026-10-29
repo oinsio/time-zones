@@ -30,7 +30,7 @@ export function presentHereEntry(
   cityLabel: string,
   context: LocationRowsContext,
 ): PresentedHereEntry {
-  const zoneMoment = presentZoneMoment(hereEntry, context);
+  const zoneMoment = presentZoneMoment({ ...hereEntry, cityLabel }, context);
   const mark = presentLocationMarks(context.translate)[LocationMarkKind.HERE];
   return {
     ...zoneMoment,

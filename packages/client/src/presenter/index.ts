@@ -18,7 +18,11 @@ export {
 // Implements FR1, FR2, FR7, FR9 of add-time-sliders-to-location-cards.
 export type { HourLabel, PresentedDayTrack } from "./dayTrack";
 // Implements FR1, FR2 of show-local-time-and-date-on-location-cards.
-export { formatLocalDate, formatLocalTime } from "./localDateTime";
+export {
+  formatLocalDate,
+  formatLocalTime,
+  formatWallClockTime,
+} from "./localDateTime";
 export {
   LOCATION_MARK_TEXT_KEYS,
   type PresentedLocationMark,
@@ -29,6 +33,8 @@ export {
   formatOffsetDifference,
   type PresentedOffsetDifference,
 } from "./offsetDifference";
+// Implements FR2 of add-wall-time-input-with-hint.
+export { parseWallTimeInput } from "./parseWallTimeInput";
 // Implements FR2, FR3, FR10 of show-here-entry-for-device-time.
 export {
   type PresentedHereEntry,

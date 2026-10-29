@@ -41,6 +41,7 @@ const rows: LocationRow[] = ["moscow", "tokyo", "kyiv"].map((id) => ({
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
+  wallTimeInputLabel: "",
 }));
 
 const dropOver = (activeId: string, overId: string | null) =>

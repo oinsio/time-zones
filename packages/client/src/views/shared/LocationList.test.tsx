@@ -17,6 +17,7 @@ const rows: LocationRow[] = [
     localTimeLabel: "",
     localDateLabel: "",
     localIsoDate: "",
+    wallTimeInputLabel: "",
     countryName: "Russia",
   },
   {
@@ -28,6 +29,7 @@ const rows: LocationRow[] = [
     localTimeLabel: "",
     localDateLabel: "",
     localIsoDate: "",
+    wallTimeInputLabel: "",
     countryName: "Japan",
   },
   {
@@ -39,6 +41,7 @@ const rows: LocationRow[] = [
     localTimeLabel: "",
     localDateLabel: "",
     localIsoDate: "",
+    wallTimeInputLabel: "",
     countryName: "Ukraine",
   },
 ];

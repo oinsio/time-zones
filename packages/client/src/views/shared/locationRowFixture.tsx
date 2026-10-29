@@ -14,6 +14,7 @@ export const kolkataRow: LocationRowModel = {
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
+  wallTimeInputLabel: "",
 };
 
 export const renderKolkataRow = (

@@ -31,7 +31,7 @@
     "wallTimeInputLabel": "Ввести время — {{city}}, {{time}}",
     "wallTimeInputError": "Введите время в формате ЧЧ:ММ",
     "wallTimeHintGap": "{{requestedTime}} не существует в этот день — часы переведены вперёд. Показано {{shownTime}}",
-    "wallTimeHintAmbiguous": "{{requestedTime}} бывает дважды — показано первое ({{utcOffset}}).",
+    "wallTimeHintAmbiguous": "{{requestedTime}} бывает дважды — показано первое ({{utcOffset}})",
     "hereMarkLabel": "Вы здесь",
     "hereMarkCaption": "здесь",
     "deviceTimeMeta": "Время устройства · {{utcOffset}}",
