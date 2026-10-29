@@ -6,9 +6,10 @@ import type { Clock } from "@/lib/temporal";
 import {
   getEffectiveInstant,
   getReferenceZone,
+  getWallClockNote,
   LocationCommandType,
   ReferenceMode,
-  WallClockStatus,
+  WallClockNotePlacement,
   type WorldClockState,
 } from "@/model";
 import { type PresentedDateBar, presentDateBar } from "@/presenter";
@@ -26,19 +27,18 @@ function buildDateBar(
   const now = clock.instant();
   const zone = getReferenceZone(state);
   const effective = getEffectiveInstant(state, now).toZonedDateTimeISO(zone);
-  const { reference } = state;
+  const note = getWallClockNote(state);
   const gap =
-    reference.mode === ReferenceMode.LIVE ||
-    reference.wallClockStatus !== WallClockStatus.GAP
-      ? undefined
-      : {
-          requestedWallTime: reference.requestedWallTime,
+    note.placement === WallClockNotePlacement.DATE_BAR
+      ? {
+          requestedWallTime: note.requestedWallTime,
           shownWallTime: effective.toPlainTime(),
-        };
+        }
+      : undefined;
   return presentDateBar({
     effectiveDate: effective.toPlainDate(),
     today: now.toZonedDateTimeISO(zone).toPlainDate(),
-    isPinned: reference.mode === ReferenceMode.PINNED,
+    isPinned: state.reference.mode === ReferenceMode.PINNED,
     gap,
     language,
     translate,
@@ -51,6 +51,8 @@ function buildDateBar(
  * through the write scheduler, so no date change is stored.
  * Implements FR1, FR2, FR3, FR4, FR6, FR7, NFR-A3 of
  * select-date-with-calendar-and-now (D5).
+ * Implements FR7 of add-wall-time-input-with-hint (D2): the gap note comes
+ * from `getWallClockNote`.
  */
 export function useReferenceMoment() {
   const context = useContext(LocationsContext);

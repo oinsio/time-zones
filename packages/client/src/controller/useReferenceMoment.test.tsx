@@ -9,6 +9,7 @@ import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 import { LocationsProvider } from "./LocationsProvider";
 import { useReferenceMoment } from "./useReferenceMoment";
+import { useWallTimeInput, WallTimeTargetKind } from "./useWallTimeInput";
 
 const GAP_NOTE_EN =
   "02:30 does not exist on this day because of a clock change; showing 03:30.";
@@ -180,5 +181,64 @@ describe("useReferenceMoment", () => {
     });
 
     expect(writeScheduler.lastDelayMs()).toBeUndefined();
+  });
+});
+
+// Verifies FR7 of add-wall-time-input-with-hint (D2).
+describe("useReferenceMoment and a wall-time input", () => {
+  beforeEach(() => i18n.changeLanguage("en"));
+  afterEach(() => i18n.changeLanguage("ru"));
+
+  function setupWithWallTime() {
+    const clock = createSwitchableClock(
+      "2026-03-07T07:30:00Z",
+      "America/New_York",
+    );
+    return renderHook(
+      () => ({ reference: useReferenceMoment(), wallTime: useWallTimeInput() }),
+      {
+        wrapper: ({ children }: { children: ReactNode }) => (
+          <LocationsProvider
+            repository={createInMemoryLocationRepository()}
+            writeScheduler={createManualWriteScheduler()}
+            clock={clock}
+            tickScheduler={createManualTickScheduler()}
+          >
+            {children}
+          </LocationsProvider>
+        ),
+      },
+    );
+  }
+
+  it("ends the gap note of a date change", () => {
+    const { result } = setupWithWallTime();
+    act(() => result.current.reference.showNextDay());
+    expect(result.current.reference.dateBar.gapNote).toBe(GAP_NOTE_EN);
+
+    act(() => {
+      result.current.wallTime.confirmWallTime(
+        { kind: WallTimeTargetKind.HERE_ENTRY },
+        "10:00",
+        "2026-03-08",
+      );
+    });
+
+    expect(result.current.reference.dateBar.gapNote).toBeUndefined();
+  });
+
+  it("shows no gap note for a wall-time GAP", () => {
+    const { result } = setupWithWallTime();
+
+    act(() => {
+      result.current.wallTime.confirmWallTime(
+        { kind: WallTimeTargetKind.HERE_ENTRY },
+        "02:30",
+        "2026-03-08",
+      );
+    });
+
+    expect(result.current.reference.dateBar.isoDate).toBe("2026-03-08");
+    expect(result.current.reference.dateBar.gapNote).toBeUndefined();
   });
 });
