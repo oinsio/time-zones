@@ -39,7 +39,8 @@ When a new version of the app is available, the shell SHALL show a non-blocking 
 - **THEN** no check runs
 
 #### Scenario: A check on return fails offline
-- **GIVEN** the network is unreachable
-- **AND** the app last checked for a new version 16 minutes ago
+- **GIVEN** the start-up check for a new version succeeded 16 minutes ago
+- **AND** no update-check failure note is shown
+- **AND** the network is now unreachable
 - **WHEN** the page becomes visible
 - **THEN** the note that the latest version could not be fetched is shown

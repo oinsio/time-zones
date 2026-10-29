@@ -72,10 +72,11 @@ Effects on the existing code:
 - `SET_DEVICE_TIME_ZONE` already canonicalizes the device zone read through the `Clock`, so the Here mark still matches.
 - All ~20 Temporal call sites work unchanged, including `resolveWallClock` and `dayPeriodWindows`, if the spike shows that `PlainDateTime#toZonedDateTime` with each disambiguation reaches the shimmed constructor.
 
-**Spike (task 1.1).** It installs a fake native constructor that rejects `Europe/Kyiv`, wraps it with a minimal retry, resets modules and re-imports `@/lib/temporal`. It checks:
+**Spike (task 1.1).** It installs a fake native constructor that rejects `Europe/Kyiv`, wraps it with a minimal retry, resets modules and re-imports `@/lib/temporal`. Vitest leaves `node_modules` packages to Node, and `vi.resetModules()` does not re-evaluate them; `src/test/setup.ts` already imports `@/lib/temporal`, so without more the polyfill would keep the real constructor, which accepts `Europe/Kyiv` in Node, and every check would pass with the shim bypassed. Task 1.1 therefore adds `temporal-polyfill` to `test.server.deps.inline` in `vitest.config.ts` (Vitest 3.2), so a fresh import re-evaluates it, and the spike also asserts on the fake's call log. It checks:
 
+- the fake native constructor was called with `Europe/Kyiv` and threw, then with `Europe/Kiev` and succeeded (the shim was reached, not bypassed);
 - `Instant#toZonedDateTimeISO("Europe/Kyiv")` at `2026-03-08T07:30:00Z` gives `09:30` and `+02:00`, and what `.timeZoneId` returns;
-- `resolveWallClock("Europe/Kyiv", …)` gives `2026-03-08T08:00:00Z` `UNIQUE` for `2026-03-08T10:00`, and `GAP` (`2026-03-29T01:30:00Z`) for `2026-03-29T03:30`, the DST start in Kyiv. That is the case the later change `add-wall-time-input-with-hint` relies on;
+- `resolveWallClock("Europe/Kyiv", …)` gives `2026-03-08T08:00:00Z` `UNIQUE` for `2026-03-08T10:00`, `2026-03-29T01:30:00Z` `GAP` for `2026-03-29T03:30` (DST start in Kyiv), and `2026-10-25T00:30:00Z` `AMBIGUOUS` for `2026-10-25T03:30` (DST end; `compatible` picks the earlier `+03:00` instant). These are the `compatible`, `earlier` and `later` paths of `src/model/wallClock.ts`, which the later change `add-wall-time-input-with-hint` relies on;
 - no other `Intl` or `Date` path throws.
 
 If any check fails, D4 switches to the explicit resolver below before section 5 of `tasks.md`. Either way the spike stays as a permanent test (`src/lib/legacy/zoneShim.temporal.test.ts`), so the result is recorded in code, not in this document.
@@ -139,7 +140,7 @@ A new `src/controller/useUpdateRecheckOnReturn.ts` takes the `ServiceWorkerRegis
 
 Every fallback is driven by a missing API. jsdom tests remove the API (`vi.stubGlobal("PointerEvent", undefined)`, deleting `Intl.DisplayNames`, a `MediaQueryList` stub without `addEventListener`) and re-import the module under test after `vi.resetModules()`.
 
-The zone shim is tested with a fake native `Intl.DateTimeFormat` that rejects `Europe/Kyiv`, installed before a fresh import of `@/lib/temporal` (`vi.resetModules`). Tests never import `temporal-polyfill` directly (`.claude/rules/temporal.md`).
+The zone shim is tested with a fake native `Intl.DateTimeFormat` that rejects `Europe/Kyiv`, installed before a fresh import of `@/lib/temporal` (`vi.resetModules`). This works only because `temporal-polyfill` is inlined (`test.server.deps.inline`, task 1.1, see D4), and each such test asserts that the fake was called with `Europe/Kyiv` and rejected it, so a bypassed shim fails the test. Tests never import `temporal-polyfill` directly (`.claude/rules/temporal.md`).
 
 Real-browser behaviour runs in playwright-bdd on Chromium. A shared E2E helper `emulateEngineWithoutPointerEvents(page)`, in its own module `src/test/e2e/withoutPointerEvents.ts` so that the `locations`, `time_selection` and `browser_compatibility` steps import it without reaching into another feature's step helpers, uses `page.addInitScript` to delete `window.PointerEvent` and to stop `pointerdown`, `pointermove`, `pointerup` and `pointercancel` in the window capture phase, so React and dnd-kit see only touch, mouse and click events, as on iOS 12. Taps and finger drags go through the existing CDP touch helpers.
 

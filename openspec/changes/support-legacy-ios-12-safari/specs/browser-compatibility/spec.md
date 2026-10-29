@@ -80,6 +80,7 @@ When the engine rejects a canonical IANA zone but accepts one of its legacy name
 |---|---|---|
 | `2026-03-08T10:00` | `2026-03-08T08:00:00Z` | `UNIQUE` |
 | `2026-03-29T03:30` | `2026-03-29T01:30:00Z` | `GAP` |
+| `2026-10-25T03:30` | `2026-10-25T00:30:00Z` | `AMBIGUOUS` |
 
 #### Scenario: A zone rejected under every name
 - **GIVEN** the engine rejects `America/Ciudad_Juarez` and has no legacy name for it
