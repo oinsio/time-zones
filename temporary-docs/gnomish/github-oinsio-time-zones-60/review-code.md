@@ -165,7 +165,8 @@ Survivors, none in a line this branch changed and none exposing an untested requ
 - Impact: The approved baselines document a screen the app no longer shows. That breaks a ticked task and an NFR. The screenshot check also cannot catch a regression that drops the Here entry from the empty state, because the baselines and a broken build would match. The next real change to these screens would be compared against an outdated layout.
 - Fix: From `packages/client`, run `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "Screenshot of the (empty|suggestions|IST results) state" --update-snapshots=all` (both `chromium` and `mobile-chrome`). Look at the 24 rewritten PNGs to confirm the Here entry is in them, then run the same command without the flag and commit the baselines.
 - Fix risk: Only baseline files change. The baselines will then be rendered by this environment's Chromium. The config comment notes a macOS-vs-Linux gap of up to 1.31%, which is inside the 2.5% tolerance, the same as for the 16 baselines this branch already added.
-- Status: open
+- Status: fixed
+- Resolution: regenerated the empty, suggestions and IST results baselines with --update-snapshots=all in both projects; 16 PNGs changed (the 375 px dialog states are fully covered by the dialog and stayed identical), the empty 375 px baseline now shows the Almaty Here entry, and the scenario passes without the flag (24 passed).
 
 ### R2 — WARNING — Five changed test files exceed the 200-line limit
 - Location: `packages/client/src/test/features/locations/steps/locations_here_entry_e2e.steps.ts:1` (265 lines), `packages/client/src/test/features/locations/steps/hereEntryWorld.tsx:1` (242), `packages/client/src/test/features/locations/steps/locations_here_entry_data_unit.steps.tsx:1` (205), `packages/client/src/test/features/locations/steps/locationsStates.ts:1` (206, was 172), `packages/client/src/test/features/locations/locations_ui_e2e.feature:1` (212, was 193)
@@ -180,7 +181,8 @@ Survivors, none in a line this branch changed and none exposing an untested requ
 
   After the moves, check every file listed in Location with `wc -l`. Each must be under 200 lines.
 - Fix risk: Step definitions in playwright-bdd are global. `playwright.bdd.config.ts:13-14` picks up every `src/test/features/**/*_e2e.feature` and every `steps/*_e2e.{steps,fixtures}.ts`. So moving helpers, but not step texts, cannot cause duplicate-step errors, and the new feature file is found without a config change. `npx bddgen` must be rerun. The four moved scenarios belong to the archived change add-locations-via-search. Their texts and tags stay as they are and only their file changes, so their traceability tags still resolve. The screenshot outline and its rows stay in `locations_ui_e2e.feature`, for two reasons: task 8.4 of this change and task 5.4 of the active change add-wall-time-input-with-hint both name "the screenshot outline of `locations/locations_ui_e2e.feature`", and the baseline names come from the test title (`locations_layout_e2e.steps.ts:65-69`). Task 8.3 stays true because the Here entry scenario does not move. The rows that add-wall-time-input-with-hint plans for the outline will use up part of the roughly 16 lines of headroom. The unit and E2E runs of the touched files must pass unchanged.
-- Status: open
+- Status: fixed
+- Resolution: split by moving helpers and steps, text of steps unchanged: layout steps to locations_here_entry_layout_e2e.steps.ts, loader to hereEntryDataLoader.ts, queries to hereEntryQueries.ts, seeding to locationsSeedHelpers.ts, and the four sync/offline scenarios to locations_sync_offline_e2e.feature; all five files are now under 200 lines.
 
 ### R3 — SUGGESTION — The Here entry keeps the derived city after the search loads the data following a failed background load
 - Location: `packages/client/src/controller/useExemplarCity.ts:23-35`
@@ -189,7 +191,8 @@ Survivors, none in a line this branch changed and none exposing an untested requ
 - Impact: Russian interface, device in `Asia/Almaty`, a transient network failure on the first load, then the user opens the search and it succeeds. The Here entry keeps showing `Almaty` instead of `Алматы` for the rest of the session, although the data is in memory. This happens only after a failed first load, so the stakes are low.
 - Fix: In `useExemplarCity`, resolve the search on render as `const search = loadedSearch ?? readLoadedCitySearch(load);` and use it for `getExemplarCity`. Add a case to `useExemplarCity.test.tsx`: a rejected first load, then a successful `loadCitySearchOnce(load)` from outside, then a rerender gives `Алматы`. The hook stays without a retry of its own (design D4).
 - Fix risk: The name updates on the next render of `CardsView` (the minute tick or any list change), not at the moment the search resolves. That is enough here. Without the new test, Stryker would report a survivor on the `??`.
-- Status: open
+- Status: fixed
+- Resolution: useExemplarCity reads readLoadedCitySearch(load) on render; covered by the new useExemplarCity.test.tsx case "after a failed load when the data is loaded elsewhere", which failed before the fix.
 
 ## Verdict
 
