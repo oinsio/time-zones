@@ -101,7 +101,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - an item click calls its action and closes the menu;
   - `pointerdown` outside closes it.
 
-  Add a second file, `views/shared/LocationMenu.legacy.test.tsx`. It removes `PointerEvent` with `vi.stubGlobal("PointerEvent", undefined)`, calls `vi.resetModules()` and imports the module again, as `views/shared/DayTrack.legacy.test.tsx` does. There, a click opens the menu, "Remove" calls remove, and `touchstart` outside closes it (FR14, M5). Verify with `npx vitest run src/views/shared/LocationMenu.test.tsx src/views/shared/LocationMenu.legacy.test.tsx`.
+  Add a second file, `views/shared/LocationMenu.legacy.test.tsx`. It removes `PointerEvent` with `vi.stubGlobal("PointerEvent", undefined)`, calls `vi.resetModules()` and imports the module again, as `views/shared/DayTrack.legacy.test.tsx` does. There, a click opens the menu, "Remove" calls remove, and `touchstart` outside closes it. A `focusout` with `relatedTarget: null` fired on the focused item, followed by a click on "Remove", keeps the menu open and still calls remove, as WebKit does on a tap. A `focusout` whose `relatedTarget` is outside the menu closes it, and the menu container has `tabIndex` -1 (FR14, M5). Verify with `npx vitest run src/views/shared/LocationMenu.test.tsx src/views/shared/LocationMenu.legacy.test.tsx`.
 - [ ] 6.3 TDD the row changes (D3, D8) in new `views/shared/LocationRow.home.test.tsx`. The former remove button stays in this task, so the existing remove tests keep passing; 6.4 removes it.
   - the row has the location menu "Actions for {city}", and its "Remove" item calls `onRemove`;
   - "Make home" / "Clear home", and no home item for an unknown zone;
