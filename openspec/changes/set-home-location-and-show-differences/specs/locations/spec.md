@@ -87,10 +87,11 @@ Presenting 50 rows with offset differences SHALL build no more formatters than w
 
 #### Scenario: 50 rows within the work bound
 - **GIVEN** 50 locations, one of them home
+- **AND** the home location is the only one in `Asia/Almaty` and one other location is the only one in `Europe/Moscow`
 - **AND** the rows were presented once
 - **WHEN** the rows are presented again
 - **THEN** no date, time or region name formatter is built
-- **AND** the reference zone's UTC offset is computed once
+- **AND** the reference zone's UTC offset is computed once: the time zone lookups in `Asia/Almaty` exceed those in `Europe/Moscow` by at most 1
 
 ### Requirement: Location menu
 Each card SHALL have a location menu button showing "⋯" with a hit area of at least 44 × 44 px, in place of the former remove button. It MUST follow the WAI-ARIA menu button pattern: Enter, Space or Arrow Down open it on the first item, the arrows move between items, Enter activates, Esc closes it and returns focus to the button. Opening it MUST NOT start a reorder or move a day track's handle. <!-- implements FR11, NFR-A2, UX3 of set-home-location-and-show-differences -->

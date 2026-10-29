@@ -159,7 +159,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Differences from home", "DST changes the difference", "Differences from the device time zone without home", "Same offset, another zone", "Unknown zone";
   - "A home change updates the differences at once";
   - "Texts in both languages", "Accessible texts";
-  - "50 rows within the work bound": `startWorkCount()` (ADR-0008) plus the `toZonedDateTimeISO` count of D4.
+  - "50 rows within the work bound": `startWorkCount()` (ADR-0008) plus the per-zone `toZonedDateTimeISO` count of D4: the home row alone in `Asia/Almaty`, one other row alone in `Europe/Moscow`, the reference day computed before counting, and Almaty lookups exceeding Moscow lookups by at most 1. The spy is test-scoped, in `src/test/`.
 
   Covers FR5, FR6, NFR-A3, NFR-P1. Extend `test/benchmarks/rowPresenting.bench.ts` with a home set. Verify with `npx vitest run src/test/features/locations/steps/locations_offset_difference_unit.steps.tsx`, then run the benchmark once with `npx vitest bench --run --mode test src/test/benchmarks/rowPresenting.bench.ts` (it reports the timing and does not fail on it, ADR-0008).
 - [ ] 7.3 Write `test/features/home_location/home_location_menu_unit.feature` and its steps with "Remove without Pointer Events" and "Close by tapping outside" (FR14). The steps use the legacy setup of 6.2. Verify with `npx vitest run src/test/features/home_location/steps/home_location_menu_unit.steps.tsx`.
