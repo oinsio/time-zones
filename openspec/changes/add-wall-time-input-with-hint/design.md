@@ -109,7 +109,7 @@ New hook `controller/useWallTimeInput.ts` returns `confirmWallTime(target, text,
 
 - Model: `locationCommands` move covered by the existing `locations.test.ts`; `reduceWallTime.test.ts`, `wallClockNote.test.ts`, `followReferenceZone.test.ts` (Vitest, `it.each`).
 - Presenter: `parseWallTimeInput.test.ts`, `wallTimeHint.test.ts`, `localDateTime.test.ts`, `dateBar.test.ts` unchanged, a new `presentZoneMoment.wallTime.test.ts`.
-- Controller and views: `useWallTimeInput.test.tsx`, `WallTimeInput.test.tsx`, `WallTimeInput.legacy.test.tsx` (no `PointerEvent`), `WallTimeHint.test.tsx`.
+- Controller and views: `useReferenceMoment.test.tsx` (the gap note), new `useLocations.wallTime.test.tsx` (`rowsContext.wallClockNote`), `useWallTimeInput.test.tsx`, `WallTimeInput.test.tsx`, `WallTimeInput.legacy.test.tsx` (no `PointerEvent`), `WallTimeHint.test.tsx`.
 - Unit BDD (jsdom, no focus or names): `time_selection_wall_time_input_unit.feature`, the work bounds in `time_selection_wall_time_budget.feature`, the two scenarios in `date_selection_wall_clock.feature`.
 - E2E (focus, selection, names, axe-core, layout, the legacy tap, screenshots): `time_selection_wall_time_input_e2e.feature`, the `@view-contract` scenario, the screenshot outline.
 

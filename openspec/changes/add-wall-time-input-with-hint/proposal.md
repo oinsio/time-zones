@@ -172,7 +172,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M3: From `2026-03-08T07:30:00Z`, typing `02:30` in New York pins `2026-03-08T07:30:00Z` with `GAP` and the hint text of FR7. From `2026-11-01T07:30:00Z`, typing `01:30` in New York pins `2026-11-01T05:30:00Z` with `AMBIGUOUS` and `UTC−4` in the hint (2 of 2).
 - M4: Parsing: the 10 texts `9`, `09`, `930`, `0930`, `9:30`, `09:30`, `09.30`, ` 9:30 `, `0:00`, `23:59` give the expected time, and the 6 texts `24:00`, `9:60`, `abc`, `12345`, `9:3` and the empty text are rejected (16 of 16).
 - M5: 0 storage writes caused by 20 wall-time inputs and a Now.
-- M6: Mutation score of the new or changed model, presenter, controller and view code ≥ 95% (minimum 90%), in scoped Stryker runs of at most 5 files each.
+- M6: Mutation score of every new or changed model, presenter, controller and view source file ≥ 95% (minimum 90%), in scoped Stryker runs of at most 5 files each (the 24 files named in the 7 runs of `tasks.md` 2.5, 3.5 and 5.4; `index.ts` re-exports and constants excluded).
 - M7: axe-core reports 0 violations in 5 states × 2 themes (10 of 10); 0 horizontal scrolling at 320 px and 2560 px; the new and re-approved screenshot baselines pass without `--update-snapshots`.
 - M8: With Pointer Events removed, a tap on the time of New York opens the field (1 of 1, in jsdom and in Chromium). With an engine stub that rejects `Europe/Kyiv` and accepts `Europe/Kiev`, typing `10:00` in Kyiv from `2026-03-08T07:30:00Z` pins `2026-03-08T08:00:00Z` with `UNIQUE`, and the stored zone stays `Europe/Kyiv` (1 of 1). The BigInt source scan `test/noBigIntInSources.test.ts` stays green.
 
