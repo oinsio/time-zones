@@ -5,6 +5,8 @@ import animate from "tailwindcss-animate";
 /** Font family name registered by @fontsource-variable/manrope. */
 const MANROPE_FONT_FAMILY = "Manrope Variable";
 
+const DVH_WITH_VH_FALLBACK = ["100vh", "100dvh"];
+
 const config: Config = {
   darkMode: "media",
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
@@ -32,6 +34,13 @@ const config: Config = {
           working: "var(--color-day-working)",
           evening: "var(--color-day-evening)",
         },
+      },
+      // Fallback for engines without the dvh unit (iOS Safari before 15.4): both
+      // declarations are emitted in this order. Implements FR12 of
+      // support-legacy-ios-12-safari (D7).
+      minHeight: {
+        // Tailwind accepts a fallback array here; its typings only allow a string.
+        dvh: DVH_WITH_VH_FALLBACK as unknown as string,
       },
       fontFamily: {
         sans: [MANROPE_FONT_FAMILY, ...defaultTheme.fontFamily.sans],
