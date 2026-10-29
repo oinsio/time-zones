@@ -188,7 +188,9 @@ Rules this stage adds on top of the skill:
   requirement to satisfy validation.
 - Do not implement anything. Commit as you go, and often — small commits on the
   task branch are what makes an attempt readable afterwards. Never push: the
-  factory owns the remote and pushes the branch itself.
+  factory owns the remote and pushes the branch itself. A commit subject never
+  starts with `gnomish:` — that namespace is the factory's own, and a commit
+  carrying it is refused and aborts the task.
 
 ## Before you stop
 

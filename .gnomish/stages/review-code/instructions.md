@@ -160,6 +160,8 @@ or mutation gap you list as ❌/⚠️ that is worth fixing also becomes a findi
   OpenSpec files, `.gnomish/`, `.claude/`; a check rejects anything else.
   Stryker's reports are git-ignored, so running it is fine.
 - Commit `review-code.md` when done. Never push: the factory owns the remote.
+  The subject never starts with `gnomish:` — that namespace is the factory's
+  own, and a commit carrying it is refused and aborts the task.
 - **Nobody is going to answer you.** Decide within the specs and the rules.
 
 **Before you stop, grade yourself as the judge will.** A judge grades this

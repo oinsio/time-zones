@@ -147,7 +147,8 @@ every criterion in it, one by one; fix what you find first.
 Commit as you go, and often — one commit per finished task is a good rhythm;
 small commits on the task branch are what makes an attempt readable
 afterwards. Never push: the factory owns the remote and pushes the branch
-itself.
+itself. A commit subject never starts with `gnomish:` — that namespace is
+the factory's own, and a commit carrying it is refused and aborts the task.
 
 Keep your output small. There is no hard ceiling — the factory drains the
 round's stdout while it runs — but every printed byte is context and money. So:

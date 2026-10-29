@@ -121,6 +121,8 @@ not the other sections. It is the reviewer's record plus your answers.
   first failure, so run the whole list again before you stop.
 - Commit as you go — one commit per fixed finding, subject starting with its
   id (`R3: reuse clock tick interval`). Never push: the factory owns the remote.
+  A subject never starts with `gnomish:` — that namespace is the factory's own,
+  and a commit carrying it is refused and aborts the task.
 
 **Before you stop, grade yourself as the judge will.** A judge grades this
 round against `.gnomish/stages/fix-code/acceptance.md`. Read it and check your
