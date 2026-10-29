@@ -5,6 +5,7 @@ import {
   usePwaUpdateStatus,
   useStorageAvailability,
 } from "@/controller";
+import { type Clock, systemClock } from "@/lib/temporal";
 import { DateBar } from "@/views/shared";
 import { MainPage } from "./MainPage";
 import { OfflineReadyNotice } from "./OfflineReadyNotice";
@@ -17,17 +18,19 @@ import { UpdateNotice } from "./UpdateNotice";
  * page. Renders an empty content region while the registry is empty.
  * Implements FR2, FR6, FR7, FR11, UX2 of setup-app-shell-and-pages-deploy and
  * FR1, FR8, FR9 of add-main-page-scaffold and FR13 of add-locations-via-search
- * (D3), and FR8 of select-date-with-calendar-and-now (D7).
+ * (D3), and FR8 of select-date-with-calendar-and-now (D7), and FR10 of
+ * support-legacy-ios-12-safari (D10: the clock is handed down to the update
+ * recheck and the locations).
  */
-export function AppShell() {
+export function AppShell({ clock = systemClock }: { clock?: Clock }) {
   return (
-    <LocationsProvider>
-      <AppShellContent />
+    <LocationsProvider clock={clock}>
+      <AppShellContent clock={clock} />
     </LocationsProvider>
   );
 }
 
-function AppShellContent() {
+function AppShellContent({ clock }: { clock: Clock }) {
   useDocumentLanguage();
   const { hasSaveFailed } = useLocations();
   const {
@@ -36,7 +39,7 @@ function AppShellContent() {
     isUpdateCheckFailed,
     applyUpdate,
     dismiss,
-  } = usePwaUpdateStatus();
+  } = usePwaUpdateStatus(clock);
   const isStorageAvailable = useStorageAvailability();
 
   return (
