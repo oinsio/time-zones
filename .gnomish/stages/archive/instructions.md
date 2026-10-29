@@ -43,6 +43,9 @@ Rules:
   exactly as the implement stage left them.
 - Commit your work once it validates. Never push: the factory owns the remote
   and pushes the branch itself.
+- A commit subject never starts with `gnomish:` — that namespace is the
+  factory's own, and a commit carrying it is refused and aborts the task. Use
+  e.g. `archive(<change>): archive the change`.
 
 Keep your output small. There is no hard ceiling — the factory drains the
 round's stdout while it runs — but every printed byte is context and money. So:

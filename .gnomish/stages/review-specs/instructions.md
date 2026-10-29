@@ -188,6 +188,8 @@ a finding.
   artifacts, code, `openspec/specs/`, `.gnomish/`, `.claude/`; a check rejects
   anything else.
 - Commit `review-specs.md` when done. Never push: the factory owns the remote.
+  The subject never starts with `gnomish:` — that namespace is the factory's
+  own, and a commit carrying it is refused and aborts the task.
 - **Nobody is going to answer you.** Decide within the task and the rules.
 
 **Before you stop, grade yourself as the judge will.** A judge grades this

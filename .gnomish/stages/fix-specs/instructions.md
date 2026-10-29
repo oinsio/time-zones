@@ -111,6 +111,8 @@ severity, not the other sections.
 - Do not implement anything.
 - Commit as you go — one commit per fixed finding, subject starting with its
   id (`R2: add DST gap scenario`). Never push: the factory owns the remote.
+  A subject never starts with `gnomish:` — that namespace is the factory's own,
+  and a commit carrying it is refused and aborts the task.
 
 This stage writes only markdown, and the worktree has no `node_modules`; you
 need none. If a `PostToolUse` hook speaks up, read it as feedback on the file
