@@ -22,8 +22,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 2. Model (TDD)
 
-- [ ] 2.1 Refactor, no behaviour change: move `LocationCommandType`, `LocationErrorCode` and `LocationCommand` from `model/locations.ts` (192 lines) to new `model/locationCommands.ts`, re-exported from `locations.ts` (design D1). Verify with `npx vitest run src/model`.
-- [ ] 2.2 TDD `WallTimeTargetKind`, `WallTimeTarget` and the optional `wallTimeTarget` of `ReferenceMoment.PINNED` in `model/referenceMoment.ts`; `SET_WALL_TIME` and `LocationErrorCode.INVALID_TIME` in `model/locationCommands.ts`; the reducer in new `model/reduceWallTime.ts`, delegated from `reduceLocations` (design D1; FR3, FR4, FR10, FR13). Tests in new `model/reduceWallTime.test.ts` with `it.each`, header `// Verifies FR3, FR4, FR9, FR10, FR13 of add-wall-time-input-with-hint (D1).`:
+- [x] 2.1 Refactor, no behaviour change: move `LocationCommandType`, `LocationErrorCode` and `LocationCommand` from `model/locations.ts` (192 lines) to new `model/locationCommands.ts`, re-exported from `locations.ts` (design D1). Verify with `npx vitest run src/model`.
+- [x] 2.2 TDD `WallTimeTargetKind`, `WallTimeTarget` and the optional `wallTimeTarget` of `ReferenceMoment.PINNED` in `model/referenceMoment.ts`; `SET_WALL_TIME` and `LocationErrorCode.INVALID_TIME` in `model/locationCommands.ts`; the reducer in new `model/reduceWallTime.ts`, delegated from `reduceLocations` (design D1; FR3, FR4, FR10, FR13). Tests in new `model/reduceWallTime.test.ts` with `it.each`, header `// Verifies FR3, FR4, FR9, FR10, FR13 of add-wall-time-input-with-hint (D1).`:
   - device `Asia/Almaty`, now `2026-03-08T07:30:00Z`, New York target, `10:40` on `2026-03-08` → `2026-03-08T14:40:00Z` `UNIQUE`, target set (M2); `23:00` → `2026-03-09T03:00:00Z` (M2);
   - `02:30` on `2026-03-08` → `2026-03-08T07:30:00Z` `GAP`, `requestedWallTime` `02:30`; `01:30` on `2026-11-01` → `2026-11-01T05:30:00Z` `AMBIGUOUS` (M3);
   - Here entry target, device `Asia/Almaty`, list Moscow, `08:00` on `2026-03-08` → `2026-03-08T03:00:00Z`; Here entry target while a location in `Asia/Almaty` is listed → `LOCATION_NOT_FOUND`;

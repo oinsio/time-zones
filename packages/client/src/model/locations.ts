@@ -1,13 +1,24 @@
 import { DEVICE_TIME_ZONE_FALLBACK_ID } from "@/constants";
 import { followReferenceZone } from "./followReferenceZone";
+import {
+  type LocationCommand,
+  LocationCommandType,
+  LocationErrorCode,
+} from "./locationCommands";
 import { buildLocationId } from "./locationId";
 import { moveLocationInList } from "./moveLocation";
 import { reduceHomeLocation } from "./reduceHomeLocation";
 import { reduceReferenceMoment } from "./reduceReferenceMoment";
 import { reduceSelectInstant } from "./reduceSelectInstant";
+import { reduceWallTime } from "./reduceWallTime";
 import { LIVE_REFERENCE_MOMENT, type ReferenceMoment } from "./referenceMoment";
 import { canonicalizeTimeZoneId } from "./timeZoneId";
 
+export {
+  type LocationCommand,
+  LocationCommandType,
+  LocationErrorCode,
+} from "./locationCommands";
 export { buildLocationId, canonicalizeLocationId } from "./locationId";
 
 /**
@@ -45,57 +56,6 @@ export const INITIAL_WORLD_CLOCK_STATE: WorldClockState = {
   reference: LIVE_REFERENCE_MOMENT,
   homeLocationId: null,
 };
-
-export enum LocationCommandType {
-  ADD_LOCATION = "ADD_LOCATION",
-  REMOVE_LOCATION = "REMOVE_LOCATION",
-  REPLACE_LOCATIONS = "REPLACE_LOCATIONS",
-  MOVE_LOCATION = "MOVE_LOCATION",
-  SET_DEVICE_TIME_ZONE = "SET_DEVICE_TIME_ZONE",
-  SET_DATE = "SET_DATE",
-  SHIFT_DATE = "SHIFT_DATE",
-  RESET_TO_NOW = "RESET_TO_NOW",
-  SELECT_INSTANT = "SELECT_INSTANT",
-  SET_HOME_LOCATION = "SET_HOME_LOCATION",
-}
-
-export enum LocationErrorCode {
-  DUPLICATE_LOCATION = "DUPLICATE_LOCATION",
-  UNKNOWN_TIME_ZONE = "UNKNOWN_TIME_ZONE",
-  LOCATION_NOT_FOUND = "LOCATION_NOT_FOUND",
-  LOCATION_POSITION_OUT_OF_RANGE = "LOCATION_POSITION_OUT_OF_RANGE",
-  INVALID_DATE = "INVALID_DATE",
-  DATE_OUT_OF_RANGE = "DATE_OUT_OF_RANGE",
-  INVALID_INSTANT = "INVALID_INSTANT",
-}
-
-export type LocationCommand =
-  | {
-      type: LocationCommandType.ADD_LOCATION;
-      timeZoneId: string;
-      label: string;
-      countryCode: string;
-    }
-  | { type: LocationCommandType.REMOVE_LOCATION; id: string }
-  | {
-      type: LocationCommandType.MOVE_LOCATION;
-      id: string;
-      /** 0-based index in the list after the move. */
-      targetIndex: number;
-    }
-  | {
-      type: LocationCommandType.REPLACE_LOCATIONS;
-      locations: readonly Location[];
-      homeLocationId: string | null;
-    }
-  | { type: LocationCommandType.SET_HOME_LOCATION; id: string | null }
-  | { type: LocationCommandType.SET_DEVICE_TIME_ZONE; timeZoneId: string }
-  /** `date` is an ISO date, `now` an ISO 8601 timestamp with `Z`. */
-  | { type: LocationCommandType.SET_DATE; date: string; now: string }
-  | { type: LocationCommandType.SHIFT_DATE; days: number; now: string }
-  | { type: LocationCommandType.RESET_TO_NOW }
-  /** `instant` is an ISO 8601 timestamp with `Z`. */
-  | { type: LocationCommandType.SELECT_INSTANT; instant: string };
 
 export type LocationsReduceResult =
   | { ok: true; state: WorldClockState }
@@ -186,6 +146,8 @@ function reduceCommand(
     case LocationCommandType.SHIFT_DATE:
     case LocationCommandType.RESET_TO_NOW:
       return reduceReferenceMoment(state, command);
+    case LocationCommandType.SET_WALL_TIME:
+      return reduceWallTime(state, command);
     case LocationCommandType.SELECT_INSTANT:
       return reduceSelectInstant(state, command);
   }

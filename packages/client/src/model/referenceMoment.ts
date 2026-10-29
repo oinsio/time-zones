@@ -8,6 +8,19 @@ export enum ReferenceMode {
   PINNED = "PINNED",
 }
 
+/** Which row a wall-time input was typed in. */
+export enum WallTimeTargetKind {
+  LOCATION = "LOCATION",
+  HERE_ENTRY = "HERE_ENTRY",
+}
+
+/**
+ * The row a wall-time input was typed in: a listed location or the Here entry.
+ * Implements FR3, FR7 of add-wall-time-input-with-hint (D2).
+ */
+export type WallTimeTarget =
+  | { kind: WallTimeTargetKind.LOCATION; locationId: string }
+  | { kind: WallTimeTargetKind.HERE_ENTRY };
 /**
  * The one moment every location's time is derived from (ADR-0003). The
  * instant exists only while pinned; it is never stored.
@@ -21,6 +34,8 @@ export type ReferenceMoment =
       wallClockStatus: WallClockStatus;
       /** The wall time kept from the previous moment, before any gap shift. */
       requestedWallTime: Temporal.PlainTime;
+      /** The row a wall-time input was typed in; ends with any other change of the moment. */
+      wallTimeTarget?: WallTimeTarget;
     };
 
 export const LIVE_REFERENCE_MOMENT: ReferenceMoment = {

@@ -72,6 +72,8 @@ export {
   LIVE_REFERENCE_MOMENT,
   ReferenceMode,
   type ReferenceMoment,
+  type WallTimeTarget,
+  WallTimeTargetKind,
 } from "./referenceMoment";
 export { createStore, type ReduceResult, type Store } from "./store";
 export { canonicalizeTimeZoneId } from "./timeZoneId";
