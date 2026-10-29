@@ -103,7 +103,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 6. Views (TDD)
 
 - [ ] 6.1 Refactor without behaviour change: extract the place column, `LocalDateTime` and `DayTrack` layout of `LocationRow` into `views/shared/ZoneRowContent.tsx` (design D5). Verify that `npx vitest run src/views/shared` passes unchanged.
-- [ ] 6.2 TDD `views/shared/HereEntryRow.tsx`, exported from `views/shared/index.ts` (design D5; FR2, FR4, FR5, UX1). It is a `<section>` named by `accessibleName`, with the Here mark, city, caption, meta line, time and date, and a day track wired to the track handlers. It has no drag handle, no Location menu and no remove action. Tests in `HereEntryRow.test.tsx` with M2 data:
+- [ ] 6.2 TDD `views/shared/HereEntryRow.tsx`, exported from `views/shared/index.ts` (design D5; FR2, FR4, FR5, UX1). It is a `<section>` named by `accessibleName`, with the Here mark, city, caption, meta line, time and date, and a day track wired to the track handlers. It has no drag handle, no Location menu and no remove action. It passes `isCityOneLine` to `ZoneRowContent`, so its city is one `truncate` line; `LocationRow` never sets it, so cards keep wrapping (design D5, UX3). Tests in `HereEntryRow.test.tsx` with M2 data:
   - the content;
   - no `button` (no drag handle, menu or remove action);
   - the slider named `Время — Алматы`.
