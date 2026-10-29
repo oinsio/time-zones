@@ -2,7 +2,7 @@
 
 ## Context
 
-Driven by FR1–FR13, NFR-P1, NFR-P2, NFR-A2 and UX1–UX3 of `proposal.md` (see proposal.md — Why). Current state, checked in `packages/client/`:
+Driven by FR1–FR13, NFR-P1, NFR-P2, NFR-A1, NFR-A2 and UX1–UX3 of `proposal.md` (see proposal.md — Why). Current state, checked in `packages/client/`:
 
 - `vite.config.ts` sets no `build.target`, so Vite 6 (`vite@6.4.3` in the lockfile) builds for its default `es2020, edge88, firefox78, chrome87, safari14`. The sources use `??` and `?.` (for example `src/controller/useCitySearch.ts:25`), which that target keeps and Safari 12 cannot parse.
 - `scripts/check-bundle-size.mjs` counts as initial JS the entry `<script type="module">` of `dist/index.html` plus its `modulepreload` links, against `INITIAL_JS_BUDGET_KB = 150`. It also requires a separate `CardsView-` chunk. Polyfills inside the initial JS would spend the budget in every browser.

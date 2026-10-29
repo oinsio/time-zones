@@ -139,3 +139,12 @@ The built CSS SHALL express every `inset` utility through `top`, `right`, `botto
 #### Scenario: Modern screenshots unchanged
 - **WHEN** the screenshot tests run in `chromium` and `mobile-chrome`
 - **THEN** every approved baseline passes without being updated
+
+### Requirement: Accessibility of the legacy fallbacks
+The main page and the search dialog SHALL have no accessibility violations in modern engines, and MUST have none when Pointer Events are absent and the input fallbacks are active. <!-- implements NFR-A1 of support-legacy-ios-12-safari -->
+
+#### Scenario: No accessibility violations without Pointer Events
+- **GIVEN** the engine has no Pointer Events
+- **WHEN** the main page is shown and the search dialog is opened
+- **THEN** an accessibility check reports no violations on the main page
+- **AND** an accessibility check reports no violations in the search dialog
