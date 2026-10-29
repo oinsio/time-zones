@@ -105,4 +105,23 @@ describe("useExemplarCity", () => {
     expect(result.current).toBe("Алматы");
     await waitFor(() => expect(load).toHaveBeenCalledTimes(1));
   });
+
+  it("should give the loaded name after a failed load when the data is loaded elsewhere", async () => {
+    const load: LoadCitySearch = vi
+      .fn<LoadCitySearch>()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(search);
+    const { result, rerender } = renderHook(() =>
+      useExemplarCity("Asia/Almaty", load),
+    );
+    await act(async () => undefined);
+    expect(result.current).toBe("Almaty");
+
+    await act(async () => {
+      await loadCitySearchOnce(load);
+    });
+    rerender();
+
+    expect(result.current).toBe("Алматы");
+  });
 });

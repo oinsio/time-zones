@@ -30,7 +30,10 @@ export function useExemplarCity(
 
   if (timeZoneId === undefined) return undefined;
   return (
-    loadedSearch?.getExemplarCity(timeZoneId, language) ??
+    (loadedSearch ?? readLoadedCitySearch(load))?.getExemplarCity(
+      timeZoneId,
+      language,
+    ) ??
     deriveCityNameFromTimeZoneId(timeZoneId)
   );
 }
