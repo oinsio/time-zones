@@ -1,6 +1,12 @@
 # Set home location and show differences
 
-Depends on: `support-legacy-ios-12-safari`. Implement this change after that change is archived. It adds iOS Safari 12.5 to the supported engines, the legacy zone shim behind `getUtcOffsetMinutes`, the Pointer Events detection and the 150 KB initial JavaScript check this change relies on.
+Builds on `support-legacy-ios-12-safari`, archived on 2026-10-29 (`openspec/changes/archive/2026/10/2026-10-29-support-legacy-ios-12-safari/`), so it does not block this change. From that change, this one uses:
+- iOS Safari 12.5 as a supported engine (`openspec/specs/browser-compatibility/spec.md`);
+- the legacy zone shim (`src/lib/legacy/zoneShim.ts`), which is installed before `temporal-polyfill`, so `getUtcOffsetMinutes` also works for a renamed zone on outdated zone data;
+- the Pointer Events flag `IS_POINTER_EVENTS_SUPPORTED` (`src/lib/legacy/pointerEvents.ts`, exported from `src/lib/legacy/index.ts`);
+- the 150 KB gzipped budget for initial JavaScript (`scripts/check-bundle-size.mjs`, package script `check:bundle-size`).
+
+Its handoff patches H2 (ADR-0009) and H3 (the `browser-compatibility` glossary context) have not been applied on main yet. This change does not rely on them.
 
 ## Why
 
@@ -23,8 +29,11 @@ Audience: every user. It is the next MVP feature, and two later changes build on
 - MODIFIED: the stored location list also holds the home location. **BREAKING** for stored data: the document moves to schema version 2. A version 1 document is migrated on load. A version 2 document is unreadable for an older app version (ADR-0004 "newer" rule).
 - MODIFIED: a stored home that points to a missing location is cleared silently on load, instead of making the list unreadable.
 - MODIFIED: the leading mark slot gets its second kind, home. A row that is both home and in the device time zone shows only the home mark.
+- MODIFIED: a row's accessible name adds the offset difference's accessible text after the city and the mark ("Moscow 2 hours behind").
 
 ### Glossary terms (`docs/glossary/`)
+
+The implement stage writes only under `packages/`, so the glossary entries below ship in this change as the handoff patch H1 (`tasks.md`, "Human follow-up"). Code, specs and translations use these names from the first task on.
 
 | Term | Change |
 |---|---|
@@ -46,7 +55,7 @@ Audience: every user. It is the next MVP feature, and two later changes build on
 
 ### Modified Capabilities
 
-- `locations`: ADDED offset difference on rows. MODIFIED removal (clears home), the Cards list (the location menu replaces the remove button), storage (schema 2), the unreadable list (dangling home), tab sync (home), the Here mark (yields to the home mark), the row name, the leading mark kinds, and the card layout.
+- `locations`: ADDED offset difference on rows and the location menu. MODIFIED: removal (clears home), the Cards list (the location menu replaces the remove button), storage (schema 2), the unreadable list (dangling home), tab sync (home), the Here mark (yields to the home mark), the row name (in "Here mark is accessible and fits every screen" and "Local time and date are fast and accessible"), the leading mark kinds, and the card layout.
 - `time-selection`: MODIFIED "Day track spans the reference day". The reference zone may be the home location's zone.
 - `date-selection`: MODIFIED "Reference moment". The reference zone may be the home location's zone.
 
@@ -54,8 +63,8 @@ Audience: every user. It is the next MVP feature, and two later changes build on
 
 - `packages/client/src/`: `model/` (`WorldClockState.homeLocationId`, `SET_HOME_LOCATION`, `getReferenceZone`, `LocationMarkKind.HOME`, `getOffsetDifferenceMinutes`, `parseStoredLocations`), `adapters/` (`locationsDocument.ts` schema 2 and migration, both repositories), `ports/` (`LocationRepository` loads and saves home), `constants/` (`LOCATIONS_SCHEMA_VERSION = 2`), `presenter/` (`formatOffsetDifference`, a shared signed-offset core with `formatUtcOffset`, `presentLocationRows`, `LOCATION_MARK_TEXT_KEYS`), `controller/` (`setHomeLocation`), `views/shared/` (`LocationMenu`, `LocationRow`, `LocationList` focus, `LocationMarkIcon`), `locales/en.json`, `locales/ru.json`.
 - No new dependency. The location menu must open by tap on iOS Safari 12.5, which has no Pointer Events, and must keep the initial JavaScript within its budget (FR14, NFR-P2; the choice is in design.md).
-- Docs: `docs/glossary/`, `docs/architecture/views.md`, `docs/architecture/domain-model.md`, `docs/adr/0004-local-persistence-strategy.md` (load normalization note).
-- Tests: new unit BDD and E2E features under `src/test/features/home_location/` and `src/test/features/locations/`. Every screenshot baseline with rows is re-approved, and the "home" and "travelling" states are added.
+- Docs, as handoff patches (the implement stage writes only under `packages/`): H1 `docs/glossary/`; H2 `docs/architecture/views.md`, `docs/architecture/domain-model.md` and a load normalization note in `docs/adr/0004-local-persistence-strategy.md`. That note refines ADR-0004 and does not change its decision.
+- Tests: new unit BDD and E2E features under `src/test/features/home_location/` and `src/test/features/locations/`. Existing features that use the former remove button or the old row names are updated. Every screenshot baseline with rows is re-approved, and the "home" and "travelling" states are added.
 
 ## Goals
 
@@ -104,7 +113,7 @@ Audience: every user. It is the next MVP feature, and two later changes build on
 #### Performance
 
 - NFR-P1: Presenting 50 rows with offset differences builds no more formatters than today: at most 3 date and time formatters per distinct time zone and 1 region name formatter on the first presentation, none on a repeated one. The reference zone's UTC offset is computed once per presentation, not once per row (work bounds, ADR-0008). The timing is reported by the existing `rowPresenting.bench.ts`, extended with home.
-- NFR-P2: The location menu keeps the initial JavaScript of the modern build within 150 KB gzipped (NFR-P1 of `support-legacy-ios-12-safari`, checked by `scripts/check-bundle-size.mjs`).
+- NFR-P2: The location menu keeps the initial JavaScript of the build within 150 KB gzipped (NFR-P1 of `support-legacy-ios-12-safari`, checked by `scripts/check-bundle-size.mjs` through `check:bundle-size` after `build`). The build stays free of syntax that Safari 12 cannot parse (`check:legacy-build`).
 
 #### Accessibility
 
@@ -142,11 +151,13 @@ Audience: every user. It is the next MVP feature, and two later changes build on
 
 Feature files tagged `@set-home-location-and-show-differences`:
 
-- `src/test/features/home_location/home_location_unit.feature`: set, move, clear, remove, reset, reference zone, home mark and priority, storage, migration, dangling home, tabs (vitest-cucumber).
+- `src/test/features/home_location/home_location_unit.feature`: set, move, clear, remove, reset, reference zone, home mark and priority, storage, migration, dangling home, tabs, the menu items (vitest-cucumber).
 - `src/test/features/locations/locations_offset_difference_unit.feature`: values, text, accessible text, recomputation, the work bound (vitest-cucumber).
-- `src/test/features/home_location/home_location_e2e.feature`: location menu by pointer and keyboard, focus, announcements, axe-core, layout, screenshots (playwright-bdd).
+- `src/test/features/home_location/home_location_menu_unit.feature`: the location menu by click with `PointerEvent` removed from the environment (FR14) (vitest-cucumber).
+- `src/test/features/home_location/home_location_e2e.feature`: the location menu by pointer and keyboard, focus, accessible names, announcements, the Russian interface, axe-core, layout (playwright-bdd).
+- `src/test/features/home_location/home_location_legacy_e2e.feature`: the location menu by tap in Chromium with Pointer Events suppressed (FR14) (playwright-bdd).
 - `src/test/features/home_location/home_location_view_contract_e2e.feature`: the `@view-contract` scenario "Set and clear home".
-- `src/test/features/home_location/home_location_menu_unit.feature`: the location menu by click and keyboard, and with `PointerEvent` removed from the environment (FR14) (vitest-cucumber).
+- Existing features that gain the modified scenarios: `locations_management.feature`, `locations_persistence.feature`, `locations_storage_ui_unit.feature`, `locations_here_mark_unit.feature`, `locations_device_time_zone_e2e.feature`, `locations_local_time_e2e.feature`, `locations_ui_e2e.feature`, `locations_view_contract_e2e.feature`, `time_selection_day_track.feature`, `date_selection_reference_moment.feature`, and the screenshot outline.
 
 ## Visual Reference
 
