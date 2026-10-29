@@ -13,11 +13,12 @@ and landed on `main`. Only one of them is this task's; the others are someone
 else's work and stay exactly as they are — never edit, move, validate-fix or
 archive them. Decide which one is yours before anything else:
 
-1. **Read what has landed.** Your working copy is cut from a pinned base and
-   never rebased, so ask `origin/main` (the factory keeps it current):
-   `git ls-tree -d --name-only origin/main openspec/changes/` lists the active
-   changes, `git ls-tree -d -r --name-only origin/main openspec/changes/archive/`
-   the archived ones. Never merge, rebase or pull.
+1. **Read what has landed.** Your working copy is cut from a pinned base of
+   `main` and never rebased, and it has no `origin` remote: what you see is
+   `main` as of that base, the parent of the branch's `gnomish: task started`
+   commit. `ls openspec/changes/` lists the active changes,
+   `ls -R openspec/changes/archive/` the archived ones. Never merge, rebase,
+   pull or add a remote.
 2. **Read the decisions.** The briefing's `=== Decisions ===` section carries
    every answer a human gave on this task. A decision wins over what you infer,
    and a question it already answers is never asked again.

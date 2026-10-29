@@ -80,7 +80,7 @@ verify:
   - type: command
     command: |
       . .gnomish/lib/task-change.sh
-      base=$(git merge-base HEAD origin/main)
+      . .gnomish/lib/task-base.sh
       outside=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -v "^$change/" | grep -vxF "$record" | grep -v '^\.gnomish-task/' || true)
       [ -z "$outside" ] || { echo "$outside"; echo "the specify stage writes only under $change/ and $record - if you made the edits above, undo each of them yourself with: git checkout $base -- <file>; other active changes are someone else's work and stay exactly as they are"; exit 1; }
   # LLM judge grades the change against acceptance.md; read-only. Opus with room to open
