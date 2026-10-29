@@ -1,142 +1,191 @@
 # Tasks
 
-Depends on: `support-legacy-ios-12-safari`, then `set-home-location-and-show-differences`. Start only after both are archived (proposal, design Context).
+Both changes this one builds on, `support-legacy-ios-12-safari` and `set-home-location-and-show-differences`, are archived. The owners named below were checked on `main` (design, Context).
 
-All source paths are under `packages/client/src/`. Commands run from `packages/client/` unless they start with `pnpm --filter`.
+All source paths are under `packages/client/src/`. Commands run from `packages/client/` unless they start with `pnpm --filter` or `git`.
 
-- **Running tests:** one command at a time, never in the background. Mutation runs take at most 5 files per run. The report is in `reports/mutation/mutation-report.json`.
-- **Time in tests:** only `fakeClock(instant, timeZone)` of `@/lib/temporal` or `createSwitchableClock`. Never `vi.setSystemTime()` or `vi.useFakeTimers()`. Ticks come from `createManualTickScheduler()`, and writes are observed with `createManualWriteScheduler()`.
-- **Traceability:** every new test, step file and feature carries `show-here-entry-for-device-time`:
-  - `@show-here-entry-for-device-time @FR-X` tags above scenarios;
+- **Running tests:** one command at a time, never in the background. Stryker runs only with `--mutate`, at most 5 files per run, and its report is in `reports/mutation/mutation-report.json`.
+- **Time in tests:** only `fakeClock(instant, timeZone)` of `@/lib/temporal` or `createSwitchableClock` (`test/switchableClock.ts`). Never `vi.setSystemTime()` or `vi.useFakeTimers()`. Ticks come from `createManualTickScheduler()` (`test/tickSchedulers.ts`), and writes are observed with `createManualWriteScheduler()` (`test/writeSchedulers.ts`).
+- **Traceability:** every new or changed test, step file and feature carries `show-here-entry-for-device-time`:
+  - `@show-here-entry-for-device-time @FR-X` tags above scenarios, and `// @show-here-entry-for-device-time @FR-X` before `f.Scenario`;
   - `// Verifies NFR-X of show-here-entry-for-device-time` in E2E steps;
   - `Implements FR-X of show-here-entry-for-device-time` in the JSDoc of new or changed production code.
-- **Glossary:** use only `docs/glossary/` terms (Here entry, Here mark, exemplar city, device time zone, offset difference, Location menu). The Here entry is never called a location in code, specs or strings.
+- **Glossary:** use only `docs/glossary/` terms (Here entry, Here mark, exemplar city, device time zone, offset difference, Location menu). The Here entry is never called a location in code, specs or strings, and never a "default location" or "auto-added location".
 - **File size:** every file stays under 200 lines. "design Dn" refers to `design.md`.
 
-## 1. Preconditions and strings
+## 1. Strings (no TDD)
 
-- [ ] 1.1 Confirm that both dependencies are archived:
-  - `openspec list` shows neither `support-legacy-ios-12-safari` nor `set-home-location-and-show-differences` as active;
-  - `model/` exports `getOffsetDifferenceMinutes`;
-  - `presenter/` exports `formatOffsetDifference`;
-  - `views/shared/` has the Location menu;
-  - the legacy zone shim and the day-track tap fallback exist.
-
-  Record the current owner names in this file if they differ from design D2–D4.
-- [ ] 1.2 Add `locations.deviceTimeMeta` ("Device time · {{utcOffset}}" / «Время устройства · {{utcOffset}}») and `locations.hereEntryName` ("{{city}}, {{hereMark}}, Device time" / «{{city}}, {{hereMark}}, Время устройства») to `locales/en.json` and `locales/ru.json` (design D8, FR10). Verify with `npx vitest run src/locales/locales.test.ts`.
+- [ ] 1.1 Add `locations.deviceTimeMeta` ("Device time · {{utcOffset}}" / «Время устройства · {{utcOffset}}») and `locations.hereEntryName` ("{{city}}, {{hereMark}}, Device time" / «{{city}}, {{hereMark}}, Время устройства») to `locales/en.json` and `locales/ru.json` (design D8, FR10). Verify with `npx vitest run src/locales/locales.test.ts`.
 
 ## 2. Model (TDD)
 
-- [ ] 2.1 TDD `getHereEntry(state)` in new `model/hereEntry.ts`, built on `isLocationInDeviceTimeZone` (design D1, FR1, FR6). Tests in `model/hereEntry.test.ts` with `it.each`:
+- [ ] 2.1 Widen `isLocationInDeviceTimeZone` to `Pick<Location, "timeZoneId">` and the first argument of `getOffsetDifferenceMinutes` to `{ id?: string; timeZoneId: string }` (design D1, FR3). Add cases to `model/offsetDifference.test.ts`:
+  - a subject without an ID in the device zone and no home → `undefined`;
+  - the same with home Almaty and device `Europe/Moscow` → `−120`;
+  - a subject without an ID and an equal offset to home → `0`.
+
+  Verify red, then green, with `npx vitest run src/model/offsetDifference.test.ts src/model/deviceTimeZone.test.ts`.
+- [ ] 2.2 TDD `getHereEntry(state)` in new `model/hereEntry.ts`, built on `isLocationInDeviceTimeZone` (design D1, FR1, FR6). Tests in `model/hereEntry.test.ts` with `it.each`:
   - empty list → `{ timeZoneId }` of the device time zone;
   - list Moscow with device `Asia/Almaty` → `Asia/Almaty`;
   - list Almaty, Moscow → `undefined`;
   - device `Europe/Minsk` with Moscow → `Europe/Minsk` (NG4);
-  - the device time zone after `SET_DEVICE_TIME_ZONE` with an unknown ID → `UTC`.
+  - the device time zone after `SET_DEVICE_TIME_ZONE` with `Mars/Olympus_Mons` → `UTC`.
 
-  Export from `model/index.ts`. Verify red, then green, with `npx vitest run src/model/hereEntry.test.ts`.
-- [ ] 2.2 Move `deriveNameFromZoneId` from `adapters/city-search/zoneCitiesSource.ts` to `model/timeZoneId.ts` as `deriveCityNameFromTimeZoneId`. Build on the legacy change's version of both files and keep its `Intl.DisplayNames` guard and the BigInt-free code (design D3, D7). First write the characterization test in `model/timeZoneId.test.ts`:
+  Export `getHereEntry` and `HereEntry` from `model/index.ts`. Verify red, then green, with `npx vitest run src/model/hereEntry.test.ts`.
+- [ ] 2.3 Run `npx stryker run --mutate 'src/model/hereEntry.ts,src/model/offsetDifference.ts,src/model/deviceTimeZone.ts'`. Verify a score ≥ 95% (minimum 90%) in the report, and kill survivors with tests.
+
+## 3. Port and adapter: exemplar city (TDD)
+
+- [ ] 3.1 Move `deriveNameFromZoneId` and its constants from `adapters/city-search/zoneCitiesSource.ts` to new `adapters/city-search/deriveCityNameFromTimeZoneId.ts` as `deriveCityNameFromTimeZoneId`, exported from `adapters/city-search/index.ts` and `adapters/index.ts` (design D3). First write `deriveCityNameFromTimeZoneId.test.ts` with `it.each`:
   - `Asia/Almaty` → `Almaty`;
   - `America/New_York` → `New York`;
   - `America/Argentina/Buenos_Aires` → `Buenos Aires`;
   - `UTC` → `UTC`.
 
-  Then switch the zone cities source to it. Verify `npx vitest run src/model/timeZoneId.test.ts`, then `npx vitest run src/adapters/city-search` (unchanged results).
-- [ ] 2.3 Mutation run over `src/model/hereEntry.ts,src/model/timeZoneId.ts`. Verify a score ≥ 95% (minimum 90%), and kill survivors with tests.
-
-## 3. Port and adapter: exemplar city (TDD)
-
-- [ ] 3.1 TDD `getExemplarCity(timeZoneId, language)` on `CitySearch` (`ports/citySearch.ts`) and in `createCompositeCitySearch` (from `recordsById`, falling back to `deriveCityNameFromTimeZoneId`; design D3, FR8). Add to the shared contract `adapters/city-search/citySource.contract.ts` (or the `CitySearch` contract suite, wherever the contract tests of the port live):
+  Then switch the zone cities source to it. Verify `npx vitest run src/adapters/city-search`, with the existing results unchanged.
+- [ ] 3.2 TDD `getExemplarCity(timeZoneId, language)` on `CitySearch` (`ports/citySearch.ts`) and in `createCompositeCitySearch` (design D3, FR8, FR12). The contract goes in new `adapters/city-search/citySearch.contract.ts` (`describeCitySearchContract`), run from new `createCompositeCitySearch.exemplarCity.test.ts` with the extracted data (`virtual:zone-cities`, as in `controller/useCitySearch.test.ts`):
   - `Asia/Almaty` → `Almaty` / `Алматы`;
-  - `Europe/Kyiv` → the CLDR name, looked up by the canonical ID (FR12);
+  - `Europe/Kyiv` (en) → `Kyiv`, looked up by the canonical ID (CLDR 48, `cldr-dates-full`);
   - a zone without data → the derived name.
 
-  Run it against every `CitySearch` implementation. Verify `npx vitest run src/adapters/city-search`.
-- [ ] 3.2 Mutation run over `src/adapters/city-search/createCompositeCitySearch.ts,src/adapters/city-search/zoneCitiesSource.ts`. Verify a score ≥ 95% (minimum 90%).
+  Comment `// FR8: …` / `// FR12: …` per case. Verify `npx vitest run src/adapters/city-search`.
+- [ ] 3.3 Run `npx stryker run --mutate 'src/adapters/city-search/createCompositeCitySearch.ts,src/adapters/city-search/zoneCitiesSource.ts,src/adapters/city-search/deriveCityNameFromTimeZoneId.ts'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 4. Presenter (TDD)
 
-- [ ] 4.1 Refactor without behaviour change: extract `presentZoneMoment(timeZoneId, context)` from `presentLocationRows` into `presenter/presentZoneMoment.ts`. It covers the UTC offset, local time and date, ISO date, day track and offset difference (design D2). `presentLocationRows` spreads its result. Verify that the existing `npx vitest run src/presenter` passes unchanged, and that `npx vitest run src/test/features/locations` stays green, including the row work-bound scenarios.
+- [ ] 4.1 Refactor without behaviour change: extract `presentZoneMoment(subject, context)` from `presentLocationRows` into `presenter/presentZoneMoment.ts`. It covers the UTC offset, offset difference, local time and date, ISO date and day track (design D2). `presentLocationRows` spreads its result. Verify that `npx vitest run src/presenter` passes unchanged. Then verify that `npx vitest run src/test/features/locations` stays green, including the row work-bound scenarios.
 - [ ] 4.2 TDD `presentHereEntry(hereEntry, cityLabel, context)` in `presenter/presentHereEntry.ts` (design D2, D8; FR2, FR3, FR10, NFR-A2). Tests in `presenter/presentHereEntry.test.ts`:
-  - M2: `Алматы`, mark kind `HERE` with caption `здесь`, `metaLabel` `Время устройства · UTC+5`, `12:30`, `вс, 8 мар.`, no offset difference, day track fraction equal to a location row's;
+  - M2: `Алматы`, mark kind `HERE` with caption `здесь`, `metaLabel` `Время устройства · UTC+5`, `12:30`, `вс, 8 мар.`, no offset difference, day track equal to a location row's in the same zone;
   - M4: `Москва` with `−2 ч` and `Время устройства · UTC+3`;
-  - unknown zone → `UTC` with `Device time · UTC`;
+  - home in the same offset → `0 ч`;
+  - device `UTC` → `Device time · UTC`;
   - `accessibleName` `Алматы, Вы здесь, Время устройства`;
   - English meta `Device time · UTC+5:30` for `Asia/Kolkata`.
 
   Export from `presenter/index.ts`. Verify red, then green, with `npx vitest run src/presenter/presentHereEntry.test.ts`.
-- [ ] 4.3 Mutation run over `src/presenter/presentZoneMoment.ts,src/presenter/presentHereEntry.ts,src/presenter/presentLocationRows.ts`. Verify a score ≥ 95% (minimum 90%).
+- [ ] 4.3 Run `npx stryker run --mutate 'src/presenter/presentZoneMoment.ts,src/presenter/presentHereEntry.ts,src/presenter/presentLocationRows.ts'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 5. Controller (TDD)
 
-- [ ] 5.1 Refactor without behaviour change: move the per-loader cache and load call of `useCitySearch` into `controller/cityDataCache.ts` (design D4). Verify that the existing `npx vitest run src/controller/useCitySearch.test.ts` passes unchanged.
-- [ ] 5.2 TDD `useExemplarCity(timeZoneId, load)` in `controller/useExemplarCity.ts` (design D4, FR8, NFR-P2). Tests with a deferred fake loader:
-  - first render returns `Almaty` before the load resolves;
-  - after it resolves (ru) → `Алматы`;
-  - a rejected load keeps `Almaty`, with no error state;
-  - `undefined` zone → the loader is never called;
-  - after `useCitySearch` loaded the same loader, the name is ready on the first render.
+- [ ] 5.1 TDD `controller/cityDataCache.ts` (`loadCitySearchOnce`, `readLoadedCitySearch`; design D4). Tests in `cityDataCache.test.ts`:
+  - two calls during one pending load call the loader once;
+  - a resolved search is read back synchronously;
+  - after a rejection the next call loads again.
 
-  Verify red, then green, with `npx vitest run src/controller/useExemplarCity.test.tsx`.
-- [ ] 5.3 TDD `hereEntry` from `useLocations`: `presentHereEntry` in the same memo as the rows, with the city from `useExemplarCity` (design D2, D4; FR1, FR6). Tests in new `controller/useLocations.hereEntry.test.tsx`:
-  - shown and hidden with list changes;
+  Then switch `useCitySearch` to it. Verify `npx vitest run src/controller/cityDataCache.test.ts`, then `npx vitest run src/controller/useCitySearch.test.ts` unchanged.
+- [ ] 5.2 Add `loadCitySearch?: LoadCitySearch` to `LocationsProvider` (default: the `loadCitySearch` adapter) and to `LocationsContextValue`. `useLocations` returns `rowsContext` and `hereEntry` (`undefined` while `UNREADABLE`; design D4, FR1, FR9). Tests in new `controller/useLocations.hereEntry.test.tsx`:
+  - shown and hidden with add and remove;
   - a device time zone change read at a minute tick;
   - a list change from another tab;
   - reset;
-  - follows the reference moment;
+  - `undefined` for an unreadable stored list;
   - nothing scheduled for writing (M5).
 
   Verify `npx vitest run src/controller/useLocations.hereEntry.test.tsx`.
-- [ ] 5.4 Mutation run over `src/controller/useExemplarCity.ts,src/controller/cityDataCache.ts,src/controller/useLocations.ts`. Verify a score ≥ 95% (minimum 90%).
+- [ ] 5.3 TDD `useExemplarCity(timeZoneId, load)` in `controller/useExemplarCity.ts` (design D4, FR8, NFR-P2). Tests in `useExemplarCity.test.tsx` with a deferred fake loader:
+  - the first render returns `Almaty` and the loader is not called before the effect;
+  - after the load resolves (ru) → `Алматы`;
+  - a rejected load keeps `Almaty`, with no error state and no second call;
+  - an `undefined` zone → the loader is never called;
+  - after `useCitySearch` loaded the same loader, the name is ready on the first render.
+
+  Verify red, then green, with `npx vitest run src/controller/useExemplarCity.test.tsx`.
+- [ ] 5.4 TDD `useHereEntry()` in `controller/useHereEntry.ts`, exported from `controller/index.ts` (design D4; FR2, FR6, FR8). Tests in `useHereEntry.test.tsx`:
+  - the presented entry follows the reference moment after a time selection;
+  - it is `undefined` while a location matches;
+  - it uses the loader from `LocationsProvider`.
+
+  Verify `npx vitest run src/controller/useHereEntry.test.tsx`.
+- [ ] 5.5 Run `npx stryker run --mutate 'src/controller/cityDataCache.ts,src/controller/useExemplarCity.ts,src/controller/useHereEntry.ts,src/controller/useLocations.ts,src/controller/useCitySearch.ts'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 6. Views (TDD)
 
 - [ ] 6.1 Refactor without behaviour change: extract the place column, `LocalDateTime` and `DayTrack` layout of `LocationRow` into `views/shared/ZoneRowContent.tsx` (design D5). Verify that `npx vitest run src/views/shared` passes unchanged.
-- [ ] 6.2 TDD `views/shared/HereEntryRow.tsx`: a `<section>` named by `accessibleName`, with the Here mark, city, caption, meta line, time and date, and a day track wired to `useTimeSelection`. It has no drag handle, no Location menu and no remove action (design D5; FR2, FR4, FR5, UX1). Tests in `HereEntryRow.test.tsx`, with M2 data. Verify `npx vitest run src/views/shared/HereEntryRow.test.tsx`.
-- [ ] 6.3 TDD `CardsView`:
-  - the Here entry first, outside `LocationList` and its `<ul>`;
+- [ ] 6.2 TDD `views/shared/HereEntryRow.tsx`, exported from `views/shared/index.ts` (design D5; FR2, FR4, FR5, UX1, UX3). It is a `<section>` named by `accessibleName`, with the Here mark, city, caption, meta line, time and date, and a day track wired to the track handlers. It has no drag handle, no Location menu and no remove action. Tests in `HereEntryRow.test.tsx` with M2 data:
+  - the content;
+  - no `button` (no drag handle, menu or remove action);
+  - the slider named `Время — Алматы`;
+  - the city slot is single-line (`truncate`).
+
+  Verify `npx vitest run src/views/shared/HereEntryRow.test.tsx`.
+- [ ] 6.3 TDD `CardsView` (design D5, D6; FR1, FR7, FR9, UX2). Tests in new `views/cards/CardsView.hereEntry.test.tsx`, with a loader passed to `LocationsProvider`:
+  - the Here entry first, outside the `<ul>`;
   - in the empty state, the Here entry, then the explanation, then "Add location";
-  - no Here entry on the load error;
+  - no Here entry and no loader call on the load error;
   - focus after removing the last location still goes to "Add location".
 
-  Design D5, D6; FR1, FR7, FR9, UX2. Verify `npx vitest run src/views/cards`.
+  Then fix existing `CardsView*.test.tsx` and other view tests that count sliders or times page-wide (design D9). Verify `npx vitest run src/views`.
+- [ ] 6.4 Run `npx stryker run --mutate 'src/views/shared/HereEntryRow.tsx,src/views/shared/ZoneRowContent.tsx,src/views/cards/CardsView.tsx'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 7. Unit BDD (vitest-cucumber)
 
-- [ ] 7.1 Write `test/features/locations/locations_here_entry_unit.feature` from the `locations` delta: every scenario of the requirements from "Here entry when no location matches" to "Here entry is fast". That includes the renamed device time zone `Europe/Kiev` with the legacy engine stub (FR12), the exemplar city with a deferred loader, and the work-bound scenario wrapped in `startWorkCount()` (NFR-P1, ADR-0008). Add step definitions in `steps/`, reusing the existing worlds and steps. Verify `npx vitest run src/test/features/locations/locations_here_entry_unit.feature`.
-- [ ] 7.2 Update `test/features/main_page/main_page_states_unit.feature` to the MODIFIED "Empty state" scenarios. Verify `npx vitest run src/test/features/main_page`.
-- [ ] 7.3 Add the Here entry to `test/benchmarks/rowPresenting.bench.ts` (NFR-P1). Verify `pnpm bench` runs it, as a report only.
+- [ ] 7.1 Write `test/features/locations/locations_here_entry_unit.feature` and `steps/locations_here_entry_unit.steps.ts`, reusing the existing worlds and steps. It holds these scenarios of the `locations` delta:
+  - "No location matches", "A location matches", "Matching is by time zone ID, not by offset" (FR1);
+  - "Here entry on the design sample", "English meta line" (FR2, UX1);
+  - "No home", "Travelling with home set" (FR3);
+  - "Nothing to remove or move", "Nothing is stored for the Here entry" (FR4);
+  - "Time selection from the Here entry" (FR5);
+  - the four scenarios of "Here entry follows the device time zone" (FR6);
+  - the four scenarios of "Exemplar city of the Here entry", with a deferred loader (FR8, NFR-P2);
+  - "Unreadable stored list", "Storage unavailable" (FR9);
+  - "Renamed device time zone", with the outdated-engine stub of `browser_compatibility/steps/legacyZoneWorld.ts` (FR12, M7);
+  - "Both languages" (FR10);
+  - "Presenting again builds no formatter", wrapped in `startWorkCount()` (`test/workCounters.ts`), asserting 0 formatter builds and at most `MAX_TRANSITION_LOOKUPS_PER_ZONE` lookups for the Here entry (NFR-P1, ADR-0008).
+
+  Verify `npx vitest run src/test/features/locations/steps/locations_here_entry_unit.steps.ts`.
+- [ ] 7.2 Update `test/features/main_page/main_page_states_unit.feature` and its steps to the MODIFIED "Empty state" scenarios: the Here entry first, the explanation and "Add location" below, and no location list stored (FR7, UX2). Verify `npx vitest run src/test/features/main_page`.
+- [ ] 7.3 Add the Here entry to `test/benchmarks/rowPresenting.bench.ts` (NFR-P1). Verify with `pnpm bench`, which only reports.
 
 ## 8. E2E, accessibility and screenshots (playwright-bdd)
 
-- [ ] 8.1 Write `test/features/locations/locations_here_entry_e2e.feature`:
-  - layout at 320 px and 2560 px with no horizontal scrolling;
-  - no drag handle or menu;
-  - reorder keeps the Here entry first, with announcements counting locations only;
-  - time selection on its day track;
-  - accessible name and list size;
-  - axe-core in 3 states × 2 themes (NFR-A1, NFR-A2, NFR-R1, FR4, FR5).
+- [ ] 8.1 Write `test/features/locations/locations_here_entry_e2e.feature` and `steps/locations_here_entry_e2e.steps.ts`. The E2E device time zone is `Asia/Almaty`, so the Here entry is shown whenever Almaty is not stored. It holds these `locations` delta scenarios:
+  - "Reorder keeps the Here entry first", with the announcement (FR4);
+  - a keyboard variant of "Time selection from the Here entry": arrow keys on its slider (FR5);
+  - "Tap on the Here entry's day track without Pointer Events", with `emulateEngineWithoutPointerEvents` (FR12);
+  - "Name and list size" (NFR-A2);
+  - "No violations" with axe-core, in 3 states × 2 themes (NFR-A1). Travelling is home Moscow with the list Moscow, Kolkata, New York;
+  - "Narrow and wide screens", with no horizontal scrolling and the same layout as the Moscow card (NFR-R1, UX1).
 
-  The E2E device zone `Asia/Almaty` gives the Here entry when Almaty is not stored. Verify with the project's single-feature E2E command.
-- [ ] 8.2 Add the `@view-contract` scenario "See the Here entry without home" to `locations/locations_view_contract_e2e.feature` (FR11). Verify it in the `view-contract-cards` project.
-- [ ] 8.3 Add the states "here-entry", "here-entry-empty" and "here-entry-travel" to the screenshot outline of `locations/locations_ui_e2e.feature`, at 375 / 1024 px × light / dark × `chromium` / `mobile-chrome`. Re-approve the baselines whose list has no location in `Asia/Almaty` (NFR-R2). Verify that a second run passes without `--update-snapshots`.
+  Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "@show-here-entry-for-device-time"`.
+- [ ] 8.2 Add the `@view-contract` scenario "See the Here entry without home" to `locations/locations_view_contract_e2e.feature` (FR11). Verify with `npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep "See the Here entry without home"`.
+- [ ] 8.3 Update the lazy-data scenarios to the MODIFIED `location-search` delta (design D9, FR8):
+  - "Data loads only when the search opens" in `locations_ui_e2e.feature` and "The slash key loads the search data only when it opens the search" in `locations_search_shortcut_e2e.feature` first store a location in `Asia/Almaty`;
+  - add "The Here entry's request is the only one" to `locations_ui_e2e.feature`: the empty list, the data loaded, then the search opened, exactly 1 request (M5);
+  - in `steps/locationsStates.ts`, the `search loading` and `search error` states store Almaty before they hold or fail the data.
 
-## 9. Documentation and glossary
+  Tag each with `@show-here-entry-for-device-time @FR8`. Verify with `npx playwright test -c playwright.bdd.config.ts --grep "search data|search loading|search error|slash key loads"`.
+- [ ] 8.4 Add the states `here-entry` (list Moscow, Kolkata, New York) and `here-entry-travel` (the same list, Moscow home) to `WorldClockState` in `steps/locationsStates.ts`. Add them to the screenshot outline of `locations_ui_e2e.feature` at 375 / 1024 px × light / dark, tagged `@show-here-entry-for-device-time @NFR-R2`. Re-approve `empty`, `suggestions` and `IST results` under `test/features/__screenshots__/{chromium,mobile-chrome}/` with `--update-snapshots`. Then verify that `npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without that flag.
 
-- [ ] 9.1 Update `docs/glossary/`:
-  - `locations.md`: Here entry — drop *(planned)*, add *RU:* and *Code:* `getHereEntry`, `presentHereEntry`, `HereEntryRow`; add to Location row's *Not:* that the Here entry is not a location row;
+## 9. Handoff patches (files the implement stage may not edit)
+
+- [ ] 9.1 Handoff H1: write `openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch` and its README section (`.gnomish/stages/specify/handoff.md`, "Handoff items"). The patch updates `docs/glossary/`:
+  - `locations.md`: Here entry drops *(planned)*, adds *RU:* строка «Здесь», мета «Время устройства» and *Code:* `getHereEntry`, `presentHereEntry`, `useHereEntry`, `HereEntryRow`. Location row adds `presentZoneMoment` to *Code:* and "*Not:* the Here entry";
   - `search.md`: Exemplar city gets *Code:* `CitySearch.getExemplarCity`, `deriveCityNameFromTimeZoneId`;
   - `views.md`: View contract adds the Here entry.
 
-  Verify the review checklist of `.claude/rules/glossary.md`, including `grep -rniE "default location|auto-added location" packages/client/src docs openspec/specs` returning nothing.
-- [ ] 9.2 Update `docs/architecture/views.md` "Here entry" and "UI states" (outside the numbered list, shown in the empty state, meta "Device time · UTC+5" instead of `GMT+5`). Verify by reading the section against the `locations` delta.
+  Verify from the repository root with `git apply --check openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch`, `git status --short docs` (it must print nothing), and `grep -c "^+.*useHereEntry" openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch` ≥ 1.
+- [ ] 9.2 Handoff H2: write `handoff/H2-architecture-views-here-entry.patch` and its README section. The patch updates `docs/architecture/views.md`. In "Here entry" (line 80), it says outside the numbered list, shown in the empty state, meta "Device time · UTC+5". The README notes that it applies after H2 of `set-home-location-and-show-differences` with `git apply --3way` if the "Row header" line was changed first. Verify from the repository root with `git apply --check openspec/changes/show-here-entry-for-device-time/handoff/H2-architecture-views-here-entry.patch`, `git status --short docs` (it must print nothing), and `grep -c "^+.*Device time · UTC+5" openspec/changes/show-here-entry-for-device-time/handoff/H2-architecture-views-here-entry.patch` = 1.
 
-## 10. Integration checks
+## 10. Final verification
 
-- [ ] 10.1 Run `npx vitest run` once, and then `pnpm run build`. Verify both pass, and that `get_file_problems` (JetBrains MCP, when available) reports no errors in changed files.
-- [ ] 10.2 Verify traceability: `grep -rn "show-here-entry-for-device-time" packages/client/src` finds each of FR1–FR12, NFR-P1, NFR-P2, NFR-A1, NFR-A2, NFR-R1, NFR-R2 and UX1–UX3 at least once (M1).
+- [ ] 10.1 Traceability (M1): this loop, run from `packages/client/`, must print nothing.
 
-## Workflow follow-up
+  ```
+  for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 FR9 FR10 FR11 FR12 NFR-P1 NFR-P2 NFR-A1 NFR-A2 NFR-R1 NFR-R2 UX1 UX2 UX3; do
+    grep -rqE "show-here-entry-for-device-time.*(^|[^A-Za-z0-9-])@?$id([^0-9]|$)|(^|[^A-Za-z0-9-])@?$id([^0-9]|$).*show-here-entry-for-device-time" src || echo "missing $id"
+  done
+  ```
+- [ ] 10.2 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build`, `pnpm --filter @time-zones/client check:bundle-size` and `pnpm --filter @time-zones/client check:legacy-build`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone. Fix every existing feature that counts sliders, times or requests page-wide and now meets the Here entry (design D9).
+- [ ] 10.3 Check the glossary (`.claude/rules/glossary.md`, "Review checklist"). `grep -rniE "default location|auto-added location" src` and `grep -rn "GMT" src/locales` print nothing.
 
-- Ask the owner to run the full Stryker suite and share the report.
-- Archive with `/opsx:archive` after review. The archive merges the `locations` ADDED requirements and the `main-page` "Empty state" modification.
+## Human follow-up
+
+The operator reviews these on the PR that the deliver stage opens, then applies the patches.
+
+- H1 (FR2, FR8): apply `handoff/H1-glossary-here-entry.patch`. It sets the owners of Here entry, Exemplar city and Location row, and adds the Here entry to the View contract in `docs/glossary/`.
+  Why manual: the implement stage writes only under `packages/`, and the glossary lives in `docs/glossary/`.
+  Automated part: `git apply --check` in task 9.1. The owners it names are covered by the tests of sections 2–6.
+- H2 (FR1, FR7, NFR-A2): apply `handoff/H2-architecture-views-here-entry.patch`. It updates "Here entry" in `docs/architecture/views.md`.
+  Why manual: the implement stage writes only under `packages/`, and the document lives in `docs/architecture/`.
+  Automated part: `git apply --check` in task 9.2. The behaviour it describes is covered by the features of sections 7–8.
