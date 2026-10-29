@@ -30,11 +30,21 @@ Feature: Locations in a real browser
     And the page is still marked
 
   @add-locations-via-search @NFR-P2
+  @show-here-entry-for-device-time @FR8
   Scenario: Data loads only when the search opens
-    Given the user opens the locations app
+    Given the stored locations are "Almaty"
+    When the user opens the locations app
     Then the page has not requested the search data
     When the user opens the search
     Then the page has requested the search data
+
+  @show-here-entry-for-device-time @FR8 @NFR-P2 @M5
+  Scenario: The Here entry's request is the only one
+    Given the user opens the locations app
+    When the Here entry has loaded the zone cities data
+    And the user opens the search
+    Then the suggestions are shown
+    And the page has requested the search data exactly 1 time
 
   @add-locations-via-search @NFR-A3
   @set-home-location-and-show-differences @FR11

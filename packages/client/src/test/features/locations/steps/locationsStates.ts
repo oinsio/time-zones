@@ -34,6 +34,10 @@ const HOME_CITY_NAMES = ["Almaty", "Kathmandu", "New York"];
 const HOME_CITY_NAME = "Almaty";
 const TRAVELLING_HOME_CITY_NAME = "Moscow";
 const MENU_OPEN_CITY_NAME = "Kathmandu";
+const HERE_ENTRY_CITY_NAMES = ["Moscow", "Kolkata", "New York"];
+const HERE_ENTRY_HOME_CITY_NAME = "Moscow";
+/** The E2E device time zone is Asia/Almaty (playwright.bdd.config.ts). */
+const DEVICE_CITY_NAME = "Almaty";
 
 /** The UI states of the locations screen that have a screen of their own. */
 export enum WorldClockState {
@@ -53,6 +57,19 @@ export enum WorldClockState {
   HOME = "home",
   TRAVELLING = "travelling",
   MENU_OPEN = "menu open",
+  HERE_ENTRY = "here-entry",
+  HERE_ENTRY_TRAVEL = "here-entry-travel",
+}
+
+/**
+ * Stores the device's city, so no Here entry loads the search data before the
+ * state holds or fails it (FR8 of show-here-entry-for-device-time). The page
+ * starts without a service worker, so the data routes of the state apply.
+ */
+async function storeDeviceCity(world: LocationsWorld) {
+  await world.seedList(buildStoredLocations([DEVICE_CITY_NAME]));
+  await world.reloadWithoutServiceWorker();
+  await expect(world.page.getByRole("listitem")).toHaveCount(1);
 }
 
 /** Seeds a list with a home location and shows it. */
@@ -75,7 +92,8 @@ async function seedHomeList(
  * Implements NFR-A1, UX1, FR12, FR13, FR15 of add-locations-via-search and
  * NFR-R3 of select-date-with-calendar-and-now (pinned and calendar states);
  * NFR-A1, NFR-R2 of set-home-location-and-show-differences (home, travelling
- * and menu open states).
+ * and menu open states); FR1, FR7, NFR-A1 of show-here-entry-for-device-time
+ * (here-entry and here-entry-travel states).
  */
 export async function enterLocationsState(
   world: LocationsWorld,
@@ -104,11 +122,13 @@ export async function enterLocationsState(
       await expect(page.getByText(STORAGE_WARNING_TEXT)).toBeVisible();
       break;
     case WorldClockState.SEARCH_LOADING:
+      await storeDeviceCity(world);
       await world.holdSearchData();
       await openSearch(page);
       await expect(page.getByText(SEARCH_LOADING_TEXT)).toBeVisible();
       break;
     case WorldClockState.SEARCH_ERROR:
+      await storeDeviceCity(world);
       await world.failSearchData();
       await openSearch(page);
       await expect(page.getByText(SEARCH_LOAD_ERROR_TEXT)).toBeVisible();
@@ -154,6 +174,20 @@ export async function enterLocationsState(
         await menuButton(page, MENU_OPEN_CITY_NAME).click();
         await expect(page.getByRole("menu")).toBeVisible();
       }
+      break;
+    case WorldClockState.HERE_ENTRY:
+      await world.seedList(buildStoredLocations(HERE_ENTRY_CITY_NAMES));
+      await world.reloadIfOpen();
+      await expect(page.getByRole("listitem")).toHaveCount(
+        HERE_ENTRY_CITY_NAMES.length,
+      );
+      break;
+    case WorldClockState.HERE_ENTRY_TRAVEL:
+      await seedHomeList(
+        world,
+        HERE_ENTRY_CITY_NAMES,
+        HERE_ENTRY_HOME_CITY_NAME,
+      );
       break;
     case WorldClockState.TRAVELLING:
       await seedHomeList(world, LIST_CITY_NAMES, TRAVELLING_HOME_CITY_NAME);
