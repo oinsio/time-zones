@@ -11,6 +11,8 @@ const countrylessRow: LocationRowModel = {
   cityLabel: "Kyiv",
   countryName: "",
   utcOffsetLabel: "UTC+2",
+  offsetDifferenceLabel: "",
+  offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
@@ -29,6 +31,7 @@ describe("LocationRow without a country name", () => {
             <LocationRow
               row={countrylessRow}
               onRemove={vi.fn()}
+              onSetHome={() => undefined}
               onSelectTrackFraction={vi.fn()}
               onMoveTrack={vi.fn()}
               isReorderable

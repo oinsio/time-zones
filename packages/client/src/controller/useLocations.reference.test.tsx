@@ -25,6 +25,7 @@ function setup() {
     initialDocument: {
       status: LocationsLoadStatus.LOADED,
       locations: [newYork],
+      homeLocationId: null,
     },
   });
   const rendered = renderHook(

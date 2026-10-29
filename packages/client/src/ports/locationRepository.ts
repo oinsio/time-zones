@@ -1,5 +1,14 @@
 import type { Location } from "@/model";
 
+/**
+ * What is stored: the list and the id of the home location, which is always an
+ * id of the list. Implements FR8, FR10 of set-home-location-and-show-differences (D6).
+ */
+export type StoredLocations = {
+  locations: readonly Location[];
+  homeLocationId: string | null;
+};
+
 /** Outcome of reading the stored locations document. */
 export enum LocationsLoadStatus {
   LOADED = "LOADED",
@@ -8,7 +17,7 @@ export enum LocationsLoadStatus {
 }
 
 export type LocationsLoadResult =
-  | { status: LocationsLoadStatus.LOADED; locations: readonly Location[] }
+  | ({ status: LocationsLoadStatus.LOADED } & StoredLocations)
   | { status: LocationsLoadStatus.EMPTY }
   | { status: LocationsLoadStatus.UNREADABLE };
 
@@ -25,8 +34,8 @@ export enum SaveOutcome {
  */
 export interface LocationRepository {
   load(): LocationsLoadResult;
-  /** Stores the list; never throws. */
-  save(locations: readonly Location[]): SaveOutcome;
+  /** Stores the list with its home location; never throws. */
+  save(snapshot: StoredLocations): SaveOutcome;
   /** Removes the stored list; never throws. */
   clear(): SaveOutcome;
   /**

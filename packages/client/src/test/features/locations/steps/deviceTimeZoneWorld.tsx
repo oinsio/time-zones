@@ -44,6 +44,7 @@ export const rowHasHereMark = (row: HTMLElement, caption: string) =>
 export const createDeviceTimeZoneWorld = () => {
   let deviceZone = DEFAULT_DEVICE_ZONE;
   let storedCities: string[] = [];
+  let homeCity: string | undefined;
   let latestLocations: LocationsHandle;
   let backend: ReturnType<typeof createInMemoryLocationBackend>;
 
@@ -55,7 +56,7 @@ export const createDeviceTimeZoneWorld = () => {
   const rowOf = (city: string) =>
     screen
       .getByRole("button", {
-        name: i18n.t("locations.removeLocation", { city }),
+        name: i18n.t("locations.locationMenu", { city }),
       })
       .closest("li") as HTMLElement;
 
@@ -72,12 +73,15 @@ export const createDeviceTimeZoneWorld = () => {
       cleanup();
       deviceZone = DEFAULT_DEVICE_ZONE;
       storedCities = [];
+      homeCity = undefined;
       await i18n.changeLanguage(ENGLISH_LANGUAGE);
     },
     openApp: () => {
       backend = createInMemoryLocationBackend({
         status: LocationsLoadStatus.LOADED,
         locations: storedCities.map((city) => buildLocation(cityEntry(city))),
+        homeLocationId:
+          homeCity === undefined ? null : buildLocation(cityEntry(homeCity)).id,
       });
       const Rows = () => {
         latestLocations = useLocations();
@@ -85,6 +89,7 @@ export const createDeviceTimeZoneWorld = () => {
           <LocationList
             rows={latestLocations.rows}
             onRemove={latestLocations.removeLocation}
+            onSetHome={latestLocations.setHomeLocation}
             onMove={latestLocations.moveLocation}
             onSelectTrackFraction={() => undefined}
             onMoveTrack={() => undefined}
@@ -107,6 +112,9 @@ export const createDeviceTimeZoneWorld = () => {
     },
     givenList: (_ctx: unknown, cities: string) => {
       storedCities = cities.split(CITY_SEPARATOR);
+    },
+    givenHome: (_ctx: unknown, city: string) => {
+      homeCity = city;
     },
     givenLanguage: async (_ctx: unknown, language: string) => {
       await i18n.changeLanguage(language);

@@ -1,7 +1,11 @@
 import { useContext, useMemo, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "@/i18n";
-import { getEffectiveInstant, getReferenceDay } from "@/model";
+import {
+  getEffectiveInstant,
+  getReferenceDay,
+  getReferenceOffsetMinutes,
+} from "@/model";
 import { presentLocationRows } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
 
@@ -24,24 +28,29 @@ const MISSING_PROVIDER_MESSAGE =
  * select-date-with-calendar-and-now (D5).
  * Passes the reference day, read at the same instant, to the presenter:
  * Implements FR1, FR2 of add-time-sliders-to-location-cards (D6).
+ * Passes the home location and the reference offset, read once per
+ * presentation: Implements FR5, FR7 of set-home-location-and-show-differences (D4).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
   const { store, clock, minuteTick, ...rest } = context;
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
-  const { locations, deviceTimeZoneId } = state;
+  const { locations, deviceTimeZoneId, homeLocationId } = state;
   const { i18n, t } = useTranslation();
   const language = (i18n.resolvedLanguage ??
     i18n.language) as SupportedLanguage;
   // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick re-presents the rows at each minute
   const rows = useMemo(() => {
     const now = clock.instant();
+    const instant = getEffectiveInstant(state, now);
     return presentLocationRows(locations, {
       language,
-      instant: getEffectiveInstant(state, now),
+      instant,
       translate: t,
       deviceTimeZoneId,
+      homeLocationId,
+      referenceOffsetMinutes: getReferenceOffsetMinutes(state, instant),
       referenceDay: getReferenceDay(state, now),
     });
   }, [state, locations, deviceTimeZoneId, language, t, clock, minuteTick]);

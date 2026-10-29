@@ -82,6 +82,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         instant,
         translate: i18n.t,
         deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
+        homeLocationId: null,
+        referenceOffsetMinutes: undefined,
         referenceDay: buildReferenceDay(instant),
       });
     });

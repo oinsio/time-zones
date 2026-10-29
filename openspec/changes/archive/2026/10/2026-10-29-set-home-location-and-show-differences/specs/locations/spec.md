@@ -87,10 +87,11 @@ Presenting 50 rows with offset differences SHALL build no more formatters than w
 
 #### Scenario: 50 rows within the work bound
 - **GIVEN** 50 locations, one of them home
+- **AND** the home location is the only one in `Asia/Almaty` and one other location is the only one in `Europe/Moscow`
 - **AND** the rows were presented once
 - **WHEN** the rows are presented again
 - **THEN** no date, time or region name formatter is built
-- **AND** the reference zone's UTC offset is computed once
+- **AND** the reference zone's UTC offset is computed once: the time zone lookups in `Asia/Almaty` exceed those in `Europe/Moscow` by at most 1
 
 ### Requirement: Location menu
 Each card SHALL have a location menu button showing "⋯" with a hit area of at least 44 × 44 px, in place of the former remove button. It MUST follow the WAI-ARIA menu button pattern: Enter, Space or Arrow Down open it on the first item, the arrows move between items, Enter activates, Esc closes it and returns focus to the button. Opening it MUST NOT start a reorder or move a day track's handle. <!-- implements FR11, NFR-A2, UX3 of set-home-location-and-show-differences -->
@@ -435,3 +436,28 @@ The time SHALL be the most prominent text of a card — larger and bolder than t
 - **WHEN** it is shown at 375 px or 1024 px in the light or the dark theme
 - **THEN** the Almaty row shows `12:30` and the Moscow row shows `10:30`, each with its date
 - **AND** the screen matches the re-approved "list" screenshot
+
+### Requirement: Local time and date are fast and accessible
+Presenting 50 locations with their time, date, offset and here mark SHALL take at most 50 ms, and the time and the date MUST appear in the same render as their row, with no loading state. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: presenting 50 rows again, in the same language and for the same reference day, MUST build no date, time or region name formatter. The time and date labels MUST stay identical, character for character, in English and Russian. A list with times and dates MUST have no axe-core violations in the light and dark themes. The time and the date MUST be readable text of the card but MUST NOT be a live region, so minute updates are not announced. A row's accessible name MUST stay its city, followed by its leading mark's accessible label when it has one and by its offset difference's accessible text when it has one (see "Here mark is accessible and fits every screen"); the time and the date MUST NOT be part of it. <!-- implements NFR-P1, NFR-A1, NFR-A2 of show-local-time-and-date-on-location-cards; FR1, FR5, FR6, NFR-P1, UX1 of replace-wall-clock-row-budgets-with-deterministic-checks; NFR-A1 of match-here-mark-to-design; NFR-A3 of set-home-location-and-show-differences -->
+
+#### Scenario: 50 rows within the budget
+- **GIVEN** 50 locations whose rows have been presented with time and date once
+- **WHEN** their rows are presented with time and date again
+- **THEN** no date, time or region name formatter is built
+
+#### Scenario: Labels are unchanged by formatter reuse
+- **GIVEN** the list contains Kolkata, Kathmandu and New York
+- **WHEN** their rows are presented at `2026-07-15T12:00:00Z` in English and then in Russian
+- **THEN** each row shows the same time and date labels as the platform's own date formatting gives for that zone, with each label's format, in the same language, without the shared formatters
+
+#### Scenario: No accessibility violations with times
+- **GIVEN** the list contains locations with times and dates
+- **WHEN** the list is shown in the light or the dark theme
+- **THEN** axe-core reports no violations
+
+#### Scenario: Time does not change the row name and is not announced
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list contains Almaty and Moscow
+- **WHEN** the user opens the app
+- **THEN** the Almaty row is named "Almaty You are here" and the Moscow row is named "Moscow 2 hours behind"
+- **AND** the time of Almaty is not inside a live region

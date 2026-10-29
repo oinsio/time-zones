@@ -19,7 +19,7 @@ import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationList } from "@/views/shared";
-import { cityEntry } from "./locationsUiWorld";
+import { cityEntry, HIDDEN_FROM_TEXT_SELECTOR } from "./locationsUiWorld";
 import {
   BUDGET_ROW_COUNT,
   BUDGET_SECOND_MOMENT,
@@ -28,11 +28,9 @@ import {
 } from "./rowBudgetWorld";
 
 const feature = await loadFeature("../locations_utc_offset_unit.feature");
-
 const UNKNOWN_ZONE_LABEL = "Olympus";
 const RUSSIAN_LANGUAGE = "ru";
 const ENGLISH_LANGUAGE = "en";
-
 type LocationsHandle = ReturnType<typeof useLocations>;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
@@ -56,6 +54,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         <LocationList
           rows={latestLocations.rows}
           onRemove={latestLocations.removeLocation}
+          onSetHome={latestLocations.setHomeLocation}
           onMove={latestLocations.moveLocation}
           onSelectTrackFraction={() => undefined}
           onMoveTrack={() => undefined}
@@ -68,6 +67,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           initialDocument: {
             status: LocationsLoadStatus.LOADED,
             locations: storedLocations,
+            homeLocationId: null,
           },
         })}
         writeScheduler={immediateWriteScheduler}
@@ -80,15 +80,15 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   const textWithoutHourLabels = (card: HTMLElement) => {
     const copy = card.cloneNode(true) as HTMLElement;
-    for (const hourLabel of copy.querySelectorAll("[data-hour-label]")) {
-      hourLabel.remove();
+    for (const label of copy.querySelectorAll(HIDDEN_FROM_TEXT_SELECTOR)) {
+      label.remove();
     }
     return copy.textContent;
   };
   const rowOf = (city: string) =>
     screen
       .getByRole("button", {
-        name: i18n.t("locations.removeLocation", { city }),
+        name: i18n.t("locations.locationMenu", { city }),
       })
       .closest("li") as HTMLElement;
 
@@ -222,7 +222,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         expect(row).not.toHaveTextContent(/UTC/);
         expect(
           within(row).getByRole("button", {
-            name: i18n.t("locations.removeLocation", { city }),
+            name: i18n.t("locations.locationMenu", { city }),
           }),
         ).toBeVisible();
       },

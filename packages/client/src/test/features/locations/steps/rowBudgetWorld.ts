@@ -3,7 +3,7 @@ import i18n from "i18next";
 import { expect } from "vitest";
 import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
-import type { Location } from "@/model";
+import { getUtcOffsetMinutes, type Location } from "@/model";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
@@ -29,6 +29,8 @@ type BudgetPresenting = {
   timestamp?: string;
   language?: SupportedLanguage;
   deviceTimeZoneId?: string;
+  /** Presents the rows with this location as home (set-home-location-and-show-differences). */
+  homeLocation?: Location;
 };
 
 export function presentBudgetRows(
@@ -37,6 +39,7 @@ export function presentBudgetRows(
     timestamp = BUDGET_FIRST_MOMENT,
     language = BUDGET_LANGUAGE,
     deviceTimeZoneId = UNIT_TEST_DEVICE_TIME_ZONE,
+    homeLocation,
   }: BudgetPresenting = {},
 ): LocationRow[] {
   const instant = fakeClock(timestamp).instant();
@@ -45,7 +48,14 @@ export function presentBudgetRows(
     instant,
     translate: i18n.getFixedT(language),
     deviceTimeZoneId,
-    referenceDay: buildReferenceDay(instant, deviceTimeZoneId),
+    homeLocationId: homeLocation?.id ?? null,
+    referenceOffsetMinutes: homeLocation
+      ? getUtcOffsetMinutes(homeLocation.timeZoneId, instant)
+      : undefined,
+    referenceDay: buildReferenceDay(
+      instant,
+      homeLocation?.timeZoneId ?? deviceTimeZoneId,
+    ),
   });
 }
 

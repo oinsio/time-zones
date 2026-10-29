@@ -5,11 +5,12 @@ Feature: Here mark in a real browser
 
   @mark-device-time-zone-in-location-list @NFR-A1 @FR1
   @match-here-mark-to-design @NFR-A1
+  @set-home-location-and-show-differences @NFR-A3
   Scenario: Row name includes the badge
     Given the stored locations are "Almaty", "Moscow"
     And the user opens the locations app
     Then the row of "Almaty" is named "Almaty You are here"
-    And the row of "Moscow" is named "Moscow"
+    And the row of "Moscow" is named "Moscow 2 hours behind"
 
   @mark-device-time-zone-in-location-list @NFR-A2 @M4
   @match-here-mark-to-design @NFR-A2 @M4

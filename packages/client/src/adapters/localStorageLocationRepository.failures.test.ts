@@ -32,7 +32,9 @@ describe("local storage location repository failures", () => {
       }),
       createChannel: () => undefined,
     });
-    expect(repository.save([moscow])).toBe(SaveOutcome.FAILED);
+    expect(repository.save({ locations: [moscow], homeLocationId: null })).toBe(
+      SaveOutcome.FAILED,
+    );
   });
 
   it("should not call getStorage when created", () => {
@@ -49,10 +51,10 @@ describe("local storage location repository failures", () => {
 
   it("should answer FAILED to save and clear when the storage cannot be read", () => {
     const repository = createBlocked();
-    expect([repository.save([moscow]), repository.clear()]).toEqual([
-      SaveOutcome.FAILED,
-      SaveOutcome.FAILED,
-    ]);
+    expect([
+      repository.save({ locations: [moscow], homeLocationId: null }),
+      repository.clear(),
+    ]).toEqual([SaveOutcome.FAILED, SaveOutcome.FAILED]);
   });
 
   it("should return a working unsubscribe when the storage cannot be read", () => {
@@ -70,7 +72,7 @@ describe("local storage location repository failures", () => {
         removeEventListener: () => undefined,
       }),
     });
-    repository.save([moscow]);
+    repository.save({ locations: [moscow], homeLocationId: null });
     expect(postMessage).not.toHaveBeenCalled();
   });
 
@@ -81,7 +83,9 @@ describe("local storage location repository failures", () => {
         throw new Error("no channel");
       },
     });
-    expect(repository.save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(repository.save({ locations: [moscow], homeLocationId: null })).toBe(
+      SaveOutcome.SAVED,
+    );
   });
 
   it("should still save when posting to the channel throws", () => {
@@ -95,7 +99,9 @@ describe("local storage location repository failures", () => {
         removeEventListener: () => undefined,
       }),
     });
-    expect(repository.save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(repository.save({ locations: [moscow], homeLocationId: null })).toBe(
+      SaveOutcome.SAVED,
+    );
   });
 });
 
@@ -115,6 +121,7 @@ describe("local storage location repository without BroadcastChannel", () => {
     expect(listener).toHaveBeenCalledWith({
       status: LocationsLoadStatus.LOADED,
       locations: [],
+      homeLocationId: null,
     });
   });
 

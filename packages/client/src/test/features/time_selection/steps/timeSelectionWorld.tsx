@@ -38,6 +38,7 @@ export const createTimeSelectionWorld = () => {
   let clock = createSwitchableClock(DEFAULT_INSTANT, DEFAULT_DEVICE_ZONE);
   let backend = createInMemoryLocationBackend();
   let storedLocations: ReturnType<typeof buildLocation>[] = [];
+  let homeLocationId: string | null = null;
   let tickScheduler = createManualTickScheduler();
   let writeScheduler = createManualWriteScheduler();
   let hooks: {
@@ -90,6 +91,7 @@ export const createTimeSelectionWorld = () => {
     reset: async () => {
       cleanup();
       storedLocations = [];
+      homeLocationId = null;
       backend = createInMemoryLocationBackend();
       clock = createSwitchableClock(DEFAULT_INSTANT, DEFAULT_DEVICE_ZONE);
       tickScheduler = createManualTickScheduler();
@@ -110,12 +112,19 @@ export const createTimeSelectionWorld = () => {
         .split(CITY_SEPARATOR)
         .map((city) => buildLocation(cityEntry(city)));
     },
+    setHomeCity: (city: string) => {
+      homeLocationId = buildLocation(cityEntry(city)).id;
+    },
     setStoredLocations: (locations: ReturnType<typeof buildLocation>[]) => {
       storedLocations = locations;
     },
     open: () => {
       backend.document = storedLocations.length
-        ? { status: LocationsLoadStatus.LOADED, locations: storedLocations }
+        ? {
+            status: LocationsLoadStatus.LOADED,
+            locations: storedLocations,
+            homeLocationId,
+          }
         : backend.document;
       hooks = renderHook(
         () => ({
@@ -140,7 +149,10 @@ export const createTimeSelectionWorld = () => {
     addCityInAnotherTab: (city: string) => {
       const otherTab = createInMemoryLocationRepository({ backend });
       act(() => {
-        otherTab.save([...storedLocations, buildLocation(cityEntry(city))]);
+        otherTab.save({
+          locations: [...storedLocations, buildLocation(cityEntry(city))],
+          homeLocationId: null,
+        });
       });
     },
     selectFraction: (fraction: number) =>

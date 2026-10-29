@@ -1,6 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { localStorageLocationRepository } from "@/adapters";
-import { LOCATIONS_WRITE_DEBOUNCE_MS } from "@/constants";
 import { type Clock, systemClock } from "@/lib/temporal";
 import {
   createStore,
@@ -12,10 +11,10 @@ import {
   type LocationRepository,
   type LocationsLoadResult,
   LocationsLoadStatus,
-  SaveOutcome,
+  type StoredLocations,
 } from "@/ports";
+import { createLocationsActions } from "./createLocationsActions";
 import {
-  type AddLocationInput,
   LocationsContext,
   type LocationsContextValue,
   LocationsStatus,
@@ -39,8 +38,10 @@ const statusOf = (result: LocationsLoadResult): LocationsStatus =>
     ? LocationsStatus.UNREADABLE
     : LocationsStatus.READY;
 
-const listOf = (result: LocationsLoadResult) =>
-  result.status === LocationsLoadStatus.LOADED ? result.locations : [];
+const storedOf = (result: LocationsLoadResult): StoredLocations =>
+  result.status === LocationsLoadStatus.LOADED
+    ? { locations: result.locations, homeLocationId: result.homeLocationId }
+    : { locations: [], homeLocationId: null };
 
 function createLocationsStore(
   initialResult: LocationsLoadResult,
@@ -53,7 +54,7 @@ function createLocationsStore(
   });
   store.dispatch({
     type: LocationCommandType.REPLACE_LOCATIONS,
-    locations: listOf(initialResult),
+    ...storedOf(initialResult),
   });
   return store;
 }
@@ -72,6 +73,8 @@ function createLocationsStore(
  * Ticks at every minute boundary while the page is visible: re-reads the
  * device zone and re-presents the rows without writing (FR3, FR4 of
  * show-local-time-and-date-on-location-cards, D4).
+ * Loads, applies and writes the home location with the list: FR8, FR10 of
+ * set-home-location-and-show-differences (D6).
  */
 export function LocationsProvider({
   children,
@@ -89,67 +92,24 @@ export function LocationsProvider({
   const [minuteTick, setMinuteTick] = useState(0);
   const cancelPendingWrite = useRef<(() => void) | undefined>(undefined);
 
-  const actions = useMemo(() => {
-    const writeNow = (outcome: SaveOutcome) =>
-      setHasSaveFailed(outcome === SaveOutcome.FAILED);
-    const discardPendingWrite = () => {
-      cancelPendingWrite.current?.();
-      cancelPendingWrite.current = undefined;
-    };
-    const flushWrite = () => {
-      discardPendingWrite();
-      writeNow(repository.save(store.getSnapshot().locations));
-    };
-    const scheduleWrite = () => {
-      discardPendingWrite();
-      cancelPendingWrite.current = writeScheduler.schedule(
-        flushWrite,
-        LOCATIONS_WRITE_DEBOUNCE_MS,
-      );
-    };
-    const dispatchAndSchedule = (
-      command: Parameters<typeof store.dispatch>[0],
-    ) => {
-      const snapshotBefore = store.getSnapshot();
-      const outcome = store.dispatch(command);
-      if (outcome.ok && store.getSnapshot() !== snapshotBefore) scheduleWrite();
-      return outcome;
-    };
-    return {
-      flushPendingWrite: () => {
-        if (cancelPendingWrite.current) flushWrite();
-      },
-      addLocation: (input: AddLocationInput) =>
-        dispatchAndSchedule({
-          type: LocationCommandType.ADD_LOCATION,
-          ...input,
-        }),
-      removeLocation: (id: string) =>
-        dispatchAndSchedule({ type: LocationCommandType.REMOVE_LOCATION, id }),
-      moveLocation: (id: string, targetIndex: number) =>
-        dispatchAndSchedule({
-          type: LocationCommandType.MOVE_LOCATION,
-          id,
-          targetIndex,
-        }),
-      resetLocations: () => {
-        discardPendingWrite();
-        const outcome = repository.clear();
-        store.dispatch({
-          type: LocationCommandType.REPLACE_LOCATIONS,
-          locations: [],
-        });
-        setLoadStatus(LocationsStatus.READY);
-        if (outcome === SaveOutcome.FAILED) setHasSaveFailed(true);
-      },
-    };
-  }, [repository, store, writeScheduler]);
+  const actions = useMemo(
+    () =>
+      createLocationsActions({
+        repository,
+        store,
+        writeScheduler,
+        cancelPendingWrite,
+        setHasSaveFailed,
+        setLoadStatus,
+      }),
+    [repository, store, writeScheduler],
+  );
 
   useEffect(() => {
     const unsubscribe = repository.subscribe((result) => {
       store.dispatch({
         type: LocationCommandType.REPLACE_LOCATIONS,
-        locations: listOf(result),
+        ...storedOf(result),
       });
       setLoadStatus(statusOf(result));
     });
@@ -182,6 +142,7 @@ export function LocationsProvider({
       addLocation: actions.addLocation,
       removeLocation: actions.removeLocation,
       moveLocation: actions.moveLocation,
+      setHomeLocation: actions.setHomeLocation,
       resetLocations: actions.resetLocations,
     }),
     [store, clock, minuteTick, loadStatus, hasSaveFailed, actions],

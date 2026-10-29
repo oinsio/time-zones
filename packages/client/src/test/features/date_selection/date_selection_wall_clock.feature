@@ -43,3 +43,14 @@ Feature: Wall-clock resolution
     When a date change arrives with the date "2026-13-01"
     Then the change is rejected as an invalid date
     And the moment is still live in the store
+
+  @set-home-location-and-show-differences @FR4
+  Scenario: A device time zone change drops the gap note
+    Given no home is set
+    And the device time zone is "America/New_York"
+    And the current instant is "2026-03-07T07:30:00Z"
+    And the app is open
+    And the user moved to the next day, so the bar shows the gap note
+    When the device time zone changes to "Asia/Almaty"
+    Then the moment is pinned to "2026-03-08T07:30:00Z"
+    And the bar shows no note

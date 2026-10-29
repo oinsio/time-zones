@@ -6,7 +6,7 @@ Lets the user pick a time of day by dragging, tapping or moving the day track (s
 ## Requirements
 
 ### Requirement: Day track spans the reference day
-Every location card in the Cards view whose time zone is known SHALL show a day track. Every track MUST span the same reference day. The day starts at the start of the day that contains the effective instant in the reference zone, and ends at the start of the next day of that zone, measured in absolute time. A day is therefore 23, 24 or 25 hours long around DST changes and is never assumed to be 24 hours. The reference zone is the device time zone, a canonical IANA identifier, never a raw UTC offset. A row whose zone the browser does not know MUST show no track, and the other rows MUST be unaffected. An empty list shows no track. Inputs: the effective instant (ISO 8601 with `Z`) and the reference zone. Output: the start and end instants of the reference day. Errors: none. The track needs no network and behaves the same offline. <!-- implements FR1 of add-time-sliders-to-location-cards -->
+Every location card in the Cards view whose time zone is known SHALL show a day track. Every track MUST span the same reference day. The day starts at the start of the day that contains the effective instant in the reference zone, and ends at the start of the next day of that zone, measured in absolute time. A day is therefore 23, 24 or 25 hours long around DST changes and is never assumed to be 24 hours. The reference zone is the home location's time zone when home is set, otherwise the device time zone (see the `home-location` capability); it is a canonical IANA identifier, never a raw UTC offset. A row whose zone the browser does not know MUST show no track, and the other rows MUST be unaffected. An empty list shows no track. Inputs: the effective instant (ISO 8601 with `Z`) and the reference zone. Output: the start and end instants of the reference day. Errors: none. The track needs no network and behaves the same offline. <!-- implements FR1 of add-time-sliders-to-location-cards ; FR4 of set-home-location-and-show-differences -->
 
 #### Scenario: A 24-hour reference day
 - **GIVEN** the device time zone is `Asia/Almaty`
@@ -31,6 +31,13 @@ Every location card in the Cards view whose time zone is known SHALL show a day 
 - **WHEN** the list is presented
 - **THEN** that location's card shows no track
 - **AND** the Moscow card shows its track
+
+#### Scenario: The day of the home location
+- **GIVEN** the device time zone is `Europe/Moscow`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Almaty and Moscow and Almaty is home
+- **WHEN** the user opens the app
+- **THEN** every card shows a track for the day from `2026-03-07T19:00:00Z` to `2026-03-08T19:00:00Z`
 
 ### Requirement: Handle position
 The handle of every track SHALL stand at the position of the effective instant within the reference day. The position is the elapsed absolute time since the start of the day divided by the day's length, a fraction from 0 to 1, and it MUST be the same on every card. While the moment is live the handle MUST follow the clock at every minute update, and when the day changes at midnight of the reference zone the track moves to the new day. While the moment is pinned the handle MUST stay where it is. Inputs: the reference day and the effective instant. Output: the fraction. Errors: none. <!-- implements FR2 of add-time-sliders-to-location-cards -->

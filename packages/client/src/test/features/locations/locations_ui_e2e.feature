@@ -37,10 +37,13 @@ Feature: Locations in a real browser
     Then the page has requested the search data
 
   @add-locations-via-search @NFR-A3
+  @set-home-location-and-show-differences @FR11
   Scenario: Remove action names the city
     Given the stored locations are "Moscow"
     When the user opens the locations app
-    Then the list offers the action "Remove Moscow"
+    Then the list offers the action "Actions for Moscow"
+    When the user opens the location menu of "Moscow"
+    Then the menu offers the item "Remove"
 
   @add-locations-via-search @NFR-A3
   Scenario: Adding and removing are announced politely
@@ -112,6 +115,7 @@ Feature: Locations in a real browser
   @select-date-with-calendar-and-now @NFR-R3 @M7
   @add-time-sliders-to-location-cards @NFR-R3 @M9
   @match-here-mark-to-design @NFR-R2 @M5
+  @set-home-location-and-show-differences @NFR-R2
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme
@@ -150,6 +154,14 @@ Feature: Locations in a real browser
       | time-selected | 375   | dark  |
       | time-selected | 1024  | light |
       | time-selected | 1024  | dark  |
+      | home        | 375   | light |
+      | home        | 375   | dark  |
+      | home        | 1024  | light |
+      | home        | 1024  | dark  |
+      | travelling  | 375   | light |
+      | travelling  | 375   | dark  |
+      | travelling  | 1024  | light |
+      | travelling  | 1024  | dark  |
 
   @add-locations-via-search @FR14
   Scenario: Added in another tab

@@ -42,6 +42,8 @@ export const createTrackBudgetWorld = () => {
       instant: getEffectiveInstant(next, now),
       translate: i18n.getFixedT(ENGLISH_LANGUAGE),
       deviceTimeZoneId: next.deviceTimeZoneId,
+      homeLocationId: null,
+      referenceOffsetMinutes: undefined,
       referenceDay: getReferenceDay(next, now),
     });
   };

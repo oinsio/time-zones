@@ -14,6 +14,8 @@ const row = {
   cityLabel: "Kolkata",
   countryName: "India",
   utcOffsetLabel: "UTC+5:30",
+  offsetDifferenceLabel: "",
+  offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
@@ -34,6 +36,7 @@ const renderWithDragging = (isDragging: boolean) => {
       <LocationRow
         row={row}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onSelectTrackFraction={vi.fn()}
         onMoveTrack={vi.fn()}
         isReorderable

@@ -75,3 +75,12 @@ Feature: Reference moment
     Then the moment is live
     And the "Almaty" row shows the time "12:30" and the date "Sun, Mar 8"
     And the Now button is not shown
+
+  @set-home-location-and-show-differences @FR4
+  Scenario: A home change keeps the pinned moment
+    Given the device time zone is "Europe/Moscow"
+    And the list contains "Almaty, Moscow"
+    And the moment is pinned to "2026-03-08T20:30:00Z"
+    When the user makes "Almaty" home
+    Then the moment is pinned to "2026-03-08T20:30:00Z"
+    And the date bar shows Monday, March 9

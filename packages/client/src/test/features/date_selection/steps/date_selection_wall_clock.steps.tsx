@@ -15,11 +15,11 @@ import {
   reduceLocations,
 } from "@/model";
 import { createDateSelectionWorld } from "./dateSelectionWorld";
+import { noteOfBar, statusOfNextDayFrom } from "./wallClockStepHelpers";
 
 const feature = await loadFeature("../date_selection_wall_clock.feature");
 
 const NO_NOTE = "no note";
-const NOTE_TEXT_SELECTOR = "p.text-xs";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createDateSelectionWorld();
@@ -37,27 +37,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     world.setInstant(timestamp);
   const givenAppOpen = () => world.openApp();
   const whenNextDay = () => world.showNextDay();
-  const statusOfNextDayFrom = (timestamp: string) => {
-    const statusStore = createStore(reduceLocations, INITIAL_WORLD_CLOCK_STATE);
-    statusStore.dispatch({
-      type: LocationCommandType.SET_DEVICE_TIME_ZONE,
-      timeZoneId: world.clock().timeZoneId(),
-    });
-    statusStore.dispatch({
-      type: LocationCommandType.SHIFT_DATE,
-      days: ONE_DAY,
-      now: timestamp,
-    });
-    const { reference } = statusStore.getSnapshot();
-    return reference.mode === ReferenceMode.PINNED
-      ? reference.wallClockStatus
-      : undefined;
-  };
-  const noteOfBar = () =>
-    world.barElement().querySelector(NOTE_TEXT_SELECTOR)?.textContent;
   const thenNoteIs = (_ctx: unknown, note: string) =>
-    expect(noteOfBar()).toBe(note);
-  const thenNoNote = () => expect(noteOfBar()).toBeUndefined();
+    expect(noteOfBar(world)).toBe(note);
+  const thenNoNote = () => expect(noteOfBar(world)).toBeUndefined();
 
   // @select-date-with-calendar-and-now @FR4
   f.Scenario("A gap is told in the bar", ({ Given, And, When, Then }) => {
@@ -81,7 +63,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "the user moved to the next day, so the bar shows the gap note",
         async () => {
           await whenNextDay();
-          expect(noteOfBar()).toBeDefined();
+          expect(noteOfBar(world)).toBeDefined();
         },
       );
       When("the user moves a day track to the next 15-minute step", () =>
@@ -137,12 +119,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       When("the user moves to the next day", whenNextDay);
       Then("the moment is pinned to <pinned> with the status <status>", () => {
         world.expectPinnedTo(variables.pinned);
-        expect(statusOfNextDayFrom(variables.from)).toBe(variables.status);
+        expect(statusOfNextDayFrom(world, variables.from)).toBe(
+          variables.status,
+        );
       });
       And("the bar note is <note>", () =>
         variables.note === NO_NOTE
           ? thenNoNote()
-          : expect(noteOfBar()).toBe(variables.note),
+          : expect(noteOfBar(world)).toBe(variables.note),
       );
     },
   );
@@ -173,6 +157,35 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the moment is still live in the store", () =>
         expect(store.getSnapshot().reference.mode).toBe(ReferenceMode.LIVE),
       );
+    },
+  );
+
+  // @set-home-location-and-show-differences @FR4
+  f.Scenario(
+    "A device time zone change drops the gap note",
+    ({ Given, And, When, Then }) => {
+      Given("no home is set", () => undefined);
+      And("the device time zone is {string}", givenZone);
+      And("the current instant is {string}", givenInstant);
+      And("the app is open", givenAppOpen);
+      And(
+        "the user moved to the next day, so the bar shows the gap note",
+        async () => {
+          await whenNextDay();
+          expect(noteOfBar(world)).toBeDefined();
+        },
+      );
+      When(
+        "the device time zone changes to {string}",
+        async (_ctx, zone: string) => {
+          world.setDeviceZone(zone);
+          await world.runTick();
+        },
+      );
+      Then("the moment is pinned to {string}", (_ctx, pinned: string) =>
+        world.expectPinnedTo(pinned),
+      );
+      And("the bar shows no note", thenNoNote);
     },
   );
 });

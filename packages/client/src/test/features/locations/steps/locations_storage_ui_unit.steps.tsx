@@ -5,8 +5,9 @@ import { screen, within } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { expect, vi } from "vitest";
-import { STORAGE_KEYS } from "@/constants";
+import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import {
+  cityEntry,
   closeApp,
   expectEmptyState,
   expectListContains,
@@ -125,6 +126,26 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(
         screen.getByRole("button", { name: "Добавить место" }),
       ).toBeVisible();
+    });
+  });
+
+  // @set-home-location-and-show-differences @FR9
+  f.Scenario("Home of the wrong type", ({ Given, When, Then }) => {
+    Given(
+      "the stored list holds {string} and its home is the number {int}",
+      (_ctx, city: string, homeLocationId: number) =>
+        localStorage.setItem(
+          STORAGE_KEYS.LOCATIONS,
+          JSON.stringify({
+            schemaVersion: LOCATIONS_SCHEMA_VERSION,
+            payload: { locations: [cityEntry(city)], homeLocationId },
+          }),
+        ),
+    );
+    When("the user opens the app", () => openApp());
+    Then("an error message with a reset action is shown", () => {
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveTextContent(i18n.t("locations.loadError"));
     });
   });
 });

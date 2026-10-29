@@ -8,6 +8,7 @@ import { createInMemoryLocationRepository } from "@/adapters";
 import { LocationsProvider } from "@/controller";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { removeLocationThroughMenu } from "@/test/removeLocationThroughMenu";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import CardsView from "./CardsView";
@@ -30,6 +31,7 @@ const savedLocations = (...labels: string[]) => ({
     locations: labels.map((label) =>
       buildLocation({ label, timeZoneId: `Test/${label}`, countryCode: "RU" }),
     ),
+    homeLocationId: null,
   },
 });
 
@@ -116,7 +118,7 @@ describe("CardsView", () => {
 
   it("should announce a removed location politely", async () => {
     renderCards(savedLocations("Alpha", "Beta"));
-    await userEvent.click(screen.getByRole("button", { name: "Remove Alpha" }));
+    await removeLocationThroughMenu("Alpha");
     expect(screen.getByText("Alpha removed")).toHaveAttribute(
       "aria-live",
       "polite",
@@ -126,7 +128,7 @@ describe("CardsView", () => {
 
   it("should focus Add location after the last location is removed", async () => {
     renderCards(savedLocations("Alpha"));
-    await userEvent.click(screen.getByRole("button", { name: "Remove Alpha" }));
+    await removeLocationThroughMenu("Alpha");
     expect(screen.getByRole("button", { name: "Add location" })).toHaveFocus();
   });
 

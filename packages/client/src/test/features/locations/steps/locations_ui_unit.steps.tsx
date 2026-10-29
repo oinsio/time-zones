@@ -64,8 +64,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         secondCountry: string,
       ) => {
         const [firstRow, secondRow] = screen.getAllByRole("listitem");
-        expect(firstRow).toHaveTextContent(`${firstCity}${firstCountry}`);
-        expect(secondRow).toHaveTextContent(`${secondCity}${secondCountry}`);
+        expect(firstRow).toHaveTextContent(
+          new RegExp(`${firstCity}.*${firstCountry}`),
+        );
+        expect(secondRow).toHaveTextContent(
+          new RegExp(`${secondCity}.*${secondCountry}`),
+        );
       },
     );
   });

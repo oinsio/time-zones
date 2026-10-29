@@ -6,7 +6,7 @@ Lets the user see every location at another date than today — the previous or 
 ## Requirements
 
 ### Requirement: Reference moment
-The app SHALL keep one reference moment from which every location's time, date and UTC offset are derived. The moment MUST be either live — equal to the current instant of the clock — or pinned to one instant chosen by the user. It MUST be live whenever the app opens. It MUST NOT be written to storage and MUST NOT be passed to other open tabs; a change of the location list in another tab MUST keep it. Reset of an unreadable list MUST keep it. The reference zone of this change is the device time zone (canonical IANA identifier, never a raw offset), since no home location exists. Inputs: the clock's current instant (ISO 8601 with `Z`) and the device time zone. Output: the effective instant — the current instant while live, the pinned instant while pinned. Errors: none. <!-- implements FR1 of select-date-with-calendar-and-now -->
+The app SHALL keep one reference moment from which every location's time, date and UTC offset are derived. The moment MUST be either live — equal to the current instant of the clock — or pinned to one instant chosen by the user. It MUST be live whenever the app opens. It MUST NOT be written to storage and MUST NOT be passed to other open tabs; a change of the location list in another tab MUST keep it. Reset of an unreadable list MUST keep it. The reference zone is the home location's time zone when home is set, otherwise the device time zone (canonical IANA identifier, never a raw offset; see the `home-location` capability). Setting, moving or clearing home MUST keep the moment: live stays live, pinned keeps its instant. Inputs: the clock's current instant (ISO 8601 with `Z`), the device time zone and the home location. Output: the effective instant — the current instant while live, the pinned instant while pinned. Errors: none. <!-- implements FR1 of select-date-with-calendar-and-now ; FR4 of set-home-location-and-show-differences -->
 
 #### Scenario: The app opens live
 - **GIVEN** the device time zone is `Asia/Almaty`
@@ -27,6 +27,14 @@ The app SHALL keep one reference moment from which every location's time, date a
 - **WHEN** another tab adds Moscow to the list
 - **THEN** the moment is still pinned to `2026-03-09T07:30:00Z`
 - **AND** the Moscow row shows `10:30` and `Mon, Mar 9`
+
+#### Scenario: A home change keeps the pinned moment
+- **GIVEN** the device time zone is `Europe/Moscow`
+- **AND** the moment is pinned to `2026-03-08T20:30:00Z`
+- **AND** the list contains Almaty and Moscow
+- **WHEN** the user makes Almaty home
+- **THEN** the moment is still pinned to `2026-03-08T20:30:00Z`
+- **AND** the date bar shows Monday, March 9
 
 ### Requirement: Previous and next day
 The previous-day and next-day actions SHALL move the reference moment exactly one calendar day back or forward in the reference zone, keeping the wall-clock time the moment has there, and MUST pin the moment. From a live moment they MUST start from the current instant. Inputs: the effective instant, the reference zone, the direction (−1 or +1 day). Output: the pinned instant and its wall-clock status (see "Wall-clock resolution on the new date"). Errors: a move with a malformed current instant MUST be rejected as invalid; a move that would leave the range of dates the platform's date arithmetic supports MUST be rejected and MUST change nothing. <!-- implements FR2, FR10 of select-date-with-calendar-and-now -->
@@ -61,7 +69,7 @@ The previous-day and next-day actions SHALL move the reference moment exactly on
 - **AND** the moment is unchanged
 
 ### Requirement: Wall-clock resolution on the new date
-When a date change keeps a wall-clock time that does not exist on the new date in the reference zone (a DST gap), the moment SHALL move forward by the length of the gap; when the wall-clock time occurs twice (a DST overlap), the moment MUST be the earlier of the two instants. The outcome MUST be reported with the pinned moment as `UNIQUE`, `GAP` or `AMBIGUOUS`. On `GAP` the date bar MUST tell the user, in the interface language, which wall-clock time was kept and which time is shown instead. The note MUST stay until the next date change, the next time selection on a day track (see the `time-selection` capability) or Now; a time selection pins an exact instant and is reported as `UNIQUE`. `UNIQUE` and `AMBIGUOUS` MUST show no note. <!-- implements FR4 of select-date-with-calendar-and-now; FR5 of add-time-sliders-to-location-cards -->
+When a date change keeps a wall-clock time that does not exist on the new date in the reference zone (a DST gap), the moment SHALL move forward by the length of the gap; when the wall-clock time occurs twice (a DST overlap), the moment MUST be the earlier of the two instants. The outcome MUST be reported with the pinned moment as `UNIQUE`, `GAP` or `AMBIGUOUS`. On `GAP` the date bar MUST tell the user, in the interface language, which wall-clock time was kept and which time is shown instead. The note MUST stay until the next date change, the next time selection on a day track (see the `time-selection` capability), Now, or a change of the reference zone; a time selection pins an exact instant and is reported as `UNIQUE`. A change of the reference zone keeps the pinned instant; a moment reported as `GAP` is then reported as `UNIQUE`. `UNIQUE` and `AMBIGUOUS` MUST show no note. <!-- implements FR4 of select-date-with-calendar-and-now; FR5 of add-time-sliders-to-location-cards; FR4 of set-home-location-and-show-differences -->
 
 #### Scenario: A gap is told in the bar
 - **GIVEN** the device time zone is `America/New_York`
@@ -98,6 +106,16 @@ When a date change keeps a wall-clock time that does not exist on the new date i
 - **WHEN** a date change arrives with the date `2026-13-01`
 - **THEN** the change is rejected as an invalid date
 - **AND** the moment is still live
+
+#### Scenario: A device time zone change drops the gap note
+- **GIVEN** no home is set
+- **AND** the device time zone is `America/New_York`
+- **AND** the interface language is English
+- **AND** the current instant is `2026-03-07T07:30:00Z`
+- **AND** the user moved to the next day, so the moment is pinned to `2026-03-08T07:30:00Z` and the bar shows the gap note
+- **WHEN** the device time zone changes to `Asia/Almaty`
+- **THEN** the moment is still pinned to `2026-03-08T07:30:00Z`
+- **AND** the bar shows no note
 
 ### Requirement: Choose a date in the calendar
 Activating the shown date SHALL open a calendar showing the month of the reference moment's date in the reference zone, with that date marked as selected and today's date in the reference zone marked as today. The calendar MUST let the user show the previous and the next month without changing the reference moment. Picking a day MUST move the reference moment to that date, keeping its wall-clock time in the reference zone (with the resolution of "Wall-clock resolution on the new date"), pin it and close the calendar. Picking the date already shown, or closing the calendar without picking, MUST change nothing: a live moment stays live. Inputs: the picked ISO date (`2026-07-15`), the effective instant, the reference zone. Output: the pinned instant. Errors: a malformed date or a date outside the supported range MUST be rejected and change nothing. <!-- implements FR3, FR10 of select-date-with-calendar-and-now -->

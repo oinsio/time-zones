@@ -1,4 +1,5 @@
 // Verifies FR1, FR2, FR3, FR4 of add-time-sliders-to-location-cards (D2).
+// Verifies FR4 of set-home-location-and-show-differences (M3): the day of home.
 import { beforeAll, describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import {
@@ -26,6 +27,27 @@ const dayOf = (zone: string, iso: string) =>
 let ALMATY_DAY: ReferenceDay;
 beforeAll(() => {
   ALMATY_DAY = dayOf("Asia/Almaty", "2026-03-08T07:30:00Z");
+});
+
+describe("getReferenceDay with a home location", () => {
+  it("should span the day of home, not of the device zone", () => {
+    const almaty = {
+      id: "Asia/Almaty|Almaty",
+      timeZoneId: "Asia/Almaty",
+      label: "Almaty",
+      countryCode: "KZ",
+    };
+    const state: WorldClockState = {
+      ...stateIn("Europe/Moscow"),
+      locations: [almaty],
+      homeLocationId: almaty.id,
+    };
+
+    const day = getReferenceDay(state, instantOf("2026-03-08T07:30:00Z"));
+
+    expect(day.start.toString()).toBe("2026-03-07T19:00:00Z");
+    expect(day.end.toString()).toBe("2026-03-08T19:00:00Z");
+  });
 });
 
 describe("getReferenceDay", () => {

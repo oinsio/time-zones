@@ -21,6 +21,7 @@ const renderWith = (cities: string[], clock: Clock) =>
       initialDocument: {
         status: LocationsLoadStatus.LOADED,
         locations: cities.map(cityOf),
+        homeLocationId: null,
       },
     }),
     undefined,
@@ -78,6 +79,7 @@ describe("useLocations device time zone", () => {
       result.current.addLocation({ ...KNOWN_CITIES.Almaty, label: "Almaty" }),
     );
     expect(Object.keys(backend.document).sort()).toEqual([
+      "homeLocationId",
       "locations",
       "status",
     ]);

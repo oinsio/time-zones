@@ -2,49 +2,10 @@
 // Verifies FR2, FR6, UX1, NFR-A2 of show-local-time-and-date-on-location-cards (D5).
 // Verifies FR1 of reorder-locations-by-drag-and-drop.
 // Verifies FR1 of add-time-sliders-to-location-cards (D8).
-// Verifies FR1, FR2, UX1, UX2 of mark-device-time-zone-in-location-list (D5).
-// Verifies FR1, FR2, FR4, UX1, UX2, UX3, NFR-A1 of match-here-mark-to-design.
-import { DndContext } from "@dnd-kit/core";
-import { SortableContext } from "@dnd-kit/sortable";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import i18n from "i18next";
-import {
-  DayPeriod,
-  LocationMarkKind,
-  type LocationRow as LocationRowModel,
-} from "@/presenter";
-import { LocationRow } from "./LocationRow";
-
-const row: LocationRowModel = {
-  id: "kolkata",
-  cityLabel: "Kolkata",
-  countryName: "India",
-  utcOffsetLabel: "UTC+5:30",
-  localTimeLabel: "",
-  localDateLabel: "",
-  localIsoDate: "",
-};
-
-const renderRow = (
-  overrides: Partial<LocationRowModel> = {},
-  isReorderable = true,
-) =>
-  render(
-    <DndContext>
-      <SortableContext items={[row.id]}>
-        <ul>
-          <LocationRow
-            row={{ ...row, ...overrides }}
-            onRemove={vi.fn()}
-            onSelectTrackFraction={vi.fn()}
-            onMoveTrack={vi.fn()}
-            isReorderable={isReorderable}
-            prefersReducedMotion={false}
-          />
-        </ul>
-      </SortableContext>
-    </DndContext>,
-  );
+import { DayPeriod } from "@/presenter";
+import { renderKolkataRow as renderRow } from "./locationRowFixture";
 
 describe("LocationRow", () => {
   beforeEach(async () => {
@@ -68,13 +29,13 @@ describe("LocationRow", () => {
     renderRow({ utcOffsetLabel: "" });
     expect(screen.queryByText(/UTC/)).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Remove Kolkata" }),
+      screen.getByRole("button", { name: "Actions for Kolkata" }),
     ).toBeInTheDocument();
   });
 
   it("should show no secondary line when both country and offset are empty", () => {
     renderRow({ countryName: "", utcOffsetLabel: "" });
-    expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata$/);
+    expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata⋯$/);
   });
 
   it("should show the move handle when reorderable", () => {
@@ -120,78 +81,8 @@ describe("LocationRow", () => {
       renderRow();
       expect(screen.queryByText("12:30")).not.toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: "Remove Kolkata" }),
+        screen.getByRole("button", { name: "Actions for Kolkata" }),
       ).toBeInTheDocument();
-    });
-  });
-
-  describe("here mark", () => {
-    const hereMark = {
-      kind: LocationMarkKind.HERE,
-      accessibleLabel: "You are here",
-      caption: "here",
-    };
-
-    it("should put the mark image before the city on the city line", () => {
-      renderRow({ mark: hereMark });
-      const cityLine = screen.getByText("Kolkata").parentElement;
-      expect(cityLine?.firstElementChild).toBe(
-        screen.getByRole("img", { name: "You are here" }),
-      );
-      expect(cityLine?.firstElementChild?.nextElementSibling).toBe(
-        screen.getByText("Kolkata"),
-      );
-    });
-
-    it("should put the caption right after the city", () => {
-      renderRow({ mark: hereMark });
-      expect(screen.getByText("Kolkata").nextElementSibling).toBe(
-        screen.getByText("here"),
-      );
-    });
-
-    it("should hide the caption from assistive technology", () => {
-      renderRow({ mark: hereMark });
-      expect(screen.getByText("here")).toHaveAttribute("aria-hidden", "true");
-    });
-
-    it("should draw the caption as bold accent text", () => {
-      renderRow({ mark: hereMark });
-      expect(screen.getByText("here")).toHaveClass("text-accent", "font-bold");
-    });
-
-    it.each(["bg-accent", "rounded-full", "border"])(
-      "should not draw the caption as a pill with the %s class",
-      (pillClassName) => {
-        renderRow({ mark: hereMark });
-        expect(screen.getByText("here")).not.toHaveClass(pillClassName);
-      },
-    );
-
-    it("should name the row by the city and the mark", () => {
-      renderRow({ mark: hereMark });
-      expect(
-        screen.getByRole("listitem", { name: "Kolkata You are here" }),
-      ).toBeInTheDocument();
-    });
-
-    it("should name the row by the city alone without a mark", () => {
-      renderRow();
-      expect(
-        screen.getByRole("listitem", { name: "Kolkata" }),
-      ).toBeInTheDocument();
-    });
-
-    it("should start the city line with the city and render nothing else on it without a mark", () => {
-      renderRow();
-      expect(screen.getByText("Kolkata").parentElement?.children).toHaveLength(
-        1,
-      );
-    });
-
-    it("should not show the former pill text", () => {
-      renderRow({ mark: hereMark });
-      expect(screen.queryByText("Your time zone")).toBeNull();
     });
   });
 });

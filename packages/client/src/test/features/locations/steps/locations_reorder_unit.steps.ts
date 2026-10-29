@@ -214,6 +214,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         cityLabel: label,
         countryName: "",
         utcOffsetLabel: "",
+        offsetDifferenceLabel: "",
+        offsetDifferenceAccessibleLabel: "",
         localTimeLabel: "",
         localDateLabel: "",
         localIsoDate: "",
@@ -222,6 +224,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         createElement(LocationList, {
           rows,
           onRemove: vi.fn(),
+          onSetHome: vi.fn(),
           onMove: vi.fn(),
           onSelectTrackFraction: vi.fn(),
           onMoveTrack: vi.fn(),

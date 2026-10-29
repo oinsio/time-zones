@@ -7,16 +7,13 @@ import {
   UTC_OFFSET_PLUS_SIGN,
 } from "@/constants";
 
-/**
- * "UTC+5:30" style label; the prefix alone for a zero offset; minutes only
- * when not zero; a real minus sign for negative offsets.
- * Implements FR3, UX2 of show-utc-offset-on-location-rows (D2).
- */
-export function formatUtcOffset(
-  offsetMinutes: number,
-  utcPrefix: string,
-): string {
-  if (offsetMinutes === 0) return utcPrefix;
+/** Sign, whole hours and `:MM` (only when not zero) of an offset in minutes. */
+export function formatSignedHoursMinutes(offsetMinutes: number): {
+  sign: string;
+  hours: number;
+  minutes: number;
+  minutesPart: string;
+} {
   const sign = offsetMinutes < 0 ? UTC_OFFSET_MINUS_SIGN : UTC_OFFSET_PLUS_SIGN;
   const absoluteMinutes = Math.abs(offsetMinutes);
   const hours = Math.floor(absoluteMinutes / MINUTES_PER_HOUR);
@@ -25,5 +22,21 @@ export function formatUtcOffset(
     minutes === 0
       ? ""
       : `${UTC_OFFSET_MINUTES_SEPARATOR}${String(minutes).padStart(UTC_OFFSET_MINUTES_DIGITS, UTC_OFFSET_MINUTES_PAD)}`;
+  return { sign, hours, minutes, minutesPart };
+}
+
+/**
+ * "UTC+5:30" style label; the prefix alone for a zero offset; minutes only
+ * when not zero; a real minus sign for negative offsets.
+ * Implements FR3, UX2 of show-utc-offset-on-location-rows (D2).
+ * Implements FR6 of set-home-location-and-show-differences (D5): the parts
+ * come from `formatSignedHoursMinutes`.
+ */
+export function formatUtcOffset(
+  offsetMinutes: number,
+  utcPrefix: string,
+): string {
+  if (offsetMinutes === 0) return utcPrefix;
+  const { sign, hours, minutesPart } = formatSignedHoursMinutes(offsetMinutes);
   return `${utcPrefix}${sign}${hours}${minutesPart}`;
 }

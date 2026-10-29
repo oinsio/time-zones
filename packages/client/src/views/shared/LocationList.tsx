@@ -44,6 +44,8 @@ const FINGER_OR_POINTER_OPTIONS = {
 type LocationListProps = {
   rows: readonly LocationRowModel[];
   onRemove: (id: string) => void;
+  /** `null` clears home. */
+  onSetHome: (id: string | null) => void;
   onMove: (id: string, targetIndex: number) => void;
   onSelectTrackFraction: (fraction: number) => void;
   onMoveTrack: (move: TrackMove) => void;
@@ -51,7 +53,7 @@ type LocationListProps = {
 
 /**
  * The locations in list order, sortable by drag and drop. After a removal,
- * focus moves to the next row's remove action, or the previous one when the
+ * focus moves to the next row's location menu button, or the previous one when the
  * last row was removed.
  * Implements FR10, NFR-A3 of add-locations-via-search (D10).
  * Implements FR1, FR3, FR7, UX2, UX3 of reorder-locations-by-drag-and-drop
@@ -60,15 +62,18 @@ type LocationListProps = {
  * track selection and move handlers to each row.
  * Implements FR9, UX2 of support-legacy-ios-12-safari (D8): TouchSensor where
  * Pointer Events are missing.
+ * Implements FR11 of set-home-location-and-show-differences (D7, D8): the
+ * focus after a removal goes to a location menu button.
  */
 export function LocationList({
   rows,
   onRemove,
+  onSetHome,
   onMove,
   onSelectTrackFraction,
   onMoveTrack,
 }: LocationListProps) {
-  const removeButtons = useRef<(HTMLButtonElement | null)[]>([]);
+  const menuButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const focusIndexAfterRemoval = useRef<number | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const accessibility = useReorderAnnouncements(rows);
@@ -85,7 +90,7 @@ export function LocationList({
     const focusIndex = focusIndexAfterRemoval.current;
     focusIndexAfterRemoval.current = null;
     if (focusIndex === null) return;
-    removeButtons.current[Math.min(focusIndex, rows.length - 1)]?.focus();
+    menuButtons.current[Math.min(focusIndex, rows.length - 1)]?.focus();
   }, [rows]);
 
   const handleRemove = (rowIndex: number, id: string) => {
@@ -114,12 +119,13 @@ export function LocationList({
             <LocationRow
               key={row.id}
               ref={(button) => {
-                removeButtons.current[rowIndex] = button;
+                menuButtons.current[rowIndex] = button;
               }}
               row={row}
               onSelectTrackFraction={onSelectTrackFraction}
               onMoveTrack={onMoveTrack}
               onRemove={(id) => handleRemove(rowIndex, id)}
+              onSetHome={onSetHome}
               isReorderable={rows.length >= MIN_LOCATIONS_TO_REORDER}
               prefersReducedMotion={prefersReducedMotion}
             />

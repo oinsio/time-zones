@@ -24,6 +24,7 @@ function setup(startTimestamp: string, deviceTimeZoneId: string) {
     initialDocument: {
       status: LocationsLoadStatus.LOADED,
       locations: [cityRow("Moscow"), cityRow("New York")],
+      homeLocationId: null,
     },
   });
   const rendered = renderHook(

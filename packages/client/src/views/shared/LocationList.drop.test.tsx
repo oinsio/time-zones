@@ -36,6 +36,8 @@ const rows: LocationRow[] = ["moscow", "tokyo", "kyiv"].map((id) => ({
   cityLabel: id,
   countryName: "",
   utcOffsetLabel: "",
+  offsetDifferenceLabel: "",
+  offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
@@ -54,6 +56,7 @@ describe("LocationList drop", () => {
       <LocationList
         rows={rows}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={onMove}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
@@ -72,6 +75,7 @@ describe("LocationList drop", () => {
       <LocationList
         rows={rows}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={onMove}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
@@ -87,6 +91,7 @@ describe("LocationList drop", () => {
       <LocationList
         rows={rows}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
@@ -96,6 +101,7 @@ describe("LocationList drop", () => {
       <LocationList
         rows={rows}
         onRemove={vi.fn()}
+        onSetHome={() => undefined}
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}

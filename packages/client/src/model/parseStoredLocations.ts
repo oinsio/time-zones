@@ -1,12 +1,22 @@
-import { buildLocationId, type Location } from "./locations";
+import {
+  buildLocationId,
+  canonicalizeLocationId,
+  type Location,
+} from "./locations";
 import { canonicalizeTimeZoneId } from "./timeZoneId";
 
 /**
  * Validates the payload of the stored locations document.
  * Implements FR9, FR12 of add-locations-via-search (D4).
+ * Implements FR8, FR9 of set-home-location-and-show-differences (D6).
  */
 export type ParseStoredLocationsResult =
-  | { ok: true; locations: readonly Location[] }
+  | {
+      ok: true;
+      locations: readonly Location[];
+      /** Always an id of `locations`, or `null`. */
+      homeLocationId: string | null;
+    }
   | { ok: false };
 
 /** ISO 3166-1 alpha-2 code, or empty for zones without a country. */
@@ -47,5 +57,24 @@ export function parseStoredLocations(
       countryCode: entry.countryCode,
     });
   }
-  return { ok: true, locations };
+  const homeLocationId = parseHomeLocationId(payload.homeLocationId, knownIds);
+  return homeLocationId === undefined
+    ? REJECTED
+    : { ok: true, locations, homeLocationId };
+}
+
+/**
+ * `null` for a missing or dangling home (normalized on load, FR9);
+ * `undefined` for a value of the wrong type.
+ */
+function parseHomeLocationId(
+  storedValue: unknown,
+  knownIds: ReadonlySet<string>,
+): string | null | undefined {
+  if (storedValue === undefined || storedValue === null) return null;
+  if (typeof storedValue !== "string") return undefined;
+  const homeLocationId = canonicalizeLocationId(storedValue);
+  return homeLocationId !== undefined && knownIds.has(homeLocationId)
+    ? homeLocationId
+    : null;
 }

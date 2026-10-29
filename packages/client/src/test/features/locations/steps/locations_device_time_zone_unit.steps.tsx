@@ -129,6 +129,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the user adds {string}", whenAdds);
     Then("the stored list document holds only the locations", () => {
       expect(Object.keys(world.getBackend().document).sort()).toEqual([
+        "homeLocationId",
         "locations",
         "status",
       ]);
@@ -189,6 +190,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         instant: world.clock.instant(),
         translate: i18n.getFixedT(ENGLISH_LANGUAGE),
         deviceTimeZoneId: world.getDeviceZone(),
+        homeLocationId: null,
+        referenceOffsetMinutes: undefined,
         referenceDay: buildReferenceDay(
           world.clock.instant(),
           world.getDeviceZone(),

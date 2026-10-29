@@ -18,6 +18,7 @@ type LocationMarkTextKeys = {
  * Text keys of every mark kind; the exhaustive record makes a new kind fail to
  * compile until it has texts.
  * Implements FR3, FR4 of match-here-mark-to-design (D2).
+ * Implements FR7 of set-home-location-and-show-differences (D3).
  */
 export const LOCATION_MARK_TEXT_KEYS: Record<
   LocationMarkKind,
@@ -27,6 +28,7 @@ export const LOCATION_MARK_TEXT_KEYS: Record<
     accessibleLabelKey: "locations.hereMarkLabel",
     captionKey: "locations.hereMarkCaption",
   },
+  [LocationMarkKind.HOME]: { accessibleLabelKey: "locations.homeMarkLabel" },
 };
 
 /**

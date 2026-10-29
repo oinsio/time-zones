@@ -1,18 +1,21 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { createDateSelectionWorld } from "./dateSelectionWorld";
+import { Temporal } from "@/lib/temporal";
+import { createHomeLocationWorld } from "../../home_location/steps/homeLocationWorld";
 import { createReferenceMomentSteps } from "./referenceMomentStepHelpers";
 
 const feature = await loadFeature("../date_selection_reference_moment.feature");
 
 const REPEATED_MOVE_COUNT = 5;
+const ONE_DAY = { days: 1 };
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
-  const world = createDateSelectionWorld();
+  const home = createHomeLocationWorld();
+  const { world } = home;
 
   f.BeforeEachScenario(async () => {
-    await world.reset();
+    await home.reset();
   });
   f.AfterAllScenarios(world.finish);
 
@@ -154,4 +157,30 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     And("the Now button is not shown", thenNowNotShown);
   });
+  // @set-home-location-and-show-differences @FR4
+  f.Scenario(
+    "A home change keeps the pinned moment",
+    ({ Given, And, When, Then }) => {
+      Given("the device time zone is {string}", givenZone);
+      And("the list contains {string}", givenList);
+      And(
+        "the moment is pinned to {string}",
+        async (_ctx, timestamp: string) => {
+          const dayBefore = Temporal.Instant.from(timestamp)
+            .toZonedDateTimeISO("UTC")
+            .subtract(ONE_DAY);
+          world.setInstant(dayBefore.toInstant().toString());
+          await world.openApp();
+          await world.showNextDay();
+        },
+      );
+      When("the user makes {string} home", home.steps.whenMakesHome);
+      Then("the moment is pinned to {string}", home.steps.thenPinned);
+      And("the date bar shows Monday, March 9", () =>
+        expect(world.getReference().dateBar.fullDateLabel).toContain(
+          "Monday, March 9",
+        ),
+      );
+    },
+  );
 });

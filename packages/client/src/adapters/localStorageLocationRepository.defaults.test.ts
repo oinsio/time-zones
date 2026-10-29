@@ -24,8 +24,8 @@ describe("local storage location repository persistence request", () => {
     const persist = vi.fn().mockResolvedValue(true);
     vi.stubGlobal("navigator", { storage: { persist } });
     const repository = createRepository();
-    repository.save([moscow]);
-    repository.save([]);
+    repository.save({ locations: [moscow], homeLocationId: null });
+    repository.save({ locations: [], homeLocationId: null });
     expect(persist).toHaveBeenCalledTimes(1);
   });
 
@@ -37,20 +37,24 @@ describe("local storage location repository persistence request", () => {
         throw new Error("blocked");
       },
       createChannel: () => undefined,
-    }).save([moscow]);
+    }).save({ locations: [moscow], homeLocationId: null });
     expect(persist).not.toHaveBeenCalled();
   });
 
   it("should save when the browser has no storage manager", () => {
     vi.stubGlobal("navigator", {});
-    expect(createRepository().save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(
+      createRepository().save({ locations: [moscow], homeLocationId: null }),
+    ).toBe(SaveOutcome.SAVED);
   });
 
   it("should save when persist rejects", () => {
     vi.stubGlobal("navigator", {
       storage: { persist: () => Promise.reject(new Error("denied")) },
     });
-    expect(createRepository().save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(
+      createRepository().save({ locations: [moscow], homeLocationId: null }),
+    ).toBe(SaveOutcome.SAVED);
   });
 });
 
@@ -60,7 +64,10 @@ describe("local storage location repository defaults", () => {
   });
 
   it("should use the browser localStorage for the exported repository", () => {
-    localStorageLocationRepository.save([moscow]);
+    localStorageLocationRepository.save({
+      locations: [moscow],
+      homeLocationId: null,
+    });
     expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).not.toBeNull();
   });
 
@@ -80,7 +87,7 @@ describe("local storage location repository defaults", () => {
     );
     createLocalStorageLocationRepository({
       getStorage: useBrowserStorage,
-    }).save([moscow]);
+    }).save({ locations: [moscow], homeLocationId: null });
     expect(names).toEqual([LOCATIONS_SYNC_CHANNEL_NAME]);
     expect(postMessage).toHaveBeenCalledTimes(1);
   });
@@ -130,11 +137,15 @@ describe("local storage location repository defaults", () => {
 
   it("should not fail when persist answers nothing", () => {
     vi.stubGlobal("navigator", { storage: { persist: () => undefined } });
-    expect(createRepository().save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(
+      createRepository().save({ locations: [moscow], homeLocationId: null }),
+    ).toBe(SaveOutcome.SAVED);
   });
 
   it("should not fail when the storage manager has no persist", () => {
     vi.stubGlobal("navigator", { storage: {} });
-    expect(createRepository().save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(
+      createRepository().save({ locations: [moscow], homeLocationId: null }),
+    ).toBe(SaveOutcome.SAVED);
   });
 });

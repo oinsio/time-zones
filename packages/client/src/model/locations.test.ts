@@ -135,6 +135,7 @@ describe("reduceLocations REPLACE_LOCATIONS", () => {
     const state = expectOk(
       reduceLocations(emptyState, {
         type: LocationCommandType.REPLACE_LOCATIONS,
+        homeLocationId: null,
         locations,
       }),
     );
@@ -188,6 +189,7 @@ describe("INITIAL_WORLD_CLOCK_STATE", () => {
     expect(INITIAL_WORLD_CLOCK_STATE).toEqual({
       locations: [],
       deviceTimeZoneId: "UTC",
+      homeLocationId: null,
       reference: { mode: ReferenceMode.LIVE },
     });
   });
@@ -228,6 +230,7 @@ describe("reduceLocations SET_DEVICE_TIME_ZONE", () => {
       reduceLocations(added, {
         type: LocationCommandType.REPLACE_LOCATIONS,
         locations: [],
+        homeLocationId: null,
       }),
     );
     expect(

@@ -6,8 +6,12 @@ import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
 import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import { KNOWN_CITIES } from "@/test/factories/buildLocation";
+import { removeLocationThroughMenu } from "@/test/removeLocationThroughMenu";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 
+/** Row parts that are not the row's own text: hour labels, offset difference, menu trigger. */
+export const HIDDEN_FROM_TEXT_SELECTOR =
+  "[data-hour-label],[data-offset-difference],[aria-haspopup]";
 export const NOT_JSON = "{not json";
 
 export const cityEntry = (label: string) => ({
@@ -90,11 +94,6 @@ export const failStorageWrites = (shouldFail: (key: string) => boolean) => {
   });
 };
 
-export const removeCity = (city: string) =>
-  userEvent.click(
-    screen.getByRole("button", {
-      name: i18n.t("locations.removeLocation", { city }),
-    }),
-  );
+export const removeCity = removeLocationThroughMenu;
 
 export const storageWarningText = () => i18n.t("mainPage.storageUnavailable");

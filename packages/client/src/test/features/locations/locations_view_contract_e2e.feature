@@ -45,10 +45,11 @@ Feature: Locations in every registered view
     And the locations list does not show "Moscow"
 
   @add-locations-via-search @view-contract @NFR-A3
+  @set-home-location-and-show-differences @FR11
   Scenario: Focus after removal
     Given the stored locations are "Almaty", "Moscow", "Kolkata"
     When the user removes "Moscow" with the keyboard
-    Then focus is on the remove action of "Kolkata"
+    Then focus is on the location menu button of "Kolkata"
 
   @add-locations-via-search @view-contract @NFR-A3
   Scenario: Focus after the last removal

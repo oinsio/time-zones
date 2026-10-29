@@ -1,4 +1,5 @@
 // Verifies FR1, FR2, FR6 of select-date-with-calendar-and-now (D1).
+// Verifies FR4 of set-home-location-and-show-differences (D2): the reference zone.
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import {
@@ -25,6 +26,13 @@ import {
 } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
+const ALMATY = {
+  id: "Asia/Almaty|Almaty",
+  timeZoneId: "Asia/Almaty",
+  label: "Almaty",
+  countryCode: "KZ",
+};
+
 describe("reference moment state", () => {
   it("should start live", () => {
     expect(INITIAL_WORLD_CLOCK_STATE.reference).toEqual(LIVE_REFERENCE_MOMENT);
@@ -46,6 +54,22 @@ describe("reference moment state", () => {
 
   it("should take the reference zone from the device zone", () => {
     expect(getReferenceZone(liveState("Asia/Almaty"))).toBe("Asia/Almaty");
+  });
+
+  it("should read the home zone when home is set", () => {
+    const state = {
+      ...liveState("Europe/Moscow"),
+      locations: [ALMATY],
+      homeLocationId: ALMATY.id,
+    };
+
+    expect(getReferenceZone(state)).toBe("Asia/Almaty");
+  });
+
+  it("should read the device zone when home is not set", () => {
+    const state = { ...liveState("Europe/Moscow"), locations: [ALMATY] };
+
+    expect(getReferenceZone(state)).toBe("Europe/Moscow");
   });
 });
 

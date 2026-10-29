@@ -3,6 +3,8 @@ import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import { test as contractTest } from "../../view_contract/steps/view_contract_e2e.fixtures";
 
 const SEARCH_DATA_URL_PATTERN = /\/city-search-[^/]+\.json$/;
+/** The key of `src/i18n.ts`, which Playwright cannot import. */
+const LANGUAGE_STORAGE_KEY = "language";
 const BLANK_PAGE_URL = "about:blank";
 const APP_ROOT_URL = ".";
 
@@ -59,13 +61,26 @@ export class LocationsWorld {
     return this.otherTab;
   }
 
-  /** Seeds a version-1 document once, before the app reads it. */
-  async seedList(locations: StoredLocation[]) {
+  /** Seeds the current document once, before the app reads it; home is a stored location or none. */
+  async seedList(locations: StoredLocation[], homeLocation?: StoredLocation) {
     await this.seedDocument(
       JSON.stringify({
         schemaVersion: LOCATIONS_SCHEMA_VERSION,
-        payload: { locations },
+        payload: {
+          locations,
+          homeLocationId: homeLocation
+            ? `${homeLocation.timeZoneId}|${homeLocation.label}`
+            : null,
+        },
       }),
+    );
+  }
+
+  /** Makes the app start in the given interface language. */
+  async seedLanguage(language: string) {
+    await this.page.addInitScript(
+      ({ key, value }) => window.localStorage.setItem(key, value),
+      { key: LANGUAGE_STORAGE_KEY, value: language },
     );
   }
 

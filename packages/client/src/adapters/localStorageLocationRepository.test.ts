@@ -1,4 +1,5 @@
 // Verifies FR9, FR11 (document) of add-locations-via-search (D4).
+// Verifies FR8 of set-home-location-and-show-differences (D6): home in the document.
 import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import { LocationsLoadStatus } from "@/ports";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
@@ -32,7 +33,7 @@ describeLocationRepositoryContract("local storage", {
 
 describe("local storage location repository document", () => {
   it("should store a versioned envelope without derived ids", () => {
-    createRepository().save([moscow]);
+    createRepository().save({ locations: [moscow], homeLocationId: null });
     expect(
       JSON.parse(localStorage.getItem(STORAGE_KEYS.LOCATIONS) ?? ""),
     ).toEqual({
@@ -41,13 +42,22 @@ describe("local storage location repository document", () => {
         locations: [
           { timeZoneId: "Europe/Moscow", label: "Moscow", countryCode: "RU" },
         ],
+        homeLocationId: null,
       },
     });
   });
 
+  it("should store the id of the home location in the payload", () => {
+    createRepository().save({ locations: [moscow], homeLocationId: moscow.id });
+    expect(
+      JSON.parse(localStorage.getItem(STORAGE_KEYS.LOCATIONS) ?? "").payload
+        .homeLocationId,
+    ).toBe(moscow.id);
+  });
+
   it("should remove the stored document on clear", () => {
     const repository = createRepository();
-    repository.save([moscow]);
+    repository.save({ locations: [moscow], homeLocationId: null });
     repository.clear();
     expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).toBeNull();
   });
@@ -97,6 +107,7 @@ describe("local storage location repository document", () => {
     expect(createRepository().load()).toMatchObject({
       status: LocationsLoadStatus.LOADED,
       locations: [{ timeZoneId: "Asia/Kolkata" }],
+      homeLocationId: null,
     });
   });
 
@@ -111,6 +122,7 @@ describe("local storage location repository document", () => {
     expect(repository.load()).toEqual({
       status: LocationsLoadStatus.LOADED,
       locations: [],
+      homeLocationId: null,
     });
   });
 

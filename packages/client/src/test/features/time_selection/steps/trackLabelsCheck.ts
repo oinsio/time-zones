@@ -30,6 +30,8 @@ export const createTrackLabelsCheck = () => {
       instant,
       translate: i18n.getFixedT(language),
       deviceTimeZoneId: LABEL_DEVICE_TIME_ZONE,
+      homeLocationId: null,
+      referenceOffsetMinutes: undefined,
       referenceDay: buildReferenceDay(instant, LABEL_DEVICE_TIME_ZONE),
     }).map((row) => row.dayTrack?.hourLabels ?? []);
   };

@@ -124,6 +124,7 @@ describe("date commands: picking, resetting and keeping", () => {
     const outcome = reduceLocations(state, {
       type: LocationCommandType.REPLACE_LOCATIONS,
       locations: [],
+      homeLocationId: null,
     });
 
     expect(outcome.ok && outcome.state.reference).toBe(state.reference);

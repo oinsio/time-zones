@@ -18,7 +18,7 @@ export {
   WORK_START_WALL_TIME,
 } from "./dayPeriods";
 export { DEVICE_TIME_ZONE_FALLBACK_ID } from "./deviceTimeZone";
-export { ROOT_ELEMENT_ID } from "./dom";
+export { OutsidePressEvent, ROOT_ELEMENT_ID } from "./dom";
 export { KeyboardKey } from "./keyboard";
 export { LEGACY_ZONE_PROBE_ID } from "./legacy";
 export {
@@ -28,6 +28,7 @@ export {
 } from "./localDateTime";
 export {
   LOCATION_MARK_ICON_SIZE_PX,
+  LOCATION_MENU_TRIGGER_GLYPH,
   LOCATIONS_SCHEMA_VERSION,
   LOCATIONS_WRITE_DEBOUNCE_MS,
 } from "./locations";
@@ -71,6 +72,8 @@ export {
   MINUTES_PER_HOUR,
   NANOSECONDS_PER_MILLISECOND,
   NANOSECONDS_PER_MINUTE,
+  OFFSET_DIFFERENCE_DURATION_SEPARATOR,
+  OFFSET_DIFFERENCE_ZERO_VALUE,
   UTC_OFFSET_MINUS_SIGN,
   UTC_OFFSET_MINUTES_DIGITS,
   UTC_OFFSET_MINUTES_PAD,

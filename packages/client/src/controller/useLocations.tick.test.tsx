@@ -27,6 +27,7 @@ function setup(cities: string[], startTimestamp: string, deviceZone = "UTC") {
       initialDocument: {
         status: LocationsLoadStatus.LOADED,
         locations: cities.map(cityOf),
+        homeLocationId: null,
       },
     }),
     writeScheduler,

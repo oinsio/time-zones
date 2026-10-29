@@ -1,4 +1,4 @@
-import { type LucideIcon, Navigation } from "lucide-react";
+import { House, type LucideIcon, Navigation } from "lucide-react";
 import { LOCATION_MARK_ICON_SIZE_PX } from "@/constants";
 import { LocationMarkKind, type PresentedLocationMark } from "@/presenter";
 
@@ -12,12 +12,14 @@ type LocationMarkIconDefinition = {
  * Icon of every mark kind; the exhaustive record makes a new kind fail to
  * compile until it has an icon.
  * Implements FR4, UX1 of match-here-mark-to-design (D3).
+ * Implements FR7 of set-home-location-and-show-differences (D3): the house.
  */
 export const LOCATION_MARK_ICONS: Record<
   LocationMarkKind,
   LocationMarkIconDefinition
 > = {
   [LocationMarkKind.HERE]: { Icon: Navigation, isFilled: true },
+  [LocationMarkKind.HOME]: { Icon: House, isFilled: false },
 };
 
 type LocationMarkIconProps = {

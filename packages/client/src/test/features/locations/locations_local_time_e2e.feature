@@ -49,9 +49,10 @@ Feature: Local time and date on location rows in a real browser
 
   @show-local-time-and-date-on-location-cards @NFR-A2
   @match-here-mark-to-design @NFR-A1
+  @set-home-location-and-show-differences @NFR-A3
   Scenario: Time does not change the row name
     Given the stored locations are "Almaty", "Moscow"
     When the user opens the locations app
     Then the row of "Almaty" is named "Almaty You are here"
-    And the row of "Moscow" is named "Moscow"
+    And the row of "Moscow" is named "Moscow 2 hours behind"
     And the time of "Almaty" is not inside a live region

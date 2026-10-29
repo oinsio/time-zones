@@ -21,7 +21,10 @@ describe("useLocations", () => {
         result.current.addLocation(moscowInput);
       });
       expect(result.current.locations).toEqual([moscow]);
-      expect(save).toHaveBeenCalledWith([moscow]);
+      expect(save).toHaveBeenCalledWith({
+        locations: [moscow],
+        homeLocationId: null,
+      });
     });
 
     it("should return the model error for a duplicate and not save again", () => {
@@ -44,6 +47,7 @@ describe("useLocations", () => {
         initialDocument: {
           status: LocationsLoadStatus.LOADED,
           locations: [moscow, almaty],
+          homeLocationId: null,
         },
       });
       const save = vi.spyOn(repository, "save");
@@ -52,7 +56,10 @@ describe("useLocations", () => {
         result.current.removeLocation(moscow.id);
       });
       expect(result.current.locations).toEqual([almaty]);
-      expect(save).toHaveBeenCalledWith([almaty]);
+      expect(save).toHaveBeenCalledWith({
+        locations: [almaty],
+        homeLocationId: null,
+      });
     });
 
     it("should collapse a burst of changes into one debounced write", () => {

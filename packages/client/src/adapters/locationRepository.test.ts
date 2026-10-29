@@ -24,6 +24,7 @@ describe("in-memory location repository", () => {
     const initialDocument = {
       status: LocationsLoadStatus.LOADED,
       locations: [moscow],
+      homeLocationId: null,
     } as const;
     expect(
       createInMemoryLocationRepository({ initialDocument }).load(),
@@ -32,7 +33,9 @@ describe("in-memory location repository", () => {
 
   it("should answer FAILED to save when it is not writable", () => {
     const repository = createInMemoryLocationRepository({ isWritable: false });
-    expect(repository.save([moscow])).toBe(SaveOutcome.FAILED);
+    expect(repository.save({ locations: [moscow], homeLocationId: null })).toBe(
+      SaveOutcome.FAILED,
+    );
   });
 
   it("should answer FAILED to clear when it is not writable", () => {
@@ -44,12 +47,13 @@ describe("in-memory location repository", () => {
     const initialDocument = {
       status: LocationsLoadStatus.LOADED,
       locations: [moscow],
+      homeLocationId: null,
     } as const;
     const repository = createInMemoryLocationRepository({
       initialDocument,
       isWritable: false,
     });
-    repository.save([]);
+    repository.save({ locations: [], homeLocationId: null });
     repository.clear();
     expect(repository.load()).toEqual(initialDocument);
   });
