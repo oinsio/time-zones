@@ -20,7 +20,7 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 - MODIFIED: the page declares itself as a home-screen web app for iOS (`apple-mobile-web-app-capable`).
 - ADDED: the dialog and its overlay keep their position, and the main page keeps its full height, on engines without the `inset` shorthand and the `dvh` unit.
 - MODIFIED: every pull request checks that the built JavaScript parses at the Safari 12 level and that the built CSS has no `inset` shorthand. A unit test checks that production sources contain no BigInt.
-- Glossary (`docs/glossary/`): new context `browser-compatibility` with the terms supported engine, legacy engine, legacy support and legacy zone shim; **update recheck** added to the app shell context. **Time selection** already names the tap, so it is unchanged. The glossary, the new ADR and the CI step sit outside the implement stage's paths, so they ship as handoff patches (`tasks.md`, "Human follow-up").
+- Glossary (`docs/glossary/`): new context `browser-compatibility` with the terms supported engine, legacy engine, legacy support and legacy zone shim; **update recheck** added to the app shell context; the *Code:* owners of **legacy zone name** (time context) gain `getLegacyZoneNames`, the canonical → legacy view of the same alias map. **Time selection** already names the tap, so it is unchanged. The glossary, the new ADR and the CI step sit outside the implement stage's paths, so they ship as handoff patches (`tasks.md`, "Human follow-up").
 - No storage schema change, no new network calls. The stored list stays ADR-0004 schema version 1.
 
 ## Capabilities
@@ -138,9 +138,9 @@ All paths are under `packages/client/` unless stated otherwise.
 
 Feature files tagged `@support-legacy-ios-12-safari`:
 
-- `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_unit.feature` (vitest-cucumber): polyfills installed only when missing, legacy zone names (including wall-clock resolution), missing `Intl.DisplayNames`, `ResizeObserver` and `addEventListener` on `MediaQueryList`, zone checks without BigInt.
+- `src/test/features/browser_compatibility/` (vitest-cucumber): `browser_compatibility_legacy_boot.feature` (main page on a legacy engine, polyfills installed only when missing), `browser_compatibility_legacy_zones.feature` (zone checks without BigInt, legacy zone names including wall-clock resolution) and `browser_compatibility_missing_apis.feature` (missing `Intl.DisplayNames`, `ResizeObserver` and `addEventListener` on `MediaQueryList`).
 - `src/test/features/browser_compatibility/browser_compatibility_legacy_engine_e2e.feature` (playwright-bdd): no polyfill request in Chromium, axe-core on the main page and the search dialog with Pointer Events emulated away.
-- New scenarios in `time_selection_select_time.feature` (tap and click logic, unit), `time_selection_touch_e2e.feature` (real tap without Pointer Events, slider name and keys), `locations_reorder_e2e.feature` (finger drag without Pointer Events, no page scroll), `location_search_by_country.feature` (country search without `Intl.DisplayNames`), `app_shell_notices.feature` (check on return to the screen) and `app_shell_smoke_e2e.feature` (iOS home-screen meta tag).
+- New feature files next to the existing ones of each capability, so existing step files stay within the size limit: `time_selection_legacy_tap.feature` (tap and click logic, unit), `time_selection_legacy_touch_e2e.feature` (real tap without Pointer Events, slider name and keys), `locations_reorder_legacy_touch_e2e.feature` (finger drag without Pointer Events, no page scroll), `app_shell_update_recheck.feature` (check on return to the screen) and `app_shell_ios_home_screen_e2e.feature` (iOS home-screen meta tag). New scenarios in `location_search_by_country.feature` (country search without `Intl.DisplayNames`).
 - The build checks (FR12, FR13) run as a script. Its rules are covered by unit tests under `src/test/legacyBuild/`.
 
 ## Visual Reference
