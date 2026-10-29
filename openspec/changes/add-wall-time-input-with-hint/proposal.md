@@ -167,7 +167,7 @@ No changes (no IA documents exist under `docs/ia/`).
 
 ## Success Metrics
 
-- M1: 100% of FR1–FR13, NFR-P1, NFR-A1–NFR-A4, NFR-R1–NFR-R2 and UX1–UX3 have at least one automated test under `packages/client/src/` that names `add-wall-time-input-with-hint` together with the id (21 of 21 ids).
+- M1: 100% of FR1–FR13, NFR-P1, NFR-A1–NFR-A4, NFR-R1–NFR-R2 and UX1–UX3 have at least one automated test under `packages/client/src/` that names `add-wall-time-input-with-hint` together with the id (23 of 23 ids).
 - M2: Device zone `Asia/Almaty`, moment `2026-03-08T07:30:00Z`, rows Almaty, Moscow, Kolkata, New York. Typing `10:40` in New York pins `2026-03-08T14:40:00Z` with `UNIQUE`: Almaty `19:40`, Moscow `17:40`, Kolkata `20:10`, no hint. Typing `23:00` in New York from the same moment pins `2026-03-09T03:00:00Z`, and the date bar shows 9 March (2 of 2).
 - M3: From `2026-03-08T07:30:00Z`, typing `02:30` in New York pins `2026-03-08T07:30:00Z` with `GAP` and the hint text of FR7. From `2026-11-01T07:30:00Z`, typing `01:30` in New York pins `2026-11-01T05:30:00Z` with `AMBIGUOUS` and `UTC−4` in the hint (2 of 2).
 - M4: Parsing: the 10 texts `9`, `09`, `930`, `0930`, `9:30`, `09:30`, `09.30`, ` 9:30 `, `0:00`, `23:59` give the expected time, and the 6 texts `24:00`, `9:60`, `abc`, `12345`, `9:3` and the empty text are rejected (16 of 16).
