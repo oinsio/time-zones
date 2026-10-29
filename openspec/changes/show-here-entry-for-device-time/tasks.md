@@ -70,13 +70,13 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 5. Controller (TDD)
 
-- [ ] 5.1 TDD `controller/cityDataCache.ts` (`loadCitySearchOnce`, `readLoadedCitySearch`; design D4). Tests in `cityDataCache.test.ts`:
+- [x] 5.1 TDD `controller/cityDataCache.ts` (`loadCitySearchOnce`, `readLoadedCitySearch`; design D4). Tests in `cityDataCache.test.ts`:
   - two calls during one pending load call the loader once;
   - a resolved search is read back synchronously;
   - after a rejection the next call loads again.
 
   Then switch `useCitySearch` to it. Verify `npx vitest run src/controller/cityDataCache.test.ts`, then `npx vitest run src/controller/useCitySearch.test.ts` unchanged.
-- [ ] 5.2 Add `loadCitySearch?: LoadCitySearch` to `LocationsProvider` (default: the `loadCitySearch` adapter) and to `LocationsContextValue`. `useLocations` returns `rowsContext` and `hereEntry` (`undefined` while `UNREADABLE`; design D4, FR1, FR9). Tests in new `controller/useLocations.hereEntry.test.tsx`:
+- [x] 5.2 Add `loadCitySearch?: LoadCitySearch` to `LocationsProvider` (default: the `loadCitySearch` adapter) and to `LocationsContextValue`. `useLocations` returns `rowsContext` and `hereEntry` (`undefined` while `UNREADABLE`; design D4, FR1, FR9). Tests in new `controller/useLocations.hereEntry.test.tsx`:
   - shown and hidden with add and remove;
   - a device time zone change read at a minute tick;
   - a list change from another tab;
@@ -85,7 +85,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - nothing scheduled for writing (M5).
 
   Verify `npx vitest run src/controller/useLocations.hereEntry.test.tsx`.
-- [ ] 5.3 TDD `useExemplarCity(timeZoneId, load)` in `controller/useExemplarCity.ts` (design D4, FR8, NFR-P2). Tests in `useExemplarCity.test.tsx` with a deferred fake loader:
+- [x] 5.3 TDD `useExemplarCity(timeZoneId, load)` in `controller/useExemplarCity.ts` (design D4, FR8, NFR-P2). Tests in `useExemplarCity.test.tsx` with a deferred fake loader:
   - the first render returns `Almaty` and the loader is not called before the effect;
   - after the load resolves (ru) → `Алматы`;
   - a rejected load keeps `Almaty`, with no error state and no second call;
@@ -93,13 +93,13 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - after `useCitySearch` loaded the same loader, the name is ready on the first render.
 
   Verify red, then green, with `npx vitest run src/controller/useExemplarCity.test.tsx`.
-- [ ] 5.4 TDD `useHereEntry()` in `controller/useHereEntry.ts`, exported from `controller/index.ts` (design D4; FR2, FR6, FR8). Tests in `useHereEntry.test.tsx`:
+- [x] 5.4 TDD `useHereEntry()` in `controller/useHereEntry.ts`, exported from `controller/index.ts` (design D4; FR2, FR6, FR8). Tests in `useHereEntry.test.tsx`:
   - the presented entry follows the reference moment after a time selection;
   - it is `undefined` while a location matches;
   - it uses the loader from `LocationsProvider`.
 
   Verify `npx vitest run src/controller/useHereEntry.test.tsx`.
-- [ ] 5.5 Run `npx stryker run --mutate 'src/controller/cityDataCache.ts,src/controller/useExemplarCity.ts,src/controller/useHereEntry.ts,src/controller/useLocations.ts,src/controller/useCitySearch.ts'`. Verify a score ≥ 95% (minimum 90%).
+- [x] 5.5 Run `npx stryker run --mutate 'src/controller/cityDataCache.ts,src/controller/useExemplarCity.ts,src/controller/useHereEntry.ts,src/controller/useLocations.ts,src/controller/useCitySearch.ts'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 6. Views (TDD)
 

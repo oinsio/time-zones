@@ -5,6 +5,7 @@ import type { SupportedLanguage } from "@/i18n";
 import type { Location } from "@/model";
 import type { CitySearch, LoadCitySearch } from "@/ports";
 import { type PresentedSearchResult, presentSearchResults } from "@/presenter";
+import { loadCitySearchOnce, readLoadedCitySearch } from "./cityDataCache";
 
 export enum CitySearchStatus {
   LOADING = "LOADING",
@@ -12,12 +13,10 @@ export enum CitySearchStatus {
   FAILED = "FAILED",
 }
 
-/** A loaded search per loader, so reopening is instant. */
-const loadedSearches = new WeakMap<LoadCitySearch, CitySearch>();
-
 /**
  * Loads the city search data and presents its results. A failed load is not
- * cached: `retry` calls the loader again.
+ * cached: `retry` calls the loader again. Shares the load with the Here entry
+ * through `cityDataCache` (FR8 of show-here-entry-for-device-time).
  * Implements FR6, FR15, NFR-P2 of add-locations-via-search (D8, D9).
  */
 export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
@@ -25,18 +24,17 @@ export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
   const language = (i18n.resolvedLanguage ??
     i18n.language) as SupportedLanguage;
   const [search, setSearch] = useState<CitySearch | undefined>(() =>
-    loadedSearches.get(load),
+    readLoadedCitySearch(load),
   );
   const [isFailed, setIsFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` re-runs the load on retry
   useEffect(() => {
-    if (loadedSearches.has(load)) return;
+    if (readLoadedCitySearch(load) !== undefined) return;
     let isCurrent = true;
-    load().then(
+    loadCitySearchOnce(load).then(
       (loaded) => {
-        loadedSearches.set(load, loaded);
         if (isCurrent) setSearch(loaded);
       },
       () => {

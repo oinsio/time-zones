@@ -7,6 +7,7 @@ import type {
   Store,
   WorldClockState,
 } from "@/model";
+import type { LoadCitySearch } from "@/ports";
 
 /** Whether the stored list could be read. Implements FR12 of add-locations-via-search (D5). */
 export enum LocationsStatus {
@@ -32,6 +33,8 @@ export type LocationsContextValue = {
   /** Counts minute ticks; re-presents the rows. Implements FR3 of show-local-time-and-date-on-location-cards (D4). */
   minuteTick: number;
   loadStatus: LocationsStatus;
+  /** Loads the city data once for the Here entry and the search. Implements FR8 of show-here-entry-for-device-time (D4). */
+  loadCitySearch: LoadCitySearch;
   hasSaveFailed: boolean;
   addLocation: (input: AddLocationInput) => LocationsReduceResult;
   removeLocation: (id: string) => LocationsReduceResult;

@@ -21,6 +21,9 @@ describe("useLocations", () => {
     expect(Object.keys(result.current).sort()).toEqual(
       [
         "rows",
+        "rowsContext",
+        "hereEntry",
+        "loadCitySearch",
         "locations",
         "loadStatus",
         "hasSaveFailed",
