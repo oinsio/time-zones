@@ -140,6 +140,7 @@ The implement stage writes only under `packages/`, so the glossary entries below
 | any | no home, no row in the device time zone | every row shows a difference from the device time zone (until NG1) |
 | any | home, device in the same zone | home row: home mark only; others: difference from home |
 | any | home, device elsewhere (travelling) | home row: home mark; device row: Here mark, difference, "here" |
+| any | loading | no loading state: the list and its home are read synchronously before the first render (`LocationRepository.load()`), so marks and differences appear in the first render |
 | any | empty list | empty state unchanged |
 | any | row with an unknown zone | no difference; no "Make home" item |
 | any | storage unavailable | home works for the session; the storage warning is shown |
