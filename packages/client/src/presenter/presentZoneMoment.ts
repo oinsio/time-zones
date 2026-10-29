@@ -92,7 +92,7 @@ export function presentZoneMoment(
     offsetMinutes === undefined
       ? ""
       : formatUtcOffset(offsetMinutes, translate("locations.utcOffsetPrefix"));
-  const isHintHere = isNoteForSubject(wallClockNote, subject.id);
+  const hintNote = findRowNoteOf(wallClockNote, subject.id);
   return {
     utcOffsetLabel,
     offsetDifferenceLabel: difference?.label ?? "",
@@ -116,26 +116,33 @@ export function presentZoneMoment(
       time: localTimeLabel,
     }),
     wallTimeHint:
-      isHintHere && wallClockNote?.placement === WallClockNotePlacement.ROW
-        ? presentWallTimeHint({
-            status: wallClockNote.status,
-            requestedWallTime: wallClockNote.requestedWallTime,
+      hintNote === undefined
+        ? undefined
+        : presentWallTimeHint({
+            status: hintNote.status,
+            requestedWallTime: hintNote.requestedWallTime,
             shownTimeLabel: localTimeLabel,
             utcOffsetLabel,
             language,
             translate,
-          })
-        : undefined,
+          }),
   };
 }
 
-/** Whether the note is a row note about this subject: a location by id, the Here entry by having none. */
-function isNoteForSubject(
+type RowNote = Extract<
+  WallClockNote,
+  { placement: WallClockNotePlacement.ROW }
+>;
+
+/** The note when it is a row note about this subject: a location by id, the Here entry by having none. */
+function findRowNoteOf(
   note: WallClockNote | undefined,
   subjectId: string | undefined,
-): boolean {
-  if (note?.placement !== WallClockNotePlacement.ROW) return false;
-  return note.target.kind === WallTimeTargetKind.HERE_ENTRY
-    ? subjectId === undefined
-    : subjectId === note.target.locationId;
+): RowNote | undefined {
+  if (note?.placement !== WallClockNotePlacement.ROW) return undefined;
+  const isAboutSubject =
+    note.target.kind === WallTimeTargetKind.HERE_ENTRY
+      ? subjectId === undefined
+      : subjectId === note.target.locationId;
+  return isAboutSubject ? note : undefined;
 }

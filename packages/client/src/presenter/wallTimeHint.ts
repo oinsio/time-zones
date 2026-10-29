@@ -29,18 +29,17 @@ export function presentWallTimeHint({
   translate,
 }: WallTimeHintContext): string | undefined {
   const requestedTime = formatWallClockTime(requestedWallTime, language);
-  switch (status) {
-    case WallClockStatus.GAP:
-      return translate("locations.wallTimeHintGap", {
-        requestedTime,
-        shownTime: shownTimeLabel,
-      });
-    case WallClockStatus.AMBIGUOUS:
-      return translate("locations.wallTimeHintAmbiguous", {
-        requestedTime,
-        utcOffset: utcOffsetLabel,
-      });
-    case WallClockStatus.UNIQUE:
-      return undefined;
+  if (status === WallClockStatus.GAP) {
+    return translate("locations.wallTimeHintGap", {
+      requestedTime,
+      shownTime: shownTimeLabel,
+    });
   }
+  if (status === WallClockStatus.AMBIGUOUS) {
+    return translate("locations.wallTimeHintAmbiguous", {
+      requestedTime,
+      utcOffset: utcOffsetLabel,
+    });
+  }
+  return undefined;
 }

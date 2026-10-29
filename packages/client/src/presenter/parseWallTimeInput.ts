@@ -5,7 +5,7 @@ import {
 } from "@/constants";
 
 const DIGITS_PER_TIME_PART = 2;
-const MINUTE_ABSENT = "0";
+const MINUTE_ABSENT = 0;
 
 /**
  * Reads a typed 24-hour wall-clock time (`9`, `930`, `9:30`, `09.30`) and
