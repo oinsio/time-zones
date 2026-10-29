@@ -16,7 +16,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Constants and locale keys (no TDD)
 
-- [ ] 1.1 Set `LOCATIONS_SCHEMA_VERSION = 2` in `constants/locations.ts` (D6). In `locales/en.json` and `locales/ru.json`, add `locations.homeMarkLabel` ("Home location" / «Домашнее место»), `locationMenu` ("Actions for {{city}}" / «Действия: {{city}}»), `makeHome` («Сделать домашним»), `clearHome` («Убрать отметку дома»), `remove` («Удалить»), `homeSetAnnouncement` ("{{city}} is now home" / «{{city}} — теперь домашнее место»), `homeClearedAnnouncement` ("Home cleared" / «Отметка дома снята»), `offsetDifferenceHours`, `offsetDifferenceAhead`, `offsetDifferenceBehind`, `offsetDifferenceSame`, and `durationHours_*` / `durationMinutes_*` (Russian `_one`, `_few`, `_many`; English `_one`, `_other`). Delete the unused `locations.removeLocation` (D5, D7, FR11, FR12). Verify with `npx vitest run src/locales/locales.test.ts`, and check that `grep -rniE "локаци" src/locales` prints nothing.
+- [ ] 1.1 Set `LOCATIONS_SCHEMA_VERSION = 2` in `constants/locations.ts` (D6). In `locales/en.json` and `locales/ru.json`, add `locations.homeMarkLabel` ("Home location" / «Домашнее место»), `locationMenu` ("Actions for {{city}}" / «Действия: {{city}}»), `makeHome` («Сделать домашним»), `clearHome` («Убрать отметку дома»), `remove` («Удалить»), `homeSetAnnouncement` ("{{city}} is now home" / «{{city}} — теперь домашнее место»), `homeClearedAnnouncement` ("Home cleared" / «Отметка дома снята»), `offsetDifferenceHours`, `offsetDifferenceAhead`, `offsetDifferenceBehind`, `offsetDifferenceSame`, and `durationHours_*` / `durationMinutes_*` (Russian `_one`, `_few`, `_many`; English `_one`, `_other`) (D5, D7, FR11, FR12). Keep `locations.removeLocation` for now: `views/shared/LocationRow.tsx:139` and the tests still use it, and task 6.4 deletes it together with the button. Verify with `npx vitest run src/locales/locales.test.ts`, and check that `grep -rniE "локаци" src/locales` prints nothing.
 
 ## 2. Model (TDD)
 
@@ -102,21 +102,47 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `pointerdown` outside closes it.
 
   Add a second file, `views/shared/LocationMenu.legacy.test.tsx`. It removes `PointerEvent` with `vi.stubGlobal("PointerEvent", undefined)`, calls `vi.resetModules()` and imports the module again, as `views/shared/DayTrack.legacy.test.tsx` does. There, a click opens the menu, "Remove" calls remove, and `touchstart` outside closes it (FR14, M5). Verify with `npx vitest run src/views/shared/LocationMenu.test.tsx src/views/shared/LocationMenu.legacy.test.tsx`.
-- [ ] 6.3 TDD the row changes (D3, D8) in new `views/shared/LocationRow.home.test.tsx`:
-  - the menu replaces the remove button;
+- [ ] 6.3 TDD the row changes (D3, D8) in new `views/shared/LocationRow.home.test.tsx`. The former remove button stays in this task, so the existing remove tests keep passing; 6.4 removes it.
+  - the row has the location menu "Actions for {city}", and its "Remove" item calls `onRemove`;
   - "Make home" / "Clear home", and no home item for an unknown zone;
   - the difference after the city and before the caption, with `aria-hidden`;
   - `aria-labelledby` lists the city, mark and difference ids.
 
-  Extend `views/shared/LocationMarkIcon.test.tsx`: test that `HOME` renders the house icon in the accent colour at `LOCATION_MARK_ICON_SIZE_PX`. Update the remove clicks in `views/shared/LocationRow.test.tsx` to go through the menu. Covers FR7, FR11, NFR-A3, UX1, UX2. Verify with `npx vitest run src/views/shared/LocationRow.home.test.tsx src/views/shared/LocationMarkIcon.test.tsx src/views/shared/LocationRow.test.tsx`.
-- [ ] 6.4 TDD focus and announcements in new `views/shared/LocationList.menu.test.tsx` and in `views/cards/CardsView.test.tsx`:
-  - after a removal, focus goes to the next row's menu button;
+  Extend `views/shared/LocationMarkIcon.test.tsx`: test that `HOME` renders the house icon in the accent colour at `LOCATION_MARK_ICON_SIZE_PX`. Covers FR7, FR11, NFR-A3, UX1, UX2. Verify with `npx vitest run src/views/shared/LocationRow.home.test.tsx src/views/shared/LocationMarkIcon.test.tsx`.
+- [ ] 6.4 Retire the former remove button in one step (D8). Its key `locations.removeLocation` ("Remove {{city}}" / «Удалить: {{city}}») goes now, and so does every use of the button name, so that `typecheck` and the remove tests stay green after this task:
+  - delete the × button from `views/shared/LocationRow.tsx` (lines 136–144), so the menu replaces it. Add the test "the row has no remove button outside its menu" to `views/shared/LocationRow.home.test.tsx`;
+  - delete `locations.removeLocation` from `locales/en.json` and `locales/ru.json`;
+  - in `views/shared/LocationRow.tsx` the `removeButtonRef` prop becomes `menuButtonRef` on the menu trigger, and in `views/shared/LocationList.tsx` the `removeButtons` refs become `menuButtons`, so that focus after a removal goes to the next row's menu button;
+  - add a test helper `test/removeLocationThroughMenu.ts`. It opens the menu named `locations.locationMenu` for the city and clicks the `locations.remove` menu item, using `userEvent`;
+  - in `views/shared/LocationRow.test.tsx` (lines 71, 123), `views/shared/LocationList.test.tsx` ("Remove Tokyo", "Remove Kyiv", "Remove Moscow", lines 74–176) and `views/cards/CardsView.test.tsx` ("Remove Alpha", lines 119, 129), removals go through the helper. Focus checks and the order check (line 174) look for the menu button "Actions for …" instead;
+  - unit BDD worlds and steps that find a row or remove a city by the key now use `locations.locationMenu`, or the helper for a removal. The files are:
+    - `test/features/locations/steps/locationsUiWorld.tsx:96` (`removeCity`);
+    - `deviceTimeZoneWorld.tsx:58`, `localTimeWorld.tsx:50` (`rowOf`), under `test/features/locations/steps/`;
+    - `locations_utc_offset_unit.steps.tsx:91` and `:225`, and `locations_local_time_unit.steps.tsx:157` ("keeps its remove action" now checks the menu button), under the same folder;
+    - `test/features/date_selection/steps/dateSelectionWorld.tsx:74` (`rowOf`);
+    - `test/features/date_selection/steps/referenceMomentRowsWorld.ts:47` (rows mapped by `aria-label`).
+
+    These edits replace lines in place. `locations_utc_offset_unit.steps.tsx` is already over 200 lines (278) and must not grow;
+  - E2E helpers that name the button: `test/features/locations/steps/locationsReorderE2eHelpers.ts:24` builds its prefix from `locations.locationMenu` ("Actions for "), so `readListOrder` reads the menu buttons. `removeButton` in `locationsE2eHelpers.ts:67` becomes `menuButton` ("Actions for {city}"), with a `removeThroughMenu(page, city)` next to it. Update its callers in `locations_view_contract_e2e.steps.ts` (lines 11, 73, 82, 127). `locations_local_time_e2e.steps.ts:35` still takes the row's last `button`, which is now the menu button, so it stays unchanged.
+
+  Covers FR11. Verify, one command at a time:
+  - `grep -rnE "(^|[^A-Za-z])locations\.removeLocation|\"removeLocation\"" src` prints nothing;
+  - `pnpm --filter @time-zones/client typecheck`;
+  - `npx vitest run src/locales/locales.test.ts src/views/shared/LocationRow.test.tsx src/views/shared/LocationList.test.tsx src/views/cards/CardsView.test.tsx`;
+  - `npx vitest run <steps file>`, one file per run, for every steps file that imports a world changed above:
+    - under `test/features/locations/steps/`: `locations_ui_unit`, `locations_utc_offset_unit`, `locations_storage_ui_unit`, `locations_device_time_zone_unit`, `locations_here_mark_unit`, `locations_clock_tick` and `locations_local_time_unit` (`.steps.tsx`);
+    - under `test/features/browser_compatibility/steps/`: `browser_compatibility_missing_apis` and `browser_compatibility_legacy_boot`;
+    - under `test/features/date_selection/steps/`: `date_selection_date_bar`, `date_selection_calendar`, `date_selection_calendar_month`, `date_selection_wall_clock`, `date_selection_reference_moment` and `date_selection_reference_moment_rows`.
+
+  The E2E helpers are run in 8.4.
+- [ ] 6.5 TDD focus and announcements in new `views/shared/LocationList.menu.test.tsx` and in `views/cards/CardsView.test.tsx`:
+  - after a removal through the menu, focus goes to the next row's menu button;
   - after a home change, focus stays on the same row's menu button;
   - "Almaty is now home" and "Home cleared" are announced politely.
 
-  Update the "Remove Tokyo" and "Remove Alpha" clicks of `LocationList.test.tsx` and `CardsView.test.tsx` to go through the menu. Covers FR11, NFR-A2. Verify with `npx vitest run src/views/shared/LocationList.menu.test.tsx src/views/shared/LocationList.test.tsx src/views/cards/CardsView.test.tsx`.
-- [ ] 6.5 Write new `test/locationMenuDependencies.test.ts` (`// Verifies NFR-P2 of set-home-location-and-show-differences`). It reads `package.json` and `src/views/shared/LocationMenu.tsx` as text. It asserts that no `@radix-ui/react-dropdown-menu` or other menu package is a dependency, and that the menu imports only `react`, `react-i18next`, `lucide-react` and `@/` modules (D7). The spec scenario "Bundle budget" itself is verified by `check:bundle-size` in 10.2. Verify with `npx vitest run src/test/locationMenuDependencies.test.ts`.
-- [ ] 6.6 Mutation run: `npx stryker run --mutate 'src/views/shared/LocationMenu.tsx,src/views/shared/locationMenuKeys.ts,src/views/shared/LocationRow.tsx,src/views/shared/LocationList.tsx,src/views/cards/CardsView.tsx'` scores ≥ 95%. Then run `npx stryker run --mutate 'src/views/shared/LocationMarkIcon.tsx'` alone.
+  Covers FR11, NFR-A2. Verify with `npx vitest run src/views/shared/LocationList.menu.test.tsx src/views/cards/CardsView.test.tsx`.
+- [ ] 6.6 Write new `test/locationMenuDependencies.test.ts` (`// Verifies NFR-P2 of set-home-location-and-show-differences`). It reads `package.json` and `src/views/shared/LocationMenu.tsx` as text. It asserts that no `@radix-ui/react-dropdown-menu` or other menu package is a dependency, and that the menu imports only `react`, `react-i18next`, `lucide-react` and `@/` modules (D7). The spec scenario "Bundle budget" itself is verified by `check:bundle-size` in 10.2. Verify with `npx vitest run src/test/locationMenuDependencies.test.ts`.
+- [ ] 6.7 Mutation run: `npx stryker run --mutate 'src/views/shared/LocationMenu.tsx,src/views/shared/locationMenuKeys.ts,src/views/shared/LocationRow.tsx,src/views/shared/LocationList.tsx,src/views/cards/CardsView.tsx'` scores ≥ 95%. Then run `npx stryker run --mutate 'src/views/shared/LocationMarkIcon.tsx'` alone.
 
 ## 7. Unit BDD (vitest-cucumber)
 
@@ -145,7 +171,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "The day of the home location" → `time_selection/time_selection_day_track.feature`;
   - "A home change keeps the pinned moment" → `date_selection/date_selection_reference_moment.feature`.
 
-  Update the steps that remove a location through the former button (`locations_management.steps.ts`, `locations_persistence.steps.ts`, the `*World.tsx` helpers). Covers FR3, FR4, FR7, FR8. Verify each feature's steps file alone with `npx vitest run <steps file>`.
+  The steps in `locations_management.steps.ts` dispatch `REMOVE_LOCATION` to the store, and the steps in `locations_persistence.steps.ts` call `removeLocation` on the hook. Neither used the button, so neither needs a change for it. Task 6.4 already updated the worlds that did use it. Covers FR3, FR4, FR7, FR8. Verify each feature's steps file alone with `npx vitest run <steps file>`.
 
 ## 8. E2E BDD (playwright-bdd) and screenshots
 
@@ -164,11 +190,11 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 - [ ] 8.4 Update the existing E2E features and steps to the modified scenarios:
   - "Row name includes the badge" in `locations_device_time_zone_e2e.feature`: Moscow is named "Moscow 2 hours behind";
   - "Time does not change the row name" in `locations_local_time_e2e.feature`: the same;
-  - "Remove action names the city" in `locations_ui_e2e.feature`: "Actions for Moscow" and "Remove";
+  - "Remove action names the city" in `locations_ui_e2e.feature` (line 43, "Remove Moscow" today): the list offers the menu button "Actions for Moscow", and the open menu offers the menu item "Remove". The step "the list offers the action {string}" in `locations_ui_e2e.steps.ts:109` looks for a `button`, so add a step for the menu item;
   - "Focus after removal" in `locations_view_contract_e2e.feature`: the menu button of Kolkata;
-  - `removeButton` in `locationsE2eHelpers.ts` opens the menu first.
+  - the E2E helpers changed in 6.4 are proved here: `menuButton` and `removeThroughMenu` in `locationsE2eHelpers.ts` (used by `locations_view_contract_e2e.steps.ts`), and `readListOrder` in `locationsReorderE2eHelpers.ts` (used by `locations_reorder_drag_e2e.steps.ts` and `locations_reorder_checks_e2e.steps.ts`).
 
-  Tag each changed scenario with `@set-home-location-and-show-differences @NFR-A3` or `@FR11`. Covers NFR-A3, FR11. Verify with `npx playwright test -c playwright.bdd.config.ts --grep "Row name includes|Time does not change the row name|Remove action names|Focus after"`.
+  Tag each changed scenario with `@set-home-location-and-show-differences @NFR-A3` or `@FR11`. Covers NFR-A3, FR11. Verify with `npx playwright test -c playwright.bdd.config.ts --grep "Row name includes|Time does not change the row name|Remove action names|Focus after"`. Then run `npx playwright test -c playwright.bdd.config.ts --grep "Reorder locations"` once, alone, to rerun the reorder features that read the list order through the menu buttons.
 - [ ] 8.5 Add the `home` and `travelling` states to `test/features/locations/steps/locationsStates.ts`, and add them to the screenshot outline of `locations_ui_e2e.feature` (375 / 1024 px × light / dark). Re-approve every existing baseline with rows under `test/features/__screenshots__/{chromium,mobile-chrome}/` with `--update-snapshots` (NFR-R2). Then check that `npx playwright test -c playwright.bdd.config.ts --grep Screenshot` passes without that flag.
 
 ## 9. Handoff patches (files the implement stage may not edit)
