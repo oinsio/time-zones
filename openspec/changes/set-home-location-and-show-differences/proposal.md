@@ -6,7 +6,7 @@ Builds on `support-legacy-ios-12-safari`, archived on 2026-10-29 (`openspec/chan
 - the Pointer Events flag `IS_POINTER_EVENTS_SUPPORTED` (`src/lib/legacy/pointerEvents.ts`, exported from `src/lib/legacy/index.ts`);
 - the 150 KB gzipped budget for initial JavaScript (`scripts/check-bundle-size.mjs`, package script `check:bundle-size`).
 
-Its handoff patches H2 (ADR-0009) and H3 (the `browser-compatibility` glossary context) have not been applied on main yet. This change does not rely on them.
+Its handoff patches H1 (the CI step that runs `check:legacy-build`), H2 (ADR-0009) and H3 (the `browser-compatibility` glossary context) have not been applied on main yet, so CI runs `check:bundle-size` but not `check:legacy-build`. This change does not rely on them: task 10.2 runs `check:legacy-build` itself.
 
 ## Why
 
