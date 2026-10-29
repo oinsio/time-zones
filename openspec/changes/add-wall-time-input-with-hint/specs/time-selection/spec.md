@@ -47,10 +47,11 @@ A wall-time input SHALL accept a 24-hour wall-clock time written as `H`, `HH`, `
 | `23:59` | `23:59` |
 
 ### Requirement: Invalid wall-time text
-Any text that is not an accepted wall-time text, including the empty text, SHALL change nothing. The field MUST stay open and MUST show the error "Enter the time as HH:MM" / «Введите время в формате ЧЧ:ММ», linked to the field. <!-- implements FR6 of add-wall-time-input-with-hint -->
+Any text that is not an accepted wall-time text, including the empty text, SHALL change nothing, whether it is confirmed with Enter or by leaving the field. The field MUST stay open and MUST show the error "Enter the time as HH:MM" / «Введите время в формате ЧЧ:ММ», linked to the field. <!-- implements FR6 of add-wall-time-input-with-hint -->
 
 #### Scenario: Rejected texts
-- **GIVEN** the moment is live
+- **GIVEN** the interface language is English
+- **AND** the moment is live
 - **WHEN** the user confirms the text `<text>`
 - **THEN** the field shows the error "Enter the time as HH:MM"
 - **AND** the moment is still live
@@ -110,7 +111,7 @@ After a wall-time input, every row's time, date, UTC offset and handle SHALL sho
 - **AND** the Now button is shown
 
 ### Requirement: Wall-time input is never stored
-A wall-time input SHALL NOT be written to storage and SHALL NOT be passed to other open tabs. A change of the list in another tab MUST keep the moment. When the typed location no longer exists, nothing MUST change and the field MUST close without a message. A command with a malformed time or date MUST be rejected and change nothing. <!-- implements FR9, FR10 of add-wall-time-input-with-hint -->
+A wall-time input SHALL NOT be written to storage and SHALL NOT be passed to other open tabs. A change of the list in another tab MUST keep the moment. When the typed row no longer exists (the location was removed, or a location now shows the device time instead of the Here entry), nothing MUST change and the field MUST close without a message. A command with a malformed time or date MUST be rejected and change nothing. <!-- implements FR9, FR10 of add-wall-time-input-with-hint -->
 
 #### Scenario: Nothing is stored or shared
 - **GIVEN** the list contains Almaty and New York
@@ -166,7 +167,7 @@ When a wall-time input resolves to `GAP` or `AMBIGUOUS`, only the row where the 
 - **THEN** New York shows the hint "01:30 occurs twice — showing the first (UTC−4)."
 
 ### Requirement: Wall-time hint lifetime
-The wall-time hint SHALL stay until the next wall-time input, time selection, date change or Now. When its row is removed, or the Here entry that carries it disappears, the hint MUST disappear and the moment MUST stay. <!-- implements FR7, FR9 of add-wall-time-input-with-hint -->
+The wall-time hint SHALL stay until the next wall-time input, time selection, date change or Now. A change of the reference zone (home set or cleared) MUST keep a hint on a location. A change of the device time zone MUST end a hint on the Here entry and keep the pinned instant. When its row is removed, or the Here entry that carries it disappears, the hint MUST disappear and the moment MUST stay. <!-- implements FR7, FR9 of add-wall-time-input-with-hint -->
 
 #### Scenario: The hint ends with the next change
 - **GIVEN** New York shows a wall-time hint
@@ -186,16 +187,38 @@ The wall-time hint SHALL stay until the next wall-time input, time selection, da
 - **THEN** no row shows a wall-time hint
 - **AND** the moment stays pinned
 
+#### Scenario: A home change keeps the hint
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Moscow and New York
+- **AND** the user typed `02:30` in New York, so New York shows a wall-time hint
+- **WHEN** the user makes Moscow home
+- **THEN** New York still shows the wall-time hint
+- **AND** the moment is still pinned to `2026-03-08T07:30:00Z` with the status `GAP`
+- **AND** the date bar shows no note
+
+#### Scenario: A device time zone change ends the hint on the Here entry
+- **GIVEN** the device time zone is `America/New_York`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains only Moscow, so the Here entry is shown
+- **AND** the user typed `02:30` in the Here entry, so it shows a wall-time hint
+- **WHEN** the device time zone changes to `Asia/Almaty`
+- **THEN** no row shows a wall-time hint
+- **AND** the date bar shows no note
+- **AND** the moment is still pinned to `2026-03-08T07:30:00Z`
+
 ### Requirement: One wall-clock note at a time
 At most one note about a wall-clock time SHALL be visible: a wall-time hint in one row, or the gap note in the date bar, never both. A date change never produces a wall-time hint, and a wall-time input never produces the gap note. <!-- implements FR7 of add-wall-time-input-with-hint -->
 
 #### Scenario: A wall-time input ends the gap note
 - **GIVEN** the device time zone is `America/New_York`
 - **AND** the current instant is `2026-03-07T07:30:00Z`
+- **AND** the list contains New York
 - **AND** the user moved to the next day, so the date bar shows the gap note
-- **WHEN** the user types `10:00` in New York
-- **THEN** the date bar shows no note
-- **AND** no row shows a wall-time hint
+- **WHEN** the user types `02:45` in New York
+- **THEN** the moment is pinned to `2026-03-08T07:45:00Z` with the status `GAP`
+- **AND** the date bar shows no note
+- **AND** only New York shows a wall-time hint
 
 ### Requirement: Wall-time input strings are localized
 The input's name, the input error and both wall-time hints SHALL exist in English and Russian. The time button and its field MUST be named "Enter time — {city}, {time}" / «Ввести время — {city}, {time}», with the row's city label and shown time, so no two rows share a name. <!-- implements FR11, NFR-A2 of add-wall-time-input-with-hint -->
@@ -213,13 +236,20 @@ The input's name, the input error and both wall-time hints SHALL exist in Englis
 | Russian | `Ввести время — Москва, 10:30` |
 
 ### Requirement: Wall-time input is fast
-A wall-time input followed by presenting 50 rows SHALL stay within fixed work bounds. Presenting the rows again after the input MUST build no new date or time formatter. Resolving the typed time MUST look up time zone transitions of the typed row's zone only. Timing is reported by a non-blocking benchmark, never asserted in unit tests (ADR-0008). <!-- implements NFR-P1 of add-wall-time-input-with-hint -->
+A wall-time input followed by presenting 50 rows SHALL stay within fixed work bounds. Presenting the rows again after the input MUST build no new date or time formatter, also while a wall-time hint is shown. Resolving the typed time MUST convert wall-clock time to an instant in the typed row's zone only. Timing is reported by a non-blocking benchmark, never asserted in unit tests (ADR-0008). <!-- implements NFR-P1 of add-wall-time-input-with-hint -->
 
 #### Scenario: No new formatter after a wall-time input
-- **GIVEN** 50 rows are presented
-- **WHEN** the user types `10:40` in one row and the rows are presented again
+- **GIVEN** the current instant is `2026-03-08T07:30:00Z`
+- **AND** 50 rows are presented, one of them New York
+- **AND** the user typed `02:30` in New York, so New York shows a wall-time hint
+- **WHEN** the rows are presented again
 - **THEN** no date or time formatter is built
-- **AND** time zone transitions are looked up only in that row's zone
+
+#### Scenario: The typed time is resolved in its row's zone only
+- **GIVEN** the current instant is `2026-03-08T07:30:00Z`
+- **AND** 50 rows are presented, one of them New York
+- **WHEN** the user types `10:40` in New York
+- **THEN** wall-clock time is converted to an instant only in `America/New_York`
 
 ### Requirement: Accessible wall-time input
 The wall-time input SHALL pass axe-core with the time as a button, the field open, the field with an error, and a `GAP` and an `AMBIGUOUS` hint, in the light and dark themes. The hint MUST be announced politely; times that change in other rows MUST NOT be announced. The time button MUST show a visible focus ring and have a hit area of at least 44 × 44 px. <!-- implements NFR-A1, NFR-A3, UX1 of add-wall-time-input-with-hint -->
@@ -231,10 +261,15 @@ The wall-time input SHALL pass axe-core with the time as a button, the field ope
 | state | theme |
 |---|---|
 | the time buttons | light |
+| the time buttons | dark |
+| an open field | light |
 | an open field | dark |
 | a field with an error | light |
+| a field with an error | dark |
+| a `GAP` hint | light |
 | a `GAP` hint | dark |
 | an `AMBIGUOUS` hint | light |
+| an `AMBIGUOUS` hint | dark |
 
 ### Requirement: Keyboard-safe wall-time input
 Keys typed in the field SHALL NOT start a card reorder and SHALL NOT scroll the page. Tab MUST leave the field and confirm it as Enter does. The field MUST request a numeric keyboard and no autocompletion. <!-- implements NFR-A4, NFR-A2 of add-wall-time-input-with-hint -->

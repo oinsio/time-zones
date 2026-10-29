@@ -2,34 +2,36 @@
 
 ## Context
 
-Driven by FR1–FR13, NFR-P1, NFR-A1–NFR-A4, NFR-R1, NFR-R2 and UX1–UX3 of `proposal.md`. The change starts after `support-legacy-ios-12-safari`, `set-home-location-and-show-differences` and `show-here-entry-for-device-time` are archived. The state below is the code today plus what those changes add.
+Driven by FR1–FR13, NFR-P1, NFR-A1–NFR-A4, NFR-R1, NFR-R2 and UX1–UX3 of `proposal.md`. The three changes it builds on (`support-legacy-ios-12-safari`, `set-home-location-and-show-differences`, `show-here-entry-for-device-time`) are archived and on `main`. Every owner below was opened on `main` in `packages/client/src/`; the glossary (`docs/glossary/`) names each one.
 
-Current owners, checked in `packages/client/src/`. The glossary (`docs/glossary/`) names each one:
+- **Wall-clock time → instant, wall-clock status**: `resolveWallClock(timeZoneId, plainDateTime)` and `WallClockStatus` in `model/wallClock.ts`. It resolves with `compatible` and classifies with `earlier` / `later` (three `PlainDateTime#toZonedDateTime` calls). `reduceReferenceMoment.ts` (`SET_DATE`, `SHIFT_DATE`) calls it.
+- **Legacy zone names**: `lib/legacy/zoneShim.ts` wraps `Intl.DateTimeFormat`. `lib/legacy/zoneShim.temporal.test.ts` already proves that `resolveWallClock("Europe/Kyiv", …)` gives `UNIQUE`, `GAP` and `AMBIGUOUS` on an engine that accepts only `Europe/Kiev`. So the shim covers `PlainDateTime#toZonedDateTime` (proposal Q5).
+- **Pointer Events**: `IS_POINTER_EVENTS_SUPPORTED` in `lib/legacy/pointerEvents.ts`, exported by `lib/legacy/index.ts`. The E2E helper `emulateEngineWithoutPointerEvents` is in `test/e2e/withoutPointerEvents.ts`. `test/noBigIntInSources.test.ts` fails on BigInt literals, `BigInt(` and `epochNanoseconds` in production sources.
+- **Reference moment**: `ReferenceMoment` in `model/referenceMoment.ts`. `PINNED` carries `instant`, `wallClockStatus` and `requestedWallTime` (a `Temporal.PlainTime`). `getReferenceZone` and `getEffectiveInstant` live there too.
+- **Reference-zone rule**: `model/followReferenceZone.ts`. `reduceLocations` runs it after every command. When the reference zone changed and the moment is `GAP`, it keeps the instant, sets `UNIQUE` and rewrites `requestedWallTime`, which ends the gap note.
+- **Time selection**: `reduceSelectInstant` in `model/reduceSelectInstant.ts` returns the same state object for the instant already pinned; its status is always `UNIQUE`. The controller is `useTimeSelection` (`controller/useTimeSelection.ts`), which dispatches straight to the store.
+- **Commands and reducer**: `LocationCommandType`, `LocationErrorCode`, `LocationCommand` and `reduceLocations` in `model/locations.ts`, **192 lines** today.
+- **Here entry**: `getHereEntry(state)` in `model/hereEntry.ts`; `useLocations` returns it, `useHereEntry` presents it with `presentHereEntry`.
+- **Gap note**: `buildDateBar` in `controller/useReferenceMoment.ts` decides `gap` from `reference.wallClockStatus === GAP`; `presentDateBar` in `presenter/dateBar.ts` formats both times with an inline `time.toLocaleString(language, LOCAL_TIME_FORMAT_OPTIONS)`, which builds a formatter per call (ADR-0008, Context).
+- **Local time label**: `formatLocalTime` in `presenter/localDateTime.ts`, on the cached `getDateTimeFormatter(language, timeZoneId, kind)` of `presenter/dateTimeFormatters.ts`.
+- **UTC offset**: `getUtcOffsetMinutes` (model) and `formatUtcOffset(offsetMinutes, utcPrefix)` (presenter) with the prefix `locations.utcOffsetPrefix` and the minus sign `UTC_OFFSET_MINUS_SIGN` (`−`).
+- **Zone part of a row**: `presentZoneMoment(subject, context)` in `presenter/presentZoneMoment.ts` (105 lines), with `LocationRowsContext`. Both `presentLocationRows` and `presentHereEntry` spread it, so a field added there reaches location rows and the Here entry.
+- **Card layout block**: `views/shared/ZoneRowContent.tsx` (114 lines) renders the place column, `LocalDateTime` and `DayTrack` for `LocationRow` and `HereEntryRow`. `LocalDateTime.tsx` (30 lines) renders the time as a plain `<span>`. The reorder `KeyboardSensor` (`LocationList.tsx`) listens on the drag handle only (`DragHandle` gets the sortable `listeners`).
+- **Tokens**: `styles/tokens.css` has `--color-notice` / `--color-notice-foreground` for both themes (Tailwind `bg-notice`, `text-notice-foreground`): a warm yellow background with dark text, used for app notices. There is no other warning token.
 
-- **Wall-clock time → instant, wall-clock status**: `resolveWallClock(timeZoneId, plainDateTime)` and `WallClockStatus` in `model/wallClock.ts`. It resolves with `compatible` and classifies `UNIQUE`, `GAP` or `AMBIGUOUS`. `SET_DATE` / `SHIFT_DATE` already call it from `model/reduceReferenceMoment.ts`.
-- **Reference moment**: `ReferenceMoment` in `model/referenceMoment.ts`. `PINNED` carries `instant`, `wallClockStatus` and `requestedWallTime`. `getReferenceZone` and `getEffectiveInstant` live there too.
-- **Time selection**: `SELECT_INSTANT` in `model/reduceSelectInstant.ts`. It returns the same state object for the instant already pinned, and its status is always `UNIQUE`.
-- **Commands and reducer**: `LocationCommandType`, `LocationErrorCode` and `reduceLocations` in `model/locations.ts` (161 lines). The file is near the size limit, so new reducer bodies go to their own files, as `reduceSelectInstant` did.
-- **Gap note**: `controller/useReferenceMoment.ts` decides `gap` from `reference.wallClockStatus === GAP`, and `presenter/dateBar.ts` formats it. It formats the requested time with an inline `time.toLocaleString(language, LOCAL_TIME_FORMAT_OPTIONS)`.
-- **Local time label**: `formatLocalTime` in `presenter/localDateTime.ts`, built on the cached `getDateTimeFormatter` (`presenter/dateTimeFormatters.ts`, ADR-0008).
-- **UTC offset**: `getUtcOffsetMinutes` (model) and `formatUtcOffset(offsetMinutes, utcPrefix)` (presenter), prefix `locations.utcOffsetPrefix`.
-- **Rows**: `presentLocationRows` with the zone-level part shared with the Here entry (from `show-here-entry-for-device-time`), `useLocations`, `LocationsContext` (`addLocation`, `removeLocation`, `moveLocation`, …).
-- **Time display**: `views/shared/LocalDateTime.tsx` (30 lines) renders the time and date as plain text. It is used by `LocationRow` and `HereEntryRow` through the shared card layout block.
-- **Legacy engines** (from `support-legacy-ios-12-safari`): `IS_POINTER_EVENTS_SUPPORTED` in `lib/legacy/`; the `Intl.DateTimeFormat` legacy zone shim installed before `temporal-polyfill`; a source scan that fails on BigInt literals, `BigInt(` and `epochNanoseconds`.
-
-Binding decisions: ADR-0002 (commands as JSON, view state in the view), ADR-0003 (wall-clock input and DST, the moment is never stored), ADR-0004 (only repositories write), ADR-0007 (reference zone), ADR-0008 (work bounds). No global decision is needed.
+Binding decisions: ADR-0002 (commands as JSON, views emit events, view state in the view), ADR-0003 (wall-clock input and DST, the moment is never stored), ADR-0004 (only repositories write), ADR-0007 (reference zone, the Here entry), ADR-0008 (work bounds). No global decision is needed.
 
 ## Goals / Non-Goals
 
 **Goals:** add the wall-time input by extending the existing owners. The only new model state is the wall-time target. One parser for typed text, one rule for "which note is shown", one formatter for a wall-clock time in a note.
 
-**Non-Goals:** a generic time-field component; any change to storage, tab sync or the date bar's layout; smooth dragging on iOS 12.
+**Non-Goals:** a generic time-field component; any change to storage, tab sync or the date bar's layout.
 
 ## Decisions
 
 ### D1. Model: `SET_WALL_TIME` resolves through `resolveWallClock` (FR3, FR4, FR10, FR13)
 
-New command in `model/locations.ts`, reduced in new `model/reduceWallTime.ts`:
+`model/locations.ts` would pass 200 lines with one more command and error. First, without changing behaviour, `LocationCommandType`, `LocationErrorCode` and the `LocationCommand` union move to new `model/locationCommands.ts`; `locations.ts` re-exports them, so every import stays as it is. Then the new command:
 
 ```ts
 | {
@@ -42,16 +44,14 @@ New command in `model/locations.ts`, reduced in new `model/reduceWallTime.ts`:
   }
 ```
 
-The reducer:
+It is reduced in new `model/reduceWallTime.ts`:
 
-1. Validates the form: `time` must match `HH:MM` with hours 0–23 and minutes 0–59, else `INVALID_TIME` (new `LocationErrorCode`). `Temporal.PlainDate.from(date)` failing gives the existing `INVALID_DATE`. This checks the command's shape only. The lenient formats belong to the parser (D3) and are not repeated here.
-2. Resolves the zone of the target: the location's `timeZoneId` (not found → `LOCATION_NOT_FOUND`), or `deviceTimeZoneId` for the Here entry.
+1. Checks the shape: `time` must match `WALL_TIME_COMMAND_PATTERN` (`HH:MM`, hours 0–23, minutes 0–59), else new `LocationErrorCode.INVALID_TIME`. A `date` that `Temporal.PlainDate.from` rejects gives the existing `INVALID_DATE`. The lenient formats belong to the parser (D3) and are not repeated here.
+2. Finds the zone of the target: the location's `timeZoneId` (no such location → `LOCATION_NOT_FOUND`), or `getHereEntry(state)?.timeZoneId` for the Here entry (no Here entry, because a location now shows the device time → `LOCATION_NOT_FOUND`, the same "row is gone" answer).
 3. Calls `resolveWallClock(zone, date.toPlainDateTime(time))`. A `RangeError` beyond Temporal's range gives the existing `DATE_OUT_OF_RANGE`.
-4. Pins `{ mode: PINNED, instant, wallClockStatus: status, requestedWallTime: time, wallTimeTarget: target }`. When the state already holds the same instant, status and target, it returns the same state object, so the store does not notify.
+4. Pins `{ mode: PINNED, instant, wallClockStatus: status, requestedWallTime: time, wallTimeTarget: target }`. When the state already holds an equal instant (`Instant#equals`), status and target, it returns the same state object, so the store does not notify (FR4).
 
-There is no second `toZonedDateTime` with a disambiguation option anywhere. `requestedWallTime` keeps one meaning: "the wall-clock time the user asked for". For a date change it is a time of the reference zone; for a wall-time input it is a time of the target's zone. `wallTimeTarget` says which.
-
-No BigInt: the reducer compares instants with `Temporal.Instant#equals`, never through `epochNanoseconds`, so the legacy source scan stays green (FR13).
+There is no second `toZonedDateTime` with a disambiguation option. `requestedWallTime` keeps one meaning, "the wall-clock time the user asked for": for a date change a time of the reference zone, for a wall-time input a time of the target's zone; `wallTimeTarget` says which. No BigInt: instants are compared with `Instant#equals`, never through `epochNanoseconds` (FR13).
 
 ### D2. Model: the wall-time target and where a note goes (FR7, FR9)
 
@@ -64,77 +64,89 @@ export type WallTimeTarget =
   | { kind: WallTimeTargetKind.HERE_ENTRY };
 ```
 
-`ReferenceMoment.PINNED` gains an optional `wallTimeTarget`. `SELECT_INSTANT` and the date commands build their pinned moment without it, so any later time selection or date change ends the hint without extra code in those reducers. `RESET_TO_NOW` returns live.
+`ReferenceMoment.PINNED` gains an optional `wallTimeTarget`. `SELECT_INSTANT` and the date commands build their pinned moment without it, so a later time selection or date change ends the hint with no extra code in those reducers; `RESET_TO_NOW` returns live.
 
-One selector decides the note, `getWallClockNote(state)` in new `model/wallClockNote.ts`:
+One selector decides the note, `getWallClockNote(state)` in new `model/wallClockNote.ts`. It returns a `WallClockNote`: `{ placement: NONE }`, `{ placement: DATE_BAR, requestedWallTime }` or `{ placement: ROW, target, status, requestedWallTime }` (`WallClockNotePlacement` enum):
 
-- live, or `UNIQUE` → none;
-- no `wallTimeTarget` and `GAP` → the date bar (today's gap note);
-- no `wallTimeTarget` and `AMBIGUOUS` → none (as today);
-- a `wallTimeTarget` and `GAP` / `AMBIGUOUS` → that target, but only while it is shown: the location is still in the list, or `getHereEntry(state)` (from `show-here-entry-for-device-time`) still returns the Here entry. Otherwise → none, and the moment stays (FR9).
+- live, or `UNIQUE` → `NONE`;
+- no `wallTimeTarget` and `GAP` → `DATE_BAR` (today's gap note);
+- no `wallTimeTarget` and `AMBIGUOUS` → `NONE` (as today);
+- a `wallTimeTarget` and `GAP` / `AMBIGUOUS` → `ROW` while the target is shown: the location is in the list, or `getHereEntry(state)` returns the Here entry. Otherwise `NONE`, and the moment stays (FR9).
 
-`useReferenceMoment` builds the gap note from this selector instead of reading `wallClockStatus` itself. `useLocations` passes the selector's target to the presenter. So "one note at a time" lives in one function of the model, and neither presenter nor view re-decides it. The removal of a row needs no change in `REMOVE_LOCATION`, which `set-home-location-and-show-differences` also edits.
+`followReferenceZone` keeps the note consistent with the zone it is about. It already compares the previous and next state after every command:
+
+- no target, `GAP`, reference zone changed → `UNIQUE` (unchanged behaviour, the gap note ends);
+- a location target → nothing; the reference zone is not the row's zone, and a location's zone never changes, so a home change keeps the hint;
+- a Here entry target and the device time zone changed → the target is dropped, the status becomes `UNIQUE` and `requestedWallTime` the instant's wall time in the reference zone, exactly as in the first rule. The instant stays. Dropping the target alone would turn the hint into a gap note.
+
+`useReferenceMoment` builds the gap note from `getWallClockNote` instead of reading `wallClockStatus`. `useLocations` puts the note into `LocationRowsContext`. So "one note at a time" is one function of the model, and neither presenter nor view re-decides it. `REMOVE_LOCATION` and `REPLACE_LOCATIONS` need no change.
 
 ### D3. Presenter: one parser for typed text (FR2, FR6)
 
-New `presenter/parseWallTimeInput.ts`: `parseWallTimeInput(text: string): string | undefined` returns the canonical `HH:MM` or `undefined`. It trims, then matches one anchored pattern per form of FR2. The patterns and limits come from new constants in `constants/timeSelection.ts` (`WALL_TIME_INPUT_PATTERNS`, `MAX_HOUR = 23`, `MAX_MINUTE = 59`). Pure, locale-independent, tested with `it.each` over M4. It lives in the presenter because it reads user text, not a model rule. The model checks only the canonical form (D1).
+New `presenter/parseWallTimeInput.ts`: `parseWallTimeInput(text: string): string | undefined` returns the canonical `HH:MM` or `undefined`. It trims, then matches the anchored patterns of FR2 and checks the limits. The patterns and limits are new constants in `constants/timeSelection.ts` (`WALL_TIME_INPUT_PATTERNS`, `MAX_WALL_TIME_HOUR = 23`, `MAX_WALL_TIME_MINUTE = 59`, `WALL_TIME_COMMAND_PATTERN`), re-exported from `constants/index.ts`. Pure and locale-independent. It lives in the presenter because it reads user text, not a model rule; the model checks only the canonical form (D1).
 
-### D4. Presenter: the wall-time hint and one formatter for a wall-clock time (FR7, FR11, NFR-A2)
+### D4. Presenter: the hint, the name and one formatter for a wall-clock time (FR7, FR11, NFR-A2, NFR-P1)
 
-- New `formatWallClockTime(time: Temporal.PlainTime, language)` in `presenter/localDateTime.ts`, next to `formatLocalTime`, with `LOCAL_TIME_FORMAT_OPTIONS`. The requested time of a gap or overlap is not an instant, so it cannot use the zone-bound cached formatter. `presentDateBar` switches its inline `toLocaleString` to this function, so the gap note and the hint share one owner for "a wall-clock time in a note".
-- New `presentWallTimeHint({ status, requestedWallTime, shownZoned, language, translate })` in `presenter/wallTimeHint.ts`. `GAP` → `locations.wallTimeHint.gap` with `{ requestedTime, shownTime }`, where `shownTime` is `formatLocalTime(shownZoned)`. `AMBIGUOUS` → `locations.wallTimeHint.ambiguous` with `{ requestedTime, utcOffset }`, where `utcOffset` is `formatUtcOffset(getUtcOffsetMinutes(...), translate("locations.utcOffsetPrefix"))`. It does not reuse `date.gapNote`: the glossary keeps the gap note and the wall-time hint apart.
-- Row data gains `wallTimeHint?: string` and `wallTimeInputLabel` ("Enter time — {{city}}, {{time}}"). They are filled where the zone-level row part is presented, once for location rows and the Here entry.
+- New `formatWallClockTime(time: Temporal.PlainTime, language)` in `presenter/localDateTime.ts`, next to `formatLocalTime`. A requested time is not an instant, so it is formatted by the cached `getDateTimeFormatter(language, UTC_ZONE_ID, LOCAL_TIME)` at the time's milliseconds since midnight (`Temporal.PlainTime` difference, no zone lookup). Presenting again therefore builds no formatter (NFR-P1). `presentDateBar` switches its inline `toLocaleString` for the gap note to it, so the gap note and the hint share one owner, and the date bar stops building a formatter per call.
+- New `presentWallTimeHint({ status, requestedWallTime, shownZoned, language, translate })` in `presenter/wallTimeHint.ts`. `GAP` → `locations.wallTimeHint.gap` with `{ requestedTime, shownTime }`, where `shownTime` is `formatLocalTime(shownZoned)`. `AMBIGUOUS` → `locations.wallTimeHint.ambiguous` with `{ requestedTime, utcOffset }`, where `utcOffset` is `formatUtcOffset(getUtcOffsetMinutes(...), translate("locations.utcOffsetPrefix"))`. `UNIQUE` → `undefined`. It does not reuse `date.gapNote`: the glossary keeps the gap note and the wall-time hint apart.
+- `PresentedZoneMoment` gains `wallTimeInputLabel` ("Enter time — {{city}}, {{time}}") and `wallTimeHint?: string`. `presentZoneMoment`'s subject gains `cityLabel` (`presentLocationRows` passes the location's label, `presentHereEntry` its city label). `LocationRowsContext` gains `wallClockNote`; the hint is filled only when the note is `ROW` and its target is this subject (a location by `id`, the Here entry by having no `id`).
 - Locale keys: `locations.wallTimeInputLabel`, `locations.wallTimeInputError`, `locations.wallTimeHint.gap`, `locations.wallTimeHint.ambiguous`, in `en.json` and `ru.json`.
 
-### D5. Controller: `setWallTime` (FR3, FR8, FR9, FR10)
+### D5. Controller: `useWallTimeInput` (FR3, FR6, FR8, FR9, FR10)
 
-`LocationsContextValue` gains `setWallTime(target, time, date)`, dispatched straight to the store like the date commands (`useReferenceMoment`), never through the write scheduler, so nothing is stored or broadcast. It returns the reduce result. The view closes the field on `ok` and also on `LOCATION_NOT_FOUND` (FR10). No hook duplicates `useTimeSelection`.
+New hook `controller/useWallTimeInput.ts` returns `confirmWallTime(target, text, date): WallTimeInputOutcome`. It calls `parseWallTimeInput`; `undefined` → `INVALID_TEXT` and nothing is dispatched. Otherwise it dispatches `SET_WALL_TIME` straight to the store, like `useTimeSelection` and the date actions of `useReferenceMoment`, never through the write scheduler, so nothing is stored or broadcast. Any result of the store, `ok` or a rejection such as `LOCATION_NOT_FOUND`, gives `CLOSED` (FR10). `WallTimeInputOutcome` is an enum in the hook's module; `controller/index.ts` exports the hook, the enum, `WallTimeTarget` and `WallTimeTargetKind` (as it does `TrackMove`). The view thus only emits the typed text (ADR-0002). A separate hook, not a function of `useTimeSelection`, because the glossary keeps wall-time input and time selection apart.
 
-### D6. View: `WallTimeInput` inside `LocalDateTime` (FR1, FR5, FR13, NFR-A2, NFR-A4, UX1, UX2)
+### D6. View: the time button and `WallTimeInput` (FR1, FR5, FR6, FR13, NFR-A2, NFR-A4, UX1, UX2)
 
-- `LocalDateTime` renders the time as a `<button type="button">` with `onClick`. A plain `click` fires after a tap on iOS 12 without Pointer Events. No `onPointer*` handler opens the field. The button is named by `wallTimeInputLabel`.
-- On click it renders `WallTimeInput` in place (view state: open / text / error). It is an `<input type="text" inputmode="numeric" autocomplete="off">` with the same label, never `type="time"`. Focus and full selection on open.
-- Enter / blur with changed text → `parseWallTimeInput` → `setWallTime`. Invalid → the error under the field with `aria-describedby` and `aria-invalid`, field stays open. Escape / blur without change → close. Focus returns to the button after Enter and Escape.
-- `onKeyDown` stops propagation for Space, Enter and arrows, so the `KeyboardSensor` of the reorder never sees them. The field is outside the drag handle, as `DayTrack` is.
-- New `WallTimeHint` (`role="status"`) renders the row's hint between the country line and the track, with new tokens `--color-hint-warning-bg` / `--color-hint-warning-fg` for both themes if no token fits.
+- `LocalDateTime` renders the time as a `<button type="button">` with `onClick`, named by `wallTimeInputLabel`. A plain `click` fires after a tap on iOS 12 without Pointer Events; no `onPointer*` handler opens the field.
+- On click it renders new `views/shared/WallTimeInput.tsx` in place, with view state open / text / error. It is `<input type="text" inputmode="numeric" autocomplete="off">` with the same name, never `type="time"`; focus and full selection on open.
+- Enter, Tab or blur with changed text → `onConfirm(text)`. `INVALID_TEXT` → the error under the field with `aria-describedby` and `aria-invalid`, the field stays open. `CLOSED` → close. Escape, or blur without change → close. Focus returns to the button after Enter and Escape.
+- `onKeyDown` stops propagation of Space, Enter and the arrow keys, and the field sits outside the drag handle, so the reorder `KeyboardSensor` never sees them.
+- `ZoneRowContent` gains `wallTimeInputLabel`, `wallTimeHint` and `onConfirmWallTime(text, date)`; `LocationRow` binds the location target and `HereEntryRow` the Here entry target, and `CardsView` passes `confirmWallTime` from `useWallTimeInput` through `LocationList`.
+- New `views/shared/WallTimeHint.tsx` (`role="status"`, an "i" icon from `lucide-react`) renders under the place column, before the day track. Colours: the existing `bg-notice` / `text-notice-foreground` tokens, which are the warm warning pair of both themes; no new token (UX3).
 
 ### D7. Where each test goes
 
-- Model: `reduceWallTime.test.ts`, `wallClockNote.test.ts` (Vitest, `it.each`).
-- Presenter: `parseWallTimeInput.test.ts`, `wallTimeHint.test.ts`, `dateBar.test.ts` (unchanged gap note after the refactor).
-- View: `LocalDateTime.test.tsx`, `WallTimeInput.test.tsx`, plus `WallTimeInput.legacy.test.tsx` that removes `PointerEvent` with `vi.stubGlobal`, re-imports the module and checks that a `click` opens the field.
-- Unit BDD: `time_selection_wall_time_input.feature`; E2E: `time_selection_wall_time_input_e2e.feature`; the `@view-contract` scenario; screenshot states.
+- Model: `locationCommands` move covered by the existing `locations.test.ts`; `reduceWallTime.test.ts`, `wallClockNote.test.ts`, `followReferenceZone.test.ts` (Vitest, `it.each`).
+- Presenter: `parseWallTimeInput.test.ts`, `wallTimeHint.test.ts`, `localDateTime.test.ts`, `dateBar.test.ts` unchanged, a new `presentZoneMoment.wallTime.test.ts`.
+- Controller and views: `useWallTimeInput.test.tsx`, `WallTimeInput.test.tsx`, `WallTimeInput.legacy.test.tsx` (no `PointerEvent`), `WallTimeHint.test.tsx`.
+- Unit BDD (jsdom, no focus or names): `time_selection_wall_time_input_unit.feature`, the work bounds in `time_selection_wall_time_budget.feature`, the two scenarios in `date_selection_wall_clock.feature`.
+- E2E (focus, selection, names, axe-core, layout, the legacy tap, screenshots): `time_selection_wall_time_input_e2e.feature`, the `@view-contract` scenario, the screenshot outline.
 
 ## Consequences
 
 Positive:
 - Every DST rule stays in `resolveWallClock`; the hint and the gap note share one formatter and one placement rule.
 - The legacy rules hold by construction: click instead of pointer events, a text field, no BigInt.
-- Rows of both kinds get the input from the shared layout block, so the Here entry needs no second implementation.
+- Rows of both kinds get the input and the hint from `presentZoneMoment` and `ZoneRowContent`, so the Here entry needs no second implementation.
 
 Negative:
 - `ReferenceMoment.PINNED` grows by an optional field that only one command sets.
+- `followReferenceZone` gains a third rule.
 - Every screenshot with rows is re-approved, because the time becomes a button.
 
 ## Alternatives Considered
 
 **Target by zone ID instead of a location or the Here entry**: simpler, but two locations may share a zone (identity is zone plus city label), and the hint would show in both. Rejected.
 
-**A hint flag set by `SET_WALL_TIME` and cleared by every other reducer**: spreads one rule over five reducers, including `REMOVE_LOCATION`, which another change edits. Rejected for the selector of D2.
+**A hint flag set by `SET_WALL_TIME` and cleared by every other reducer**: spreads one rule over several reducers, including `REMOVE_LOCATION` and `REPLACE_LOCATIONS`. Rejected for the selector of D2.
 
-**Parsing in the model**: keeps one layer, but the model would learn user-text formats (dots, missing colon), which are presentation. Rejected; the model checks only the canonical form.
+**Parsing in the model or in the view**: the model would learn user-text formats (dots, missing colon), which are presentation; the view would call the presenter and the store itself, against ADR-0002. Rejected; the controller calls the presenter's parser and the model checks only the canonical form.
+
+**`setWallTime` in `useTimeSelection` or in `LocationsContextValue`**: the first mixes two glossary concepts; the second sits next to the actions that schedule writes. Rejected for `useWallTimeInput`.
 
 **`<input type="time">`**: native pickers differ per OS, follow the system 12/24-hour setting (NG1) and look different on iOS 12. Rejected (proposal Q2).
 
 **Reusing `date.gapNote` for the hint**: same words for two glossary concepts; the hint also needs the overlap text. Rejected.
 
+**New hint colour tokens**: the notice pair is already the warm warning colour in both themes. Rejected as a duplicate.
+
 ## Risks / Trade-offs
 
-- **Legacy zone shim and wall-clock resolution (proposal Q5).** The spike of `support-legacy-ios-12-safari` (its task 1.1) checks `Instant#toZonedDateTimeISO("Europe/Kyiv")` only. `resolveWallClock` takes `PlainDateTime#toZonedDateTime(zone, { disambiguation })` three times. It most likely reaches the same captured `Intl.DateTimeFormat`, but this is not proven. Mitigation: task 2.2 adds a `resolveWallClock` test with an engine stub that rejects `Europe/Kyiv` and accepts `Europe/Kiev`. It expects `10:00` on `2026-03-08` to resolve to `2026-03-08T08:00:00Z` `UNIQUE`, and `03:30` on `2026-03-29` (DST start in Kyiv) to resolve as `GAP`. If it fails, the fix belongs to the shim owner (`lib/legacy/zoneShim.ts`), not to a second path in `resolveWallClock`.
-- **BigInt.** Temporal's `epochNanoseconds` is tempting for equality checks. The legacy source scan fails CI on it. All comparisons use `Instant#equals` or `epochMilliseconds`.
-- **Blur on iOS 12.** Closing the numeric keyboard on iOS blurs the field. Blur with changed text confirms (FR3), so typing then tapping elsewhere commits, as intended. It is checked manually on the owner's device together with the legacy change's M7.
-- **`model/locations.ts` size.** Adding one command type and one error code keeps it under 200 lines; the reducer body is in `reduceWallTime.ts`.
+- **Legacy zone names.** Covered on `main` (Context, proposal Q5). Task 2.2 adds a `SET_WALL_TIME` case with the same engine stub. If it ever fails, the fix belongs to `lib/legacy/zoneShim.ts`, not to a second path in `resolveWallClock`.
+- **BigInt.** Temporal's `epochNanoseconds` is tempting for equality checks; the source scan fails on it. All comparisons use `Instant#equals`.
+- **Blur on iOS 12.** Closing the numeric keyboard on iOS blurs the field; blur with changed text confirms (FR3), so typing then tapping elsewhere commits. The E2E scenario with `emulateEngineWithoutPointerEvents` covers the tap; blur-confirms is covered by the Tab case.
 
 ## Migration Plan
 
-None: no stored data changes. Docs to update in the same change: glossary (`time-selection.md`, `date-selection.md`), `views.md` ("Time display", "Wall-time hint" with `UTC−4`), `domain-model.md` (`SET_WALL_TIME(target, time, date)`), `open-questions.md` Q4.
+None: no stored data changes. The documents are updated by handoff patches H1 (glossary) and H2 (architecture docs), because the implement stage writes only under `packages/` (`tasks.md`, section 7).
