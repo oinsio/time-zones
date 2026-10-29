@@ -49,12 +49,12 @@ The existing test asserts `toHaveClass("lucide-house")` and `not.toHaveAttribute
 - **Unit (jsdom, `LocationMarkIcon.test.tsx`):** the home `<svg>` has `fill="none"`, `stroke="currentColor"`, `stroke-width="2"`, `stroke-linejoin="round"`, `viewBox="0 0 24 24"` and width / height `18`. Its only drawn child is one `path` with `d="M4 11l8-7 8 7v9H4z"`. It has no `circle`, `rect`, `line`, `polyline` or `polygon`, and no second `path`.
 - **Unit BDD (jsdom):** the same markup facts, read through the real app (`deviceTimeZoneWorld.tsx`).
 - **E2E (real browser):** `getComputedStyle(svg).fill` is `"none"`, and the computed `stroke` equals the accent token resolved in the active theme. The token is resolved by `readTokenStyle(page, "stroke", "--color-accent")` from `test/features/time_selection/steps/timeSelectionE2eHelpers.ts`. The bounding box is 18 × 18 px. jsdom computes no inherited paint and applies no `prefers-color-scheme`, so the per-theme check needs the browser. ADR-0001: "vitest-cucumber runs in jsdom — no real focus, aria, layout".
-- **Visual regression:** the 16 `home` and `travelling` baselines are re-approved. The other baselines must not change, which proves the Here mark and the rest of the row are untouched.
+- **Visual regression:** the 16 `home` and `travelling` baselines are rewritten with `--update-snapshots=all`, so the approved screenshots record the outlined house. The 2.5% `maxDiffPixelRatio` (`playwright.bdd.config.ts`) is too loose to detect the fill of an 18 × 18 px icon. So the screenshots record the approved look but do not guard the fill; the unit, unit BDD and E2E paint checks do. The other baselines still pass unchanged, which shows the rest of the screen did not shift.
 
 ## Consequences
 
 Positive:
-- The house matches the design in both themes, and a regression back to a painted or library-shaped house fails three test levels.
+- The house matches the design in both themes, and a regression back to a painted or library-shaped house fails the unit, unit BDD and E2E paint checks.
 - No new dependency, no new file in `src/`, no layer or type change. `LOCATION_MARK_ICONS` stays the one owner of mark icons.
 
 Negative:

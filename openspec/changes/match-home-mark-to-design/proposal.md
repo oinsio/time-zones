@@ -115,7 +115,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M1: 100% of FR1–FR4, NFR-A1, NFR-R1, UX1 and UX2 have at least one automated test tagged or commented with `match-home-mark-to-design`.
 - M2: In the `home` state, the home mark's drawn glyph has the computed fill `none` and a computed stroke equal to the active accent colour in 2 of 2 themes (E2E, 2 checks).
 - M3: The home mark's glyph has exactly 1 drawn shape and 0 painted fills. The Here mark's glyph is filled with `currentColor` (unit test, 3 assertions).
-- M4: 16 of 16 screenshot baselines of the `home` and `travelling` states are re-approved and pass without `--update-snapshots`. 0 baselines of other states change.
+- M4: 16 of 16 screenshot baselines of the `home` and `travelling` states are rewritten by this change, show the outlined house, and pass without `--update-snapshots`. 0 baselines of other states change.
 - M5: The mutation score of `views/shared/LocationMarkIcon.tsx` is at least 95% (minimum 90%).
 
 ## Open Questions
