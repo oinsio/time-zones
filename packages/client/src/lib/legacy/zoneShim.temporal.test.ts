@@ -29,7 +29,9 @@ describe("legacy zone shim against temporal-polyfill", () => {
       }
       return new nativeDateTimeFormat(locales, options);
     } as unknown as typeof Intl.DateTimeFormat;
-    FakeNative.prototype = nativeDateTimeFormat.prototype;
+    Object.defineProperty(FakeNative, "prototype", {
+      value: nativeDateTimeFormat.prototype,
+    });
     FakeNative.supportedLocalesOf = nativeDateTimeFormat.supportedLocalesOf;
     const WithRetry = function (
       locales?: string | string[],
@@ -45,7 +47,9 @@ describe("legacy zone shim against temporal-polyfill", () => {
         });
       }
     } as unknown as typeof Intl.DateTimeFormat;
-    WithRetry.prototype = nativeDateTimeFormat.prototype;
+    Object.defineProperty(WithRetry, "prototype", {
+      value: nativeDateTimeFormat.prototype,
+    });
     WithRetry.supportedLocalesOf = nativeDateTimeFormat.supportedLocalesOf;
     Intl.DateTimeFormat = WithRetry;
     vi.resetModules();

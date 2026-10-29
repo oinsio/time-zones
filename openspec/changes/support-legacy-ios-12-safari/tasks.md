@@ -27,8 +27,8 @@ All source paths are under `packages/client/`. Commands run from `packages/clien
 
 ## 2. Dependencies and constants (no TDD: setup and constants)
 
-- [ ] 2.1 Add the dependencies of design D3 and D9: `pnpm --filter @time-zones/client add core-js @juggle/resize-observer`, then `pnpm --filter @time-zones/client add -D core-js-compat acorn` (`core-js-compat` at the same minor as `core-js`). Verify with `pnpm --filter @time-zones/client typecheck`.
-- [ ] 2.2 Add the constants and re-export them from `src/constants/index.ts`:
+- [x] 2.1 Add the dependencies of design D3 and D9: `pnpm --filter @time-zones/client add core-js @juggle/resize-observer`, then `pnpm --filter @time-zones/client add -D core-js-compat acorn` (`core-js-compat` at the same minor as `core-js`). Verify with `pnpm --filter @time-zones/client typecheck`.
+- [x] 2.2 Add the constants and re-export them from `src/constants/index.ts`:
   - `UPDATE_RECHECK_INTERVAL_MS = 15 * MILLISECONDS_PER_MINUTE` in new `src/constants/update.ts` (design D10, FR10);
   - `REORDER_TOUCH_ACTIVATION_DELAY_MS = 250` and `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX = 5` in `src/constants/reorder.ts` (design D8, FR9);
   - `LEGACY_ZONE_PROBE_ID = "Europe/Kyiv"` in new `src/constants/legacy.ts` (design D2);
