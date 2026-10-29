@@ -9,7 +9,11 @@ import {
   reduceLocations,
   type WorldClockState,
 } from "./locations";
-import { ReferenceMode } from "./referenceMoment";
+import {
+  ReferenceMode,
+  type WallTimeTarget,
+  WallTimeTargetKind,
+} from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
 const almaty: Location = {
@@ -141,5 +145,69 @@ describe("followReferenceZone", () => {
     const next = gapState({ homeLocationId: almaty.id });
 
     expect(followReferenceZone(next, next)).toBe(next);
+  });
+
+  // Verifies FR7 of add-wall-time-input-with-hint (D2).
+  describe("a wall-time GAP", () => {
+    const withTarget = (
+      wallTimeTarget: WallTimeTarget,
+      overrides: Partial<WorldClockState> = {},
+    ): WorldClockState => {
+      const before = gapState(overrides);
+      if (before.reference.mode !== ReferenceMode.PINNED)
+        throw new Error("live");
+      return {
+        ...before,
+        reference: { ...before.reference, wallTimeTarget },
+      };
+    };
+
+    it.each([
+      [
+        "home is set",
+        { type: LocationCommandType.SET_HOME_LOCATION, id: almaty.id },
+      ],
+      [
+        "the device zone changes",
+        {
+          type: LocationCommandType.SET_DEVICE_TIME_ZONE,
+          timeZoneId: "Asia/Tokyo",
+        },
+      ],
+    ] as const)("on a location keeps its hint when %s", (_name, command) => {
+      const before = withTarget({
+        kind: WallTimeTargetKind.LOCATION,
+        locationId: almaty.id,
+      });
+
+      expect(reduceOk(before, command).reference).toBe(before.reference);
+    });
+
+    it("on the Here entry turns into a plain moment when the device zone changes", () => {
+      const state = reduceOk(
+        withTarget({ kind: WallTimeTargetKind.HERE_ENTRY }),
+        {
+          type: LocationCommandType.SET_DEVICE_TIME_ZONE,
+          timeZoneId: "Asia/Tokyo",
+        },
+      );
+
+      expectGapNoteDropped(state, "16:30:00");
+      expect(
+        state.reference.mode === ReferenceMode.PINNED &&
+          state.reference.wallTimeTarget,
+      ).toBeUndefined();
+    });
+
+    it("on the Here entry keeps its hint when home is set", () => {
+      const before = withTarget({ kind: WallTimeTargetKind.HERE_ENTRY });
+
+      expect(
+        reduceOk(before, {
+          type: LocationCommandType.SET_HOME_LOCATION,
+          id: almaty.id,
+        }).reference,
+      ).toBe(before.reference);
+    });
   });
 });
