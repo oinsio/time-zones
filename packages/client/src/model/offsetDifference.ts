@@ -1,6 +1,6 @@
 import type { Temporal } from "@/lib/temporal";
 import { isLocationInDeviceTimeZone } from "./deviceTimeZone";
-import type { Location, WorldClockState } from "./locations";
+import type { WorldClockState } from "./locations";
 import { getReferenceZone } from "./referenceMoment";
 import { getUtcOffsetMinutes } from "./utcOffset";
 
@@ -22,9 +22,11 @@ export function getReferenceOffsetMinutes(
  * the reference), and when either offset is unknown. The one place that decides
  * which rows have a difference.
  * Implements FR5 of set-home-location-and-show-differences (D4).
+ * Implements FR3 of show-here-entry-for-device-time: the subject may be the
+ * Here entry, which has a zone and no ID.
  */
 export function getOffsetDifferenceMinutes(
-  location: Location,
+  location: { id?: string; timeZoneId: string },
   rowOffsetMinutes: number | undefined,
   referenceOffsetMinutes: number | undefined,
   context: { deviceTimeZoneId: string; homeLocationId: string | null },

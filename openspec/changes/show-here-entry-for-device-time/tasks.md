@@ -16,17 +16,17 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Strings (no TDD)
 
-- [ ] 1.1 Add `locations.deviceTimeMeta` ("Device time · {{utcOffset}}" / «Время устройства · {{utcOffset}}») and `locations.hereEntryName` ("{{city}}, {{hereMark}}, Device time" / «{{city}}, {{hereMark}}, Время устройства») to `locales/en.json` and `locales/ru.json` (design D8, FR10). Verify with `npx vitest run src/locales/locales.test.ts`.
+- [x] 1.1 Add `locations.deviceTimeMeta` ("Device time · {{utcOffset}}" / «Время устройства · {{utcOffset}}») and `locations.hereEntryName` ("{{city}}, {{hereMark}}, Device time" / «{{city}}, {{hereMark}}, Время устройства») to `locales/en.json` and `locales/ru.json` (design D8, FR10). Verify with `npx vitest run src/locales/locales.test.ts`.
 
 ## 2. Model (TDD)
 
-- [ ] 2.1 Widen `isLocationInDeviceTimeZone` to `Pick<Location, "timeZoneId">` and the first argument of `getOffsetDifferenceMinutes` to `{ id?: string; timeZoneId: string }` (design D1, FR3). Add cases to `model/offsetDifference.test.ts`:
+- [x] 2.1 Widen `isLocationInDeviceTimeZone` to `Pick<Location, "timeZoneId">` and the first argument of `getOffsetDifferenceMinutes` to `{ id?: string; timeZoneId: string }` (design D1, FR3). Add cases to `model/offsetDifference.test.ts`:
   - a subject without an ID in the device zone and no home → `undefined`;
   - the same with home Almaty and device `Europe/Moscow` → `−120`;
   - a subject without an ID and an equal offset to home → `0`.
 
   Verify red, then green, with `npx vitest run src/model/offsetDifference.test.ts src/model/deviceTimeZone.test.ts`.
-- [ ] 2.2 TDD `getHereEntry(state)` in new `model/hereEntry.ts`, built on `isLocationInDeviceTimeZone` (design D1, FR1, FR6). Tests in `model/hereEntry.test.ts` with `it.each`:
+- [x] 2.2 TDD `getHereEntry(state)` in new `model/hereEntry.ts`, built on `isLocationInDeviceTimeZone` (design D1, FR1, FR6). Tests in `model/hereEntry.test.ts` with `it.each`:
   - empty list → `{ timeZoneId }` of the device time zone;
   - list Moscow with device `Asia/Almaty` → `Asia/Almaty`;
   - list Almaty, Moscow → `undefined`;
@@ -35,7 +35,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - the device time zone after `SET_DEVICE_TIME_ZONE` with `Mars/Olympus_Mons` → `UTC`.
 
   Export `getHereEntry` and `HereEntry` from `model/index.ts`. Verify red, then green, with `npx vitest run src/model/hereEntry.test.ts`.
-- [ ] 2.3 Run `npx stryker run --mutate 'src/model/hereEntry.ts,src/model/offsetDifference.ts,src/model/deviceTimeZone.ts'`. Verify a score ≥ 95% (minimum 90%) in the report, and kill survivors with tests.
+- [x] 2.3 Run `npx stryker run --mutate 'src/model/hereEntry.ts,src/model/offsetDifference.ts,src/model/deviceTimeZone.ts'`. Verify a score ≥ 95% (minimum 90%) in the report, and kill survivors with tests.
 
 ## 3. Port and adapter: exemplar city (TDD)
 
