@@ -116,6 +116,7 @@ Feature: Locations in a real browser
   @add-time-sliders-to-location-cards @NFR-R3 @M9
   @match-here-mark-to-design @NFR-R2 @M5
   @set-home-location-and-show-differences @NFR-R2
+  @match-home-mark-to-design @NFR-R1 @M4
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme

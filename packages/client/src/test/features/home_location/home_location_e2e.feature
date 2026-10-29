@@ -21,6 +21,7 @@ Feature: Home location in a real browser
     Then the list order is still "Almaty, Moscow"
 
   @set-home-location-and-show-differences @FR11 @NFR-A2
+  @match-home-mark-to-design @NFR-A1
   Scenario: Setting home is announced
     Given the stored locations are "Almaty", "Moscow"
     And the user opens the locations app
@@ -60,6 +61,7 @@ Feature: Home location in a real browser
     Then the location menu button of "Almaty" is at least 44 px wide and tall
 
   @set-home-location-and-show-differences @NFR-A1
+  @match-home-mark-to-design @NFR-A1
   Scenario Outline: Accessibility in the <state> state in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the user opens the locations app
