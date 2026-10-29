@@ -17,11 +17,12 @@ import { MainPage } from "@/app";
 import {
   LocationsProvider,
   TrackMove,
+  useLocations,
   useReferenceMoment,
   useTimeSelection,
 } from "@/controller";
 import { Temporal } from "@/lib/temporal";
-import { LocationsLoadStatus } from "@/ports";
+import { type LocationRepository, LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { resetPageVisibility } from "@/test/pageVisibility";
 import { createSwitchableClock } from "@/test/switchableClock";
@@ -38,6 +39,7 @@ const DEFAULT_DEVICE_ZONE = "UTC";
 
 type ReferenceHandle = ReturnType<typeof useReferenceMoment>;
 type TimeSelectionHandle = ReturnType<typeof useTimeSelection>;
+type LocationsHandle = ReturnType<typeof useLocations>;
 
 /**
  * Per-scenario state of the date selection features: an in-memory list, a
@@ -50,12 +52,16 @@ export const createDateSelectionWorld = () => {
   let storedLocations: ReturnType<typeof buildLocation>[] = [];
   let latestReference: ReferenceHandle;
   let latestTimeSelection: TimeSelectionHandle;
+  let latestLocations: LocationsHandle;
+  let storedHomeLocationId: string | null = null;
+  let repositoryOverride: LocationRepository | undefined;
   let tickScheduler = createManualTickScheduler();
   let writeScheduler = createManualWriteScheduler();
 
   const Probe = () => {
     latestReference = useReferenceMoment();
     latestTimeSelection = useTimeSelection();
+    latestLocations = useLocations();
     return null;
   };
 
@@ -87,6 +93,12 @@ export const createDateSelectionWorld = () => {
     getWriteScheduler: () => writeScheduler,
     getTickScheduler: () => tickScheduler,
     getReference: () => latestReference,
+    getLocations: () => latestLocations,
+    getBackend: () => backend,
+    /** Opens the app on this repository instead of the in-memory backend. */
+    useRepository: (repository: LocationRepository | undefined) => {
+      repositoryOverride = repository;
+    },
     rowOf,
     shownIsoDate,
     barElement,
@@ -94,6 +106,8 @@ export const createDateSelectionWorld = () => {
       cleanup();
       resetPageVisibility();
       storedLocations = [];
+      storedHomeLocationId = null;
+      repositoryOverride = undefined;
       backend = createInMemoryLocationBackend();
       clock = createSwitchableClock(DEFAULT_INSTANT, DEFAULT_DEVICE_ZONE);
       tickScheduler = createManualTickScheduler();
@@ -120,17 +134,23 @@ export const createDateSelectionWorld = () => {
     setStoredLocations: (locations: ReturnType<typeof buildLocation>[]) => {
       storedLocations = locations;
     },
+    setStoredHome: (city: string | null) => {
+      storedHomeLocationId =
+        city === null ? null : buildLocation(cityEntry(city)).id;
+    },
     openApp: async () => {
       backend.document = storedLocations.length
         ? {
             status: LocationsLoadStatus.LOADED,
             locations: storedLocations,
-            homeLocationId: null,
+            homeLocationId: storedHomeLocationId,
           }
         : backend.document;
       render(
         <LocationsProvider
-          repository={createInMemoryLocationRepository({ backend })}
+          repository={
+            repositoryOverride ?? createInMemoryLocationRepository({ backend })
+          }
           writeScheduler={writeScheduler}
           clock={clock}
           tickScheduler={tickScheduler}
@@ -140,7 +160,9 @@ export const createDateSelectionWorld = () => {
         </LocationsProvider>,
       );
       await screen.findByRole("group", { name: i18n.t("date.barLabel") });
-      if (storedLocations.length > 0) await screen.findAllByRole("listitem");
+      if (storedLocations.length > 0 || repositoryOverride) {
+        await screen.findAllByRole("listitem");
+      }
     },
     addCityInAnotherTab: (city: string) => {
       const otherTab = createInMemoryLocationRepository({ backend });
