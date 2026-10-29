@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import { loadLegacySupport } from "@/lib/legacy";
 
 type DateTimeFormatConstructor = typeof Intl.DateTimeFormat;
@@ -39,12 +40,13 @@ function buildOutdatedDateTimeFormat(rejectedZones: string[]) {
 /** Fresh copies of the modules that keep the `Intl.DateTimeFormat` they first see. */
 const importFreshModules = async () => {
   vi.resetModules();
-  const [model, presenter, temporal] = await Promise.all([
+  const [adapters, model, presenter, temporal] = await Promise.all([
+    import("@/adapters"),
     import("@/model"),
     import("@/presenter"),
     import("@/lib/temporal"),
   ]);
-  return { model, presenter, temporal };
+  return { adapters, model, presenter, temporal };
 };
 
 export type FreshModules = Awaited<ReturnType<typeof importFreshModules>>;
@@ -60,6 +62,7 @@ export async function startOnOutdatedZoneData() {
 
 export const restoreZoneData = () => {
   Intl.DateTimeFormat = nativeDateTimeFormat;
+  localStorage.clear();
   vi.unstubAllGlobals();
   vi.resetModules();
 };
@@ -80,3 +83,13 @@ export async function checkAlmatyDayStops(
   vi.unstubAllGlobals();
   return { canonicalZone, stops };
 }
+
+/** Writes a stored list holding one location, the way a previous visit left it. */
+export const seedStoredLocation = (label: string, timeZoneId: string) =>
+  localStorage.setItem(
+    STORAGE_KEYS.LOCATIONS,
+    JSON.stringify({
+      schemaVersion: LOCATIONS_SCHEMA_VERSION,
+      payload: { locations: [{ label, timeZoneId, countryCode: "" }] },
+    }),
+  );

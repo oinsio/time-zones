@@ -1,4 +1,5 @@
 // NFR-P1, NFR-P2 of support-legacy-ios-12-safari: the main chunk is preloaded, the legacy chunk is not.
+// R1 of review-code: the main stylesheet is linked from index.html again.
 import { describe, expect, it } from "vitest";
 import { addMainChunkPreloads } from "../../../scripts/legacyBoot/addMainChunkPreloads";
 
@@ -42,5 +43,33 @@ describe("addMainChunkPreloads placement", () => {
     expect(result).toContain(
       '<title>T</title><link rel="modulepreload" crossorigin href="/a/main.js">\n    <link rel="modulepreload" crossorigin href="/a/vendor.js">\n  </head>',
     );
+  });
+});
+
+describe("addMainChunkPreloads stylesheets", () => {
+  it("should add one stylesheet link per CSS file inside the head", () => {
+    const result = addMainChunkPreloads(
+      HTML,
+      [],
+      ["/a/main.css", "/a/more.css"],
+    );
+
+    expect(result.match(/rel="stylesheet"/g)).toHaveLength(2);
+    expect(result).toContain(
+      '<link rel="stylesheet" crossorigin href="/a/main.css">',
+    );
+    expect(result.indexOf('href="/a/more.css"')).toBeLessThan(
+      result.indexOf("</head>"),
+    );
+  });
+
+  it("should not repeat a stylesheet the page already links", () => {
+    const linked = addMainChunkPreloads(HTML, [], ["/a/main.css"]);
+
+    expect(addMainChunkPreloads(linked, [], ["/a/main.css"])).toBe(linked);
+  });
+
+  it("should leave the HTML unchanged for an empty stylesheet list", () => {
+    expect(addMainChunkPreloads(HTML, [], [])).toBe(HTML);
   });
 });

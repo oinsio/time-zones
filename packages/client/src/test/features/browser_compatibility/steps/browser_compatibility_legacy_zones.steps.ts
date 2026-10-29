@@ -1,10 +1,12 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
+import { LocationsLoadStatus, SaveOutcome } from "@/ports";
 import {
   checkAlmatyDayStops,
   type FreshModules,
   restoreZoneData,
+  seedStoredLocation,
   startOnOutdatedZoneData,
 } from "./legacyZoneWorld";
 
@@ -37,6 +39,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   };
   const givenOutdatedZoneData = async () => {
     engine = await startOnOutdatedZoneData();
+  };
+  const loadStoredZoneIds = () => {
+    const loaded =
+      engine.modules.adapters.localStorageLocationRepository.load();
+    expect(loaded.status).toBe(LocationsLoadStatus.LOADED);
+    return loaded.status === LocationsLoadStatus.LOADED
+      ? loaded.locations.map((location) => location.timeZoneId)
+      : [];
   };
   const expectNativeRejectedKyiv = () => {
     expect(engine.rejectedZones.map((zone) => zone.toLowerCase())).toContain(
@@ -80,7 +90,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @support-legacy-ios-12-safari @FR4
-  f.Scenario("Adding a renamed zone", ({ Given, When, Then }) => {
+  f.Scenario("Adding a renamed zone", ({ Given, When, Then, And }) => {
     Given(
       "the engine rejects {string} and accepts {string}",
       givenOutdatedZoneData,
@@ -101,6 +111,16 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         }
       },
     );
+    And("the stored list holds {string}", (_ctx, zone: string) => {
+      if (!addOutcome.ok) throw new Error("the location was not added");
+      const { adapters } = engine.modules;
+      expect(
+        adapters.localStorageLocationRepository.save(
+          addOutcome.state.locations,
+        ),
+      ).toBe(SaveOutcome.SAVED);
+      expect(loadStoredZoneIds()).toEqual([zone]);
+    });
   });
 
   // @support-legacy-ios-12-safari @FR4
@@ -109,26 +129,28 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       "the engine rejects {string} and accepts {string}",
       givenOutdatedZoneData,
     );
+    And(
+      "the stored list contains {string} with the zone {string}",
+      (_ctx, label: string, zone: string) => seedStoredLocation(label, zone),
+    );
     And("the current instant is {string}", (_ctx, instant: string) => {
       instantText = instant;
     });
     let card = { time: "", offset: "" };
-    When(
-      "the app shows {string} with the zone {string}",
-      (_ctx, _label: string, zone: string) => {
-        const { model, presenter, temporal } = engine.modules;
-        const instant = temporal.Temporal.Instant.from(instantText);
-        const local = model.getLocalDateTime(zone, instant);
-        const offsetMinutes = model.getUtcOffsetMinutes(zone, instant);
-        card = {
-          time: local ? presenter.formatLocalTime(local, LANGUAGE) : "",
-          offset:
-            offsetMinutes === undefined
-              ? ""
-              : presenter.formatUtcOffset(offsetMinutes, UTC_PREFIX),
-        };
-      },
-    );
+    When("the app starts", () => {
+      const { model, presenter, temporal } = engine.modules;
+      const [zone] = loadStoredZoneIds();
+      const instant = temporal.Temporal.Instant.from(instantText);
+      const local = model.getLocalDateTime(zone, instant);
+      const offsetMinutes = model.getUtcOffsetMinutes(zone, instant);
+      card = {
+        time: local ? presenter.formatLocalTime(local, LANGUAGE) : "",
+        offset:
+          offsetMinutes === undefined
+            ? ""
+            : presenter.formatUtcOffset(offsetMinutes, UTC_PREFIX),
+      };
+    });
     Then(
       "the {string} card shows {string} and {string}",
       (_ctx, _label: string, time: string, offset: string) => {
@@ -136,6 +158,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         expect(card).toEqual({ time, offset });
       },
     );
+    And("the stored list is read without error", () => {
+      expect(loadStoredZoneIds()).toEqual(["Europe/Kyiv"]);
+    });
   });
 
   // @support-legacy-ios-12-safari @FR4 @M3

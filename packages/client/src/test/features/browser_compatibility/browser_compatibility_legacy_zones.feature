@@ -14,13 +14,16 @@ Feature: Time zones on a legacy engine
     Given the engine rejects "Europe/Kyiv" and accepts "Europe/Kiev"
     When the user adds "Kyiv" with the zone "Europe/Kyiv"
     Then the location is added with the zone "Europe/Kyiv"
+    And the stored list holds "Europe/Kyiv"
 
   @support-legacy-ios-12-safari @FR4
   Scenario: A renamed zone shows its time
     Given the engine rejects "Europe/Kyiv" and accepts "Europe/Kiev"
+    And the stored list contains "Kyiv" with the zone "Europe/Kyiv"
     And the current instant is "2026-03-08T07:30:00Z"
-    When the app shows "Kyiv" with the zone "Europe/Kyiv"
+    When the app starts
     Then the "Kyiv" card shows "09:30" and "UTC+2"
+    And the stored list is read without error
 
   @support-legacy-ios-12-safari @FR4 @M3
   Scenario Outline: A wall-clock time in a renamed zone
