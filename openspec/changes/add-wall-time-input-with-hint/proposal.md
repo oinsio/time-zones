@@ -25,6 +25,7 @@ Audience: every user, on phones and wide screens.
 - ADDED: a view contract scenario for typing an exact time.
 - ADDED: the wall-time input works on legacy engines (iOS Safari 12.5): it opens on a plain tap without Pointer Events, and a typed time resolves in a zone the engine knows only by its legacy name (`Europe/Kyiv` as `Europe/Kiev`).
 - MODIFIED: the date bar's gap note also ends with a wall-time input. At most one note about a wall-clock time shows at a time: the gap note in the date bar or the wall-time hint in a row. The existing rule stays: a change of the reference zone ends the gap note.
+- MODIFIED: the Here entry has two Tab stops, the time button and then the slider (it had only the slider). The rest of "Accessible Here entry" in the `locations` capability is unchanged.
 - MODIFIED (documents, delivered as handoff patches because the implement stage writes only under `packages/`): `open-questions.md` Q4 — typing a time works for listed locations and for the Here entry. `domain-model.md` — `SET_WALL_TIME(target, time, date)` with its errors. `views.md` — the wall-time hint shows `UTC−4`, never `GMT-4`.
 - No stored data changes. The reference moment is never stored (ADR-0003, ADR-0004).
 
@@ -46,6 +47,7 @@ None.
 
 - `time-selection`: ADDED requirements for the wall-time input, the parsing of typed text, the wall-time hint, its accessibility, layout and work bounds, the legacy engines, and the view contract scenario.
 - `date-selection`: MODIFIED "Wall-clock resolution on the new date". The gap note also ends with a wall-time input and never shows together with a wall-time hint.
+- `locations`: MODIFIED "Accessible Here entry". The Here entry's time is a wall-time input, so the entry has two Tab stops: the time button, then the slider.
 
 ## Impact
 
@@ -111,7 +113,7 @@ None.
 #### Accessibility
 
 - NFR-A1: axe-core reports no violations with the time as a button, with the field open, with the field showing an error, and with a `GAP` and an `AMBIGUOUS` hint, in the light and dark themes.
-- NFR-A2: The time button is named "Enter time — {city}, {time}" / «Ввести время — {city}, {time}», so every row's button has a distinct name. The field has the same name, `inputmode="numeric"` and `autocomplete="off"`.
+- NFR-A2: The time button is named "Enter time — {city}, {time}" / «Ввести время — {city}, {time}», so every row's button has a distinct name. The field has the same name, `inputmode="numeric"` and `autocomplete="off"`. On the Here entry the time button is a Tab stop before the slider, so the entry has two Tab stops instead of one.
 - NFR-A3: The wall-time hint is announced politely (`role="status"`). Times that change in other rows are not announced, as today.
 - NFR-A4: Keys typed in the field do not start a card reorder and do not scroll the page. Tab leaves the field and confirms it as in FR3.
 
@@ -156,6 +158,7 @@ Feature files under `packages/client/src/test/features/`, tagged `@add-wall-time
 - `date_selection/date_selection_wall_clock.feature` (vitest-cucumber): the two new gap-note scenarios.
 - The `@view-contract` scenario "Type an exact time" in `time_selection/time_selection_view_contract_e2e.feature`.
 - The states "wall-time-input" and "wall-time-hint" in the screenshot outline of `locations/locations_ui_e2e.feature`.
+- `locations/locations_here_entry_e2e.feature` (playwright-bdd): the scenario "One Tab stop on the Here entry" keeps its name (the day track is still one Tab stop) and now expects the time button before the slider (MODIFIED `locations` delta).
 
 ## Visual Reference
 
