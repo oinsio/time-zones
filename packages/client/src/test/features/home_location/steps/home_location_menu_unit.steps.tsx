@@ -148,11 +148,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       fireEvent.click(legacyMenuButton("Moscow"));
       expect(screen.getByRole("menu")).toBeInTheDocument();
     });
-    When("the user taps outside the menu", () =>
+    When("the user taps outside the menu", () => {
       fireEvent.touchStart(
         screen.getByRole("button", { name: OUTSIDE_BUTTON_NAME }),
-      ),
-    );
+      );
+    });
     Then("the menu is closed and the list is unchanged", () => {
       expect(screen.queryByRole("menu")).toBeNull();
       expect(shownCities()).toEqual(initialCities);

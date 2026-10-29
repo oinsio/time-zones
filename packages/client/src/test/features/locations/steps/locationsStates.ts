@@ -11,6 +11,7 @@ import {
 import type { LocationsWorld } from "./locations_ui_e2e.fixtures";
 import {
   buildStoredLocations,
+  menuButton,
   NO_RESULTS_TEXT,
   openSearch,
   resultOption,
@@ -29,6 +30,10 @@ const LIST_CITY_NAMES = ["Almaty", "Moscow"];
 const TIME_SELECTED_CITY = "Almaty";
 const TIME_SELECTED_PERCENT = 75;
 const TIME_SELECTED_LABEL = "18:00";
+const HOME_CITY_NAMES = ["Almaty", "Kathmandu", "New York"];
+const HOME_CITY_NAME = "Almaty";
+const TRAVELLING_HOME_CITY_NAME = "Moscow";
+const MENU_OPEN_CITY_NAME = "Kathmandu";
 
 /** The UI states of the locations screen that have a screen of their own. */
 export enum WorldClockState {
@@ -45,6 +50,21 @@ export enum WorldClockState {
   PINNED = "pinned",
   CALENDAR = "calendar",
   TIME_SELECTED = "time-selected",
+  HOME = "home",
+  TRAVELLING = "travelling",
+  MENU_OPEN = "menu open",
+}
+
+/** Seeds a list with a home location and shows it. */
+async function seedHomeList(
+  world: LocationsWorld,
+  cityNames: string[],
+  homeCityName: string,
+) {
+  const [homeLocation] = buildStoredLocations([homeCityName]);
+  await world.seedList(buildStoredLocations(cityNames), homeLocation);
+  await world.reloadIfOpen();
+  await expect(world.page.getByRole("listitem")).toHaveCount(cityNames.length);
 }
 
 /**
@@ -53,7 +73,9 @@ export enum WorldClockState {
  * routes are set on the page that stays, which the service worker does not
  * control yet (D8).
  * Implements NFR-A1, UX1, FR12, FR13, FR15 of add-locations-via-search and
- * NFR-R3 of select-date-with-calendar-and-now (pinned and calendar states).
+ * NFR-R3 of select-date-with-calendar-and-now (pinned and calendar states);
+ * NFR-A1, NFR-R2 of set-home-location-and-show-differences (home, travelling
+ * and menu open states).
  */
 export async function enterLocationsState(
   world: LocationsWorld,
@@ -124,6 +146,17 @@ export async function enterLocationsState(
       await expect(timeTextOf(page, TIME_SELECTED_CITY)).toHaveText(
         TIME_SELECTED_LABEL,
       );
+      break;
+    case WorldClockState.HOME:
+    case WorldClockState.MENU_OPEN:
+      await seedHomeList(world, HOME_CITY_NAMES, HOME_CITY_NAME);
+      if (state === WorldClockState.MENU_OPEN) {
+        await menuButton(page, MENU_OPEN_CITY_NAME).click();
+        await expect(page.getByRole("menu")).toBeVisible();
+      }
+      break;
+    case WorldClockState.TRAVELLING:
+      await seedHomeList(world, LIST_CITY_NAMES, TRAVELLING_HOME_CITY_NAME);
       break;
     case WorldClockState.PINNED:
     case WorldClockState.CALENDAR:
