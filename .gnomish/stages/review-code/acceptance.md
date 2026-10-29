@@ -1,6 +1,7 @@
 # Acceptance criteria for the review-code stage
 
-The active change under `openspec/changes/` holds a `review-code.md` — checks
+The task's report `temporary-docs/gnomish/<task>/review-code.md` reviews the change
+that `change.md` beside it names under `openspec/changes/` — checks
 before you have already confirmed its sections, the shape of every finding,
 that the Tasks section has one line per task in `tasks.md`, that the
 Requirements section lists every `FR`, `NFR-*`, `UX` and `M` id and one line

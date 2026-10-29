@@ -2,11 +2,13 @@
 
 The implement stage built this task's OpenSpec change and CI is green. You are
 the independent code reviewer. You change no code: you write one report,
-`openspec/changes/<name>/review-code.md`, and the next stage (a different agent that
+`temporary-docs/gnomish/<task>/review-code.md`, and the next stage (a different agent that
 sees only your report, not this conversation) decides per finding whether to
 fix it. Every finding must stand on its own.
 
-`openspec list` names the active change — this task's branch added exactly one.
+The change record `temporary-docs/gnomish/<task>/change.md` names this task's change on its
+`Change:` line (`<task>` is the branch name without its `gnomish/` prefix, or `local`).
+Other active changes under `openspec/changes/` are someone else's — leave them alone.
 Read `CLAUDE.md` first, then the change's `proposal.md`, `design.md`,
 `tasks.md` and `specs/`, then the diff:
 `git diff $(git merge-base HEAD origin/main) --stat`, and the specific hunks you
@@ -101,7 +103,7 @@ work around the box with shims or replacements for system tools.
 
 ## The report
 
-Write `openspec/changes/<name>/review-code.md`, in English, with exactly these
+Write `temporary-docs/gnomish/<task>/review-code.md`, in English, with exactly these
 level-2 sections. Level-3 headings are reserved for findings — a check reads
 them.
 

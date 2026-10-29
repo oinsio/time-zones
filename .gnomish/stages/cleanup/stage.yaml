@@ -1,0 +1,64 @@
+# Stage goal, shown to the gnome.
+purpose: remove this task's pipeline reports from the branch, so the pull request carries the code, the specs and the archived change - not the scratch notes the stages wrote for one another
+# The checkout, plus the archived change: cleanup runs once the change has landed in the archive.
+inputs:
+  - kind: source
+  - kind: internal
+    producerOutputId: archived-change
+# Every stage of this pipeline writes its reports under temporary-docs/gnomish/<task>/ and
+# nowhere else (.gnomish/lib/task-change.sh), so one directory is all there is to remove. The
+# reports stay readable in the branch history after this stage, which is where deliver reads
+# them. What this stage leaves behind:
+#   finished  -> temporary-docs/gnomish/<task>/ gone from the working copy, nothing else changed.
+outputs:
+  - id: reports-removed
+# Who does the work: a Claude Code CLI agent. One `rm -r`: the cheapest model is enough.
+executor:
+  type: agent-cli
+  model: claude-haiku-5-5
+  # Only these four keys are accepted.
+  settings:
+    # Agent turns per round.
+    maxTurns: 10
+    # Round is killed after this; counts as infra failure, not an attempt.
+    roundTimeout: 300s
+    # Cannot widen what .claude/settings.json denies.
+    allowedTools:
+      - Bash
+    # No file edits, no subagents, no web, no scheduling.
+    disallowedTools:
+      - Agent
+      - Edit
+      - Write
+      - ScheduleWakeup
+      - SendMessage
+      - ToolSearch
+      - WebFetch
+      - WebSearch
+# Prompt for the gnome.
+instructions: stages/cleanup/instructions.md
+# Run in order after each round (sh -c, POSIX); a failure is fed back and burns an attempt.
+verify:
+  # The reports directory is gone, and nothing else moved. The helper is not sourced: the change
+  # record it reads is exactly what this stage removes.
+  - type: command
+    command: |
+      branch=$(git branch --show-current)
+      case "$branch" in gnomish/*) task=${branch#gnomish/} ;; *) task=local ;; esac
+      reports=temporary-docs/gnomish/$task
+      if [ -e "$reports" ]; then
+        echo "$reports still exists - remove it: rm -r $reports"
+        exit 1
+      fi
+      stray=$(git status --porcelain --untracked-files=all | sed 's/^...//' \
+        | grep -v "^$reports/" | grep -v '^\.gnomish-task/' || true)
+      if [ -n "$stray" ]; then
+        echo "this stage removes $reports/ and nothing else, but the working copy also carries:"
+        echo "$stray"
+        echo "if you made these edits, undo each of them yourself and nothing else; if you did not, leave them exactly as they are."
+        exit 1
+      fi
+# auto = go to next stage; manual = wait for a human.
+advancement: auto
+autonomy:
+  attemptLimit: 2

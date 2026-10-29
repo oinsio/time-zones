@@ -1,7 +1,7 @@
 # Acceptance criteria for the implement stage
 
-- The code implements the one active OpenSpec change under `openspec/changes/`
-  that the previous stage produced: every requirement in its spec deltas is
+- The code implements the OpenSpec change under `openspec/changes/` that the
+  change record `temporary-docs/gnomish/<task>/change.md` names: every requirement in its spec deltas is
   realised, and every task in its `tasks.md` is done and ticked.
 - The change does what the task asked, and nothing more — no scope the specs do
   not call for.

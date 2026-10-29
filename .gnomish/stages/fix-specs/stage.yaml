@@ -45,9 +45,8 @@ verify:
   # Exactly one active change; every finding carries a final status and a resolution.
   - type: command
     command: |
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
-      [ "$(printf '%s\n' "$change" | grep -c .)" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found: $change"; exit 1; }
-      review="$change/review-specs.md"
+      . .gnomish/lib/task-change.sh
+      review="$reports/review-specs.md"
       [ -f "$review" ] || { echo "$review is missing - the review-specs stage left it there; restore it from git"; exit 1; }
       open=$(grep -nE '^- Status: open' "$review" || true)
       [ -z "$open" ] || { echo "$open"; echo "these findings are still open - fix or reject each one, see stages/fix-specs/instructions.md"; exit 1; }
@@ -56,21 +55,23 @@ verify:
       findings=$(grep -cE '^### R[0-9]+ — ' "$review" || true)
       resolutions=$(grep -cE '^- Resolution: .{20,}' "$review" || true)
       [ "$resolutions" = "$findings" ] || { echo "$review has $findings findings but $resolutions '- Resolution:' lines of substance - every finding gets one, right after its Status"; exit 1; }
-  # Everything this branch changed so far lives inside the change directory: specify,
-  # review-specs and fix-specs write specifications only.
+  # Everything this branch changed so far lives inside the change directory and the task's
+  # reports: specify, review-specs and fix-specs write specifications only.
   - type: command
     command: |
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      . .gnomish/lib/task-change.sh
       base=$(git merge-base HEAD origin/main)
-      outside=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -v "^$change/" | grep -v '^\.gnomish-task/' || true)
-      [ -z "$outside" ] || { echo "$outside"; echo "the fix-specs stage revises only files under $change/ - restore the files above with: git checkout $base -- <file>"; exit 1; }
-  # OpenSpec's own strict validation, as after specify.
+      outside=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -v "^$change/" | grep -vxF "$record" | grep -vxF "$reports/review-specs.md" | grep -v '^\.gnomish-task/' || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the fix-specs stage revises only files under $change/ and the resolutions in $reports/review-specs.md - if you made the edits above, undo each of them yourself with: git checkout $base -- <file>; other active changes are someone else's work and stay exactly as they are"; exit 1; }
+  # OpenSpec's own strict validation of this task's change, as after specify.
   - type: command
-    command: openspec validate --changes --strict --no-interactive
+    command: |
+      . .gnomish/lib/task-change.sh
+      openspec validate "$change_name" --type change --strict --no-interactive
   # proposal.md still has required sections and FR/M ids.
   - type: command
     command: >-
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive);
+      . .gnomish/lib/task-change.sh;
       proposal="$change/proposal.md";
       for section in '## Why' '## What Changes' '## Goals' '## Non-Goals' '## Requirements' '## Success Metrics'; do
         grep -q "^$section" "$proposal" || { echo "$proposal has no '$section' section — see .claude/rules/proposal-format.md"; exit 1; };
@@ -81,10 +82,10 @@ verify:
   # lines change. The baseline is the last round commit of the review-specs stage.
   - type: command
     command: |
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      . .gnomish/lib/task-change.sh
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-specs#/ { print $1; exit }')
       [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
-      review="$change/review-specs.md"
+      review="$reports/review-specs.md"
       hunks=$(git diff -U0 "$since" -- "$review" | grep -E '^[-+]' | grep -vE '^(---|\+\+\+) ' || true)
       removed=$(printf '%s\n' "$hunks" | grep -E '^-' | grep -vxF -- '-- Status: open' || true)
       added=$(printf '%s\n' "$hunks" | grep -E '^\+' | grep -vE '^\+(- Status: |- Resolution: |  +[^ ])' || true)

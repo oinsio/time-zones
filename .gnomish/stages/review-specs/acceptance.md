@@ -1,6 +1,7 @@
 # Acceptance criteria for the review-specs stage
 
-The active change under `openspec/changes/` holds a `review-specs.md` — a check
+The task's report `temporary-docs/gnomish/<task>/review-specs.md` reviews the change
+that `change.md` beside it names under `openspec/changes/` — a check
 before you has already confirmed its sections, the shape of every finding,
 that the Coverage table lists every id `proposal.md` defines, and that every
 Summary number matches its section. Do not recount them.

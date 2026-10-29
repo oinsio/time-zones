@@ -49,9 +49,8 @@ verify:
   # well-formed finding list the fix-code stage can close item by item.
   - type: command
     command: |
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
-      [ "$(printf '%s\n' "$change" | grep -c .)" = "1" ] || { echo "expected exactly one active change under openspec/changes/, found: $change"; exit 1; }
-      review="$change/review-code.md"
+      . .gnomish/lib/task-change.sh
+      review="$reports/review-code.md"
       [ -f "$review" ] || { echo "$review is missing - write the review report there, see stages/review-code/instructions.md"; exit 1; }
       for section in '## Summary' '## Tasks' '## Requirements' '## Mutation' '## Findings' '## Verdict'; do
         grep -q "^$section" "$review" || { echo "$review has no '$section' section"; exit 1; }
@@ -71,8 +70,8 @@ verify:
   # delta-spec scenario has its line.
   - type: command
     command: |
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
-      review="$change/review-code.md"
+      . .gnomish/lib/task-change.sh
+      review="$reports/review-code.md"
       section() { awk -v heading="## $1" 'index($0, heading) == 1 { inside = 1; next } /^## / { inside = 0 } inside' "$review"; }
       summary_value() { section Summary | awk -F'|' -v label="$1" '{ cell = $2; gsub(/^[ \t]+|[ \t]+$/, "", cell); if (cell == label) { value = $3; gsub(/^[ \t]+|[ \t]+$/, "", value); print value; exit } }'; }
       expect() {
@@ -101,8 +100,8 @@ verify:
   # factory's own bookkeeping.
   - type: command
     command: |
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
-      review="$change/review-code.md"
+      . .gnomish/lib/task-change.sh
+      review="$reports/review-code.md"
       added=$(git log --diff-filter=A --format=%H -- "$review" | tail -1)
       base=HEAD
       [ -z "$added" ] || base="$added^"

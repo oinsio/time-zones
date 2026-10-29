@@ -1,8 +1,10 @@
 # Acceptance criteria for the specify stage
 
-Under `openspec/changes/` there is exactly one non-archived change directory,
-holding the artifacts the `spec-driven` schema requires: `proposal.md`, spec
-deltas under `specs/`, `design.md` and `tasks.md`. A change with no behavioural
+The change record `temporary-docs/gnomish/<task>/change.md` names one change
+under `openspec/changes/` (its `Change:` line). Other active changes there are
+someone else's work: judge only the named one. It holds the artifacts the
+`spec-driven` schema requires: `proposal.md`, spec deltas under `specs/`,
+`design.md` and `tasks.md`. A change with no behavioural
 delta may set `skip_specs: true` in its `.openspec.yaml` instead of shipping a
 spec delta — but only when the task genuinely changes no behaviour.
 
@@ -50,7 +52,7 @@ spec delta — but only when the task genuinely changes no behaviour.
   reason is missing or does not hold.
 - The change is scoped to the task and nothing beyond it.
 
-Start from the change directory: `proposal.md` and `tasks.md` name the
+Start from the change record, then the change directory it names: `proposal.md` and `tasks.md` name the
 files, ADRs and rules you need to open. Do not walk the whole tree.
 
 Your turns are limited and each one counts, however many tools it calls. Read
@@ -66,6 +68,6 @@ later. When a finding cites a rule, an ADR or the code, quote what the source
 actually says, so the fix is made against the source and not a paraphrase.
 Judge by reading the change directory, `docs/adr/`, `.claude/rules/`,
 `openspec/specs/` and the source. You have no git: judge the files as they are now; what changed and what did not is already enforced by the command checks before you. Do not run the build,
-the tests, or the OpenSpec CLI: `openspec validate --changes --strict` has
+the tests, or the OpenSpec CLI: `openspec validate <change> --strict` has
 already been run as a separate check before you, and a passing validation is a
 precondition of your review, not part of it.

@@ -6,9 +6,65 @@ build or config files. The next stage implements what you write, and it sees
 your documents, not this conversation: everything the implementer needs must
 end up in the files.
 
+## First: which change this task works on
+
+`openspec/changes/` may hold several active changes: specs a human wrote ahead
+and landed on `main`. Only one of them is this task's; the others are someone
+else's work and stay exactly as they are — never edit, move, validate-fix or
+archive them. Decide which one is yours before anything else:
+
+1. **Read what has landed.** Your working copy is cut from a pinned base and
+   never rebased, so ask `origin/main` (the factory keeps it current):
+   `git ls-tree -d --name-only origin/main openspec/changes/` lists the active
+   changes, `git ls-tree -d -r --name-only origin/main openspec/changes/archive/`
+   the archived ones. Never merge, rebase or pull.
+2. **Read the decisions.** The briefing's `=== Decisions ===` section carries
+   every answer a human gave on this task. A decision wins over what you infer,
+   and a question it already answers is never asked again.
+3. **Resolve the name.** An explicit `Change: <name>` line in the task wins
+   outright. Otherwise, exactly one kebab-case token in the title or body that
+   names a directory under `openspec/changes/` is the change. When the task
+   names an active change, **that change is yours to finish**: review it against
+   the code and the rules below and fix it in place — do not create a second
+   one. When it names none, you create a new one (see "How to do it").
+4. **Check its dependencies** — only for an existing change; a new one you
+   write against the code as it is. A dependency is another *active* change
+   that must reach `main` first: a `Supersedes:` line, "after `<change>` lands",
+   "depends on", "builds on" in its proposal or design; a `### Requirement:`
+   under `## MODIFIED` that another active change modifies too, with no order
+   declared; a module, port or capability its tasks use that only another
+   active change introduces. An archived change is never a dependency.
+
+**Escalate instead of writing anything** when the task names more than one
+change, names a change that does not exist or is archived, or the change is
+blocked by a dependency that has not landed and no decision lets it proceed.
+Run `echo "$GNOMISH_DECISION_FILE"`, write that path with the Write tool as one
+JSON object — `{"question": "<the finding, with the chain and a file:line per
+link>", "options": ["...", "..."]}` — and finish your turn. The factory posts it
+to the tracker and parks the task; no attempt is burnt.
+
+**Otherwise write the change record** — the task's only other file —
+at `temporary-docs/gnomish/<task>/change.md`, where `<task>` is the branch name
+from `git branch --show-current` without its `gnomish/` prefix, or `local`:
+
+```
+Change: <change-name>
+Verdict: no-blocking-dependencies
+```
+
+Both lines are checked mechanically; every later stage reads `Change:` to learn
+which change this task works on, so write it as soon as the name is settled — for
+a new change, the name you are about to create. Add a `## Notes` list only for
+what a human would act on (a decision you applied, a dependency that turned out
+to have landed); keep the record under 1200 bytes and never list the changes
+you ruled out.
+
 ## How to do it
 
-Invoke the repository's own skill and follow it end to end:
+For a task that names an existing change, skip the skill: read the change's
+artifacts, then do everything below from "What the skill cannot know" on, fixing
+the change in place. For a new change, invoke the repository's own skill and
+follow it end to end:
 
     Skill(skill="openspec-propose", args="<the task, in your own words>")
 
@@ -90,11 +146,12 @@ reviewer checks every such claim, and a stale one sends the change back.
 
 Rules this stage adds on top of the skill:
 
-- Everything you write lives under `openspec/changes/<name>/`. Do not touch
-  `packages/`, `docs/`, `package.json`, the lockfile, `.github/` or `.gnomish/`.
-  Archived changes are immutable — never edit under `openspec/changes/archive/`.
-- Create exactly one change, named `kebab-case-descriptive` — never a generic
-  name like `update` or `wip`. The next stage has to find it unambiguously.
+- Everything you write lives under `openspec/changes/<name>/`, plus the change
+  record. Do not touch `packages/`, `docs/`, `package.json`, the lockfile,
+  `.github/`, `.gnomish/` or any other active change. Archived changes are
+  immutable — never edit under `openspec/changes/archive/`.
+- Work on exactly one change — the one in the change record. A new one is named
+  `kebab-case-descriptive`, never a generic name like `update` or `wip`.
 - Every requirement carries an id — `FR1`, `NFR-P1`, `NFR-A1`, `NFR-R1`, `UX1`,
   `M1`, `G1`, `NG1`, `Q1` — and success metrics are concrete numbers, never
   "the feature works". Define each id at the start of its own list item in

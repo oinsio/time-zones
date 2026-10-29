@@ -1,6 +1,7 @@
 # Acceptance criteria for the fix-specs stage
 
-The active change's `review-specs.md` lists the reviewer's findings, each now
+The task's report `temporary-docs/gnomish/<task>/review-specs.md` (the change it
+reviews is the one `change.md` beside it names) lists the reviewer's findings, each now
 closed with a `Status` (`fixed` or `rejected (<reason>)`) and a `Resolution` —
 checks before you have confirmed that shape, that only the change directory
 changed, that nothing in `review-specs.md` but those lines changed, and that
