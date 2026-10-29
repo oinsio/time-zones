@@ -42,7 +42,7 @@ Binding decisions followed: ADR-0002 (layers: side effects in the controller, vi
 
 The static import graph of `boot.ts` holds only `lib/legacy/` and `@/constants` (plain values; apart from imports between its own files, its only import is the type-only `SupportedLanguage` from `@/i18n` in `src/constants/date.ts`, which the build erases). `lib/legacy/` must not import `@/lib/temporal`, React or any app module statically, so nothing evaluates `temporal-polyfill` before the shim (task 5.5 checks it with a source scan).
 
-To avoid a request waterfall on modern browsers, a small Vite plugin (`transformIndexHtml`, `enforce: "post"`) adds `<link rel="modulepreload">` for the `main` chunk and its static imports. `check-bundle-size.mjs` already counts those links, so the budget measures exactly what a modern browser fetches at start. The legacy chunk gets no preload link and stays outside the budget.
+To avoid a request waterfall on modern browsers, a small Vite plugin (`transformIndexHtml`, `enforce: "post"`) adds `<link rel="modulepreload">` for the `main` chunk and its static imports. The HTML rewrite is a pure function in its own module, so it is unit-tested and mutation-tested like the other `scripts/` rules; the plugin only collects the file names from the bundle. `check-bundle-size.mjs` already counts those links, so the budget measures exactly what a modern browser fetches at start. The legacy chunk gets no preload link and stays outside the budget.
 
 
 ### D3. Polyfill set: everything core-js reports as missing in iOS 12.5 (FR2, FR6)
