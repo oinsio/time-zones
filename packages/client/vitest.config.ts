@@ -10,6 +10,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.{test,steps}.{ts,tsx}"],
+    // Re-evaluated after vi.resetModules(), so tests can install an Intl shim first.
+    server: { deps: { inline: ["temporal-polyfill"] } },
     // E2E steps run in playwright-bdd against a real browser, not in Vitest.
     exclude: [...configDefaults.exclude, "src/**/*_e2e.steps.ts"],
     coverage: {
