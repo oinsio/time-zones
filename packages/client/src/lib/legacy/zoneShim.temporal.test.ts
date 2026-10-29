@@ -1,5 +1,6 @@
 // FR4 of support-legacy-ios-12-safari: the shim reaches temporal-polyfill
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createLegacyZoneDateTimeFormat } from "./zoneShim";
 
 const RENAMED_ZONE_ID = "Europe/Kyiv";
 const LEGACY_ZONE_ID = "Europe/Kiev";
@@ -17,7 +18,7 @@ describe("legacy zone shim against temporal-polyfill", () => {
 
   beforeEach(() => {
     zoneCalls = [];
-    const FakeNative = function (
+    function FakeNative(
       locales?: string | string[],
       options?: Intl.DateTimeFormatOptions,
     ) {
@@ -28,30 +29,16 @@ describe("legacy zone shim against temporal-polyfill", () => {
         if (!isAccepted) throw new RangeError(`Invalid time zone ${timeZone}`);
       }
       return new nativeDateTimeFormat(locales, options);
-    } as unknown as typeof Intl.DateTimeFormat;
+    }
     Object.defineProperty(FakeNative, "prototype", {
       value: nativeDateTimeFormat.prototype,
     });
-    FakeNative.supportedLocalesOf = nativeDateTimeFormat.supportedLocalesOf;
-    const WithRetry = function (
-      locales?: string | string[],
-      options?: Intl.DateTimeFormatOptions,
-    ) {
-      try {
-        return new FakeNative(locales, options);
-      } catch (error) {
-        if (!isRenamedZone(options?.timeZone)) throw error;
-        return new FakeNative(locales, {
-          ...options,
-          timeZone: LEGACY_ZONE_ID,
-        });
-      }
-    } as unknown as typeof Intl.DateTimeFormat;
-    Object.defineProperty(WithRetry, "prototype", {
-      value: nativeDateTimeFormat.prototype,
+    const nativeStandIn = Object.assign(FakeNative, {
+      supportedLocalesOf: nativeDateTimeFormat.supportedLocalesOf,
+    }) as unknown as typeof Intl.DateTimeFormat;
+    Intl.DateTimeFormat = createLegacyZoneDateTimeFormat(nativeStandIn, {
+      [RENAMED_ZONE_ID]: [LEGACY_ZONE_ID],
     });
-    WithRetry.supportedLocalesOf = nativeDateTimeFormat.supportedLocalesOf;
-    Intl.DateTimeFormat = WithRetry;
     vi.resetModules();
   });
 

@@ -1,5 +1,6 @@
 /**
- * Fails the build when the initial JavaScript exceeds the gzipped budget.
+ * Fails the build when the initial JavaScript exceeds the gzipped budget
+ * (NFR-P1 of support-legacy-ios-12-safari: the budget holds with the boot step).
  * Initial JavaScript = the entry script of dist/index.html plus its
  * modulepreload links; lazily imported chunks are not counted.
  * Also fails when the Cards view is not a separate chunk, because that chunk
