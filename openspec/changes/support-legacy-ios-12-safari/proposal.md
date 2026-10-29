@@ -46,7 +46,7 @@ All paths are under `packages/client/` unless stated otherwise.
 - New `src/lib/legacy/`: feature detection, the polyfill loader, the `Intl.DateTimeFormat` legacy zone shim.
 - `src/model/timeZoneId.ts`, `dayPeriodStops.ts`, `dayPeriodWindows.ts`: BigInt removed.
 - `src/presenter/countryName.ts`, `src/adapters/city-search/zoneCitiesSource.ts`: `Intl.DisplayNames` guarded.
-- `src/controller/usePrefersReducedMotion.ts`, `src/controller/usePwaUpdateStatus.ts`, new `src/controller/useUpdateRecheckOnReturn.ts`.
+- `src/controller/usePrefersReducedMotion.ts`, `src/controller/usePwaUpdateStatus.ts`, new `src/controller/useUpdateRecheckOnReturn.ts`, and `src/app/AppShell.tsx` (an optional clock for the update recheck).
 - `src/views/shared/DayTrack.tsx`, `src/views/shared/LocationList.tsx`.
 - `scripts/`: the legacy syntax and CSS check, the core-js list builder.
 - New dependencies: `core-js` and `@juggle/resize-observer` (loaded only on legacy engines); dev `core-js-compat` and `acorn` (both already in the lockfile as transitive dependencies).
