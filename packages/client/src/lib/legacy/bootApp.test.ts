@@ -1,8 +1,12 @@
 // FR2 of support-legacy-ios-12-safari: boot loads legacy support before the app, only when needed.
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { bootApp } from "./bootApp";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 const SOURCE_ROOT = join(__dirname, "..", "..");
 const FORBIDDEN_STATIC_IMPORT =
@@ -51,10 +55,24 @@ describe("bootApp", () => {
     const { steps } = createLoaders(true, () =>
       Promise.reject(new Error("chunk missing")),
     );
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await bootApp(steps);
 
     expect(steps.loadApp).toHaveBeenCalledTimes(1);
+  });
+
+  // R4 of review-code: the root cause of a failed polyfill load is logged.
+  it("should log the error when legacy support fails", async () => {
+    const loadError = new Error("chunk missing");
+    const { steps } = createLoaders(true, () => Promise.reject(loadError));
+    const errorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    await bootApp(steps);
+
+    expect(errorSpy).toHaveBeenCalledWith(loadError);
   });
 });
 

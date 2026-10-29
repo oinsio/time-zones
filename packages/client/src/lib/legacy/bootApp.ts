@@ -14,8 +14,9 @@ export async function bootApp(steps: BootAppSteps): Promise<void> {
   if (steps.needsLegacySupport()) {
     try {
       await steps.loadLegacySupport();
-    } catch {
+    } catch (legacySupportError) {
       // Fall through: the app starts without the polyfills.
+      console.error(legacySupportError);
     }
   }
   await steps.loadApp();
