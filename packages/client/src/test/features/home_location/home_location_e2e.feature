@@ -89,3 +89,15 @@ Feature: Home location in a real browser
       | width |
       | 320   |
       | 2560  |
+
+  @set-home-location-and-show-differences @NFR-R1
+  Scenario Outline: The travelling state fits a <width> px wide screen
+    Given the screen is <width> px wide for the locations
+    And the user opens the locations app
+    When the locations are in the travelling state
+    Then the locations screen does not scroll horizontally
+
+    Examples:
+      | width |
+      | 320   |
+      | 2560  |

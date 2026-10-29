@@ -11,6 +11,7 @@ import {
 export function formatSignedHoursMinutes(offsetMinutes: number): {
   sign: string;
   hours: number;
+  minutes: number;
   minutesPart: string;
 } {
   const sign = offsetMinutes < 0 ? UTC_OFFSET_MINUS_SIGN : UTC_OFFSET_PLUS_SIGN;
@@ -21,7 +22,7 @@ export function formatSignedHoursMinutes(offsetMinutes: number): {
     minutes === 0
       ? ""
       : `${UTC_OFFSET_MINUTES_SEPARATOR}${String(minutes).padStart(UTC_OFFSET_MINUTES_DIGITS, UTC_OFFSET_MINUTES_PAD)}`;
-  return { sign, hours, minutesPart };
+  return { sign, hours, minutes, minutesPart };
 }
 
 /**

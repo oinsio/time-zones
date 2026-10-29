@@ -231,7 +231,8 @@ Every file is ≥ 90%. No survivor exposes an untested requirement, so this sect
 - Impact: a layout change that makes the travelling row overflow at 320 px (for example `whitespace-nowrap` on the difference, or removing `flex-wrap` from the header span `LocationRow.tsx:136`) passes CI. That is the exact NFR-R1 condition, so the requirement has no failing test.
 - Fix: in `home_location_e2e.feature`, add a scenario outline tagged `@set-home-location-and-show-differences @NFR-R1`, "The travelling state fits a <width> px wide screen". Reuse the existing steps "the screen is <width> px wide for the locations", "the user opens the locations app", "When the locations are in the travelling state" (from `locationsStates.ts`, `LocationsState.TRAVELLING`) and "the locations screen does not scroll horizontally", with examples 320 and 2560.
 - Fix risk: low. It only adds E2E examples built from existing steps and an existing state, in the E2E feature where `bdd-e2e.md` puts layout checks. It adds two Playwright runs per project.
-- Status: open
+- Status: fixed
+- Resolution: added the scenario outline "The travelling state fits a <width> px wide screen" (320 and 2560) tagged @NFR-R1 to home_location_e2e.feature, built from existing steps.
 
 ### R2 — WARNING — Three test files grew past the 200-line limit
 - Location: `packages/client/src/adapters/localStorageLocationRepository.defaults.test.ts:20`
@@ -240,7 +241,8 @@ Every file is ≥ 90%. No survivor exposes an untested requirement, so this sect
 - Impact: this breaks the change's own file-size task constraint and the project invariant. The cost is larger files for later changes that touch the same date-selection worlds and the repository tests, which `show-here-entry-for-device-time` will extend next.
 - Fix: move the `describe("local storage location repository migration to version 2")` block (lines 20-89) into a new sibling `adapters/localStorageLocationRepository.migration.test.ts`. Move the stored-home seeding of `dateSelectionWorld.tsx` (`setStoredHome`, `useRepository` and the `LOADED` document builder) into a sibling helper module under `test/features/date_selection/steps/`. Move the shared step bodies of `date_selection_wall_clock.steps.tsx` (`givenZone`, `givenInstant`, `givenAppOpen`, `whenNextDay`, `thenNoNote`, lines 35-60, today closures over `world`) into a sibling helper module as functions that take the world, as `time_selection/steps/dayTrackSteps.ts` does. The feature file does not change.
 - Fix risk: low. These are pure moves with no behaviour change, and the same tests run before and after. Keep each steps file paired with its feature (`bdd-unit.md`); only helpers move.
-- Status: open
+- Status: fixed
+- Resolution: moved the migration describe to localStorageLocationRepository.migration.test.ts (defaults 151 lines); moved bar/row queries to dateSelectionQueries.tsx and wall-clock helpers to wallClockStepHelpers.ts; every touched file is under 200 lines, same tests run.
 
 ### R3 — SUGGESTION — `formatDuration` recomputes the hours and minutes split that `formatSignedHoursMinutes` owns
 - Location: `packages/client/src/presenter/offsetDifference.ts:16`
@@ -249,7 +251,8 @@ Every file is ≥ 90%. No survivor exposes an untested requirement, so this sect
 - Impact: two owners of the hours/minutes split. A change to it, such as rounding seconds-level offsets, has to be made twice, or the visible label and the accessible text disagree for the same row.
 - Fix: return the numeric `minutes` from `formatSignedHoursMinutes` next to `hours` and `minutesPart`. Have `formatDuration` take `hours` and `minutes` from that result instead of dividing again.
 - Fix risk: low. `formatSignedHoursMinutes` gains one field, and `presenter/utcOffset.test.ts` and `presenter/offsetDifference.test.ts` keep their expectations.
-- Status: open
+- Status: fixed
+- Resolution: formatSignedHoursMinutes now also returns minutes and formatDuration takes hours and minutes from it; the existing utcOffset and offsetDifference tests keep passing.
 
 ### R4 — SUGGESTION — The row decides "can be home" from the presence of a day track
 - Location: `packages/client/src/views/shared/LocationRow.tsx:90`
@@ -258,7 +261,8 @@ Every file is ≥ 90%. No survivor exposes an untested requirement, so this sect
 - Impact: if the presenter ever omits the day track for another reason, the "Make home" item silently disappears from a valid row. If the model's rule changes, the menu offers an item that the reducer rejects with `LOCATION_NOT_FOUND`, and nothing is announced.
 - Fix: add a boolean `canBeHome` to the presenter's `LocationRow`, set in `presentLocationRows` from the same zone check the reducer uses (a small exported model predicate, called by `reduceHomeLocation` too). `LocationRow.tsx` then reads `row.canBeHome` instead of `row.dayTrack`.
 - Fix risk: moderate scope. It touches the model, the presenter type and the row, and `locationRowFixture.tsx` plus the row tests need the new field. Behaviour is unchanged today.
-- Status: open
+- Status: rejected (not-worth-it)
+- Resolution: behaviour is unchanged today and the reviewer rates the fix as moderate scope (model, presenter type, row, fixtures); a day track exists exactly when the zone is valid, and the reducer rejects an invalid one safely. A suggestion not worth widening the change.
 
 ## Verdict
 

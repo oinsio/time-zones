@@ -1,6 +1,5 @@
 import type { TFunction } from "i18next";
 import {
-  MINUTES_PER_HOUR,
   OFFSET_DIFFERENCE_DURATION_SEPARATOR,
   OFFSET_DIFFERENCE_ZERO_VALUE,
 } from "@/constants";
@@ -13,9 +12,11 @@ export type PresentedOffsetDifference = {
   accessibleLabel: string;
 };
 
-function formatDuration(absoluteMinutes: number, translate: TFunction): string {
-  const hours = Math.floor(absoluteMinutes / MINUTES_PER_HOUR);
-  const minutes = absoluteMinutes % MINUTES_PER_HOUR;
+function formatDuration(
+  hours: number,
+  minutes: number,
+  translate: TFunction,
+): string {
   const parts: string[] = [];
   if (hours > 0)
     parts.push(translate("locations.durationHours", { count: hours }));
@@ -43,10 +44,10 @@ export function formatOffsetDifference(
       accessibleLabel: translate("locations.offsetDifferenceSame"),
     };
   }
-  const { sign, hours, minutesPart } =
+  const { sign, hours, minutes, minutesPart } =
     formatSignedHoursMinutes(differenceMinutes);
   const signedValue = `${sign}${hours}${minutesPart}`;
-  const duration = formatDuration(Math.abs(differenceMinutes), translate);
+  const duration = formatDuration(hours, minutes, translate);
   return {
     label:
       minutesPart === ""

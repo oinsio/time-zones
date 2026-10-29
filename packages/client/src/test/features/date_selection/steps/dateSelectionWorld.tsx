@@ -6,7 +6,6 @@ import {
   screen,
   within,
 } from "@testing-library/react/pure";
-import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { expect } from "vitest";
 import {
@@ -30,6 +29,13 @@ import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 import { DateBar } from "@/views/shared";
 import { cityEntry } from "../../locations/steps/locationsUiWorld";
+import {
+  barElement,
+  clickBarButton,
+  isNowShown,
+  rowOf,
+  shownIsoDate,
+} from "./dateSelectionQueries";
 
 export const ENGLISH_LANGUAGE = "en";
 export const RUSSIAN_LANGUAGE = "ru";
@@ -65,23 +71,6 @@ export const createDateSelectionWorld = () => {
     return null;
   };
 
-  const barElement = () =>
-    screen.getByRole("group", { name: i18n.t("date.barLabel") });
-  const clickBarButton = (key: string) =>
-    userEvent.click(
-      within(barElement()).getByRole("button", { name: i18n.t(key) }),
-    );
-  const isNowShown = () =>
-    within(barElement()).queryByRole("button", { name: i18n.t("date.now") }) !==
-    null;
-  const rowOf = (city: string) =>
-    screen
-      .getByRole("button", {
-        name: i18n.t("locations.locationMenu", { city }),
-      })
-      .closest("li") as HTMLElement;
-  const shownIsoDate = () =>
-    barElement().querySelector("time")?.getAttribute("datetime");
   const deviceDateOf = (timestamp: string) =>
     Temporal.Instant.from(timestamp)
       .toZonedDateTimeISO(clock.timeZoneId())
