@@ -12,8 +12,10 @@
   `skip_specs: true` correctly promotes nothing.
 - The archiving was done by the OpenSpec CLI, not by hand: the archived
   directory holds the change's own artifacts (`proposal.md`, `design.md`,
-  `specs/`, `tasks.md` and the review reports), and the promoted text in
-  `openspec/specs/` reads as the merge of those deltas.
+  `specs/` and `tasks.md`), and the promoted text in `openspec/specs/` reads
+  as the merge of those deltas. The review reports are not among them: they
+  live in `temporary-docs/gnomish/<task>/`, so their absence from the archived
+  directory is expected.
 - Every earlier entry under `openspec/changes/archive/` still sits in the
   `YYYY/MM/YYYY-MM-DD-<name>` layout.
 
