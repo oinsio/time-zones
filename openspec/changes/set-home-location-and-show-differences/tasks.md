@@ -34,7 +34,14 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - the command equals `JSON.parse(JSON.stringify(command))`.
 
   Covers FR1, FR2, FR3, FR10. Verify red, then green, with `npx vitest run src/model/homeLocation.test.ts src/model/locations.test.ts`.
-- [ ] 2.2 TDD the body of `getReferenceZone` (D2) in `model/referenceMoment.test.ts`: the home zone when home is set, otherwise the device zone. Extend `model/dayTrack.test.ts` with M3 (home Almaty, device Moscow → `2026-03-07T19:00:00Z`–`2026-03-08T19:00:00Z`). Covers FR4. Verify with `npx vitest run src/model/referenceMoment.test.ts src/model/dayTrack.test.ts`.
+- [ ] 2.2 TDD the body of `getReferenceZone` (D2) in `model/referenceMoment.test.ts`: the home zone when home is set, otherwise the device zone. Extend `model/dayTrack.test.ts` with M3 (home Almaty, device Moscow → `2026-03-07T19:00:00Z`–`2026-03-08T19:00:00Z`). Then TDD new `model/followReferenceZone.ts` (D2) in `model/followReferenceZone.test.ts`, and call it from `reduceLocations`:
+  - a pinned `GAP` moment (New York, `2026-03-08T07:30:00Z`, requested 02:30) and home set to Almaty → the same instant, `UNIQUE`, requested wall time 12:30;
+  - the same after `SET_DEVICE_TIME_ZONE` to `Asia/Almaty` without home, after removing the home location, and after `REPLACE_LOCATIONS` that drops home;
+  - a `GAP` moment and an unchanged reference zone (a device change while home is set, adding a location) → the same `reference` object;
+  - a pinned `UNIQUE` or `AMBIGUOUS` moment and a zone change → the same `reference` object;
+  - a live moment → still live.
+
+  `model/referenceMomentPicking.test.ts` stays green unchanged. Covers FR4. Verify with `npx vitest run src/model/referenceMoment.test.ts src/model/dayTrack.test.ts src/model/followReferenceZone.test.ts src/model/referenceMomentPicking.test.ts`.
 - [ ] 2.3 TDD `LocationMarkKind.HOME` and the new `getLocationMarkKind(location, deviceTimeZoneId, homeLocationId)` (D3) in `model/locationMark.test.ts`, with `it.each`: home only, here only, home in the device zone → home, neither → `undefined`. Covers FR7. Verify with `npx vitest run src/model/locationMark.test.ts`.
 - [ ] 2.4 TDD new `model/offsetDifference.ts` (D4) in `model/offsetDifference.test.ts`:
   - M2 values: Moscow −120, Kolkata 30, New York −540, and New York −600 at `06:30Z`;
@@ -53,7 +60,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a dangling id → `null`.
 
   Covers FR8, FR9. Verify with `npx vitest run src/model/parseStoredLocations.test.ts`.
-- [ ] 2.6 Mutation run (M6): `npx stryker run --mutate 'src/model/locations.ts,src/model/reduceHomeLocation.ts,src/model/referenceMoment.ts,src/model/locationMark.ts,src/model/offsetDifference.ts'` scores ≥ 95% (minimum 90%). Add tests for the survivors and run it again.
+- [ ] 2.6 Mutation run (M6): `npx stryker run --mutate 'src/model/locations.ts,src/model/reduceHomeLocation.ts,src/model/referenceMoment.ts,src/model/locationMark.ts,src/model/offsetDifference.ts'` scores ≥ 95% (minimum 90%). Add tests for the survivors and run it again. Then run `npx stryker run --mutate 'src/model/followReferenceZone.ts'` alone, with the same target.
 
 ## 3. Ports and adapters (TDD)
 
@@ -149,7 +156,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 - [ ] 7.1 Write `test/features/home_location/home_location_unit.feature` and `steps/home_location_unit.steps.tsx` with the `home-location` scenarios that need no browser:
   - "Make Almaty home", "Home moves to another location", "Location already gone", "Clear home";
   - "Removing home clears it", "The first added location is not home", "Reorder keeps home in place";
-  - "The day follows home while travelling", "Clearing home returns to the device day", "A pinned moment keeps its instant";
+  - "The day follows home while travelling", "Clearing home returns to the device day", "A pinned moment keeps its instant", "A home change drops the gap note";
   - "Only the home row shows the home mark", "Home in the device time zone", "Travelling";
   - "Home survives a reload", "A list from the previous version", "Home points to a missing location", "Home set in another tab";
   - "Menu of a row that is not home", "Menu of the home row", "No home item for an unknown zone".
@@ -169,7 +176,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Home of the wrong type" → `locations/locations_storage_ui_unit.feature`;
   - "The home row shows no here mark", "Home wins over here" → `locations/locations_here_mark_unit.feature`;
   - "The day of the home location" → `time_selection/time_selection_day_track.feature`;
-  - "A home change keeps the pinned moment" → `date_selection/date_selection_reference_moment.feature`.
+  - "A home change keeps the pinned moment" → `date_selection/date_selection_reference_moment.feature`;
+  - "A device time zone change drops the gap note" → `date_selection/date_selection_wall_clock.feature`, tagged `@set-home-location-and-show-differences @FR4`.
 
   The steps in `locations_management.steps.ts` dispatch `REMOVE_LOCATION` to the store, and the steps in `locations_persistence.steps.ts` call `removeLocation` on the hook. Neither used the button, so neither needs a change for it. Task 6.4 already updated the worlds that did use it. Covers FR3, FR4, FR7, FR8. Verify each feature's steps file alone with `npx vitest run <steps file>`.
 

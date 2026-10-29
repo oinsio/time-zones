@@ -57,7 +57,7 @@ The implement stage writes only under `packages/`, so the glossary entries below
 
 - `locations`: ADDED offset difference on rows and the location menu. MODIFIED: removal (clears home), the Cards list (the location menu replaces the remove button), storage (schema 2), the unreadable list (dangling home), tab sync (home), the Here mark (yields to the home mark), the row name (in "Here mark is accessible and fits every screen" and "Local time and date are fast and accessible"), the leading mark kinds, and the card layout.
 - `time-selection`: MODIFIED "Day track spans the reference day". The reference zone may be the home location's zone.
-- `date-selection`: MODIFIED "Reference moment". The reference zone may be the home location's zone.
+- `date-selection`: MODIFIED "Reference moment". The reference zone may be the home location's zone. MODIFIED "Wall-clock resolution on the new date": the gap note also ends when the reference zone changes.
 
 ## Impact
 
@@ -96,7 +96,7 @@ The implement stage writes only under `packages/`, so the glossary entries below
 - FR1: Any location of the list whose zone is known can be made the home location from its location menu. At most one location is home. Making another location home moves home to it. Making the current home home again changes nothing. A request for a location that is no longer in the list fails as location not found and changes nothing.
 - FR2: Home can be cleared from the home location's menu. The reference zone is then the device time zone.
 - FR3: Removing the home location clears home. Resetting an unreadable list leaves no home. Adding a location never sets home, also for the first location. Reordering keeps home and does not move the home location.
-- FR4: The reference zone is the home location's canonical time zone ID when home is set, otherwise the device time zone. A change of the reference zone keeps the reference moment: a live moment stays live, a pinned moment keeps its instant. The reference day, the date bar's date and the gap note follow the new zone in the same render.
+- FR4: The reference zone is the home location's canonical time zone ID when home is set, otherwise the device time zone. A change of the reference zone keeps the reference moment: a live moment stays live, a pinned moment keeps its instant. The reference day, the date bar's date and the gap note follow the new zone in the same render: a gap note that described a wall-clock time in the previous reference zone is no longer shown. This holds for every change of the reference zone: home set, moved, cleared or removed, home changed in another tab, and a device time zone change while no home is set.
 - FR5: Every row whose zone is known shows its offset difference: its UTC offset minus the reference zone's UTC offset at the effective instant. The home location's row shows none. Without home, a row with the Here mark shows none. Another row whose offset equals the reference zone's shows `0 h`. The difference is recomputed whenever the UTC offset is: on open, on list changes, on a language change, on a reference moment change, at every minute tick and on a device time zone change.
 - FR6: The difference text has a sign and the hours. Whole hours carry the unit (`−2 h` / `−2 ч`, `+3 h` / `+3 ч`). Hours with minutes have no unit (`+0:30`, `−5:30`, `+5:45`). Zero is `0 h` / `0 ч` without a sign. The minus is the typographic minus `−`.
 - FR7: The home mark takes the leading mark slot: a house icon with the accessible label "Home location" / «Домашнее место» and no caption. A row shows at most one leading mark. A row that is home and in the device time zone shows the home mark only. A row in the device time zone that is not home shows the Here mark, its offset difference and the caption "here".
@@ -158,7 +158,7 @@ Feature files tagged `@set-home-location-and-show-differences`:
 - `src/test/features/home_location/home_location_e2e.feature`: the location menu by pointer and keyboard, focus, accessible names, announcements, the Russian interface, axe-core, layout (playwright-bdd).
 - `src/test/features/home_location/home_location_legacy_e2e.feature`: the location menu by tap in Chromium with Pointer Events suppressed (FR14) (playwright-bdd).
 - `src/test/features/home_location/home_location_view_contract_e2e.feature`: the `@view-contract` scenario "Set and clear home".
-- Existing features that gain the modified scenarios: `locations_management.feature`, `locations_persistence.feature`, `locations_storage_ui_unit.feature`, `locations_here_mark_unit.feature`, `locations_device_time_zone_e2e.feature`, `locations_local_time_e2e.feature`, `locations_ui_e2e.feature`, `locations_view_contract_e2e.feature`, `time_selection_day_track.feature`, `date_selection_reference_moment.feature`, and the screenshot outline.
+- Existing features that gain the modified scenarios: `locations_management.feature`, `locations_persistence.feature`, `locations_storage_ui_unit.feature`, `locations_here_mark_unit.feature`, `locations_device_time_zone_e2e.feature`, `locations_local_time_e2e.feature`, `locations_ui_e2e.feature`, `locations_view_contract_e2e.feature`, `time_selection_day_track.feature`, `date_selection_reference_moment.feature`, `date_selection_wall_clock.feature`, and the screenshot outline.
 
 ## Visual Reference
 

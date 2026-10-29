@@ -32,9 +32,16 @@ Binding decisions followed: ADR-0002 (layers, commands as data, view contract "s
 - `REPLACE_LOCATIONS { locations, homeLocationId }`: the initial load, a change from another tab and the reset (`null`) all pass home. The reducer keeps invariant 1 of `docs/architecture/domain-model.md` itself: a home id that is not in `locations` becomes `null`.
 - `canonicalizeLocationId(id)` joins `buildLocationId` in `model/locations.ts`. It splits at the first `ID_SEPARATOR` (zone ids contain no `|`), canonicalizes the zone and rebuilds the id, or returns `undefined`. It stays the one owner of the id format, and the parser (D6) uses it.
 
-### D2. Reference zone: only the body of `getReferenceZone` changes (FR4)
+### D2. Reference zone: decided only in `getReferenceZone`, followed by the gap note (FR4)
 
-`getReferenceZone(state)` returns the home location's `timeZoneId` when `homeLocationId` is set, otherwise `deviceTimeZoneId`. No caller changes. The reference day, date changes, the gap note, the calendar and the date bar follow home automatically. A home change does not touch `state.reference`, so a live moment stays live and a pinned instant is kept.
+`getReferenceZone(state)` returns the home location's `timeZoneId` when `homeLocationId` is set, otherwise `deviceTimeZoneId`. It stays the one place that decides the reference zone, and no caller changes. The reference day, date changes, the calendar and the date bar's date follow home automatically.
+
+The gap note does not. `buildDateBar` (`controller/useReferenceMoment.ts`) shows it from `reference.wallClockStatus` and `reference.requestedWallTime`, which `reduceReferenceMoment` resolved in the previous zone, and `SET_DEVICE_TIME_ZONE` already keeps `state.reference` today. So new `model/followReferenceZone.ts` exports `followReferenceZone(previous, next): WorldClockState`. `reduceLocations` calls it on the state of every successful command:
+
+- when `getReferenceZone(previous)` equals `getReferenceZone(next)`, or the moment is live, or the pinned status is not `WallClockStatus.GAP`, it returns `next` unchanged, with the same `reference` object;
+- otherwise it keeps the pinned instant and sets `wallClockStatus` to `UNIQUE` and `requestedWallTime` to the instant's wall time in the new reference zone.
+
+Keying on `getReferenceZone` covers `SET_HOME_LOCATION`, `REMOVE_LOCATION` of home, `REPLACE_LOCATIONS` (another tab, the reset) and `SET_DEVICE_TIME_ZONE` without home in one place, in the model (ADR-0002). A live moment stays live, and a pinned instant is kept. Because a non-`GAP` reference keeps its object, `model/referenceMomentPicking.test.ts` ("should keep the reference when the device zone changes", which pins with `UNIQUE`) stays green. The stable "Wall-clock resolution on the new date" gains "or a change of the reference zone" (the `date-selection` delta).
 
 ### D3. Marks: a second kind in the one owner (FR7)
 
@@ -100,7 +107,7 @@ No dependency is added, so the initial JavaScript grows only by the component. `
 ## Consequences
 
 Positive:
-- Home changes one function body (`getReferenceZone`), and every reference-zone reader follows it.
+- Home changes one function body (`getReferenceZone`), and every reference-zone reader follows it. The one piece of state resolved in a zone, the gap note, is reset in one model helper (`followReferenceZone`) for every kind of zone change.
 - One owner each for marks, offsets, signed-offset text and the id format, so no logic is duplicated.
 - The menu works by tap without Pointer Events and adds no dependency.
 

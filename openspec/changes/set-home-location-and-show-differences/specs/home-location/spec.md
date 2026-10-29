@@ -54,7 +54,7 @@ Removing the home location SHALL clear home. Resetting an unreadable list MUST l
 - **AND** Moscow is still home
 
 ### Requirement: Reference zone follows home
-The reference zone SHALL be the home location's canonical time zone ID when home is set, and the device time zone otherwise. Changing it MUST keep the reference moment: live stays live, pinned keeps its instant. The reference day, the date bar's date and the gap note MUST follow the new zone in the same render. <!-- implements FR4 of set-home-location-and-show-differences -->
+The reference zone SHALL be the home location's canonical time zone ID when home is set, and the device time zone otherwise. Changing it MUST keep the reference moment: live stays live, pinned keeps its instant. The reference day, the date bar's date and the gap note MUST follow the new zone in the same render: a gap note about a wall-clock time in the previous reference zone MUST NOT be shown after the change (see "Wall-clock resolution on the new date" in the `date-selection` capability). <!-- implements FR4 of set-home-location-and-show-differences -->
 
 #### Scenario: The day follows home while travelling
 - **GIVEN** the device time zone is `Europe/Moscow`
@@ -76,6 +76,16 @@ The reference zone SHALL be the home location's canonical time zone ID when home
 - **WHEN** the user makes Almaty home
 - **THEN** the moment is still pinned to `2026-03-08T20:30:00Z`
 - **AND** the date bar shows the date `2026-03-09`
+
+#### Scenario: A home change drops the gap note
+- **GIVEN** the device time zone is `America/New_York`
+- **AND** the interface language is English
+- **AND** the list contains New York and Almaty
+- **AND** the current instant is `2026-03-07T07:30:00Z`
+- **AND** the user moved to the next day, so the moment is pinned to `2026-03-08T07:30:00Z` and the bar shows `02:30 does not exist on this day because of a clock change; showing 03:30.`
+- **WHEN** the user makes Almaty home
+- **THEN** the moment is still pinned to `2026-03-08T07:30:00Z`
+- **AND** the bar shows no note
 
 ### Requirement: Home mark
 The home location's row SHALL show the home mark in the leading mark slot: a house icon outlined in the accent colour, the size of the Here mark icon, with the accessible label "Home location" («Домашнее место») and no caption. No other row MAY show it. <!-- implements FR7, UX2 of set-home-location-and-show-differences -->
