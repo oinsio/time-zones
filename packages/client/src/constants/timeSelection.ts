@@ -11,3 +11,15 @@ export const MAX_TRACK_FRACTION = 1;
 export const TRACK_VALUE_MIN_MINUTES = 0;
 /** Offset changes move local time by less than this; bounds the boundary search. */
 export const OFFSET_CHANGE_MARGIN_HOURS = 3;
+
+// Implements FR2 of add-wall-time-input-with-hint (D1, D3).
+/** Accepted typed texts: `H`, `HH`; `H:MM`, `HH:MM`, `H.MM`, `HH.MM`; `HMM`, `HHMM`. */
+export const WALL_TIME_INPUT_PATTERNS: readonly RegExp[] = [
+  /^(?<hour>\d{1,2})$/,
+  /^(?<hour>\d{1,2})[:.](?<minute>\d{2})$/,
+  /^(?<hour>\d{1,2})(?<minute>\d{2})$/,
+];
+export const MAX_WALL_TIME_HOUR = 23;
+export const MAX_WALL_TIME_MINUTE = 59;
+/** The canonical `HH:MM` shape of the `SET_WALL_TIME` command. */
+export const WALL_TIME_COMMAND_PATTERN = /^(?<hour>\d{2}):(?<minute>\d{2})$/;
