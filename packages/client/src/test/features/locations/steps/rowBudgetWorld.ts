@@ -45,6 +45,8 @@ export function presentBudgetRows(
     instant,
     translate: i18n.getFixedT(language),
     deviceTimeZoneId,
+    homeLocationId: null,
+    referenceOffsetMinutes: undefined,
     referenceDay: buildReferenceDay(instant, deviceTimeZoneId),
   });
 }

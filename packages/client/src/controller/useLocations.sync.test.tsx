@@ -25,7 +25,7 @@ describe("useLocations", () => {
     it("should replace the list with a loaded one and set ready", () => {
       const { other, view } = setUpTwoInstances();
       act(() => {
-        other.save([almaty]);
+        other.save({ locations: [almaty], homeLocationId: null });
       });
       expect(view.result.current.locations).toEqual([almaty]);
       expect(view.result.current.loadStatus).toBe(LocationsStatus.READY);
@@ -35,7 +35,7 @@ describe("useLocations", () => {
       const { own, other } = setUpTwoInstances();
       const save = vi.spyOn(own, "save");
       act(() => {
-        other.save([almaty]);
+        other.save({ locations: [almaty], homeLocationId: null });
       });
       expect(save).not.toHaveBeenCalled();
     });
@@ -43,7 +43,7 @@ describe("useLocations", () => {
     it("should empty the list when the other instance clears", () => {
       const { other, view } = setUpTwoInstances();
       act(() => {
-        other.save([almaty]);
+        other.save({ locations: [almaty], homeLocationId: null });
       });
       act(() => {
         other.clear();

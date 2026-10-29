@@ -10,5 +10,6 @@ export {
   type LocationsLoadResult,
   LocationsLoadStatus,
   SaveOutcome,
+  type StoredLocations,
 } from "./locationRepository";
 export type { StorageAvailability } from "./storageAvailability";

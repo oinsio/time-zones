@@ -17,6 +17,7 @@ const seededRepository = () =>
     initialDocument: {
       status: LocationsLoadStatus.LOADED,
       locations: [moscow, almaty, newYork],
+      homeLocationId: null,
     },
   });
 
@@ -35,7 +36,10 @@ describe("useLocations moveLocation", () => {
       almaty.id,
     ]);
     expect(save).toHaveBeenCalledTimes(1);
-    expect(save).toHaveBeenCalledWith([newYork, moscow, almaty]);
+    expect(save).toHaveBeenCalledWith({
+      locations: [newYork, moscow, almaty],
+      homeLocationId: null,
+    });
   });
 
   it("should return ok and save nothing for a move to its own index", () => {

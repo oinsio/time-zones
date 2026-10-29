@@ -68,6 +68,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           initialDocument: {
             status: LocationsLoadStatus.LOADED,
             locations: storedLocations,
+            homeLocationId: null,
           },
         })}
         writeScheduler={immediateWriteScheduler}

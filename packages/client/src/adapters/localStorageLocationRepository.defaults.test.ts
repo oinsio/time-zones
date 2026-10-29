@@ -1,9 +1,11 @@
 // Verifies FR11, FR13 (persistence request, defaults) of add-locations-via-search (D4).
+// Verifies FR8, FR9 of set-home-location-and-show-differences (D6): migration to version 2.
 import { LOCATIONS_SYNC_CHANNEL_NAME, STORAGE_KEYS } from "@/constants";
-import { SaveOutcome } from "@/ports";
+import { LocationsLoadStatus, SaveOutcome } from "@/ports";
 import {
   createRepository,
   moscow,
+  storeDocument,
   useBrowserStorage,
 } from "@/test/localStorageRepositoryHelpers";
 import {
@@ -15,6 +17,76 @@ beforeEach(() => {
   localStorage.clear();
 });
 
+describe("local storage location repository migration to version 2", () => {
+  const v1Locations = [
+    { timeZoneId: "Asia/Almaty", label: "Almaty", countryCode: "KZ" },
+    { timeZoneId: "Europe/Moscow", label: "Moscow", countryCode: "RU" },
+    { timeZoneId: "Asia/Calcutta", label: "Kolkata", countryCode: "IN" },
+  ];
+
+  it("should load a version 1 list in order with no home", () => {
+    storeDocument({ schemaVersion: 1, payload: { locations: v1Locations } });
+
+    const result = createRepository().load();
+
+    expect(result).toMatchObject({
+      status: LocationsLoadStatus.LOADED,
+      homeLocationId: null,
+    });
+    expect(
+      result.status === LocationsLoadStatus.LOADED &&
+        result.locations.map((location) => location.id),
+    ).toEqual([
+      "Asia/Almaty|Almaty",
+      "Europe/Moscow|Moscow",
+      "Asia/Kolkata|Kolkata",
+    ]);
+  });
+
+  it("should write nothing when a version 1 list is loaded", () => {
+    const rawDocument = JSON.stringify({
+      schemaVersion: 1,
+      payload: { locations: v1Locations },
+    });
+    storeDocument(rawDocument);
+
+    createRepository().load();
+
+    expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).toBe(rawDocument);
+  });
+
+  it("should clear a home that is missing from its list on load", () => {
+    storeDocument({
+      schemaVersion: 2,
+      payload: { locations: v1Locations, homeLocationId: "Asia/Tokyo|Tokyo" },
+    });
+
+    expect(createRepository().load()).toMatchObject({
+      status: LocationsLoadStatus.LOADED,
+      homeLocationId: null,
+    });
+  });
+
+  it("should keep a listed home on load", () => {
+    storeDocument({
+      schemaVersion: 2,
+      payload: { locations: v1Locations, homeLocationId: "Asia/Almaty|Almaty" },
+    });
+
+    expect(createRepository().load()).toMatchObject({
+      homeLocationId: "Asia/Almaty|Almaty",
+    });
+  });
+
+  it("should load a version 3 document as unreadable", () => {
+    storeDocument({ schemaVersion: 3, payload: { locations: [] } });
+
+    expect(createRepository().load()).toEqual({
+      status: LocationsLoadStatus.UNREADABLE,
+    });
+  });
+});
+
 describe("local storage location repository persistence request", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -24,8 +96,8 @@ describe("local storage location repository persistence request", () => {
     const persist = vi.fn().mockResolvedValue(true);
     vi.stubGlobal("navigator", { storage: { persist } });
     const repository = createRepository();
-    repository.save([moscow]);
-    repository.save([]);
+    repository.save({ locations: [moscow], homeLocationId: null });
+    repository.save({ locations: [], homeLocationId: null });
     expect(persist).toHaveBeenCalledTimes(1);
   });
 
@@ -37,20 +109,24 @@ describe("local storage location repository persistence request", () => {
         throw new Error("blocked");
       },
       createChannel: () => undefined,
-    }).save([moscow]);
+    }).save({ locations: [moscow], homeLocationId: null });
     expect(persist).not.toHaveBeenCalled();
   });
 
   it("should save when the browser has no storage manager", () => {
     vi.stubGlobal("navigator", {});
-    expect(createRepository().save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(
+      createRepository().save({ locations: [moscow], homeLocationId: null }),
+    ).toBe(SaveOutcome.SAVED);
   });
 
   it("should save when persist rejects", () => {
     vi.stubGlobal("navigator", {
       storage: { persist: () => Promise.reject(new Error("denied")) },
     });
-    expect(createRepository().save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(
+      createRepository().save({ locations: [moscow], homeLocationId: null }),
+    ).toBe(SaveOutcome.SAVED);
   });
 });
 
@@ -60,7 +136,10 @@ describe("local storage location repository defaults", () => {
   });
 
   it("should use the browser localStorage for the exported repository", () => {
-    localStorageLocationRepository.save([moscow]);
+    localStorageLocationRepository.save({
+      locations: [moscow],
+      homeLocationId: null,
+    });
     expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).not.toBeNull();
   });
 
@@ -80,7 +159,7 @@ describe("local storage location repository defaults", () => {
     );
     createLocalStorageLocationRepository({
       getStorage: useBrowserStorage,
-    }).save([moscow]);
+    }).save({ locations: [moscow], homeLocationId: null });
     expect(names).toEqual([LOCATIONS_SYNC_CHANNEL_NAME]);
     expect(postMessage).toHaveBeenCalledTimes(1);
   });
@@ -130,11 +209,15 @@ describe("local storage location repository defaults", () => {
 
   it("should not fail when persist answers nothing", () => {
     vi.stubGlobal("navigator", { storage: { persist: () => undefined } });
-    expect(createRepository().save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(
+      createRepository().save({ locations: [moscow], homeLocationId: null }),
+    ).toBe(SaveOutcome.SAVED);
   });
 
   it("should not fail when the storage manager has no persist", () => {
     vi.stubGlobal("navigator", { storage: {} });
-    expect(createRepository().save([moscow])).toBe(SaveOutcome.SAVED);
+    expect(
+      createRepository().save({ locations: [moscow], homeLocationId: null }),
+    ).toBe(SaveOutcome.SAVED);
   });
 });

@@ -20,8 +20,14 @@ export type AddLocationInput = {
   countryCode: string;
 };
 
+export type WorldClockStore = Store<
+  WorldClockState,
+  LocationCommand,
+  LocationErrorCode
+>;
+
 export type LocationsContextValue = {
-  store: Store<WorldClockState, LocationCommand, LocationErrorCode>;
+  store: WorldClockStore;
   clock: Clock;
   /** Counts minute ticks; re-presents the rows. Implements FR3 of show-local-time-and-date-on-location-cards (D4). */
   minuteTick: number;
@@ -31,6 +37,8 @@ export type LocationsContextValue = {
   removeLocation: (id: string) => LocationsReduceResult;
   /** Implements FR2 of reorder-locations-by-drag-and-drop. */
   moveLocation: (id: string, targetIndex: number) => LocationsReduceResult;
+  /** `null` clears home. Implements FR3 of set-home-location-and-show-differences. */
+  setHomeLocation: (id: string | null) => LocationsReduceResult;
   resetLocations: () => void;
 };
 

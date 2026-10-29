@@ -27,6 +27,7 @@ describe("useLocations", () => {
         "addLocation",
         "removeLocation",
         "moveLocation",
+        "setHomeLocation",
         "resetLocations",
       ].sort(),
     );
@@ -38,6 +39,7 @@ describe("useLocations", () => {
         initialDocument: {
           status: LocationsLoadStatus.LOADED,
           locations: [moscow],
+          homeLocationId: null,
         },
       });
       const { result } = renderLocations(repository);
@@ -50,6 +52,7 @@ describe("useLocations", () => {
         initialDocument: {
           status: LocationsLoadStatus.LOADED,
           locations: [moscow],
+          homeLocationId: null,
         },
       });
       const { result } = renderLocations(
@@ -112,6 +115,7 @@ describe("useLocations", () => {
         initialDocument: {
           status: LocationsLoadStatus.LOADED,
           locations: [moscow],
+          homeLocationId: null,
         },
       });
       const { result } = renderLocations(repository);

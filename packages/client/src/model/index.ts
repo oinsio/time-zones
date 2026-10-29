@@ -3,6 +3,7 @@
 // reorder-locations-by-drag-and-drop.
 // Implements FR1-FR4 of mark-device-time-zone-in-location-list.
 // Implements FR1, FR4 of match-here-mark-to-design.
+// Implements FR1-FR5, FR7, FR10 of set-home-location-and-show-differences.
 
 export {
   CalendarMove,
@@ -43,6 +44,7 @@ export { getLocalDateTime } from "./localDateTime";
 export { getLocationMarkKind, LocationMarkKind } from "./locationMark";
 export {
   buildLocationId,
+  canonicalizeLocationId,
   INITIAL_WORLD_CLOCK_STATE,
   type Location,
   type LocationCommand,
@@ -53,6 +55,10 @@ export {
   type WorldClockState,
 } from "./locations";
 export { moveLocationInList } from "./moveLocation";
+export {
+  getOffsetDifferenceMinutes,
+  getReferenceOffsetMinutes,
+} from "./offsetDifference";
 export {
   type ParseStoredLocationsResult,
   parseStoredLocations,

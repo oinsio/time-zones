@@ -3,12 +3,12 @@ import {
   LOCATIONS_SYNC_CHANNEL_NAME,
   STORAGE_KEYS,
 } from "@/constants";
-import type { Location } from "@/model";
 import {
   type LocationRepository,
   type LocationsLoadResult,
   LocationsLoadStatus,
   SaveOutcome,
+  type StoredLocations,
 } from "@/ports";
 import {
   deserializeLocationsDocument,
@@ -109,11 +109,11 @@ export function createLocalStorageLocationRepository({
 
   return {
     load,
-    save: (locations: readonly Location[]) => {
+    save: (snapshot: StoredLocations) => {
       const outcome = write((storage) =>
         storage.setItem(
           STORAGE_KEYS.LOCATIONS,
-          serializeLocationsDocument(locations, schemaVersion),
+          serializeLocationsDocument(snapshot, schemaVersion),
         ),
       );
       if (outcome === SaveOutcome.SAVED) requestPersistentStorage();

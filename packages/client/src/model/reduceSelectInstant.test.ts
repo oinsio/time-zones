@@ -125,6 +125,7 @@ describe("reduceLocations SELECT_INSTANT", () => {
       reduceLocations(pinned, {
         type: LocationCommandType.REPLACE_LOCATIONS,
         locations: [],
+        homeLocationId: null,
       }),
     );
 

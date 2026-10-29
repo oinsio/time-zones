@@ -24,6 +24,11 @@ export {
   type PresentedLocationMark,
   presentLocationMarks,
 } from "./locationMark";
+// Implements FR5-FR7 of set-home-location-and-show-differences.
+export {
+  formatOffsetDifference,
+  type PresentedOffsetDifference,
+} from "./offsetDifference";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";
 export {
   type PresentedSearchResult,

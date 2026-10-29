@@ -109,11 +109,14 @@ export const saveAndLoadStoredZoneIds = (
   modules: FreshModules,
   locations: Parameters<
     FreshModules["adapters"]["localStorageLocationRepository"]["save"]
-  >[0],
+  >[0]["locations"],
 ) => {
-  expect(modules.adapters.localStorageLocationRepository.save(locations)).toBe(
-    SaveOutcome.SAVED,
-  );
+  expect(
+    modules.adapters.localStorageLocationRepository.save({
+      locations,
+      homeLocationId: null,
+    }),
+  ).toBe(SaveOutcome.SAVED);
   return loadStoredZoneIds(modules);
 };
 

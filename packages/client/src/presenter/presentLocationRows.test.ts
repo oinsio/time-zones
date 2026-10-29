@@ -28,6 +28,8 @@ const present = (
     language,
     instant: options.instant ?? july,
     deviceTimeZoneId: options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,
+    homeLocationId: null,
+    referenceOffsetMinutes: undefined,
     referenceDay: buildReferenceDay(
       options.instant ?? july,
       options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,

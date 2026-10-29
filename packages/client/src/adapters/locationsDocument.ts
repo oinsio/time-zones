@@ -1,10 +1,15 @@
 import { LOCATIONS_SCHEMA_VERSION } from "@/constants";
-import { type Location, parseStoredLocations } from "@/model";
-import { type LocationsLoadResult, LocationsLoadStatus } from "@/ports";
+import { parseStoredLocations } from "@/model";
+import {
+  type LocationsLoadResult,
+  LocationsLoadStatus,
+  type StoredLocations,
+} from "@/ports";
 
 /**
  * The stored locations document: `{ schemaVersion, payload }` (ADR-0004).
  * Implements FR9, FR11, FR12 of add-locations-via-search (D4).
+ * Implements FR8, FR9 of set-home-location-and-show-differences (D6).
  */
 
 /** Upgrades a payload from the version it is keyed by to the next one. */
@@ -12,15 +17,17 @@ export type PayloadMigrations = Readonly<
   Record<number, (payload: unknown) => unknown>
 >;
 
-/** Version 1 is the first version: nothing to migrate from yet. */
-export const LOCATION_MIGRATIONS: PayloadMigrations = {};
+/** Version 1 had no home location: the migration adds "no home" (FR8). */
+export const LOCATION_MIGRATIONS: PayloadMigrations = {
+  1: (payload) => ({ ...(payload as object), homeLocationId: null }),
+};
 
 const UNREADABLE: LocationsLoadResult = {
   status: LocationsLoadStatus.UNREADABLE,
 };
 
 export function serializeLocationsDocument(
-  locations: readonly Location[],
+  { locations, homeLocationId }: StoredLocations,
   schemaVersion = LOCATIONS_SCHEMA_VERSION,
 ): string {
   return JSON.stringify({
@@ -31,6 +38,7 @@ export function serializeLocationsDocument(
         label,
         countryCode,
       })),
+      homeLocationId,
     },
   });
 }
@@ -67,7 +75,11 @@ export function deserializeLocationsDocument(
       migratePayload(schemaVersion, payload, currentVersion, migrations),
     );
     return parsed.ok
-      ? { status: LocationsLoadStatus.LOADED, locations: parsed.locations }
+      ? {
+          status: LocationsLoadStatus.LOADED,
+          locations: parsed.locations,
+          homeLocationId: parsed.homeLocationId,
+        }
       : UNREADABLE;
   } catch {
     return UNREADABLE;

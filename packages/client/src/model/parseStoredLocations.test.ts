@@ -1,4 +1,5 @@
 // FR9, FR12 of add-locations-via-search: validating a stored payload (D4).
+// Verifies FR8, FR9 of set-home-location-and-show-differences (D6): the home location id.
 import { describe, expect, it } from "vitest";
 import { parseStoredLocations } from "./parseStoredLocations";
 
@@ -18,6 +19,7 @@ describe("parseStoredLocations", () => {
     });
     expect(outcome).toEqual({
       ok: true,
+      homeLocationId: null,
       locations: [
         { id: "Asia/Almaty|Almaty", ...almaty },
         {
@@ -33,6 +35,7 @@ describe("parseStoredLocations", () => {
   it("should accept an empty list", () => {
     expect(parseStoredLocations({ locations: [] })).toEqual({
       ok: true,
+      homeLocationId: null,
       locations: [],
     });
   });
@@ -114,5 +117,54 @@ describe("parseStoredLocations", () => {
       locations: [{ id: "Europe/Kyiv|Kyiv" }],
     });
     expect(outcome.ok && outcome.locations).toHaveLength(1);
+  });
+
+  describe("homeLocationId", () => {
+    const withHome = (homeLocationId: unknown) =>
+      parseStoredLocations({ locations: [almaty], homeLocationId });
+
+    it("should read a string that names a listed location", () => {
+      expect(withHome("Asia/Almaty|Almaty")).toMatchObject({
+        ok: true,
+        homeLocationId: "Asia/Almaty|Almaty",
+      });
+    });
+
+    it("should read null as no home", () => {
+      expect(withHome(null)).toMatchObject({ ok: true, homeLocationId: null });
+    });
+
+    it("should read a missing home as no home", () => {
+      expect(parseStoredLocations({ locations: [almaty] })).toMatchObject({
+        ok: true,
+        homeLocationId: null,
+      });
+    });
+
+    it.each([1, true, {}, []])("should reject home %j", (homeLocationId) => {
+      expect(withHome(homeLocationId)).toEqual({ ok: false });
+    });
+
+    it("should canonicalize the id of a legacy zone", () => {
+      const outcome = parseStoredLocations({
+        locations: [{ ...almaty, timeZoneId: "Europe/Kiev", label: "Kyiv" }],
+        homeLocationId: "Europe/Kiev|Kyiv",
+      });
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        homeLocationId: "Europe/Kyiv|Kyiv",
+      });
+    });
+
+    it.each(["Asia/Tokyo|Tokyo", "Mars/Base|Base", ""])(
+      "should clear a home that points to %j",
+      (homeLocationId) => {
+        expect(withHome(homeLocationId)).toMatchObject({
+          ok: true,
+          homeLocationId: null,
+        });
+      },
+    );
   });
 });

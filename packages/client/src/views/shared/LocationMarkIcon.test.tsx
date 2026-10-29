@@ -1,4 +1,5 @@
 // Verifies FR4, UX1, M3 of match-here-mark-to-design: the leading mark icon.
+// Verifies FR7 of set-home-location-and-show-differences: the home mark icon.
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { LOCATION_MARK_ICON_SIZE_PX } from "@/constants";
@@ -11,7 +12,24 @@ const hereMark: PresentedLocationMark = {
   caption: "here",
 };
 
+const homeMark: PresentedLocationMark = {
+  kind: LocationMarkKind.HOME,
+  accessibleLabel: "Home location",
+  caption: "",
+};
+
 describe("LocationMarkIcon", () => {
+  it("should draw the home mark as an outlined house in the accent color", () => {
+    render(<LocationMarkIcon mark={homeMark} id="mark-id" />);
+
+    const wrapper = screen.getByRole("img", { name: "Home location" });
+    const icon = wrapper.querySelector("svg");
+    expect(wrapper).toHaveClass("text-accent");
+    expect(icon).toHaveClass("lucide-house");
+    expect(icon).toHaveAttribute("width", String(LOCATION_MARK_ICON_SIZE_PX));
+    expect(icon).not.toHaveAttribute("fill", "currentColor");
+  });
+
   it("should name the wrapper by the accessible label and give it the id", () => {
     render(<LocationMarkIcon mark={hereMark} id="mark-id" />);
 

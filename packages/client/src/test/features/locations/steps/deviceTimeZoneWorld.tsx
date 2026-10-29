@@ -78,6 +78,7 @@ export const createDeviceTimeZoneWorld = () => {
       backend = createInMemoryLocationBackend({
         status: LocationsLoadStatus.LOADED,
         locations: storedCities.map((city) => buildLocation(cityEntry(city))),
+        homeLocationId: null,
       });
       const Rows = () => {
         latestLocations = useLocations();

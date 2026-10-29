@@ -20,6 +20,8 @@ const row: LocationRowModel = {
   cityLabel: "Kolkata",
   countryName: "India",
   utcOffsetLabel: "UTC+5:30",
+  offsetDifferenceLabel: "",
+  offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",

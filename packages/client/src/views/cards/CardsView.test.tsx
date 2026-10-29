@@ -30,6 +30,7 @@ const savedLocations = (...labels: string[]) => ({
     locations: labels.map((label) =>
       buildLocation({ label, timeZoneId: `Test/${label}`, countryCode: "RU" }),
     ),
+    homeLocationId: null,
   },
 });
 

@@ -16,11 +16,11 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Constants and locale keys (no TDD)
 
-- [ ] 1.1 Set `LOCATIONS_SCHEMA_VERSION = 2` in `constants/locations.ts` (D6). In `locales/en.json` and `locales/ru.json`, add `locations.homeMarkLabel` ("Home location" / «Домашнее место»), `locationMenu` ("Actions for {{city}}" / «Действия: {{city}}»), `makeHome` («Сделать домашним»), `clearHome` («Убрать отметку дома»), `remove` («Удалить»), `homeSetAnnouncement` ("{{city}} is now home" / «{{city}} — теперь домашнее место»), `homeClearedAnnouncement` ("Home cleared" / «Отметка дома снята»), `offsetDifferenceHours`, `offsetDifferenceAhead`, `offsetDifferenceBehind`, `offsetDifferenceSame`, and `durationHours_*` / `durationMinutes_*` (Russian `_one`, `_few`, `_many`; English `_one`, `_other`) (D5, D7, FR11, FR12). Keep `locations.removeLocation` for now: `views/shared/LocationRow.tsx:139` and the tests still use it, and task 6.4 deletes it together with the button. Verify with `npx vitest run src/locales/locales.test.ts`, and check that `grep -rniE "локаци" src/locales` prints nothing.
+- [x] 1.1 Set `LOCATIONS_SCHEMA_VERSION = 2` in `constants/locations.ts` (D6). In `locales/en.json` and `locales/ru.json`, add `locations.homeMarkLabel` ("Home location" / «Домашнее место»), `locationMenu` ("Actions for {{city}}" / «Действия: {{city}}»), `makeHome` («Сделать домашним»), `clearHome` («Убрать отметку дома»), `remove` («Удалить»), `homeSetAnnouncement` ("{{city}} is now home" / «{{city}} — теперь домашнее место»), `homeClearedAnnouncement` ("Home cleared" / «Отметка дома снята»), `offsetDifferenceHours`, `offsetDifferenceAhead`, `offsetDifferenceBehind`, `offsetDifferenceSame`, and `durationHours_*` / `durationMinutes_*` (Russian `_one`, `_few`, `_many`; English `_one`, `_other`) (D5, D7, FR11, FR12). Keep `locations.removeLocation` for now: `views/shared/LocationRow.tsx:139` and the tests still use it, and task 6.4 deletes it together with the button. Verify with `npx vitest run src/locales/locales.test.ts`, and check that `grep -rniE "локаци" src/locales` prints nothing.
 
 ## 2. Model (TDD)
 
-- [ ] 2.1 TDD the home location (D1): `homeLocationId` and `REMOVE_LOCATION` clearing home in `model/locations.ts`, `SET_HOME_LOCATION` in new `model/reduceHomeLocation.ts`, `REPLACE_LOCATIONS { locations, homeLocationId }` dropping a home that is not in the list, and `canonicalizeLocationId`. Test in new `model/homeLocation.test.ts`:
+- [x] 2.1 TDD the home location (D1): `homeLocationId` and `REMOVE_LOCATION` clearing home in `model/locations.ts`, `SET_HOME_LOCATION` in new `model/reduceHomeLocation.ts`, `REPLACE_LOCATIONS { locations, homeLocationId }` dropping a home that is not in the list, and `canonicalizeLocationId`. Test in new `model/homeLocation.test.ts`:
   - set;
   - move to another location;
   - set again → the same state object;
@@ -34,7 +34,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - the command equals `JSON.parse(JSON.stringify(command))`.
 
   Covers FR1, FR2, FR3, FR10. Verify red, then green, with `npx vitest run src/model/homeLocation.test.ts src/model/locations.test.ts`.
-- [ ] 2.2 TDD the body of `getReferenceZone` (D2) in `model/referenceMoment.test.ts`: the home zone when home is set, otherwise the device zone. Extend `model/dayTrack.test.ts` with M3 (home Almaty, device Moscow → `2026-03-07T19:00:00Z`–`2026-03-08T19:00:00Z`). Then TDD new `model/followReferenceZone.ts` (D2) in `model/followReferenceZone.test.ts`, and call it from `reduceLocations`:
+- [x] 2.2 TDD the body of `getReferenceZone` (D2) in `model/referenceMoment.test.ts`: the home zone when home is set, otherwise the device zone. Extend `model/dayTrack.test.ts` with M3 (home Almaty, device Moscow → `2026-03-07T19:00:00Z`–`2026-03-08T19:00:00Z`). Then TDD new `model/followReferenceZone.ts` (D2) in `model/followReferenceZone.test.ts`, and call it from `reduceLocations`:
   - a pinned `GAP` moment (New York, `2026-03-08T07:30:00Z`, requested 02:30) and home set to Almaty → the same instant, `UNIQUE`, requested wall time 12:30;
   - the same after `SET_DEVICE_TIME_ZONE` to `Asia/Almaty` without home, after removing the home location, and after `REPLACE_LOCATIONS` that drops home;
   - a `GAP` moment and an unchanged reference zone (a device change while home is set, adding a location) → the same `reference` object;
@@ -42,8 +42,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a live moment → still live.
 
   `model/referenceMomentPicking.test.ts` stays green unchanged. Covers FR4. Verify with `npx vitest run src/model/referenceMoment.test.ts src/model/dayTrack.test.ts src/model/followReferenceZone.test.ts src/model/referenceMomentPicking.test.ts`.
-- [ ] 2.3 TDD `LocationMarkKind.HOME` and the new `getLocationMarkKind(location, deviceTimeZoneId, homeLocationId)` (D3) in `model/locationMark.test.ts`, with `it.each`: home only, here only, home in the device zone → home, neither → `undefined`. Covers FR7. Verify with `npx vitest run src/model/locationMark.test.ts`.
-- [ ] 2.4 TDD new `model/offsetDifference.ts` (D4) in `model/offsetDifference.test.ts`:
+- [x] 2.3 TDD `LocationMarkKind.HOME` and the new `getLocationMarkKind(location, deviceTimeZoneId, homeLocationId)` (D3) in `model/locationMark.test.ts`, with `it.each`: home only, here only, home in the device zone → home, neither → `undefined`. Covers FR7. Verify with `npx vitest run src/model/locationMark.test.ts`.
+- [x] 2.4 TDD new `model/offsetDifference.ts` (D4) in `model/offsetDifference.test.ts`:
   - M2 values: Moscow −120, Kolkata 30, New York −540, and New York −600 at `06:30Z`;
   - `getReferenceOffsetMinutes` with home Almaty and device Moscow → 300;
   - the home row → `undefined`;
@@ -52,7 +52,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - an unknown row offset → `undefined`.
 
   Covers FR5. `src/test/noBigIntInSources.test.ts` must stay green. Verify with `npx vitest run src/model/offsetDifference.test.ts src/test/noBigIntInSources.test.ts`.
-- [ ] 2.5 TDD the v2 payload in `model/parseStoredLocations.ts` (D6), in `model/parseStoredLocations.test.ts`:
+- [x] 2.5 TDD the v2 payload in `model/parseStoredLocations.ts` (D6), in `model/parseStoredLocations.test.ts`:
   - `homeLocationId` as a string or `null` is read;
   - a missing one → `null`;
   - a number → rejected;
@@ -64,8 +64,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 3. Ports and adapters (TDD)
 
-- [ ] 3.1 TDD `StoredLocations`, `LocationsLoadResult.LOADED { locations, homeLocationId }` and `save({ locations, homeLocationId })` in `ports/locationRepository.ts` (D6). Extend `adapters/locationRepository.contract.ts` so that it runs against both adapters: save and load home, `clear` drops it, and an external change carries home (FR8, FR10). Verify with `npx vitest run src/adapters/locationRepository.test.ts src/adapters/localStorageLocationRepository.test.ts`.
-- [ ] 3.2 TDD the migration `LOCATION_MIGRATIONS[1]` and the v2 serializer in `adapters/locationsDocument.ts` (D6), in `adapters/localStorageLocationRepository.defaults.test.ts`:
+- [x] 3.1 TDD `StoredLocations`, `LocationsLoadResult.LOADED { locations, homeLocationId }` and `save({ locations, homeLocationId })` in `ports/locationRepository.ts` (D6). Extend `adapters/locationRepository.contract.ts` so that it runs against both adapters: save and load home, `clear` drops it, and an external change carries home (FR8, FR10). Verify with `npx vitest run src/adapters/locationRepository.test.ts src/adapters/localStorageLocationRepository.test.ts`.
+- [x] 3.2 TDD the migration `LOCATION_MIGRATIONS[1]` and the v2 serializer in `adapters/locationsDocument.ts` (D6), in `adapters/localStorageLocationRepository.defaults.test.ts`:
   - a v1 fixture with 3 locations loads as `LOADED` in the same order, with `homeLocationId: null` (M4);
   - a v2 document whose home is missing from its list loads with `null` (M4);
   - a v3 document stays `UNREADABLE`.
@@ -75,8 +75,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 4. Presenter (TDD)
 
-- [ ] 4.1 Extract `formatSignedHoursMinutes` from `presenter/utcOffset.ts` (D5). The existing `presenter/utcOffset.test.ts` stays green without changes, which proves the refactor kept the behaviour. Then TDD new `presenter/offsetDifference.ts` (`formatOffsetDifference`) with the text and accessible-text tables of the `locations` delta ("Offset difference text", "Offset difference accessible text"), in English and Russian. Covers FR6, NFR-A3. Verify with `npx vitest run src/presenter/utcOffset.test.ts src/presenter/offsetDifference.test.ts`.
-- [ ] 4.2 TDD `presentLocationRows` with `homeLocationId` and `referenceOffsetMinutes` in `LocationRowsContext` (D4, D5), in new `presenter/presentLocationRows.home.test.ts`:
+- [x] 4.1 Extract `formatSignedHoursMinutes` from `presenter/utcOffset.ts` (D5). The existing `presenter/utcOffset.test.ts` stays green without changes, which proves the refactor kept the behaviour. Then TDD new `presenter/offsetDifference.ts` (`formatOffsetDifference`) with the text and accessible-text tables of the `locations` delta ("Offset difference text", "Offset difference accessible text"), in English and Russian. Covers FR6, NFR-A3. Verify with `npx vitest run src/presenter/utcOffset.test.ts src/presenter/offsetDifference.test.ts`.
+- [x] 4.2 TDD `presentLocationRows` with `homeLocationId` and `referenceOffsetMinutes` in `LocationRowsContext` (D4, D5), in new `presenter/presentLocationRows.home.test.ts`:
   - `offsetDifferenceLabel` and `offsetDifferenceAccessibleLabel` for M2;
   - the home mark through `LOCATION_MARK_TEXT_KEYS[HOME]`, labelled «Домашнее место», with no caption;
   - travelling: Moscow has the Here mark and `−2 h`.
@@ -86,7 +86,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 5. Controller (TDD)
 
-- [ ] 5.1 TDD `setHomeLocation` (D1, D4, D6). Move the action builders of `controller/LocationsProvider.tsx` into new `controller/createLocationsActions.ts`, add `setHomeLocation` there, and expose it through `controller/locationsContext.ts` and `useLocations.ts`. `useLocations` passes `homeLocationId` and `getReferenceOffsetMinutes(state, instant)`. Add `setHomeLocation` to the key list in `controller/useLocations.test.tsx`. Test in new `controller/useLocations.home.test.tsx`, with the in-memory repository, the switchable clock and the manual write scheduler:
+- [x] 5.1 TDD `setHomeLocation` (D1, D4, D6). Move the action builders of `controller/LocationsProvider.tsx` into new `controller/createLocationsActions.ts`, add `setHomeLocation` there, and expose it through `controller/locationsContext.ts` and `useLocations.ts`. `useLocations` passes `homeLocationId` and `getReferenceOffsetMinutes(state, instant)`. Add `setHomeLocation` to the key list in `controller/useLocations.test.tsx`. Test in new `controller/useLocations.home.test.tsx`, with the in-memory repository, the switchable clock and the manual write scheduler:
   - setting home schedules 1 write that carries home;
   - setting the same home writes nothing;
   - opening with a v1 document writes nothing;

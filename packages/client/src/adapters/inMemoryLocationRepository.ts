@@ -1,9 +1,9 @@
-import type { Location } from "@/model";
 import {
   type LocationRepository,
   type LocationsLoadResult,
   LocationsLoadStatus,
   SaveOutcome,
+  type StoredLocations,
 } from "@/ports";
 
 type ExternalChangeListener = {
@@ -55,8 +55,8 @@ export function createInMemoryLocationRepository({
 
   return {
     load: () => backend.document,
-    save: (locations: readonly Location[]) =>
-      write({ status: LocationsLoadStatus.LOADED, locations }),
+    save: ({ locations, homeLocationId }: StoredLocations) =>
+      write({ status: LocationsLoadStatus.LOADED, locations, homeLocationId }),
     clear: () => write({ status: LocationsLoadStatus.EMPTY }),
     subscribe: (onExternalChange) => {
       const listener = { owner: instanceKey, notify: onExternalChange };

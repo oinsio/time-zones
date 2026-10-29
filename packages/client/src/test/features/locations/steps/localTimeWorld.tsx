@@ -111,6 +111,7 @@ export const createLocalTimeWorld = () => {
             initialDocument: {
               status: LocationsLoadStatus.LOADED,
               locations: storedLocations,
+              homeLocationId: null,
             },
           })}
           writeScheduler={

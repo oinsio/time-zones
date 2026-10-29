@@ -4,6 +4,7 @@ import { ONE_DAY } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import {
   getEffectiveInstant,
+  getReferenceOffsetMinutes,
   INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   reduceLocations,
@@ -74,6 +75,8 @@ export const createRowBudgetWorld = () => {
       instant,
       translate: i18n.getFixedT(ENGLISH_LANGUAGE),
       deviceTimeZoneId: state.deviceTimeZoneId,
+      homeLocationId: state.homeLocationId,
+      referenceOffsetMinutes: getReferenceOffsetMinutes(state, instant),
       referenceDay: buildReferenceDay(instant, state.deviceTimeZoneId),
     });
   const presentDateShift = (days: number) => {

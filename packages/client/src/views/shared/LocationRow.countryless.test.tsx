@@ -11,6 +11,8 @@ const countrylessRow: LocationRowModel = {
   cityLabel: "Kyiv",
   countryName: "",
   utcOffsetLabel: "UTC+2",
+  offsetDifferenceLabel: "",
+  offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",

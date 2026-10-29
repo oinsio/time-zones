@@ -122,7 +122,11 @@ export const createDateSelectionWorld = () => {
     },
     openApp: async () => {
       backend.document = storedLocations.length
-        ? { status: LocationsLoadStatus.LOADED, locations: storedLocations }
+        ? {
+            status: LocationsLoadStatus.LOADED,
+            locations: storedLocations,
+            homeLocationId: null,
+          }
         : backend.document;
       render(
         <LocationsProvider
@@ -141,7 +145,10 @@ export const createDateSelectionWorld = () => {
     addCityInAnotherTab: (city: string) => {
       const otherTab = createInMemoryLocationRepository({ backend });
       act(() => {
-        otherTab.save([...storedLocations, buildLocation(cityEntry(city))]);
+        otherTab.save({
+          locations: [...storedLocations, buildLocation(cityEntry(city))],
+          homeLocationId: null,
+        });
       });
     },
     moveTrackToNextStep: () =>

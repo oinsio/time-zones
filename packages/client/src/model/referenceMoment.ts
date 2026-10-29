@@ -27,9 +27,16 @@ export const LIVE_REFERENCE_MOMENT: ReferenceMoment = {
   mode: ReferenceMode.LIVE,
 };
 
-/** Zone the reference date is read in: the device zone until a home exists (ADR-0007). */
+/**
+ * Zone the reference date is read in: the home location's zone, else the
+ * device zone (ADR-0007). The one place that decides it.
+ * Implements FR4 of set-home-location-and-show-differences (D2).
+ */
 export function getReferenceZone(state: WorldClockState): string {
-  return state.deviceTimeZoneId;
+  const home = state.locations.find(
+    (location) => location.id === state.homeLocationId,
+  );
+  return home?.timeZoneId ?? state.deviceTimeZoneId;
 }
 
 /** `now` while live, the pinned instant otherwise. Implements FR1, FR5. */

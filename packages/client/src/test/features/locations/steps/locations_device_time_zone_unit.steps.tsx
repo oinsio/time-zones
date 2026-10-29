@@ -189,6 +189,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         instant: world.clock.instant(),
         translate: i18n.getFixedT(ENGLISH_LANGUAGE),
         deviceTimeZoneId: world.getDeviceZone(),
+        homeLocationId: null,
+        referenceOffsetMinutes: undefined,
         referenceDay: buildReferenceDay(
           world.clock.instant(),
           world.getDeviceZone(),

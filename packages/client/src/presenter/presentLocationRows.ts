@@ -4,6 +4,7 @@ import type { Temporal } from "@/lib/temporal";
 import {
   getLocalDateTime,
   getLocationMarkKind,
+  getOffsetDifferenceMinutes,
   getUtcOffsetMinutes,
   type Location,
   type ReferenceDay,
@@ -15,6 +16,7 @@ import {
   type PresentedLocationMark,
   presentLocationMarks,
 } from "./locationMark";
+import { formatOffsetDifference } from "./offsetDifference";
 import { formatUtcOffset } from "./utcOffset";
 
 export type LocationRow = {
@@ -23,7 +25,11 @@ export type LocationRow = {
   countryName: string;
   /** "UTC+3" style label; empty when the offset cannot be computed. */
   utcOffsetLabel: string;
-  /** Leading mark of the row ("here"); `undefined` when the row has none. */
+  /** "−2 h" style label; empty when the row has no offset difference. */
+  offsetDifferenceLabel: string;
+  /** "2 hours behind" style text read in the row name; empty without a difference. */
+  offsetDifferenceAccessibleLabel: string;
+  /** Leading mark of the row ("home" or "here"); `undefined` when the row has none. */
   mark?: PresentedLocationMark;
   /** "12:30" style label; empty when the zone is unknown. */
   localTimeLabel: string;
@@ -40,6 +46,9 @@ export type LocationRowsContext = {
   instant: Temporal.Instant;
   translate: TFunction;
   deviceTimeZoneId: string;
+  homeLocationId: string | null;
+  /** Offset of the reference zone, read once per presentation (NFR-P1). */
+  referenceOffsetMinutes: number | undefined;
   referenceDay: ReferenceDay;
 };
 
@@ -52,6 +61,7 @@ export type LocationRowsContext = {
  * Implements FR1, FR4 of match-here-mark-to-design (D2): the row's mark.
  * Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).
  * Implements FR1 of add-time-sliders-to-location-cards (D5): the day track.
+ * Implements FR5, FR6, FR7 of set-home-location-and-show-differences (D3-D5).
  */
 export function presentLocationRows(
   locations: readonly Location[],
@@ -60,6 +70,8 @@ export function presentLocationRows(
     instant,
     translate,
     deviceTimeZoneId,
+    homeLocationId,
+    referenceOffsetMinutes,
     referenceDay,
   }: LocationRowsContext,
 ): LocationRow[] {
@@ -67,7 +79,21 @@ export function presentLocationRows(
   const marks = presentLocationMarks(translate);
   return locations.map((location) => {
     const offsetMinutes = getUtcOffsetMinutes(location.timeZoneId, instant);
-    const markKind = getLocationMarkKind(location, deviceTimeZoneId);
+    const markKind = getLocationMarkKind(
+      location,
+      deviceTimeZoneId,
+      homeLocationId,
+    );
+    const differenceMinutes = getOffsetDifferenceMinutes(
+      location,
+      offsetMinutes,
+      referenceOffsetMinutes,
+      { deviceTimeZoneId, homeLocationId },
+    );
+    const difference =
+      differenceMinutes === undefined
+        ? undefined
+        : formatOffsetDifference(differenceMinutes, translate);
     const localDateTime = getLocalDateTime(location.timeZoneId, instant);
     const localTimeLabel = localDateTime
       ? formatLocalTime(localDateTime, language)
@@ -83,6 +109,8 @@ export function presentLocationRows(
         offsetMinutes === undefined
           ? ""
           : formatUtcOffset(offsetMinutes, utcPrefix),
+      offsetDifferenceLabel: difference?.label ?? "",
+      offsetDifferenceAccessibleLabel: difference?.accessibleLabel ?? "",
       mark: markKind === undefined ? undefined : marks[markKind],
       localTimeLabel,
       localDateLabel,
