@@ -124,7 +124,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 7. Unit BDD (vitest-cucumber)
 
-- [ ] 7.1 Write `test/features/locations/locations_here_entry_unit.feature` and `steps/locations_here_entry_unit.steps.ts`, reusing the existing worlds and steps. It holds these scenarios of the `locations` delta:
+- [x] 7.1 Write `test/features/locations/locations_here_entry_unit.feature` and `steps/locations_here_entry_unit.steps.ts`, reusing the existing worlds and steps. It holds these scenarios of the `locations` delta:
   - "No location matches", "A location matches", "The home location matches", "Matching is by time zone ID, not by offset" (FR1);
   - "Here entry on the design sample", "English meta line" (FR2, UX1);
   - "No home", "Travelling with home set" (FR3);
@@ -138,8 +138,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Presenting again builds no formatter", wrapped in `startWorkCount()` (`test/workCounters.ts`), asserting 0 formatter builds and at most `MAX_TRANSITION_LOOKUPS_PER_ZONE` lookups for the Here entry (NFR-P1, ADR-0008).
 
   Verify `npx vitest run src/test/features/locations/steps/locations_here_entry_unit.steps.ts`.
-- [ ] 7.2 Update `test/features/main_page/main_page_states_unit.feature` and its steps to the MODIFIED "Empty state" scenarios: the Here entry first, the explanation and "Add location" below, and no location list stored (FR7, UX2). Verify `npx vitest run src/test/features/main_page`.
-- [ ] 7.3 Add the Here entry to `test/benchmarks/rowPresenting.bench.ts` (NFR-P1). Verify with `pnpm bench`, which only reports.
+- [x] 7.2 Update `test/features/main_page/main_page_states_unit.feature` and its steps to the MODIFIED "Empty state" scenarios: the Here entry first, the explanation and "Add location" below, and no location list stored (FR7, UX2). Verify `npx vitest run src/test/features/main_page`.
+- [x] 7.3 Add the Here entry to `test/benchmarks/rowPresenting.bench.ts` (NFR-P1). Verify with `pnpm bench`, which only reports.
 
 ## 8. E2E, accessibility and screenshots (playwright-bdd)
 

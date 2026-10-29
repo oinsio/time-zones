@@ -7,6 +7,7 @@ import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
+import { STORAGE_KEYS } from "@/constants";
 import { fakeServiceWorker } from "@/test/fakeServiceWorker";
 import { registryOverride } from "@/test/registryOverride";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
@@ -122,23 +123,43 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @add-main-page-scaffold @FR7 @UX1
+  // @show-here-entry-for-device-time @FR7 @UX2
   f.Scenario("First launch", ({ Given, When, Then, And }) => {
+    const isFollowing = (first: Element, second: Element) =>
+      Boolean(
+        first.compareDocumentPosition(second) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    const getExplanation = () => screen.getByText("No locations added yet.");
+    const getAddLocation = () =>
+      screen.getByRole("button", { name: i18n.t("locations.addLocation") });
+    const getHereEntry = () =>
+      screen.getByRole("region", { name: /Device time$/ });
     Given("the active UI language is en", async () => {
       await i18n.changeLanguage("en");
     });
-    When("the user opens the app with no locations", () => openApp());
-    Then(
-      "the empty state explanation is shown in the current language",
-      async () => {
-        expect(
-          await screen.findByText("No locations added yet."),
-        ).toBeInTheDocument();
+    When("the user opens the app with no locations", () => {
+      stubZoneCitiesFetch();
+      return openApp();
+    });
+    Then("the Here entry for the device time zone is shown first", async () => {
+      expect(
+        await screen.findByRole("region", { name: /Device time$/ }),
+      ).toBeVisible();
+      expect(isFollowing(getHereEntry(), getExplanation())).toBe(true);
+    });
+    And(
+      "the empty state explanation is shown in the current language below it",
+      () => {
+        expect(getExplanation()).toBeVisible();
+        expect(isFollowing(getHereEntry(), getExplanation())).toBe(true);
       },
     );
-    And('the "Add location" action is offered', () => {
-      expect(
-        screen.getByRole("button", { name: i18n.t("locations.addLocation") }),
-      ).toBeInTheDocument();
+    And('the "Add location" action is offered below it', () => {
+      expect(isFollowing(getExplanation(), getAddLocation())).toBe(true);
+    });
+    And("no location list is stored", () => {
+      expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).toBeNull();
     });
   });
 
