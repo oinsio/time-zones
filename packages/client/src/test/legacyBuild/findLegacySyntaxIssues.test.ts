@@ -44,6 +44,15 @@ describe("findLegacySyntaxIssues", () => {
     "new RegExp(pattern);",
     "new Map();",
     "a.b(c);",
+    "a && b;",
+    "a || b;",
+    'Foo("(?<=a)b");',
+    'new Foo("(?<=a)b");',
+    "RegExp();",
+    "new RegExp(5);",
+    "new RegExp(`(?<=a)b`);",
+    "x.RegExp('(?<=a)b');",
+    "/a/.test(x);",
   ])("should allow %s", (source) => {
     expect(constructsOf(source)).toEqual([]);
   });
@@ -70,6 +79,10 @@ describe("findInsetShorthand", () => {
     [".a{top:0;inset-inline:0}", 0],
     [".a{--tw-ring-inset: ;top:0}", 0],
     ["", 0],
+    ["inset:0", 1],
+    [".a{top:0}.b{ inset:0}", 1],
+    [".a{top:0;\ninset:0}", 1],
+    [".a{top:0;xinset:0}", 0],
   ])("should find in %s the count %i", (css, count) => {
     expect(findInsetShorthand(css)).toHaveLength(count);
   });
@@ -82,6 +95,9 @@ describe("findDvhWithoutFallback", () => {
     ".x{min-height:100dvh;min-height:100vh}",
     ".x{height:100vh;min-height:100dvh}",
     "@media(min-width:1px){.y{height:50.5dvh}}",
+    ".x{ height : 100dvh }",
+    '.x{content:"a:100dvh"}',
+    ".x{width:100vh;height:100dvh}",
   ])("should report %s", (css) => {
     expect(findDvhWithoutFallback(css)).toHaveLength(1);
   });
@@ -93,6 +109,14 @@ describe("findDvhWithoutFallback", () => {
     "",
   ])("should not report %s", (css) => {
     expect(findDvhWithoutFallback(css)).toEqual([]);
+  });
+
+  it("should trim the selector and the declaration in the finding", () => {
+    expect(
+      findDvhWithoutFallback(".a{top:0}  .b  { height : 100dvh }"),
+    ).toEqual([
+      `${LegacyConstruct.DVH_WITHOUT_FALLBACK}: .b { height: 100dvh }`,
+    ]);
   });
 
   it("should name the rule", () => {

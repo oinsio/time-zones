@@ -2,8 +2,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { UPDATE_RECHECK_INTERVAL_MS } from "@/constants";
-import { createSwitchableClock } from "@/test/switchableClock";
 import { resetPageVisibility, setPageVisibility } from "@/test/pageVisibility";
+import { createSwitchableClock } from "@/test/switchableClock";
 import { useUpdateRecheckOnReturn } from "./useUpdateRecheckOnReturn";
 
 const START = "2026-03-08T07:30:00Z";

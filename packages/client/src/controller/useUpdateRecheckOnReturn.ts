@@ -21,6 +21,7 @@ export function useUpdateRecheckOnReturn(
 ): void {
   const lastCheckMilliseconds = useRef<number | null>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the start-up check counts from the moment the registration appears
   useEffect(() => {
     lastCheckMilliseconds.current = clock.instant().epochMilliseconds;
   }, [registration, clock]);

@@ -38,10 +38,10 @@ const config: Config = {
       // Fallback for engines without the dvh unit (iOS Safari before 15.4): both
       // declarations are emitted in this order. Implements FR12 of
       // support-legacy-ios-12-safari (D7).
-      minHeight: {
-        // Tailwind accepts a fallback array here; its typings only allow a string.
-        dvh: DVH_WITH_VH_FALLBACK as unknown as string,
-      },
+      // Tailwind accepts a fallback array here; its typings only allow a string.
+      minHeight: { dvh: DVH_WITH_VH_FALLBACK as unknown as string },
+      // The content scan also emits `.h-dvh` from the `min-h-dvh` class name.
+      height: { dvh: DVH_WITH_VH_FALLBACK as unknown as string },
       fontFamily: {
         sans: [MANROPE_FONT_FAMILY, ...defaultTheme.fontFamily.sans],
       },

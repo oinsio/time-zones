@@ -6,7 +6,7 @@ import {
 } from "../../../scripts/legacyCoreJs/buildLegacyCoreJsModules";
 
 describe("buildLegacyCoreJsModules", () => {
-  const importLines = buildLegacyCoreJsModules().split("\n");
+  const readImportLines = () => buildLegacyCoreJsModules().split("\n");
 
   it("should target iOS Safari 12", () => {
     expect(LEGACY_CORE_JS_TARGET).toBe("ios_saf 12.2");
@@ -15,16 +15,16 @@ describe("buildLegacyCoreJsModules", () => {
   it.each(["es.array.at", "es.object.has-own"])(
     "should import %s, which iOS 12 lacks",
     (moduleName) => {
-      expect(importLines).toContain(
+      expect(readImportLines()).toContain(
         `import "core-js/modules/${moduleName}.js";`,
       );
     },
   );
 
-  it.each(["es.promise", "es.object.from-entries"])(
+  it.each(["es.promise", "es.object.from-entries", "esnext.array.group"])(
     "should skip %s, which iOS 12 has",
     (moduleName) => {
-      expect(importLines).not.toContain(
+      expect(readImportLines()).not.toContain(
         `import "core-js/modules/${moduleName}.js";`,
       );
     },
@@ -32,7 +32,7 @@ describe("buildLegacyCoreJsModules", () => {
 
   it("should write one import per line and nothing else", () => {
     expect(
-      importLines.every((line) =>
+      readImportLines().every((line) =>
         /^import "core-js\/modules\/[\w.-]+\.js";$/.test(line),
       ),
     ).toBe(true);

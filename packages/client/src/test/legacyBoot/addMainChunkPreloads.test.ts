@@ -34,3 +34,13 @@ describe("addMainChunkPreloads", () => {
     expect(addMainChunkPreloads(linked, ["/a/main.js"])).toBe(linked);
   });
 });
+
+describe("addMainChunkPreloads placement", () => {
+  it("should put the links right before the closing head tag, one per line", () => {
+    const result = addMainChunkPreloads(HTML, ["/a/main.js", "/a/vendor.js"]);
+
+    expect(result).toContain(
+      '<title>T</title><link rel="modulepreload" crossorigin href="/a/main.js">\n    <link rel="modulepreload" crossorigin href="/a/vendor.js">\n  </head>',
+    );
+  });
+});
