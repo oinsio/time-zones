@@ -31,7 +31,6 @@
     "hereMarkLabel": "You are here",
     "hereMarkCaption": "here",
     "addLocation": "Add location",
-    "removeLocation": "Remove {{city}}",
     "homeMarkLabel": "Home location",
     "locationMenu": "Actions for {{city}}",
     "makeHome": "Make home",

@@ -15,6 +15,13 @@ export const createDayTrackSteps = (
     world.setInstant(timestamp),
   givenList: (_ctx: unknown, cities: string) => world.setStoredCities(cities),
   givenAppOpen: () => world.open(),
+  givenHome: (_ctx: unknown, city: string) => world.setHomeCity(city),
+  thenEveryTrackSpans: (_ctx: unknown, start: string, end: string) => {
+    for (const row of world.rows()) {
+      const day = world.dayBoundsOf(row.cityLabel);
+      expect([day.start.toString(), day.end.toString()]).toEqual([start, end]);
+    }
+  },
   givenMoscowAndUnknownZone: () =>
     world.setStoredLocations([
       buildLocation(cityEntry("Moscow")),

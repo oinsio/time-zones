@@ -1,11 +1,14 @@
 import { DEVICE_TIME_ZONE_FALLBACK_ID } from "@/constants";
 import { followReferenceZone } from "./followReferenceZone";
+import { buildLocationId } from "./locationId";
 import { moveLocationInList } from "./moveLocation";
 import { reduceHomeLocation } from "./reduceHomeLocation";
 import { reduceReferenceMoment } from "./reduceReferenceMoment";
 import { reduceSelectInstant } from "./reduceSelectInstant";
 import { LIVE_REFERENCE_MOMENT, type ReferenceMoment } from "./referenceMoment";
 import { canonicalizeTimeZoneId } from "./timeZoneId";
+
+export { buildLocationId, canonicalizeLocationId } from "./locationId";
 
 /**
  * World clock state, commands and reducer.
@@ -97,24 +100,6 @@ export type LocationCommand =
 export type LocationsReduceResult =
   | { ok: true; state: WorldClockState }
   | { ok: false; error: LocationErrorCode };
-
-const ID_SEPARATOR = "|";
-
-export function buildLocationId(timeZoneId: string, label: string): string {
-  return `${timeZoneId}${ID_SEPARATOR}${label}`;
-}
-
-/**
- * The id with its zone canonicalized, or `undefined` for an unknown zone. The
- * one owner of the id format besides `buildLocationId`.
- */
-export function canonicalizeLocationId(id: string): string | undefined {
-  const separatorIndex = id.indexOf(ID_SEPARATOR);
-  if (separatorIndex < 0) return undefined;
-  const timeZoneId = canonicalizeTimeZoneId(id.slice(0, separatorIndex));
-  if (timeZoneId === undefined) return undefined;
-  return buildLocationId(timeZoneId, id.slice(separatorIndex + 1));
-}
 
 function failWith(error: LocationErrorCode): LocationsReduceResult {
   return { ok: false, error };

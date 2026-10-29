@@ -8,14 +8,12 @@ import { createTrackBudgetWorld } from "./trackBudgetWorld";
 import { createTrackLabelsCheck } from "./trackLabelsCheck";
 
 const feature = await loadFeature("../time_selection_day_track.feature");
-
 const BUDGET_DEVICE_TIME_ZONE = "UTC";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
   const budget = createTrackBudgetWorld();
   const labelsCheck = createTrackLabelsCheck();
-
   f.BeforeEachScenario(async () => {
     await world.reset();
   });
@@ -27,6 +25,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     givenInstant,
     givenList,
     givenAppOpen,
+    givenHome,
+    thenEveryTrackSpans,
     givenPinnedHere,
     whenNextMinute,
     thenEveryHandleAt,
@@ -41,15 +41,20 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the user opens the app", givenAppOpen);
     Then(
       "every card shows a track for the day from {string} to {string}",
-      (_ctx, start: string, end: string) => {
-        for (const row of world.rows()) {
-          const day = world.dayBoundsOf(row.cityLabel);
-          expect([day.start.toString(), day.end.toString()]).toEqual([
-            start,
-            end,
-          ]);
-        }
-      },
+      thenEveryTrackSpans,
+    );
+  });
+
+  // @set-home-location-and-show-differences @FR4
+  f.Scenario("The day of the home location", ({ Given, And, When, Then }) => {
+    Given("the device time zone is {string}", givenZone);
+    And("the current instant is {string}", givenInstant);
+    And("the list contains {string}", givenList);
+    And("{string} is home", givenHome);
+    When("the user opens the app", givenAppOpen);
+    Then(
+      "every card shows a track for the day from {string} to {string}",
+      thenEveryTrackSpans,
     );
   });
 

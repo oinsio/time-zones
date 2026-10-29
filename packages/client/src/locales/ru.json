@@ -31,7 +31,6 @@
     "hereMarkLabel": "Вы здесь",
     "hereMarkCaption": "здесь",
     "addLocation": "Добавить место",
-    "removeLocation": "Удалить: {{city}}",
     "homeMarkLabel": "Домашнее место",
     "locationMenu": "Действия: {{city}}",
     "makeHome": "Сделать домашним",

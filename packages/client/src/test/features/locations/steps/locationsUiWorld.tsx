@@ -9,6 +9,9 @@ import { KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { removeLocationThroughMenu } from "@/test/removeLocationThroughMenu";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 
+/** Row parts that are not the row's own text: hour labels, offset difference, menu trigger. */
+export const HIDDEN_FROM_TEXT_SELECTOR =
+  "[data-hour-label],[data-offset-difference],[aria-haspopup]";
 export const NOT_JSON = "{not json";
 
 export const cityEntry = (label: string) => ({

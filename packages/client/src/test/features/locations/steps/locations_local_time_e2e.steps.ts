@@ -13,7 +13,7 @@ const PLACE_COLUMN_XPATH =
 const TIME_TEXT_XPATH = "xpath=preceding-sibling::span";
 const LIVE_REGION_XPATH = "xpath=ancestor-or-self::*[@aria-live]";
 const DATE_ELEMENT = "time";
-const REMOVE_BUTTON = "button";
+const MENU_BUTTON = "button";
 
 type Box = { x: number; y: number; width: number; height: number };
 
@@ -32,7 +32,7 @@ const parts = async (row: Locator, city: string) => {
     time: await requireBox(dateElement.locator(TIME_TEXT_XPATH)),
     date: await requireBox(dateElement),
     card: await requireBox(row),
-    removeButton: await requireBox(row.locator(REMOVE_BUTTON).last()),
+    menuButton: await requireBox(row.locator(MENU_BUTTON).last()),
   };
 };
 
@@ -66,7 +66,7 @@ Then(
     expect(box.time.y).toBeLessThan(box.city.y + box.city.height);
     expect(box.time.y + box.time.height).toBeGreaterThan(box.city.y);
     expect(box.time.x + box.time.width).toBeLessThanOrEqual(
-      box.removeButton.x + ALIGNMENT_TOLERANCE_PX,
+      box.menuButton.x + ALIGNMENT_TOLERANCE_PX,
     );
     expect(box.date.y).toBeGreaterThanOrEqual(box.time.y + box.time.height);
     expect(

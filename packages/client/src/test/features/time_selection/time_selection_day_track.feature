@@ -76,3 +76,12 @@ Feature: Day track of a location card
     Given the list contains Kolkata, Kathmandu and New York
     When their tracks are presented for the day starting "2026-03-08T00:00:00Z" in English and then in Russian
     Then each track shows the same hour labels as the platform's own date formatting gives for that zone, with the hour label's format, in the same language, without the shared formatters
+
+  @set-home-location-and-show-differences @FR4
+  Scenario: The day of the home location
+    Given the device time zone is "Europe/Moscow"
+    And the current instant is "2026-03-08T07:30:00Z"
+    And the list contains "Almaty, Moscow"
+    And "Almaty" is home
+    When the user opens the app
+    Then every card shows a track for the day from "2026-03-07T19:00:00Z" to "2026-03-08T19:00:00Z"
