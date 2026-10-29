@@ -11,7 +11,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `@show-here-entry-for-device-time @FR-X` tags above scenarios, and `// @show-here-entry-for-device-time @FR-X` before `f.Scenario`;
   - `// Verifies NFR-X of show-here-entry-for-device-time` in E2E steps;
   - `Implements FR-X of show-here-entry-for-device-time` in the JSDoc of new or changed production code.
-- **Glossary:** use only `docs/glossary/` terms (Here entry, Here mark, exemplar city, device time zone, offset difference, Location menu). The Here entry is never called a location in code, specs or strings, and never a "default location" or "auto-added location".
+- **Glossary:** use only `docs/glossary/` terms (Here entry, Here mark, exemplar city, device time zone, offset difference, Location menu; the last two as the pending predecessor patch defines them, section 9). The Here entry is never called a location in code, specs or strings, and never a "default location" or "auto-added location".
 - **File size:** every file stays under 200 lines. "design Dn" refers to `design.md`.
 
 ## 1. Strings (no TDD)
@@ -103,11 +103,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 6. Views (TDD)
 
 - [ ] 6.1 Refactor without behaviour change: extract the place column, `LocalDateTime` and `DayTrack` layout of `LocationRow` into `views/shared/ZoneRowContent.tsx` (design D5). Verify that `npx vitest run src/views/shared` passes unchanged.
-- [ ] 6.2 TDD `views/shared/HereEntryRow.tsx`, exported from `views/shared/index.ts` (design D5; FR2, FR4, FR5, UX1, UX3). It is a `<section>` named by `accessibleName`, with the Here mark, city, caption, meta line, time and date, and a day track wired to the track handlers. It has no drag handle, no Location menu and no remove action. Tests in `HereEntryRow.test.tsx` with M2 data:
+- [ ] 6.2 TDD `views/shared/HereEntryRow.tsx`, exported from `views/shared/index.ts` (design D5; FR2, FR4, FR5, UX1). It is a `<section>` named by `accessibleName`, with the Here mark, city, caption, meta line, time and date, and a day track wired to the track handlers. It has no drag handle, no Location menu and no remove action. Tests in `HereEntryRow.test.tsx` with M2 data:
   - the content;
   - no `button` (no drag handle, menu or remove action);
-  - the slider named `Время — Алматы`;
-  - the city slot is single-line (`truncate`).
+  - the slider named `Время — Алматы`.
+
+  The kept height (UX3) and the Tab order (NFR-A2) are layout and keyboard checks, so they are E2E scenarios in task 8.1, not jsdom tests.
 
   Verify `npx vitest run src/views/shared/HereEntryRow.test.tsx`.
 - [ ] 6.3 TDD `CardsView` (design D5, D6; FR1, FR7, FR9, UX2). Tests in new `views/cards/CardsView.hereEntry.test.tsx`, with a loader passed to `LocationsProvider`:
@@ -145,8 +146,10 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a keyboard variant of "Time selection from the Here entry": arrow keys on its slider (FR5);
   - "Tap on the Here entry's day track without Pointer Events", with `emulateEngineWithoutPointerEvents` (FR12);
   - "Name and list size" (NFR-A2);
+  - "One Tab stop on the Here entry" (NFR-A2): press Tab from the page start until the focus enters the Here entry `<section>`, assert that the focused element is the slider named `Время — Алматы`, then press Tab once and assert that the focus is outside the section;
   - "No violations" with axe-core, in 3 states × 2 themes (NFR-A1). Travelling is home Moscow with the list Moscow, Kolkata, New York;
-  - "Narrow and wide screens", with no horizontal scrolling and the same layout as the Moscow card (NFR-R1, UX1).
+  - "Narrow and wide screens", with no horizontal scrolling and the same layout as the Moscow card (NFR-R1, UX1);
+  - "The exemplar city keeps the height" (UX3): hold the data with `holdSearchData()` (`steps/locations_ui_e2e.fixtures.ts`), read the Here entry's `boundingBox()` height and the Moscow card's `y` while it shows `Almaty`, call `releaseHeldRequests()`, wait for `Алматы`, and assert both values are equal at 375 px and 1024 px.
 
   Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "@show-here-entry-for-device-time"`.
 - [ ] 8.2 Add the `@view-contract` scenario "See the Here entry without home" to `locations/locations_view_contract_e2e.feature` (FR11). Verify with `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --project view-contract-cards --grep "See the Here entry without home"`.
@@ -160,13 +163,38 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 9. Handoff patches (files the implement stage may not edit)
 
-- [ ] 9.1 Handoff H1: write `openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch` and its README section (`.gnomish/stages/specify/handoff.md`, "Handoff items"). The patch updates `docs/glossary/`:
+**Apply order.** The archived `set-home-location-and-show-differences` left two patches that `main` does not carry yet:
+
+- `handoff/H1-glossary-home-location.patch` adds **Location menu** and **Home mark** and gives **Offset difference** its *Code:* `getOffsetDifferenceMinutes`, `formatOffsetDifference`. On `main`, `docs/glossary/` has no Location menu entry, and Offset difference is still *(planned)* (`time.md:21`);
+- `handoff/H2-architecture-docs-home-location.patch` adds the "Location menu" row right above "Here entry" in `docs/architecture/views.md`.
+
+Both touch lines next to the ones H1 and H2 below change. H1 and H2 are made against `main` as committed, so they apply there with plain `git apply`. After the predecessor patches they apply with `git apply -C0`. `--3way` does not help, because the changes sit on adjacent lines and conflict. Each README section states this order.
+
+**Scratch check** used by 9.1 and 9.2, run from the repository root. It copies `docs/` of `HEAD` into a temporary folder and touches no repository file. `<patch>` is the patch of the task:
+
+```
+pred=openspec/changes/archive/2026/10/2026-10-29-set-home-location-and-show-differences/handoff
+scratch=$(mktemp -d) && git archive HEAD docs | tar -x -C "$scratch"
+(cd "$scratch" && git apply "$OLDPWD/$pred/H1-glossary-home-location.patch" "$OLDPWD/$pred/H2-architecture-docs-home-location.patch" && git apply -C0 "$OLDPWD/<patch>")
+```
+
+- [ ] 9.1 Handoff H1: write `openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch` and its README section (`.gnomish/stages/specify/handoff.md`, "In `openspec/changes/<name>/handoff/`"). The patch updates `docs/glossary/`:
   - `locations.md`: Here entry drops *(planned)*, adds *RU:* строка «Здесь», мета «Время устройства» and *Code:* `getHereEntry`, `presentHereEntry`, `useHereEntry`, `HereEntryRow`. Location row adds `presentZoneMoment` to *Code:* and "*Not:* the Here entry";
   - `search.md`: Exemplar city gets *Code:* `CitySearch.getExemplarCity`, `deriveCityNameFromTimeZoneId`;
   - `views.md`: View contract adds the Here entry.
 
-  Verify from the repository root with `git apply --check openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch`, `git status --short docs` (it must print nothing), and `grep -c "^+.*useHereEntry" openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch` ≥ 1.
-- [ ] 9.2 Handoff H2: write `handoff/H2-architecture-views-here-entry.patch` and its README section. The patch updates `docs/architecture/views.md`. In "Here entry" (line 80), it says outside the numbered list, shown in the empty state, meta "Device time · UTC+5". The README notes that it applies after H2 of `set-home-location-and-show-differences` with `git apply --3way` if the "Row header" line was changed first. Verify from the repository root with `git apply --check openspec/changes/show-here-entry-for-device-time/handoff/H2-architecture-views-here-entry.patch`, `git status --short docs` (it must print nothing), and `grep -c "^+.*Device time · UTC+5" openspec/changes/show-here-entry-for-device-time/handoff/H2-architecture-views-here-entry.patch` = 1.
+  The README section states the apply order. Verify from the repository root:
+  - `git apply --check openspec/changes/show-here-entry-for-device-time/handoff/H1-glossary-here-entry.patch`;
+  - the scratch check with this patch exits 0, and then `grep -c "useHereEntry" "$scratch/docs/glossary/locations.md"` ≥ 1 and `grep -c "Location menu" "$scratch/docs/glossary/locations.md"` ≥ 1, so both changes' entries are there;
+  - `git status --short docs` prints nothing.
+- [ ] 9.2 Handoff H2: write `openspec/changes/show-here-entry-for-device-time/handoff/H2-architecture-here-entry.patch` and its README section. The patch updates:
+  - `docs/architecture/views.md`, "Here entry" (line 80): outside the numbered list, shown in the empty state, meta "Device time · UTC+5";
+  - `docs/architecture/domain-model.md`, "Selectors" (lines 89–90). Today the `getRows(state)` row says the display rows put "the derived Here entry first", and `getLocationSnapshot` lists an "is-derived" flag. The patch makes `getRows` return `locations` only, adds a `getHereEntry(state)` row (the Here entry's time zone when no location matches the device time zone, otherwise nothing; design D1), and drops "is-derived", because the Here entry is not a row (design D2, D5).
+
+  The README section states the apply order. Verify from the repository root:
+  - `git apply --check openspec/changes/show-here-entry-for-device-time/handoff/H2-architecture-here-entry.patch`;
+  - the scratch check with this patch exits 0, and then `grep -c "getHereEntry" "$scratch/docs/architecture/domain-model.md"` = 1, `grep -c "is-derived" "$scratch/docs/architecture/domain-model.md"` = 0, `grep -c "Device time · UTC+5" "$scratch/docs/architecture/views.md"` = 1 and `grep -c "Location menu" "$scratch/docs/architecture/views.md"` ≥ 1;
+  - `git status --short docs` prints nothing.
 
 ## 10. Final verification
 
@@ -182,11 +210,11 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## Human follow-up
 
-The operator reviews these on the PR that the deliver stage opens, then applies the patches.
+The operator reviews these on the PR that the deliver stage opens, then applies the patches. If the two pending patches of `set-home-location-and-show-differences` are applied first, H1 and H2 go on with `git apply -C0`; otherwise with plain `git apply` (section 9, "Apply order").
 
 - H1 (FR2, FR8): apply `handoff/H1-glossary-here-entry.patch`. It sets the owners of Here entry, Exemplar city and Location row, and adds the Here entry to the View contract in `docs/glossary/`.
   Why manual: the implement stage writes only under `packages/`, and the glossary lives in `docs/glossary/`.
-  Automated part: `git apply --check` in task 9.1. The owners it names are covered by the tests of sections 2–6.
-- H2 (FR1, FR7, NFR-A2): apply `handoff/H2-architecture-views-here-entry.patch`. It updates "Here entry" in `docs/architecture/views.md`.
-  Why manual: the implement stage writes only under `packages/`, and the document lives in `docs/architecture/`.
-  Automated part: `git apply --check` in task 9.2. The behaviour it describes is covered by the features of sections 7–8.
+  Automated part: `git apply --check` and the scratch check in task 9.1. The owners it names are covered by the tests of sections 2–6.
+- H2 (FR1, FR7, NFR-A2): apply `handoff/H2-architecture-here-entry.patch`. It updates "Here entry" in `docs/architecture/views.md` and the selectors in `docs/architecture/domain-model.md`.
+  Why manual: the implement stage writes only under `packages/`, and both documents live in `docs/architecture/`.
+  Automated part: `git apply --check` and the scratch check in task 9.2. The behaviour it describes is covered by the features of sections 7–8.

@@ -28,7 +28,8 @@ Glossary terms (`docs/glossary/`, written as a handoff patch, see `tasks.md`):
 - **Exemplar city** (`search.md`): add *Code:* `CitySearch.getExemplarCity` and `deriveCityNameFromTimeZoneId`. Today the term has no code owner, and deriving a name from a time zone ID is a private `deriveNameFromZoneId` in `adapters/city-search/zoneCitiesSource.ts`.
 - **Location row** (`locations.md`): *Code:* adds `presentZoneMoment` (the zone part shared with the Here entry). *Not:* the Here entry.
 - **View contract** (`views.md`): add the Here entry.
-- **Here mark**, **Offset difference**, **Location menu**: unchanged. The Here entry uses the same mark kind and the same matching rule.
+- **Here mark**: unchanged. The Here entry uses the same mark kind and the same matching rule.
+- **Offset difference** and **Location menu**: not changed by this change. On `main`, Offset difference is still *(planned)* without a *Code:* part (`time.md`), and there is no Location menu entry. Both come from the pending glossary patch of the archived `set-home-location-and-show-differences` (`handoff/H1-glossary-home-location.patch`), which names `getOffsetDifferenceMinutes`, `formatOffsetDifference` and `LocationMenu`, the owners on `main`. This change's glossary patch applies after it (`tasks.md`, "Apply order").
 
 ## Capabilities
 
@@ -60,7 +61,8 @@ None. The Here entry belongs to the Locations context.
   - screenshot baselines whose list is empty are re-approved, and two new states are added.
 - Docs, as handoff patches (the implement stage writes only under `packages/`):
   - the glossary entries above;
-  - `docs/architecture/views.md` ("Here entry": outside the numbered list, in the empty state, `UTC+5` instead of `GMT+5`).
+  - `docs/architecture/views.md` ("Here entry": outside the numbered list, in the empty state, `UTC+5` instead of `GMT+5`);
+  - `docs/architecture/domain-model.md` ("Selectors": `getHereEntry` in place of a Here entry inside `getRows`, no "is-derived" flag).
 - No new dependencies and no storage schema change. No new network: the zone cities data is the existing lazy file, precached by the PWA (`globPatterns` include `json` in `vite.config.ts`).
 
 ## Goals
@@ -153,7 +155,7 @@ None. The Here entry belongs to the Locations context.
 Feature files under `packages/client/src/test/features/`, tagged `@show-here-entry-for-device-time`:
 
 - `locations/locations_here_entry_unit.feature` (vitest-cucumber): when the Here entry is shown, content, offset difference with and without home, nothing to remove or move, following the device time zone and list changes, the derived and the exemplar city, page states, the renamed device time zone on outdated zone data, strings, the work bound.
-- `locations/locations_here_entry_e2e.feature` (playwright-bdd): reorder keeps it first with announcements, time selection by keys, tap without Pointer Events, accessible name and list size, axe-core, layout and no horizontal scrolling.
+- `locations/locations_here_entry_e2e.feature` (playwright-bdd): reorder keeps it first with announcements, time selection by keys, tap without Pointer Events, accessible name and list size, one Tab stop, axe-core, layout and no horizontal scrolling, the height kept when the exemplar city loads.
 - `locations/locations_view_contract_e2e.feature`: the `@view-contract` scenario "See the Here entry without home".
 - `main_page/main_page_states_unit.feature`: the empty state with the Here entry.
 - `locations/locations_ui_e2e.feature` and `locations/locations_search_shortcut_e2e.feature`: the modified lazy-data scenarios, and the screenshot outline with the two new states.

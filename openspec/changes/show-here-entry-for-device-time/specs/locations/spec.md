@@ -244,6 +244,14 @@ The Here entry SHALL be outside the numbered location list, so assistive technol
 - **AND** the location list has 2 items
 - **AND** the Here entry's slider is named `Время — Алматы`
 
+#### Scenario: One Tab stop on the Here entry
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the interface language is Russian
+- **AND** the list is Moscow
+- **WHEN** the user moves the focus through the page with Tab
+- **THEN** exactly one element of the Here entry takes the focus: the slider named `Время — Алматы`
+- **AND** the next Tab moves the focus out of the Here entry
+
 #### Scenario: No violations
 - **GIVEN** the Here entry is shown above a list, in the empty state, or while travelling with home set
 - **WHEN** axe-core checks the page in the light and dark themes
@@ -257,6 +265,16 @@ The Here entry SHALL use the card layout: text above the day track below 768 px,
 - **WHEN** the viewport is 320 px and then 2560 px wide
 - **THEN** the page does not scroll horizontally
 - **AND** the Here entry's layout matches the Moscow card's layout
+
+#### Scenario: The exemplar city keeps the height
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the interface language is Russian
+- **AND** the zone cities data is held back
+- **AND** the list is Moscow
+- **WHEN** the user opens the app and the Here entry shows `Almaty`
+- **AND** the zone cities data finishes loading and the Here entry shows `Алматы`
+- **THEN** the Here entry's height is the same as before the load
+- **AND** the Moscow card has not moved
 
 #### Scenario: Approved screenshots
 - **GIVEN** the device time zone is `Asia/Almaty`
