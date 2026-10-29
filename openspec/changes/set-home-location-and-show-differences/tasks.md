@@ -126,7 +126,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - E2E helpers that name the button: `test/features/locations/steps/locationsReorderE2eHelpers.ts:24` builds its prefix from `locations.locationMenu` ("Actions for "), so `readListOrder` reads the menu buttons. `removeButton` in `locationsE2eHelpers.ts:67` becomes `menuButton` ("Actions for {city}"), with a `removeThroughMenu(page, city)` next to it. Update its callers in `locations_view_contract_e2e.steps.ts` (lines 11, 73, 82, 127). `locations_local_time_e2e.steps.ts:35` still takes the row's last `button`, which is now the menu button, so it stays unchanged.
 
   Covers FR11. Verify, one command at a time:
-  - `grep -rnE "(^|[^A-Za-z])locations\.removeLocation|\"removeLocation\"" src` prints nothing;
+  - `grep -rnE "(^|[^A-Za-z])locations\.removeLocation|\"removeLocation\":" src` prints nothing. The `:` matches the locale key, not the `"removeLocation",` entry in the key list of `controller/useLocations.test.tsx:28`, which names the hook action that stays (5.1);
   - `pnpm --filter @time-zones/client typecheck`;
   - `npx vitest run src/locales/locales.test.ts src/views/shared/LocationRow.test.tsx src/views/shared/LocationList.test.tsx src/views/cards/CardsView.test.tsx`;
   - `npx vitest run <steps file>`, one file per run, for every steps file that imports a world changed above:
