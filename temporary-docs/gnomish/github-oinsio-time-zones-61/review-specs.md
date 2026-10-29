@@ -105,7 +105,8 @@
 - Impact: implemented as written, an existing stable requirement and its E2E break without a declared change. The implementer must either edit an existing scenario of a stable spec with no delta (the archive then merges a spec that still demands one Tab stop) or leave `test:bdd` red. The task asks for the input on the Here entry, so the stable requirement has to change on purpose.
 - Fix: add `specs/locations/spec.md` with `## MODIFIED Requirements` → "Accessible Here entry", restating the whole requirement with: "Its time is a wall-time input and its day track one Tab stop named like a card's: Tab reaches the time button, then the slider, then leaves the Here entry" (keep the existing `implements` comment and append `NFR-A2 of add-wall-time-input-with-hint`). Rename the scenario to "Two Tab stops on the Here entry": the first stop is the button whose name starts with «Ввести время — Алматы», the second the slider `Время — Алматы`, the next Tab leaves. Keep "Name and list size" and "No violations" unchanged. In `proposal.md` add `locations` under "Modified Capabilities" and a "MODIFIED: the Here entry has two Tab stops, the time button and the slider" bullet in "What Changes". In `tasks.md` 6.4 add: update `locations/locations_here_entry_e2e.feature` and its step (count 2 stops in that order), tagged `@add-wall-time-input-with-hint @NFR-A2`.
 - Fix risk: the step `exactly one element of the Here entry takes the focus` is shared by no other feature, so it is renamed, not duplicated. The scenario has no fixed clock, so the step must match the name by its city prefix, not by the full time. Adds one more spec file to the change.
-- Status: open
+- Status: fixed
+- Resolution: added specs/locations/spec.md (MODIFIED "Accessible Here entry": time button then slider, implements NFR-A2 of add-wall-time-input-with-hint; the scenario keeps its name "One Tab stop on the Here entry" because openspec validate refuses a MODIFIED block that drops a scenario, and it now expects two stops in order, so the day track stays one Tab stop); proposal What Changes, NFR-A2, Modified Capabilities and Behavior name it; tasks.md 6.4 updates locations_here_entry_e2e.feature and its step (2 stops, button matched by city prefix) with @add-wall-time-input-with-hint @NFR-A2.
 
 ### R2 — WARNING — The MODIFIED date-selection text says every GAP becomes UNIQUE on a reference-zone change
 - Location: `openspec/changes/add-wall-time-input-with-hint/specs/date-selection/spec.md:4`
@@ -114,7 +115,8 @@
 - Impact: after the archive, the stable `date-selection` and `time-selection` specs disagree about the status after a home change. An implementer or a later change that follows `date-selection` keeps today's rule in `followReferenceZone` (`model/followReferenceZone.ts`: every pinned `GAP` → `UNIQUE` when the reference zone changed), which ends the hint on a home change and breaks FR7 and the scenario "A home change keeps the hint".
 - Fix: in `specs/date-selection/spec.md:4` replace that sentence with "A change of the reference zone keeps the pinned instant; a moment that a date change reported as `GAP` is then reported as `UNIQUE`. The status of a moment pinned by a wall-time input follows the `time-selection` capability: it stays for a location, and on the Here entry it ends when the device time zone changes." Do not write that every wall-time input "keeps its status": a device time zone change with no home is a reference-zone change and ends the hint on the Here entry (D2 rule 3).
 - Fix risk: low. The scenario "A device time zone change drops the gap note" (`specs/date-selection/spec.md:60-68`, date-change `GAP`) and "A device time zone change ends the hint on the Here entry" (`specs/time-selection/spec.md:200-208`) both still hold under the new text, and it adds no behaviour beyond design D2. The sentence names the time-selection rules, so a later edit of D2 rule 3 has to update it too.
-- Status: open
+- Status: fixed
+- Resolution: specs/date-selection/spec.md now limits GAP to UNIQUE on a reference-zone change to a moment a date change reported as GAP, and says a wall-time input follows time-selection (stays for a location, ends on the Here entry when the device time zone changes).
 
 ### R3 — WARNING — Confirming or closing by leaving the field (blur, Tab) has no test
 - Location: `openspec/changes/add-wall-time-input-with-hint/tasks.md:56`
@@ -123,7 +125,8 @@
 - Impact: the blur handler, which design.md names as the iOS 12 commit path when the numeric keyboard closes, can ship broken (no commit, or commit without a change, or the error dropped on blur) with every test green; NFR-A4's Tab clause goes untested, against rule 1 of `test-planning.md` ("Every FR/NFR/UX from proposal must have at least one automated test covering it").
 - Fix: in `tasks.md` 5.1 add jsdom cases to `WallTimeInput.test.tsx`: blur after typing `1040` calls `onConfirm` with `1040`; blur with the text unchanged closes without `onConfirm`; blur after typing `9:3` with `INVALID_TEXT` keeps the field and shows the error. In `specs/time-selection/spec.md` "Keyboard-safe wall-time input" add the scenario "Tab confirms the field" (open New York, type `1040`, press Tab → New York shows `10:40`), and list it in task 6.4 with `@NFR-A4 @FR3`.
 - Fix risk: low. In jsdom, blur is fired with `fireEvent.blur`; the real focus move by Tab stays in the E2E scenario, as `bdd-e2e.md` places focus behaviour in a real browser.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 5.1 adds three jsdom blur cases (commit on change, close without change, error kept on 9:3); specs/time-selection/spec.md "Keyboard-safe wall-time input" gains scenario "Tab confirms the field", listed in task 6.4 with @NFR-A4 @FR3; design.md Risks "Blur on iOS 12" now points at both.
 
 ### R4 — SUGGESTION — Task 6.1 points the renamed-zone scenario at the stub of a model test, not at the existing feature helpers
 - Location: `openspec/changes/add-wall-time-input-with-hint/tasks.md:63`
@@ -132,7 +135,8 @@
 - Impact: small. The implementer may copy the stub of the model test into the new step file, a second copy of an existing test helper, instead of reusing `legacyZoneWorld.ts`; the scenario itself can be written correctly either way.
 - Fix: in `tasks.md` 6.1 replace "(FR13, with the stub of 2.2)" with "(FR13: `startOnOutdatedZoneData()` of `test/features/browser_compatibility/steps/legacyZoneWorld.ts`, `SET_WALL_TIME` dispatched to `reduceLocations` of the returned `modules.model`, `restoreZoneData()` in `f.AfterEachScenario`, as `locations/steps/locations_here_entry_data_unit.steps.tsx` does for "Renamed device time zone")".
 - Fix risk: none; the scenario stays in the same feature file, and step files already import from another feature's `steps/` (`locations_here_entry_data_unit.steps.tsx` imports `legacyZoneWorld`).
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 6.1 now names startOnOutdatedZoneData() and restoreZoneData() of test/features/browser_compatibility/steps/legacyZoneWorld.ts, as locations_here_entry_data_unit.steps.tsx uses them, and forbids copying the stub of 2.2.
 
 ### R5 — SUGGESTION — `WallClockNote` and `WallClockNotePlacement` name a concept with no glossary entry
 - Location: `openspec/changes/add-wall-time-input-with-hint/proposal.md:31-37`
@@ -141,7 +145,8 @@
 - Impact: a later change looking up "which note is shown" finds two entries that both point at `getWallClockNote` and may add a second placement rule; low stakes.
 - Fix: in the proposal "What Changes" glossary bullets add "NEW **Wall-clock note** (`date-selection.md`) — the one note about a wall-clock time on screen: the gap note in the date bar or the wall-time hint in a row, never both. *Code:* `getWallClockNote`, `WallClockNote`, `WallClockNotePlacement`", and name it in task 7.1's H1 patch.
 - Fix risk: none; the H1 patch already edits `docs/glossary/date-selection.md`.
-- Status: open
+- Status: fixed
+- Resolution: proposal What Changes adds NEW glossary term Wall-clock note (date-selection.md, Code: getWallClockNote, WallClockNote, WallClockNotePlacement); tasks.md 7.1 H1 patch adds it with a grep check, and Human follow-up H1 mentions it.
 
 ### R6 — SUGGESTION — Design D1 assigns the command's string to the `PlainTime` field
 - Location: `openspec/changes/add-wall-time-input-with-hint/design.md:52`
@@ -150,7 +155,8 @@
 - Impact: small; the type checker catches it, but the design as written shows the wrong value for a field it says keeps "one meaning".
 - Fix: write `requestedWallTime: Temporal.PlainTime.from(time)` in D1 step 4.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: design.md D1 step 4 now pins requestedWallTime: Temporal.PlainTime.from(time).
 
 ## Verdict
 
