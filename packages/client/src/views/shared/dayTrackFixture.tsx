@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { afterAll, beforeAll, vi } from "vitest";
+import { vi } from "vitest";
 import { DayPeriod, type PresentedDayTrack } from "@/presenter";
 import { DayTrack } from "./DayTrack";
 
@@ -29,27 +29,6 @@ export const renderTrack = () =>
       onMoveTrack={vi.fn()}
     />,
   );
-
-/** jsdom has no PointerEvent; React reads `pointerType` and `pointerId` from it. */
-class FakePointerEvent extends MouseEvent {
-  pointerId: number;
-  pointerType: string;
-  constructor(type: string, init: PointerEventInit = {}) {
-    super(type, init);
-    this.pointerId = init.pointerId ?? 0;
-    this.pointerType = init.pointerType ?? "";
-  }
-}
-
-/** Registers a `PointerEvent` stand-in for the tests of the calling file. */
-export const useFakePointerEvents = () => {
-  beforeAll(() => {
-    vi.stubGlobal("PointerEvent", FakePointerEvent);
-  });
-  afterAll(() => {
-    vi.unstubAllGlobals();
-  });
-};
 
 export const TRACK_WIDTH = 400;
 

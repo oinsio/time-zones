@@ -5,6 +5,7 @@ import { initReactI18next } from "react-i18next";
 import { languageResolutionOptions, localeResources } from "@/i18n";
 import { systemClock } from "@/lib/temporal";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "./deviceTimeZone";
+import { FakePointerEvent } from "./fakePointerEvent";
 
 // jsdom doesn't implement ResizeObserver
 globalThis.ResizeObserver = class ResizeObserver {
@@ -12,6 +13,11 @@ globalThis.ResizeObserver = class ResizeObserver {
   unobserve() {}
   disconnect() {}
 } as unknown as typeof globalThis.ResizeObserver;
+
+// jsdom doesn't implement PointerEvent; a legacy test removes it with vi.stubGlobal
+if (typeof globalThis.PointerEvent !== "function") {
+  globalThis.PointerEvent = FakePointerEvent as unknown as typeof PointerEvent;
+}
 
 // jsdom doesn't implement window.matchMedia
 Object.defineProperty(window, "matchMedia", {
