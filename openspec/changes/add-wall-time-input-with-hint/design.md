@@ -49,7 +49,7 @@ It is reduced in new `model/reduceWallTime.ts`:
 1. Checks the shape: `time` must match `WALL_TIME_COMMAND_PATTERN` (`HH:MM`, hours 0–23, minutes 0–59), else new `LocationErrorCode.INVALID_TIME`. A `date` that `Temporal.PlainDate.from` rejects gives the existing `INVALID_DATE`. The lenient formats belong to the parser (D3) and are not repeated here.
 2. Finds the zone of the target: the location's `timeZoneId` (no such location → `LOCATION_NOT_FOUND`), or `getHereEntry(state)?.timeZoneId` for the Here entry (no Here entry, because a location now shows the device time → `LOCATION_NOT_FOUND`, the same "row is gone" answer).
 3. Calls `resolveWallClock(zone, date.toPlainDateTime(time))`. A `RangeError` beyond Temporal's range gives the existing `DATE_OUT_OF_RANGE`.
-4. Pins `{ mode: PINNED, instant, wallClockStatus: status, requestedWallTime: time, wallTimeTarget: target }`. When the state already holds an equal instant (`Instant#equals`), status and target, it returns the same state object, so the store does not notify (FR4).
+4. Pins `{ mode: PINNED, instant, wallClockStatus: status, requestedWallTime: Temporal.PlainTime.from(time), wallTimeTarget: target }`. When the state already holds an equal instant (`Instant#equals`), status and target, it returns the same state object, so the store does not notify (FR4).
 
 There is no second `toZonedDateTime` with a disambiguation option. `requestedWallTime` keeps one meaning, "the wall-clock time the user asked for": for a date change a time of the reference zone, for a wall-time input a time of the target's zone; `wallTimeTarget` says which. No BigInt: instants are compared with `Instant#equals`, never through `epochNanoseconds` (FR13).
 
