@@ -6,10 +6,10 @@
 |---|---|
 | Stale claims | 0 |
 | Requirements fully covered | 46/47 |
-| Contradictions | 4 |
+| Contradictions | 3 |
 | CRITICAL | 1 |
-| WARNING | 3 |
-| SUGGESTION | 2 |
+| WARNING | 2 |
+| SUGGESTION | 3 |
 
 ## Freshness
 
@@ -95,7 +95,6 @@
 - The change gives the Here entry a focusable time button (`proposal.md:91` FR1, `specs/time-selection/spec.md:3-4`, design D6), but the stable `openspec/specs/locations/spec.md:1185` ("Its day track MUST be one Tab stop") and its scenario "One Tab stop on the Here entry" (`locations/spec.md:1197-1203`, "exactly one element of the Here entry takes the focus: the slider") are not modified by any delta (R1).
 - `specs/date-selection/spec.md:4` states, unqualified, "A change of the reference zone keeps the pinned instant; a moment reported as `GAP` is then reported as `UNIQUE`", while `specs/time-selection/spec.md:190-198` ("A home change keeps the hint … with the status `GAP`") and design D2 (`design.md:79`) keep `GAP` for a wall-time input on a location (R2).
 - `design.md:148` says "blur-confirms is covered by the Tab case", but no task has a Tab or blur case: `tasks.md:56` (5.1) tests Enter, Escape, `INVALID_TEXT`, `CLOSED`; `tasks.md:66` (6.4) and `specs/time-selection/spec.md:277-282` confirm with Enter (R3).
-- `tasks.md:34` (2.2) puts the renamed-zone case in its own file "so the stub never leaks", while `tasks.md:63` (6.1) puts the scenario "A renamed zone on outdated zone data" "with the stub of 2.2" into the shared rendered-app feature with about twenty other scenarios (R4).
 
 ## Findings
 
@@ -111,10 +110,10 @@
 ### R2 — WARNING — The MODIFIED date-selection text says every GAP becomes UNIQUE on a reference-zone change
 - Location: `openspec/changes/add-wall-time-input-with-hint/specs/date-selection/spec.md:4`
 - Rule: `.claude/rules/delta-specs.md`
-- Problem: The restated requirement keeps the sentence "A change of the reference zone keeps the pinned instant; a moment reported as `GAP` is then reported as `UNIQUE`." The same change decides the opposite for a wall-time input on a location: `specs/time-selection/spec.md:190-198` ("A home change keeps the hint" … "pinned … with the status `GAP`") and design D2 (`design.md:78-79`: rule 1 applies only with no target, "a location target → nothing").
-- Impact: after the archive, the stable `date-selection` and `time-selection` specs disagree about the status after a home change. An implementer or a later change that follows `date-selection` keeps today's rule in `followReferenceZone` (every `GAP` → `UNIQUE`), which ends the hint on a home change and breaks FR7 and the scenario "A home change keeps the hint".
-- Fix: in `specs/date-selection/spec.md:4` replace that sentence with "A change of the reference zone keeps the pinned instant; a moment that a date change reported as `GAP` is then reported as `UNIQUE` (a wall-time input keeps its status, see the `time-selection` capability)."
-- Fix risk: none — the scenario "A device time zone change drops the gap note" (date-change `GAP`) still holds under the qualified text.
+- Problem: The restated requirement keeps the sentence "A change of the reference zone keeps the pinned instant; a moment reported as `GAP` is then reported as `UNIQUE`." The same change decides otherwise for a wall-time input on a location: `specs/time-selection/spec.md:190-198` ("A home change keeps the hint" … "pinned … with the status `GAP`") and design D2 (`design.md:78-79`: rule 1 applies only with no target, "a location target → nothing"). For a Here entry target the status does follow the device time zone (`design.md:80`, `specs/time-selection/spec.md:200-208`), but by D2 rule 3, not by the reference-zone rule: with a home set, a home change is a reference-zone change that leaves a Here entry target untouched (`getHereEntry` in `model/hereEntry.ts:13` does not depend on the home).
+- Impact: after the archive, the stable `date-selection` and `time-selection` specs disagree about the status after a home change. An implementer or a later change that follows `date-selection` keeps today's rule in `followReferenceZone` (`model/followReferenceZone.ts`: every pinned `GAP` → `UNIQUE` when the reference zone changed), which ends the hint on a home change and breaks FR7 and the scenario "A home change keeps the hint".
+- Fix: in `specs/date-selection/spec.md:4` replace that sentence with "A change of the reference zone keeps the pinned instant; a moment that a date change reported as `GAP` is then reported as `UNIQUE`. The status of a moment pinned by a wall-time input follows the `time-selection` capability: it stays for a location, and on the Here entry it ends when the device time zone changes." Do not write that every wall-time input "keeps its status": a device time zone change with no home is a reference-zone change and ends the hint on the Here entry (D2 rule 3).
+- Fix risk: low. The scenario "A device time zone change drops the gap note" (`specs/date-selection/spec.md:60-68`, date-change `GAP`) and "A device time zone change ends the hint on the Here entry" (`specs/time-selection/spec.md:200-208`) both still hold under the new text, and it adds no behaviour beyond design D2. The sentence names the time-selection rules, so a later edit of D2 rule 3 has to update it too.
 - Status: open
 
 ### R3 — WARNING — Confirming or closing by leaving the field (blur, Tab) has no test
@@ -126,13 +125,13 @@
 - Fix risk: low. In jsdom, blur is fired with `fireEvent.blur`; the real focus move by Tab stays in the E2E scenario, as `bdd-e2e.md` places focus behaviour in a real browser.
 - Status: open
 
-### R4 — WARNING — The renamed-zone scenario is put in the shared rendered-app feature, against task 2.2's isolation
+### R4 — SUGGESTION — Task 6.1 points the renamed-zone scenario at the stub of a model test, not at the existing feature helpers
 - Location: `openspec/changes/add-wall-time-input-with-hint/tasks.md:63`
 - Rule: `.claude/rules/bdd-unit.md`
-- Problem: Task 2.2 (`tasks.md:34`) puts the legacy case in its own file `model/reduceWallTime.legacy.test.ts` "so the stub never leaks", because the stub needs `vi.resetModules()` and a fresh `import("@/model")`. Task 6.1 then puts "A renamed zone on outdated zone data" "with the stub of 2.2" into `time_selection_wall_time_input_unit.feature`, whose steps render the app "as in `steps/timeSelectionWorld.tsx`" together with about twenty other scenarios. The modules a statically rendered app imports keep the `Intl.DateTimeFormat` they first saw (`test/features/browser_compatibility/steps/legacyZoneWorld.ts`, "Fresh copies of the modules that keep the `Intl.DateTimeFormat` they first see"), so the stub either has no effect on the rendered app or leaks into the other scenarios of the file.
-- Impact: the FR13 / M8 scenario either passes without exercising the shim (it never proves the renamed-zone path through `SET_WALL_TIME`) or makes the other scenarios of the shared feature flaky.
-- Fix: in `tasks.md` 6.1 remove "A renamed zone on outdated zone data" and add a task (6.1a) writing `test/features/time_selection/time_selection_wall_time_legacy_zone.feature` with steps that use `startOnOutdatedZoneData()` of `browser_compatibility/steps/legacyZoneWorld.ts` and dispatch `SET_WALL_TIME` through the fresh model's `reduceLocations`. Verify with `npx vitest run src/test/features/time_selection/steps/time_selection_wall_time_legacy_zone.steps.ts`. Add the file to the proposal's "Behavior" list.
-- Fix risk: one more feature file; the step file imports a world from another feature's `steps/`, which the code already does (`locations/steps/locationsStates.ts` imports from `date_selection/steps` and `time_selection/steps`).
+- Problem: Task 6.1 asks for the scenario "A renamed zone on outdated zone data" "with the stub of 2.2". The stub of 2.2 (`tasks.md:34`) is the engine stub inside `lib/legacy/zoneShim.temporal.test.ts`, a plain Vitest file. For a shared vitest-cucumber feature the code already has the pattern: `locations/steps/locations_here_entry_data_unit.steps.tsx` runs "Renamed device time zone" (lines 147–178) with `startOnOutdatedZoneData()` of `browser_compatibility/steps/legacyZoneWorld.ts`, works on the fresh `engine.modules` it returns, and undoes the stub with `restoreZoneData()` in `f.AfterEachScenario` (lines 33–36). Task 6.1 does not name it.
+- Impact: small. The implementer may copy the stub of the model test into the new step file, a second copy of an existing test helper, instead of reusing `legacyZoneWorld.ts`; the scenario itself can be written correctly either way.
+- Fix: in `tasks.md` 6.1 replace "(FR13, with the stub of 2.2)" with "(FR13: `startOnOutdatedZoneData()` of `test/features/browser_compatibility/steps/legacyZoneWorld.ts`, `SET_WALL_TIME` dispatched to `reduceLocations` of the returned `modules.model`, `restoreZoneData()` in `f.AfterEachScenario`, as `locations/steps/locations_here_entry_data_unit.steps.tsx` does for "Renamed device time zone")".
+- Fix risk: none; the scenario stays in the same feature file, and step files already import from another feature's `steps/` (`locations_here_entry_data_unit.steps.tsx` imports `legacyZoneWorld`).
 - Status: open
 
 ### R5 — SUGGESTION — `WallClockNote` and `WallClockNotePlacement` name a concept with no glossary entry
@@ -155,4 +154,4 @@
 
 ## Verdict
 
-Needs revision. Blocking: R1 (the change breaks a stable `locations` requirement and its E2E without a delta). R2, R3 and R4 should be fixed in the same pass.
+Needs revision. Blocking: R1 (the change breaks a stable `locations` requirement and its E2E without a delta). The warnings R2 and R3 should be fixed in the same pass; R4–R6 are polish.
