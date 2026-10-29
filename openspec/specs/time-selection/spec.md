@@ -55,11 +55,11 @@ The handle of every track SHALL stand at the position of the effective instant w
 - **THEN** the UTC handle still stands at `0.75`
 
 ### Requirement: Select a time on a track
-Pressing a track with the pointer, or dragging its handle, SHALL pin the reference moment to the instant at the pointer's position. That instant MUST be rounded to the nearest 15-minute step counted from the start of the reference day. It MUST be clamped between the start of the day and the last step before the day's end, so a selection never leaves the reference day. Every card's time, date, UTC offset and handle MUST show the new moment in the same render as the selection, with no loading state. Selecting the instant that is already pinned MUST change nothing. A selection is reported with the pinned moment as `UNIQUE`. A mouse or pen MUST select on press. A touch MUST select only once the finger has moved horizontally along the track, or when it lifts after a tap that the browser did not cancel. A touch gesture that moves mostly vertically, or that the browser cancels to scroll, MUST select nothing.
+Pressing a track with the pointer, or dragging its handle, SHALL pin the reference moment to the instant at the pointer's position. That instant MUST be rounded to the nearest 15-minute step counted from the start of the reference day. It MUST be clamped between the start of the day and the last step before the day's end, so a selection never leaves the reference day. Every card's time, date, UTC offset and handle MUST show the new moment in the same render as the selection, with no loading state. Selecting the instant that is already pinned MUST change nothing. A selection is reported with the pinned moment as `UNIQUE`. A mouse or pen MUST select on press. A touch MUST select only once the finger has moved horizontally along the track, or when it lifts after a tap that the browser did not cancel. A touch gesture that moves mostly vertically, or that the browser cancels to scroll, MUST select nothing. On an engine without Pointer Events, a tap (a click at the tapped position) MUST select as a press does, with the same rounding and clamping; dragging along the track is not available there. On engines with Pointer Events a click MUST NOT add a selection of its own.
 
 Inputs: the pointer's position as a fraction of the track's width, the reference day, and the reference zone. Output: the pinned instant (ISO 8601 with `Z`). Errors: a selection whose instant is malformed (not ISO 8601 with `Z`) MUST be rejected as an invalid instant and MUST change nothing.
 
-<!-- implements FR3, FR8 of add-time-sliders-to-location-cards -->
+<!-- implements FR3, FR8 of add-time-sliders-to-location-cards; FR8, NFR-A2, UX1 of support-legacy-ios-12-safari -->
 
 #### Scenario: Dragging one track moves every card
 - **GIVEN** the interface language is English
@@ -95,6 +95,29 @@ Inputs: the pointer's position as a fraction of the track's width, the reference
 - **WHEN** a time selection arrives with the instant `2026-03-08T07:30:00` (no `Z`)
 - **THEN** the selection is rejected as an invalid instant
 - **AND** the moment is still live
+
+#### Scenario: A tap selects a time without Pointer Events
+- **GIVEN** the engine has no Pointer Events
+- **AND** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Almaty and New York
+- **WHEN** the user taps three quarters of the New York track
+- **THEN** the moment is pinned to `2026-03-08T13:00:00Z`
+- **AND** the Almaty card shows `18:00`
+
+#### Scenario: A finger tap keeps the slider accessible without Pointer Events
+- **GIVEN** the engine has no Pointer Events
+- **AND** the list contains Almaty and New York
+- **WHEN** the user taps three quarters of the New York track with a finger
+- **THEN** the moment is pinned to the time at that position
+- **AND** the track keeps its slider role, accessible name and value range
+- **AND** the arrow keys still move the selection by one track step
+
+#### Scenario: A click adds nothing where Pointer Events exist
+- **GIVEN** the engine has Pointer Events
+- **AND** the moment is live
+- **WHEN** a click arrives on a track with no pointer press before it
+- **THEN** the moment is still live
 
 ### Requirement: Move the handle with the keyboard
 A focused track SHALL move the reference moment by keys, counted in steps from the start of the reference day. Arrow Right and Arrow Up go to the first 15-minute step after the current value, and Arrow Left and Arrow Down to the last step before it. Page Up goes 60 minutes forward from the current step and Page Down 60 minutes back. Home goes to the start of the reference day and End to its last 15-minute step. Every result MUST be clamped to the reference day and pinned as a pointer selection is. The keys MUST NOT scroll the page and MUST NOT start a card reorder. Inputs: the key, the effective instant, the reference day. Output: the pinned instant. Errors: none; other keys change nothing. <!-- implements FR4 of add-time-sliders-to-location-cards -->
