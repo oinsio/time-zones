@@ -60,7 +60,9 @@ verify:
   - type: command
     command: |
       . .gnomish/lib/task-change.sh
-      . .gnomish/lib/task-base.sh
+      # Where the task branch started: the box has no origin, so never origin/main.
+      start=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "task" && $4 == "started" { print $1; exit }')
+      base=$(git rev-parse "$start^" 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null) || { echo "cannot tell where this task branch started: no 'gnomish: task started' commit and no origin/main"; exit 1; }
       outside=$({ git diff --name-only "$base"; git ls-files -o --exclude-standard; } | sort -u | grep -v "^$change/" | grep -vxF "$record" | grep -vxF "$reports/review-specs.md" | grep -v '^\.gnomish-task/' || true)
       [ -z "$outside" ] || { echo "$outside"; echo "the fix-specs stage revises only files under $change/ and the resolutions in $reports/review-specs.md - if you made the edits above, undo each of them yourself with: git checkout $base -- <file>; other active changes are someone else's work and stay exactly as they are"; exit 1; }
   # OpenSpec's own strict validation of this task's change, as after specify.
@@ -84,7 +86,8 @@ verify:
     command: |
       . .gnomish/lib/task-change.sh
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-specs#/ { print $1; exit }')
-      [ -n "$since" ] || { . .gnomish/lib/task-base.sh; since=$base; }
+      start=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "task" && $4 == "started" { print $1; exit }')
+      [ -n "$since" ] || since=$(git rev-parse "$start^" 2>/dev/null || git merge-base HEAD origin/main)
       review="$reports/review-specs.md"
       hunks=$(git diff -U0 "$since" -- "$review" | grep -E '^[-+]' | grep -vE '^(---|\+\+\+) ' || true)
       removed=$(printf '%s\n' "$hunks" | grep -E '^-' | grep -vxF -- '-- Status: open' || true)

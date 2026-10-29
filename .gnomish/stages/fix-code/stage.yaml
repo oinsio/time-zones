@@ -69,7 +69,8 @@ verify:
   # Files this branch added or changed under packages/client/src stay under the 300-line hard cap.
   - type: command
     command: >-
-      . .gnomish/lib/task-base.sh;
+      start=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "task" && $4 == "started" { print $1; exit }');
+      base=$(git rev-parse "$start^" 2>/dev/null || git merge-base HEAD origin/main 2>/dev/null) || { echo "cannot tell where this task branch started: no 'gnomish: task started' commit and no origin/main"; exit 1; };
       oversized=$({ git diff --name-only --diff-filter=AM "$base" -- packages/client/src;
       git ls-files -o --exclude-standard packages/client/src; } | sort -u |
       while read -r file; do [ -f "$file" ] && lines=$(wc -l < "$file") && [ "$lines" -gt 300 ] && echo "$file: $lines lines"; done);
@@ -93,7 +94,8 @@ verify:
     command: |
       . .gnomish/lib/task-change.sh
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-code#/ { print $1; exit }')
-      [ -n "$since" ] || { . .gnomish/lib/task-base.sh; since=$base; }
+      start=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "task" && $4 == "started" { print $1; exit }')
+      [ -n "$since" ] || since=$(git rev-parse "$start^" 2>/dev/null || git merge-base HEAD origin/main)
       changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
       outside=$(printf '%s\n' "$changed" | grep . | grep -v '^packages/client/' | grep -vxF "$reports/review-code.md" || true)
       [ -z "$outside" ] || { echo "$outside"; echo "the fix-code stage edits only packages/client/ and the resolutions in $reports/review-code.md - restore the files above with: git checkout $since -- <file>"; exit 1; }
@@ -103,7 +105,8 @@ verify:
     command: |
       . .gnomish/lib/task-change.sh
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^fix-code#/ { print $1; exit }')
-      [ -n "$since" ] || { . .gnomish/lib/task-base.sh; since=$base; }
+      start=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "task" && $4 == "started" { print $1; exit }')
+      [ -n "$since" ] || since=$(git rev-parse "$start^" 2>/dev/null || git merge-base HEAD origin/main)
       review="$reports/review-code.md"
       hunks=$(git diff -U0 "$since" -- "$review" | grep -E '^[-+]' | grep -vE '^(---|\+\+\+) ' || true)
       removed=$(printf '%s\n' "$hunks" | grep -E '^-' | grep -vxF -- '-- Status: open' || true)
