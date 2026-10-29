@@ -34,7 +34,7 @@ Binding decisions followed: ADR-0002 (layers: side effects in the controller, vi
 
 ### D2. Boot module loads legacy support, then the app (FR2, NFR-P2)
 
-`index.html` points at a new `src/boot.ts`. It does three things in order:
+`index.html` points at a new `src/boot.ts`. It holds only one call: `bootApp({ needsLegacySupport, loadLegacySupport, loadApp: () => import("./main") })`. The pure `bootApp` lives in `src/lib/legacy/bootApp.ts` (exported from `lib/legacy/index.ts`), so its test imports it without starting a real boot, and `src/boot.ts` is excluded from Stryker like `src/main.tsx`. `bootApp` does three things in order:
 
 1. It calls `needsLegacySupport()`. The check is true when any of these holds: `"at" in Array.prototype` is false (marks Safari < 15.4 and covers the core-js gap), `ResizeObserver` is missing, or `new Intl.DateTimeFormat("en", { timeZone: LEGACY_ZONE_PROBE_ID })` throws (`LEGACY_ZONE_PROBE_ID = "Europe/Kyiv"`).
 2. When the check is true, it awaits `loadLegacySupport()`, which `lib/legacy/index.ts` defines as `() => import("./installLegacySupport")`. The dynamic import lives inside the module, so `boot.ts` imports only through `@/lib/legacy` (module boundary rule) and the polyfills stay in their own chunk.
