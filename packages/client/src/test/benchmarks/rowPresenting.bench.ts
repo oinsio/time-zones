@@ -18,6 +18,11 @@ import {
   buildBudgetLocations,
   presentBudgetRows,
 } from "../features/locations/steps/rowBudgetWorld";
+import {
+  buildWallTimeBudgetState,
+  presentBudgetState,
+  typeInNewYork,
+} from "../features/time_selection/steps/wallTimeBudgetWorld";
 
 const WARMUP_ITERATIONS = 5;
 const SAMPLE_ITERATIONS = 20;
@@ -31,6 +36,9 @@ const BADGE_MATCHING_ROW_COUNT = 10;
 const DATE_CHANGE_START_MOMENT = "2026-03-08T07:30:00Z";
 const DATE_CHANGE_DEVICE_TIME_ZONE = "UTC";
 
+// Implements NFR-P1 of add-wall-time-input-with-hint: the wall-time input case.
+const WALL_TIME_BENCH_TEXT = "02:30";
+const wallTimeState = buildWallTimeBudgetState();
 const locations = buildBudgetLocations(BUDGET_ROW_COUNT);
 const badgeLocations = locations.map((location, index) =>
   buildLocation({
@@ -102,6 +110,13 @@ describe("row presenting", () => {
         },
       );
       if (outcome.ok) presentBudgetRows(outcome.state.locations);
+    },
+    options,
+  );
+  bench(
+    "wall-time input on 50 rows",
+    () => {
+      presentBudgetState(typeInNewYork(wallTimeState, WALL_TIME_BENCH_TEXT));
     },
     options,
   );

@@ -18,4 +18,20 @@ describe("startZoneLookupCount", () => {
     expect(count.lookupsIn("Europe/Moscow")).toBe(1);
     expect(count.lookupsIn("Asia/Tokyo")).toBe(0);
   });
+
+  // Verifies NFR-P1 of add-wall-time-input-with-hint (D1): wall-clock lookups.
+  it("should count wall-clock time conversions per zone and stop counting", () => {
+    const wallClock = Temporal.PlainDateTime.from("2026-03-08T02:30:00");
+    const count = startZoneLookupCount();
+
+    wallClock.toZonedDateTime("America/New_York");
+    wallClock.toZonedDateTime("America/New_York", {
+      disambiguation: "later",
+    });
+    count.stop();
+    wallClock.toZonedDateTime("America/New_York");
+
+    expect(count.wallClockLookupsIn("America/New_York")).toBe(2);
+    expect(count.wallClockLookupsIn("Europe/Moscow")).toBe(0);
+  });
 });
