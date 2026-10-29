@@ -35,6 +35,7 @@ Feature: Here entry in a real browser
     And the card of "Moscow" shows the time "16:00"
 
   @show-here-entry-for-device-time @NFR-A2
+  @add-wall-time-input-with-hint @NFR-A2
   Scenario: Name and list size
     Given the locations interface language is Russian
     And the stored locations are "Moscow", "New York"
@@ -44,12 +45,14 @@ Feature: Here entry in a real browser
     And the Here entry's slider is named "Время — Алматы"
 
   @show-here-entry-for-device-time @NFR-A2
+  @add-wall-time-input-with-hint @NFR-A2
   Scenario: One Tab stop on the Here entry
     Given the locations interface language is Russian
     And the stored locations are "Moscow"
     And the user opens the locations app
+    And the Here entry's slider is named "Время — Алматы"
     When the user moves the focus through the page with Tab
-    Then exactly one element of the Here entry takes the focus: the slider named "Время — Алматы"
+    Then exactly two elements of the Here entry take the focus: the button named "Ввести время — Алматы" and then the slider named "Время — Алматы"
     And the next Tab moves the focus out of the Here entry
 
   @show-here-entry-for-device-time @NFR-A1

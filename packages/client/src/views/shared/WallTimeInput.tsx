@@ -83,7 +83,7 @@ export function WallTimeInput({
         onChange={(event) => setText(event.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        className="w-24 rounded-md border border-accent bg-surface text-2xl font-bold leading-none tabular-nums md:w-36 md:text-4xl"
+        className="min-h-11 w-24 rounded-md border border-accent bg-surface text-2xl font-bold leading-none tabular-nums md:w-36 md:text-4xl"
       />
       {hasError && (
         <span id={errorId} className="text-sm text-danger">

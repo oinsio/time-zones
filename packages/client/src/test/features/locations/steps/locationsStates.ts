@@ -24,6 +24,7 @@ import {
 import {
   seedHereEntryState,
   seedHomeList,
+  seedWallTimeState,
   storeDeviceCity,
 } from "./locationsSeedHelpers";
 
@@ -60,6 +61,8 @@ export enum WorldClockState {
   MENU_OPEN = "menu open",
   HERE_ENTRY = "here-entry",
   HERE_ENTRY_TRAVEL = "here-entry-travel",
+  WALL_TIME_INPUT = "wall-time-input",
+  WALL_TIME_HINT = "wall-time-hint",
 }
 
 /**
@@ -71,7 +74,8 @@ export enum WorldClockState {
  * NFR-R3 of select-date-with-calendar-and-now (pinned and calendar states);
  * NFR-A1, NFR-R2 of set-home-location-and-show-differences (home, travelling
  * and menu open states); FR1, FR7, NFR-A1 of show-here-entry-for-device-time
- * (here-entry and here-entry-travel states).
+ * (here-entry and here-entry-travel states); NFR-R2 of
+ * add-wall-time-input-with-hint (wall-time-input and wall-time-hint states).
  */
 export async function enterLocationsState(
   world: LocationsWorld,
@@ -159,6 +163,10 @@ export async function enterLocationsState(
         world,
         state === WorldClockState.HERE_ENTRY_TRAVEL,
       );
+      break;
+    case WorldClockState.WALL_TIME_INPUT:
+    case WorldClockState.WALL_TIME_HINT:
+      await seedWallTimeState(world, state === WorldClockState.WALL_TIME_HINT);
       break;
     case WorldClockState.TRAVELLING:
       await seedHomeList(world, LIST_CITY_NAMES, TRAVELLING_HOME_CITY_NAME);

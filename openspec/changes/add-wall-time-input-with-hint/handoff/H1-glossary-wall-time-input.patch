@@ -1,0 +1,23 @@
+diff --git a/docs/glossary/date-selection.md b/docs/glossary/date-selection.md
+index 2e891bf..d0b87bf 100644
+--- a/docs/glossary/date-selection.md
++++ b/docs/glossary/date-selection.md
+@@ -6,5 +6,6 @@ Choosing the day the reference moment falls on, and returning to now. Decisions:
+ - **Date change** — moving the reference moment to another date while keeping the wall-clock time of the reference zone: by a day step or from the calendar. *Code:* `SET_DATE`, `SHIFT_DATE`. *Not:* a time selection.
+ - **Calendar** — the dialog that picks a distant date, month by month. *Code:* `CalendarDialog`, `presentCalendarMonth`. *RU:* «Выберите дату». *Never:* datepicker.
+ - **Now button** — the button that returns the reference moment to live. It is shown only while the moment is pinned. *Code:* `RESET_TO_NOW`. *RU:* «Сейчас». *Never:* Now control, Today button, reset.
+-- **Gap note** — the note in the date bar after a date change lands in a DST gap: which wall-clock time was asked for and which is shown. It disappears on the next date change, time selection or Now. *Code:* `DateBarGap`, `date.gapNote`. *Not:* the wall-time hint.
+-- **Wall-time hint** *(planned)* — the note in a card after a typed wall-clock time resolves to gap or ambiguous. *Code:* `SET_WALL_TIME`. *Not:* the gap note.
++- **Gap note** — the note in the date bar after a date change lands in a DST gap: which wall-clock time was asked for and which is shown. It disappears on the next date change, time selection, wall-time input, change of the reference zone or Now. *Code:* `DateBarGap`, `date.gapNote`, `getWallClockNote`. *Not:* the wall-time hint.
++- **Wall-time hint** — the note in the row where a wall-time input was typed, when the typed time resolves to a DST gap or overlap. *RU:* «02:30 не существует в этот день — часы переведены вперёд. Показано 03:30» / «01:30 бывает дважды — показано первое (UTC−4)». *Code:* `getWallClockNote`, `presentWallTimeHint`, `WallTimeHint`. *Not:* the gap note.
++- **Wall-clock note** — the one note about a wall-clock time on screen: the gap note in the date bar or the wall-time hint in a row, never both. *Code:* `getWallClockNote`, `WallClockNote`, `WallClockNotePlacement`.
+diff --git a/docs/glossary/time-selection.md b/docs/glossary/time-selection.md
+index f548db8..047755a 100644
+--- a/docs/glossary/time-selection.md
++++ b/docs/glossary/time-selection.md
+@@ -18,3 +18,5 @@ Choosing a time of day, and showing each location's day around the reference mom
+ - **Hour label** — a location's local time printed under its day track on wide screens, at the start, every 6 hours and at the end of the reference day (`22 · 04 · 10 · 16 · 22`). *Code:* `HourLabel`, `formatHourLabel`.
+ - **Hour cell** *(planned, Grid view)* — one absolute hour of the reference day in a grid row.
+ - **Midnight marker** *(planned)* — a mark with the new date where a location's local midnight falls on its track or row.
++- **Wall-time input** — typing an exact wall-clock time in a location card or the Here entry. *RU:* «Ввести время». *Not:* a time selection, which is a choice on a day track in track steps. *Never:* time picker, time edit. *Code:* `SET_WALL_TIME`, `parseWallTimeInput`, `useWallTimeInput`, `WallTimeInput`.
++- **Wall-time target** — the row a wall-time input was typed in: a location or the Here entry. It decides where the wall-time hint is shown. *Code:* `WallTimeTarget`.

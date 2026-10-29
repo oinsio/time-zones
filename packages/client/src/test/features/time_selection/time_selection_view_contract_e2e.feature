@@ -16,3 +16,12 @@ Feature: Time selection in every registered view
     When the user returns to now with the bar
     Then the card of "Almaty" shows the time "12:30"
     And the card of "Moscow" shows the time "10:30"
+
+  @add-wall-time-input-with-hint @view-contract @FR12
+  Scenario: Type an exact time
+    When the user types "1145" in the wall-time input of "Moscow"
+    Then the card of "Almaty" shows the time "13:45"
+    And the card of "Moscow" shows the time "11:45"
+    When the user returns to now with the bar
+    Then the card of "Almaty" shows the time "12:30"
+    And the card of "Moscow" shows the time "10:30"
