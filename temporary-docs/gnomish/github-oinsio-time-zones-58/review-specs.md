@@ -109,7 +109,8 @@ None.
 - Impact: when the change is archived, nothing in `openspec/specs/browser-compatibility/` states the accessibility rule for the legacy fallbacks. Task 10.2 then builds a Gherkin scenario with no upward spec, and a later change can drop the axe check without contradicting any stable spec.
 - Fix: in `specs/browser-compatibility/spec.md`, extend the "Supported engines" requirement with "With Pointer Events absent, the main page and the search dialog MUST have no accessibility violations." Add `NFR-A1` to its comment (`implements FR1, NFR-A1 of support-legacy-ios-12-safari`). Add the scenario "No accessibility violations without Pointer Events": GIVEN the engine has no Pointer Events, WHEN the main page is shown and the search dialog is opened, THEN an accessibility check reports no violations. Its name must match the one task 10.2 already uses.
 - Fix risk: none. Task 10.2 already builds this E2E scenario with axe-core in playwright-bdd, which is where `.claude/rules/bdd-e2e.md` and ADR-0001 put accessibility checks.
-- Status: open
+- Status: fixed
+- Resolution: added the requirement "Accessibility of the legacy fallbacks" (implements NFR-A1) with the scenario "No accessibility violations without Pointer Events" to specs/browser-compatibility/spec.md; task 10.2 now names that requirement, and design.md Context lists NFR-A1.
 
 ### R2 — WARNING — The recheck scenarios cannot set "16 minutes ago" through AppShell
 - Location: `openspec/changes/support-legacy-ios-12-safari/tasks.md:115`
@@ -118,7 +119,8 @@ None.
 - Impact: the implement stage cannot write task 7.3 as specified. It will either reach for a forbidden fake timer, overwrite `systemClock.now` from the steps, or render a harness without AppShell, and then the "note is shown" scenario no longer checks the real shell. FR10 can end up untested at the BDD level, or tested in a way the rules forbid.
 - Fix: in design D10 and task 7.2, add "`AppShell` takes an optional `clock?: Clock` prop, default `systemClock`, and passes it to `usePwaUpdateStatus(clock)` and to `LocationsProvider` (which already accepts `clock`, `src/controller/LocationsProvider.tsx:80`)". In task 7.3, add "the steps render `AppShell` with `createSwitchableClock` and advance it by 16 or 5 minutes before `setPageVisibility("visible")`". Add `src/app/AppShell.tsx` to the proposal's Impact list.
 - Fix risk: low. `main.tsx` keeps calling `<AppShell />`, so production gets `systemClock` as today. Existing AppShell tests and steps keep passing because the prop is optional. AppShell is the composition root, so passing a `Clock` port down keeps to ADR-0007 and `.claude/rules/architecture.md`.
-- Status: open
+- Status: fixed
+- Resolution: design D10 now gives AppShell an optional `clock?: Clock` prop (default systemClock) passed to usePwaUpdateStatus and LocationsProvider; task 7.2 adds it to src/app/AppShell.tsx, task 7.3 renders AppShell with createSwitchableClock and moves it 16 or 5 minutes before setPageVisibility("visible"), and proposal Impact lists src/app/AppShell.tsx.
 
 ### R3 — WARNING — The legacy build check misses lookbehind built with `new RegExp`
 - Location: `openspec/changes/support-legacy-ios-12-safari/design.md:119`
@@ -131,7 +133,8 @@ None.
 - Impact: the lookbehind clause of FR13 is not enforced. A dependency with a lookbehind pattern passes `check:legacy-build` and CI, then fails at run time on iOS 12. If the pattern sits at module top level, the app does not start (FR1).
 - Fix: in design D9 and task 9.1, extend `findLegacySyntaxIssues` to also report every `NewExpression` or `CallExpression` whose callee is `RegExp` and whose first argument is a string literal containing `(?<=` or `(?<!`, as construct `regex lookbehind`. Add the `it.each` cases `new RegExp("(?<=a)b")` and `RegExp("(?<!a)b")` (reported) and `new RegExp("(?:a)b")` (not reported). Keep the literal check.
 - Fix risk: a dependency that builds a lookbehind `RegExp` only inside a feature-detection `try`/`catch` would now fail the check even though it is safe at run time. The implementer would then need a named allow-list entry in the script. That is acceptable and visible in review.
-- Status: open
+- Status: fixed
+- Resolution: design D9 and task 9.1 now also report `new RegExp(…)` / `RegExp(…)` calls whose first string-literal argument contains `(?<=` or `(?<!`, with a named allow-list for guarded feature detection; task 9.1 adds the it.each cases `new RegExp("(?<=a)b")`, `RegExp("(?<!a)b")` (reported) and `new RegExp("(?:a)b")` (not reported).
 
 ### R4 — WARNING — M6 has no mutation run for the new `scripts/` modules
 - Location: `openspec/changes/support-legacy-ios-12-safari/tasks.md:125`
@@ -145,7 +148,8 @@ None.
 - Impact: the rules that decide whether CI fails a build (FR12, FR13) and which polyfills iOS 12 gets (FR2) can ship with weak tests, for example a `dvh` fallback rule whose inverted comparison survives. M6 can then neither be shown nor be claimed as met.
 - Fix: add task 9.3 "Mutation run (M6). Verify that `npx stryker run --mutate 'scripts/legacyBuild/findLegacySyntaxIssues.ts,scripts/legacyCoreJs/buildLegacyCoreJsModules.ts'` scores ≥ 95% (minimum 90%); kill survivors with extra cases in `src/test/legacyBuild/` and `src/test/legacyCoreJs/`." For the `modulepreload` plugin, either give task 5.6 a unit test of its pure HTML transform under `src/test/legacyBoot/` and add the file to the same run (at most 5 files), or say in task 5.6 that the plugin is glue only and covered by the build check.
 - Fix risk: low. It adds one Stryker run of 2–3 files, within the 5-file limit in `CLAUDE.md`. A plugin without a unit test would score low if it were added to the run without one, hence the either/or above.
-- Status: open
+- Status: fixed
+- Resolution: task 5.6 splits the modulepreload plugin into the pure transform scripts/legacyBoot/addMainChunkPreloads.ts (unit-tested in src/test/legacyBoot/) and a glue plugin (design D2 notes it); new task 9.3 runs Stryker scoped to findLegacySyntaxIssues.ts, buildLegacyCoreJsModules.ts and addMainChunkPreloads.ts for M6.
 
 ### R5 — SUGGESTION — Importing `boot.ts` in its test runs the real boot
 - Location: `openspec/changes/support-legacy-ios-12-safari/tasks.md:73`
@@ -154,7 +158,8 @@ None.
 - Impact: Vitest reports an unhandled rejection and fails `npx vitest run src/boot.test.ts` even when every assertion passes. The implementer finds this only at the green step and must improvise a `vi.mock("./main")`.
 - Fix: in design D2 and task 5.5, put the pure `bootApp` in its own module (`src/lib/legacy/bootApp.ts`, exported from `lib/legacy/index.ts`). `src/boot.ts` then holds only the call, and `src/boot.ts` is added to the `!src/main.tsx`-style exclusions of Stryker. Test `bootApp` in `src/lib/legacy/bootApp.test.ts`. Alternatively, keep the layout and state in task 5.5 that `boot.test.ts` mocks `./main` and `@/lib/legacy` with `vi.mock` before importing `./boot`.
 - Fix risk: low. The source-scan case of task 5.5 must then also scan `src/lib/legacy/bootApp.ts`, which the `src/lib/legacy/*.ts` glob already covers. Editing `stryker.config.mjs` is inside `packages/`, so the implement stage may do it.
-- Status: open
+- Status: fixed
+- Resolution: design D2 and task 5.5 move the pure bootApp into src/lib/legacy/bootApp.ts (exported from lib/legacy/index.ts, tested in src/lib/legacy/bootApp.test.ts); src/boot.ts holds only the call and is added to the Stryker exclusions next to src/main.tsx; task 5.7 mutates bootApp.ts instead of boot.ts.
 
 ## Verdict
 
