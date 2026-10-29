@@ -166,7 +166,8 @@ ERROR Stryker Unexpected error occurred while running Stryker Error: ENOSPC: no 
 - Impact: On every cold, uncached start in a modern browser, the stylesheet request starts one round trip later than before this change: html → boot JS → CSS, instead of html → CSS in parallel. The `__vitePreload` call waits for the CSS before it evaluates `main`, so first render is delayed by that round trip. The change set out to keep modern browsers unchanged and to remove the boot waterfall (D2), and NFR-P1/M5 measure only JS, so the regression passes every current check.
 - Fix: In `mainChunkPreloadPlugin`, also collect `chunk.viteMetadata?.importedCss` for every chunk in the closure. Extend the pure `addMainChunkPreloads` (or add a sibling pure function in `scripts/legacyBoot/`) to insert one `<link rel="stylesheet" crossorigin href="${base}${file}">` per CSS file before `</head>`, skipping hrefs already present, as it does for JS. Add cases to `src/test/legacyBoot/addMainChunkPreloads.test.ts`: one link per CSS file, none duplicated, HTML unchanged for an empty list.
 - Fix risk: Low. The boot chunk's `__vitePreload` already skips a CSS dependency when `link[href="…"][rel="stylesheet"]` exists (seen in the built `index-*.js`), so the CSS is not loaded twice, provided the href is the same `${base}${fileName}` the helper builds. The stylesheet becomes render-blocking in `<head>` again, which is how it worked before this change, so NFR-R1 baselines are unaffected. `check-bundle-size.mjs` counts only JS, and the polyfill chunk still gets no link.
-- Status: open
+- Status: fixed
+- Resolution: `addMainChunkPreloads` takes a third list of stylesheet URLs and `mainChunkPreloadPlugin` collects `viteMetadata.importedCss` over the static-import closure, so `dist/index.html` links the stylesheet again (verified in the build). Covered by addMainChunkPreloads.test.ts "addMainChunkPreloads stylesheets" (one link per file, no repeat, unchanged for empty).
 
 ### R2 — WARNING — Renamed-zone scenarios drop the spec's stored-list steps, so FR4 "reading the stored list" is untested under the shim
 - Location: `packages/client/src/test/features/browser_compatibility/browser_compatibility_legacy_zones.feature:13-23`
@@ -175,7 +176,8 @@ ERROR Stryker Unexpected error occurred while running Stryker Error: ENOSPC: no 
 - Impact: The start-up path an iOS 12 user with a stored Kyiv takes (`localStorageLocationRepository.load` → `deserializeLocationsDocument` → `parseStoredLocations` → `canonicalizeTimeZoneId`) is never run against the shim. A regression there, for example a stored-list validation that checks zones through another API, or a canonicalization step that runs before the shim is installed, would make the whole stored list unreadable on iOS 12. ADR-0004 then shows the reset screen, which risks data loss. No test would catch it.
 - Fix: Add the missing steps to both scenarios. In `legacyZoneWorld.ts`, also import `@/adapters` fresh. "the stored list holds {string}": save the added locations with `adapters.localStorageLocationRepository.save(...)`, then assert that `load()` returns `ok` with that zone id. "the stored list contains {string} with the zone {string}": seed `localStorage` the way `seedStoredList` in `locations/steps/locationsUiWorld.tsx:19` does. "the stored list is read without error": assert that `adapters.localStorageLocationRepository.load()` is `ok` and holds `Europe/Kyiv`, and present the card from the loaded location. Keep `expectNativeRejectedKyiv()` in each.
 - Fix risk: Low. `steps/browser_compatibility_legacy_zones.steps.ts` is 189 lines, so new helpers belong in `legacyZoneWorld.ts` (82 lines) to keep both under 200. `localStorage` must be cleared in `restoreZoneData` so scenarios stay independent. A fresh `@/adapters` import re-evaluates the city-search modules, which only costs time.
-- Status: open
+- Status: fixed
+- Resolution: The Kyiv scenarios now carry the spec steps ("the stored list holds", "the stored list contains … with the zone", "the app starts", "the stored list is read without error"). They save and load through the real `localStorageLocationRepository` on fresh modules while `Intl.DateTimeFormat` rejects `Europe/Kyiv`; `localStorage` is cleared in `restoreZoneData`. See browser_compatibility_legacy_zones.feature and its steps/legacyZoneWorld.ts.
 
 ### R3 — WARNING — No mutation evidence for the legacy-support modules (task 5.7) and the inset PostCSS plugin (M6)
 - Location: `packages/client/src/lib/legacy/zoneShim.ts:39` (with `needsLegacySupport.ts`, `installLegacySupport.ts`, `bootApp.ts`) and `packages/client/scripts/legacyCss/expandInsetShorthand.mjs:36`
@@ -184,7 +186,8 @@ ERROR Stryker Unexpected error occurred while running Stryker Error: ENOSPC: no 
 - Impact: M6 ("Mutation score of the new or changed code ≥ 95% (minimum 90%)") is unproven for the legacy zone shim and the boot ordering. These are the two pieces that decide whether the app starts on iOS 12 at all, and the device check (M7) is the only other safeguard. A weak assertion there, for example on the shim's case-insensitive lookup or the probe's `||` chain, would go unnoticed until the owner's device.
 - Fix: On a machine with free disk, run `cd packages/client && npx stryker run --mutate 'src/lib/legacy/zoneShim.ts,src/lib/legacy/needsLegacySupport.ts,src/lib/legacy/installLegacySupport.ts,src/lib/legacy/bootApp.ts'`, then separately `npx stryker run --mutate 'scripts/legacyCss/expandInsetShorthand.mjs'`. Kill survivors with cases in `src/lib/legacy/*.test.ts` and `src/test/legacyBuild/expandInsetShorthand.test.ts`, and record the scores in the commit message, as the other sections do.
 - Fix risk: Only time and disk: the current box has 9 MB free, so a Stryker sandbox cannot be created there. No production code changes unless a survivor shows a real gap.
-- Status: open
+- Status: rejected (not-worth-it)
+- Resolution: Not doable on this box: the disk is full (7 MB free on /gnomish/work), and `npx stryker run --mutate src/lib/legacy/bootApp.ts` fails copying its sandbox with ENOSPC. Per the stage rules the environment is reported, not worked around. The ask is a measurement with no code change implied; the scoped runs named in the Fix should be done on a machine with free disk. No score is claimed.
 
 ### R4 — SUGGESTION — bootApp swallows a failed legacy-support load without a trace
 - Location: `packages/client/src/lib/legacy/bootApp.ts:17`
@@ -193,7 +196,8 @@ ERROR Stryker Unexpected error occurred while running Stryker Error: ENOSPC: no 
 - Impact: If the polyfill chunk fails on iOS 12 (first open offline before the Service Worker precached it, or a core-js module throwing on that engine), the app starts without polyfills and fails later with a secondary error such as "`…at` is not a function". During the M7 device check the Web Inspector then shows only that secondary symptom, and the root cause is lost.
 - Fix: `catch (legacySupportError) { console.error(legacySupportError); }`. Keep the fall-through. In `bootApp.test.ts`, the case "should still load the app when legacy support fails" spies on `console.error` and asserts it was called with the rejection.
 - Fix risk: Low. The legacy boot feature's "no error is shown" step spies on `console.error` only in the scenario where the load succeeds, so it stays green. No other production module logs today, so this is the first `console.error` in `src/`.
-- Status: open
+- Status: fixed
+- Resolution: `bootApp` now logs the rejection with `console.error(legacySupportError)` and still falls through to load the app. Covered by bootApp.test.ts "should log the error when legacy support fails"; the existing failure case silences the spy and mocks are restored after each test.
 
 ## Verdict
 
