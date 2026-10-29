@@ -104,7 +104,8 @@
 - Impact: Example: device `America/New_York`, the user moves to 2026-03-08 at 02:30 (a DST gap). The moment is pinned at `2026-03-08T07:30:00Z` with status GAP. The user then makes Almaty home. The date bar keeps saying "02:30 does not exist on this day because of a clock change; showing 12:30.", which describes the old zone and is false for Almaty. The same happens when the home location is removed, when another tab changes home, and, without home, when the device time zone changes. This breaks FR4 undetected, because no test covers it.
 - Fix: (1) In `design.md` D2, add this rule. After any command, `reduceLocations` (`model/locations.ts:102`) compares `getReferenceZone` of the previous and the next state. If they differ and the moment is pinned with `wallClockStatus` GAP, it keeps the instant and resets the status to `WallClockStatus.UNIQUE`, with `requestedWallTime` = the instant's wall time in the new zone. Otherwise it returns `state.reference` unchanged, the same object. Keying on `getReferenceZone` covers SET_HOME_LOCATION, REMOVE_LOCATION of home, REPLACE_LOCATIONS and SET_DEVICE_TIME_ZONE in one place. Put the rule in one new model helper, `model/followReferenceZone.ts`, so it stays in the model (ADR-0002) and `locations.ts` stays under 200 lines. (2) In `specs/date-selection/spec.md`, add a MODIFIED "Wall-clock resolution on the new date" that restates the stable requirement and all its scenarios. Change only the sentence about when the note stays: "… or Now, or until the reference zone changes". (3) In `specs/home-location/spec.md`, under "Reference zone follows home", add the scenario "A home change drops the gap note": GIVEN device `America/New_York`, list New York and Almaty, the moment pinned at 02:30 on `2026-03-08` (gap, shown 03:30); WHEN the user makes Almaty home; THEN the moment is still pinned to `2026-03-08T07:30:00Z` AND the date bar shows no gap note. (4) In the date-selection delta, add a twin scenario for a device time zone change without home. (5) Add both cases to task 2.1 (unit tests of the helper and of `reduceLocations`) and to the scenario lists of tasks 7.1 and 7.4.
 - Fix risk: Medium. The instant is kept, so "A pinned moment keeps its instant" still holds. `referenceMomentPicking.test.ts:110-130` keeps passing only if the helper returns the same `reference` object when the status is not GAP: `pinnedState` uses `WallClockStatus.UNIQUE` (`src/test/referenceMomentSupport.ts:29`), and the test asserts `toBe`. D2's claim "only the body of `getReferenceZone` changes" and the Consequence "Home changes one function body" must be reworded. The new MODIFIED block has to restate the stable requirement exactly, apart from the one sentence (`delta-specs.md`). The helper adds one file to the mutation runs, and task 2.6 already holds 5 files, so the helper needs a run of its own.
-- Status: open
+- Status: fixed
+- Resolution: design.md D2 now adds model/followReferenceZone.ts, which reduceLocations calls after every command: when getReferenceZone changes and the pinned status is GAP, it keeps the instant and resets the status to UNIQUE; otherwise the reference object is unchanged. FR4 in proposal.md names every kind of zone change. specs/home-location adds the scenario "A home change drops the gap note". specs/date-selection adds MODIFIED "Wall-clock resolution on the new date", restated in full with "or a change of the reference zone" and the scenario "A device time zone change drops the gap note". Task 2.2 TDDs the helper, 2.6 adds its own mutation run, and 7.1 and 7.4 list both scenarios.
 
 ### R2 — WARNING — The NFR-P1 work bound cannot detect a per-row reference offset
 - Location: `openspec/changes/set-home-location-and-show-differences/design.md:59`
@@ -113,7 +114,8 @@
 - Impact: The one blocking check of the "once per presentation, not once per row" clause passes on the regression it is meant to catch, so NFR-P1 is untested (task 7.2, M1).
 - Fix: In `design.md` D4 and task 7.2, replace the "with home minus without home" comparison with a per-zone count. The `toZonedDateTimeISO` spy records its zone argument. The 50 rows put the home location alone in `Asia/Almaty` and exactly one non-home row alone in `Europe/Moscow`, and the other rows in other zones. The step calls `getReferenceOffsetMinutes` once and then `presentLocationRows`, as `useLocations` does. Assert that the lookups in `Asia/Almaty` exceed those in `Europe/Moscow` by at most 1, together with the formatter bounds of `startWorkCount()`.
 - Fix risk: Low. The home row and the Moscow row must do the same per-row work. That holds under D4, because the home row's difference returns `undefined` without a lookup, and both rows compute their UTC offset, local time and day track. If a later change gives the home row extra per-row work, the check needs adjusting. The spy stays test-scoped in `src/test/` (ADR-0008, `bdd-unit.md`).
-- Status: open
+- Status: fixed
+- Resolution: design.md D4 and task 7.2 now count toZonedDateTimeISO lookups per zone. The home row is alone in Asia/Almaty, one other row is alone in Europe/Moscow, and the reference day is computed before counting. The step asserts Almaty lookups exceed Moscow lookups by at most 1. The scenario "50 rows within the work bound" in specs/locations states the same GIVEN and THEN.
 
 ### R3 — WARNING — Closing the menu on focusout can swallow item taps in Safari
 - Location: `openspec/changes/set-home-location-and-show-differences/design.md:88`
@@ -122,7 +124,8 @@
 - Impact: On Safari, a tap on "Remove" or "Make home" can close the menu without running the action. That breaks FR14 ("Removing a location MUST stay possible on iOS Safari 12.5"), and the failure would first appear in the manual H3 device check, after implementation.
 - Fix: In `design.md` D7, change the focusout bullet to: "`focusout` closes the menu only when `relatedTarget` is an element outside the menu; a `focusout` with `relatedTarget === null` is ignored, and taps outside are handled by the pointer/touch listeners above; Tab closes it through the key mapping". Also give the `role="menu"` container `tabIndex={-1}`, so that WebKit moves focus to the menu itself. In task 6.2 (`LocationMenu.legacy.test.tsx`), add a case: a `focusout` with `relatedTarget: null` fired on the focused item, followed by a click on "Remove", still calls remove.
 - Fix risk: Low. Keyboard users who Tab out still close the menu through the Tab key (D7 "Esc and Tab close the menu"). The `tabIndex={-1}` container must not become a Tab stop. A negative tabindex is not one, so NFR-A2's "one Tab stop per card" holds.
-- Status: open
+- Status: fixed
+- Resolution: design.md D7 now closes the menu on focusout only when relatedTarget is outside the menu. It ignores a null relatedTarget, which WebKit sends on a tap, and gives the role="menu" container tabIndex -1. Task 6.2 (LocationMenu.legacy.test.tsx) adds a case: a focusout with relatedTarget null, then a click on "Remove", still calls remove; a focusout to outside closes the menu.
 
 ### R4 — WARNING — The grep check of task 6.4 can never print nothing
 - Location: `openspec/changes/set-home-location-and-show-differences/tasks.md:129`
@@ -131,7 +134,8 @@
 - Impact: Once every edit of task 6.4 is done, the grep still prints `useLocations.test.tsx:28`, so the implement stage cannot tick 6.4. Or it deletes a valid assertion about the hook's public members to make the grep pass.
 - Fix: In `tasks.md:129`, replace the pattern with `grep -rnE "(^|[^A-Za-z])locations\.removeLocation|\"removeLocation\":" src`. The `:` matches the locale key in `locales/en.json:34` / `ru.json:34`, and not the `"removeLocation",` entry of the hook key list. On main today, the new pattern prints exactly the i18n uses that task 6.4 edits (`LocationRow.tsx:139`, both locales, and the worlds and steps files it lists), plus `locationsReorderE2eHelpers.ts:24`, which it also edits.
 - Fix risk: none. The new pattern still catches every leftover use of the retired i18n key: `t("locations.removeLocation")`, `i18n.t(...)`, `englishLocale.locations.removeLocation` and the JSON key.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md task 6.4 grep alternative `\"removeLocation\"` is now `\"removeLocation\":`. The colon matches the locale key and not the hook key list entry in controller/useLocations.test.tsx:28. Verified on main: the pattern prints only the uses that 6.4 edits.
 
 ### R5 — SUGGESTION — The dependency's unapplied handoff H1 is not mentioned
 - Location: `openspec/changes/set-home-location-and-show-differences/proposal.md:9`
@@ -140,7 +144,8 @@
 - Impact: A reader of NFR-P2 ("the build stays free of syntax that Safari 12 cannot parse (`check:legacy-build`)") may assume CI guards it. Only task 10.2 runs the check, and it runs it locally.
 - Fix: In `proposal.md:9`, write "Its handoff patches H1 (the CI step `check:legacy-build`), H2 (ADR-0009) and H3 (…) have not been applied on main yet. This change does not rely on them: task 10.2 runs `check:legacy-build` itself."
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md line 9 now names H1 (the CI step check:legacy-build) as unapplied too, alongside H2 and H3. It says CI runs only check:bundle-size and that task 10.2 runs check:legacy-build itself.
 
 ### R6 — SUGGESTION — "A pinned moment keeps its instant" never puts Almaty in the list
 - Location: `openspec/changes/set-home-location-and-show-differences/specs/home-location/spec.md:72-77`
@@ -149,7 +154,8 @@
 - Impact: Taken literally, "make Almaty home" fails as location not found. The step author has to guess the list, so the unit BDD of task 7.1 may differ from the date-selection scenario.
 - Fix: Add "- **AND** the list contains Almaty and Moscow" after the pinned-moment GIVEN at `specs/home-location/spec.md:74`.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: specs/home-location/spec.md, scenario "A pinned moment keeps its instant", now has "AND the list contains Almaty and Moscow" after the pinned-moment GIVEN.
 
 ## Verdict
 
