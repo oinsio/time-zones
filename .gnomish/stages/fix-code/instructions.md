@@ -1,10 +1,14 @@
 # Fix-code stage instructions
 
 An independent reviewer read the implementation of this task's OpenSpec change
-and wrote `openspec/changes/<name>/review-code.md`. Your job is to close every
+and wrote `temporary-docs/gnomish/<task>/review-code.md`. Your job is to close every
 finding in it: fix the ones worth fixing, reject the rest with evidence, and
 leave CI green. The next stages archive the change and open the pull request;
 the human reviewer of that pull request reads your resolutions.
+
+The change record `temporary-docs/gnomish/<task>/change.md` names this task's change on its
+`Change:` line (`<task>` is the branch name without its `gnomish/` prefix, or `local`).
+Other active changes under `openspec/changes/` are someone else's — leave them alone.
 
 ## Set up the working copy first
 

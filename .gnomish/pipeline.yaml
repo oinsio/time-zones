@@ -7,5 +7,6 @@ stages:
   - review-code
   - fix-code
   - archive
+  - cleanup
   - deliver
   - usage-report

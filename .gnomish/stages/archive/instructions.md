@@ -6,9 +6,9 @@ project's living specs under `openspec/specs/`.
 
 Do it with the OpenSpec CLI — never by merging spec text yourself:
 
-1. `openspec list` names the active changes. This task's branch added exactly
-   one — that one is yours. If more than one shows up, find yours with
-   `git diff --name-only $(git merge-base HEAD origin/main)...HEAD -- openspec/changes`.
+1. The change record `temporary-docs/gnomish/<task>/change.md` names your change on
+   its `Change:` line (`<task>` is the branch name without its `gnomish/` prefix, or
+   `local`). Every other active change belongs to someone else.
 2. Check it really is finished: `openspec status --change <name>` and no
    remaining `- [ ]` in its `tasks.md`. If a task is still open, stop and say so
    in your closing summary — do not tick it yourself, and do not archive.
@@ -26,7 +26,8 @@ Do it with the OpenSpec CLI — never by merging spec text yourself:
    Look at `openspec/changes/archive/` first — earlier changes already sit in
    that layout; match it.
 5. Confirm: `openspec validate --specs --strict --no-interactive` passes, and
-   `openspec/changes/` holds nothing but `archive/`.
+   `openspec/changes/<name>/` no longer exists. Other active changes stay where
+   they are.
 
 Rules:
 

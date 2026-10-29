@@ -50,7 +50,8 @@ verify:
   # Every task of the active change is ticked.
   - type: command
     command: >-
-      if grep -rn '^[[:space:]]*- \[ \]' openspec/changes --include=tasks.md --exclude-dir=archive;
+      . .gnomish/lib/task-change.sh;
+      if grep -n '^[[:space:]]*- \[ \]' "$change/tasks.md";
       then echo "the tasks listed above are still open - do them, then tick them in tasks.md"; exit 1; fi
   # Files this branch added or changed under packages/client/src stay under the 300-line hard cap.
   - type: command
@@ -78,11 +79,11 @@ verify:
   # package.json / the lockfile change only when tasks.md asks for a dependency or names package.json.
   - type: command
     command: |
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      . .gnomish/lib/task-change.sh
       since=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "round" && $4 !~ /^implement#/ { print $1; exit }')
       [ -n "$since" ] || since=$(git merge-base HEAD origin/main)
       changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
-      forbidden=$(printf '%s\n' "$changed" | grep -E '^(openspec/|\.gnomish/|\.github/|\.claude/|docs/adr/|CLAUDE\.md$)' | grep -vxF "$change/tasks.md" | grep -v "^$change/handoff/" || true)
+      forbidden=$(printf '%s\n' "$changed" | grep -E '^(openspec/|temporary-docs/|\.gnomish/|\.github/|\.claude/|docs/adr/|CLAUDE\.md$)' | grep -vxF "$change/tasks.md" | grep -v "^$change/handoff/" || true)
       [ -z "$forbidden" ] || { echo "$forbidden"; echo "the implement stage edits only packages/, the checkboxes of $change/tasks.md and $change/handoff/ - put changes to these paths into a handoff patch (see .gnomish/stages/specify/handoff.md) and restore the files above with: git checkout $since -- <file>"; exit 1; }
       dependencies=$(printf '%s\n' "$changed" | grep -E '(^|/)(package\.json|pnpm-lock\.yaml)$' || true)
       if [ -n "$dependencies" ] && ! grep -qiE 'pnpm add|dependenc|package\.json' "$change/tasks.md"; then echo "$dependencies"; echo "tasks.md asks for no dependency or package.json change - restore the files above with: git checkout $since -- <file>"; exit 1; fi
@@ -90,7 +91,7 @@ verify:
   # A follow-up section with H<n> items needs the README that explains them.
   - type: command
     command: |
-      change=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name archive)
+      . .gnomish/lib/task-change.sh
       for patch in "$change"/handoff/*.patch; do
         [ -e "$patch" ] || continue
         git apply --check "$patch" || { echo "$patch does not apply to the branch - regenerate it as .gnomish/stages/specify/handoff.md describes"; exit 1; }

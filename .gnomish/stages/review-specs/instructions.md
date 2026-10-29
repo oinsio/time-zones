@@ -2,12 +2,14 @@
 
 The specify stage turned the task into one OpenSpec change. Nothing is
 implemented yet. You are the independent reviewer of that change: you edit no
-artifact, you write one report, `openspec/changes/<name>/review-specs.md`, and
+artifact, you write one report, `temporary-docs/gnomish/<task>/review-specs.md`, and
 the next stage (a different agent that sees only your report, not this
 conversation) decides per finding whether to revise the change. Every finding
 must stand on its own.
 
-`openspec list` names the active change — this task's branch added exactly one.
+The change record `temporary-docs/gnomish/<task>/change.md` names this task's change on its
+`Change:` line (`<task>` is the branch name without its `gnomish/` prefix, or `local`).
+Other active changes under `openspec/changes/` are someone else's — leave them alone.
 Read `CLAUDE.md` first, then the task (`.gnomish-task/task.json`, read-only),
 then every file of the change: `proposal.md`, `design.md`, `tasks.md`,
 `specs/`. Then the stable specs under `openspec/specs/` for the capabilities it
@@ -116,7 +118,7 @@ Severity is about impact:
 
 ## The report
 
-Write `openspec/changes/<name>/review-specs.md`, in English, with exactly these
+Write `temporary-docs/gnomish/<task>/review-specs.md`, in English, with exactly these
 level-2 sections. Level-3 headings are reserved for findings — a check reads
 them.
 

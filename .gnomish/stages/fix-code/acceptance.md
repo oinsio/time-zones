@@ -1,6 +1,7 @@
 # Acceptance criteria for the fix-code stage
 
-The active change's `review-code.md` lists the reviewer's findings, each now closed
+The task's report `temporary-docs/gnomish/<task>/review-code.md` (the change it
+reviews is the one `change.md` beside it names) lists the reviewer's findings, each now closed
 with a `Status` (`fixed` or `rejected (<reason>)`) and a `Resolution` — checks
 before you have confirmed that shape, that nothing in `review-code.md` but
 those lines changed, and that this stage edited nothing outside

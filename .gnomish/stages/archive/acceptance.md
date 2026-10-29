@@ -1,9 +1,10 @@
 # Acceptance criteria for the archive stage
 
-- The change this task branch introduced now lives under
+- The change the change record `temporary-docs/gnomish/<task>/change.md` names
+  now lives under
   `openspec/changes/archive/YYYY/MM/YYYY-MM-DD-<name>/`, with `YYYY` and `MM`
-  matching its date prefix, and `openspec/changes/` contains nothing else
-  besides `archive/`.
+  matching its date prefix, and the change directory is gone from `openspec/changes/`.
+  Other active changes there are someone else's and stay untouched.
 - The archived change is complete: every task in its `tasks.md` is ticked.
 - Its spec deltas were promoted into `openspec/specs/`: each capability the
   change added or modified is reflected there, and the promoted text describes

@@ -38,8 +38,11 @@ Steps:
      `pnpm build`, the bundle budget, the BDD E2E suite, and the Vitest specs
      and `.feature` files under `packages/client/src/` that cover the change;
      the mutation scores if the implement stage's commits or summary give them;
-   - the outcome of both reviews, from `review-specs.md` and `review-code.md`
-     in the archived change: for each, how many findings per severity were
+   - the outcome of both reviews, from `review-specs.md` and `review-code.md`.
+     The cleanup stage removed `temporary-docs/gnomish/<task>/` before you, so
+     read each from the commit before that removal:
+     `git show $(git log -1 --format=%H --diff-filter=D -- temporary-docs/gnomish/<task>)^:temporary-docs/gnomish/<task>/review-specs.md`
+     (`<task>`: the branch name without its `gnomish/` prefix). For each, how many findings per severity were
      fixed and rejected, and every rejected finding by id with its reason in
      one line — the human decides whether they agree;
    - if the archived change has a `handoff/` folder, a "Human follow-up"

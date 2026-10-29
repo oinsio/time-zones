@@ -1,6 +1,7 @@
 # Implement stage instructions
 
-The previous stage left one OpenSpec change under `openspec/changes/`. Your job
+The previous stages left this task's OpenSpec change under `openspec/changes/`.
+Your job
 is to build exactly what it specifies in the Time Zones PWA
 (`packages/client`), test-first, and leave CI green. The next stages archive the
 change and open the pull request; they see your commits, not this conversation.
@@ -49,10 +50,10 @@ Invoke the repository's own skill and follow it end to end:
     Skill(skill="openspec-apply-change", args="<change name>")
 
 That is the same text a human on this project runs as `/opsx:apply`, so the
-stage and hand work follow one procedure. `openspec list` names the active
-changes; this task's branch added exactly one — that one is yours. If more than
-one shows up, find yours with
-`git diff --name-only $(git merge-base HEAD origin/main)...HEAD -- openspec/changes`.
+stage and hand work follow one procedure.
+The change record `temporary-docs/gnomish/<task>/change.md` names this task's change on its
+`Change:` line (`<task>` is the branch name without its `gnomish/` prefix, or `local`).
+Other active changes under `openspec/changes/` are someone else's — leave them alone.
 Read its `proposal.md`, the spec deltas under `specs/`, `design.md` and
 `tasks.md`. `tasks.md` is your work order — work through it in order.
 

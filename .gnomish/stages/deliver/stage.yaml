@@ -1,6 +1,6 @@
 # Stage goal, shown to the gnome.
 purpose: open (or update) the pull request that hands this task's branch to a human reviewer, and mirror its body into pr-body.md so the checks can read what was published
-# The checkout, plus what the implement, fix-code and archive stages produced.
+# The checkout, plus what the implement, fix-code, archive and cleanup stages produced.
 inputs:
   - kind: source
   - kind: internal
@@ -9,6 +9,8 @@ inputs:
     producerOutputId: code-review-resolution
   - kind: internal
     producerOutputId: archived-change
+  - kind: internal
+    producerOutputId: reports-removed
 # Name of what the stage produces.
 outputs:
   - id: pull-request
@@ -133,10 +135,16 @@ verify:
       [ -n "$test_files" ] || { echo "the body names no .feature or test files - say which ones under packages/client/src/ cover the change"; exit 1; }
       missing_files=$(printf '%s\n' "$test_files" | while read -r name; do [ -n "$(find packages/client/src -path "*/$name" -print -quit)" ] || echo "$name"; done)
       [ -z "$missing_files" ] || { echo "$missing_files"; echo "the body names the files above, and none exists under packages/client/src/ - name the real ones"; exit 1; }
+      # The reports are gone from the working copy since cleanup; they are read from the commit
+      # that removed them, one before it.
+      branch=$(git branch --show-current)
+      case "$branch" in gnomish/*) task=${branch#gnomish/} ;; *) task=local ;; esac
+      reports=temporary-docs/gnomish/$task
+      removed_in=$(git log -1 --format=%H --diff-filter=D -- "$reports" || true)
       for review in review-specs.md review-code.md; do
-        [ -f "$archive/$review" ] || continue
+        [ -n "$removed_in" ] && report=$(git show "$removed_in^:$reports/$review" 2>/dev/null) || continue
         grep -qF "$review" pr-body.md || { echo "the body never summarises $review - give its fixed and rejected counts"; exit 1; }
-        for finding in $(awk '/^### /{ finding = $2 } /^- Status: rejected/{ print finding }' "$archive/$review"); do
+        for finding in $(printf '%s\n' "$report" | awk '/^### /{ finding = $2 } /^- Status: rejected/{ print finding }'); do
           grep -qw "$finding" pr-body.md || { echo "$review rejects $finding, and the body never names it - list every rejected finding with its reason"; exit 1; }
         done
       done

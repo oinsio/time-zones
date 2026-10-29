@@ -1,11 +1,15 @@
 # Fix-specs stage instructions
 
 An independent reviewer read this task's OpenSpec change before any code was
-written and wrote `openspec/changes/<name>/review-specs.md`. Your job is to
+written and wrote `temporary-docs/gnomish/<task>/review-specs.md`. Your job is to
 close every finding in it: revise the change's artifacts for the findings worth
 fixing, reject the rest with evidence, and leave the change valid. The
 implement stage builds from the artifacts you leave; the human reviewer of the
 final pull request reads your resolutions.
+
+The change record `temporary-docs/gnomish/<task>/change.md` names this task's change on its
+`Change:` line (`<task>` is the branch name without its `gnomish/` prefix, or `local`).
+Other active changes under `openspec/changes/` are someone else's — leave them alone.
 
 ## Triage before you touch an artifact
 
