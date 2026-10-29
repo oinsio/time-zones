@@ -17,10 +17,14 @@ const { Given, When, Then } = createBdd(test);
 const LIVE_REGION = "[aria-live]";
 
 Given("the page is taller than the screen", async ({ locationsWorld }) => {
-  const isTaller = await locationsWorld.page.evaluate(
-    () => document.documentElement.scrollHeight > window.innerHeight,
-  );
-  expect(isTaller).toBe(true);
+  // The app mounts after the load event (the boot chunk imports it), so wait for the cards.
+  await expect
+    .poll(() =>
+      locationsWorld.page.evaluate(
+        () => document.documentElement.scrollHeight > window.innerHeight,
+      ),
+    )
+    .toBe(true);
 });
 
 Then("the page has scrolled down", async ({ locationsWorld }) => {
