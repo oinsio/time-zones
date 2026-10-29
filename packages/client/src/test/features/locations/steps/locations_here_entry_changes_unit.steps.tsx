@@ -8,6 +8,8 @@ import { LocationsLoadStatus } from "@/ports";
 import { createHereEntryChecks } from "./hereEntryChecks";
 import { createHereEntryWorld } from "./hereEntryWorld";
 
+// The time button is the wall-time input of add-wall-time-input-with-hint, not a remove action.
+const NOT_WALL_TIME_INPUT_NAME = /^(?!Ввести время|Enter time)/;
 const feature = await loadFeature(
   "../locations_here_entry_changes_unit.feature",
 );
@@ -48,7 +50,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then(
       "the Here entry has no remove action, no drag handle and no Location menu",
       () =>
-        expect(within(world.hereEntry()).queryAllByRole("button")).toEqual([]),
+        expect(
+          within(world.hereEntry()).queryAllByRole("button", {
+            name: NOT_WALL_TIME_INPUT_NAME,
+          }),
+        ).toEqual([]),
     );
   });
 
