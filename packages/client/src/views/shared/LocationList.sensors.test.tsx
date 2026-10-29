@@ -1,4 +1,5 @@
 // FR9, UX2 of support-legacy-ios-12-safari: the drag sensor follows Pointer Events support.
+
 import * as dndCore from "@dnd-kit/core";
 import { render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -7,6 +8,7 @@ import {
   REORDER_TOUCH_ACTIVATION_DELAY_MS,
   REORDER_TOUCH_ACTIVATION_TOLERANCE_PX,
 } from "@/constants";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 
 vi.mock("@dnd-kit/core", async (importOriginal) => {
   const original = await importOriginal<typeof import("@dnd-kit/core")>();
@@ -24,6 +26,7 @@ async function renderListWithSensors() {
       onSetHome={() => undefined}
       onSelectTrackFraction={vi.fn()}
       onMoveTrack={vi.fn()}
+      onConfirmWallTime={ignoreWallTime}
     />,
   );
   return vi.mocked(dndCore.useSensor).mock.calls;

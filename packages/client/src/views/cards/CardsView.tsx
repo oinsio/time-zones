@@ -5,6 +5,7 @@ import {
   useHereEntry,
   useLocations,
   useTimeSelection,
+  useWallTimeInput,
 } from "@/controller";
 import {
   HereEntryRow,
@@ -37,6 +38,7 @@ export default function CardsView() {
   } = useLocations();
   const hereEntry = useHereEntry();
   const { selectTrackFraction, moveTrack } = useTimeSelection();
+  const { confirmWallTime } = useWallTimeInput();
   const addLocationButtonRef = useRef<HTMLButtonElement>(null);
   const hasRemovedLastLocation = useRef(false);
   const [announcement, setAnnouncement] = useState("");
@@ -83,6 +85,7 @@ export default function CardsView() {
           entry={hereEntry}
           onSelectTrackFraction={selectTrackFraction}
           onMoveTrack={moveTrack}
+          onConfirmWallTime={confirmWallTime}
         />
       )}
       {rows.length === 0 ? (
@@ -97,6 +100,7 @@ export default function CardsView() {
           onMove={moveLocation}
           onSelectTrackFraction={selectTrackFraction}
           onMoveTrack={moveTrack}
+          onConfirmWallTime={confirmWallTime}
         />
       )}
       <LocationSearch

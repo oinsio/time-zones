@@ -1,4 +1,5 @@
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
+
 import { act, cleanup, render, screen } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
@@ -7,6 +8,7 @@ import { LocationsProvider, useLocations } from "@/controller";
 import { type Clock, fakeClock } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { resetPageVisibility } from "@/test/pageVisibility";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import {
@@ -103,6 +105,7 @@ export const createLocalTimeWorld = () => {
             onMove={latestLocations.moveLocation}
             onSelectTrackFraction={() => undefined}
             onMoveTrack={() => undefined}
+            onConfirmWallTime={ignoreWallTime}
           />
         );
       };

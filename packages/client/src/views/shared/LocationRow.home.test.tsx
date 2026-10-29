@@ -1,4 +1,5 @@
 // Verifies FR7, FR11, NFR-A3, UX1, UX2 of set-home-location-and-show-differences (D3, D7, D8).
+
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
@@ -8,6 +9,7 @@ import {
   LocationMarkKind,
   type LocationRow as LocationRowModel,
 } from "@/presenter";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { ALMATY_TRACK } from "./dayTrackFixture";
 import { LocationRow } from "./LocationRow";
 
@@ -48,6 +50,7 @@ function renderRow(overrides: Partial<LocationRowModel> = {}) {
             onSetHome={onSetHome}
             onSelectTrackFraction={vi.fn()}
             onMoveTrack={vi.fn()}
+            onConfirmWallTime={ignoreWallTime}
             isReorderable
             prefersReducedMotion={false}
           />

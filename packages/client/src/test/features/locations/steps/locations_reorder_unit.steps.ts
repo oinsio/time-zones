@@ -15,6 +15,7 @@ import {
   reduceLocations,
 } from "@/model";
 import type { LocationRow } from "@/presenter";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import { LocationList } from "@/views/shared";
@@ -229,6 +230,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           onMove: vi.fn(),
           onSelectTrackFraction: vi.fn(),
           onMoveTrack: vi.fn(),
+          onConfirmWallTime: ignoreWallTime,
         }),
       );
     });

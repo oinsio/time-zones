@@ -1,9 +1,11 @@
 // Verifies FR10, UX4 of add-locations-via-search.
 // Verifies FR1, UX3 of reorder-locations-by-drag-and-drop.
+
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import type { LocationRow } from "@/presenter";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { removeLocationThroughMenu } from "@/test/removeLocationThroughMenu";
 import { LocationList } from "./LocationList";
 
@@ -52,6 +54,7 @@ const noopHandlers = {
   onMove: vi.fn(),
   onSelectTrackFraction: () => undefined,
   onMoveTrack: () => undefined,
+  onConfirmWallTime: ignoreWallTime,
 };
 
 describe("LocationList", () => {

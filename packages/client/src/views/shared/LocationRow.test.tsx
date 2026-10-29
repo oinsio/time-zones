@@ -3,7 +3,9 @@
 // Verifies FR1 of reorder-locations-by-drag-and-drop.
 // Verifies FR1 of add-time-sliders-to-location-cards (D8).
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
+import { WallTimeInputOutcome, WallTimeTargetKind } from "@/controller";
 import { DayPeriod } from "@/presenter";
 import { renderKolkataRow as renderRow } from "./locationRowFixture";
 
@@ -111,5 +113,36 @@ describe("LocationRow day track", () => {
     const { container } = renderRow();
 
     expect(container.querySelectorAll("[data-day-track]")).toHaveLength(0);
+  });
+
+  // Verifies FR1, FR7 of add-wall-time-input-with-hint (D6).
+  it("should confirm a typed time with the location target", async () => {
+    const onConfirmWallTime = vi.fn(() => WallTimeInputOutcome.CLOSED);
+    renderRow(
+      {
+        localTimeLabel: "18:00",
+        localIsoDate: "2026-03-08",
+        wallTimeInputLabel: "Ввести время — Kolkata, 18:00",
+      },
+      true,
+      onConfirmWallTime,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Ввести время — Kolkata, 18:00" }),
+    );
+    await userEvent.type(screen.getByRole("textbox"), "{Enter}");
+
+    expect(onConfirmWallTime).toHaveBeenCalledWith(
+      { kind: WallTimeTargetKind.LOCATION, locationId: "kolkata" },
+      "18:00",
+      "2026-03-08",
+    );
+  });
+
+  it("should show the wall-time hint of its row", () => {
+    renderRow({ wallTimeHint: "02:30 не существует" });
+
+    expect(screen.getByText("02:30 не существует")).toBeInTheDocument();
   });
 });

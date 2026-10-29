@@ -16,6 +16,7 @@ import { type Clock, fakeClock } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationList } from "@/views/shared";
@@ -58,6 +59,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           onMove={latestLocations.moveLocation}
           onSelectTrackFraction={() => undefined}
           onMoveTrack={() => undefined}
+          onConfirmWallTime={ignoreWallTime}
         />
       );
     };

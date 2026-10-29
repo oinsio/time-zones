@@ -19,8 +19,12 @@ import {
   REORDER_TOUCH_ACTIVATION_DELAY_MS,
   REORDER_TOUCH_ACTIVATION_TOLERANCE_PX,
 } from "@/constants";
-import type { TrackMove } from "@/controller";
-import { usePrefersReducedMotion } from "@/controller";
+import {
+  type TrackMove,
+  usePrefersReducedMotion,
+  type WallTimeInputOutcome,
+  type WallTimeTarget,
+} from "@/controller";
 import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import type { LocationRow as LocationRowModel } from "@/presenter";
 import { LocationRow } from "./LocationRow";
@@ -49,6 +53,11 @@ type LocationListProps = {
   onMove: (id: string, targetIndex: number) => void;
   onSelectTrackFraction: (fraction: number) => void;
   onMoveTrack: (move: TrackMove) => void;
+  onConfirmWallTime: (
+    target: WallTimeTarget,
+    text: string,
+    date: string,
+  ) => WallTimeInputOutcome;
 };
 
 /**
@@ -72,6 +81,7 @@ export function LocationList({
   onMove,
   onSelectTrackFraction,
   onMoveTrack,
+  onConfirmWallTime,
 }: LocationListProps) {
   const menuButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const focusIndexAfterRemoval = useRef<number | null>(null);
@@ -124,6 +134,7 @@ export function LocationList({
               row={row}
               onSelectTrackFraction={onSelectTrackFraction}
               onMoveTrack={onMoveTrack}
+              onConfirmWallTime={onConfirmWallTime}
               onRemove={(id) => handleRemove(rowIndex, id)}
               onSetHome={onSetHome}
               isReorderable={rows.length >= MIN_LOCATIONS_TO_REORDER}
