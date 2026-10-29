@@ -58,6 +58,8 @@ type LocationListProps = {
  * (D5): a drop outside the list or on the card itself moves nothing.
  * Implements FR3, FR4 of add-time-sliders-to-location-cards (D8): passes the
  * track selection and move handlers to each row.
+ * Implements FR9, UX2 of support-legacy-ios-12-safari (D8): TouchSensor where
+ * Pointer Events are missing.
  */
 export function LocationList({
   rows,
