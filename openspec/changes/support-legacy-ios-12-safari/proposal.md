@@ -19,7 +19,7 @@ Research behind this proposal: the `@vitejs/plugin-legacy` documentation, canius
 - MODIFIED: the app checks for a new version again when it returns to the screen, at most once per 15 minutes, on every platform. This is a workaround for WebKit bug 199110: iOS never restarts an installed PWA. The existing update notice and update-check failure note are reused.
 - MODIFIED: the page declares itself as a home-screen web app for iOS (`apple-mobile-web-app-capable`).
 - ADDED: the dialog and its overlay keep their position, and the main page keeps its full height, on engines without the `inset` shorthand and the `dvh` unit.
-- MODIFIED: every pull request checks that the built JavaScript parses at the Safari 12 level and that the built CSS has no `inset` shorthand. A unit test checks that production sources contain no BigInt.
+- MODIFIED: every pull request checks that the built JavaScript parses at the Safari 12 level and that the built CSS has no `inset` shorthand and no `dvh` height without a preceding `vh` fallback. A unit test checks that production sources contain no BigInt.
 - Glossary (`docs/glossary/`): new context `browser-compatibility` with the terms supported engine, legacy engine, legacy support and legacy zone shim; **update recheck** added to the app shell context; the *Code:* owners of **legacy zone name** (time context) gain `getLegacyZoneNames`, the canonical → legacy view of the same alias map. **Time selection** already names the tap, so it is unchanged. The glossary, the new ADR and the CI step sit outside the implement stage's paths, so they ship as handoff patches (`tasks.md`, "Human follow-up").
 - No storage schema change, no new network calls. The stored list stays ADR-0004 schema version 1.
 
@@ -96,7 +96,7 @@ All paths are under `packages/client/` unless stated otherwise.
 - FR10: When the page becomes visible again and at least 15 minutes have passed since the last update check, the app MUST check for a new version. A found version MUST show the existing update notice. A failed check MUST show the existing update-check failure note. Checks MUST NOT run while the page is hidden.
 - FR11: The page head MUST contain `<meta name="apple-mobile-web-app-capable" content="yes">`.
 - FR12: The built CSS MUST express every `inset` utility through `top`, `right`, `bottom` and `left`. Every `dvh` height MUST be preceded by a `vh` fallback, so the dialog, its overlay and the main page keep their layout on iOS 12.
-- FR13: Every pull request MUST fail when the built JavaScript does not parse at the Safari 12 level (including regular-expression lookbehind), when the built CSS contains an `inset` shorthand, or when production sources contain BigInt.
+- FR13: Every pull request MUST fail when the built JavaScript does not parse at the Safari 12 level (including regular-expression lookbehind), when the built CSS contains an `inset` shorthand or a `dvh` height without a preceding `vh` fallback, or when production sources contain BigInt.
 
 ### Non-Functional
 
@@ -154,7 +154,7 @@ No changes (no IA documents exist under `docs/ia/`).
 ## Success Metrics
 
 - M1: 100% of FR1–FR13, NFR-P1, NFR-P2, NFR-A1, NFR-A2, NFR-R1 and UX1–UX3 have at least one automated test or CI check that names `support-legacy-ios-12-safari` together with the id. The exception is FR1 on a real device (M7).
-- M2: The legacy build check (`check:legacy-build`, run locally by the implement stage and in CI once H1 is applied) reports 0 syntax issues in `dist/assets/*.js` at the Safari 12 level and 0 `inset:` declarations in `dist/assets/*.css`.
+- M2: The legacy build check (`check:legacy-build`, run locally by the implement stage and in CI once H1 is applied) reports 0 syntax issues in `dist/assets/*.js` at the Safari 12 level and, in `dist/assets/*.css`, 0 `inset:` declarations and 0 `dvh` declarations without a preceding `vh` fallback.
 - M3: With `Europe/Kyiv` rejected and `Europe/Kiev` accepted by the stubbed engine, adding Kyiv succeeds, the stored id is `Europe/Kyiv`, and the row shows the same time and offset as `Europe/Kiev` at `2026-03-08T07:30:00Z` (`09:30`, `UTC+2`).
 - M4: With `Intl.DisplayNames`, `ResizeObserver` and `MediaQueryList.addEventListener` removed from the test environment, the main page renders with 0 uncaught errors (3 of 3 cases).
 - M5: Initial JS of the modern build ≤ 150 KB gzipped. On an engine with every built-in, 0 requests for the polyfill chunk.

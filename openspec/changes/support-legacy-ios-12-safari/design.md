@@ -51,7 +51,7 @@ To avoid a request waterfall on modern browsers, a small Vite plugin (`transform
 
 `src/lib/legacy/installLegacySupport.ts` imports, in this order:
 
-1. The core-js `stable` modules that `core-js-compat` reports as needed for `ios_saf 12.2`. A build-time virtual module (`virtual:legacy-core-js`, declared in `src/vite-env.d.ts`) lists them, and the `core-js-compat` version is pinned to the `core-js` dependency.
+1. The core-js `stable` modules that `core-js-compat` reports as needed for `ios_saf 12.2`. A build-time virtual module (`virtual:legacy-core-js`, declared in `src/vite-env.d.ts`) lists them, and the `core-js-compat` version is pinned to the `core-js` dependency. The plugin that serves it is registered in both `vite.config.ts` and `vitest.config.ts` (whose `plugins` are `[react(), zoneDataPlugin()]` today), as `zoneDataPlugin` already is for `virtual:time-zone-aliases`. Stryker runs through `vitest.config.ts` (`stryker.config.mjs`), so scoped mutation runs resolve it too.
 2. `@juggle/resize-observer`, assigned to `globalThis.ResizeObserver` only when it is absent.
 3. The zone shim of D4, installed only when the probe of D2 fails.
 
@@ -103,7 +103,7 @@ A guard is chosen over a polyfill for `Intl.DisplayNames`. `@formatjs/intl-displ
 ### D7. CSS fallbacks through esbuild's CSS target and a Tailwind fallback value (FR12)
 
 - `build.cssTarget` with `safari12`: esbuild expands `inset` into `top/right/bottom/left` for that target. The CSS check (D9) proves it on every build.
-- `min-h-dvh`: set `theme.extend.minHeight.dvh` in `tailwind.config.ts` to the fallback array `["100vh", "100dvh"]`. Tailwind emits both declarations in that order, so an engine without `dvh` keeps `100vh`.
+- `min-h-dvh`: set `theme.extend.minHeight.dvh` in `tailwind.config.ts` to the fallback array `["100vh", "100dvh"]`. Tailwind emits both declarations in that order, so an engine without `dvh` keeps `100vh`. The CSS check (D9) fails any `dvh` declaration without that fallback, so a later `h-dvh` or arbitrary `[100dvh]` class cannot regress it.
 
 **Alternatives:** `postcss-preset-env`: a new PostCSS dependency for one property. Rejected. `css.transformer: "lightningcss"`: replaces the PostCSS pipeline Tailwind 3 needs. Rejected. Rewriting `inset-*` classes by hand: easy to regress in new components. Rejected.
 
@@ -122,7 +122,7 @@ A new `scripts/check-legacy-build.mjs` (package script `check:legacy-build`) run
 
 - It parses every `dist/assets/*.js`, `dist/sw.js` and `dist/workbox-*.js` with `acorn` (`ecmaVersion: 2020`, module). That rejects ES2021+ syntax such as `??=`, numeric separators, class fields and top-level `await`.
 - It walks the AST and rejects `ChainExpression`, `??`, BigInt literals and regex literals with `(?<=` / `(?<!`. Those are ES2020 or ES2018 syntax that Safari 12 lacks, while `import()` and `import.meta` stay allowed.
-- It scans `dist/assets/*.css` for `inset:` declarations.
+- It scans `dist/assets/*.css` for `inset:` declarations, and for any rule whose `dvh` declaration (for example `min-height:100dvh`) has no declaration of the same property with a `vh` value before it in that rule (FR12).
 - It exits non-zero and names the file and the construct.
 
 Its rules live in a pure module (`scripts/legacyBuild/findLegacySyntaxIssues.ts`) tested from `src/test/legacyBuild/`, as `scripts/benchBudgets.ts` is tested from `src/test/benchmarks/`. The CI step that runs the script goes into `.github/workflows/ci.yml`, after "Check initial JS budget", through handoff H1, because the implement stage may not edit `.github/`.
