@@ -81,3 +81,12 @@ describe("LocationSearchDialog", () => {
     expect(onChoose).toHaveBeenCalledWith(kolkata);
   });
 });
+
+// UX3 of support-legacy-ios-12-safari: no empty country element in a result.
+describe("LocationSearchDialog result without a country name", () => {
+  it("should render the city and no country element", () => {
+    renderDialog({ presentedResults: [{ ...kolkata, countryName: "" }] });
+    const cityLine = screen.getByText("Kolkata", { exact: false });
+    expect(cityLine.parentElement?.children).toHaveLength(1);
+  });
+});

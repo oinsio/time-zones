@@ -1,5 +1,5 @@
 // Verifies FR2, FR3, FR9 of add-locations-via-search (D7).
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { POPULAR_TIME_ZONE_IDS } from "@/constants";
 import { almaty, idsOf, moscow, utc } from "./zoneCitiesFixtures";
 import { createZoneCitiesSource } from "./zoneCitiesSource";
@@ -92,5 +92,30 @@ describe("zone cities source records", () => {
   it("should list the abbreviations of a zone as aliases", () => {
     const source = createZoneCitiesSource([moscow], () => ["Europe/Moscow"]);
     expect(source.records[0]?.aliases).toEqual(["MSK"]);
+  });
+});
+
+// FR5 of support-legacy-ios-12-safari: no country search without Intl.DisplayNames.
+describe("zone cities source without Intl.DisplayNames", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should match a country name only while Intl.DisplayNames exists", () => {
+    const withNames = createZoneCitiesSource([almaty], () => ["Asia/Almaty"]);
+    vi.stubGlobal("Intl", { ...Intl, DisplayNames: undefined });
+    const withoutNames = createZoneCitiesSource([almaty], () => [
+      "Asia/Almaty",
+    ]);
+
+    expect(withNames.match("kazakhstan")).toHaveLength(1);
+    expect(withoutNames.match("kazakhstan")).toEqual([]);
+  });
+
+  it("should still match the city without Intl.DisplayNames", () => {
+    vi.stubGlobal("Intl", { ...Intl, DisplayNames: undefined });
+    const source = createZoneCitiesSource([almaty], () => ["Asia/Almaty"]);
+
+    expect(source.match("almaty")).toHaveLength(1);
   });
 });

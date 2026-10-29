@@ -83,3 +83,44 @@ describe("usePrefersReducedMotion", () => {
     expect(result.current).toBe(false);
   });
 });
+
+// FR7 of support-legacy-ios-12-safari: addListener on a MediaQueryList without addEventListener.
+describe("usePrefersReducedMotion on a MediaQueryList with only addListener", () => {
+  const originalMatchMedia = window.matchMedia;
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia;
+  });
+
+  function stubLegacyMatchMedia(initialMatches: boolean) {
+    const listeners = new Set<ChangeListener>();
+    const queryList = {
+      matches: initialMatches,
+      addListener: vi.fn((listener: ChangeListener) => listeners.add(listener)),
+      removeListener: vi.fn((listener: ChangeListener) =>
+        listeners.delete(listener),
+      ),
+    };
+    window.matchMedia = vi.fn(
+      () => queryList,
+    ) as unknown as typeof window.matchMedia;
+    return { queryList, listeners };
+  }
+
+  it("should return true once the preference turns on", () => {
+    const { queryList, listeners } = stubLegacyMatchMedia(false);
+    const { result } = renderHook(() => usePrefersReducedMotion());
+    act(() => {
+      queryList.matches = true;
+      for (const listener of listeners) listener();
+    });
+    expect(result.current).toBe(true);
+  });
+
+  it("should remove the same listener on unmount", () => {
+    const { queryList } = stubLegacyMatchMedia(false);
+    const { unmount } = renderHook(() => usePrefersReducedMotion());
+    const addedListener = queryList.addListener.mock.calls[0][0];
+    unmount();
+    expect(queryList.removeListener).toHaveBeenCalledWith(addedListener);
+  });
+});

@@ -46,16 +46,16 @@ All source paths are under `packages/client/`. Commands run from `packages/clien
 
 ## 4. API guards (TDD)
 
-- [ ] 4.1 TDD `src/presenter/countryName.ts`: return `""` when `Intl.DisplayNames` is not a function (design D6, FR5). Tests in new `src/presenter/countryName.test.ts`, with the global removed and the module re-imported: `presentCountryName("KZ", "en")` → `""` with no throw. With the global present, `"Kazakhstan"` stays. Verify red, then green, with `npx vitest run src/presenter/countryName.test.ts`.
-- [ ] 4.2 TDD `readCountryTexts` in `src/adapters/city-search/zoneCitiesSource.ts`: `[]` without `Intl.DisplayNames` (FR5). In `src/adapters/city-search/zoneCitiesSource.test.ts`, with the global removed: "Kazakhstan" matches no record by country, and "Almaty" still matches. Verify red, then green, with `npx vitest run src/adapters/city-search/zoneCitiesSource.test.ts`.
-- [ ] 4.3 UX3 tests: in new `src/views/shared/LocationRow.countryless.test.tsx` (the existing `LocationRow.test.tsx` is already 224 lines and stays untouched), a row with `countryName: ""` and an offset label renders the offset and no empty country element. In `src/views/shared/LocationSearchDialog.test.tsx` (83 lines), a result with `countryName: ""` renders the city and no empty country element. Tag both `// UX3 of support-legacy-ios-12-safari`. Verify with `npx vitest run src/views/shared/LocationRow.countryless.test.tsx`, then `npx vitest run src/views/shared/LocationSearchDialog.test.tsx`.
-- [ ] 4.4 TDD `src/controller/usePrefersReducedMotion.ts`: `addListener` / `removeListener` fallback (design D6, FR7). Tests in `src/controller/usePrefersReducedMotion.test.ts` with a `MediaQueryList` stub that has only `addListener`:
+- [x] 4.1 TDD `src/presenter/countryName.ts`: return `""` when `Intl.DisplayNames` is not a function (design D6, FR5). Tests in new `src/presenter/countryName.test.ts`, with the global removed and the module re-imported: `presentCountryName("KZ", "en")` → `""` with no throw. With the global present, `"Kazakhstan"` stays. Verify red, then green, with `npx vitest run src/presenter/countryName.test.ts`.
+- [x] 4.2 TDD `readCountryTexts` in `src/adapters/city-search/zoneCitiesSource.ts`: `[]` without `Intl.DisplayNames` (FR5). In `src/adapters/city-search/zoneCitiesSource.test.ts`, with the global removed: "Kazakhstan" matches no record by country, and "Almaty" still matches. Verify red, then green, with `npx vitest run src/adapters/city-search/zoneCitiesSource.test.ts`.
+- [x] 4.3 UX3 tests: in new `src/views/shared/LocationRow.countryless.test.tsx` (the existing `LocationRow.test.tsx` is already 224 lines and stays untouched), a row with `countryName: ""` and an offset label renders the offset and no empty country element. In `src/views/shared/LocationSearchDialog.test.tsx` (83 lines), a result with `countryName: ""` renders the city and no empty country element. Tag both `// UX3 of support-legacy-ios-12-safari`. Verify with `npx vitest run src/views/shared/LocationRow.countryless.test.tsx`, then `npx vitest run src/views/shared/LocationSearchDialog.test.tsx`.
+- [x] 4.4 TDD `src/controller/usePrefersReducedMotion.ts`: `addListener` / `removeListener` fallback (design D6, FR7). Tests in `src/controller/usePrefersReducedMotion.test.ts` with a `MediaQueryList` stub that has only `addListener`:
   - the preference turns on → the hook returns `true`;
   - unmount → `removeListener` is called with the same listener;
   - the modern path still uses `addEventListener`.
 
   Verify red, then green, with `npx vitest run src/controller/usePrefersReducedMotion.test.ts`.
-- [ ] 4.5 Mutation run. Verify that `npx stryker run --mutate 'src/presenter/countryName.ts,src/adapters/city-search/zoneCitiesSource.ts,src/controller/usePrefersReducedMotion.ts'` scores ≥ 95% (minimum 90%).
+- [x] 4.5 Mutation run. Verify that `npx stryker run --mutate 'src/presenter/countryName.ts,src/adapters/city-search/zoneCitiesSource.ts,src/controller/usePrefersReducedMotion.ts'` scores ≥ 95% (minimum 90%).
 
 ## 5. Legacy support and boot (TDD)
 

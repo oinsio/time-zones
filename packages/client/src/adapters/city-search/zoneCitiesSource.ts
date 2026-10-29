@@ -85,8 +85,9 @@ function buildRecord(
   };
 }
 
+/** Implements FR5 of support-legacy-ios-12-safari (no texts without Intl.DisplayNames). */
 function readCountryTexts(countryCode: string): SearchableText[] {
-  if (countryCode === "") return [];
+  if (countryCode === "" || typeof Intl.DisplayNames !== "function") return [];
   return SUPPORTED_LANGUAGES.flatMap((language) => {
     const countryName = new Intl.DisplayNames(language, {
       type: REGION_DISPLAY_TYPE,
