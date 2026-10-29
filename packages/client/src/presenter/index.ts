@@ -29,10 +29,16 @@ export {
   formatOffsetDifference,
   type PresentedOffsetDifference,
 } from "./offsetDifference";
+// Implements FR2, FR3, FR10 of show-here-entry-for-device-time.
+export {
+  type PresentedHereEntry,
+  presentHereEntry,
+} from "./presentHereEntry";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";
 export {
   type PresentedSearchResult,
   presentSearchResults,
 } from "./presentSearchResults";
+export type { LocationRowsContext } from "./presentZoneMoment";
 // Implements FR3 of show-utc-offset-on-location-rows.
 export { formatUtcOffset } from "./utcOffset";

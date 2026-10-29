@@ -56,8 +56,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 4. Presenter (TDD)
 
-- [ ] 4.1 Refactor without behaviour change: extract `presentZoneMoment(subject, context)` from `presentLocationRows` into `presenter/presentZoneMoment.ts`. It covers the UTC offset, offset difference, local time and date, ISO date and day track (design D2). `presentLocationRows` spreads its result. Verify that `npx vitest run src/presenter` passes unchanged. Then verify that `npx vitest run src/test/features/locations` stays green, including the row work-bound scenarios.
-- [ ] 4.2 TDD `presentHereEntry(hereEntry, cityLabel, context)` in `presenter/presentHereEntry.ts` (design D2, D8; FR2, FR3, FR10, NFR-A2). Tests in `presenter/presentHereEntry.test.ts`:
+- [x] 4.1 Refactor without behaviour change: extract `presentZoneMoment(subject, context)` from `presentLocationRows` into `presenter/presentZoneMoment.ts`. It covers the UTC offset, offset difference, local time and date, ISO date and day track (design D2). `presentLocationRows` spreads its result. Verify that `npx vitest run src/presenter` passes unchanged. Then verify that `npx vitest run src/test/features/locations` stays green, including the row work-bound scenarios.
+- [x] 4.2 TDD `presentHereEntry(hereEntry, cityLabel, context)` in `presenter/presentHereEntry.ts` (design D2, D8; FR2, FR3, FR10, NFR-A2). Tests in `presenter/presentHereEntry.test.ts`:
   - M2: `Алматы`, mark kind `HERE` with caption `здесь`, `metaLabel` `Время устройства · UTC+5`, `12:30`, `вс, 8 мар.`, no offset difference, day track equal to a location row's in the same zone;
   - M4: `Москва` with `−2 ч` and `Время устройства · UTC+3`;
   - home in the same offset → `0 ч`;
@@ -66,7 +66,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - English meta `Device time · UTC+5:30` for `Asia/Kolkata`.
 
   Export from `presenter/index.ts`. Verify red, then green, with `npx vitest run src/presenter/presentHereEntry.test.ts`.
-- [ ] 4.3 Run `npx stryker run --mutate 'src/presenter/presentZoneMoment.ts,src/presenter/presentHereEntry.ts,src/presenter/presentLocationRows.ts'`. Verify a score ≥ 95% (minimum 90%).
+- [x] 4.3 Run `npx stryker run --mutate 'src/presenter/presentZoneMoment.ts,src/presenter/presentHereEntry.ts,src/presenter/presentLocationRows.ts'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 5. Controller (TDD)
 
