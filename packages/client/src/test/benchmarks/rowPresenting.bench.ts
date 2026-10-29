@@ -1,4 +1,5 @@
 // Implements FR6, verifies NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D5).
+// Implements NFR-P1 of set-home-location-and-show-differences: rows with a home location.
 import { bench, describe } from "vitest";
 import { ONE_DAY } from "@/constants";
 import {
@@ -66,6 +67,16 @@ describe("row presenting", () => {
     () => {
       presentBudgetRows(badgeLocations, {
         deviceTimeZoneId: BADGE_DEVICE_TIME_ZONE,
+      });
+    },
+    options,
+  );
+  bench(
+    "present 50 rows with a home location",
+    () => {
+      presentBudgetRows(badgeLocations, {
+        deviceTimeZoneId: BADGE_DEVICE_TIME_ZONE,
+        homeLocation: badgeLocations[BADGE_MATCHING_ROW_COUNT],
       });
     },
     options,
