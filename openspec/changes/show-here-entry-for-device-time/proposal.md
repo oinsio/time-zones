@@ -69,7 +69,7 @@ None. The Here entry belongs to the Locations context.
 
 - G1: In 100% of list states (empty, no matching location, home set elsewhere) the device time is on the screen without any user action.
 - G2: The Here entry appears, changes and disappears in the same render as the change of the location list or the device time zone that causes it.
-- G3: On first launch the user sees their own time, and 0 storage writes happen.
+- G3: On first launch the user sees their own time, and no location list is written.
 
 ## Non-Goals
 
@@ -104,7 +104,7 @@ None. The Here entry belongs to the Locations context.
 - FR4: The Here entry cannot be removed, reordered or made home. It has no drag handle and no Location menu. It is never a drop target: locations are reordered only among themselves, and the Here entry always stays first. Positions in reorder announcements count locations only.
 - FR5: A time selection on the Here entry's day track works as on a card's day track: by pointer and by keys, with the same pinning of the reference moment.
 - FR6: The Here entry follows the device time zone. The zone is read at the same moments as today: at start, at every minute tick, and when the page becomes visible. The Here entry appears, changes or disappears in the same render as the Here mark. The same holds when a location is added, removed or reordered, when the list changes in another tab, and when the list is reset. An unknown device time zone is `UTC`, shown as "UTC · here · Device time · UTC".
-- FR7: With an empty location list, the Here entry is shown first, then the explanation and the "Add location" action, which opens the search as today. Nothing is written to storage.
+- FR7: With an empty location list, the Here entry is shown first, then the explanation and the "Add location" action, which opens the search as today. No location list is written.
 - FR8: The city of the Here entry is the exemplar city of the device time zone in the interface language, from the zone cities data. That data is loaded in the background after the first render, only while the Here entry is shown. Until it is loaded, or when loading fails, the city is derived from the time zone ID (`Asia/Almaty` → `Almaty`), with no error shown. Showing the Here entry never waits for the data. The search reuses data the Here entry loaded, so the page requests the data at most once until a load fails.
 - FR9: The unreadable stored list keeps its load error with Reset and shows no Here entry, and the zone cities data is not requested for it. The view skeleton is unchanged, and the Here entry appears together with the rows. With storage unavailable, the Here entry is shown as usual.
 - FR10: Every new string ("Device time", the Here entry's accessible name) exists in English and Russian.
@@ -174,7 +174,7 @@ No changes (no IA documents exist under `docs/ia/`).
 - M2: Device time zone `Asia/Almaty`, current instant `2026-03-08T07:30:00Z`, Russian, list Moscow, Kolkata, New York, no home, zone cities data loaded. The first row is the Here entry: `Алматы`, `здесь`, `Время устройства · UTC+5`, `12:30`, `вс, 8 мар.`, no offset difference. Moscow shows `−2 ч`, Kolkata `+0:30`, New York `−9 ч` (4 of 4).
 - M3: After Almaty is added, exactly 1 row has the Here mark: the stored Almaty. After it is removed, the Here entry is first again. Both transitions happen in one render (2 of 2).
 - M4: Home Almaty, device time zone `Europe/Moscow`, Moscow not in the list, Russian. The first row is the Here entry `Москва` with `−2 ч` and `Время устройства · UTC+3`. The reference day is `2026-03-07T19:00:00Z`–`2026-03-08T19:00:00Z`.
-- M5: First launch: 0 storage writes, and the Here entry is shown with the derived city before the zone cities data resolves. Opening the search after that load makes 0 further requests for the data (1 request in total).
+- M5: First launch: 0 writes of the location list (none scheduled by the location repository), and the Here entry is shown with the derived city before the zone cities data resolves. Opening the search after that load makes 0 further requests for the data (1 request in total).
 - M6: Mutation score of the new or changed model, presenter, adapter, controller and view code ≥ 95% (minimum 90%), in scoped Stryker runs. axe-core reports 0 violations in 3 states × 2 themes. The new and re-approved screenshot baselines pass without `--update-snapshots`.
 - M7: With the engine stub that rejects `Europe/Kyiv` and accepts `Europe/Kiev`, device time zone reported as `Europe/Kiev`, English, current instant `2026-03-08T07:30:00Z`, list Moscow: the Here entry shows `Kyiv`, `09:30` and `Device time · UTC+2`.
 
