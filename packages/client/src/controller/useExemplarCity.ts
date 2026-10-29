@@ -33,7 +33,6 @@ export function useExemplarCity(
     (loadedSearch ?? readLoadedCitySearch(load))?.getExemplarCity(
       timeZoneId,
       language,
-    ) ??
-    deriveCityNameFromTimeZoneId(timeZoneId)
+    ) ?? deriveCityNameFromTimeZoneId(timeZoneId)
   );
 }

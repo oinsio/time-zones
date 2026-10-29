@@ -66,3 +66,11 @@ export const createHereEntryChecks = (world: HereEntryWorld) => {
     expectCardTime,
   };
 };
+
+/** The open search lists its suggestions. */
+export const expectSuggestions = () => {
+  expect(
+    screen.getByText(i18n.t("locations.suggestionsHeading")),
+  ).toBeVisible();
+  expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+};

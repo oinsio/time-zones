@@ -1,7 +1,3 @@
-// Implements FR1-FR9 of show-here-entry-for-device-time (D4-D6): the world of the Here entry features.
-// "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
-
-import zoneCities from "virtual:zone-cities";
 import {
   act,
   cleanup,
@@ -9,14 +5,12 @@ import {
   render,
   screen,
   waitFor,
-  within,
 } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
 import {
-  createCompositeCitySearch,
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
 } from "@/adapters";
@@ -25,7 +19,6 @@ import { KeyboardKey } from "@/constants";
 import { LocationsProvider, useLocations } from "@/controller";
 import { fakeClock } from "@/lib/temporal";
 import { getUtcOffsetMinutes } from "@/model";
-import { type LoadCitySearch, LocationsLoadStatus } from "@/ports";
 import { formatUtcOffset } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
@@ -33,23 +26,23 @@ import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { DateBar } from "@/views/shared";
+import { createDataLoaderState, DataMode } from "./hereEntryDataLoader";
+import {
+  buildStoredDocument,
+  findHereEntries,
+  getCardOf,
+  getHereEntry,
+  getHereSlider,
+} from "./hereEntryQueries";
 import { cityEntry } from "./locationsUiWorld";
+
+export { DataMode };
 
 const DEFAULT_INSTANT = "2026-03-08T07:30:00Z";
 const CITY_SEPARATOR = ", ";
 const EMPTY_LIST = "empty";
 
-export enum DataMode {
-  LOADED = "LOADED",
-  HELD = "HELD",
-  FAILING = "FAILING",
-}
-
 type LocationsHandle = ReturnType<typeof useLocations>;
-
-/** The part of the Here entry's name that no city or mark changes. */
-const deviceTimeName = () =>
-  i18n.t("locations.hereEntryName").split(", ").at(-1);
 
 /** Per-scenario state and the step handlers shared by the Here entry features. */
 export const createHereEntryWorld = () => {
@@ -57,58 +50,13 @@ export const createHereEntryWorld = () => {
   let instant = DEFAULT_INSTANT;
   let cities: string[] = [];
   let homeCity: string | undefined;
-  let dataMode = DataMode.LOADED;
   let isListUnreadable = false;
   let hasStoredList = true;
-  let dataRequests = 0;
-  let releaseData: () => void = () => undefined;
   let latestLocations: LocationsHandle;
   let backend: ReturnType<typeof createInMemoryLocationBackend>;
   let clock = createSwitchableClock(instant, deviceZone);
   let tickScheduler = createManualTickScheduler();
-
-  /** A new loader per opened app: the city data cache is keyed by loader. */
-  const createLoader = (): LoadCitySearch => () => {
-    dataRequests += 1;
-    if (dataMode === DataMode.FAILING)
-      return Promise.reject(new Error("offline"));
-    const search = createCompositeCitySearch(zoneCities);
-    if (dataMode === DataMode.LOADED) return Promise.resolve(search);
-    return new Promise((resolve) => {
-      releaseData = () => resolve(search);
-    });
-  };
-
-  const hereEntries = () =>
-    screen
-      .queryAllByRole("region")
-      .filter((region) =>
-        (region.getAttribute("aria-label") ?? "").endsWith(
-          deviceTimeName() ?? "",
-        ),
-      );
-  const hereEntry = () => {
-    const [entry] = hereEntries();
-    expect(entry, "the Here entry").toBeDefined();
-    return entry;
-  };
-  const cardOf = (city: string) =>
-    screen
-      .getByRole("button", { name: i18n.t("locations.locationMenu", { city }) })
-      .closest("li") as HTMLElement;
-  const hereSlider = () => within(hereEntry()).getByRole("slider");
-
-  const buildDocument = () => {
-    if (isListUnreadable)
-      return { status: LocationsLoadStatus.UNREADABLE } as const;
-    if (!hasStoredList) return { status: LocationsLoadStatus.EMPTY } as const;
-    return {
-      status: LocationsLoadStatus.LOADED,
-      locations: cities.map((city) => buildLocation(cityEntry(city))),
-      homeLocationId:
-        homeCity === undefined ? null : buildLocation(cityEntry(homeCity)).id,
-    } as const;
-  };
+  const dataLoader = createDataLoaderState();
 
   const Probe = () => {
     latestLocations = useLocations();
@@ -116,11 +64,11 @@ export const createHereEntryWorld = () => {
   };
 
   return {
-    hereEntry,
-    hereEntries,
-    cardOf,
-    hereSlider,
-    getDataRequests: () => dataRequests,
+    hereEntry: getHereEntry,
+    hereEntries: findHereEntries,
+    cardOf: getCardOf,
+    hereSlider: getHereSlider,
+    getDataRequests: dataLoader.getRequestCount,
     /** "UTC+5" for a zone at the scenario instant. */
     formatOffsetOf: (zone: string) =>
       formatUtcOffset(
@@ -141,10 +89,9 @@ export const createHereEntryWorld = () => {
       instant = DEFAULT_INSTANT;
       cities = [];
       homeCity = undefined;
-      dataMode = DataMode.LOADED;
       isListUnreadable = false;
       hasStoredList = true;
-      dataRequests = 0;
+      dataLoader.reset();
       await i18n.changeLanguage("en");
     },
     givenDeviceZone: (_ctx: unknown, zone: string) => {
@@ -166,7 +113,7 @@ export const createHereEntryWorld = () => {
       await i18n.changeLanguage(language);
     },
     givenData: (mode: DataMode) => () => {
-      dataMode = mode;
+      dataLoader.setMode(mode);
     },
     givenNoStoredList: () => {
       hasStoredList = false;
@@ -177,8 +124,15 @@ export const createHereEntryWorld = () => {
     openApp: async () => {
       clock = createSwitchableClock(instant, deviceZone);
       tickScheduler = createManualTickScheduler();
-      const loadCitySearch = createLoader();
-      backend = createInMemoryLocationBackend(buildDocument());
+      const loadCitySearch = dataLoader.createLoader();
+      backend = createInMemoryLocationBackend(
+        buildStoredDocument({
+          isListUnreadable,
+          hasStoredList,
+          cities,
+          homeCity,
+        }),
+      );
       render(
         <LocationsProvider
           repository={createInMemoryLocationRepository({ backend })}
@@ -226,10 +180,10 @@ export const createHereEntryWorld = () => {
       act(() => tickScheduler.runPending());
     },
     whenMovesHereTrackOneHourForward: () => {
-      fireEvent.keyDown(hereSlider(), { key: KeyboardKey.PAGE_UP });
+      fireEvent.keyDown(getHereSlider(), { key: KeyboardKey.PAGE_UP });
     },
     whenDataFinishesLoading: async () => {
-      await act(async () => releaseData());
+      await act(async () => dataLoader.release());
     },
     whenOpensSearch: async () => {
       await userEvent.click(

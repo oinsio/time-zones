@@ -21,6 +21,11 @@ import {
   typeQuery,
   UNREADABLE_DOCUMENT_TEXT,
 } from "./locationsE2eHelpers";
+import {
+  seedHereEntryState,
+  seedHomeList,
+  storeDeviceCity,
+} from "./locationsSeedHelpers";
 
 const STORAGE_WARNING_TEXT = englishLocale.mainPage.storageUnavailable;
 const RESULTS_QUERY = "Mos";
@@ -34,10 +39,6 @@ const HOME_CITY_NAMES = ["Almaty", "Kathmandu", "New York"];
 const HOME_CITY_NAME = "Almaty";
 const TRAVELLING_HOME_CITY_NAME = "Moscow";
 const MENU_OPEN_CITY_NAME = "Kathmandu";
-const HERE_ENTRY_CITY_NAMES = ["Moscow", "Kolkata", "New York"];
-const HERE_ENTRY_HOME_CITY_NAME = "Moscow";
-/** The E2E device time zone is Asia/Almaty (playwright.bdd.config.ts). */
-const DEVICE_CITY_NAME = "Almaty";
 
 /** The UI states of the locations screen that have a screen of their own. */
 export enum WorldClockState {
@@ -59,29 +60,6 @@ export enum WorldClockState {
   MENU_OPEN = "menu open",
   HERE_ENTRY = "here-entry",
   HERE_ENTRY_TRAVEL = "here-entry-travel",
-}
-
-/**
- * Stores the device's city, so no Here entry loads the search data before the
- * state holds or fails it (FR8 of show-here-entry-for-device-time). The page
- * starts without a service worker, so the data routes of the state apply.
- */
-async function storeDeviceCity(world: LocationsWorld) {
-  await world.seedList(buildStoredLocations([DEVICE_CITY_NAME]));
-  await world.reloadWithoutServiceWorker();
-  await expect(world.page.getByRole("listitem")).toHaveCount(1);
-}
-
-/** Seeds a list with a home location and shows it. */
-async function seedHomeList(
-  world: LocationsWorld,
-  cityNames: string[],
-  homeCityName: string,
-) {
-  const [homeLocation] = buildStoredLocations([homeCityName]);
-  await world.seedList(buildStoredLocations(cityNames), homeLocation);
-  await world.reloadIfOpen();
-  await expect(world.page.getByRole("listitem")).toHaveCount(cityNames.length);
 }
 
 /**
@@ -176,17 +154,10 @@ export async function enterLocationsState(
       }
       break;
     case WorldClockState.HERE_ENTRY:
-      await world.seedList(buildStoredLocations(HERE_ENTRY_CITY_NAMES));
-      await world.reloadIfOpen();
-      await expect(page.getByRole("listitem")).toHaveCount(
-        HERE_ENTRY_CITY_NAMES.length,
-      );
-      break;
     case WorldClockState.HERE_ENTRY_TRAVEL:
-      await seedHomeList(
+      await seedHereEntryState(
         world,
-        HERE_ENTRY_CITY_NAMES,
-        HERE_ENTRY_HOME_CITY_NAME,
+        state === WorldClockState.HERE_ENTRY_TRAVEL,
       );
       break;
     case WorldClockState.TRAVELLING:

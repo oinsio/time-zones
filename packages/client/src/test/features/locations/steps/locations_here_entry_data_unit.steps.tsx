@@ -9,7 +9,7 @@ import {
   restoreZoneData,
   startOnOutdatedZoneData,
 } from "../../browser_compatibility/steps/legacyZoneWorld";
-import { createHereEntryChecks } from "./hereEntryChecks";
+import { createHereEntryChecks, expectSuggestions } from "./hereEntryChecks";
 import {
   createWarmHereEntryCheck,
   presentHereEntryOnEngine,
@@ -28,12 +28,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   const expectHereEntryCity = (_ctx: unknown, city: string) =>
     expectHereEntryShows(city);
-  const expectSuggestions = () => {
-    expect(
-      screen.getByText(i18n.t("locations.suggestionsHeading")),
-    ).toBeVisible();
-    expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
-  };
 
   f.BeforeEachScenario(world.reset);
   f.AfterEachScenario(() => {
