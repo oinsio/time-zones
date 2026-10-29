@@ -12,8 +12,8 @@ import {
   BUILD_OUT_DIR,
   BUILD_TARGETS,
 } from "./app.config";
-import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { mainChunkPreloadPlugin } from "./scripts/legacyBoot/mainChunkPreloadPlugin";
+import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 
 export default defineConfig({

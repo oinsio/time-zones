@@ -7,7 +7,7 @@ const nativeDateTimeFormat = Intl.DateTimeFormat;
 const arrayAt = Array.prototype.at;
 
 function rejectProbeZone() {
-  const RejectingFormat = function (
+  function RejectingFormat(
     locales?: string | string[],
     options?: Intl.DateTimeFormatOptions,
   ) {
@@ -15,7 +15,7 @@ function rejectProbeZone() {
       throw new RangeError("Invalid time zone");
     }
     return new nativeDateTimeFormat(locales, options);
-  };
+  }
   Intl.DateTimeFormat =
     RejectingFormat as unknown as typeof Intl.DateTimeFormat;
 }

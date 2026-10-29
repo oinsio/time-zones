@@ -21,8 +21,6 @@ export { DEVICE_TIME_ZONE_FALLBACK_ID } from "./deviceTimeZone";
 export { ROOT_ELEMENT_ID } from "./dom";
 export { KeyboardKey } from "./keyboard";
 export { LEGACY_ZONE_PROBE_ID } from "./legacy";
-export { VISIBILITY_CHANGE_EVENT, VISIBLE_STATE } from "./pageVisibility";
-export { UPDATE_RECHECK_INTERVAL_MS } from "./update";
 export {
   HOUR_LABEL_FORMAT_OPTIONS,
   LOCAL_DATE_FORMAT_OPTIONS,
@@ -33,6 +31,7 @@ export {
   LOCATIONS_SCHEMA_VERSION,
   LOCATIONS_WRITE_DEBOUNCE_MS,
 } from "./locations";
+export { VISIBILITY_CHANGE_EVENT, VISIBLE_STATE } from "./pageVisibility";
 export {
   MIN_LOCATIONS_TO_REORDER,
   REDUCED_MOTION_MEDIA_QUERY,
@@ -67,6 +66,7 @@ export {
   TRACK_TOUCH_SLOP_PX,
   TRACK_VALUE_MIN_MINUTES,
 } from "./timeSelection";
+export { UPDATE_RECHECK_INTERVAL_MS } from "./update";
 export {
   MINUTES_PER_HOUR,
   NANOSECONDS_PER_MILLISECOND,
