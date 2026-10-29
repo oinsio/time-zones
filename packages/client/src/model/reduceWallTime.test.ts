@@ -140,6 +140,7 @@ describe("SET_WALL_TIME resolves the typed wall-clock time", () => {
     ["9:30", "2026-03-08", LocationErrorCode.INVALID_TIME],
     ["09:5", "2026-03-08", LocationErrorCode.INVALID_TIME],
     ["10:60", "2026-03-08", LocationErrorCode.INVALID_TIME],
+    ["10:40", "2026-02-30", LocationErrorCode.INVALID_DATE],
     ["10:40", "2026-13-01", LocationErrorCode.INVALID_DATE],
     ["23:00", "+275760-09-13", LocationErrorCode.DATE_OUT_OF_RANGE],
   ])("rejects %s on %s with %s", (time, date, error) => {
@@ -210,5 +211,59 @@ describe("SET_WALL_TIME resolves the typed wall-clock time", () => {
   it("is plain JSON", () => {
     const command = setWallTime(newYorkTarget, "10:40", "2026-03-08");
     expect(JSON.parse(JSON.stringify(command))).toEqual(command);
+  });
+
+  it("accepts the last minute of the hour", () => {
+    const result = reduceLocations(
+      stateWith(newYork),
+      setWallTime(newYorkTarget, "10:59", "2026-03-10"),
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("replaces a pinned UNIQUE status of the same instant with the typed outcome", () => {
+    const selected = reduceLocations(stateWith(newYork), {
+      type: LocationCommandType.SELECT_INSTANT,
+      instant: "2026-11-01T05:30:00Z",
+    });
+    if (!selected.ok) throw new Error("expected ok");
+    const result = reduceLocations(
+      selected.state,
+      setWallTime(newYorkTarget, "01:30", "2026-11-01"),
+    );
+    if (!result.ok) throw new Error("expected ok");
+    expect(pinnedOf(result.state).wallClockStatus).toBe(
+      WallClockStatus.AMBIGUOUS,
+    );
+  });
+
+  it("replaces the outcome of the same instant and target", () => {
+    const unique = reduceLocations(
+      stateWith(newYork),
+      setWallTime(newYorkTarget, "03:30", "2026-03-08"),
+    );
+    if (!unique.ok) throw new Error("expected ok");
+    const gap = reduceLocations(
+      unique.state,
+      setWallTime(newYorkTarget, "02:30", "2026-03-08"),
+    );
+    if (!gap.ok) throw new Error("expected ok");
+    expect(pinnedOf(gap.state).wallClockStatus).toBe(WallClockStatus.GAP);
+  });
+
+  it("moves to another instant of the same target and outcome", () => {
+    const first = reduceLocations(
+      stateWith(newYork),
+      setWallTime(newYorkTarget, "10:40", "2026-03-08"),
+    );
+    if (!first.ok) throw new Error("expected ok");
+    const second = reduceLocations(
+      first.state,
+      setWallTime(newYorkTarget, "11:40", "2026-03-08"),
+    );
+    if (!second.ok) throw new Error("expected ok");
+    expect(pinnedOf(second.state).instant.toString()).toBe(
+      "2026-03-08T15:40:00Z",
+    );
   });
 });

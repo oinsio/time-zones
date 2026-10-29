@@ -92,4 +92,23 @@ describe("getWallClockNote", () => {
       requestedWallTime,
     });
   });
+
+  it("finds the targeted location among several", () => {
+    expect(
+      getWallClockNote(
+        pinned(WallClockStatus.GAP, newYorkTarget, [almaty, newYork]),
+      ).placement,
+    ).toBe(WallClockNotePlacement.ROW);
+  });
+
+  it("shows a location target while the Here entry does not exist", () => {
+    const almatyTarget: WallTimeTarget = {
+      kind: WallTimeTargetKind.LOCATION,
+      locationId: almaty.id,
+    };
+    expect(
+      getWallClockNote(pinned(WallClockStatus.GAP, almatyTarget, [almaty]))
+        .placement,
+    ).toBe(WallClockNotePlacement.ROW);
+  });
 });

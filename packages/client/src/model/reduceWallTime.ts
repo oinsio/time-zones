@@ -57,7 +57,7 @@ export function reduceWallTime(
   }
   let date: Temporal.PlainDate;
   try {
-    date = Temporal.PlainDate.from(command.date, { overflow: "reject" });
+    date = Temporal.PlainDate.from(command.date);
   } catch (e) {
     if (e instanceof RangeError) return fail(LocationErrorCode.INVALID_DATE);
     throw e;
