@@ -39,20 +39,20 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 3. Port and adapter: exemplar city (TDD)
 
-- [ ] 3.1 Move `deriveNameFromZoneId` and its constants from `adapters/city-search/zoneCitiesSource.ts` to new `adapters/city-search/deriveCityNameFromTimeZoneId.ts` as `deriveCityNameFromTimeZoneId`, exported from `adapters/city-search/index.ts` and `adapters/index.ts` (design D3). First write `deriveCityNameFromTimeZoneId.test.ts` with `it.each`:
+- [x] 3.1 Move `deriveNameFromZoneId` and its constants from `adapters/city-search/zoneCitiesSource.ts` to new `adapters/city-search/deriveCityNameFromTimeZoneId.ts` as `deriveCityNameFromTimeZoneId`, exported from `adapters/city-search/index.ts` and `adapters/index.ts` (design D3). First write `deriveCityNameFromTimeZoneId.test.ts` with `it.each`:
   - `Asia/Almaty` → `Almaty`;
   - `America/New_York` → `New York`;
   - `America/Argentina/Buenos_Aires` → `Buenos Aires`;
   - `UTC` → `UTC`.
 
   Then switch the zone cities source to it. Verify `npx vitest run src/adapters/city-search`, with the existing results unchanged.
-- [ ] 3.2 TDD `getExemplarCity(timeZoneId, language)` on `CitySearch` (`ports/citySearch.ts`) and in `createCompositeCitySearch` (design D3, FR8, FR12). The contract goes in new `adapters/city-search/citySearch.contract.ts` (`describeCitySearchContract`), run from new `createCompositeCitySearch.exemplarCity.test.ts` with the extracted data (`virtual:zone-cities`, as in `controller/useCitySearch.test.ts`):
+- [x] 3.2 TDD `getExemplarCity(timeZoneId, language)` on `CitySearch` (`ports/citySearch.ts`) and in `createCompositeCitySearch` (design D3, FR8, FR12). The contract goes in new `adapters/city-search/citySearch.contract.ts` (`describeCitySearchContract`), run from new `createCompositeCitySearch.exemplarCity.test.ts` with the extracted data (`virtual:zone-cities`, as in `controller/useCitySearch.test.ts`):
   - `Asia/Almaty` → `Almaty` / `Алматы`;
   - `Europe/Kyiv` (en) → `Kyiv`, looked up by the canonical ID (CLDR 48, `cldr-dates-full`);
   - a zone without data → the derived name.
 
   Comment `// FR8: …` / `// FR12: …` per case. Verify `npx vitest run src/adapters/city-search`.
-- [ ] 3.3 Run `npx stryker run --mutate 'src/adapters/city-search/createCompositeCitySearch.ts,src/adapters/city-search/zoneCitiesSource.ts,src/adapters/city-search/deriveCityNameFromTimeZoneId.ts'`. Verify a score ≥ 95% (minimum 90%).
+- [x] 3.3 Run `npx stryker run --mutate 'src/adapters/city-search/createCompositeCitySearch.ts,src/adapters/city-search/zoneCitiesSource.ts,src/adapters/city-search/deriveCityNameFromTimeZoneId.ts'`. Verify a score ≥ 95% (minimum 90%).
 
 ## 4. Presenter (TDD)
 

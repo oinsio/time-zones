@@ -1,11 +1,13 @@
 export {
   createCompositeCitySearch,
   createFetchCitySearchLoader,
+  deriveCityNameFromTimeZoneId,
 } from "./city-search";
 export {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
 } from "./inMemoryLocationRepository";
+
 export { inMemoryStorageAvailability } from "./inMemoryStorageAvailability";
 export { loadCitySearch } from "./loadCitySearch";
 export {
