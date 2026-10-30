@@ -11,7 +11,7 @@ Apply `H1-glossary-track-end.patch` of the archived change `fix-day-track-handle
 - **Changes:** **Day track** and **Handle** in `docs/glossary/time-selection.md`: a dragged handle follows the pointer and settles at the reference moment when released.
 - **Serves:** FR3, UX2.
 - **Why manual:** the glossary lives in `docs/`, which the implement stage does not edit.
-- **Automated part:** `git apply --check` of the patch.
+- **Automated part:** `git apply --check` of the patch, and the scratch check: apply the track-end patch, then `git apply --unidiff-zero` of this patch, on a clean tree.
 - **Verify:** `grep -q "except a handle that is being dragged" docs/glossary/time-selection.md`.
 
 ## H2: Drag on real iOS devices
