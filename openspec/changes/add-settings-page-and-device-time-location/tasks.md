@@ -44,7 +44,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 2. Preferences: model, port, adapters, tab sync (TDD, design D5, D6)
 
-- [ ] 2.1 Constants (no TDD): in `constants/storage.ts` add `STORAGE_KEYS.PREFERENCES = "time-zones:preferences"` and `PREFERENCES_SYNC_CHANNEL_NAME = "time-zones:preferences-sync"`; create `constants/preferences.ts` with `PREFERENCES_SCHEMA_VERSION = 1` (as `LOCATIONS_SCHEMA_VERSION` lives in `constants/locations.ts`); export the new names from `constants/index.ts`. Verify `pnpm --filter @time-zones/client typecheck`.
+- [ ] 2.1 Constants (no TDD): in `constants/storage.ts` add `STORAGE_KEYS.PREFERENCES = "time-zones:preferences"` and `PREFERENCES_SYNC_CHANNEL_NAME = "time-zones:preferences-sync"`; create `constants/preferences.ts` with `PREFERENCES_SCHEMA_VERSION = 1` and `PREFERENCES_WRITE_DEBOUNCE_MS` (as `LOCATIONS_SCHEMA_VERSION` lives in `constants/locations.ts`); export the new names from `constants/index.ts`. Verify `pnpm --filter @time-zones/client typecheck`.
 - [ ] 2.2 RED (FR4, FR5, FR7): `preferences/preferences.test.ts` covers:
   - `DEFAULT_PREFERENCES` is `{ theme: ThemePreference.SYSTEM, hourFormat: HourFormat.H24 }`;
   - `reducePreferences` applies `SET_THEME` and `SET_HOUR_FORMAT` and returns the same object for an unchanged value;
@@ -104,7 +104,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 - [ ] 4.1 RED (FR4, FR5, FR7): `controller/PreferencesProvider.test.tsx` and `controller/useThemePreference.test.tsx`, with `createInMemoryPreferencesRepository`:
   - the defaults apply without a document and nothing is saved on mount;
-  - `setHourFormat(H12)` saves once;
+  - `setHourFormat(H12)` applies at once, and two quick changes save once, after `PREFERENCES_WRITE_DEBOUNCE_MS`, driven by `createManualWriteScheduler()` from `test/writeSchedulers.ts` as in `controller/useLocations.changes.test.tsx` (never `vi.useFakeTimers()`);
+  - a `pagehide` flushes a pending write;
   - an external change applies;
   - `UNREADABLE` gives the defaults and `loadStatus` `UNREADABLE`, and `resetPreferences()` clears it;
   - a failing save sets `hasSaveFailed` and keeps the choice;
@@ -179,7 +180,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 Each feature implements the spec-delta scenarios of the same names, with `@add-settings-page-and-device-time-location @FR-X` tags and step files under `steps/`. Steps use real stores and in-memory repositories, not mocks.
 
 - [ ] 7.1 `test/features/settings/settings_preferences_unit.feature` + steps: "Default is System", "Default is 24-hour", "Opening writes nothing" (FR4, FR5, FR7). Every scenario that asserts token values ("Dark on a light system", "Light on a dark system", "System follows a change of the system preference", and "Choices survive a reload", which ends with the dark token values from the first render) is not here: jsdom applies no media queries and no CSS, so they live in task 8.2 only. Verify `npx vitest run src/test/features/settings`.
-- [ ] 7.2 `test/features/settings/settings_storage_unit.feature` + steps: "Corrupted preferences", "Reset", "Storage unavailable", "Another tab changes the hour format" (two providers over one `test/localStorageMock.ts` and `test/inMemoryChannel.ts`) (FR7). Verify `npx vitest run src/test/features/settings`.
+- [ ] 7.2 `test/features/settings/settings_storage_unit.feature` + steps: "Corrupted preferences", "Reset", "Storage unavailable", "Another tab changes the hour format" (two providers over one `test/localStorageMock.ts` and `test/inMemoryChannel.ts`; the steps run the pending debounced write with `createManualWriteScheduler()` before they assert the stored document or the second tab) (FR7). Verify `npx vitest run src/test/features/settings`.
 - [ ] 7.3 `test/features/settings/settings_hour_format_unit.feature` + steps:
   - "Gap note in 12-hour format", "Time in the 12-hour format", "Hour labels in the 12-hour format", "Open the field in the 12-hour format" (FR5);
   - "Accepted 12-hour texts", "Rejected 12-hour texts", "The shown time is accepted unchanged" (FR6);

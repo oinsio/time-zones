@@ -117,7 +117,7 @@ In both hour formats, a wall-time input SHALL accept, in addition to the 24-hour
 | 24-hour | English |
 
 ### Requirement: Preferences are kept on the device
-The theme preference and the hour format SHALL be saved on the device as one versioned document and restored when the app is opened again, also offline. A stored Light or Dark choice MUST be in force when the main page is first shown. Nothing MUST be written for the preferences until the user changes a setting. The preferences MUST NOT be part of the locations document, and a change of the preferences MUST NOT write the locations document. Inputs: the stored document. Output: the preferences in force. <!-- implements FR4, FR7 of add-settings-page-and-device-time-location -->
+The theme preference and the hour format SHALL be saved on the device as one versioned document and restored when the app is opened again, also offline. A stored Light or Dark choice MUST be in force when the main page is first shown. Nothing MUST be written for the preferences until the user changes a setting. A chosen setting MUST apply at once; its write MUST be debounced and MUST NOT block the interface, and a pending write MUST be flushed when the page is hidden. The preferences MUST NOT be part of the locations document, and a change of the preferences MUST NOT write the locations document. Inputs: the stored document. Output: the preferences in force. <!-- implements FR4, FR7 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Choices survive a reload
 - **GIVEN** the user chose the theme Dark and the hour format 12-hour
