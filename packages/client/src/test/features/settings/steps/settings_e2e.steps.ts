@@ -57,10 +57,10 @@ Then("the focus is on the settings button", async ({ locationsWorld }) => {
 
 // Verifies FR3, NFR-A1 of add-settings-page-and-device-time-location: arrow keys move the choice.
 When(
-  "the user focuses the {string} option and presses ArrowDown",
-  async ({ locationsWorld }, optionName: string) => {
+  "the user focuses the {string} option and presses {string}",
+  async ({ locationsWorld }, optionName: string, key: string) => {
     await optionOf(locationsWorld.page, optionName).focus();
-    await locationsWorld.page.keyboard.press("ArrowDown");
+    await locationsWorld.page.keyboard.press(key);
   },
 );
 

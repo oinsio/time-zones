@@ -27,10 +27,11 @@ Feature: Settings page in a real browser
 
   @add-settings-page-and-device-time-location @FR3 @NFR-A1
   Scenario: Arrow keys change the theme
-    Given the user opens the settings
-    When the user focuses the "System" option and presses ArrowDown
-    Then the option "Light" is checked
-    And the option "System" is not checked
+    Given the system colour scheme is light
+    And the user opens the settings
+    When the user focuses the "System" option and presses "ArrowUp"
+    Then the option "Dark" is checked
+    And the page background is the dark token colour
 
   @add-settings-page-and-device-time-location @FR3 @FR5 @NFR-A1
   Scenario: Names and checked state
