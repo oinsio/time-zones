@@ -135,6 +135,29 @@ describe("PreferencesProvider", () => {
     expect(result.current.preferences).toEqual(DEFAULT_PREFERENCES);
   });
 
+  it("should report READY once a change has replaced an unreadable document", () => {
+    const { result, writeScheduler } = renderPreferences(
+      createInMemoryPreferencesRepository({
+        initialDocument: { status: PreferencesLoadStatus.UNREADABLE },
+      }),
+    );
+    act(() => result.current.setTheme(ThemePreference.DARK));
+    act(() => writeScheduler.runPending());
+    expect(result.current.loadStatus).toBe(PreferencesStatus.READY);
+  });
+
+  it("should keep reporting UNREADABLE while the save of a change fails", () => {
+    const { result, writeScheduler } = renderPreferences(
+      createInMemoryPreferencesRepository({
+        initialDocument: { status: PreferencesLoadStatus.UNREADABLE },
+        isWritable: false,
+      }),
+    );
+    act(() => result.current.setTheme(ThemePreference.DARK));
+    act(() => writeScheduler.runPending());
+    expect(result.current.loadStatus).toBe(PreferencesStatus.UNREADABLE);
+  });
+
   it("should clear the document and the status on reset", () => {
     const repository = createInMemoryPreferencesRepository({
       initialDocument: { status: PreferencesLoadStatus.UNREADABLE },

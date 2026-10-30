@@ -80,9 +80,11 @@ export function PreferencesProvider({
 
   const flushWrite = useCallback(() => {
     discardPendingWrite();
-    setHasSaveFailed(
-      repository.save(latestPreferences.current) === SaveOutcome.FAILED,
-    );
+    const saveOutcome = repository.save(latestPreferences.current);
+    setHasSaveFailed(saveOutcome === SaveOutcome.FAILED);
+    if (saveOutcome === SaveOutcome.SAVED) {
+      setLoadStatus(PreferencesStatus.READY);
+    }
   }, [repository, discardPendingWrite]);
 
   const applyChange = useCallback(
