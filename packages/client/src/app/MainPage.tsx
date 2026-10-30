@@ -27,7 +27,7 @@ export function MainPage({ notices, bottomBar, headerActions }: MainPageProps) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-screen-2xl flex-col px-4">
       <header className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-border pt-6 pb-4 md:flex md:gap-4">
-        <h1 className="order-2 col-start-2 text-center text-2xl font-semibold md:order-1 md:text-left">
+        <h1 className="order-2 col-start-2 text-center text-2xl font-semibold md:order-1 md:mr-auto md:text-left">
           {t("app.title")}
         </h1>
         {headerActions}

@@ -14,6 +14,7 @@ const BANNER_ROLE = "banner";
 const HEADING_ROLE = "heading";
 const BUTTON_ROLE = "button";
 const MIN_TARGET_SIZE_PX = 44;
+const MAX_ADJACENT_GAP_PX = 24;
 const SETTINGS_HEADING = englishLocale.settings.title;
 
 const headerOf = (page: Page) => page.getByRole(BANNER_ROLE);
@@ -43,6 +44,19 @@ Then(
     const edges = await Promise.all(parts.map(leftEdgeOf));
     expect(edges).toEqual([...edges].sort((left, right) => left - right));
     expect(new Set(edges).size).toBe(edges.length);
+  },
+);
+
+// Verifies NFR-R1 of add-settings-page-and-device-time-location: both buttons group at the right.
+Then(
+  "the button named {string} is directly before the button named {string}",
+  async ({ locationsWorld }, firstName: string, secondName: string) => {
+    const { page } = locationsWorld;
+    const first = await requireBox(headerButton(page, firstName));
+    const second = await requireBox(headerButton(page, secondName));
+    const gap = second.x - (first.x + first.width);
+    expect(gap).toBeGreaterThanOrEqual(0);
+    expect(gap).toBeLessThanOrEqual(MAX_ADJACENT_GAP_PX);
   },
 );
 

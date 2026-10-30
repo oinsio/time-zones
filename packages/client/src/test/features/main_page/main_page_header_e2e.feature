@@ -18,6 +18,7 @@ Feature: Main page header in a real browser
     When the user opens the locations app
     Then the header shows, from left to right, the title "Часовые пояса", the button named "Добавить место" and the button named "Настройки"
     And the button named "Добавить место" shows the visible text "Добавить"
+    And the button named "Добавить место" is directly before the button named "Настройки"
 
   @add-settings-page-and-device-time-location @FR1 @FR2
   Scenario: The header opens the search and the settings

@@ -19,7 +19,7 @@ export const SettingsButton = forwardRef<
       type="button"
       onClick={onClick}
       aria-label={t("settings.open")}
-      className="order-3 col-start-3 flex min-h-11 min-w-11 items-center justify-center justify-self-end rounded-md text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent md:ml-auto"
+      className="order-3 col-start-3 flex min-h-11 min-w-11 items-center justify-center justify-self-end rounded-md text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
     >
       <SlidersHorizontal aria-hidden="true" />
     </button>
