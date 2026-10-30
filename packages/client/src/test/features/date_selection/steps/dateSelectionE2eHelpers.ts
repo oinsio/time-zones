@@ -47,7 +47,10 @@ export async function showNextDay(page: Page) {
   await expect(nowButton(page)).toBeEnabled();
 }
 
-export async function computedColourOfVariable(page: Page, variableName: string) {
+export async function computedColourOfVariable(
+  page: Page,
+  variableName: string,
+) {
   return page.evaluate((cssVariable) => {
     const probe = document.createElement("div");
     probe.style.color = `var(${cssVariable})`;

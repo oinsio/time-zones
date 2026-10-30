@@ -1,5 +1,5 @@
-import { expect } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { expect } from "vitest";
 import { isNowInactive, nowButtonOfBar } from "./dateSelectionQueries";
 import type { createDateSelectionWorld } from "./dateSelectionWorld";
 

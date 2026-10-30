@@ -52,11 +52,12 @@ Then(
 );
 
 // Verifies FR2, M5 of keep-now-button-visible-when-live.
-When("the user forces a click on the inactive Now button", async ({
-  locationsWorld,
-}) => {
-  await nowButton(locationsWorld.page).click({ force: true });
-});
+When(
+  "the user forces a click on the inactive Now button",
+  async ({ locationsWorld }) => {
+    await nowButton(locationsWorld.page).click({ force: true });
+  },
+);
 
 // Verifies FR4, UX1, M1 of keep-now-button-visible-when-live.
 Then(

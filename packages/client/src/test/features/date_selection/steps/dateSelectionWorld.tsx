@@ -1,10 +1,5 @@
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
-import {
-  act,
-  cleanup,
-  render,
-  screen,
-} from "@testing-library/react/pure";
+import { act, cleanup, render, screen } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
 import {
