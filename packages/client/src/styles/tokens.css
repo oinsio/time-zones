@@ -2,10 +2,12 @@
  * Design tokens. Values come from docs/architecture/views.md ("Visual style")
  * and the approved screens in docs/design/screens.
  * Implements FR9, NFR-A3, UX1 of setup-app-shell-and-pages-deploy.
+ * Implements FR4, NFR-A3 of keep-now-button-visible-when-live (D3).
  */
 :root {
   --color-background: #f7f7f5;
   --color-foreground: #18181b;
+  --color-muted: #e4e4e7;
   --color-muted-foreground: #5b5b63;
   --color-accent: #2f5bd3;
   --color-accent-foreground: #ffffff;
@@ -25,6 +27,7 @@
   :root {
     --color-background: #0f1729;
     --color-foreground: #eef2fa;
+    --color-muted: #2a3550;
     --color-muted-foreground: #9aa8c2;
     --color-accent: #5ec2e8;
     --color-accent-foreground: #0b1220;

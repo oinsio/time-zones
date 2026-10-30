@@ -1,4 +1,5 @@
 // Verifies FR3 of select-date-with-calendar-and-now (D6).
+// Verifies FR1, FR2, FR3, FR4 of keep-now-button-visible-when-live (D1, D2).
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -69,9 +70,7 @@ describe("CalendarDialog", () => {
     await clickButton("Sunday, March 8, 2026");
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Now" }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Now" })).toBeDisabled();
   });
 
   it("should change nothing when the calendar is closed without a pick", async () => {
@@ -83,9 +82,7 @@ describe("CalendarDialog", () => {
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(shownIsoDate(container)).toBe("2026-03-08");
-    expect(
-      screen.queryByRole("button", { name: "Now" }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Now" })).toBeDisabled();
   });
 
   it("should give days of neighbouring months no button", async () => {

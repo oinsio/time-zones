@@ -14,12 +14,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Design token (no TDD: tokens and config)
 
-- [ ] 1.1 RED: in `styles/tokens.test.ts`, add `"muted"` to `NEW_TOKENS`. In the `describe.each` block, add `it("should give the muted foreground at least 4.5:1 against the muted fill")` using `contrastRatio(readRequired(theme, "muted-foreground"), readRequired(theme, "muted"))` and `MIN_TEXT_CONTRAST`. Start the file comment with `// Verifies NFR-A3 of keep-now-button-visible-when-live.` above the existing line (design D3, M2). Run `npx vitest run src/styles/tokens.test.ts` and see it fail.
-- [ ] 1.2 GREEN: add `--color-muted: #e4e4e7;` to the light block and `--color-muted: #2a3550;` to the dark block of `styles/tokens.css`. Add `Implements FR4, NFR-A3 of keep-now-button-visible-when-live (D3).` to its header comment. Map `muted: "var(--color-muted)"` in `packages/client/tailwind.config.ts` (outside `src/`) next to `"muted-foreground"`. Verify, one at a time: `npx vitest run src/styles/tokens.test.ts`, then `pnpm --filter @time-zones/client typecheck`.
+- [x] 1.1 RED: in `styles/tokens.test.ts`, add `"muted"` to `NEW_TOKENS`. In the `describe.each` block, add `it("should give the muted foreground at least 4.5:1 against the muted fill")` using `contrastRatio(readRequired(theme, "muted-foreground"), readRequired(theme, "muted"))` and `MIN_TEXT_CONTRAST`. Start the file comment with `// Verifies NFR-A3 of keep-now-button-visible-when-live.` above the existing line (design D3, M2). Run `npx vitest run src/styles/tokens.test.ts` and see it fail.
+- [x] 1.2 GREEN: add `--color-muted: #e4e4e7;` to the light block and `--color-muted: #2a3550;` to the dark block of `styles/tokens.css`. Add `Implements FR4, NFR-A3 of keep-now-button-visible-when-live (D3).` to its header comment. Map `muted: "var(--color-muted)"` in `packages/client/tailwind.config.ts` (outside `src/`) next to `"muted-foreground"`. Verify, one at a time: `npx vitest run src/styles/tokens.test.ts`, then `pnpm --filter @time-zones/client typecheck`.
 
 ## 2. View: Now is always rendered (TDD)
 
-- [ ] 2.1 RED: in `views/shared/DateBar.test.tsx` (design D1, D2; FR1–FR4):
+- [x] 2.1 RED: in `views/shared/DateBar.test.tsx` (design D1, D2; FR1–FR4):
   - rename "should show the date without Now while live" to "should show the date with an inactive Now while live". It expects `screen.getByRole("button", { name: "Now" })` to be disabled;
   - rename "should show Now after the next day and hide it after Now" to "should activate Now after the next day and deactivate it after Now". It expects the button enabled after "Next day", disabled after "Now", and `document.activeElement` to be the date button (`/^Choose date/`);
   - add "should keep the moment live when the inactive Now is clicked": click the disabled Now, then `shownIsoDate` is still `2026-03-08` and the button is still disabled;
@@ -29,7 +29,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - in `views/shared/CalendarDialog.test.tsx`, "should keep a live moment live when the shown date is picked" and "should change nothing when the calendar is closed without a pick" expect `screen.getByRole("button", { name: "Now" })` to be disabled instead of `not.toBeInTheDocument()`.
 
   Put `// Verifies FR1, FR2, FR3, FR4 of keep-now-button-visible-when-live (D1, D2).` under the existing first line of both files. Run `npx vitest run src/views/shared/DateBar.test.tsx src/views/shared/CalendarDialog.test.tsx` and see the new expectations fail.
-- [ ] 2.2 GREEN: in `views/shared/DateBar.tsx`, drop the `dateBar.isPinned &&` condition. Render the button always with `disabled={!dateBar.isPinned}`, and add `disabled:cursor-default disabled:bg-muted disabled:text-muted-foreground` to its class list. Keep `handleReturnToNow` as it is. In the JSDoc, change "and, while pinned, Now" to "and Now (active while pinned, inactive while live)", and add `Implements FR1, FR2, FR3, FR4, NFR-A1 of keep-now-button-visible-when-live (D1, D2).` Verify `npx vitest run src/views/shared/DateBar.test.tsx src/views/shared/CalendarDialog.test.tsx`.
+- [x] 2.2 GREEN: in `views/shared/DateBar.tsx`, drop the `dateBar.isPinned &&` condition. Render the button always with `disabled={!dateBar.isPinned}`, and add `disabled:cursor-default disabled:bg-muted disabled:text-muted-foreground` to its class list. Keep `handleReturnToNow` as it is. In the JSDoc, change "and, while pinned, Now" to "and Now (active while pinned, inactive while live)", and add `Implements FR1, FR2, FR3, FR4, NFR-A1 of keep-now-button-visible-when-live (D1, D2).` Verify `npx vitest run src/views/shared/DateBar.test.tsx src/views/shared/CalendarDialog.test.tsx`.
 
 ## 3. Unit BDD: shown/not shown becomes active/inactive (design D4)
 
