@@ -34,6 +34,7 @@ Feature: Wall-time input in a real browser
     And the wall-time field requests a numeric keyboard
 
   @add-wall-time-input-with-hint @NFR-A4 @FR3
+  @keep-now-button-visible-when-live @FR3
   Scenario: Tab confirms the field
     Given the stored locations are "Almaty", "New York"
     And the user opens the locations app

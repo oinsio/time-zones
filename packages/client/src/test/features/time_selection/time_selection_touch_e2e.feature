@@ -3,6 +3,7 @@ Feature: Day track by touch in a real browser
   As a user on a phone I scroll past tracks with a swipe and pick a time with a tap.
 
   @add-time-sliders-to-location-cards @FR3 @NFR-R2
+  @keep-now-button-visible-when-live @FR2
   Scenario: A vertical swipe on a track scrolls without selecting a time
     Given the current time is "2026-03-08T07:30:00Z"
     And the screen is 375 by 300 px for the locations
@@ -15,6 +16,7 @@ Feature: Day track by touch in a real browser
     And the time of "Almaty" still equals the live time
 
   @add-time-sliders-to-location-cards @FR3 @NFR-R2
+  @keep-now-button-visible-when-live @FR3
   Scenario: A finger tap on a track selects a time
     Given the current time is "2026-03-08T07:30:00Z"
     And the screen is 375 px wide for the locations

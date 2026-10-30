@@ -131,13 +131,15 @@ When(
 );
 
 // Verifies FR3, FR5 of add-time-sliders-to-location-cards.
+// Verifies FR2, FR3 of keep-now-button-visible-when-live.
 Then("the Now button is active", async ({ locationsWorld }) => {
-  await expect(nowButton(locationsWorld.page)).toBeVisible();
+  await expect(nowButton(locationsWorld.page)).toBeEnabled();
 });
 
 // Verifies FR3 of add-time-sliders-to-location-cards.
+// Verifies FR2, FR3 of keep-now-button-visible-when-live.
 Then("the Now button is inactive", async ({ locationsWorld }) => {
-  await expect(nowButton(locationsWorld.page)).toHaveCount(0);
+  await expect(nowButton(locationsWorld.page)).toBeDisabled();
 });
 
 // Verifies FR3 of add-time-sliders-to-location-cards.

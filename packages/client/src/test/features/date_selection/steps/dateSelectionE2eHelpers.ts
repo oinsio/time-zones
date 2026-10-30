@@ -44,7 +44,18 @@ export async function requireBox(locator: Locator): Promise<Box> {
 
 export async function showNextDay(page: Page) {
   await nextDayButton(page).click();
-  await expect(nowButton(page)).toBeVisible();
+  await expect(nowButton(page)).toBeEnabled();
+}
+
+export async function computedColourOfVariable(page: Page, variableName: string) {
+  return page.evaluate((cssVariable) => {
+    const probe = document.createElement("div");
+    probe.style.color = `var(${cssVariable})`;
+    document.body.appendChild(probe);
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  }, variableName);
 }
 
 export async function openCalendarWithMouse(page: Page) {

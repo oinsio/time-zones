@@ -4,6 +4,7 @@ Feature: Date selection in a real browser
   pass axe-core, fit every screen and look as approved.
 
   @select-date-with-calendar-and-now @NFR-A2
+  @keep-now-button-visible-when-live @NFR-A2
   Scenario: Tab order of the bar
     Given the current time is "2026-03-08T07:30:00Z"
     And the user opens the locations app
@@ -88,6 +89,7 @@ Feature: Date selection in a real browser
     Then "Monday, March 9, 2026" is announced politely once
 
   @select-date-with-calendar-and-now @NFR-A1 @M7
+  @keep-now-button-visible-when-live @NFR-A1 @M4
   Scenario Outline: No accessibility violations in the <bar state> state in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme

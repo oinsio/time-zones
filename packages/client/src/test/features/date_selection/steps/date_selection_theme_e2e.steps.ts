@@ -1,10 +1,11 @@
 // Verifies UX1, UX2, UX3, NFR-R1 of select-date-with-calendar-and-now.
-import { expect, type Locator, type Page } from "@playwright/test";
+import { expect, type Locator } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import {
   barOf,
   calendarOf,
+  computedColourOfVariable,
   dateButton,
   MIN_TOUCH_TARGET_PX,
   nextDayButton,
@@ -19,17 +20,6 @@ const CALENDAR_DAY_SELECTOR = "table button";
 const ACCENT_COLOUR_VARIABLE = "--color-accent";
 const ACCENT_FOREGROUND_VARIABLE = "--color-accent-foreground";
 const FOREGROUND_VARIABLE = "--color-foreground";
-
-async function computedColourOfVariable(page: Page, variableName: string) {
-  return page.evaluate((cssVariable) => {
-    const probe = document.createElement("div");
-    probe.style.color = `var(${cssVariable})`;
-    document.body.appendChild(probe);
-    const colour = getComputedStyle(probe).color;
-    probe.remove();
-    return colour;
-  }, variableName);
-}
 
 const eachBox = async (locator: Locator) =>
   Promise.all((await locator.all()).map((item) => requireBox(item)));

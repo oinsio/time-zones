@@ -162,8 +162,9 @@ Then("the calendar is closed", async ({ locationsWorld }) => {
   await expect(calendarOf(locationsWorld.page)).toBeHidden();
 });
 
+// Verifies FR1 of keep-now-button-visible-when-live.
 Then("the bar is live", async ({ locationsWorld }) => {
-  await expect(nowButton(locationsWorld.page)).toHaveCount(0);
+  await expect(nowButton(locationsWorld.page)).toBeDisabled();
 });
 
 Then("the focus is on the date button", async ({ locationsWorld }) => {
