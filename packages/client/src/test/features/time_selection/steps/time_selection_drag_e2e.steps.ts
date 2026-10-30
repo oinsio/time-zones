@@ -2,6 +2,7 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import { PERCENT_PER_FRACTION } from "@/constants";
 import { emulateEngineWithoutPointerEvents } from "@/test/e2e/withoutPointerEvents";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import {
@@ -30,7 +31,6 @@ enum DragPointer {
 
 const FIRST_MOVE_PX = 20;
 const HANDLE_TOLERANCE_PX = 1;
-const PERCENT = 100;
 const NOTICE_WAIT_MS = 3000;
 const heldMouseX = new WeakMap<object, number>();
 const pointerKinds = new WeakMap<object, DragPointer>();
@@ -180,7 +180,7 @@ Then(
     const slider = sliderOf(page, city);
     const value = Number(await slider.getAttribute("aria-valuenow"));
     const maxValue = Number(await slider.getAttribute("aria-valuemax"));
-    const expected = await pointOnBar(page, city, (value / maxValue) * PERCENT);
+    const expected = await pointOnBar(page, city, (value / maxValue) * PERCENT_PER_FRACTION);
     const handle = centreOfBox(await requireBox(visibleHandleOf(page, city)));
     expect(Math.abs(handle.x - expected.x)).toBeLessThanOrEqual(
       HANDLE_TOLERANCE_PX,

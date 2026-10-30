@@ -3,6 +3,7 @@ import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { cleanup } from "@testing-library/react/pure";
 import { expect, vi } from "vitest";
+import { PERCENT_PER_FRACTION } from "@/constants";
 import { startWorkCount } from "@/test/workCounters";
 import { createDayTrackSteps } from "./dayTrackSteps";
 import {
@@ -22,7 +23,6 @@ type StepDefiners = Parameters<
 const feature = await loadFeature("../time_selection_drag_unit.feature");
 
 const PERCENT_PRECISION = 4;
-const PERCENT_PER_FRACTION = 100;
 const THREE_QUARTERS = 0.75;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
