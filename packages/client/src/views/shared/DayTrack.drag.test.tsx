@@ -28,15 +28,18 @@ describe("DayTrack drag", () => {
     expect(onSelectFraction).toHaveBeenLastCalledWith(0.75);
   });
 
-  it("should cancel the default touchmove only during a drag", () => {
-    const { slider } = setup();
-    expect(fireEvent.touchMove(slider)).toBe(true);
-    fireEvent.pointerDown(slider, pointer("touch", 100, 0));
-    fireEvent.pointerMove(slider, pointer("touch", 150, 0));
-    expect(fireEvent.touchMove(slider)).toBe(false);
-    fireEvent.pointerUp(slider, pointer("touch", 150, 0));
-    expect(fireEvent.touchMove(slider)).toBe(true);
-  });
+  it.each(["pointerUp", "pointerCancel"] as const)(
+    "should cancel the default touchmove only during a drag ended by %s",
+    (endEvent) => {
+      const { slider } = setup();
+      expect(fireEvent.touchMove(slider)).toBe(true);
+      fireEvent.pointerDown(slider, pointer("touch", 100, 0));
+      fireEvent.pointerMove(slider, pointer("touch", 150, 0));
+      expect(fireEvent.touchMove(slider)).toBe(false);
+      fireEvent[endEvent](slider, pointer("touch", 150, 0));
+      expect(fireEvent.touchMove(slider)).toBe(true);
+    },
+  );
 
   it("should not cancel touchmove during a vertical swipe", () => {
     const { slider } = setup();
