@@ -180,7 +180,11 @@ Then(
     const slider = sliderOf(page, city);
     const value = Number(await slider.getAttribute("aria-valuenow"));
     const maxValue = Number(await slider.getAttribute("aria-valuemax"));
-    const expected = await pointOnBar(page, city, (value / maxValue) * PERCENT_PER_FRACTION);
+    const expected = await pointOnBar(
+      page,
+      city,
+      (value / maxValue) * PERCENT_PER_FRACTION,
+    );
     const handle = centreOfBox(await requireBox(visibleHandleOf(page, city)));
     expect(Math.abs(handle.x - expected.x)).toBeLessThanOrEqual(
       HANDLE_TOLERANCE_PX,
