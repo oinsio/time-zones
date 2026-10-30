@@ -95,7 +95,8 @@ Run in this review, one run, from `packages/client/`:
 - Impact: the approved images still show the handle overlapping the time — the defect this change fixes. A later change that drops the inset (or reintroduces the overlap) differs from the baseline by less than before and passes the visual check, so the visual regression guard for FR4/UX1 approves the bug. NFR-R2 is not met and task 5.5 is ticked but not done.
 - Fix: from `packages/client/`, on Linux (the environment the baselines were taken in), run `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "Screenshot of the .* at 1024 px" --update-snapshots=all`. Then check that `git status --short src/test/features/__screenshots__ | grep -v -- "-at-1024-px-"` prints nothing, revert (`git checkout -- <file>`) any rewritten 1024 px baseline whose image shows no visible change (pure byte churn), and commit the new 1024 px baselines for both `chromium` and `mobile-chrome`. Finally run `npx playwright test -c playwright.bdd.config.ts --grep "Screenshot of the"` without the flag and see it pass.
 - Fix risk: `=all` rewrites every matching 1024 px baseline, including states where the track change may not be visible; that churn is avoided by reverting the unchanged-looking files as described. Baselines rendered on a machine whose fonts or rendering differ from CI would make the screenshot scenarios fail in CI, so they must be produced in the same Linux/Chromium setup CI uses. No production code changes.
-- Status: open
+- Status: fixed
+- Resolution: re-approved the 1024 px baselines for both chromium and mobile-chrome with --update-snapshots=all; kept the 20 light/dark files of the list, pinned, time-selected, travelling and calendar states that show tracks, reverted the 1024 px baselines of states without tracks as byte churn; the "Screenshot of the" scenarios pass (104) unflagged.
 
 ## Verdict
 
