@@ -34,6 +34,7 @@ const iconButtonClassName =
  * (open, focused day) stays here; picking reports the ISO date.
  * Implements FR3, FR9, NFR-A1, NFR-A2, NFR-R1, NFR-R2, UX1 of
  * select-date-with-calendar-and-now (D6).
+ * Implements NFR-R1, UX2 of keep-now-button-visible-when-live.
  */
 export const CalendarDialog = forwardRef<
   HTMLButtonElement,
@@ -82,7 +83,7 @@ export const CalendarDialog = forwardRef<
           type="button"
           aria-haspopup="dialog"
           aria-label={dateBar.chooseDateLabel}
-          className="flex min-h-11 items-center rounded-md px-2 text-base font-semibold text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          className="flex min-h-11 items-center rounded-md px-2 text-base font-semibold md:w-72 md:justify-center md:whitespace-nowrap text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
         >
           <time dateTime={dateBar.isoDate}>
             <span data-date-label="short" className="md:hidden">

@@ -1,3 +1,4 @@
+// Verifies NFR-A3 of keep-now-button-visible-when-live.
 // Verifies UX5, NFR-A1 of add-locations-via-search (D10).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -5,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const TOKENS_FILE = join(process.cwd(), "src", "styles", "tokens.css");
 const DARK_THEME_MARKER = "@media (prefers-color-scheme: dark)";
-const NEW_TOKENS = ["surface", "border", "overlay", "danger"];
+const NEW_TOKENS = ["surface", "border", "overlay", "danger", "muted"];
 const MIN_TEXT_CONTRAST = 4.5;
 const MIN_NON_TEXT_CONTRAST = 3;
 const HEX_RADIX = 16;
@@ -76,6 +77,14 @@ describe.each(["light", "dark"] as const)(
         expect(ratio).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
       },
     );
+
+    it("should give the muted foreground at least 4.5:1 against the muted fill", () => {
+      const ratio = contrastRatio(
+        readRequired(theme, "muted-foreground"),
+        readRequired(theme, "muted"),
+      );
+      expect(ratio).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+    });
 
     it("should give the border at least 3:1 against the surface", () => {
       const ratio = contrastRatio(

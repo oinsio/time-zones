@@ -1,4 +1,6 @@
+import userEvent from "@testing-library/user-event";
 import { expect } from "vitest";
+import { isNowInactive, nowButtonOfBar } from "./dateSelectionQueries";
 import type { createDateSelectionWorld } from "./dateSelectionWorld";
 
 type DateSelectionWorld = ReturnType<typeof createDateSelectionWorld>;
@@ -18,6 +20,8 @@ export function createReferenceMomentSteps(world: DateSelectionWorld) {
     givenAppOpen: () => world.openApp(),
     givenMovedToNextDay: () => world.showNextDay(),
     whenOpens: () => world.openApp(),
+    whenActivatesInactiveNow: () =>
+      userEvent.click(nowButtonOfBar() as HTMLElement),
     whenNextDay: () => world.showNextDay(),
     whenPreviousDay: () => world.showPreviousDay(),
     thenLive: () => world.expectLive(),
@@ -32,8 +36,8 @@ export function createReferenceMomentSteps(world: DateSelectionWorld) {
     },
     thenOffset: (_ctx: unknown, city: string, offset: string) =>
       world.expectRowOffset(city, offset),
-    thenNowNotShown: () => expect(world.isNowShown()).toBe(false),
-    thenNowShown: () => expect(world.isNowShown()).toBe(true),
+    thenNowInactive: () => expect(isNowInactive()).toBe(true),
+    thenNowActive: () => expect(world.isNowActive()).toBe(true),
     whenNextMinute: async (_ctx: unknown, timestamp: string) => {
       world.setInstant(timestamp);
       await world.runTick();

@@ -11,9 +11,18 @@ export const clickBarButton = (key: string) =>
     within(barElement()).getByRole("button", { name: i18n.t(key) }),
   );
 
-export const isNowShown = () =>
-  within(barElement()).queryByRole("button", { name: i18n.t("date.now") }) !==
-  null;
+export const nowButtonOfBar = () =>
+  within(barElement()).queryByRole("button", { name: i18n.t("date.now") });
+
+export const isNowActive = () => {
+  const nowButton = nowButtonOfBar();
+  return nowButton !== null && !(nowButton as HTMLButtonElement).disabled;
+};
+
+export const isNowInactive = () => {
+  const nowButton = nowButtonOfBar();
+  return nowButton !== null && (nowButton as HTMLButtonElement).disabled;
+};
 
 export const rowOf = (city: string) =>
   screen

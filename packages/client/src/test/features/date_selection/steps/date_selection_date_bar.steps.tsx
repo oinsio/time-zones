@@ -153,6 +153,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @select-date-with-calendar-and-now @FR8 @M4
+  // @keep-now-button-visible-when-live @FR1
   f.ScenarioOutline("Bar in each state", ({ When, Then }, variables) => {
     When("the main page is in the <state> state", async () => {
       await BAR_STATES[variables.state]?.();
@@ -165,7 +166,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       if (variables.state === "view error") await screen.findByRole("alert");
     });
     Then(
-      "the date bar is shown with the previous-day, date and next-day buttons",
+      "the date bar is shown with the previous-day, date and next-day buttons and an inactive Now",
       () => {
         const bar = screen.getByRole("group", {
           name: i18n.t("date.barLabel"),
@@ -179,6 +180,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         expect(
           within(bar).getByRole("button", { name: /^Choose date/ }),
         ).toBeInTheDocument();
+        expect(
+          within(bar).getByRole("button", { name: i18n.t("date.now") }),
+        ).toBeDisabled();
         cleanup();
       },
     );

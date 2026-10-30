@@ -1,11 +1,5 @@
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
-import {
-  act,
-  cleanup,
-  render,
-  screen,
-  within,
-} from "@testing-library/react/pure";
+import { act, cleanup, render, screen } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
 import {
@@ -34,7 +28,8 @@ import { cityEntry } from "../../locations/steps/locationsUiWorld";
 import {
   barElement,
   clickBarButton,
-  isNowShown,
+  isNowActive,
+  isNowInactive,
   rowOf,
   shownIsoDate,
 } from "./dateSelectionQueries";
@@ -193,15 +188,13 @@ export const createDateSelectionWorld = () => {
     pickDate: (isoDate: string) =>
       act(() => latestReference.selectDate(isoDate)),
     runTick: () => act(() => tickScheduler.runPending()),
-    isNowShown,
+    isNowActive,
     expectLive: () => {
-      expect(isNowShown()).toBe(false);
+      expect(isNowInactive()).toBe(true);
       expect(shownIsoDate()).toBe(deviceDateOf(clock.instant().toString()));
     },
     expectPinnedTo: (timestamp: string) => {
-      expect(
-        within(barElement()).getByRole("button", { name: i18n.t("date.now") }),
-      ).toBeInTheDocument();
+      expect(isNowActive()).toBe(true);
       expect(shownIsoDate()).toBe(deviceDateOf(timestamp));
     },
     expectRowShows: (city: string, time: string, date: string) => {

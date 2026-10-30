@@ -22,7 +22,7 @@ export const createSelectTimeSteps = (
   const whenKey = (_ctx: unknown, keyName: string) =>
     world.moveTrack(MOVE_BY_KEY_NAME[keyName]);
   const thenPinned = (_ctx: unknown, timestamp: string) => {
-    expect(world.isNowShown()).toBe(true);
+    expect(world.isNowActive()).toBe(true);
     expect(world.shownInstant()).toBe(timestamp);
   };
   const thenCardShows = (_ctx: unknown, city: string, time: string) =>

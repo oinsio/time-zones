@@ -16,9 +16,10 @@ const { When, Then } = createBdd(test);
 const MAX_MONTHS_TO_BROWSE = 12;
 const DATE_ELEMENT = "time";
 
+// Verifies FR3 of keep-now-button-visible-when-live.
 When("the user returns to now with the bar", async ({ locationsWorld }) => {
   await nowButton(locationsWorld.page).click();
-  await expect(nowButton(locationsWorld.page)).toHaveCount(0);
+  await expect(nowButton(locationsWorld.page)).toBeDisabled();
 });
 
 When(

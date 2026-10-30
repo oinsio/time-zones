@@ -20,14 +20,14 @@ export const createWallTimeStepHandlers = (world: WallTimeWorld) => ({
   whenTypes: (_ctx: unknown, text: string, city: string) =>
     world.typeTime(city, text),
   thenPinned: (_ctx: unknown, timestamp: string, status: string) => {
-    expect(world.isNowShown()).toBe(true);
+    expect(world.isNowActive()).toBe(true);
     expect(world.pinnedInstant()).toBe(timestamp);
     expect(world.wallClockStatus()).toBe(status);
   },
   thenCardShows: (_ctx: unknown, city: string, time: string) =>
     expect(world.rowOf(city).localTimeLabel).toBe(time),
-  thenStillLive: () => expect(world.isNowShown()).toBe(false),
-  thenStillPinned: () => expect(world.isNowShown()).toBe(true),
+  thenStillLive: () => expect(world.isNowActive()).toBe(false),
+  thenStillPinned: () => expect(world.isNowActive()).toBe(true),
   thenNoHint: () => expect(world.shownHints()).toEqual([]),
   thenNoNote: () => expect(world.hasDateBarNote()).toBe(false),
   givenTypedHint: (_ctx: unknown, text: string, city: string) => {

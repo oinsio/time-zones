@@ -3,13 +3,14 @@ Feature: Time selection and the reference moment
   As a user I return to now, change the date and open other tabs without losing or storing the selected time.
 
   @add-time-sliders-to-location-cards @FR5
+  @keep-now-button-visible-when-live @FR3
   Scenario: Now after selecting a time
     Given the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
     And the list contains "Almaty"
     And the app is open
     When the user selects three quarters of a track
-    Then the Now button is shown
+    Then the Now button is active
     When the user returns to now
     Then the moment is live
     And the "Almaty" card shows "12:30"

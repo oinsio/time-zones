@@ -185,14 +185,14 @@ A focused track SHALL move the reference moment by keys, counted in steps from t
 | `2026-03-08T18:59:00Z` | one hour back | `2026-03-08T18:00:00Z` |
 
 ### Requirement: Time selection works with the date bar
-A time selection from a live moment SHALL pin the moment, so the date bar shows the Now button. Now MUST return the moment to live: every handle shows the current instant at once and follows the clock again. A date change after a time selection keeps the selected wall-clock time in the reference zone (see the `date-selection` capability). The handles therefore keep their position, unless the new day's length or a DST gap moves them. Errors: none. <!-- implements FR5 of add-time-sliders-to-location-cards -->
+A time selection from a live moment SHALL pin the moment, so the date bar's Now button becomes active. Now MUST return the moment to live: every handle shows the current instant at once and follows the clock again. A date change after a time selection keeps the selected wall-clock time in the reference zone (see the `date-selection` capability). The handles therefore keep their position, unless the new day's length or a DST gap moves them. Errors: none. <!-- implements FR5 of add-time-sliders-to-location-cards; FR3 of keep-now-button-visible-when-live -->
 
 #### Scenario: Now after selecting a time
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the current instant is `2026-03-08T07:30:00Z`
 - **AND** the list contains Almaty
 - **WHEN** the user selects three quarters of the Almaty track
-- **THEN** the Now button is shown
+- **THEN** the Now button is active
 - **WHEN** the user returns to now
 - **THEN** the moment is live
 - **AND** the Almaty card shows `12:30` and its handle stands at `0.520833` (±0.000001)
@@ -371,7 +371,7 @@ From 768 px the handle MUST NOT cover the elements beside its track at any posit
 
 A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card in the list. A vertical swipe that starts on a track still scrolls the page and MUST NOT select a time; a finger tap on a track selects the time at that position. The page with tracks MUST NOT scroll horizontally at 320 px, 768 px and 2560 px. The approved screenshots at 375 px and 1024 px in both themes MUST show the tracks: the "list", "pinned" and "calendar" states and a new "time-selected" state.
 
-<!-- implements FR3, NFR-R1, NFR-R2, NFR-R3, UX1, UX2, UX3 of add-time-sliders-to-location-cards; FR1, FR4, NFR-R1, NFR-R2, UX1 of fix-day-track-handle-overlap-and-end-of-day -->
+<!-- implements FR3, NFR-R1, NFR-R2, NFR-R3, UX1, UX2, UX3 of add-time-sliders-to-location-cards; FR1, FR4, NFR-R1, NFR-R2, UX1 of fix-day-track-handle-overlap-and-end-of-day; FR2, FR3 of keep-now-button-visible-when-live -->
 
 #### Scenario: Track under the text on a narrow screen
 - **GIVEN** the list contains Almaty and Moscow
@@ -416,14 +416,14 @@ A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card
 - **AND** the list is long enough to scroll on a 375 px wide screen
 - **WHEN** the user swipes up with a finger starting on the Almaty track
 - **THEN** the page has scrolled
-- **AND** the moment is still live and the Now button is not shown
+- **AND** the moment is still live and the Now button is inactive
 
 #### Scenario: A finger tap on a track selects a time
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the current time is `2026-03-08T07:30:00Z`
 - **AND** the list is shown 375 px wide
 - **WHEN** the user taps three quarters of the Almaty track with a finger
-- **THEN** the Almaty card shows `18:00` and the Now button is shown
+- **THEN** the Almaty card shows `18:00` and the Now button is active
 
 #### Scenario: Touch targets
 - **WHEN** the list with tracks is shown at 320 px or 1024 px
@@ -549,7 +549,7 @@ Confirming an accepted time SHALL pin the reference moment to that wall-clock ti
 - **AND** Moscow shows `06:00`
 
 ### Requirement: The pinned wall-time moment drives every row
-After a wall-time input, every row's time, date, UTC offset and handle SHALL show the new moment in the same render. When the instant lies outside the current reference day, the day tracks and the date bar MUST move to the reference day that contains it. From live, the input MUST show the Now button, and Now MUST return to live. Typing the instant already pinned, with the same outcome in the same row, MUST change nothing. <!-- implements FR4, FR8 of add-wall-time-input-with-hint -->
+After a wall-time input, every row's time, date, UTC offset and handle SHALL show the new moment in the same render. When the instant lies outside the current reference day, the day tracks and the date bar MUST move to the reference day that contains it. From live, the input MUST make the Now button active, and Now MUST return to live. Typing the instant already pinned, with the same outcome in the same row, MUST change nothing. <!-- implements FR4, FR8 of add-wall-time-input-with-hint; FR3 of keep-now-button-visible-when-live -->
 
 #### Scenario: The typed instant leaves the reference day
 - **GIVEN** the device time zone is `Asia/Almaty`
@@ -559,7 +559,7 @@ After a wall-time input, every row's time, date, UTC offset and handle SHALL sho
 - **THEN** the moment is pinned to `2026-03-09T03:00:00Z`
 - **AND** the date bar shows 9 March
 - **AND** the reference day runs from `2026-03-08T19:00:00Z` to `2026-03-09T19:00:00Z`
-- **AND** the Now button is shown
+- **AND** the Now button is active
 
 ### Requirement: Wall-time input is never stored
 A wall-time input SHALL NOT be written to storage and SHALL NOT be passed to other open tabs. A change of the list in another tab MUST keep the moment. When the typed row no longer exists (the location was removed, or a location now shows the device time instead of the Here entry), nothing MUST change and the field MUST close without a message. A command with a malformed time or date MUST be rejected and change nothing. <!-- implements FR9, FR10 of add-wall-time-input-with-hint -->

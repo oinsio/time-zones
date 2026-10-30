@@ -27,7 +27,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const givenAppOpen = () => world.open();
   const selectQuarter = () => world.selectFraction(QUARTER);
   const thenPinned = (_ctx: unknown, timestamp: string) => {
-    expect(world.isNowShown()).toBe(true);
+    expect(world.isNowActive()).toBe(true);
     expect(world.shownInstant()).toBe(timestamp);
   };
   const thenCardShows = (_ctx: unknown, city: string, time: string) =>
@@ -39,17 +39,18 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   };
 
   // @add-time-sliders-to-location-cards @FR5
+  // @keep-now-button-visible-when-live @FR3
   f.Scenario("Now after selecting a time", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenZone);
     And("the current instant is {string}", givenInstant);
     And("the list contains {string}", givenList);
     And("the app is open", givenAppOpen);
     When("the user selects three quarters of a track", selectQuarter);
-    Then("the Now button is shown", () =>
-      expect(world.isNowShown()).toBe(true),
+    Then("the Now button is active", () =>
+      expect(world.isNowActive()).toBe(true),
     );
     When("the user returns to now", () => world.returnToNow());
-    Then("the moment is live", () => expect(world.isNowShown()).toBe(false));
+    Then("the moment is live", () => expect(world.isNowActive()).toBe(false));
     And("the {string} card shows {string}", thenCardShows);
     And("every handle stands at {number}", thenEveryHandleAt);
   });
