@@ -9,7 +9,7 @@
 | Contradictions | 0 |
 | CRITICAL | 0 |
 | WARNING | 0 |
-| SUGGESTION | 1 |
+| SUGGESTION | 0 |
 
 ## Freshness
 
@@ -23,6 +23,7 @@
 - ✅ Unit tests that expect Now to be hidden: `DateBar.test.tsx:39,54` (two `not.toBeInTheDocument()` at `:50,:66`) and `CalendarDialog.test.tsx:65,77` (`:73,:87`), with the test names task 2.1 quotes.
 - ✅ `isNowShown` lives in `test/features/date_selection/steps/dateSelectionQueries.tsx:14`, is used by `dateSelectionWorld.tsx:196-198` (`expectLive`), and `expectPinnedTo` does its own `within(barElement()).getByRole(…)` lookup (`dateSelectionWorld.tsx:201-204`); `dateSelectionWorld.tsx` has 217 lines.
 - ✅ `referenceMomentStepHelpers.ts:35-36` defines `thenNowNotShown` / `thenNowShown`; `timeSelectionWorld.tsx:186` has `isNowShown: () => current().reference.dateBar.isPinned`; callers `selectTimeSteps.ts`, `time_selection_moment.steps.tsx`, `wallTimeStepHandlers.ts`, `time_selection_legacy_tap.steps.tsx`, `date_selection_calendar.steps.tsx:113` all exist.
+- ✅ FR2's "nothing is announced" is already guaranteed outside the view: `dispatchAndAnnounce` announces only `if (outcome.ok && store.getSnapshot() !== stateBefore)` (`controller/useReferenceMoment.ts:80`), and `RESET_TO_NOW` on a live moment returns the same state (`if (state.reference.mode === ReferenceMode.LIVE) return { ok: true, state };`, `model/reduceReferenceMoment.ts:91`), tested by "should return the same state when resetting a live moment" (`model/referenceMomentPicking.test.ts:91`). With native `disabled` (design D1) the click does not reach `returnToNow` at all, so the change needs no extra live-region assertion.
 - ✅ `hereEntryWorld.tsx:194` defines `nowButton()`, asserted with `toBeInTheDocument()` at `locations_here_entry_changes_unit.steps.tsx:100`.
 - ✅ E2E: `showNextDay` waits for `nowButton(page)` `toBeVisible()` (`dateSelectionE2eHelpers.ts:45-48`); "the bar is live" expects `toHaveCount(0)` (`date_selection_e2e.steps.ts:165-166`); "the user returns to now with the bar" expects `toHaveCount(0)` (`date_selection_view_contract_e2e.steps.ts:19-21`); "the Now button is shown / is not shown" in `time_selection_pointer_e2e.steps.ts:134-141`.
 - ✅ `nowButton`, `nextDayButton`, `requireBox`, `showNextDay`, `MIN_TOUCH_TARGET_PX` are exported by `dateSelectionE2eHelpers.ts`; `computedColourOfVariable` is a local function of `date_selection_theme_e2e.steps.ts:23` (161 lines); `date_selection_e2e.steps.ts` has 187 lines.
@@ -72,15 +73,8 @@ None.
 
 ## Findings
 
-### R1 — SUGGESTION — FR2's "nothing is announced" has no assertion
-- Location: `openspec/changes/keep-now-button-visible-when-live/proposal.md:67`
-- Rule: `.claude/rules/test-planning.md`
-- Problem: FR2 says activating an inactive Now changes nothing: "the moment stays live and nothing is announced", and the delta "Return to now" repeats "nothing is announced" (`specs/date-selection/spec.md:36`). Its scenario "An inactive Now changes nothing" (`specs/date-selection/spec.md:49-57`) and the tests planned for it (tasks 2.1, 3.2, 4.2) check only the live mode, the shown date and the row. None of them reads the polite live region. `returnToNow` goes through `dispatchAndAnnounce` (`controller/useReferenceMoment.ts:106`), so a Now that is not really disabled would announce the date.
-- Impact: one clause of FR2 stays untested. With native `disabled` (design D1) the clause holds anyway, so the risk is only a later regression slipping through unseen.
-- Fix: in task 2.1's new test "should keep the moment live when the inactive Now is clicked", also expect the `[aria-live="polite"]` region of the bar to stay empty. The announcement starts as `""` (`useReferenceMoment.ts:65`). Add `- **AND** nothing is announced` to the delta scenario "An inactive Now changes nothing".
-- Fix risk: low. If the Gherkin line is added, task 3.2 needs a matching unit step that reads the live region of `barElement()` in jsdom. That step goes into `referenceMomentStepHelpers.ts` (42 lines) so `date_selection_reference_moment.steps.tsx` (186 lines) stays under 200.
-- Status: open
+None.
 
 ## Verdict
 
-Ready to implement. No blocking findings. R1 is optional polish.
+Ready to implement. No findings; nothing blocks.
