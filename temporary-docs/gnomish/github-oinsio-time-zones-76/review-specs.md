@@ -80,7 +80,8 @@
   - Then the New York slider has the value `1080` and the value text `09:00, Sun, Mar 8`.
   - And axe-core reports no violations in the light or the dark theme.
 - Fix risk: low. The edit goes into a requirement this change already modifies, so it opens no new MODIFIED block. Restating the stable "Accessible day tracks" as MODIFIED instead would risk dropping its scenarios. The values match the existing "Dragging one track moves every card" outcome (13:00Z = 09:00 EDT on 2026-03-08).
-- Status: open
+- Status: fixed
+- Resolution: specs/time-selection/spec.md "Select a time on a track" now states that the slider value and value text keep the selected track step during and after a drag, with no axe-core violations in both themes. NFR-A1 is added to its implements comment, and the scenario "The slider reports the selected step after a drag" (1080, `09:00, Sun, Mar 8`, axe) backs task 5.2's E2E scenario of the same name.
 
 ### R2 — WARNING — No plan for the task's iOS 12 fallback if the real-device check fails
 - Location: `openspec/changes/fix-day-track-drag-continuity-and-smoothness/design.md:47,73`; `tasks.md:98,109-111`
