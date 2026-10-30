@@ -256,7 +256,7 @@ Accessible names, focus, keyboard, layout, colours and axe-core are asserted her
   - `grep -rniE "hereEntry|HereEntryRow|HERE_ENTRY|default location|auto-added" src --include=*.ts --include=*.tsx`;
   - `grep -n "локац" src/locales/ru.json`;
   - `grep -rn "justify-between" src/views/shared/DateBar.tsx`.
-- [ ] 10.3 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm --filter @time-zones/client check:bundle-size` (after `pnpm run build`), and `pnpm run build`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone. Fix whatever fails.
+- [ ] 10.3 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build`, then `pnpm --filter @time-zones/client check:bundle-size`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone. Fix whatever fails.
 
 ## Human follow-up
 
