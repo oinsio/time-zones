@@ -13,7 +13,7 @@ import {
   createLocalStoragePreferencesRepository,
   type LocationsSyncChannel,
 } from "@/adapters";
-import { SettingsPage } from "@/app";
+import { SettingsPage } from "@/app/settings";
 import { STORAGE_KEYS } from "@/constants";
 import { PreferencesProvider } from "@/controller";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";

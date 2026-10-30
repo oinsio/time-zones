@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { KeyboardKey } from "@/constants";
 import {
   LocationsProvider,
@@ -16,10 +16,15 @@ import { AppPage } from "./appPage";
 import { MainPage } from "./MainPage";
 import { OfflineReadyNotice } from "./OfflineReadyNotice";
 import { SettingsButton } from "./SettingsButton";
-import { SettingsPage } from "./SettingsPage";
 import { StorageWarning } from "./StorageWarning";
 import { UpdateCheckFailedNote } from "./UpdateCheckFailedNote";
 import { UpdateNotice } from "./UpdateNotice";
+import { ViewSkeleton } from "./ViewSkeleton";
+
+/** Loaded on demand so the settings page stays out of the initial JavaScript (NFR-P1 budget). */
+const SettingsPage = lazy(async () => ({
+  default: (await import("./settings")).SettingsPage,
+}));
 
 /**
  * Application frame: owns the hooks and the notices, and renders the main
@@ -90,13 +95,15 @@ function AppShellContent({ clock }: { clock: Clock }) {
 
   if (page === AppPage.SETTINGS) {
     return (
-      <SettingsPage
-        notices={notices}
-        onBack={() => {
-          isReturningFromSettings.current = true;
-          setPage(AppPage.MAIN);
-        }}
-      />
+      <Suspense fallback={<ViewSkeleton />}>
+        <SettingsPage
+          notices={notices}
+          onBack={() => {
+            isReturningFromSettings.current = true;
+            setPage(AppPage.MAIN);
+          }}
+        />
+      </Suspense>
     );
   }
 

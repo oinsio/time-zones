@@ -36,7 +36,9 @@ describe("AppShell settings page", () => {
   it("should open the page with the settings button and focus its heading", async () => {
     render(<AppShell />);
     await openSettings();
-    expect(screen.getByRole("heading", { name: "Settings" })).toHaveFocus();
+    expect(
+      await screen.findByRole("heading", { name: "Settings" }),
+    ).toHaveFocus();
   });
 
   it("should show no date bar and no Add location button on the settings page", async () => {
@@ -63,6 +65,20 @@ describe("AppShell settings page", () => {
     await openSettings();
     await userEvent.keyboard("{Escape}");
     expect(screen.getByRole("button", { name: "Settings" })).toHaveFocus();
+  });
+
+  it("should not focus the settings button on the first render", () => {
+    render(<AppShell />);
+    expect(screen.getByRole("button", { name: "Settings" })).not.toHaveFocus();
+  });
+
+  it("should stay on the settings page for keys other than Esc", async () => {
+    render(<AppShell />);
+    await openSettings();
+    await userEvent.keyboard("a");
+    expect(
+      screen.getByRole("heading", { name: "Settings" }),
+    ).toBeInTheDocument();
   });
 
   it("should keep the pinned reference moment across the visit", async () => {

@@ -10,7 +10,7 @@ export const englishLocale = JSON.parse(
   views: { cardsEmptyState: string };
   locations: Record<string, string>;
   date: Record<string, string>;
-  settings: { title: string };
+  settings: Record<string, string>;
   mainPage: {
     viewError: string;
     retry: string;

@@ -43,6 +43,14 @@ describe("SettingsPage", () => {
     ).toHaveFocus();
   });
 
+  it("should keep the heading focusable by script only", () => {
+    renderPage();
+    expect(screen.getByRole("heading", { name: "Settings" })).toHaveAttribute(
+      "tabindex",
+      "-1",
+    );
+  });
+
   it("should have a Back button", async () => {
     const { onBack } = renderPage();
     await userEvent.click(screen.getByRole("button", { name: "Back" }));

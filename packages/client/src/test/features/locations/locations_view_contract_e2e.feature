@@ -21,6 +21,7 @@ Feature: Locations in every registered view
 
   @add-locations-via-search @view-contract @NFR-A2 @FR17
   Scenario: Add the first location with the keyboard
+    Given the stored list is empty
     When the user opens the search with Enter, types "Tokyo", presses Down and Enter
     Then the locations list shows "Tokyo"
     And the locations list holds 1 location
@@ -31,7 +32,10 @@ Feature: Locations in every registered view
     Given the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Moscow", "the device time location"
     Then the second row is the device time location showing "12:30"
-    When the user moves it to the first position, makes it home and then removes it
+    When the user picks up "Almaty" with the keyboard
+    And the user moves the picked-up card up 1 time
+    And the user drops the picked-up card with the keyboard
+    And the user makes the device time location home and then removes it
     Then the locations list order is "Moscow"
     And no location is home
 

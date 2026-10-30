@@ -170,7 +170,6 @@ export async function enterLocationsState(
     case WorldClockState.FIRST_LAUNCH:
       await expect(page.getByRole("listitem")).toHaveCount(1);
       break;
-      break;
     case WorldClockState.WALL_TIME_INPUT:
     case WorldClockState.WALL_TIME_HINT:
       await seedWallTimeState(world, state === WorldClockState.WALL_TIME_HINT);

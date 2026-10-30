@@ -151,3 +151,9 @@ Then("the active search option is in view", async ({ locationsWorld }) => {
     locationsWorld.page.getByRole("option", { selected: true }),
   ).toBeInViewport();
 });
+
+// Verifies FR13, FR17 of add-settings-page-and-device-time-location: an empty list, not the first-launch list.
+Given("the stored list is empty", async ({ locationsWorld }) => {
+  await locationsWorld.seedList([]);
+  await locationsWorld.reloadIfOpen();
+});

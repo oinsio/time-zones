@@ -1,5 +1,6 @@
 import type { Page, Route } from "@playwright/test";
 import { test as base } from "playwright-bdd";
+import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 
 const CARDS_CHUNK_URL_PATTERN = /\/CardsView-[^/]+\.js$/;
 
@@ -27,6 +28,28 @@ export class MainPageWorld {
   private readonly heldRoutes: Route[] = [];
 
   constructor(readonly page: Page) {}
+
+  /**
+   * Stores an empty list before the app starts: the first launch lists the
+   * device time location, so states about an empty list seed it.
+   * Verifies FR13 of add-settings-page-and-device-time-location.
+   */
+  async seedEmptyList() {
+    await this.page.addInitScript(
+      ({ key, schemaVersion }) => {
+        if (window.localStorage.getItem(key) === null) {
+          window.localStorage.setItem(
+            key,
+            JSON.stringify({
+              schemaVersion,
+              payload: { locations: [], homeLocationId: null },
+            }),
+          );
+        }
+      },
+      { key: STORAGE_KEYS.LOCATIONS, schemaVersion: LOCATIONS_SCHEMA_VERSION },
+    );
+  }
 
   /** Keeps every request for the Cards chunk pending until the scenario ends. */
   async holdCardsChunk() {

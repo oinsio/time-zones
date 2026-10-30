@@ -16,7 +16,6 @@ import {
   removeThroughMenu,
   SCREEN_HEIGHT_PX,
 } from "./locationsE2eHelpers";
-import { moveHandle } from "./locationsReorderE2eHelpers";
 
 const { When, Then } = createBdd(test);
 
@@ -25,8 +24,6 @@ const LIST_ITEM_ROLE = "listitem";
 const OPTION_ROLE = "option";
 const DEVICE_CITY = "Almaty";
 const SECOND_ROW_INDEX = 1;
-const SPACE_KEY = "Space";
-const ARROW_UP_KEY = "ArrowUp";
 /** The card layout switches at the md breakpoint. */
 const WIDE_LAYOUT_MIN_WIDTH_PX = 768;
 
@@ -190,13 +187,9 @@ Then(
 );
 
 When(
-  "the user moves it to the first position, makes it home and then removes it",
+  "the user makes the device time location home and then removes it",
   async ({ locationsWorld }) => {
     const { page } = locationsWorld;
-    await moveHandle(page, DEVICE_CITY).focus();
-    await page.keyboard.press(SPACE_KEY);
-    await page.keyboard.press(ARROW_UP_KEY);
-    await page.keyboard.press(SPACE_KEY);
     await expect(page.getByRole(LIST_ITEM_ROLE).first()).toHaveAccessibleName(
       DEVICE_TIME_NAME_PATTERN,
     );
@@ -218,3 +211,15 @@ Then("no location is home", async ({ locationsWorld }) => {
     }),
   ).toHaveCount(0);
 });
+
+// Verifies FR11 of add-settings-page-and-device-time-location: the polite region of the search.
+Then(
+  "the polite announcement says {string}",
+  async ({ locationsWorld }, announcement: string) => {
+    await expect(
+      locationsWorld.page.locator('[aria-live="polite"]', {
+        hasText: announcement,
+      }),
+    ).toHaveCount(1);
+  },
+);

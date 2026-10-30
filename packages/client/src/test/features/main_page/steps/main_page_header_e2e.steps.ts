@@ -49,7 +49,11 @@ Then(
 Then(
   "the button named {string} shows no visible text",
   async ({ locationsWorld }, name: string) => {
-    await expect(headerButton(locationsWorld.page, name)).toHaveText("");
+    const visibleText = await headerButton(
+      locationsWorld.page,
+      name,
+    ).innerText();
+    expect(visibleText).toBe("");
   },
 );
 

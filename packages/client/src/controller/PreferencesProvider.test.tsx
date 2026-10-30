@@ -96,6 +96,16 @@ describe("PreferencesProvider", () => {
     expect(repository.load().status).toBe(PreferencesLoadStatus.LOADED);
   });
 
+  it("should stop flushing on pagehide once unmounted", () => {
+    const { result, repository, unmount } = renderPreferences();
+    act(() => result.current.setTheme(ThemePreference.LIGHT));
+    unmount();
+    act(() => {
+      window.dispatchEvent(new Event("pagehide"));
+    });
+    expect(repository.load().status).toBe(PreferencesLoadStatus.EMPTY);
+  });
+
   it("should write nothing on pagehide without a pending change", () => {
     const { repository } = renderPreferences();
     act(() => {

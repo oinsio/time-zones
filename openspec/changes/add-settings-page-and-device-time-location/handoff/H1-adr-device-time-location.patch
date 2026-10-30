@@ -1,0 +1,58 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 801506a..2a0f2e1 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -15,7 +15,7 @@ IMPORTANT: Before naming or writing any domain type, function, constant, i18n ke
+ ## Architecture
+ 
+ - Model / presenter / swappable views — .claude/rules/architecture.md, overview: docs/architecture/overview.md
+-- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds)
++- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds, 0009 device time location)
+ - Screen design (docs win on conflict): docs/design/README.md
+ 
+ ## Domain Rules
+diff --git a/docs/adr/0007-reference-zone-and-device-time.md b/docs/adr/0007-reference-zone-and-device-time.md
+index c9f3fad..86d89d9 100644
+--- a/docs/adr/0007-reference-zone-and-device-time.md
++++ b/docs/adr/0007-reference-zone-and-device-time.md
+@@ -3,6 +3,8 @@
+ ## Status
+ Accepted (2026-09-28)
+ 
++Partly superseded by [ADR-0009](0009-device-time-location.md): the derived Here entry and First launch.
++
+ Refines [ADR-0003](0003-reference-instant-time-model.md): every place where ADR-0003 says "home location" now means the **reference zone** defined here.
+ 
+ ## Context
+diff --git a/docs/adr/0009-device-time-location.md b/docs/adr/0009-device-time-location.md
+new file mode 100644
+index 0000000..c9ed4ed
+--- /dev/null
++++ b/docs/adr/0009-device-time-location.md
+@@ -0,0 +1,26 @@
++# ADR-0009: Device time location — a removable kind of location
++
++## Status
++Accepted (2026-10-30)
++
++Partly supersedes [ADR-0007](0007-reference-zone-and-device-time.md): the derived Here entry and First launch sections.
++
++## Context
++
++ADR-0007 showed the device time as a derived **Here entry**: not stored, not removable, not reorderable, never home. Users could not remove it, move it or pick it as home, and the empty list never appeared. A new user also had a list that was empty in storage but not on screen.
++
++## Decision
++
++- The device time is a **location kind** of the list (`LocationKind.DEVICE_TIME`). It is stored as a kind without a zone, so the device time zone is never stored.
++- It is removable, reorderable, can be home and is offered in the search while it is not listed (`ADD_DEVICE_TIME_LOCATION`, `isDeviceTimeOptionShown`).
++- The first-launch list holds it (`buildFirstLaunchLocations`). After that the stored list is the truth: removing everything leaves an empty list across reloads.
++- The document schema version is 3; a version 2 document is migrated.
++- Kept from ADR-0007: the reference zone rule, the Here mark and "the device time zone is never stored".
++
++## Consequences
++Positive:
++- One row kind with the same controls as every other card.
++- The list on screen equals the stored list.
++
++Negative:
++- Existing users with an empty stored list get an empty screen after migration of an empty version 2 document, as designed.

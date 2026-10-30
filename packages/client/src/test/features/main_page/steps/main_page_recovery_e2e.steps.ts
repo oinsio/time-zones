@@ -15,11 +15,14 @@ import {
 
 const { Given, When, Then } = createBdd(test);
 
+const MAX_TABS_TO_RETRY = 5;
+
 // Verifies FR6, NFR-A2 of add-main-page-scaffold: first visit, before the
 // service worker controls the page, so page.route sees the chunk request.
 Given(
   "the view cannot be loaded on the first visit",
   async ({ mainPageWorld }) => {
+    await mainPageWorld.seedEmptyList();
     await mainPageWorld.blockCardsChunk();
   },
 );
@@ -44,8 +47,18 @@ When(
   "the user reaches Retry with Tab and presses Enter",
   async ({ mainPageWorld }) => {
     const { page } = mainPageWorld;
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("button", { name: RETRY_LABEL })).toBeFocused();
+    const retryButton = page.getByRole("button", { name: RETRY_LABEL });
+    // The header buttons come first in the tab order.
+    for (let tabCount = 0; tabCount < MAX_TABS_TO_RETRY; tabCount++) {
+      await page.keyboard.press("Tab");
+      if (
+        await retryButton.evaluate(
+          (button) => button === document.activeElement,
+        )
+      )
+        break;
+    }
+    await expect(retryButton).toBeFocused();
     await page.keyboard.press("Enter");
   },
 );
@@ -58,6 +71,7 @@ Then("the view is shown", async ({ mainPageWorld }) => {
 Given(
   "the app has been installed and its header position is recorded",
   async ({ mainPageWorld }) => {
+    await mainPageWorld.seedEmptyList();
     await installServiceWorker(mainPageWorld);
     await expect(mainPageWorld.page.getByText(EMPTY_STATE_TEXT)).toBeVisible();
     mainPageWorld.recordedHeaderBox = await readHeaderBox(mainPageWorld.page);
