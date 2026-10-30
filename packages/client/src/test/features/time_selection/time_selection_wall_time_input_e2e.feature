@@ -40,7 +40,7 @@ Feature: Wall-time input in a real browser
     And the user opens the wall-time input of "New York"
     When the user types "1040" and presses Tab
     Then the card of "New York" shows the time "10:40"
-    And the Now button is shown
+    And the Now button is active
 
   @add-wall-time-input-with-hint @NFR-A2 @FR11
   Scenario: Names in English

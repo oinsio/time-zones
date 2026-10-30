@@ -59,7 +59,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     fireEvent.click(slider, { clientX: TRACK_WIDTH_PX * THREE_QUARTERS });
   };
   const thenPinned = (_ctx: unknown, timestamp: string) => {
-    expect(world.isNowShown()).toBe(true);
+    expect(world.isNowActive()).toBe(true);
     expect(world.shownInstant()).toBe(timestamp);
   };
 
@@ -93,7 +93,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the engine has Pointer Events", givenPointerEvents);
       When("the user taps three quarters of the {string} track", whenUserTaps);
       Then("the moment is not pinned", () =>
-        expect(world.isNowShown()).toBe(false),
+        expect(world.isNowActive()).toBe(false),
       );
     },
   );

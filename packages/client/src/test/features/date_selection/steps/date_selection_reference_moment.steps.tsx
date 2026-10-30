@@ -33,11 +33,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     thenRowShows,
     thenRowsShow,
     thenOffset,
-    thenNowNotShown,
-    thenNowShown,
+    thenNowInactive,
+    whenActivatesInactiveNow,
+    thenNowActive,
   } = createReferenceMomentSteps(world);
 
   // @select-date-with-calendar-and-now @FR1 @M2
+  // @keep-now-button-visible-when-live @FR1
   f.Scenario("The app opens live", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenZone);
     And("the current instant is {string}", givenInstant);
@@ -48,7 +50,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       "the {string} row shows the time {string} and the date {string}",
       thenRowShows,
     );
-    And("the Now button is not shown", thenNowNotShown);
+    And("the Now button is inactive", thenNowInactive);
   });
 
   // @select-date-with-calendar-and-now @FR1 @M5
@@ -142,21 +144,38 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @select-date-with-calendar-and-now @FR6 @M2
+  // @keep-now-button-visible-when-live @FR3
   f.Scenario("Now after browsing dates", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", givenZone);
     And("the current instant is {string}", givenInstant);
     And("the list contains {string}", givenList);
     And("the app is open", givenAppOpen);
     And("the user moved to the next day", givenMovedToNextDay);
-    Then("the Now button is shown", thenNowShown);
+    Then("the Now button is active", thenNowActive);
     When("the user returns to now", () => world.returnToNow());
     Then("the moment is live", thenLive);
     And(
       "the {string} row shows the time {string} and the date {string}",
       thenRowShows,
     );
-    And("the Now button is not shown", thenNowNotShown);
+    And("the Now button is inactive", thenNowInactive);
   });
+
+  // @keep-now-button-visible-when-live @FR2 @M5
+  f.Scenario("An inactive Now changes nothing", ({ Given, And, When, Then }) => {
+    Given("the device time zone is {string}", givenZone);
+    And("the current instant is {string}", givenInstant);
+    And("the list contains {string}", givenList);
+    And("the app is open", givenAppOpen);
+    When("the user activates the inactive Now button", whenActivatesInactiveNow);
+    Then("the moment is live", thenLive);
+    And(
+      "the {string} row shows the time {string} and the date {string}",
+      thenRowShows,
+    );
+    And("the Now button is inactive", thenNowInactive);
+  });
+
   // @set-home-location-and-show-differences @FR4
   f.Scenario(
     "A home change keeps the pinned moment",

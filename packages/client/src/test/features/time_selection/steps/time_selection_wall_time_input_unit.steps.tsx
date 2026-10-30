@@ -155,6 +155,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @add-wall-time-input-with-hint @FR4 @FR8 @M2
+  // @keep-now-button-visible-when-live @FR3
   f.Scenario(
     "The typed instant leaves the reference day",
     ({ Given, And, When, Then }) => {
@@ -180,7 +181,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           ]);
         },
       );
-      And("the Now button is shown", thenStillPinned);
+      And("the Now button is active", thenStillPinned);
     },
   );
 

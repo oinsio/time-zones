@@ -2,7 +2,7 @@ Feature: Reference moment
   Implements change select-date-with-calendar-and-now.
   As a user I see every location at the date I choose and return to now.
 
-  @select-date-with-calendar-and-now @FR1 @M2
+  @select-date-with-calendar-and-now @FR1 @M2 @keep-now-button-visible-when-live @FR1
   Scenario: The app opens live
     Given the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
@@ -10,7 +10,7 @@ Feature: Reference moment
     When the user opens the app
     Then the moment is live
     And the "Almaty" row shows the time "12:30" and the date "Sun, Mar 8"
-    And the Now button is not shown
+    And the Now button is inactive
 
   @select-date-with-calendar-and-now @FR1 @M5
   Scenario: Date changes store nothing
@@ -63,18 +63,29 @@ Feature: Reference moment
     When the user moves to the next day twice and to the previous day once
     Then the moment is pinned to "2026-03-09T07:30:00Z"
 
-  @select-date-with-calendar-and-now @FR6 @M2
+  @select-date-with-calendar-and-now @FR6 @M2 @keep-now-button-visible-when-live @FR3
   Scenario: Now after browsing dates
     Given the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
     And the list contains "Almaty"
     And the app is open
     And the user moved to the next day
-    Then the Now button is shown
+    Then the Now button is active
     When the user returns to now
     Then the moment is live
     And the "Almaty" row shows the time "12:30" and the date "Sun, Mar 8"
-    And the Now button is not shown
+    And the Now button is inactive
+
+  @keep-now-button-visible-when-live @FR2 @M5
+  Scenario: An inactive Now changes nothing
+    Given the device time zone is "Asia/Almaty"
+    And the current instant is "2026-03-08T07:30:00Z"
+    And the list contains "Almaty"
+    And the app is open
+    When the user activates the inactive Now button
+    Then the moment is live
+    And the "Almaty" row shows the time "12:30" and the date "Sun, Mar 8"
+    And the Now button is inactive
 
   @set-home-location-and-show-differences @FR4
   Scenario: A home change keeps the pinned moment

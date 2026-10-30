@@ -18,6 +18,7 @@ Feature: Here entry follows the device time and the list
     Then no location list is stored
 
   @show-here-entry-for-device-time @FR5
+  @keep-now-button-visible-when-live @FR3
   Scenario: Time selection from the Here entry
     Given the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
@@ -26,7 +27,7 @@ Feature: Here entry follows the device time and the list
     And the user moves the Here entry's day track one hour forward
     Then the Here entry shows the time "13:30"
     And the "Moscow" row shows the time "11:30"
-    And the Now button is shown
+    And the Now button is active
 
   @show-here-entry-for-device-time @FR6
   Scenario: Adding the device's city hides the Here entry

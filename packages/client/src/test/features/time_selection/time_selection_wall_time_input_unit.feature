@@ -86,6 +86,7 @@ Feature: Type an exact time in any row
     And the "Moscow" card shows "06:00"
 
   @add-wall-time-input-with-hint @FR4 @FR8 @M2
+  @keep-now-button-visible-when-live @FR3
   Scenario: The typed instant leaves the reference day
     Given the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
@@ -95,7 +96,7 @@ Feature: Type an exact time in any row
     Then the moment is pinned to "2026-03-09T03:00:00Z" with the status "UNIQUE"
     And the date bar shows "Monday, March 9"
     And the reference day runs from "2026-03-08T19:00:00Z" to "2026-03-09T19:00:00Z"
-    And the Now button is shown
+    And the Now button is active
 
   @add-wall-time-input-with-hint @FR9 @M5
   Scenario: Nothing is stored or shared

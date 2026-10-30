@@ -25,6 +25,7 @@ Feature: Calendar
     And the moment is live
 
   @select-date-with-calendar-and-now @FR3
+  @keep-now-button-visible-when-live @FR3
   Scenario: Closing the calendar changes nothing
     Given the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
@@ -33,4 +34,4 @@ Feature: Calendar
     When the user opens the calendar, shows the next month and closes the calendar without picking
     Then the calendar is closed
     And the shown date is "2026-03-09"
-    And the Now button is shown
+    And the Now button is active

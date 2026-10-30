@@ -11,7 +11,7 @@ Feature: Day track by touch in a real browser
     And the page is taller than the screen
     When the user swipes up from the "Almaty" track with a finger
     Then the page has scrolled down
-    And the Now button is not shown
+    And the Now button is inactive
     And the time of "Almaty" still equals the live time
 
   @add-time-sliders-to-location-cards @FR3 @NFR-R2
@@ -22,4 +22,4 @@ Feature: Day track by touch in a real browser
     And the user opens the locations app
     When the user taps 75 percent of the "Almaty" track with a finger
     Then the card of "Almaty" shows the time "18:00"
-    And the Now button is shown
+    And the Now button is active
