@@ -3,13 +3,35 @@ Feature: Date bar layout in a real browser
   The bar stays at the bottom, fits every screen and looks as approved.
 
   @select-date-with-calendar-and-now @NFR-R2
+  @add-settings-page-and-device-time-location @FR15
   Scenario: Bar on a narrow screen
     Given the current time is "2026-03-08T07:30:00Z"
     And the screen is 375 px wide for the locations
     And the user opens the locations app
     When the user moved to the next day with the bar
-    Then the arrows and the date are at the left of the bar and Now is at the right
+    Then the arrows, the date and Now form one group centred in the bar
     And the bar touches the bottom of the viewport
+
+  @add-settings-page-and-device-time-location @FR15 @NFR-R2 @UX4 @M5
+  Scenario Outline: The group stays centred while the window is resized to <width> px
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the screen is 375 px wide for the locations
+    And the user opens the locations app
+    And the user moved to the next day with the bar
+    And the gap between the next-day button and Now is recorded
+    When the screen is resized to <width> px wide
+    Then the left and right free space of the group within the bar differ by at most 1 px
+    And the gap between the next-day button and Now is the recorded gap within 1 px
+    And the group is at least 8 px from each side of the viewport
+
+    Examples:
+      | width |
+      | 320   |
+      | 375   |
+      | 767   |
+      | 768   |
+      | 1024  |
+      | 2560  |
 
   @select-date-with-calendar-and-now @NFR-R2
   Scenario: Bar on a wide screen

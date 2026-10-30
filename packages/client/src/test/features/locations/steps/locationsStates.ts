@@ -22,7 +22,7 @@ import {
   UNREADABLE_DOCUMENT_TEXT,
 } from "./locationsE2eHelpers";
 import {
-  seedHereEntryState,
+  seedDeviceTimeState,
   seedHomeList,
   seedWallTimeState,
   storeDeviceCity,
@@ -59,8 +59,9 @@ export enum WorldClockState {
   HOME = "home",
   TRAVELLING = "travelling",
   MENU_OPEN = "menu open",
-  HERE_ENTRY = "here-entry",
-  HERE_ENTRY_TRAVEL = "here-entry-travel",
+  DEVICE_TIME = "device-time",
+  DEVICE_TIME_HOME = "device-time-home",
+  FIRST_LAUNCH = "first-launch",
   WALL_TIME_INPUT = "wall-time-input",
   WALL_TIME_HINT = "wall-time-hint",
 }
@@ -73,8 +74,8 @@ export enum WorldClockState {
  * Implements NFR-A1, UX1, FR12, FR13, FR15 of add-locations-via-search and
  * NFR-R3 of select-date-with-calendar-and-now (pinned and calendar states);
  * NFR-A1, NFR-R2 of set-home-location-and-show-differences (home, travelling
- * and menu open states); FR1, FR7, NFR-A1 of show-here-entry-for-device-time
- * (here-entry and here-entry-travel states); NFR-R2 of
+ * and menu open states); FR8, FR10, FR13, NFR-A1, NFR-R3 of add-settings-page-and-device-time-location
+ * (device-time, device-time-home and first-launch states); NFR-R2 of
  * add-wall-time-input-with-hint (wall-time-input and wall-time-hint states).
  */
 export async function enterLocationsState(
@@ -89,6 +90,8 @@ export async function enterLocationsState(
       await expect(page.getByRole("listitem")).toHaveCount(2);
       break;
     case WorldClockState.EMPTY:
+      await world.seedList([]);
+      await world.reloadIfOpen();
       await expect(
         page.getByText(englishLocale.views.cardsEmptyState),
       ).toBeVisible();
@@ -157,12 +160,16 @@ export async function enterLocationsState(
         await expect(page.getByRole("menu")).toBeVisible();
       }
       break;
-    case WorldClockState.HERE_ENTRY:
-    case WorldClockState.HERE_ENTRY_TRAVEL:
-      await seedHereEntryState(
+    case WorldClockState.DEVICE_TIME:
+    case WorldClockState.DEVICE_TIME_HOME:
+      await seedDeviceTimeState(
         world,
-        state === WorldClockState.HERE_ENTRY_TRAVEL,
+        state === WorldClockState.DEVICE_TIME_HOME,
       );
+      break;
+    case WorldClockState.FIRST_LAUNCH:
+      await expect(page.getByRole("listitem")).toHaveCount(1);
+      break;
       break;
     case WorldClockState.WALL_TIME_INPUT:
     case WorldClockState.WALL_TIME_HINT:

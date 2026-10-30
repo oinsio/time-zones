@@ -1,21 +1,23 @@
-// Implements FR4, FR5, NFR-A2, NFR-R1, UX3 of show-here-entry-for-device-time: locators and layout measures of the Here entry.
+// Implements FR8, FR9, NFR-A2, NFR-R1, UX3 of add-settings-page-and-device-time-location: locators and layout measures of the device time location.
 import type { Locator, Page } from "@playwright/test";
 import { requireBox } from "../../time_selection/steps/timeSelectionE2eHelpers";
 import { listRow } from "./locationsE2eHelpers";
 
-const HERE_ENTRY_NAME_PATTERN = /(Device time|Время устройства)$/;
+export const DEVICE_TIME_NAME_PATTERN = /(Device time|Время устройства)$/;
 const TIME_ELEMENT = "time";
 const TIME_TEXT_XPATH = "xpath=preceding-sibling::button";
 const SLIDER_ROLE = "slider";
+const LIST_ITEM_ROLE = "listitem";
 
-export const hereEntryOf = (page: Page) =>
-  page.getByRole("region", { name: HERE_ENTRY_NAME_PATTERN });
+/** The device time location's row: the list item whose name ends with "Device time". */
+export const deviceTimeRowOf = (page: Page) =>
+  page.getByRole(LIST_ITEM_ROLE, { name: DEVICE_TIME_NAME_PATTERN });
 
-export const hereEntryTimeOf = (page: Page) =>
-  hereEntryOf(page).locator(TIME_ELEMENT).locator(TIME_TEXT_XPATH);
+export const deviceTimeTimeOf = (page: Page) =>
+  deviceTimeRowOf(page).locator(TIME_ELEMENT).locator(TIME_TEXT_XPATH);
 
-export const hereEntrySliderOf = (page: Page) =>
-  hereEntryOf(page).getByRole(SLIDER_ROLE);
+export const deviceTimeSliderOf = (page: Page) =>
+  deviceTimeRowOf(page).getByRole(SLIDER_ROLE);
 
 /** Card, time and track of a card, relative to the card, for layout comparison. */
 async function measureCard(card: Locator) {
@@ -35,6 +37,7 @@ async function measureCard(card: Locator) {
   };
 }
 
-export const measureHereEntry = (page: Page) => measureCard(hereEntryOf(page));
+export const measureDeviceTime = (page: Page) =>
+  measureCard(deviceTimeRowOf(page));
 export const measureLocationCard = (page: Page, city: string) =>
   measureCard(listRow(page, city));

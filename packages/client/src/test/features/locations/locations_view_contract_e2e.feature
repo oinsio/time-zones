@@ -26,12 +26,14 @@ Feature: Locations in every registered view
     And the locations list holds 1 location
     And focus is on the "Add location" action
 
-  @show-here-entry-for-device-time @view-contract @FR11
-  Scenario: See the Here entry without home
+  @add-settings-page-and-device-time-location @view-contract @FR17
+  Scenario: Device time location under contract
     Given the current time is "2026-03-08T07:30:00Z"
-    And the stored locations are "Moscow"
-    Then the first row is the Here entry showing "12:30"
-    And the card of "Moscow" shows the time "10:30"
+    And the stored locations are "Moscow", "the device time location"
+    Then the second row is the device time location showing "12:30"
+    When the user moves it to the first position, makes it home and then removes it
+    Then the locations list order is "Moscow"
+    And no location is home
 
   @add-locations-via-search @view-contract @NFR-A2
   Scenario: Close with Esc
