@@ -17,8 +17,9 @@ Audience: every Cards view user who drags a handle, mostly on touch screens. Mou
 - MODIFIED `time-selection` "Select a time on a track":
   - Once a drag has started, it keeps selecting until the pointer is released, wherever the pointer goes: above or below the track, or past either end. The page does not scroll during the drag.
   - On an engine without Pointer Events, a finger drag selects the same way as on other engines. A tap still selects through the click, as today.
-- MODIFIED `time-selection` "Handle position": during a drag, the dragged handle follows the pointer's position along the track. When the drag ends, it settles at the effective instant. The other handles keep showing the effective instant.
+- MODIFIED `time-selection` "Handle position": during a drag, the dragged handle follows the pointer's position along the track. When the drag ends, it settles at the effective instant. The other handles keep showing the effective instant. "Select a time on a track" names the dragged handle as the one exception to "every handle shows the new moment in the same render".
 - MODIFIED `time-selection` "Time selection is fast": a drag move that stays inside the current track step re-presents no row.
+- MODIFIED `time-selection` "Day track layout": the handle's centre stands exactly at the effective instant, except the dragged handle during a drag, whose centre is within 1 px of the pointer and returns to the effective instant at release.
 - Unchanged: the 15-minute rounding and the clamp to the track end. Also unchanged: a mouse or pen still selects on press, and a touch still selects once it moves horizontally or lifts after a tap. A vertical swipe that starts on a track still scrolls the page. Keys, the slider's accessible name and value, the colours, the hour labels and the layout all stay as they are.
 - No stored data changes. The reference moment is never stored (ADR-0003, ADR-0004), and the drag needs no network.
 
@@ -37,7 +38,7 @@ None.
 
 ### Modified Capabilities
 
-- `time-selection`: MODIFIED "Select a time on a track", "Handle position" and "Time selection is fast".
+- `time-selection`: MODIFIED "Select a time on a track", "Handle position", "Time selection is fast" and "Day track layout".
 
 ## Goals
 
@@ -82,7 +83,7 @@ None.
 
 #### Responsive
 
-- NFR-R1: A finger drag behaves as FR1–FR3 say on a 375 px wide phone screen (`mobile-chrome` project, Pixel 5). A mouse drag behaves the same on a desktop screen (`chromium` project).
+- NFR-R1: A finger drag behaves as FR1–FR3 say on a phone screen 375 px wide (the viewport the scenario sets, in the `mobile-chrome` project, Pixel 5). A mouse drag behaves the same on a desktop screen (`chromium` project). The dragged handle stays under the pointer at 375 px and 1024 px wide.
 
 ## UX Acceptance Criteria
 
