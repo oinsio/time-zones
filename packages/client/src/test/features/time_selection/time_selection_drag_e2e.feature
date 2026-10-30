@@ -10,7 +10,7 @@ Feature: Drag a day track in a real browser
     And the stored locations are "New York", "Almaty", "Moscow", "Kolkata", "Tokyo"
     And the user opens the locations app
     And the page is taller than the screen
-    When the user drags from 25 percent to 75 percent of the "New York" track, 110 px below it, and releases
+    When the user drags from 25 percent to 75 percent of the "New York" track, 120 px below it, and releases
     Then the card of "Almaty" shows the time "18:00"
     And the page has not scrolled
 

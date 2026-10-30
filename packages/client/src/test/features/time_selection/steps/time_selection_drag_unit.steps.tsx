@@ -111,10 +111,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And(
         "the {string} handle stands at {number}",
         (_ctx: unknown, city: string, fraction: number) =>
-          expect(world.trackOf(city).fraction).toBeCloseTo(
-            fraction,
-            FRACTION_PRECISION,
-          ),
+          expect(
+            Number.parseFloat(driver.handleLeftOf(city)) / PERCENT_PER_FRACTION,
+          ).toBeCloseTo(fraction, PERCENT_PRECISION + 2),
       );
     },
   );

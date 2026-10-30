@@ -131,6 +131,21 @@ export function createDragDriver(world: World) {
       fireEvent.click(slider, { clientX: point(fraction) });
       refresh();
     },
+    /** The handle drawn on the DayTrack of another city, rendered from its current presented track. */
+    handleLeftOf: (otherCity: string) => {
+      const { container } = render(
+        createElement(DayTrack, {
+          track: world.trackOf(otherCity),
+          city: otherCity,
+          onSelectFraction: world.selectFraction,
+          onMoveTrack: world.moveTrack,
+        }),
+      );
+      const handle = container.querySelector(
+        "[data-day-track-handle]",
+      ) as HTMLElement;
+      return handle.style.left;
+    },
     handleLeft: () =>
       (slider.querySelector("[data-day-track-handle]") as HTMLElement).style
         .left,
