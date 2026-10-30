@@ -1,6 +1,6 @@
 // Verifies FR13 of add-wall-time-input-with-hint (D1, M8): a renamed zone on outdated zone data.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createLegacyZoneDateTimeFormat } from "@/lib/legacy/zoneShim";
+import { createLegacyZoneDateTimeFormat } from "@/lib/legacy";
 
 const RENAMED_ZONE_ID = "Europe/Kyiv";
 const LEGACY_ZONE_ID = "Europe/Kiev";
