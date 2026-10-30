@@ -1,7 +1,6 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { MAX_TRACK_FRACTION } from "@/constants";
 import {
   createStore,
   INITIAL_WORLD_CLOCK_STATE,
@@ -13,6 +12,7 @@ import {
 import { createSelectTimeSteps } from "./selectTimeSteps";
 import type { CardTable } from "./selectTimeTables";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
+import { registerTrackEndScenarios } from "./trackEndScenarios";
 
 const feature = await loadFeature("../time_selection_select_time.feature");
 
@@ -29,6 +29,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
   f.AfterAllScenarios(world.finish);
 
+  const steps = createSelectTimeSteps(world);
   const {
     givenZone,
     givenInstant,
@@ -40,7 +41,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     thenPinned,
     thenCardShows,
     thenEveryHandleAt,
-  } = createSelectTimeSteps(world);
+  } = steps;
 
   // @add-time-sliders-to-location-cards @FR3 @M2
   f.Scenario(
@@ -181,40 +182,5 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @fix-day-track-handle-overlap-and-end-of-day @FR1 @UX2
-  f.ScenarioOutline(
-    "The right end reaches the last minute of 23- and 25-hour days",
-    ({ Given, And, When, Then }, variables) => {
-      Given("the device time zone is {string}", givenZone);
-      And("the current instant is <instant>", () =>
-        givenInstant(undefined, variables.instant),
-      );
-      And("the list contains {string}", givenList);
-      And("the app is open", givenAppOpen);
-      When("the user selects the fraction 1.0 of the track", () =>
-        world.selectFraction(MAX_TRACK_FRACTION),
-      );
-      Then("the {string} card shows {string}", thenCardShows);
-    },
-  );
-
-  // @fix-day-track-handle-overlap-and-end-of-day @FR2
-  f.ScenarioOutline(
-    "Keys around the track end",
-    ({ Given, And, When, Then }, variables) => {
-      Given("the device time zone is {string}", givenZone);
-      And("the current instant is <from>", () =>
-        givenInstant(undefined, variables.from),
-      );
-      And("the list contains {string}", givenList);
-      And("the app is open", givenAppOpen);
-      And("the moment is pinned at its current position", givenPinnedHere);
-      When("the user moves the handle with <key>", () =>
-        whenKey(undefined, variables.key),
-      );
-      Then("the moment is pinned to <pinned>", () =>
-        thenPinned(undefined, variables.pinned),
-      );
-    },
-  );
+  registerTrackEndScenarios(f, world, steps);
 });

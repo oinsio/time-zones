@@ -32,6 +32,8 @@ export const renderTrack = () =>
   );
 
 export const TRACK_WIDTH = 400;
+export const BAR_BOX = { left: 100, width: TRACK_WIDTH } as DOMRect;
+export const WIDE_BOX = { left: 0, width: TRACK_WIDTH + 200 } as DOMRect;
 
 /** Renders the Almaty track with a 400px wide slider and spy callbacks. */
 export const setupInteractiveTrack = () => {

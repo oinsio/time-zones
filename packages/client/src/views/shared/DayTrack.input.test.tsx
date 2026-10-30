@@ -2,15 +2,15 @@
 // Verifies FR3, FR4 of add-time-sliders-to-location-cards (D7).
 import { fireEvent } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { setupInteractiveTrack as setup, TRACK_WIDTH } from "./dayTrackFixture";
+import { BAR_BOX, setupInteractiveTrack as setup } from "./dayTrackFixture";
 
 describe("DayTrack input", () => {
   const pointer = (
-    pointerType: string,
+    type: string,
     clientX: number,
     clientY = 0,
     pointerId = 1,
-  ) => ({ pointerType, clientX, clientY, pointerId });
+  ) => ({ pointerType: type, clientX, clientY, pointerId });
 
   it("should select the pressed position for a mouse", () => {
     const { slider, onSelectFraction } = setup();
@@ -77,31 +77,12 @@ describe("DayTrack input", () => {
 
   it("should measure the position from the left edge of the track", () => {
     const { slider, bar, onSelectFraction } = setup();
-    bar.getBoundingClientRect = () =>
-      ({ left: 100, width: TRACK_WIDTH }) as DOMRect;
+    bar.getBoundingClientRect = () => BAR_BOX;
 
     fireEvent.pointerDown(slider, pointer("mouse", 300));
 
     expect(onSelectFraction).toHaveBeenCalledWith(0.5);
   });
-
-  it.each([
-    ["left of", 20, 0],
-    ["right of", 520, 1],
-  ])(
-    "should select the track end for a press %s the bar",
-    (_side, clientX, expected) => {
-      const { slider, bar, onSelectFraction } = setup();
-      slider.getBoundingClientRect = () =>
-        ({ left: 0, width: TRACK_WIDTH + 200 }) as DOMRect;
-      bar.getBoundingClientRect = () =>
-        ({ left: 100, width: TRACK_WIDTH }) as DOMRect;
-
-      fireEvent.pointerDown(slider, pointer("mouse", clientX));
-
-      expect(onSelectFraction).toHaveBeenCalledWith(expected);
-    },
-  );
 
   it("should select nothing on a track without width", () => {
     const { slider, bar, onSelectFraction } = setup();

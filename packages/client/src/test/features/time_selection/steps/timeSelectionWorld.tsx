@@ -7,10 +7,6 @@ import {
   createInMemoryLocationRepository,
 } from "@/adapters";
 import {
-  NANOSECONDS_PER_MINUTE,
-  TRACK_END_BEFORE_DAY_END_MINUTES,
-} from "@/constants";
-import {
   LocationsProvider,
   type TrackMove,
   useHereEntry,
@@ -26,6 +22,7 @@ import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 import { cityEntry } from "../../locations/steps/locationsUiWorld";
+import { getDayBounds } from "./dayBounds";
 
 export const ENGLISH_LANGUAGE = "en";
 export const RUSSIAN_LANGUAGE = "ru";
@@ -188,27 +185,12 @@ export const createTimeSelectionWorld = () => {
     runTick: () => act(() => tickScheduler.runPending()),
     isNowShown: () => current().reference.dateBar.isPinned,
     shownInstant,
-    /** Start and end of the reference day, worked out from a card's track. */
-    dayBoundsOf: (city: string) => {
-      const track = trackOf(city);
-      const lengthMinutes = track.maxMinutes + TRACK_END_BEFORE_DAY_END_MINUTES;
-      const effective = Temporal.Instant.from(
+    dayBoundsOf: (city: string) =>
+      getDayBounds(
+        trackOf(city),
         current().reference.dateBar.isPinned
           ? shownInstant()
           : clock.instant().toString(),
-      );
-      const start = effective
-        .subtract({
-          nanoseconds: Math.round(
-            track.fraction * lengthMinutes * NANOSECONDS_PER_MINUTE,
-          ),
-        })
-        .round({ smallestUnit: "minute" });
-      return {
-        start,
-        end: start.add({ minutes: lengthMinutes }),
-        lengthMinutes,
-      };
-    },
+      ),
   };
 };
