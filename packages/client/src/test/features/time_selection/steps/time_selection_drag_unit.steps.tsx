@@ -21,7 +21,6 @@ type StepDefiners = Parameters<
 
 const feature = await loadFeature("../time_selection_drag_unit.feature");
 
-const FRACTION_PRECISION = 6;
 const PERCENT_PRECISION = 4;
 const PERCENT_PER_FRACTION = 100;
 const THREE_QUARTERS = 0.75;
