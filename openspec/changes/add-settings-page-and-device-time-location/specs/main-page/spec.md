@@ -49,7 +49,7 @@ When the location list is empty, the Cards view SHALL show an explanation that n
 ## ADDED Requirements
 
 ### Requirement: Header actions
-The header SHALL hold the Add location button, which opens the location search, and the settings button, which opens the settings page (see the `settings` capability). The settings button MUST be the rightmost control of the header on every width. It shows the settings (sliders) icon in the accent colour and has the accessible name "Settings" («Настройки»). Below 768 px the Add location button MUST be an icon-only "+" in the accent colour, placed before the title, with the title centred between the two buttons. From 768 px it MUST show "+" and the visible label "Add" («Добавить»), placed right of the title and directly before the settings button, with the title at the left. The Add location button's accessible name MUST be "Add location" («Добавить место») on every width. The slash shortcut MUST keep opening the search, and the content region MUST NOT show a second Add location button. Both buttons MUST be at least 44 × 44 px, and Tab MUST reach them in their visual order. The page MUST NOT scroll horizontally at 320 px and 2560 px. axe-core MUST report no violations with the narrow and the wide header in the light and the dark theme. The approved screenshots of the main page states MUST show the new header. <!-- implements FR1, FR2, NFR-A1, NFR-A2, NFR-A3, NFR-R1, NFR-R3, UX1 of add-settings-page-and-device-time-location -->
+The header SHALL hold the Add location button, which opens the location search, and the settings button, which opens the settings page (see the `settings` capability). The settings button MUST be the rightmost control of the header on every width. It shows the settings (sliders) icon in the accent colour and has the accessible name "Settings" («Настройки»). Below 768 px the Add location button MUST be an icon-only "+" in the accent colour, placed before the title, with the title centred between the two buttons. From 768 px it MUST show "+" and the visible label "Add" («Добавить»), placed right of the title and directly before the settings button, with the title at the left. The Add location button's accessible name MUST be "Add location" («Добавить место») on every width. While the stored location list is unreadable, the Add location button MUST NOT be shown; the settings button MUST stay. The slash shortcut MUST keep opening the search, and the content region MUST NOT show a second Add location button. Both buttons MUST be at least 44 × 44 px, and Tab MUST reach them in their visual order. The page MUST NOT scroll horizontally at 320 px and 2560 px. axe-core MUST report no violations with the narrow and the wide header in the light and the dark theme. The approved screenshots of the main page states MUST show the new header. <!-- implements FR1, FR2, NFR-A1, NFR-A2, NFR-A3, NFR-R1, NFR-R3, UX1 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Narrow header
 - **GIVEN** the interface language is Russian
@@ -89,3 +89,9 @@ The header SHALL hold the Add location button, which opens the location search, 
 | 375 | dark |
 | 1024 | light |
 | 1024 | dark |
+
+#### Scenario: No Add location button on an unreadable list
+- **GIVEN** the stored list is unreadable
+- **WHEN** the user opens the app
+- **THEN** the load error with Reset is shown
+- **AND** the header shows the settings button and no Add location button

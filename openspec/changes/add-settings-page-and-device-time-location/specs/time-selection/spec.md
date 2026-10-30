@@ -56,3 +56,100 @@ A wall-time input SHALL accept a 24-hour wall-clock time written as `H`, `HH`, `
 | `0:00` | `00:00` |
 | `23:59` | `23:59` |
 | `9:30 PM` | `21:30` |
+
+### Requirement: Wall-time input on every row
+The time of every location card whose time zone is known, the device time location included, SHALL be a wall-time input. Activating it by tap, click, Enter or Space MUST open a field that holds the row's current time as shown in the hour format, fully selected. A row whose zone the browser does not know shows no time and MUST have no wall-time input. The input needs no network. <!-- implements FR1 of add-wall-time-input-with-hint; FR5, FR9 of add-settings-page-and-device-time-location -->
+
+#### Scenario: Open the field
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Almaty and New York
+- **WHEN** the user opens the wall-time input of New York
+- **THEN** the field holds `03:30`, fully selected
+
+#### Scenario: Open the field in the 12-hour format
+- **GIVEN** the interface language is English
+- **AND** the hour format is 12-hour
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains New York
+- **WHEN** the user opens the wall-time input of New York
+- **THEN** the field holds `3:30 AM`, fully selected
+
+#### Scenario: No input for an unknown zone
+- **GIVEN** the list holds Moscow and a location whose zone the browser does not know (for example `Mars/Olympus_Mons`)
+- **WHEN** the list is presented
+- **THEN** Moscow has a wall-time input
+- **AND** the other location has none
+
+### Requirement: A wall-time input pins the reference moment
+Confirming an accepted time SHALL pin the reference moment to that wall-clock time in the row's zone (the device time zone for the device time location), on the local date the row showed when the field opened. A time in a DST gap MUST move forward by the gap; a time in a DST overlap MUST take the earlier instant. The outcome MUST be reported as `UNIQUE`, `GAP` or `AMBIGUOUS`. <!-- implements FR3 of add-wall-time-input-with-hint; FR9 of add-settings-page-and-device-time-location -->
+
+#### Scenario: Type a time in another city
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Almaty, Moscow, Kolkata and New York
+- **WHEN** the user types `10:40` in New York
+- **THEN** the moment is pinned to `2026-03-08T14:40:00Z` with the status `UNIQUE`
+- **AND** Almaty shows `19:40`, Moscow `17:40` and Kolkata `20:10`
+
+#### Scenario: Wall-clock outcomes of a typed time
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `<now>`
+- **AND** the list contains New York
+- **WHEN** the user types `<typed>` in New York
+- **THEN** the moment is pinned to `<pinned>` with the status `<status>`
+
+| now | typed | pinned | status |
+|---|---|---|---|
+| `2026-06-01T07:30:00Z` | `10:00` | `2026-06-01T14:00:00Z` | `UNIQUE` |
+| `2026-03-08T07:30:00Z` | `02:30` | `2026-03-08T07:30:00Z` | `GAP` |
+| `2026-11-01T07:30:00Z` | `01:30` | `2026-11-01T05:30:00Z` | `AMBIGUOUS` |
+
+#### Scenario: Type a time in the Here entry
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains the device time location and Moscow
+- **WHEN** the user types `08:00` in the device time location
+- **THEN** the moment is pinned to `2026-03-08T03:00:00Z`
+- **AND** Moscow shows `06:00`
+
+### Requirement: Wall-time hint lifetime
+The wall-time hint SHALL stay until the next wall-time input, time selection, date change or Now. A change of the reference zone (home set or cleared) MUST keep a hint on a location. A change of the device time zone MUST end a hint on the device time location and keep the pinned instant. When its row is removed, the hint MUST disappear and the moment MUST stay. <!-- implements FR7, FR9 of add-wall-time-input-with-hint; FR8, FR9 of add-settings-page-and-device-time-location -->
+
+#### Scenario: The hint ends with the next change
+- **GIVEN** New York shows a wall-time hint
+- **WHEN** the user <change>
+- **THEN** no row shows a wall-time hint
+
+| change |
+|---|
+| types `10:00` in New York |
+| moves a day track to the next step |
+| moves to the next day |
+| returns to now |
+
+#### Scenario: The hint leaves with its row
+- **GIVEN** New York shows a wall-time hint
+- **WHEN** New York is removed
+- **THEN** no row shows a wall-time hint
+- **AND** the moment stays pinned
+
+#### Scenario: A home change keeps the hint
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Moscow and New York
+- **AND** the user typed `02:30` in New York, so New York shows a wall-time hint
+- **WHEN** the user makes Moscow home
+- **THEN** New York still shows the wall-time hint
+- **AND** the moment is still pinned to `2026-03-08T07:30:00Z` with the status `GAP`
+- **AND** the date bar shows no note
+
+#### Scenario: A device time zone change ends the hint on the Here entry
+- **GIVEN** the device time zone is `America/New_York`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains the device time location and Moscow
+- **AND** the user typed `02:30` in the device time location, so it shows a wall-time hint
+- **WHEN** the device time zone changes to `Asia/Almaty`
+- **THEN** no row shows a wall-time hint
+- **AND** the date bar shows no note
+- **AND** the moment is still pinned to `2026-03-08T07:30:00Z`
