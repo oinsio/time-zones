@@ -15,6 +15,7 @@ Audience: every user of the main page, in every view, at every width and in both
 - MODIFIED `date-selection` "Return to now": the Now button is shown in both modes. While the moment is pinned it is active and returns the moment to live, as before. While live it is inactive: activating it does nothing.
 - MODIFIED `date-selection` "Reference moment": when the app opens live, the Now button is inactive. It is no longer hidden.
 - MODIFIED `date-selection` "Date bar": the bar always holds the Now button.
+- MODIFIED `date-selection` "Date bar on every page state": in every page state where the bar is shown (loading, view failed to load, empty list, unreadable stored list, storage unavailable, offline) the bar holds Now — inactive while live, active while pinned.
 - MODIFIED `date-selection` "Keyboard-operable date selection": Tab reaches Now only while it is active. An inactive Now is skipped.
 - MODIFIED `date-selection` "Accessible date selection": an inactive Now keeps its name "Now" («Сейчас») and is exposed as disabled.
 - MODIFIED `date-selection` "Date bar layout": an inactive Now has the same place, size, clock icon and label as an active one. It uses the theme's grey fill and the theme's muted foreground colour, not the accent colours. The screenshots of live states are re-approved.
@@ -35,7 +36,7 @@ None.
 
 ### Modified Capabilities
 
-- `date-selection`: MODIFIED "Reference moment", "Return to now", "Date bar", "Keyboard-operable date selection", "Accessible date selection" and "Date bar layout".
+- `date-selection`: MODIFIED "Reference moment", "Return to now", "Date bar", "Date bar on every page state", "Keyboard-operable date selection", "Accessible date selection" and "Date bar layout".
 - `time-selection`: MODIFIED "Time selection works with the date bar", "Day track layout" and "The pinned wall-time moment drives every row".
 - `locations`: MODIFIED "Select a time on the Here entry".
 

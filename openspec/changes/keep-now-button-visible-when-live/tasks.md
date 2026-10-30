@@ -40,7 +40,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `time_selection/time_selection_moment.feature` + `steps/time_selection_moment.steps.tsx` (`@FR3`);
   - `time_selection/time_selection_wall_time_input_unit.feature` + `steps/time_selection_wall_time_input_unit.steps.tsx` (`@FR3`);
   - `locations/locations_here_entry_changes_unit.feature` + `steps/locations_here_entry_changes_unit.steps.tsx` (`@FR3`). The step asserts `expect(world.nowButton()).toBeEnabled()`;
-  - `date_selection/date_selection_date_bar.feature` + `steps/date_selection_date_bar.steps.tsx`: "Bar in each state" becomes "Then the date bar is shown with the previous-day, date and next-day buttons and an inactive Now" (`@keep-now-button-visible-when-live @FR1`). The step also expects the `date.now` button in the bar to be disabled.
+  - `date_selection/date_selection_date_bar.feature` + `steps/date_selection_date_bar.steps.tsx`: "Bar in each state" (spec delta requirement "Date bar on every page state") becomes "Then the date bar is shown with the previous-day, date and next-day buttons and an inactive Now" (`@keep-now-button-visible-when-live @FR1`). The step also expects the `date.now` button in the bar to be disabled.
 
   Verify, one at a time: `npx vitest run src/test/features/date_selection`, `npx vitest run src/test/features/time_selection`, `npx vitest run src/test/features/locations/steps/locations_here_entry_changes_unit.steps.tsx`.
 

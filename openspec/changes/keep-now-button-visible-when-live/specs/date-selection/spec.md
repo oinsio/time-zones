@@ -86,6 +86,28 @@ The main page SHALL show a date bar with a previous-day button, the shown date, 
 - **THEN** the bar shows `Mon, March 9`
 
 
+### Requirement: Date bar on every page state
+The date bar SHALL be shown at the bottom of the main page in every state of the page: while the view loads, when the view failed to load, with an empty list, with an unreadable stored list, with storage unavailable, and offline. In every one of these states the bar MUST hold the Now button, inactive while the moment is live and active while it is pinned (see "Return to now"). The notices (offline-ready, update, update-check-failed, storage warning) MUST stay visible above the bar and MUST NOT cover it. Date selection needs no network. <!-- implements FR8 of select-date-with-calendar-and-now; FR1 of keep-now-button-visible-when-live -->
+
+#### Scenario: Bar in each state
+- **WHEN** the main page is in the `<state>` state, with the moment live as the app opens
+- **THEN** the date bar is shown with the previous-day, date and next-day buttons and an inactive Now
+
+| state |
+|---|
+| view loading |
+| view error |
+| empty |
+| unreadable |
+| storage unavailable |
+| offline |
+
+#### Scenario: Notice above the bar
+- **GIVEN** storage is unavailable
+- **WHEN** the main page is shown
+- **THEN** the storage warning is above the date bar and does not overlap it
+
+
 ### Requirement: Keyboard-operable date selection
 Tab SHALL reach the previous-day button, the date button, the next-day button and, only while it is active, the Now button, in that order; an inactive Now MUST NOT be a Tab stop. Enter and Space MUST activate each control Tab reaches. In the open calendar the focus MUST start on the selected day; ArrowLeft / ArrowRight MUST move it by one day, ArrowUp / ArrowDown by one week, Home / End to the first / last day of the week, PageUp / PageDown by one month, and the shown month MUST follow the focused day. Enter or Space MUST pick the focused day; Esc MUST close the calendar without change. When the calendar closes, and after Now is activated, the focus MUST be on the date button. <!-- implements NFR-A2 of select-date-with-calendar-and-now; NFR-A2 of keep-now-button-visible-when-live -->
 
