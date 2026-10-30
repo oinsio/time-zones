@@ -25,11 +25,17 @@ const TAP_FRACTION_PERCENT = 75;
 const PERCENT = 100;
 const TAB_KEY = "Tab";
 
-const tabStopCounts = new WeakMap<Page, { inside: number; hasLeft: boolean }>();
+const tabStops = new WeakMap<
+  Page,
+  { insideNames: string[]; hasLeft: boolean }
+>();
 
-const isFocusInsideHereEntry = (page: Page) =>
-  page.evaluate(
-    () => document.activeElement?.closest("section[aria-label]") !== null,
+/** The accessible name of the focused element, or `undefined` outside the Here entry. */
+const focusedNameInsideHereEntry = (page: Page) =>
+  page.evaluate(() =>
+    document.activeElement?.closest("section[aria-label]") === null
+      ? undefined
+      : (document.activeElement?.getAttribute("aria-label") ?? ""),
   );
 
 // Verifies FR4 of show-here-entry-for-device-time: the Here entry is apart from the list.
@@ -117,40 +123,40 @@ Then("the Here entry is shown", async ({ locationsWorld }) => {
 });
 
 // Verifies NFR-A2 of show-here-entry-for-device-time: the Tab stops inside the Here entry.
+// Verifies NFR-A2 of add-wall-time-input-with-hint: the time button comes before the slider.
 When(
   "the user moves the focus through the page with Tab",
   async ({ locationsWorld }) => {
     const { page } = locationsWorld;
     await expect(hereEntryOf(page)).toBeVisible();
-    const counts = { inside: 0, hasLeft: false };
+    const stops = { insideNames: [] as string[], hasLeft: false };
     for (let pressCount = 0; pressCount < MAX_TAB_PRESSES; pressCount++) {
       await page.keyboard.press(TAB_KEY);
-      const isInside = await isFocusInsideHereEntry(page);
-      if (isInside) counts.inside += 1;
-      else if (counts.inside > 0) {
-        counts.hasLeft = true;
+      const focusedName = await focusedNameInsideHereEntry(page);
+      if (focusedName !== undefined) stops.insideNames.push(focusedName);
+      else if (stops.insideNames.length > 0) {
+        stops.hasLeft = true;
         break;
       }
     }
-    tabStopCounts.set(page, counts);
+    tabStops.set(page, stops);
   },
 );
 
+// Verifies NFR-A2 of add-wall-time-input-with-hint: two Tab stops, the button matched by name prefix.
 Then(
-  "exactly one element of the Here entry takes the focus: the slider named {string}",
-  async ({ locationsWorld }, sliderName: string) => {
-    const { page } = locationsWorld;
-    expect(tabStopCounts.get(page)?.inside).toBe(1);
-    await hereEntrySliderOf(page).focus();
-    await expect(
-      hereEntryOf(page).getByRole("slider", { name: sliderName }),
-    ).toBeFocused();
+  "exactly two elements of the Here entry take the focus: the button named {string} and then the slider named {string}",
+  async ({ locationsWorld }, buttonNamePrefix: string, sliderName: string) => {
+    const insideNames = tabStops.get(locationsWorld.page)?.insideNames ?? [];
+    expect(insideNames).toHaveLength(2);
+    expect(insideNames[0]).toMatch(new RegExp(`^${buttonNamePrefix}`));
+    expect(insideNames[1]).toBe(sliderName);
   },
 );
 
 Then(
   "the next Tab moves the focus out of the Here entry",
   async ({ locationsWorld }) => {
-    expect(tabStopCounts.get(locationsWorld.page)?.hasLeft).toBe(true);
+    expect(tabStops.get(locationsWorld.page)?.hasLeft).toBe(true);
   },
 );

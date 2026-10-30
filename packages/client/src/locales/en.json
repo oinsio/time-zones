@@ -28,6 +28,10 @@
   },
   "locations": {
     "utcOffsetPrefix": "UTC",
+    "wallTimeInputLabel": "Enter time — {{city}}, {{time}}",
+    "wallTimeInputError": "Enter the time as HH:MM",
+    "wallTimeHintGap": "{{requestedTime}} does not exist on this day — clocks moved forward. Showing {{shownTime}}.",
+    "wallTimeHintAmbiguous": "{{requestedTime}} occurs twice — showing the first ({{utcOffset}}).",
     "hereMarkLabel": "You are here",
     "hereMarkCaption": "here",
     "deviceTimeMeta": "Device time · {{utcOffset}}",

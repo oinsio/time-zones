@@ -1,0 +1,39 @@
+diff --git a/docs/architecture/domain-model.md b/docs/architecture/domain-model.md
+index 143d6de..5ffeb24 100644
+--- a/docs/architecture/domain-model.md
++++ b/docs/architecture/domain-model.md
+@@ -58,7 +58,7 @@ Commands are serializable objects with a `type` enum. The reducer returns either
+ | `SET_HOME_LOCATION(id \| null)` | marks a location as home or clears the mark | `LOCATION_NOT_FOUND` |
+ | `SET_DEVICE_TIME_ZONE(timeZoneId)` | updates the device zone (controller only); an unknown ID becomes `UTC` | — |
+ | `SELECT_INSTANT(instant)` | pins the moment (grid cell, slider) | — |
+-| `SET_WALL_TIME(locationId, time, date?)` | pins the moment for a wall-clock time in a location from the list | `LOCATION_NOT_FOUND` |
++| `SET_WALL_TIME(target, time, date)` | pins the moment for a wall-clock time in a location or the Here entry (`target`) on the local date the row showed | `LOCATION_NOT_FOUND`, `INVALID_TIME`, `INVALID_DATE`, `DATE_OUT_OF_RANGE` |
+ | `SHIFT_TIME(duration)` | moves the moment by a duration (keyboard: ±1 h, ±15 min) | — |
+ | `SET_DATE(date)` | changes the date, keeping the wall-clock time of the reference zone | — |
+ | `SHIFT_DATE(days)` | previous / next day | — |
+diff --git a/docs/architecture/open-questions.md b/docs/architecture/open-questions.md
+index 306212a..1dfbbdf 100644
+--- a/docs/architecture/open-questions.md
++++ b/docs/architecture/open-questions.md
+@@ -13,7 +13,7 @@ Architecture decisions that are not made yet. When one is resolved, record the d
+ | Q1 | Which views ship in the MVP? | Cards first, Grid next, plugged in via the view registry — [ADR-0005](../adr/0005-view-registry.md) |
+ | Q2 | City database for search | Minimal zone-cities source first, richer sources added later — [ADR-0006](../adr/0006-city-data-sources.md) |
+ | Q3 | Working hours for day-period colors | Constants in the MVP: night 00-07 and 22-24, morning 07-09, work 09-18, evening 18-22 (local time of each location). Passed to `getDayPeriod` as a parameter, so a user setting can replace them later — [domain model](domain-model.md#day-periods) |
+-| Q4 | How to enter a time for a zone that is not in the list ("08:00 UTC") | The user adds the zone as a regular location first. No temporary rows and no separate converter field; `SET_WALL_TIME` works only with locations from the list |
++| Q4 | How to enter a time for a zone that is not in the list ("08:00 UTC") | The user adds the zone as a regular location first. No temporary rows and no separate converter field; `SET_WALL_TIME` works with locations from the list and with the Here entry |
+ | Q5 | Where the date bar lives | MVP: bottom bar with previous / next day, a date button opening a calendar, and the Now button — a shared block in `views/shared/`. A day strip for wide screens is decided together with the Grid view |
+ | Q6 | What the time in the row header shows | The reference moment: equals the current time in `LIVE`, the selected moment in `PINNED`; the Now button appears only when the moment is pinned |
+ | Q7 | How to show `GAP` / `AMBIGUOUS` results of wall-clock input | Inline hint in the affected card until the next change; no toast and no "show the other instant" action in the MVP — see the wall-time hint in [views](views.md) |
+diff --git a/docs/architecture/views.md b/docs/architecture/views.md
+index 6d241d6..caac53f 100644
+--- a/docs/architecture/views.md
++++ b/docs/architecture/views.md
+@@ -82,7 +82,7 @@ Used by every view, implemented once in `views/shared/`:
+ | Day-period colors | four pastel bands: night, morning, working hours, evening — from design tokens. Soft gradient transitions: 1 hour around night boundaries, 15 minutes around working hours, so 09:00 and 18:00 stay readable. Colors also differ in lightness, not only in hue |
+ | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
+ | Now button | returns to `LIVE`; visible only when the moment is pinned |
+-| Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 doesn't exist on this day — clocks moved forward. Showing 03:30" / "01:30 occurs twice — showing the first (GMT-4)"; stays until the next change; announced via `aria-live="polite"`; text comes from the presenter |
++| Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 does not exist on this day — clocks moved forward. Showing 03:30." / "01:30 occurs twice — showing the first (UTC−4)." in a location card or the Here entry; stays until the next change; `role="status"` (polite); text comes from the presenter |
+ | Date bar | bottom bar `[<] Mon, 28 Sep [>]  [Now]`: arrows switch to the previous / next day, tapping the date opens a calendar for distant dates; placed at the bottom for thumb reach. Grid may reuse it or replace it with a day strip |
+ 
+ ## Visual style

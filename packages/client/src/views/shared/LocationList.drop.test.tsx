@@ -1,9 +1,11 @@
 // Verifies FR3 of reorder-locations-by-drag-and-drop: what a drop emits.
 // jsdom has no layout, so the drag itself is replaced by calling the handler
 // the list gives to DndContext; real dragging is covered by the E2E feature.
+
 import type { DndContextProps } from "@dnd-kit/core";
 import { render } from "@testing-library/react";
 import type { LocationRow } from "@/presenter";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { LocationList } from "./LocationList";
 
 let dropHandler: DndContextProps["onDragEnd"];
@@ -41,6 +43,7 @@ const rows: LocationRow[] = ["moscow", "tokyo", "kyiv"].map((id) => ({
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
+  wallTimeInputLabel: "",
 }));
 
 const dropOver = (activeId: string, overId: string | null) =>
@@ -60,6 +63,7 @@ describe("LocationList drop", () => {
         onMove={onMove}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
+        onConfirmWallTime={ignoreWallTime}
       />,
     );
     dropOver("moscow", "kyiv");
@@ -79,6 +83,7 @@ describe("LocationList drop", () => {
         onMove={onMove}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
+        onConfirmWallTime={ignoreWallTime}
       />,
     );
     dropOver("tokyo", overId);
@@ -95,6 +100,7 @@ describe("LocationList drop", () => {
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
+        onConfirmWallTime={ignoreWallTime}
       />,
     );
     rerender(
@@ -105,6 +111,7 @@ describe("LocationList drop", () => {
         onMove={vi.fn()}
         onSelectTrackFraction={() => undefined}
         onMoveTrack={() => undefined}
+        onConfirmWallTime={ignoreWallTime}
       />,
     );
     expect(sortableItemsSeen[1]).toBe(sortableItemsSeen[0]);

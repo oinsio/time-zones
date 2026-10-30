@@ -1,5 +1,10 @@
 // Implements FR1, FR7, FR8 of show-here-entry-for-device-time: seeding helpers of the locations states.
 import { expect } from "@playwright/test";
+import {
+  openWallTimeInput,
+  typeWallTime,
+  wallTimeHintOf,
+} from "../../time_selection/steps/wallTimeE2eHelpers";
 import type { LocationsWorld } from "./locations_ui_e2e.fixtures";
 import { buildStoredLocations } from "./locationsE2eHelpers";
 
@@ -45,4 +50,30 @@ export async function seedHereEntryState(
   await expect(world.page.getByRole("listitem")).toHaveCount(
     HERE_ENTRY_CITY_NAMES.length,
   );
+}
+
+const WALL_TIME_CITY_NAMES = ["Almaty", "New York"];
+const WALL_TIME_CITY_NAME = "New York";
+const WALL_TIME_GAP_TEXT = "0230";
+
+/**
+ * Shows the list with New York's wall-time input open, or with `02:30` typed
+ * in New York so it shows the wall-time hint.
+ * Implements NFR-R2 of add-wall-time-input-with-hint.
+ */
+export async function seedWallTimeState(
+  world: LocationsWorld,
+  hasHint: boolean,
+) {
+  await world.seedList(buildStoredLocations(WALL_TIME_CITY_NAMES));
+  await world.reloadIfOpen();
+  await expect(world.page.getByRole("listitem")).toHaveCount(
+    WALL_TIME_CITY_NAMES.length,
+  );
+  if (hasHint) {
+    await typeWallTime(world.page, WALL_TIME_CITY_NAME, WALL_TIME_GAP_TEXT);
+    await expect(wallTimeHintOf(world.page)).toBeVisible();
+  } else {
+    await openWallTimeInput(world.page, WALL_TIME_CITY_NAME);
+  }
 }

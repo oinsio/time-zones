@@ -1,9 +1,11 @@
 // UX3 of support-legacy-ios-12-safari: no empty country element in a row.
+
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import type { LocationRow as LocationRowModel } from "@/presenter";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { LocationRow } from "./LocationRow";
 
 const countrylessRow: LocationRowModel = {
@@ -16,6 +18,7 @@ const countrylessRow: LocationRowModel = {
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
+  wallTimeInputLabel: "",
 };
 
 describe("LocationRow without a country name", () => {
@@ -34,6 +37,7 @@ describe("LocationRow without a country name", () => {
               onSetHome={() => undefined}
               onSelectTrackFraction={vi.fn()}
               onMoveTrack={vi.fn()}
+              onConfirmWallTime={ignoreWallTime}
               isReorderable
               prefersReducedMotion={false}
             />

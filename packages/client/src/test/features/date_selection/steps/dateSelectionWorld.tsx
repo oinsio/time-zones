@@ -19,6 +19,8 @@ import {
   useLocations,
   useReferenceMoment,
   useTimeSelection,
+  useWallTimeInput,
+  WallTimeTargetKind,
 } from "@/controller";
 import { Temporal } from "@/lib/temporal";
 import { type LocationRepository, LocationsLoadStatus } from "@/ports";
@@ -46,6 +48,7 @@ const DEFAULT_DEVICE_ZONE = "UTC";
 type ReferenceHandle = ReturnType<typeof useReferenceMoment>;
 type TimeSelectionHandle = ReturnType<typeof useTimeSelection>;
 type LocationsHandle = ReturnType<typeof useLocations>;
+type WallTimeHandle = ReturnType<typeof useWallTimeInput>;
 
 /**
  * Per-scenario state of the date selection features: an in-memory list, a
@@ -59,6 +62,7 @@ export const createDateSelectionWorld = () => {
   let latestReference: ReferenceHandle;
   let latestTimeSelection: TimeSelectionHandle;
   let latestLocations: LocationsHandle;
+  let latestWallTime: WallTimeHandle;
   let storedHomeLocationId: string | null = null;
   let repositoryOverride: LocationRepository | undefined;
   let tickScheduler = createManualTickScheduler();
@@ -68,6 +72,7 @@ export const createDateSelectionWorld = () => {
     latestReference = useReferenceMoment();
     latestTimeSelection = useTimeSelection();
     latestLocations = useLocations();
+    latestWallTime = useWallTimeInput();
     return null;
   };
 
@@ -162,6 +167,24 @@ export const createDateSelectionWorld = () => {
         });
       });
     },
+    /** Types a time in a row, on the local date the row shows (add-wall-time-input-with-hint). */
+    typeWallTime: (city: string, text: string) => {
+      const row = latestLocations.rows.find(
+        (candidate) => candidate.cityLabel === city,
+      );
+      if (row === undefined) throw new Error(`no row for ${city}`);
+      act(() => {
+        latestWallTime.confirmWallTime(
+          { kind: WallTimeTargetKind.LOCATION, locationId: row.id },
+          text,
+          row.localIsoDate,
+        );
+      });
+    },
+    wallTimeHints: () =>
+      latestLocations.rows.flatMap((row) =>
+        row.wallTimeHint === undefined ? [] : [row.cityLabel],
+      ),
     moveTrackToNextStep: () =>
       act(() => latestTimeSelection.moveTrack(TrackMove.NEXT_STEP)),
     showNextDay: () => clickBarButton("date.nextDay"),

@@ -58,7 +58,7 @@ describe("CardsView", () => {
 
   it("should offer the Add location action in the empty state", () => {
     renderCards();
-    expect(screen.getByRole("button")).toHaveTextContent("Add location");
+    expect(screen.getByRole("button", { name: "Add location" })).toBeVisible();
   });
 
   it("should list the saved locations and keep the action", () => {

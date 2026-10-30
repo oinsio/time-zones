@@ -1,7 +1,9 @@
 // Verifies UX2 of reorder-locations-by-drag-and-drop: the dragged card is
 // raised. jsdom cannot drag, so the sortable state is stubbed.
+
 import * as sortable from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { LocationRow } from "./LocationRow";
 
 vi.mock("@dnd-kit/sortable", async (importOriginal) => {
@@ -19,6 +21,7 @@ const row = {
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
+  wallTimeInputLabel: "",
 };
 
 const renderWithDragging = (isDragging: boolean) => {
@@ -39,6 +42,7 @@ const renderWithDragging = (isDragging: boolean) => {
         onSetHome={() => undefined}
         onSelectTrackFraction={vi.fn()}
         onMoveTrack={vi.fn()}
+        onConfirmWallTime={ignoreWallTime}
         isReorderable
         prefersReducedMotion={false}
       />

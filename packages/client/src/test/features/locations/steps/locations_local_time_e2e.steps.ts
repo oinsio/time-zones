@@ -1,4 +1,5 @@
 // Verifies NFR-A1, NFR-A2, NFR-R1, NFR-R2, NFR-R3 of show-local-time-and-date-on-location-cards.
+// The time text is the wall-time button since add-wall-time-input-with-hint.
 import { expect, type Locator, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "./locations_ui_e2e.fixtures";
@@ -10,7 +11,7 @@ const HALF = 2;
 const ALIGNMENT_TOLERANCE_PX = 1;
 const PLACE_COLUMN_XPATH =
   "xpath=ancestor::span[contains(@class,'flex-col')][1]";
-const TIME_TEXT_XPATH = "xpath=preceding-sibling::span";
+const TIME_TEXT_XPATH = "xpath=preceding-sibling::button";
 const LIVE_REGION_XPATH = "xpath=ancestor-or-self::*[@aria-live]";
 const DATE_ELEMENT = "time";
 const MENU_BUTTON = "button";

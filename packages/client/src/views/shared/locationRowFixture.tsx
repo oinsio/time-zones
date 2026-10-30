@@ -2,6 +2,7 @@ import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { render } from "@testing-library/react";
 import type { LocationRow as LocationRowModel } from "@/presenter";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { LocationRow } from "./LocationRow";
 
 export const kolkataRow: LocationRowModel = {
@@ -14,11 +15,13 @@ export const kolkataRow: LocationRowModel = {
   localTimeLabel: "",
   localDateLabel: "",
   localIsoDate: "",
+  wallTimeInputLabel: "",
 };
 
 export const renderKolkataRow = (
   overrides: Partial<LocationRowModel> = {},
   isReorderable = true,
+  onConfirmWallTime = ignoreWallTime,
 ) =>
   render(
     <DndContext>
@@ -30,6 +33,7 @@ export const renderKolkataRow = (
             onSetHome={() => undefined}
             onSelectTrackFraction={vi.fn()}
             onMoveTrack={vi.fn()}
+            onConfirmWallTime={onConfirmWallTime}
             isReorderable={isReorderable}
             prefersReducedMotion={false}
           />

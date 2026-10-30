@@ -1,8 +1,10 @@
 // Verifies FR11, NFR-A2 of set-home-location-and-show-differences (D7, D8): focus after menu actions.
+
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import type { LocationRow } from "@/presenter";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { removeLocationThroughMenu } from "@/test/removeLocationThroughMenu";
 import { ALMATY_TRACK } from "./dayTrackFixture";
 import { LocationList } from "./LocationList";
@@ -17,6 +19,7 @@ const buildRow = (cityLabel: string): LocationRow => ({
   localTimeLabel: "10:30",
   localDateLabel: "Sun, Mar 8",
   localIsoDate: "2026-03-08",
+  wallTimeInputLabel: "",
   dayTrack: ALMATY_TRACK,
 });
 
@@ -29,6 +32,7 @@ function renderList(onSetHome = vi.fn(), onRemove = vi.fn()) {
       onMove={vi.fn()}
       onSelectTrackFraction={vi.fn()}
       onMoveTrack={vi.fn()}
+      onConfirmWallTime={ignoreWallTime}
     />,
   );
   return { onSetHome, onRemove };

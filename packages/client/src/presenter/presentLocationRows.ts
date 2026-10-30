@@ -32,6 +32,7 @@ export type LocationRow = PresentedZoneMoment & {
  * Implements FR5, FR6, FR7 of set-home-location-and-show-differences (D3-D5).
  * Implements FR2, FR3 of show-here-entry-for-device-time (D2): the zone part
  * comes from `presentZoneMoment`.
+ * Implements FR7, NFR-A2 of add-wall-time-input-with-hint (D7): passes `cityLabel` to the zone part.
  */
 export function presentLocationRows(
   locations: readonly Location[],
@@ -50,7 +51,7 @@ export function presentLocationRows(
       cityLabel: location.label,
       countryName: presentCountryName(location.countryCode, language),
       mark: markKind === undefined ? undefined : marks[markKind],
-      ...presentZoneMoment(location, context),
+      ...presentZoneMoment({ ...location, cityLabel: location.label }, context),
     };
   });
 }

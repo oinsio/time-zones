@@ -6,11 +6,15 @@ import {
   getOffsetDifferenceMinutes,
   getUtcOffsetMinutes,
   type ReferenceDay,
+  type WallClockNote,
+  WallClockNotePlacement,
+  WallTimeTargetKind,
 } from "@/model";
 import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
 import { formatLocalDate, formatLocalTime } from "./localDateTime";
 import { formatOffsetDifference } from "./offsetDifference";
 import { formatUtcOffset } from "./utcOffset";
+import { presentWallTimeHint } from "./wallTimeHint";
 
 export type LocationRowsContext = {
   language: SupportedLanguage;
@@ -21,6 +25,8 @@ export type LocationRowsContext = {
   /** Offset of the reference zone, read once per presentation (NFR-P1). */
   referenceOffsetMinutes: number | undefined;
   referenceDay: ReferenceDay;
+  /** The one wall-clock note of the moment; absent means none. */
+  wallClockNote?: WallClockNote;
 };
 
 /** What a time zone shows at the reference moment: shared by rows and the Here entry. */
@@ -39,6 +45,10 @@ export type PresentedZoneMoment = {
   localIsoDate: string;
   /** Slider data; `undefined` when the zone is unknown. */
   dayTrack?: PresentedDayTrack;
+  /** "Enter time — Moscow, 10:30": the name of the time button and its field. */
+  wallTimeInputLabel: string;
+  /** The wall-time hint of this row; `undefined` when the row has none. */
+  wallTimeHint?: string;
 };
 
 /**
@@ -46,9 +56,11 @@ export type PresentedZoneMoment = {
  * track of a zone. The subject is a location or the Here entry (no ID).
  * Implements FR2, FR3 of show-here-entry-for-device-time (D2); the code moved
  * from `presentLocationRows`.
+ * Implements FR7, NFR-A2 of add-wall-time-input-with-hint (D7): the time button name, the wall-time hint
+ * and the row note.
  */
 export function presentZoneMoment(
-  subject: { id?: string; timeZoneId: string },
+  subject: { id?: string; timeZoneId: string; cityLabel: string },
   {
     language,
     instant,
@@ -57,6 +69,7 @@ export function presentZoneMoment(
     homeLocationId,
     referenceOffsetMinutes,
     referenceDay,
+    wallClockNote,
   }: LocationRowsContext,
 ): PresentedZoneMoment {
   const offsetMinutes = getUtcOffsetMinutes(subject.timeZoneId, instant);
@@ -77,14 +90,13 @@ export function presentZoneMoment(
   const localDateLabel = localDateTime
     ? formatLocalDate(localDateTime, language)
     : "";
+  const utcOffsetLabel =
+    offsetMinutes === undefined
+      ? ""
+      : formatUtcOffset(offsetMinutes, translate("locations.utcOffsetPrefix"));
+  const hintNote = findRowNoteOf(wallClockNote, subject.id);
   return {
-    utcOffsetLabel:
-      offsetMinutes === undefined
-        ? ""
-        : formatUtcOffset(
-            offsetMinutes,
-            translate("locations.utcOffsetPrefix"),
-          ),
+    utcOffsetLabel,
     offsetDifferenceLabel: difference?.label ?? "",
     offsetDifferenceAccessibleLabel: difference?.accessibleLabel ?? "",
     localTimeLabel,
@@ -101,5 +113,38 @@ export function presentZoneMoment(
           localDateLabel,
         })
       : undefined,
+    wallTimeInputLabel: translate("locations.wallTimeInputLabel", {
+      city: subject.cityLabel,
+      time: localTimeLabel,
+    }),
+    wallTimeHint:
+      hintNote === undefined
+        ? undefined
+        : presentWallTimeHint({
+            status: hintNote.status,
+            requestedWallTime: hintNote.requestedWallTime,
+            shownTimeLabel: localTimeLabel,
+            utcOffsetLabel,
+            language,
+            translate,
+          }),
   };
+}
+
+type RowNote = Extract<
+  WallClockNote,
+  { placement: WallClockNotePlacement.ROW }
+>;
+
+/** The note when it is a row note about this subject: a location by id, the Here entry by having none. */
+function findRowNoteOf(
+  note: WallClockNote | undefined,
+  subjectId: string | undefined,
+): RowNote | undefined {
+  if (note?.placement !== WallClockNotePlacement.ROW) return undefined;
+  const isAboutSubject =
+    note.target.kind === WallTimeTargetKind.HERE_ENTRY
+      ? subjectId === undefined
+      : subjectId === note.target.locationId;
+  return isAboutSubject ? note : undefined;
 }

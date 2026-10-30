@@ -2,7 +2,12 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { forwardRef, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import type { TrackMove } from "@/controller";
+import {
+  type TrackMove,
+  type WallTimeInputOutcome,
+  type WallTimeTarget,
+  WallTimeTargetKind,
+} from "@/controller";
 import {
   LocationMarkKind,
   type LocationRow as LocationRowModel,
@@ -20,6 +25,11 @@ type LocationRowProps = {
   onSetHome: (id: string | null) => void;
   onSelectTrackFraction: (fraction: number) => void;
   onMoveTrack: (move: TrackMove) => void;
+  onConfirmWallTime: (
+    target: WallTimeTarget,
+    text: string,
+    date: string,
+  ) => WallTimeInputOutcome;
   isReorderable: boolean;
   prefersReducedMotion: boolean;
 };
@@ -44,6 +54,7 @@ type LocationRowProps = {
  * remove button.
  * Implements FR2, FR4 of show-here-entry-for-device-time (D5): the place
  * column, time and day track live in `ZoneRowContent`.
+ * Implements FR1, FR7 of add-wall-time-input-with-hint (D6): binds the location target.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -53,6 +64,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       onSetHome,
       onSelectTrackFraction,
       onMoveTrack,
+      onConfirmWallTime,
       isReorderable,
       prefersReducedMotion,
     },
@@ -141,6 +153,15 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           localTimeLabel={row.localTimeLabel}
           localDateLabel={row.localDateLabel}
           localIsoDate={row.localIsoDate}
+          wallTimeInputLabel={row.wallTimeInputLabel}
+          wallTimeHint={row.wallTimeHint}
+          onConfirmWallTime={(text, date) =>
+            onConfirmWallTime(
+              { kind: WallTimeTargetKind.LOCATION, locationId: row.id },
+              text,
+              date,
+            )
+          }
           dayTrack={row.dayTrack}
           onSelectTrackFraction={onSelectTrackFraction}
           onMoveTrack={onMoveTrack}

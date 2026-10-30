@@ -188,4 +188,61 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the bar shows no note", thenNoNote);
     },
   );
+
+  const thenPinnedAsGap = (_ctx: unknown, pinned: string, status: string) => {
+    world.expectPinnedTo(pinned);
+    // A wall-time hint is shown exactly for GAP and AMBIGUOUS moments.
+    expect(world.wallTimeHints().length > 0).toBe(status !== "UNIQUE");
+  };
+
+  // @add-wall-time-input-with-hint @FR7
+  f.Scenario(
+    "A wall-time input ends the gap note",
+    ({ Given, And, When, Then }) => {
+      Given("the device time zone is {string}", givenZone);
+      And("the current instant is {string}", givenInstant);
+      And("the list contains {string}", (_ctx, cities: string) =>
+        world.setStoredCities(cities),
+      );
+      And("the app is open", givenAppOpen);
+      And(
+        "the user moved to the next day, so the bar shows the gap note",
+        async () => {
+          await whenNextDay();
+          expect(noteOfBar(world)).toBeDefined();
+        },
+      );
+      When(
+        "the user types {string} in {string}",
+        (_ctx, text: string, city: string) => world.typeWallTime(city, text),
+      );
+      Then(
+        "the moment is pinned to {string} with the status {string}",
+        thenPinnedAsGap,
+      );
+      And("the bar shows no note", thenNoNote);
+    },
+  );
+
+  // @add-wall-time-input-with-hint @FR7
+  f.Scenario(
+    "A gap from a wall-time input stays out of the bar",
+    ({ Given, And, When, Then }) => {
+      Given("the device time zone is {string}", givenZone);
+      And("the current instant is {string}", givenInstant);
+      And("the list contains {string}", (_ctx, cities: string) =>
+        world.setStoredCities(cities),
+      );
+      And("the app is open", givenAppOpen);
+      When(
+        "the user types {string} in {string}",
+        (_ctx, text: string, city: string) => world.typeWallTime(city, text),
+      );
+      Then(
+        "the moment is pinned to {string} with the status {string}",
+        thenPinnedAsGap,
+      );
+      And("the bar shows no note", thenNoNote);
+    },
+  );
 });

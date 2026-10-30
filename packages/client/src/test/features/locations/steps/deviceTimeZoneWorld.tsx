@@ -1,4 +1,5 @@
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
+
 import {
   act,
   cleanup,
@@ -18,6 +19,7 @@ import en from "@/locales/en.json";
 import ru from "@/locales/ru.json";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
+import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationList } from "@/views/shared";
@@ -93,6 +95,7 @@ export const createDeviceTimeZoneWorld = () => {
             onMove={latestLocations.moveLocation}
             onSelectTrackFraction={() => undefined}
             onMoveTrack={() => undefined}
+            onConfirmWallTime={ignoreWallTime}
           />
         );
       };

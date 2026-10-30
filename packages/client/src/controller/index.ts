@@ -15,4 +15,11 @@ export { usePwaUpdateStatus } from "./usePwaUpdateStatus";
 export { useReferenceMoment } from "./useReferenceMoment";
 export { useStorageAvailability } from "./useStorageAvailability";
 export { useTimeSelection } from "./useTimeSelection";
+// Implements FR3, FR6 of add-wall-time-input-with-hint.
+export {
+  useWallTimeInput,
+  WallTimeInputOutcome,
+  type WallTimeTarget,
+  WallTimeTargetKind,
+} from "./useWallTimeInput";
 export type { WriteScheduler } from "./writeScheduler";

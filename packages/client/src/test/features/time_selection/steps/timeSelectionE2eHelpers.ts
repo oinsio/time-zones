@@ -7,7 +7,7 @@ export const HANDLE_SELECTOR = "[data-day-track-handle]";
 export const BAR_SELECTOR = "[data-day-track-bar]";
 export const HOUR_LABEL_SELECTOR = "[data-hour-label]";
 const VISIBLE_HANDLE_SELECTOR = `${HANDLE_SELECTOR} > span`;
-const TIME_TEXT_XPATH = "xpath=preceding-sibling::span";
+const TIME_TEXT_XPATH = "xpath=preceding-sibling::button";
 const PERCENT = 100;
 export const DRAG_STEPS = 10;
 export const HALF = 2;

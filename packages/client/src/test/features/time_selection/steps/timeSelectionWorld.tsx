@@ -9,9 +9,11 @@ import { NANOSECONDS_PER_MINUTE, TRACK_STEP_MINUTES } from "@/constants";
 import {
   LocationsProvider,
   type TrackMove,
+  useHereEntry,
   useLocations,
   useReferenceMoment,
   useTimeSelection,
+  useWallTimeInput,
 } from "@/controller";
 import { Temporal } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
@@ -47,6 +49,8 @@ export const createTimeSelectionWorld = () => {
         locations: ReturnType<typeof useLocations>;
         reference: ReturnType<typeof useReferenceMoment>;
         time: ReturnType<typeof useTimeSelection>;
+        wallTime: ReturnType<typeof useWallTimeInput>;
+        hereEntry: ReturnType<typeof useHereEntry>;
       };
     };
   };
@@ -88,6 +92,21 @@ export const createTimeSelectionWorld = () => {
     rowOf,
     trackOf,
     reference: () => current().reference,
+    /** The hooks of the open app: wall-time input, Here entry and the list actions. */
+    app: current,
+    backendDocument: () => backend.document,
+    openOtherTab: () => createInMemoryLocationRepository({ backend }),
+    removeCityInAnotherTab: (city: string) => {
+      const removedId = buildLocation(cityEntry(city)).id;
+      act(() => {
+        createInMemoryLocationRepository({ backend }).save({
+          locations: storedLocations.filter(
+            (location) => location.id !== removedId,
+          ),
+          homeLocationId: null,
+        });
+      });
+    },
     reset: async () => {
       cleanup();
       storedLocations = [];
@@ -131,6 +150,8 @@ export const createTimeSelectionWorld = () => {
           locations: useLocations(),
           reference: useReferenceMoment(),
           time: useTimeSelection(),
+          wallTime: useWallTimeInput(),
+          hereEntry: useHereEntry(),
         }),
         {
           wrapper: ({ children }: { children: ReactNode }) => (

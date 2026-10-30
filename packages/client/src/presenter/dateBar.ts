@@ -3,10 +3,10 @@ import {
   DATE_BAR_LONG_FORMAT_OPTIONS,
   DATE_BAR_SHORT_FORMAT_OPTIONS,
   FULL_DATE_FORMAT_OPTIONS,
-  LOCAL_TIME_FORMAT_OPTIONS,
 } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import { formatWallClockTime } from "./localDateTime";
 
 export type DateBarGap = {
   requestedWallTime: Temporal.PlainTime;
@@ -41,6 +41,7 @@ const YEAR_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { year: "numeric" };
  * Texts of the date bar in the interface language; the year is appended when
  * it differs from today's.
  * Implements FR4, FR7, FR9 of select-date-with-calendar-and-now (D4).
+ * Implements NFR-P1 of add-wall-time-input-with-hint (D5): the time comes from `formatWallClockTime`.
  */
 export function presentDateBar({
   effectiveDate,
@@ -57,7 +58,7 @@ export function presentDateBar({
     FULL_DATE_FORMAT_OPTIONS,
   );
   const formatTime = (time: Temporal.PlainTime) =>
-    time.toLocaleString(language, LOCAL_TIME_FORMAT_OPTIONS);
+    formatWallClockTime(time, language);
   return {
     shortLabel: effectiveDate.toLocaleString(language, {
       ...DATE_BAR_SHORT_FORMAT_OPTIONS,

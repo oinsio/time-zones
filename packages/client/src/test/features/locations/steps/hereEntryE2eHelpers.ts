@@ -5,7 +5,7 @@ import { listRow } from "./locationsE2eHelpers";
 
 const HERE_ENTRY_NAME_PATTERN = /(Device time|Время устройства)$/;
 const TIME_ELEMENT = "time";
-const TIME_TEXT_XPATH = "xpath=preceding-sibling::span";
+const TIME_TEXT_XPATH = "xpath=preceding-sibling::button";
 const SLIDER_ROLE = "slider";
 
 export const hereEntryOf = (page: Page) =>
