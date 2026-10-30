@@ -146,6 +146,7 @@ Inputs: the pointer's position as a fraction of the track's width, measured from
 - **AND** lifts the finger there
 - **THEN** the moment is pinned to `2026-03-08T18:59:00Z`
 - **AND** the Almaty card shows `23:59`
+- **AND** the page has not scrolled
 
 #### Scenario: A finger drag adds no selection when the finger lifts
 - **GIVEN** the engine has no Pointer Events

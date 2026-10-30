@@ -105,7 +105,7 @@ The change adds no data loading. The existing states stay as they are:
 
 Feature files are in `packages/client/src/test/features/time_selection/` and tagged `@fix-day-track-drag-continuity-and-smoothness`:
 
-- `time_selection_drag_unit.feature` (unit BDD): the drag continues off the track and past its ends, the drag without Pointer Events, and a move inside one track step (FR1, FR4, FR5, NFR-P1).
+- `time_selection_drag_unit.feature` (unit BDD): the drag continues off the track and past its ends, the handle follows the pointer and settles at release, the drag without Pointer Events, and a move inside one track step (FR1, FR3, FR4, NFR-P1, UX1–UX3).
 - `time_selection_drag_e2e.feature` (playwright-bdd): mouse and finger drags that leave the track with no page scroll, the handle under the pointer, the drag without Pointer Events, and slider values with axe-core after a drag (FR1–FR4, NFR-A1, NFR-R1, UX1–UX3).
 - The existing `time_selection_e2e.feature`, `time_selection_touch_e2e.feature`, `time_selection_legacy_tap.feature` and `time_selection_legacy_touch_e2e.feature` keep passing with no change to their expected values (FR5).
 
