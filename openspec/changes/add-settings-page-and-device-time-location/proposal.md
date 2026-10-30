@@ -23,7 +23,7 @@ Audience: every user of the app, on phones and wide screens, in both themes.
 - ADDED `home-location` "Device time location as home".
 - ADDED `location-search` "Device time in the search": the search offers "Device time" while the list has no device time location.
 - MODIFIED `date-selection` "Date bar layout": the arrows, the date and Now form one centred group at every width, so nothing jumps or sticks to the screen edges.
-- MODIFIED `time-selection` "Local hour labels", "Accepted wall-time text", and `locations` "Local time and date on location rows": time texts follow the hour format.
+- MODIFIED `time-selection` "Local hour labels", "Accepted wall-time text", "Wall-time input on every row", and `locations` "Local time and date on location rows": time texts follow the hour format. MODIFIED `time-selection` "A wall-time input pins the reference moment" and "Wall-time hint lifetime", and `location-search` "Search is fast and lazy" and "Open the search with the slash key": the device time location takes the place of the Here entry, and the slash key belongs to the header button.
 - **BREAKING (stored data):** the locations document moves from schema version 2 to 3. Older documents are migrated on load: the device time location is put first, and the order and home are kept.
 
 Glossary and documents. The implement stage writes only under `packages/`, so these are delivered as handoff patches:
@@ -48,9 +48,9 @@ Glossary and documents. The implement stage writes only under `packages/`, so th
 - `app-shell`: MODIFIED "Theme follows the system and uses design tokens".
 - `locations`: MODIFIED "Location identity", "List in the Cards view", "List is kept on the device", "Unreadable stored list" and "Local time and date on location rows"; REMOVED the 15 "Here entry" requirements; ADDED the device time location requirements.
 - `home-location`: ADDED "Device time location as home".
-- `location-search`: ADDED "Device time in the search".
+- `location-search`: MODIFIED "Search is fast and lazy" and "Open the search with the slash key" (the header button, the device time location instead of the Here entry); ADDED "Device time in the search".
 - `date-selection`: MODIFIED "Date bar layout".
-- `time-selection`: MODIFIED "Local hour labels" and "Accepted wall-time text".
+- `time-selection`: MODIFIED "Local hour labels", "Accepted wall-time text", "Wall-time input on every row", "A wall-time input pins the reference moment" and "Wall-time hint lifetime" (hour format, and the device time location instead of the Here entry).
 
 ## Goals
 
@@ -147,11 +147,10 @@ There is no loading state for the preferences: they are read synchronously at st
 Features live in `packages/client/src/test/features/` and are tagged `@add-settings-page-and-device-time-location`:
 
 - `settings/settings_preferences_unit.feature`, `settings/settings_storage_unit.feature`, `settings/settings_hour_format_unit.feature`, `settings/settings_e2e.feature`, `settings/settings_view_contract_e2e.feature` (new);
-- `locations/locations_device_time_unit.feature`, `locations/locations_device_time_storage_unit.feature`, `locations/locations_device_time_e2e.feature` (new); `locations/locations_migration_unit.feature`, `locations/locations_view_contract_e2e.feature` and `locations/locations_ui_e2e.feature` (changed);
+- `locations/locations_device_time_unit.feature`, `locations/locations_device_time_storage_unit.feature`, `locations/locations_device_time_e2e.feature`, `home_location/home_location_device_time_unit.feature` (new); `locations/locations_migration_unit.feature`, `locations/locations_persistence.feature`, `locations/locations_view_contract_e2e.feature` and `locations/locations_ui_e2e.feature` (changed); the `locations_here_entry_*` features are deleted;
 - `location_search/location_search_device_time.feature` (new);
 - `main_page/main_page_header_e2e.feature` (new), `main_page/main_page_states_unit.feature` (changed);
-- `date_selection/date_selection_layout_e2e.feature` (changed);
-- `time_selection/time_selection_wall_time_input_unit.feature` (changed).
+- `date_selection/date_selection_layout_e2e.feature` (changed).
 
 ## Visual Reference
 
