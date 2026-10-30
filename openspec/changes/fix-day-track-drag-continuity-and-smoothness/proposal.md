@@ -26,7 +26,7 @@ Glossary terms (`docs/glossary/time-selection.md`). The change goes in as handof
 
 - CHANGED **Handle**: adds "During a drag, the handle follows the pointer along the track. When released, it settles at the reference moment."
 - CHANGED **Day track**: "All handles stand at the same position" becomes "All handles stand at the same position, except a handle that is being dragged."
-- Used as they are: day track, handle, time selection, track step, track fraction, track value, reference day, reference moment. **Track end** is defined in the `time-selection` spec. Its glossary entry is still the pending patch `H1-glossary-track-end.patch` of the archived `fix-day-track-handle-overlap-and-end-of-day`, and this change uses that wording.
+- Used as they are: day track, handle, time selection, track step, track fraction, track value, reference day, reference moment. **Track end** is defined in the `time-selection` spec. Its glossary entry is still the pending patch `H1-glossary-track-end.patch` of the archived `fix-day-track-handle-overlap-and-end-of-day`, and this change uses that wording. That patch is applied before H1, since H1 changes lines it keeps as context (tasks.md 6.2).
 - No new term: "drag" stays plain English, as the **Handle** entry already says ("Dragging it, or tapping the track, selects a time").
 
 ## Capabilities
