@@ -318,7 +318,8 @@ Every measured file is at or above the 90 % minimum; none is a WARNING by score.
 - Impact: Every user on a tablet or desktop sees a header that does not match the approved design, the task's item 5 ("Кнопка добавления … должна соответствовать дизайну") and FR2/NFR-R1/UX1/M1. The approved screenshots lock the wrong layout in.
 - Fix: Remove `md:ml-auto` from the settings button class in `SettingsButton.tsx`. Add `md:mr-auto` to the `h1` in `MainPage.tsx`, so the title takes the left and both buttons group at the right. On an unreadable list, where the Add button is absent, the settings button still lands at the right. In `main_page_header_e2e.steps.ts`, add a step to "Wide header", for example `the button named "Добавить место" is directly before the button named "Настройки"`. It asserts that the gap between the Add button's right edge and the settings button's left edge is smaller than the gap between the title's right edge and the Add button's left edge. Re-approve the 1024 px main-page baselines once in Linux (`npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "Screenshot of the" --update-snapshots`).
 - Fix risk: Every 1024 px main-page screenshot baseline (list, home, device-time, device-time-home, first-launch, empty, pinned, calendar, suggestions, IST results, time-selected, travelling, wall-time-hint, wall-time-input, chromium and mobile-chrome) changes and needs re-approval. The narrow grid is unaffected because `md:` classes do not apply below 768 px, and DOM and Tab order do not change. A unit test that asserts the settings button's exact class string would need updating; none asserts `md:ml-auto` today (grep finds it only in `SettingsButton.tsx`).
-- Status: open
+- Status: fixed
+- Resolution: removed md:ml-auto from SettingsButton and put md:mr-auto on the title in MainPage, so both buttons group at the right; new E2E step "is directly before" in the Wide header scenario (main_page_header_e2e) asserts the gap; 1024 px main-page baselines regenerated.
 
 ### R2 — WARNING — Enter on a city result while the Device time option is shown is untested
 - Location: `packages/client/src/views/shared/LocationSearchDialog.tsx:78`
@@ -327,7 +328,8 @@ Every measured file is at or above the 90 % minimum; none is a WARNING by score.
 - Impact: A regression in this offset arithmetic would add the wrong city or the device time location when a keyboard user picks a suggestion, and CI would stay green. This breaks FR11 ("Device time option first") together with the existing keyboard selection of results.
 - Fix: In `views/shared/LocationSearchDialog.test.tsx`, add an `it.each` over the active index with a `deviceTimeOption` and two presented results. Enter at index 0 calls `deviceTimeOption.onChoose` and not `onChoose`. Arrow Down then Enter calls `onChoose` with the first result. Arrow Down twice then Enter calls it with the second result. Re-run `npx stryker run --mutate 'src/views/shared/LocationSearchDialog.tsx'` and see `:78` and `:82` killed.
 - Fix risk: none. The change is test-only, and the behaviour it pins is the current, correct one.
-- Status: open
+- Status: fixed
+- Resolution: added LocationSearchDialog.deviceTimeKeyboard.test.tsx (Enter on the option, ArrowDown counts 1-3 choose the matching city); Stryker on LocationSearchDialog.tsx now kills the :78 and :82 mutants (score 97.2%).
 
 ### R3 — SUGGESTION — The unreadable-settings note stays after the user's change has replaced the document
 - Location: `packages/client/src/controller/PreferencesProvider.tsx:81-86`
@@ -336,7 +338,8 @@ Every measured file is at or above the 90 % minimum; none is a WARNING by score.
 - Impact: The note is false once the save succeeds. A user who trusts it and presses Reset clears the choice they just saved (`resetPreferences` calls `repository.clear()`), so the app falls back to System/24-hour and their Dark choice is lost.
 - Fix: In `flushWrite`, when `repository.save(...)` returns `SaveOutcome.SAVED`, also call `setLoadStatus(PreferencesStatus.READY)`. Add a case to `controller/PreferencesProvider.test.tsx`: start with an unreadable document, change the theme, run the scheduled write with `createManualWriteScheduler()`, and expect `loadStatus` to be `READY`.
 - Fix risk: The "Corrupted preferences", "Reset" and "No violations with the unreadable note" scenarios open the page without changing a setting, so they are unaffected. A failed save keeps the note, which is correct because the unreadable document is still stored.
-- Status: open
+- Status: fixed
+- Resolution: flushWrite in PreferencesProvider sets loadStatus READY after a SAVED outcome; PreferencesProvider.test.tsx covers "READY once a change has replaced an unreadable document" and "keeps UNREADABLE while the save fails"; Stryker 91.5%, survivors are dependency-array mutants.
 
 ### R4 — SUGGESTION — "Arrow keys change the theme" tests a different key and skips the theme assertion
 - Location: `packages/client/src/test/features/settings/settings_e2e.feature:27-33`
@@ -345,7 +348,8 @@ Every measured file is at or above the 90 % minimum; none is a WARNING by score.
 - Impact: The spec scenario's outcome, a keyboard choice that applies the dark tokens, is not executed. Today the scenario only proves that the native radio moved. It would stay green if a keyboard-moved radio stopped reaching `setTheme`, for example if the option group switched to custom `role="radio"` elements without an `onChange` path.
 - Fix: Parameterize the step `the user focuses the {string} option and presses ArrowDown` (`settings/steps/settings_e2e.steps.ts:59-65`) to `the user focuses the {string} option and presses {string}`, passing the key to `keyboard.press`. Then change the scenario to `Given the system colour scheme is light`, `And the user opens the settings`, `When the user focuses the "System" option and presses "ArrowUp"`, `Then the option "Dark" is checked` and `And the page background is the dark token colour`. The last two reuse existing steps (`settings_e2e.feature:99-104`).
 - Fix risk: Low. On native radios, Arrow Up moves to the previous option (System → Dark) in Chromium. The step text changes, so `npx bddgen` must regenerate before the run. No other feature uses the old step text (only `settings_e2e.feature` matches).
-- Status: open
+- Status: fixed
+- Resolution: step parameterised to presses {string}; scenario now presses ArrowUp from System on a light system, expects Dark checked and the dark token background (settings_e2e.feature); BDD suite passes.
 
 ## Verdict
 
