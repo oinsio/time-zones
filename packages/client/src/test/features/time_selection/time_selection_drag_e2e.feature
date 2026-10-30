@@ -6,11 +6,11 @@ Feature: Drag a day track in a real browser
   Scenario Outline: A drag continues when the pointer leaves the track
     Given the pointer is "<pointer>"
     And the current time is "2026-03-08T07:30:00Z"
-    And the screen is 375 by 340 px for the locations
+    And the screen is 375 by 300 px for the locations
     And the stored locations are "New York", "Almaty", "Moscow", "Kolkata", "Tokyo"
     And the user opens the locations app
     And the page is taller than the screen
-    When the user drags from 25 percent to 75 percent of the "New York" track, 120 px below it, and releases
+    When the user drags from 25 percent to 75 percent of the "New York" track, 90 px below it, and releases
     Then the card of "Almaty" shows the time "18:00"
     And the page has not scrolled
 
@@ -24,7 +24,7 @@ Feature: Drag a day track in a real browser
   Scenario: A drag past the right end pins the track end
     Given the pointer is "finger"
     And the current time is "2026-03-08T07:30:00Z"
-    And the screen is 375 by 340 px for the locations
+    And the screen is 375 by 300 px for the locations
     And the stored locations are "Almaty", "Moscow", "Kolkata", "Tokyo", "New York"
     And the user opens the locations app
     And the page is taller than the screen
@@ -36,7 +36,7 @@ Feature: Drag a day track in a real browser
   Scenario: A vertical swipe without Pointer Events still scrolls
     Given the engine has no Pointer Events
     And the current time is "2026-03-08T07:30:00Z"
-    And the screen is 375 by 340 px for the locations
+    And the screen is 375 by 300 px for the locations
     And the stored locations are "Almaty", "Moscow", "Kolkata", "Tokyo", "New York"
     And the user opens the locations app
     And the page is taller than the screen
@@ -47,9 +47,9 @@ Feature: Drag a day track in a real browser
   @fix-day-track-drag-continuity-and-smoothness @FR3 @UX2 @NFR-R1
   Scenario Outline: The dragged handle stays under the pointer
     Given the current time is "2026-03-08T07:30:00Z"
-    And the screen is <width> px wide for the locations
     And the stored locations are "Almaty", "Moscow"
     And the user opens the locations app
+    And the screen becomes <width> px wide
     When the user holds the mouse on the "Almaty" track at 51.2 percent
     Then the handle of "Almaty" is under the pointer
     When the user holds the mouse on the "Almaty" track at 30.1 percent
@@ -66,7 +66,8 @@ Feature: Drag a day track in a real browser
 
   @fix-day-track-drag-continuity-and-smoothness @NFR-A1
   Scenario Outline: The slider reports the selected step after a drag
-    Given the locations screen uses the <theme> theme
+    Given the pointer is "finger"
+    And the locations screen uses the <theme> theme
     And the current time is "2026-03-08T07:30:00Z"
     And the screen is 375 px wide for the locations
     And the stored locations are "Almaty", "New York"
