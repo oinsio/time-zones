@@ -31,8 +31,18 @@ enum DragPointer {
 const FIRST_MOVE_PX = 20;
 const HANDLE_TOLERANCE_PX = 1;
 const PERCENT = 100;
+const NOTICE_WAIT_MS = 3000;
 const heldMouseX = new WeakMap<object, number>();
 const pointerKinds = new WeakMap<object, DragPointer>();
+
+/** The "ready to work offline" notice covers the tracks of a short screen; dismiss it once it shows. */
+async function dismissOfflineReadyNotice(page: Page) {
+  // No notice shown: nothing covers the tracks.
+  await page
+    .getByRole("button", { name: "Dismiss" })
+    .click({ timeout: NOTICE_WAIT_MS })
+    .catch(() => undefined);
+}
 
 async function requireInViewport(page: Page, point: Point) {
   const viewport = page.viewportSize();
@@ -84,6 +94,7 @@ async function performDrag(
   offsetBelowPx: number,
 ) {
   const { page } = world;
+  await dismissOfflineReadyNotice(page);
   const kind = pointerKinds.get(world) ?? DragPointer.MOUSE;
   const bar = await requireBox(barOf(page, city));
   const from = await pointOnBar(page, city, fromPercent);

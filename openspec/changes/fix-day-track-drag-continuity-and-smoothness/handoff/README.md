@@ -6,7 +6,7 @@ The implement stage writes only under `packages/` and this folder. These items n
 
 Apply `H1-glossary-track-end.patch` of the archived change `fix-day-track-handle-overlap-and-end-of-day` first; the command below does it when it is not applied yet.
 
-- **Apply:** { git apply --check --reverse openspec/changes/archive/2026/10/2026-10-30-fix-day-track-handle-overlap-and-end-of-day/handoff/H1-glossary-track-end.patch 2>/dev/null || git apply openspec/changes/archive/2026/10/2026-10-30-fix-day-track-handle-overlap-and-end-of-day/handoff/H1-glossary-track-end.patch; } && git apply -C0 --unidiff-zero openspec/changes/fix-day-track-drag-continuity-and-smoothness/handoff/H1-glossary-handle-drag.patch
+- **Apply:** { git apply --check --reverse openspec/changes/archive/2026/10/2026-10-30-fix-day-track-handle-overlap-and-end-of-day/handoff/H1-glossary-track-end.patch 2>/dev/null || git apply openspec/changes/archive/2026/10/2026-10-30-fix-day-track-handle-overlap-and-end-of-day/handoff/H1-glossary-track-end.patch; } && git apply --unidiff-zero openspec/changes/fix-day-track-drag-continuity-and-smoothness/handoff/H1-glossary-handle-drag.patch
 - **Patch:** `H1-glossary-handle-drag.patch` (same folder as this README)
 - **Changes:** **Day track** and **Handle** in `docs/glossary/time-selection.md`: a dragged handle follows the pointer and settles at the reference moment when released.
 - **Serves:** FR3, UX2.
