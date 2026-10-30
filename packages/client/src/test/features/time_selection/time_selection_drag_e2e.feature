@@ -32,7 +32,7 @@ Feature: Drag a day track in a real browser
     Then the card of "Almaty" shows the time "23:59"
     And the page has not scrolled
 
-  @fix-day-track-drag-continuity-and-smoothness @FR2 @FR4 @FR5
+  @fix-day-track-drag-continuity-and-smoothness @FR2 @FR4 @FR5 @fix-stale-now-button-checks-in-drag-tests @FR2
   Scenario: A vertical swipe without Pointer Events still scrolls
     Given the engine has no Pointer Events
     And the current time is "2026-03-08T07:30:00Z"
@@ -42,7 +42,7 @@ Feature: Drag a day track in a real browser
     And the page is taller than the screen
     When the user swipes up from the "Almaty" track with a finger
     Then the page has scrolled down
-    And the Now button is not shown
+    And the Now button is inactive
 
   @fix-day-track-drag-continuity-and-smoothness @FR3 @UX2 @NFR-R1
   Scenario Outline: The dragged handle stays under the pointer
