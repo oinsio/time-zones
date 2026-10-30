@@ -6,12 +6,12 @@ The implement stage writes only under `packages/` and this folder. These items n
 
 Apply `H1-glossary-track-end.patch` of the archived change `fix-day-track-handle-overlap-and-end-of-day` first; the command below does it when it is not applied yet.
 
-- **Apply:** { git apply --check --reverse openspec/changes/archive/2026/10/2026-10-30-fix-day-track-handle-overlap-and-end-of-day/handoff/H1-glossary-track-end.patch 2>/dev/null || git apply openspec/changes/archive/2026/10/2026-10-30-fix-day-track-handle-overlap-and-end-of-day/handoff/H1-glossary-track-end.patch; } && git apply --unidiff-zero openspec/changes/fix-day-track-drag-continuity-and-smoothness/handoff/H1-glossary-handle-drag.patch
+- **Apply:** { git apply --check --reverse openspec/changes/archive/2026/10/2026-10-30-fix-day-track-handle-overlap-and-end-of-day/handoff/H1-glossary-track-end.patch 2>/dev/null || git apply openspec/changes/archive/2026/10/2026-10-30-fix-day-track-handle-overlap-and-end-of-day/handoff/H1-glossary-track-end.patch; } && git apply -C0 openspec/changes/fix-day-track-drag-continuity-and-smoothness/handoff/H1-glossary-handle-drag.patch
 - **Patch:** `H1-glossary-handle-drag.patch` (same folder as this README)
 - **Changes:** **Day track** and **Handle** in `docs/glossary/time-selection.md`: a dragged handle follows the pointer and settles at the reference moment when released.
 - **Serves:** FR3, UX2.
 - **Why manual:** the glossary lives in `docs/`, which the implement stage does not edit.
-- **Automated part:** `git apply --check --unidiff-zero` of the patch, and the scratch check of task 6.2: apply the track-end patch, then `git apply --unidiff-zero` of this patch (both in order), on a clean copy of `docs`.
+- **Automated part:** `git apply --check` of the patch on the committed file, and the scratch check of task 6.2: apply the track-end patch, then `git apply -C0` of this patch (both in order; `-C0` ignores the context lines that the track-end patch changes), on a clean copy of `docs`.
 - **Verify:** `grep -q "except a handle that is being dragged" docs/glossary/time-selection.md`.
 
 ## H2: Drag on real iOS devices
