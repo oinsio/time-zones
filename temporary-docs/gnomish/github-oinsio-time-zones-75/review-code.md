@@ -115,7 +115,8 @@ Measured in this review, one run at a time, from `packages/client/`:
 - Impact: NFR-R2 ("the approved screenshots of states with a live moment are re-approved with the grey Now") and the spec sentence "the screenshots of states with a live moment MUST show the inactive Now" are not met; the approved images document the old behaviour. Any later regression of the inactive Now (wrong colour, missing again) stays within the same tolerance against a baseline that never contained it, so visual regression no longer guards this button.
 - Fix: After R2 is fixed (it changes the 1024 px bar), run from `packages/client/` in Linux, alone: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "Screenshot of the" --update-snapshots`, commit the changed `.png` files, inspect one live baseline per width/theme to confirm the grey Now is visible, then re-run the outline without `--update-snapshots`.
 - Fix risk: The 4.4 check "pinned-state / time-selected-state baselines stay unchanged" will not hold at 1024 px: the date button width change in `CalendarDialog.tsx:85` (R2) moves the centred group in every state, so those 1024 px baselines change too and must be re-approved together, with that reason stated in the commit. Baselines rendered outside Linux would mismatch CI fonts.
-- Status: open
+- Status: fixed
+- Resolution: re-generated all 84 screenshot baselines on Linux (chromium and mobile-chrome) incl. the live states, which now show the grey Now (checked the 375 px dark home baseline); the 1024 px baselines also moved with the wider date button of R2; the outline passes against them (104 passed).
 
 ### R2 — WARNING — Fixed `md:w-56` date button wraps long dates and moves Now
 - Location: `packages/client/src/views/shared/CalendarDialog.tsx:85`
@@ -124,7 +125,8 @@ Measured in this review, one run at a time, from `packages/client/`:
 - Impact: From 768 px, on Russian Mondays in September and on every long label with a year (any date in another year, spec "Another year"), the date shows on two lines. The date button grows above 44 px, the bar gets taller, and with `items-center` Now moves vertically when the user switches between such a date and a shorter one. This breaks "Now MUST keep the same place … within 1 px" and UX2 ("does not move or resize any control of the bar"). Russian is the app's default language. The E2E "Now keeps its place" only tests 8 → 9 March, so it does not catch this.
 - Fix: In `CalendarDialog.tsx:85`, replace `md:w-56` with `md:w-72 whitespace-nowrap` (288 px, 272 px for the label, above the longest measured label of 267 px). Add a scenario to `date_selection/date_selection_now_e2e.feature` tagged `@keep-now-button-visible-when-live @NFR-R1 @UX2`: Russian, 1024 px, current time `"2026-09-27T07:30:00Z"` (Sunday; the next day is «понедельник, 28 сентября»). It reuses "the locations interface language is Russian", "the screen is 1024 px wide for the locations", "the user opens the locations app" and "Now keeps its place and size when the user moves to the next day". Add one new step in `steps/date_selection_now_e2e.steps.ts` asserting that `dateButton(page)`'s box height is at most `MIN_TOUCH_TARGET_PX` + 1 after the move. Add `Implements NFR-R1, UX2 of keep-now-button-visible-when-live.` to the `CalendarDialog` JSDoc.
 - Fix risk: The centred group gets 64 px wider at ≥ 768 px, so the 1024 px screenshots change (they need re-approval anyway, R1). At 768 px the group (≈ 44 + 288 + 44 + gap + Now ≈ 500 px) still fits, and "No horizontal scrolling" stays green. `whitespace-nowrap` would overflow instead of wrap if a future locale's label exceeded 272 px. Below 768 px nothing changes (`md:` only).
-- Status: open
+- Status: fixed
+- Resolution: CalendarDialog.tsx date button is now md:w-72 whitespace-nowrap, plus an Implements NFR-R1, UX2 line in its JSDoc; new E2E outline "A long date stays on one line at <width> px" (Russian, 27 to 28 September, 768 and 1024 px) failed with md:w-56 and passes now.
 
 ### R3 — SUGGESTION — Misplaced `Stryker disable` comment leaves DateBar.tsx below the 95% M6 target
 - Location: `packages/client/src/views/shared/DateBar.tsx:9`
@@ -133,7 +135,8 @@ Measured in this review, one run at a time, from `packages/client/`:
 - Impact: Measured score is 91.67% instead of the ≥ 95% target M6 names. The comment misleads readers into thinking the literal is excluded.
 - Fix: Move the comment to sit directly above line 11 (the string literal line), and name the covering scenario correctly: `// Stryker disable next-line StringLiteral: the arrow classes are checked by the "Touch targets" scenario of date_selection_layout_e2e.feature`. Re-run `npx stryker run --mutate 'src/views/shared/DateBar.tsx'` and confirm 100%.
 - Fix risk: none — Prettier keeps a line comment above a string continuation line, and the "Touch targets" E2E scenario already checks the arrow buttons' 44 × 44 px size.
-- Status: open
+- Status: fixed
+- Resolution: moved the Stryker disable comment onto the string literal line and named the Touch targets scenario correctly; scoped Stryker on DateBar.tsx now gives 100% (11 killed, 1 ignored).
 
 ### R4 — SUGGESTION — Reference-moment steps file grew past 200 lines
 - Location: `packages/client/src/test/features/date_selection/steps/date_selection_reference_moment.steps.tsx:164`
@@ -142,7 +145,8 @@ Measured in this review, one run at a time, from `packages/client/`:
 - Impact: The project's 200-line limit is broken in a file this change touched (AI context quality, per `CLAUDE.md`). The 300-line hard cap still holds.
 - Fix: Move the scenario "An inactive Now changes nothing" into a new unit feature `date_selection/date_selection_now_unit.feature`. It takes the `_unit` suffix because `date_selection_now_e2e.feature` already exists (`.claude/rules/bdd-unit.md`, File Naming). Put its steps in `date_selection/steps/date_selection_now_unit.steps.tsx`, which reuses `createDateSelectionWorld` and `createReferenceMomentSteps`. Keep the tags `@keep-now-button-visible-when-live @FR2 @M5` and the `// @keep-now-button-visible-when-live @FR2 @M5` comment.
 - Fix risk: The proposal's Behavior section names `date_selection_reference_moment.feature` for this scenario, so the location drifts from the proposal (the scenario name, tags and spec mapping stay the same). The new steps file needs its own `BeforeEachScenario` cleanup, like the reference-moment steps file.
-- Status: open
+- Status: fixed
+- Resolution: moved the scenario into date_selection_now_unit.feature with steps in date_selection_now_unit.steps.tsx; date_selection_reference_moment.steps.tsx is 189 lines; both files pass.
 
 ## Verdict
 
