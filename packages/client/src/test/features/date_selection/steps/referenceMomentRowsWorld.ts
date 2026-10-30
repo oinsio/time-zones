@@ -1,4 +1,3 @@
-import { HourFormat } from "@/preferences";
 import i18n from "i18next";
 import { expect } from "vitest";
 import { ONE_DAY } from "@/constants";
@@ -11,6 +10,7 @@ import {
   reduceLocations,
   type WorldClockState,
 } from "@/model";
+import { HourFormat } from "@/preferences";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";

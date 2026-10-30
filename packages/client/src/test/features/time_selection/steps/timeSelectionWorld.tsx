@@ -9,18 +9,19 @@ import {
 import {
   LocationsProvider,
   type TrackMove,
-  useHereEntry,
   useLocations,
   useReferenceMoment,
   useTimeSelection,
   useWallTimeInput,
 } from "@/controller";
 import { Temporal } from "@/lib/temporal";
+import { buildDeviceTimeLocation } from "@/model";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
+import { DEVICE_TIME_LIST_TOKEN } from "../../locations/steps/deviceTimeQueries";
 import { cityEntry } from "../../locations/steps/locationsUiWorld";
 import { getDayBounds } from "./dayBounds";
 
@@ -51,7 +52,6 @@ export const createTimeSelectionWorld = () => {
         reference: ReturnType<typeof useReferenceMoment>;
         time: ReturnType<typeof useTimeSelection>;
         wallTime: ReturnType<typeof useWallTimeInput>;
-        hereEntry: ReturnType<typeof useHereEntry>;
       };
     };
   };
@@ -93,7 +93,7 @@ export const createTimeSelectionWorld = () => {
     rowOf,
     trackOf,
     reference: () => current().reference,
-    /** The hooks of the open app: wall-time input, Here entry and the list actions. */
+    /** The hooks of the open app: wall-time input and the list actions. */
     app: current,
     backendDocument: () => backend.document,
     openOtherTab: () => createInMemoryLocationRepository({ backend }),
@@ -130,7 +130,11 @@ export const createTimeSelectionWorld = () => {
     setStoredCities: (cities: string) => {
       storedLocations = cities
         .split(CITY_SEPARATOR)
-        .map((city) => buildLocation(cityEntry(city)));
+        .map((city) =>
+          city === DEVICE_TIME_LIST_TOKEN
+            ? buildDeviceTimeLocation(clock.timeZoneId())
+            : buildLocation(cityEntry(city)),
+        );
     },
     setHomeCity: (city: string) => {
       homeLocationId = buildLocation(cityEntry(city)).id;
@@ -152,7 +156,6 @@ export const createTimeSelectionWorld = () => {
           reference: useReferenceMoment(),
           time: useTimeSelection(),
           wallTime: useWallTimeInput(),
-          hereEntry: useHereEntry(),
         }),
         {
           wrapper: ({ children }: { children: ReactNode }) => (

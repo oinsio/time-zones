@@ -15,7 +15,7 @@ import {
   createInMemoryLocationRepository,
 } from "@/adapters";
 import { AppShell, MainPage } from "@/app";
-import { KeyboardKey } from "@/constants";
+import { DEVICE_TIME_LOCATION_ID, KeyboardKey } from "@/constants";
 import { LocationsProvider, useLocations } from "@/controller";
 import { fakeClock } from "@/lib/temporal";
 import { getUtcOffsetMinutes } from "@/model";
@@ -25,15 +25,16 @@ import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
-import { DateBar } from "@/views/shared";
-import { createDataLoaderState, DataMode } from "./hereEntryDataLoader";
+import { DateBar, LocationSearch } from "@/views/shared";
+import { createDataLoaderState, DataMode } from "./deviceTimeDataLoader";
 import {
   buildStoredDocument,
-  findHereEntries,
+  DEVICE_TIME_LIST_TOKEN,
+  findDeviceTimeRows,
   getCardOf,
-  getHereEntry,
-  getHereSlider,
-} from "./hereEntryQueries";
+  getDeviceTimeRow,
+  getDeviceTimeSlider,
+} from "./deviceTimeQueries";
 import { cityEntry } from "./locationsUiWorld";
 
 export { DataMode };
@@ -44,8 +45,8 @@ const EMPTY_LIST = "empty";
 
 type LocationsHandle = ReturnType<typeof useLocations>;
 
-/** Per-scenario state and the step handlers shared by the Here entry features. */
-export const createHereEntryWorld = () => {
+/** Per-scenario state and the step handlers shared by the device time features. */
+export const createDeviceTimeWorld = () => {
   let deviceZone = "UTC";
   let instant = DEFAULT_INSTANT;
   let cities: string[] = [];
@@ -64,10 +65,10 @@ export const createHereEntryWorld = () => {
   };
 
   return {
-    hereEntry: getHereEntry,
-    hereEntries: findHereEntries,
+    deviceTimeRow: getDeviceTimeRow,
+    deviceTimeRows: findDeviceTimeRows,
     cardOf: getCardOf,
-    hereSlider: getHereSlider,
+    deviceTimeSlider: getDeviceTimeSlider,
     getDataRequests: dataLoader.getRequestCount,
     /** "UTC+5" for a zone at the scenario instant. */
     formatOffsetOf: (zone: string) =>
@@ -131,6 +132,7 @@ export const createHereEntryWorld = () => {
           hasStoredList,
           cities,
           homeCity,
+          deviceZone,
         }),
       );
       render(
@@ -142,7 +144,11 @@ export const createHereEntryWorld = () => {
           loadCitySearch={loadCitySearch}
         >
           <Probe />
-          <MainPage notices={null} bottomBar={<DateBar />} />
+          <MainPage
+            notices={null}
+            bottomBar={<DateBar />}
+            headerActions={<LocationSearch />}
+          />
         </LocationsProvider>,
       );
       await waitFor(() =>
@@ -172,15 +178,24 @@ export const createHereEntryWorld = () => {
     },
     whenRemoves: (_ctx: unknown, city: string) => {
       act(() => {
-        latestLocations.removeLocation(buildLocation(cityEntry(city)).id);
+        latestLocations.removeLocation(
+          city === DEVICE_TIME_LIST_TOKEN
+            ? DEVICE_TIME_LOCATION_ID
+            : buildLocation(cityEntry(city)).id,
+        );
+      });
+    },
+    whenAddsDeviceTime: () => {
+      act(() => {
+        latestLocations.addDeviceTimeLocation();
       });
     },
     whenDeviceZoneBecomesAndTicks: (_ctx: unknown, zone: string) => {
       clock.moveTo(instant, zone);
       act(() => tickScheduler.runPending());
     },
-    whenMovesHereTrackOneHourForward: () => {
-      fireEvent.keyDown(getHereSlider(), { key: KeyboardKey.PAGE_UP });
+    whenMovesDeviceTimeTrackOneHourForward: () => {
+      fireEvent.keyDown(getDeviceTimeSlider(), { key: KeyboardKey.PAGE_UP });
     },
     whenDataFinishesLoading: async () => {
       await act(async () => dataLoader.release());

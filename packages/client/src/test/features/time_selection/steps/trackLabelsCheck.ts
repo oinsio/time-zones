@@ -1,4 +1,3 @@
-import { HourFormat } from "@/preferences";
 // Implements FR5, UX1 of replace-wall-clock-row-budgets-with-deterministic-checks (D4).
 import i18n from "i18next";
 import { expect } from "vitest";
@@ -8,6 +7,7 @@ import {
 } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 import { Temporal } from "@/lib/temporal";
+import { HourFormat } from "@/preferences";
 import { type HourLabel, presentLocationRows } from "@/presenter";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";

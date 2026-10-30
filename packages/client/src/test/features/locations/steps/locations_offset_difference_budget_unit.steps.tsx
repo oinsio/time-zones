@@ -1,4 +1,3 @@
-import { HourFormat } from "@/preferences";
 // Verifies NFR-P1 of set-home-location-and-show-differences.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
@@ -6,6 +5,7 @@ import i18n from "i18next";
 import { expect, vi } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import { getReferenceOffsetMinutes, INITIAL_WORLD_CLOCK_STATE } from "@/model";
+import { HourFormat } from "@/preferences";
 import { presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";

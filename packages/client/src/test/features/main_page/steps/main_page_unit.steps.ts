@@ -8,6 +8,7 @@ import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
 import { failUpdateCheck, fakeServiceWorker } from "@/test/fakeServiceWorker";
 import { registryOverride } from "@/test/registryOverride";
+import { storeDocument } from "../../locations/steps/locationsPersistenceWorld";
 import { expectBottomBarShowsDateBar } from "./mainPageDateBarAssertions";
 
 vi.mock(
@@ -41,6 +42,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.BeforeEachScenario(async () => {
     cleanup();
     localStorage.clear();
+    storeDocument([]);
     fakeServiceWorker.isUpdateAvailable = false;
     fakeServiceWorker.shouldUpdateCheckFail = false;
     registryOverride.views = undefined;

@@ -2,7 +2,9 @@ import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
 import { expect } from "vitest";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { WallTimeInputOutcome } from "@/controller";
+import { DEFAULT_LANGUAGE } from "@/i18n";
 import {
   createStore,
   INITIAL_WORLD_CLOCK_STATE,
@@ -10,7 +12,7 @@ import {
   reduceLocations,
   WallTimeTargetKind,
 } from "@/model";
-import { parseWallTimeInput } from "@/presenter";
+import { getDayPeriodMarkers, parseWallTimeInput } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { cityEntry } from "../../locations/steps/locationsUiWorld";
 import { registerHintScenarios } from "./wallTimeHintScenarios";
@@ -77,7 +79,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   // @add-wall-time-input-with-hint @FR2 @M4
   f.ScenarioOutline("Accepted texts", ({ When, Then }, variables) => {
     When("the user confirms the text <text>", () => {
-      parsedTime = parseWallTimeInput(unquote(variables.text));
+      parsedTime = parseWallTimeInput(
+        unquote(variables.text),
+        getDayPeriodMarkers(DEFAULT_LANGUAGE),
+      );
     });
     Then("the typed wall-clock time is <time>", () =>
       expect(parsedTime).toBe(variables.time),
@@ -139,20 +144,25 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-wall-time-input-with-hint @FR3 @M2
-  f.Scenario("Type a time in the Here entry", ({ Given, And, When, Then }) => {
-    Given("the device time zone is {string}", givenZone);
-    And("the current instant is {string}", givenInstant);
-    And("the list contains {string}", givenList);
-    And("the app is open", givenAppOpen);
-    When("the user types {string} in the Here entry", (_ctx, text: string) =>
-      world.typeInHereEntry(text),
-    );
-    Then(
-      "the moment is pinned to {string} with the status {string}",
-      thenPinned,
-    );
-    And("the {string} card shows {string}", thenCardShows);
-  });
+  // @add-settings-page-and-device-time-location @FR9
+  f.Scenario(
+    "Type a time in the device time location",
+    ({ Given, And, When, Then }) => {
+      Given("the device time zone is {string}", givenZone);
+      And("the current instant is {string}", givenInstant);
+      And("the list contains {string}", givenList);
+      And("the app is open", givenAppOpen);
+      When(
+        "the user types {string} in the device time location",
+        (_ctx, text: string) => world.typeInDeviceTime(text),
+      );
+      Then(
+        "the moment is pinned to {string} with the status {string}",
+        thenPinned,
+      );
+      And("the {string} card shows {string}", thenCardShows);
+    },
+  );
 
   // @add-wall-time-input-with-hint @FR4 @FR8 @M2
   // @keep-now-button-visible-when-live @FR3
@@ -252,7 +262,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         () => {
           lastStoreOutcome = store.dispatch({
             type: LocationCommandType.SET_WALL_TIME,
-            target: { kind: WallTimeTargetKind.HERE_ENTRY },
+            target: {
+              kind: WallTimeTargetKind.LOCATION,
+              locationId: DEVICE_TIME_LOCATION_ID,
+            },
             time: variables.time,
             date: variables.date,
           });

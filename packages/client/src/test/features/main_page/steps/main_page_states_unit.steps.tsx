@@ -1,7 +1,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
-import { cleanup, render, screen } from "@testing-library/react/pure";
+import { cleanup, render, screen, within } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createElement } from "react";
@@ -12,6 +12,10 @@ import { fakeServiceWorker } from "@/test/fakeServiceWorker";
 import { registryOverride } from "@/test/registryOverride";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import { buildTestView, failingThenLoading } from "@/test/viewFixtures";
+import {
+  cityEntry,
+  storeDocument,
+} from "../../locations/steps/locationsPersistenceWorld";
 
 vi.mock(
   "virtual:pwa-register/react",
@@ -122,73 +126,83 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
+  const explanationText = () => i18n.t("views.cardsEmptyState");
+  const getAddLocationButtons = () =>
+    screen.getAllByRole("button", { name: i18n.t("locations.addLocation") });
+
   // @add-main-page-scaffold @FR7 @UX1
-  // @show-here-entry-for-device-time @FR7 @UX2
-  f.Scenario("First launch", ({ Given, When, Then, And }) => {
-    const isFollowing = (first: Element, second: Element) =>
-      Boolean(
-        first.compareDocumentPosition(second) &
-          Node.DOCUMENT_POSITION_FOLLOWING,
-      );
-    const getExplanation = () => screen.getByText("No locations added yet.");
-    const getAddLocation = () =>
-      screen.getByRole("button", { name: i18n.t("locations.addLocation") });
-    const getHereEntry = () =>
-      screen.getByRole("region", { name: /Device time$/ });
-    Given("the active UI language is en", async () => {
-      await i18n.changeLanguage("en");
+  // @add-settings-page-and-device-time-location @FR2 @FR13
+  f.Scenario("Empty list", ({ Given, When, Then, And }) => {
+    Given("the stored location list is empty", () => storeDocument([]));
+    When("the user opens the app", () => openApp());
+    Then("the explanation is shown in the current language", async () => {
+      expect(await screen.findByText(explanationText())).toBeVisible();
     });
-    When("the user opens the app with no locations", () => {
+    And("no location row is shown", () => {
+      expect(screen.queryAllByRole("listitem")).toEqual([]);
+    });
+    And("the header shows the Add location button", () => {
+      expect(
+        within(screen.getByRole("banner")).getByRole("button", {
+          name: i18n.t("locations.addLocation"),
+        }),
+      ).toBeVisible();
+    });
+  });
+
+  // @add-main-page-scaffold @FR7 @UX1
+  // @add-settings-page-and-device-time-location @FR13
+  f.Scenario("First launch", ({ Given, When, Then, And }) => {
+    Given("no location list is stored", () => localStorage.clear());
+    When("the user opens the app", () => {
       stubZoneCitiesFetch();
       return openApp();
     });
-    Then("the Here entry for the device time zone is shown first", async () => {
+    Then("the device time location is shown", async () => {
       expect(
-        await screen.findByRole("region", { name: /Device time$/ }),
+        await screen.findByRole("listitem", { name: /Device time$/ }),
       ).toBeVisible();
-      expect(isFollowing(getHereEntry(), getExplanation())).toBe(true);
     });
-    And(
-      "the empty state explanation is shown in the current language below it",
-      () => {
-        expect(getExplanation()).toBeVisible();
-        expect(isFollowing(getHereEntry(), getExplanation())).toBe(true);
-      },
-    );
-    And('the "Add location" action is offered below it', () => {
-      expect(isFollowing(getExplanation(), getAddLocation())).toBe(true);
+    And("the explanation is not shown", () => {
+      expect(screen.queryByText(explanationText())).not.toBeInTheDocument();
     });
     And("no location list is stored", () => {
       expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).toBeNull();
     });
   });
 
+  // @add-settings-page-and-device-time-location @FR13
+  f.Scenario("No explanation with locations", ({ Given, When, Then }) => {
+    Given("the stored list is the device time location and Moscow", () =>
+      storeDocument([cityEntry("Moscow")], { hasDeviceTime: true }),
+    );
+    When("the user opens the app", () => {
+      stubZoneCitiesFetch();
+      return openApp();
+    });
+    Then("the explanation is not shown", async () => {
+      await screen.findAllByRole("listitem");
+      expect(screen.queryByText(explanationText())).not.toBeInTheDocument();
+    });
+  });
+
   // @add-locations-via-search @FR17
-  f.Scenario(
-    "Add location from the empty state",
-    ({ Given, And, When, Then }) => {
-      Given("the active UI language is en", async () => {
-        await i18n.changeLanguage("en");
-      });
-      And("the app is open with no locations", async () => {
-        stubZoneCitiesFetch();
-        await openApp();
-      });
-      When("the user adds Moscow from the search", async () => {
-        await userEvent.click(
-          screen.getByRole("button", { name: i18n.t("locations.addLocation") }),
-        );
-        await userEvent.type(await screen.findByRole("combobox"), "Moscow");
-        await userEvent.click(screen.getByRole("option", { name: /Moscow/ }));
-      });
-      Then("Moscow is in the list", () => {
-        expect(screen.getByRole("listitem")).toHaveTextContent("Moscow");
-      });
-      And("the empty state explanation is gone", () => {
-        expect(
-          screen.queryByText("No locations added yet."),
-        ).not.toBeInTheDocument();
-      });
-    },
-  );
+  // @add-settings-page-and-device-time-location @FR2
+  f.Scenario("Add location from the empty state", ({ Given, When, Then }) => {
+    Given("the location list is empty", async () => {
+      storeDocument([]);
+      stubZoneCitiesFetch();
+      await openApp();
+    });
+    When("the user chooses the header's Add location button", async () => {
+      const [headerButton] = getAddLocationButtons();
+      await userEvent.click(headerButton);
+    });
+    Then("the search opens with popular suggestions", async () => {
+      expect(
+        await screen.findByText(i18n.t("locations.suggestionsHeading")),
+      ).toBeVisible();
+      expect(screen.getAllByRole("option").length).toBeGreaterThan(0);
+    });
+  });
 });

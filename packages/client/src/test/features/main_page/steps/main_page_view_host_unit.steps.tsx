@@ -43,7 +43,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     resizeObserver.reportWidth(containerWidth);
   };
-  const emptyStateText = () => i18n.t("views.cardsEmptyState");
 
   f.BeforeEachScenario(async () => {
     cleanup();
@@ -98,7 +97,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       renderHost(NARROW_WIDTH),
     );
     Then("the Cards view is shown", async () => {
-      expect(await screen.findByText(emptyStateText())).toBeInTheDocument();
+      expect(await screen.findByRole("list")).toBeInTheDocument();
     });
   });
 

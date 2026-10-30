@@ -1,4 +1,4 @@
-// Verifies FR8, FR9, FR12, NFR-P1, NFR-P2 of show-here-entry-for-device-time.
+// Verifies FR8, NFR-P1, NFR-P2 of add-settings-page-and-device-time-location.
 
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
@@ -9,25 +9,26 @@ import {
   restoreZoneData,
   startOnOutdatedZoneData,
 } from "../../browser_compatibility/steps/legacyZoneWorld";
-import { createHereEntryChecks, expectSuggestions } from "./hereEntryChecks";
+import { createDeviceTimeChecks, expectSuggestions } from "./deviceTimeChecks";
 import {
-  createWarmHereEntryCheck,
-  presentHereEntryOnEngine,
-} from "./hereEntryEngineWorld";
-import { createHereEntryWorld, DataMode } from "./hereEntryWorld";
+  createWarmDeviceTimeCheck,
+  presentDeviceTimeOnEngine,
+} from "./deviceTimeEngineWorld";
+import { createDeviceTimeWorld, DataMode } from "./deviceTimeWorld";
 
-const feature = await loadFeature("../locations_here_entry_data_unit.feature");
+const feature = await loadFeature("../locations_device_time_data_unit.feature");
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
-  const world = createHereEntryWorld();
-  const { expectNoHereEntry, expectHereEntryShows } =
-    createHereEntryChecks(world);
-  const warmCheck = createWarmHereEntryCheck();
-  let engineResult: Awaited<ReturnType<typeof presentHereEntryOnEngine>>;
+  const world = createDeviceTimeWorld();
+  const { expectDeviceTimeShows } = createDeviceTimeChecks(world);
+  const warmCheck = createWarmDeviceTimeCheck();
+  let engineResult: Awaited<ReturnType<typeof presentDeviceTimeOnEngine>>;
   let engine: Awaited<ReturnType<typeof startOnOutdatedZoneData>>;
 
-  const expectHereEntryCity = (_ctx: unknown, city: string) =>
-    expectHereEntryShows(city);
+  const expectDeviceTimeCity = (_ctx: unknown, city: string) =>
+    expectDeviceTimeShows(city);
+  const expectNoZoneCitiesRequest = () =>
+    expect(world.getDataRequests()).toBe(0);
 
   f.BeforeEachScenario(world.reset);
   f.AfterEachScenario(() => {
@@ -39,7 +40,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     await i18n.changeLanguage("ru");
   });
 
-  // @show-here-entry-for-device-time @FR8 @NFR-P2 @UX3
+  // @add-settings-page-and-device-time-location @FR8 @NFR-P2 @UX3
   f.Scenario(
     "Derived city first, exemplar city after loading",
     ({ Given, And, When, Then }) => {
@@ -49,50 +50,59 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "the zone cities data has not been loaded",
         world.givenData(DataMode.HELD),
       );
+      And("the list is {string}", world.givenList);
       When("the user opens the app", world.openApp);
       Then(
-        "the Here entry shows the derived city {string}",
-        expectHereEntryCity,
+        "the device time location shows the derived city {string}",
+        expectDeviceTimeCity,
       );
       When(
         "the zone cities data finishes loading",
         world.whenDataFinishesLoading,
       );
       Then(
-        "the Here entry shows the exemplar city {string}",
-        expectHereEntryCity,
+        "the device time location shows the exemplar city {string}",
+        expectDeviceTimeCity,
       );
     },
   );
 
-  // @show-here-entry-for-device-time @FR8
+  // @add-settings-page-and-device-time-location @FR8
   f.Scenario("Loading fails", ({ Given, And, When, Then }) => {
     Given("the device time zone is {string}", world.givenDeviceZone);
     And(
       "loading the zone cities data fails",
       world.givenData(DataMode.FAILING),
     );
+    And("the list is {string}", world.givenList);
     When("the user opens the app", world.openApp);
-    Then("the Here entry shows the derived city {string}", expectHereEntryCity);
+    Then(
+      "the device time location shows the derived city {string}",
+      expectDeviceTimeCity,
+    );
     And("no error is shown", async () => {
       await waitFor(() => expect(world.getDataRequests()).toBe(1));
       expect(screen.queryByRole("alert")).toBeNull();
     });
   });
 
-  // @show-here-entry-for-device-time @FR8 @NFR-P2
-  f.Scenario("No load without a Here entry", ({ Given, And, When, Then }) => {
-    Given("the device time zone is {string}", world.givenDeviceZone);
-    And("the list is {string}", world.givenList);
-    When("the user opens the app and does not open the search", world.openApp);
-    Then("the zone cities data is not requested", () =>
-      expect(world.getDataRequests()).toBe(0),
-    );
-  });
-
-  // @show-here-entry-for-device-time @FR8 @NFR-P2
+  // @add-settings-page-and-device-time-location @FR8 @NFR-P2
   f.Scenario(
-    "The search reuses the Here entry's data",
+    "No load without the device time location",
+    ({ Given, And, When, Then }) => {
+      Given("the device time zone is {string}", world.givenDeviceZone);
+      And("the list is {string}", world.givenList);
+      When(
+        "the user opens the app and does not open the search",
+        world.openApp,
+      );
+      Then("the zone cities data is not requested", expectNoZoneCitiesRequest);
+    },
+  );
+
+  // @add-settings-page-and-device-time-location @FR8 @NFR-P2
+  f.Scenario(
+    "The search reuses the data of the device time location",
     ({ Given, And, When, Then }) => {
       Given("the device time zone is {string}", world.givenDeviceZone);
       And("the list is {string}", world.givenList);
@@ -112,8 +122,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @show-here-entry-for-device-time @FR9
-  f.Scenario("Unreadable stored list", ({ Given, When, Then, And }) => {
+  // @add-settings-page-and-device-time-location @FR8
+  f.Scenario("Unreadable stored list", ({ Given, When, Then }) => {
     Given("the stored location list is unreadable", world.givenUnreadableList);
     When("the user opens the app", world.openApp);
     Then("the load error with Reset is shown", () => {
@@ -123,13 +133,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         within(alert).getByRole("button", { name: i18n.t("locations.reset") }),
       ).toBeVisible();
     });
-    And("no Here entry is shown", expectNoHereEntry);
-    And("the zone cities data is not requested", () =>
-      expect(world.getDataRequests()).toBe(0),
-    );
   });
 
-  // @show-here-entry-for-device-time @FR9
+  // @add-settings-page-and-device-time-location @FR8
   f.Scenario("Storage unavailable", ({ Given, And, When, Then }) => {
     Given("storage is unavailable", () => undefined);
     And("the device time zone is {string}", world.givenDeviceZone);
@@ -139,12 +145,16 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         screen.getByText(i18n.t("mainPage.storageUnavailable")),
       ).toBeVisible(),
     );
-    And("the Here entry for {string} is shown", (_ctx: unknown, zone: string) =>
-      expect(world.hereEntry()).toHaveTextContent(world.formatOffsetOf(zone)),
+    And(
+      "the device time location for {string} is shown",
+      (_ctx: unknown, zone: string) =>
+        expect(world.deviceTimeRow()).toHaveTextContent(
+          world.formatOffsetOf(zone),
+        ),
     );
   });
 
-  // @show-here-entry-for-device-time @FR12 @M7
+  // @add-settings-page-and-device-time-location @FR8 @M7
   f.Scenario("Renamed device time zone", ({ Given, And, When, Then }) => {
     Given("the engine rejects {string} and accepts {string}", async () => {
       engine = await startOnOutdatedZoneData();
@@ -154,14 +164,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the current instant is {string}", world.givenInstant);
     And("the list is {string}", world.givenList);
     When("the user opens the app", async () => {
-      engineResult = await presentHereEntryOnEngine(engine.modules, {
+      engineResult = await presentDeviceTimeOnEngine(engine.modules, {
         deviceTimeZone: world.getDeviceZone(),
         instant: world.getInstant(),
-        listedCity: "Moscow",
       });
     });
     Then(
-      "the Here entry shows {string}, the time {string} and the meta line {string}",
+      "the device time location shows {string}, the time {string} and the meta line {string}",
       (_ctx: unknown, city: string, time: string, meta: string) => {
         expect(engineResult.presented).toMatchObject({
           cityLabel: city,
@@ -177,22 +186,22 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
-  // @show-here-entry-for-device-time @NFR-P1
+  // @add-settings-page-and-device-time-location @NFR-P1
   f.Scenario(
     "Presenting again builds no formatter",
     ({ Given, When, Then, And }) => {
       Given(
-        "50 locations, none in the device time zone, have been presented with the Here entry",
+        "50 locations and the device time location have been presented",
         warmCheck.presentOnce,
       );
       When(
-        "the same rows and the Here entry are presented again for the next minute tick",
+        "the same rows are presented again for the next minute tick",
         warmCheck.presentAgain,
       );
       Then("no formatter is built", warmCheck.expectNoFormatter);
       And(
-        "the Here entry uses at most the transition lookups of one location row",
-        warmCheck.expectHereEntryLookupsWithinRowBound,
+        "the device time location uses at most the transition lookups of one location row",
+        warmCheck.expectLookupsWithinRowBound,
       );
     },
   );

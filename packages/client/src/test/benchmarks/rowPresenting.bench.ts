@@ -1,6 +1,6 @@
 // Implements FR6, verifies NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D5).
 // Implements NFR-P1 of set-home-location-and-show-differences: rows with a home location.
-// Implements NFR-P1 of show-here-entry-for-device-time: the Here entry next to the rows.
+// Implements NFR-P1 of add-settings-page-and-device-time-location: the device time location next to the rows.
 import { bench, describe } from "vitest";
 import { ONE_DAY } from "@/constants";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@/model";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createRowBudgetWorld } from "../features/date_selection/steps/referenceMomentRowsWorld";
-import { presentRowsAndHereEntry } from "../features/locations/steps/hereEntryEngineWorld";
+import { presentRowsWithDeviceTime } from "../features/locations/steps/deviceTimeEngineWorld";
 import {
   BUDGET_FIRST_MOMENT,
   BUDGET_ROW_COUNT,
@@ -92,9 +92,9 @@ describe("row presenting", () => {
     options,
   );
   bench(
-    "present 50 rows and the Here entry",
+    "present 50 rows and the device time location",
     () => {
-      presentRowsAndHereEntry(locations, BUDGET_SECOND_MOMENT);
+      presentRowsWithDeviceTime(locations, BUDGET_SECOND_MOMENT);
     },
     options,
   );

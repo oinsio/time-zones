@@ -1,10 +1,10 @@
-import { HourFormat } from "@/preferences";
 // Verifies FR5 of match-here-mark-to-design.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { cleanup } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect, vi } from "vitest";
+import { HourFormat } from "@/preferences";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";

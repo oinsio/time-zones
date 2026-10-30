@@ -1,4 +1,4 @@
-// Implements FR8 of show-here-entry-for-device-time (D4): the city data loader of the Here entry features.
+// Implements FR8 of add-settings-page-and-device-time-location (D4): the city data loader of the device time features.
 import zoneCities from "virtual:zone-cities";
 import { createCompositeCitySearch } from "@/adapters";
 import type { LoadCitySearch } from "@/ports";

@@ -1,4 +1,3 @@
-import { HourFormat } from "@/preferences";
 import i18n from "i18next";
 import { fakeClock } from "@/lib/temporal";
 import {
@@ -11,6 +10,7 @@ import {
   WallTimeTargetKind,
   type WorldClockState,
 } from "@/model";
+import { HourFormat } from "@/preferences";
 import { presentLocationRows } from "@/presenter";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";

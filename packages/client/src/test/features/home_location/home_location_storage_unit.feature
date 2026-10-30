@@ -14,7 +14,7 @@ Feature: Home location is kept
   Scenario: A list from the previous version
     Given the browser storage holds a version 1 list "Almaty, Moscow, Kolkata"
     When the user opens the app
-    Then the list is "Almaty, Moscow, Kolkata"
+    Then the list is "the device time location, Almaty, Moscow, Kolkata"
     And no location is home
     And nothing is written
 
@@ -22,7 +22,7 @@ Feature: Home location is kept
   Scenario: Home points to a missing location
     Given the browser storage holds the list "Almaty, Moscow" with home pointing to "Tokyo"
     When the user opens the app
-    Then the list is "Almaty, Moscow"
+    Then the list is "the device time location, Almaty, Moscow"
     And no location is home
     And no error is shown and nothing is written
 

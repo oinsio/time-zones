@@ -1,4 +1,3 @@
-import { HourFormat } from "@/preferences";
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, renderHook, screen } from "@testing-library/react/pure";
@@ -7,6 +6,7 @@ import { expect, vi } from "vitest";
 import { usePrefersReducedMotion } from "@/controller";
 import { loadLegacySupport } from "@/lib/legacy";
 import { Temporal } from "@/lib/temporal";
+import { HourFormat } from "@/preferences";
 import type { PresentedSearchResult } from "@/presenter";
 import { presentLocationRows, presentSearchResults } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
@@ -135,7 +135,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         expect(globalThis.ResizeObserver).toBeTypeOf("function");
       });
       And("the Cards view is shown", () => {
-        expect(screen.getByText(i18n.t("views.cardsEmptyState"))).toBeVisible();
+        expect(screen.getAllByRole("listitem")).toHaveLength(1);
       });
     },
   );

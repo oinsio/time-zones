@@ -6,6 +6,6 @@ Feature: Locations document migration
   Scenario: Previous document version is migrated
     Given the stored list is a version 1 document with Almaty, Moscow and Kolkata
     When the app is opened
-    Then the list is Almaty, Moscow, Kolkata in that order
+    Then the list is the device time location, Almaty, Moscow, Kolkata in that order
     And no location is home
     And the stored list was not written

@@ -3,6 +3,7 @@ export { AppShell } from "./AppShell";
 export { MainPage } from "./MainPage";
 export { OfflineReadyNotice } from "./OfflineReadyNotice";
 export { RecoveryScreen } from "./RecoveryScreen";
+export { SettingsPage } from "./SettingsPage";
 export { StorageWarning } from "./StorageWarning";
 export { UpdateCheckFailedNote } from "./UpdateCheckFailedNote";
 export { UpdateNotice } from "./UpdateNotice";

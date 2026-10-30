@@ -7,6 +7,7 @@ import {
   createInMemoryLocationRepository,
 } from "@/adapters";
 import { MainPage } from "@/app";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import {
   LocationsProvider,
   TrackMove,
@@ -17,6 +18,7 @@ import {
   WallTimeTargetKind,
 } from "@/controller";
 import { Temporal } from "@/lib/temporal";
+import { buildDeviceTimeLocation } from "@/model";
 import { type LocationRepository, LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { resetPageVisibility } from "@/test/pageVisibility";
@@ -24,6 +26,7 @@ import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 import { DateBar } from "@/views/shared";
+import { DEVICE_TIME_LIST_TOKEN } from "../../locations/steps/deviceTimeQueries";
 import { cityEntry } from "../../locations/steps/locationsUiWorld";
 import {
   barElement,
@@ -70,6 +73,11 @@ export const createDateSelectionWorld = () => {
     latestWallTime = useWallTimeInput();
     return null;
   };
+
+  const storedIdOf = (city: string) =>
+    city === DEVICE_TIME_LIST_TOKEN
+      ? DEVICE_TIME_LOCATION_ID
+      : buildLocation(cityEntry(city)).id;
 
   const deviceDateOf = (timestamp: string) =>
     Temporal.Instant.from(timestamp)
@@ -118,14 +126,17 @@ export const createDateSelectionWorld = () => {
     setStoredCities: (cities: string) => {
       storedLocations = cities
         .split(CITY_SEPARATOR)
-        .map((city) => buildLocation(cityEntry(city)));
+        .map((city) =>
+          city === DEVICE_TIME_LIST_TOKEN
+            ? buildDeviceTimeLocation(clock.timeZoneId())
+            : buildLocation(cityEntry(city)),
+        );
     },
     setStoredLocations: (locations: ReturnType<typeof buildLocation>[]) => {
       storedLocations = locations;
     },
     setStoredHome: (city: string | null) => {
-      storedHomeLocationId =
-        city === null ? null : buildLocation(cityEntry(city)).id;
+      storedHomeLocationId = city === null ? null : storedIdOf(city);
     },
     openApp: async () => {
       backend.document = storedLocations.length

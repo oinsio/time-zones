@@ -67,7 +67,7 @@ export const searchAndChoose = async (query: string, city: string) => {
 };
 
 export const expectListContains = (city: string) =>
-  expect(listedCityLabels()).toEqual([expect.stringContaining(city)]);
+  expect(listedCityLabels()).toContainEqual(expect.stringContaining(city));
 
 export const expectEmptyState = () => {
   expect(screen.getByText(i18n.t("views.cardsEmptyState"))).toBeVisible();
