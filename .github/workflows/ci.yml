@@ -1,6 +1,7 @@
 # Checks every pull request; reused by deploy.yml so that what is checked
 # is exactly what is published.
 # Implements FR12, FR14, NFR-P1 of setup-app-shell-and-pages-deploy (D10, D11).
+# Implements FR1–FR7, NFR-P1 of add-pr-preview-deploy (D1–D5).
 name: CI
 
 on:
@@ -57,6 +58,14 @@ jobs:
       - name: Smoke E2E
         run: pnpm --filter @time-zones/client test:bdd
 
+      - name: Upload preview build
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-build
+          path: packages/client/dist
+          retention-days: 1
+
       - name: Upload E2E report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -104,3 +113,71 @@ jobs:
       - name: Report benchmark budgets
         if: always()
         run: node packages/client/scripts/check-bench-budgets.mjs packages/client/reports/bench/bench.json
+
+  # Draft Netlify deploy of the tested build, linked in one PR comment.
+  # Never blocks the pull request check and is skipped without the secrets.
+  preview:
+    name: PR preview
+    needs: check
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Check preview secrets
+        id: preview-secrets
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          available=true
+          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "::notice::Preview skipped: NETLIFY_AUTH_TOKEN is not set"
+            available=false
+          fi
+          if [ -z "$NETLIFY_SITE_ID" ]; then
+            echo "::notice::Preview skipped: NETLIFY_SITE_ID is not set"
+            available=false
+          fi
+          echo "available=$available" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v5
+        if: steps.preview-secrets.outputs.available == 'true'
+
+      - uses: actions/setup-node@v5
+        if: steps.preview-secrets.outputs.available == 'true'
+        with:
+          node-version-file: .nvmrc
+          # packageManager in package.json would make setup-node look for pnpm, which this job never installs
+          package-manager-cache: false
+
+      - uses: actions/download-artifact@v4
+        if: steps.preview-secrets.outputs.available == 'true'
+        with:
+          name: preview-build
+          path: packages/client/dist
+
+      - name: Assemble preview site
+        if: steps.preview-secrets.outputs.available == 'true'
+        run: node packages/client/scripts/assemble-preview-site.mjs packages/client/dist preview-site
+
+      - name: Deploy preview to Netlify
+        if: steps.preview-secrets.outputs.available == 'true'
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: preview-site
+          production-deploy: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+          enable-pull-request-comment: true
+          overwrites-pull-request-comment: true
+          enable-commit-comment: false
+          enable-github-deployment: false
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
