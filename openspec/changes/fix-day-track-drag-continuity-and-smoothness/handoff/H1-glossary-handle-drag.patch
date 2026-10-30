@@ -1,0 +1,9 @@
+diff --git a/docs/glossary/time-selection.md b/docs/glossary/time-selection.md
+index f548db8..88064a7 100644
+--- a/docs/glossary/time-selection.md
++++ b/docs/glossary/time-selection.md
+@@ -6,2 +6,2 @@ Choosing a time of day, and showing each location's day around the reference mom
+-- **Day track** — the horizontal bar on a card that spans the reference day, coloured by the location's day periods, with a handle at the reference moment. All handles stand at the same position. *Code:* `DayTrack`, `presentDayTrack`. Its accessibility role is `slider`, and only in that sense is "slider" correct (`locations.timeSliderLabel` «Время — {city}»). *Never:* time slider, timeline, scrubber.
+-- **Handle** — the circle on a day track at the position of the reference moment. Dragging it, or tapping the track, selects a time. *Not:* the drag handle of a card. *Never:* thumb, knob.
++- **Day track** — the horizontal bar on a card that spans the reference day, coloured by the location's day periods, with a handle at the reference moment. All handles stand at the same position, except a handle that is being dragged. *Code:* `DayTrack`, `presentDayTrack`. Its accessibility role is `slider`, and only in that sense is "slider" correct (`locations.timeSliderLabel` «Время — {city}»). *Never:* time slider, timeline, scrubber.
++- **Handle** — the circle on a day track at the position of the reference moment. Dragging it, or tapping the track, selects a time. During a drag, the handle follows the pointer along the track. When released, it settles at the reference moment. *Not:* the drag handle of a card. *Never:* thumb, knob.
