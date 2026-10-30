@@ -1,4 +1,4 @@
-// Implements FR1, FR3, FR4 of fix-day-track-drag-continuity-and-smoothness: drives a rendered DayTrack for the unit BDD.
+// Implements FR1, FR3, FR4 of fix-day-track-drag-continuity-and-smoothness; FR1 of fix-stale-now-button-checks-in-drag-tests: drives a rendered DayTrack for the unit BDD.
 
 import { fireEvent, render, screen } from "@testing-library/react/pure";
 import { createElement } from "react";
@@ -21,10 +21,10 @@ export enum DragPointer {
 
 type World = ReturnType<typeof createTimeSelectionWorld>;
 
-/** The "moment is pinned to" check: the Now button is shown for the given instant. */
+/** The "moment is pinned to" check: the Now button is active for the given instant. */
 export const createThenPinned =
   (world: World) => (_ctx: unknown, timestamp: string) => {
-    expect(world.isNowShown()).toBe(true);
+    expect(world.isNowActive()).toBe(true);
     expect(world.shownInstant()).toBe(timestamp);
   };
 
