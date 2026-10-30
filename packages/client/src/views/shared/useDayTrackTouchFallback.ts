@@ -2,6 +2,7 @@ import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 import {
   TRACK_TOUCH_MOVE_LISTENER_OPTIONS,
+  TRACK_TOUCH_START_LISTENER_OPTIONS,
   TrackTouchEvent,
 } from "@/constants";
 import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
@@ -89,9 +90,11 @@ export function useDayTrackTouchFallback(
       latest.current.setDragFraction(null);
     };
 
-    slider.addEventListener(TrackTouchEvent.START, handleStart, {
-      passive: true,
-    });
+    slider.addEventListener(
+      TrackTouchEvent.START,
+      handleStart,
+      TRACK_TOUCH_START_LISTENER_OPTIONS,
+    );
     slider.addEventListener(
       TrackTouchEvent.MOVE,
       handleMove,

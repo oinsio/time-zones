@@ -5,7 +5,14 @@ import { cleanup } from "@testing-library/react/pure";
 import { expect, vi } from "vitest";
 import { startWorkCount } from "@/test/workCounters";
 import { createDayTrackSteps } from "./dayTrackSteps";
-import { createDragDriver, DragPointer } from "./dragSteps";
+import {
+  createDragDriver,
+  createThenPinned,
+  DragPointer,
+  OFFSET_ABOVE_PX,
+  OFFSET_BELOW_PX,
+  PAST_RIGHT_END,
+} from "./dragSteps";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
 
 type StepDefiners = Parameters<
@@ -17,11 +24,7 @@ const feature = await loadFeature("../time_selection_drag_unit.feature");
 const FRACTION_PRECISION = 6;
 const PERCENT_PRECISION = 4;
 const PERCENT_PER_FRACTION = 100;
-const QUARTER = 0.25;
 const THREE_QUARTERS = 0.75;
-const PAST_RIGHT_END = 1.2;
-const OFFSET_BELOW_PX = 120;
-const OFFSET_ABOVE_PX = -60;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
@@ -36,28 +39,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
   f.AfterAllScenarios(world.finish);
 
-  const thenPinned = (_ctx: unknown, timestamp: string) => {
-    expect(world.isNowShown()).toBe(true);
-    expect(world.shownInstant()).toBe(timestamp);
-  };
+  const thenPinned = createThenPinned(world);
   const thenCardShows = (_ctx: unknown, city: string, time: string) =>
     expect(world.rowOf(city).localTimeLabel).toBe(time);
-  const dragFingerAlong = async (
-    city: string,
-    kind: DragPointer,
-    target: number,
-    offsetY: number,
-  ) => {
-    await driver.mount(city, kind);
-    driver.press(QUARTER);
-    if (kind !== DragPointer.MOUSE) driver.startFingerDrag(QUARTER);
-    driver.moveTo(target, offsetY);
-  };
-  const givenHeldMouse = async (_ctx: unknown, city: string, at: number) => {
-    await driver.mount(city, DragPointer.MOUSE);
-    driver.press(QUARTER);
-    driver.moveTo(at, 0);
-  };
   const givenCommon = ({ Given, And }: Pick<StepDefiners, "Given" | "And">) => {
     Given("the device time zone is {string}", steps.givenZone);
     And("the current instant is {string}", steps.givenInstant);
@@ -73,7 +57,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       When(
         "the user drags the <pointer> from a quarter to three quarters of the New York track, 120 px below it",
         async () => {
-          await dragFingerAlong(
+          await driver.dragAlong(
             "New York",
             variables.pointer as DragPointer,
             THREE_QUARTERS,
@@ -95,7 +79,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       When(
         "the user drags the finger from a quarter to past the right end of the {string} track, 60 px above it",
         async (_ctx: unknown, city: string) => {
-          await dragFingerAlong(
+          await driver.dragAlong(
             city,
             DragPointer.FINGER,
             PAST_RIGHT_END,
@@ -116,8 +100,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       givenCommon({ Given, And });
       When(
         "the user holds the mouse at {number} of the {string} track during a drag",
-        (_ctx: unknown, at: number, city: string) =>
-          givenHeldMouse(_ctx, city, at),
+        (_ctx: unknown, at: number, city: string) => driver.holdMouse(city, at),
       );
       Then(
         "the {string} handle stands at {string}",
@@ -143,8 +126,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       givenCommon({ Given, And });
       And(
         "the user holds the mouse at {number} of the {string} track during a drag",
-        (_ctx: unknown, at: number, city: string) =>
-          givenHeldMouse(_ctx, city, at),
+        (_ctx: unknown, at: number, city: string) => driver.holdMouse(city, at),
       );
       When("the user releases the pointer", () => driver.release(0.512, 0));
       Then(
@@ -166,7 +148,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And(
         "the user drags the finger without Pointer Events to three quarters of the {string} track",
         (_ctx: unknown, city: string) =>
-          dragFingerAlong(
+          driver.dragAlong(
             city,
             DragPointer.FINGER_WITHOUT_POINTER_EVENTS,
             THREE_QUARTERS,
@@ -190,8 +172,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       givenCommon({ Given, And });
       And(
         "the user holds the mouse at {number} of the {string} track during a drag",
-        (_ctx: unknown, at: number, city: string) =>
-          givenHeldMouse(_ctx, city, at),
+        (_ctx: unknown, at: number, city: string) => driver.holdMouse(city, at),
       );
       When(
         "the pointer moves on to {number} of the track, counting work",

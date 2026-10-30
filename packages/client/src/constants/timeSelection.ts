@@ -22,6 +22,10 @@ export enum TrackTouchEvent {
   END = "touchend",
   CANCEL = "touchcancel",
 }
+/** A touchstart listener that never cancels the browser's scroll. */
+export const TRACK_TOUCH_START_LISTENER_OPTIONS: AddEventListenerOptions = {
+  passive: true,
+};
 /** A touchmove listener that may cancel the browser's scroll. */
 export const TRACK_TOUCH_MOVE_LISTENER_OPTIONS: AddEventListenerOptions = {
   passive: false,
