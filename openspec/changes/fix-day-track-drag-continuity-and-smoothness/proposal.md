@@ -120,7 +120,7 @@ No changes.
 
 ## Success Metrics
 
-- M1: 5 of 5 E2E drag scenarios pass: a mouse leaving the track, a finger leaving the track, a finger past the right end, a finger without Pointer Events leaving the track, and a vertical swipe without Pointer Events. In each drag scenario, the selected time is the one at the release position, and `scrollY` stays at its value from before the gesture (0 px change).
+- M1: 5 of 5 E2E drag scenarios pass: a mouse leaving the track, a finger leaving the track, a finger past the right end, a finger without Pointer Events leaving the track, and a vertical swipe without Pointer Events. In each drag scenario, the selected time is the one at the release position, and `scrollY` stays 0 from the start of the gesture to its end.
 - M2: During a drag, the centre of the visible handle is within 1 px of the pointer's horizontal position at 3 of 3 positions that are not on a track step. After release, it is within 1 px of the selected step's position.
 - M3: 0 changes to the expected values of existing time-selection scenarios. `git diff` on the existing `.feature` files of `time_selection/` shows only added tag lines.
 - M4: Stryker scoped to the changed `views/shared/` files scores at least 95% (minimum acceptable 90%).

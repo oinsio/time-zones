@@ -113,7 +113,8 @@
 - Impact: if New York is not near the top, its bar or the end point 120 px below it lies outside the 300 px viewport at scroll 0. The step then has to scroll first, which fails the absolute check, or it dispatches input outside the viewport.
 - Fix: in task 5.2, give the stored order with New York first ("New York", "Almaty", "Moscow", "Kolkata", "Tokyo"). Also have the step assert that the start point and the end point both lie inside the viewport before the gesture, and change M1's wording to "`scrollY` stays 0".
 - Fix risk: low. If New York's bar plus 120 px still does not fit in 300 px, the implementer has to lower the offset, and the spec's "120 px below" must change with it.
-- Status: open
+- Status: fixed
+- Resolution: task 5.2's first scenario now stores "New York", "Almaty", "Moscow", "Kolkata", "Tokyo" and asserts that the start and end points lie inside the viewport at scroll 0 before the gesture (lowering the offset in task and spec together if not). Proposal M1 now reads "`scrollY` stays 0", matching the reused absolute step `time_selection_pointer_e2e.steps.ts:88-94`.
 
 ## Verdict
 
