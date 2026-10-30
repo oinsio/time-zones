@@ -108,8 +108,8 @@ The features live in `packages/client/src/test/features/` and are tagged `@keep-
 
 - `date_selection/date_selection_reference_moment.feature` (unit): Now is inactive when the app opens and after Now; activating an inactive Now changes nothing (FR1, FR2, FR3);
 - `date_selection/date_selection_calendar.feature`, `time_selection/time_selection_moment.feature`, `time_selection/time_selection_wall_time_input_unit.feature`, `locations/locations_here_entry_changes_unit.feature` (unit): "the Now button is active" after a date, time or wall-time pin (FR3);
-- `date_selection/date_selection_e2e.feature`: Tab skips an inactive Now, the inactive Now is named and disabled, axe-core (NFR-A1, NFR-A2);
-- `date_selection/date_selection_layout_e2e.feature`: inactive colours, the same box live and pinned (FR4, NFR-R1, UX1, UX2);
+- `date_selection/date_selection_now_e2e.feature` (new): Tab skips an inactive Now, the inactive Now is named and disabled, a click on it changes nothing, its grey colours, the same box live and pinned (FR2, FR4, NFR-A1, NFR-A2, NFR-R1, UX1, UX2);
+- `date_selection/date_selection_e2e.feature`: axe-core with the bar live and pinned, and Tab order while pinned (NFR-A1, NFR-A2);
 - `time_selection/time_selection_touch_e2e.feature`, `time_selection/time_selection_wall_time_input_e2e.feature`: active and inactive Now in a real browser (FR2, FR3);
 - `locations/locations_ui_e2e.feature`: re-approved screenshots (NFR-R2).
 
