@@ -61,7 +61,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 5. Handoff patch and final verification
 
-- [ ] 5.1 Traceability (M7): this loop, run from `packages/client/`, must print nothing.
+- [x] 5.1 Traceability (M7): this loop, run from `packages/client/`, must print nothing.
 
   ```
   for id in FR1 FR2 FR3 FR4 NFR-A1 NFR-A2 NFR-A3 NFR-R1 NFR-R2 UX1 UX2; do
@@ -74,8 +74,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `docs/architecture/open-questions.md` Q6: "the Now button appears only when the moment is pinned" becomes "the Now button is always shown and is active only when the moment is pinned".
 
   Verify from the repository root, one command at a time: `git apply --check openspec/changes/keep-now-button-visible-when-live/handoff/H1-docs-now-button-always-shown.patch`, then `git status --short docs` prints nothing.
-- [ ] 5.3 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone, and fix every remaining scenario that still expects Now to be missing.
-- [ ] 5.4 Glossary check (`.claude/rules/glossary.md`, "Review checklist"): `grep -rniE "now (control|button is (not )?shown)|today button" src` prints nothing. `grep -rn "isPinned &&" src/views` prints nothing.
+- [x] 5.3 Run each command alone, in this order: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build`. Then run `pnpm --filter @time-zones/client test:bdd` once, alone, and fix every remaining scenario that still expects Now to be missing.
+- [x] 5.4 Glossary check (`.claude/rules/glossary.md`, "Review checklist"): `grep -rniE "now (control|button is (not )?shown)|today button" src` prints nothing. `grep -rn "isPinned &&" src/views` prints nothing.
 
 ## Human follow-up
 
