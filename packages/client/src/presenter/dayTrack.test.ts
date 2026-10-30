@@ -1,3 +1,4 @@
+// Verifies FR3 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";

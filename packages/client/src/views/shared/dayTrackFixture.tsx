@@ -1,3 +1,4 @@
+// Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
 import { render } from "@testing-library/react";
 import { vi } from "vitest";
 import { DayPeriod, type PresentedDayTrack } from "@/presenter";

@@ -1,3 +1,4 @@
+// Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR3, FR4 of add-time-sliders-to-location-cards (D7).
 import { fireEvent } from "@testing-library/react";
 import { describe, expect, it } from "vitest";

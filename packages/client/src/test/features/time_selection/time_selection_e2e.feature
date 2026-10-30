@@ -71,7 +71,7 @@ Feature: Time selection in a real browser
     Then the slider "Time in Almaty" has the value 750 within 0 to 1439 and the value text "12:30, Sun, Mar 8"
     And the time of "Almaty" is not inside a live region
 
-  @add-time-sliders-to-location-cards @NFR-A1 @M9 @fix-day-track-handle-overlap-and-end-of-day
+  @add-time-sliders-to-location-cards @NFR-A1 @M9 @fix-day-track-handle-overlap-and-end-of-day @NFR-A1
   Scenario Outline: No accessibility violations with tracks
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme

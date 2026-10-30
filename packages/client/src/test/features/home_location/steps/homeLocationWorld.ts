@@ -1,3 +1,4 @@
+// Verifies FR1, FR2, FR3, FR4 of fix-day-track-handle-overlap-and-end-of-day.
 import { act, cleanup, screen, within } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";

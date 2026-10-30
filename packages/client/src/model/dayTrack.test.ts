@@ -1,3 +1,4 @@
+// Verifies FR1, FR2, FR3 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR1, FR2, FR3, FR4 of add-time-sliders-to-location-cards (D2).
 // Verifies FR4 of set-home-location-and-show-differences (M3): the day of home.
 import { beforeAll, describe, expect, it } from "vitest";
