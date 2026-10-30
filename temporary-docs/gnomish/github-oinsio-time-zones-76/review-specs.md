@@ -103,7 +103,8 @@
 - Impact: the scenario fails against a correct implementation. To get past it, the implementer may read the handle from `world.trackOf` (the presenter) instead of the rendered handle. The settle-at-release rule (FR3, UX2) would then be untested at unit level.
 - Fix: in task 5.1, replace "render `DayTrack` … as `time_selection_legacy_tap.steps.tsx` does" with: "render `DayTrack` with `world.selectFraction`, and after every selection call `rerender` with `track={world.trackOf(city)}`, so the handle is read from the rendered `[data-day-track-handle]` with the current presented track".
 - Fix risk: none. The steps file stays in the test layer, and the 200-line limit is already handled by the task's `dragSteps.ts` clause.
-- Status: open
+- Status: fixed
+- Resolution: task 5.1 now renders `DayTrack` with `world.selectFraction` and calls `rerender` with `track={world.trackOf(city)}` after every selection, reading the handle from the rendered `[data-day-track-handle]`. Design D6's unit BDD bullet says the same (confirmed: `time_selection_legacy_tap.steps.tsx:44-52` renders once).
 
 ### R4 — SUGGESTION — E2E drag-off-track geometry and the scroll check are not pinned
 - Location: `openspec/changes/fix-day-track-drag-continuity-and-smoothness/tasks.md:62`; `proposal.md:123`

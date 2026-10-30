@@ -59,7 +59,7 @@ Every selecting move still calls `onSelectFraction`. A move that rounds to the p
 - Vitest `views/shared/dayTrackPointer.test.ts`: the helper.
 - Vitest `views/shared/DayTrack.drag.test.tsx` (new, so `DayTrack.input.test.tsx` stays under 200 lines): handle `left` during and after a drag, the `touchmove` default cancelled only while a drag is active (`fireEvent.touchMove` returns `false`), and a pointer move far outside the bar's box still selecting.
 - Vitest `views/shared/DayTrack.touchFallback.test.tsx` (new): D3 with `vi.stubGlobal("PointerEvent", undefined)` and a fresh import, as `DayTrack.legacy.test.tsx` does.
-- Unit BDD `time_selection_drag_unit.feature`: selection and handle rules with the real store (`createTimeSelectionWorld`), rendering `DayTrack` as `time_selection_legacy_tap.steps.tsx` does.
+- Unit BDD `time_selection_drag_unit.feature`: selection and handle rules with the real store (`createTimeSelectionWorld`), rendering `DayTrack` as `time_selection_legacy_tap.steps.tsx` does, and re-rendering it with `world.trackOf(city)` after every selection, so the rendered handle settles on the current presented track.
 - E2E `time_selection_drag_e2e.feature`: scroll, real touch, pixels and axe.
 
 ## Consequences
