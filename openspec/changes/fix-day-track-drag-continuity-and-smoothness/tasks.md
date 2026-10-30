@@ -14,16 +14,16 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Constants (no TDD: constants)
 
-- [ ] 1.1 In `constants/timeSelection.ts`, add the enum `TrackTouchEvent` (`START = "touchstart"`, `MOVE = "touchmove"`, `END = "touchend"`, `CANCEL = "touchcancel"`) and `TRACK_TOUCH_MOVE_LISTENER_OPTIONS: AddEventListenerOptions = { passive: false }`, under the comment `// Implements FR1, FR2, FR4 of fix-day-track-drag-continuity-and-smoothness (D1, D3, D4).`. Re-export both from `constants/index.ts`. Verify with `pnpm --filter @time-zones/client typecheck`.
+- [x] 1.1 In `constants/timeSelection.ts`, add the enum `TrackTouchEvent` (`START = "touchstart"`, `MOVE = "touchmove"`, `END = "touchend"`, `CANCEL = "touchcancel"`) and `TRACK_TOUCH_MOVE_LISTENER_OPTIONS: AddEventListenerOptions = { passive: false }`, under the comment `// Implements FR1, FR2, FR4 of fix-day-track-drag-continuity-and-smoothness (D1, D3, D4).`. Re-export both from `constants/index.ts`. Verify with `pnpm --filter @time-zones/client typecheck`.
 
 ## 2. Pointer position helper (TDD)
 
-- [ ] 2.1 RED: create `views/shared/dayTrackPointer.test.ts` for `getPointerTrackFraction(clientX, barBox)` (design D2). Use `it.each` for these cases: `{ left: 100, width: 400 }` with clientX 300 gives 0.5, with 50 gives 0, and with 900 gives 1. A box with width 0 gives `null`. Run `npx vitest run src/views/shared/dayTrackPointer.test.ts` and see it fail.
-- [ ] 2.2 GREEN: create `views/shared/dayTrackPointer.ts` with that function, clamping with `MIN_TRACK_FRACTION`/`MAX_TRACK_FRACTION`. Make `selectAt` in `DayTrack.tsx` use it, with no change in behaviour. Verify, one at a time: `npx vitest run src/views/shared/dayTrackPointer.test.ts`, then `npx vitest run src/views/shared`.
+- [x] 2.1 RED: create `views/shared/dayTrackPointer.test.ts` for `getPointerTrackFraction(clientX, barBox)` (design D2). Use `it.each` for these cases: `{ left: 100, width: 400 }` with clientX 300 gives 0.5, with 50 gives 0, and with 900 gives 1. A box with width 0 gives `null`. Run `npx vitest run src/views/shared/dayTrackPointer.test.ts` and see it fail.
+- [x] 2.2 GREEN: create `views/shared/dayTrackPointer.ts` with that function, clamping with `MIN_TRACK_FRACTION`/`MAX_TRACK_FRACTION`. Make `selectAt` in `DayTrack.tsx` use it, with no change in behaviour. Verify, one at a time: `npx vitest run src/views/shared/dayTrackPointer.test.ts`, then `npx vitest run src/views/shared`.
 
 ## 3. Pointer drag: continuity and handle position (TDD)
 
-- [ ] 3.1 RED: create `views/shared/DayTrack.drag.test.tsx`, using `setupInteractiveTrack` of `dayTrackFixture.tsx` (FR1, FR2, FR3, NFR-A1, design D1, D2):
+- [x] 3.1 RED: create `views/shared/DayTrack.drag.test.tsx`, using `setupInteractiveTrack` of `dayTrackFixture.tsx` (FR1, FR2, FR3, NFR-A1, design D1, D2):
   - a touch that moved horizontally (`SELECT`) and then moves to clientX 300, clientY 500 (far below the bar) selects 0.75;
   - during that drag, `fireEvent.touchMove(slider)` returns `false` (default cancelled), and it returns `true` before the press, during a vertical swipe (`ABANDON`), and after `pointerup`;
   - during a mouse drag to clientX 204.8 (0.512 of 400 px), the handle `[data-day-track-handle]` has `style.left` `51.2%`, while `aria-valuenow` still shows `ALMATY_TRACK.valueMinutes`;
@@ -31,11 +31,11 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - a vertical swipe never changes the handle's `left`.
 
   Run `npx vitest run src/views/shared/DayTrack.drag.test.tsx` and see it fail.
-- [ ] 3.2 GREEN: create `views/shared/useDayTrackDrag.ts`. Move the pointer handlers and the touch gesture ref out of `DayTrack.tsx` into it, add the `dragFraction` state and the native non-passive `touchmove` guard (design D1, D2, D4), and return the handlers and `dragFraction`. In `DayTrack.tsx`, place the handle at `formatPercent(dragFraction ?? track.fraction)` and extend the component JSDoc with `Implements FR1, FR2, FR3, FR5, NFR-A1 of fix-day-track-drag-continuity-and-smoothness`. Verify, one at a time: `npx vitest run src/views/shared/DayTrack.drag.test.tsx`, then `npx vitest run src/views/shared` (the existing `DayTrack.input.test.tsx`, `DayTrack.legacy.test.tsx` and `DayTrack.test.tsx` pass unchanged: FR5).
+- [x] 3.2 GREEN: create `views/shared/useDayTrackDrag.ts`. Move the pointer handlers and the touch gesture ref out of `DayTrack.tsx` into it, add the `dragFraction` state and the native non-passive `touchmove` guard (design D1, D2, D4), and return the handlers and `dragFraction`. In `DayTrack.tsx`, place the handle at `formatPercent(dragFraction ?? track.fraction)` and extend the component JSDoc with `Implements FR1, FR2, FR3, FR5, NFR-A1 of fix-day-track-drag-continuity-and-smoothness`. Verify, one at a time: `npx vitest run src/views/shared/DayTrack.drag.test.tsx`, then `npx vitest run src/views/shared` (the existing `DayTrack.input.test.tsx`, `DayTrack.legacy.test.tsx` and `DayTrack.test.tsx` pass unchanged: FR5).
 
 ## 4. Finger drag without Pointer Events (TDD)
 
-- [ ] 4.1 RED: create `views/shared/DayTrack.touchFallback.test.tsx`. Render with `vi.stubGlobal("PointerEvent", undefined)` and a fresh import, as `DayTrack.legacy.test.tsx` does (FR4, design D3):
+- [x] 4.1 RED: create `views/shared/DayTrack.touchFallback.test.tsx`. Render with `vi.stubGlobal("PointerEvent", undefined)` and a fresh import, as `DayTrack.legacy.test.tsx` does (FR4, design D3):
   - `touchStart` at x 100, then `touchMove` to x 120, then to x 300 with y 500 (`changedTouches` with one `identifier`) selects 0.75. Those moves return `false` from `fireEvent.touchMove`;
   - a mostly vertical move (x 102, y 30) selects nothing, and its `touchMove` returns `true`;
   - during the drag the handle's `left` follows the finger, and after `touchEnd` or `touchCancel` it is back at `formatPercent(ALMATY_TRACK.fraction)`;
@@ -45,7 +45,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - with Pointer Events present, touch events select nothing.
 
   Run `npx vitest run src/views/shared/DayTrack.touchFallback.test.tsx` and see it fail.
-- [ ] 4.2 GREEN: create `views/shared/useDayTrackTouchFallback.ts` (design D3). It adds its listeners only when `IS_POINTER_EVENTS_SUPPORTED` is false, removes them on unmount, and uses `TrackTouchEvent`, `TRACK_TOUCH_MOVE_LISTENER_OPTIONS`, `getTouchGestureDecision` and `getPointerTrackFraction`. Call it from `DayTrack.tsx`, share `dragFraction` with it, and make the `onClick` ignore the click after a touch drag. Wire D3 into `DayTrack.tsx` only through that one hook call and that one `onClick` guard, so that removing both (the H2 fallback, design "Consequences") restores today's tap-only behaviour and `DayTrack.legacy.test.tsx` still passes unchanged. Add `FR4, UX3 of fix-day-track-drag-continuity-and-smoothness` to the component JSDoc. Verify, one at a time: `npx vitest run src/views/shared/DayTrack.touchFallback.test.tsx`, then `npx vitest run src/views/shared`, then `npx vitest run src/test/features/time_selection/steps/time_selection_legacy_tap.steps.tsx`.
+- [x] 4.2 GREEN: create `views/shared/useDayTrackTouchFallback.ts` (design D3). It adds its listeners only when `IS_POINTER_EVENTS_SUPPORTED` is false, removes them on unmount, and uses `TrackTouchEvent`, `TRACK_TOUCH_MOVE_LISTENER_OPTIONS`, `getTouchGestureDecision` and `getPointerTrackFraction`. Call it from `DayTrack.tsx`, share `dragFraction` with it, and make the `onClick` ignore the click after a touch drag. Wire D3 into `DayTrack.tsx` only through that one hook call and that one `onClick` guard, so that removing both (the H2 fallback, design "Consequences") restores today's tap-only behaviour and `DayTrack.legacy.test.tsx` still passes unchanged. Add `FR4, UX3 of fix-day-track-drag-continuity-and-smoothness` to the component JSDoc. Verify, one at a time: `npx vitest run src/views/shared/DayTrack.touchFallback.test.tsx`, then `npx vitest run src/views/shared`, then `npx vitest run src/test/features/time_selection/steps/time_selection_legacy_tap.steps.tsx`.
 
 ## 5. Behaviour features
 
