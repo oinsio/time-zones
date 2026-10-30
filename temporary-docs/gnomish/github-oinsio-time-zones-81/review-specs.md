@@ -114,7 +114,8 @@
 - Impact: Implemented as written, the second stored document of the app writes synchronously on every click, against an Accepted ADR. A user who flips options quickly (each a `localStorage.setItem` plus a broadcast to every tab) triggers one write and one cross-tab reload per click instead of one.
 - Fix: In D5, replace "writes at once … needs no debounce" with "writes after `PREFERENCES_WRITE_DEBOUNCE_MS`, flushed on `pagehide`, the same mechanism as `createLocationsActions`/`LocationsProvider`". Add `PREFERENCES_WRITE_DEBOUNCE_MS` to `constants/preferences.ts` in task 2.1. In task 4.1, change "`setHourFormat(H12)` saves once" to "two quick changes save once, after the debounce, and a `pagehide` flushes a pending write". Drive the debounce the way the existing locations write tests do, never with `vi.useFakeTimers()` (`tdd-workflow.md`).
 - Fix risk: The E2E scenarios "Choices survive a reload" and "Another tab changes the hour format" must wait for the write: a reload fires `pagehide`, which flushes, and the other tab updates after the delay. The unit storage steps of task 7.2 must advance past the debounce. The choice still applies at once in the current tab (UX5), because only the write is delayed.
-- Status: open
+- Status: fixed
+- Resolution: design.md D5 now writes after `PREFERENCES_WRITE_DEBOUNCE_MS` through the existing `WriteScheduler`, flushed on `pagehide`, citing ADR-0004; task 2.1 adds the constant; task 4.1 tests that two quick changes save once and that `pagehide` flushes, using `createManualWriteScheduler()` (no fake timers); task 7.2 steps run the pending write before asserting; specs/settings/spec.md "Preferences are kept on the device" states the debounced, non-blocking write.
 
 ### R2 — WARNING — Nothing plans or tests the notices region on the settings page
 - Location: `openspec/changes/add-settings-page-and-device-time-location/specs/settings/spec.md:10`
@@ -123,7 +124,8 @@
 - Impact: The natural implementation of 6.5 (render `<SettingsPage />` instead of `<MainPage notices=… />`) drops the update notice, the offline-ready notice, the update-check-failed note and the storage warning while settings are open, and every listed test still passes. FR3 ends up unverified.
 - Fix: In D10, state that `SettingsPage` takes the same `notices` prop as `MainPage` and renders it in a polite `role="status"` region. Add to the "Open the settings page" requirement the scenario "Notices on the settings page": GIVEN a new version is available, WHEN the settings page is shown, THEN the update notice is announced in the notices region. Add that case to `app/AppShell.settings.test.tsx` in task 6.4, tagged FR3, with the `useRegisterSW` mock that `app/AppShell.notices.test.tsx` already uses.
 - Fix risk: none. A prop leaves `MainPage`'s footer placement untouched, and the notice is plain text in a `role="status"` region, which jsdom can assert as the existing notices tests do.
-- Status: open
+- Status: fixed
+- Resolution: design.md D10 now says the notices region lives in `MainPage`, so `SettingsPage` takes the same `notices` prop from `AppShell` and renders it in its own polite `role="status"` region; specs/settings/spec.md "Open the settings page" gains the scenario "Notices on the settings page"; task 6.4 adds that case to `app/AppShell.settings.test.tsx` (`// FR3`) with the `useRegisterSW` mock of `AppShell.notices.test.tsx`, and task 6.5 passes the prop.
 
 ### R3 — WARNING — Two stable requirements keep the removed Here entry
 - Location: `openspec/specs/date-selection/spec.md:72` and `openspec/specs/time-selection/spec.md:656`
@@ -140,7 +142,8 @@
 
   Each block gets the comment `FR9 of add-settings-page-and-device-time-location`. List both in `proposal.md` "What Changes" and "Modified Capabilities".
 - Fix risk: A MODIFIED block replaces the whole requirement on archive, so every existing scenario (`date-selection/spec.md:74-120`, `time-selection/spec.md:658-…`) must be copied verbatim. No behaviour or test changes.
-- Status: open
+- Status: fixed
+- Resolution: added MODIFIED "Wall-clock resolution on the new date" to specs/date-selection/spec.md ("on the device time location") and "Wall-time input is never stored" to specs/time-selection/spec.md ("(the location was removed)"), each copied verbatim from openspec/specs with all scenarios and the FR9 comment appended; both are listed in proposal.md "What Changes" and "Modified Capabilities". The validator passes.
 
 ### R4 — WARNING — Task 7.4 duplicates two time-selection scenarios instead of updating their existing feature
 - Location: `openspec/changes/add-settings-page-and-device-time-location/tasks.md:191`
@@ -149,7 +152,8 @@
 - Impact: The implementer either writes each scenario twice (the old copy still asserting the Here entry and failing typecheck once 1.4 lands) or discovers the gap only in the catch-all runs of 7.8/10.3. In both cases the time-selection feature drifts from its spec.
 - Fix: In task 7.4, drop those two names from the new feature's list. Add a bullet: "update in place `time_selection/time_selection_wall_time_input_unit.feature` 'Type a time in the Here entry' and 'A device time zone change ends the hint on the Here entry' to the givens of `specs/time-selection/spec.md`, and replace `HERE_ENTRY` in `wallTimeWorld.tsx` and `time_selection_wall_time_input_unit.steps.tsx` with the device time location". Verify with `npx vitest run src/test/features/time_selection`. In task 8.4, add: "update `locations_ui_e2e.feature` 'The Here entry's request is the only one' to the given 'the list holds the device time location'".
 - Fix risk: none. It narrows what 7.8 and 8.7 would otherwise have to find.
-- Status: open
+- Status: fixed
+- Resolution: task 7.4 no longer adds the two Here entry scenarios to the new feature; it updates them in place in `time_selection/time_selection_wall_time_input_unit.feature` to the givens of the time-selection delta, replaces `WallTimeTargetKind.HERE_ENTRY` in `wallTimeWorld.tsx` and `time_selection_wall_time_input_unit.steps.tsx`, and verifies with `npx vitest run src/test/features/time_selection`. Task 8.4 updates "The Here entry's request is the only one" in `locations_ui_e2e.feature` in place to the given "the list holds the device time location".
 
 ### R5 — SUGGESTION — The design has the controller read translated labels for the device time option
 - Location: `openspec/changes/add-settings-page-and-device-time-location/design.md:80`
@@ -158,7 +162,8 @@
 - Impact: Localized text is resolved in the controller, a second place that applies i18n. The search option's label would come from the controller while every other label comes from the presenter.
 - Fix: In D12 and task 4.5, add a presenter function, for example `presentDeviceTimeOptionLabels(translators)` in `presenter/` exported through `presenter/index.ts`. It receives the fixed `t` functions and returns the English and Russian labels. `useCitySearch` passes `i18n.getFixedT("en")` and `i18n.getFixedT("ru")` and keeps only the word matching with `normalizeSearchText`/`splitIntoWords`.
 - Fix risk: One more small presenter file and test. `isDeviceTimeOptionShown` stays the glossary owner, so H2 is unchanged.
-- Status: open
+- Status: fixed
+- Resolution: design.md D12 and task 4.5 now get the English and Russian labels from a new presenter function `presentDeviceTimeOptionLabels(translators)` (`presenter/presentDeviceTimeOptionLabels.ts`, exported through `presenter/index.ts`, with its own RED → GREEN test); `useCitySearch` only passes `i18n.getFixedT("en"|"ru")` and does the word matching. The H2 glossary bullet in tasks.md names it next to `isDeviceTimeOptionShown`.
 
 ### R6 — SUGGESTION — No task creates the settings page screenshot baselines
 - Location: `openspec/changes/add-settings-page-and-device-time-location/tasks.md:205`
@@ -167,7 +172,8 @@
 - Impact: Task 8.2's verification fails on missing baselines, and the implementer has to invent the update step.
 - Fix: Either name the settings outline "Screenshot of the settings page at <width> px in the <theme> theme", so that 8.6's update and re-run cover it, or add to 8.2: "Approve once in Linux: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep \"Approved screenshots\" --update-snapshots`, then run without the flag and see it pass."
 - Fix risk: The rename changes only the scenario title in `specs/settings/spec.md:231` and the feature. Baselines must be taken in Linux, as in 8.6.
-- Status: open
+- Status: fixed
+- Resolution: task 8.2 in tasks.md now approves the "Approved screenshots" baselines once in Linux with `--grep "Approved screenshots" --update-snapshots`, then re-runs the 8.1 command without the flag; the spec scenario title is unchanged.
 
 ## Verdict
 
