@@ -83,6 +83,17 @@ describe("WallTimeInput", () => {
     expect(onClose).toHaveBeenCalledWith(false);
   });
 
+  it("closes without confirming when left unchanged after the live time moved on", () => {
+    const onConfirm = vi.fn(() => WallTimeInputOutcome.CLOSED);
+    const onClose = vi.fn();
+    const props = { label: LABEL, onConfirm, onClose };
+    const { rerender } = render(<WallTimeInput {...props} initialText="10:30" />);
+    rerender(<WallTimeInput {...props} initialText="10:31" />);
+    fireEvent.blur(screen.getByRole("textbox", { name: LABEL }));
+    expect(onConfirm).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledWith(false);
+  });
+
   it("keeps the field open with the error when left with invalid text", async () => {
     const { field, onClose } = renderField(WallTimeInputOutcome.INVALID_TEXT);
     await userEvent.clear(field);

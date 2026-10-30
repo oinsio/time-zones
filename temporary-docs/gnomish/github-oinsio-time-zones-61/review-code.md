@@ -160,7 +160,8 @@ Measured by this review, in five scoped runs of at most five files each (`npx st
 - Impact: Reproduced in the production build (Chromium, page clock at `2026-06-01T14:29:55Z`, zone `America/New_York`). Open the time button (`10:29`), let the clock pass 10:30, click elsewhere without typing. The row stays at `10:29`, the moment is pinned, and the Now button appears. In live mode the user only looked and left, yet every card stops following the clock. This breaks FR5 and the spec scenario "Cancel" ("the moment is still live"). The jsdom test `WallTimeInput.test.tsx:79` misses it because it never rerenders with a new `initialText`.
 - Fix: Compare against the text the field opened with, not the live prop. In `WallTimeInput.tsx`, keep `const [openedText] = useState(initialText);` next to `text`, and use `text === openedText` in `handleBlur`. Add a case to `views/shared/WallTimeInput.test.tsx`: render with `initialText="10:30"`, `rerender` with `initialText="10:31"`, `fireEvent.blur(field)`, then expect `onConfirm` not to have been called and `onClose` to have been called with `false`.
 - Fix risk: none. The field's text already ignores later `initialText` values, because `useState` seeds it once. Enter still confirms the shown text (FR3), changed text still confirms on blur, and the existing blur tests (`:70`, `:79`, `:86`) keep passing.
-- Status: open
+- Status: fixed
+- Resolution: WallTimeInput now compares the text against `openedText` (seeded once) instead of the live `initialText` prop; covered by WallTimeInput.test.tsx "closes without confirming when left unchanged after the live time moved on".
 
 ### R2 — SUGGESTION — New test files exceed the 200-line limit the change set for itself
 - Location: `packages/client/src/test/features/time_selection/steps/time_selection_wall_time_input_e2e.steps.ts:1`
@@ -169,7 +170,8 @@ Measured by this review, in five scoped runs of at most five files each (`npx st
 - Impact: These files are close to the 300-line hard cap. The next scenario pushes them over, and the project keeps files small for AI context quality. The change's own task conventions are not met.
 - Fix: Split along the existing concerns. Move the e2e axe, layout and legacy-tap steps into a `time_selection_wall_time_layout_e2e.steps.ts`. Split `reduceWallTime.test.ts` into a resolving file and a rejection/identity file. Move the hint-lifetime scenarios (FR7, FR9) into a `time_selection_wall_time_hint_unit.feature` with its own steps file, reusing `wallTimeWorld.tsx`.
 - Fix risk: Low. The scenarios stay the same, but playwright-bdd regenerates its specs, and a step defined twice across files would clash. Run `npx bddgen` and the scoped vitest files after the move.
-- Status: open
+- Status: rejected (not-worth-it)
+- Resolution: all five files are under the 300-line hard cap that the process-invariants rule sets (200 is a target); splitting playwright-bdd and vitest-cucumber step files risks duplicate-step clashes and regenerated specs for no behaviour gain, and CI checks stay green.
 
 ## Verdict
 

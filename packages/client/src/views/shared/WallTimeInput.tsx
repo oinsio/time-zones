@@ -38,7 +38,8 @@ export function WallTimeInput({
   const { t } = useTranslation();
   const errorId = useId();
   const fieldRef = useRef<HTMLInputElement | null>(null);
-  const [text, setText] = useState(initialText);
+  const [openedText] = useState(initialText);
+  const [text, setText] = useState(openedText);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export function WallTimeInput({
   };
 
   const handleBlur = () => {
-    if (text === initialText) onClose(false);
+    if (text === openedText) onClose(false);
     else confirm(false);
   };
 
