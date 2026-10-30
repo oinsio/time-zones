@@ -71,6 +71,7 @@ Positive:
 Negative (risks and trade-offs):
 - [WebKit on iOS might still cancel a pointer for its own gestures] → NG3. A cancelled drag keeps the last selection. H2 checks real devices once.
 - [Chromium emulation is not WebKit 12] → accepted, as in `support-legacy-ios-12-safari` (its NG9). The E2E proves the code path, and H2 proves the engine.
+- [WebKit 12 may commit to a page scroll on the early `touchmove`s that D3 leaves uncancelled in `WAIT`, and ignore later `preventDefault` calls] → fallback. If the iOS 12.5 check of H2 fails (the page scrolls during a finger drag, or a vertical swipe on a track no longer scrolls), remove the `useDayTrackTouchFallback` call and its click guard from `DayTrack.tsx`, together with the tests of the drag without Pointer Events. iOS 12 then keeps today's tap-only behaviour, as the task allows ("при невозможности … оставить её работу без изменений"), and the Pointer Events path is unaffected. D3 is wired through that one call and that one guard so that this revert is small.
 - [In Chromium with `touch-pan-y`, a drag that starts horizontally may not scroll even without D1] → the E2E scenarios are a regression guard. The failing-first proof of D1 is the Vitest check that `touchmove` is cancelled during a drag.
 - [The dragged handle can be up to half a track step away from the other handles during a drag] → accepted (NG2, UX2). It settles at release.
 

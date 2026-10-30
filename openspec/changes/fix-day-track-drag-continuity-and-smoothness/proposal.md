@@ -128,4 +128,4 @@ No changes.
 
 ## Open Questions
 
-None. Real devices (iOS 12 and a newer iOS) are checked once by the operator, as handoff item H2.
+None. Real devices (iOS 12 and a newer iOS) are checked once by the operator, as handoff item H2. If the drag cannot work on iOS 12 as FR4 says, iOS 12 keeps today's tap-only behaviour, as the owner allows (Why, item 3), and H2 names how to fall back.

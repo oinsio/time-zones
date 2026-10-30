@@ -93,7 +93,8 @@
   - In task 4.2, require that the fallback is wired through that single call and the `onClick` guard, so that removing them restores `DayTrack.legacy.test.tsx` behaviour.
   - In task 6.3, add to the H2 README section a **Fallback:** line with the same instruction.
 - Fix risk: none for the code, because it only fixes where the fallback is wired and documents the revert. It adds one line to H2 and one Consequences bullet.
-- Status: open
+- Status: fixed
+- Resolution: design.md Consequences gains the WebKit 12 early-`touchmove` risk with the fallback (remove the `useDayTrackTouchFallback` call, its click guard and the no-Pointer-Events drag tests, so iOS 12 keeps tap-only, per task clause 3). Task 4.2 requires D3 to be wired only through that call and guard, task 6.3 adds a **Fallback:** line to the H2 README section, the H2 Human follow-up repeats it, and proposal Open Questions states the outcome.
 
 ### R3 — WARNING — Unit BDD "The handle settles on the selected step at release" cannot pass as planned
 - Location: `openspec/changes/fix-day-track-drag-continuity-and-smoothness/tasks.md:52,56`
