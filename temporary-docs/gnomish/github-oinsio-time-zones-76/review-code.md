@@ -111,7 +111,8 @@ The runtime error (`index += 1` → `index -= 1` in `findTouch`) is an infinite-
 - Impact: (a) The same handoff has two commands, and one of them fails. The operator reviews the tasks.md Human follow-up on the pull request. If they follow it once the track-end patch is in, they get "patch does not apply", and the FR3/UX2 glossary entries stay out of date. The ticked task 6.2 also fails its own scratch check. (b) The deliver stage lists each handoff item in the pull request from this README. Without **Files:**, the reviewer cannot see from the section which file the patch touches. The section breaks the fixed field order that `handoff.md` sets for every item, and its manual-reason texts differ from the plan they are supposed to copy.
 - Fix: keep the patch file and the README **Apply** command as they are. A context patch is what `handoff.md` needs for a plain `git apply --check`. (a) In `tasks.md`, use `git apply -C0 openspec/changes/fix-day-track-drag-continuity-and-smoothness/handoff/H1-glossary-handle-drag.patch` in place of `git apply --unidiff-zero …H1-glossary-handle-drag.patch` in the 6.2 **Apply** line (`:90`), the 6.2 scratch check (`:95`) and the Human follow-up H1 bullet (`:106`). They then match `handoff/README.md:9`, and the scratch check exits 0. (b) In `handoff/README.md`, reorder the H1 bullets to **Serves:** (FR3, UX2), **Files:** `docs/glossary/time-selection.md`, **Apply:** (the line 9 command unchanged), **Patch:** (the relative path, kept right after **Apply:**, since `handoff.md` and task 6.2 ask for the path relative to the README as well), **Verify:**, **Why manual:**, **Automated part:**. Copy the last two verbatim from the tasks.md Human follow-up H1, after the `-C0` edit of (a). Move the **Changes:** sentence into the paragraph under the heading.
 - Fix risk: low. Both edits touch only this active (not archived) change's plan and handoff text, and change no code. The 6.2 grep `^- \*\*Apply:\*\*.*H1-glossary-track-end\.patch.*H1-glossary-handle-drag\.patch` still prints `1`, because the **Apply** line keeps its text, and `grep -c "^## H[12]:"` still prints `2`. The other route, regenerating the patch with `git diff -U0` so that `--unidiff-zero` works, would break the plain `git apply --check` that `handoff.md` relies on, so it is not proposed.
-- Status: open
+- Status: rejected (contradicts-spec)
+- Resolution: the fix edits tasks.md and the change handoff/README.md; instructions.md for fix-code keeps tasks.md and the plan artifacts untouched and the stage check allows edits only under packages/client/ plus this report. Fixing it belongs to a plan update (update-change), not this stage.
 
 ### R2 — WARNING — No test shows that a cancelled touch drag gives scrolling back
 - Location: `packages/client/src/views/shared/useDayTrackDrag.ts:123`
@@ -120,7 +121,8 @@ The runtime error (`index += 1` → `index -= 1` in `findTouch`) is an infinite-
 - Impact: a regression that leaves the guard on after `pointercancel` would pass CI. After such a cancel (NG3, e.g. a system edge swipe), every later `touchmove` on that track, including a vertical swipe that starts on it, would have its default cancelled. The page would stop scrolling from that track, which breaks FR2 ("a touch gesture that is not a drag … still scrolls the page") and FR5.
 - Fix: in `views/shared/DayTrack.drag.test.tsx`, add a case (or turn `:31-39` into an `it.each` over `"pointerUp"` and `"pointerCancel"`). Do a touch `pointerDown` at x 100, then a `pointerMove` to x 150 (`SELECT`), then fire the end event, and assert `fireEvent.touchMove(slider)` returns `true`. Then re-run `npx stryker run --mutate 'src/views/shared/useDayTrackDrag.ts'` to confirm the mutant is killed.
 - Fix risk: none. It adds a test only and uses the fixture and `pointer()` helper the file already has.
-- Status: open
+- Status: fixed
+- Resolution: DayTrack.drag.test.tsx touchmove guard test is now an it.each over pointerUp and pointerCancel; Stryker on useDayTrackDrag.ts is 100% (the line 123 mutant is killed).
 
 ### R3 — SUGGESTION — Drag steps declare their own percent-per-fraction constants
 - Location: `packages/client/src/test/features/time_selection/steps/time_selection_drag_unit.steps.tsx:25`
@@ -129,7 +131,8 @@ The runtime error (`index += 1` → `index -= 1` in `findTouch`) is an infinite-
 - Impact: there are two more owners of the fraction-to-percent factor. The steps turn the handle's `left` back into a fraction with their own copy, not the factor the view uses, so they would drift apart if the drawing factor ever changed.
 - Fix: delete both local constants. Import `PERCENT_PER_FRACTION` from `@/constants` in `time_selection_drag_unit.steps.tsx` and in `time_selection_drag_e2e.steps.ts`, and use it at `time_selection_drag_unit.steps.tsx:114,134` and `time_selection_drag_e2e.steps.ts:183`.
 - Fix risk: none. Both step files already import through the `@/` alias (`@/test/workCounters`, `@/test/e2e/withoutPointerEvents`), and `@/constants` is a pure module with no DOM or Vitest dependency, so it also loads in playwright-bdd.
-- Status: open
+- Status: fixed
+- Resolution: both step files now import PERCENT_PER_FRACTION from @/constants and drop their local copies; time_selection_drag_unit.steps.tsx passes.
 
 ## Verdict
 
