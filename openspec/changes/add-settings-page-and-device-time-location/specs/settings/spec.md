@@ -26,6 +26,11 @@ The header's settings button SHALL open the settings page. The settings page MUS
 - **THEN** the main page is shown
 - **AND** the focus is on the settings button
 
+#### Scenario: Notices on the settings page
+- **GIVEN** a new version of the app is available
+- **WHEN** the settings page is shown
+- **THEN** the update notice is announced in the notices region
+
 ### Requirement: Theme preference
 The settings page SHALL offer the theme preference as three options, each with an icon and a label: Light with a sun icon («Светлая»), Dark with a moon icon («Тёмная») and System with a monitor icon («Системная»). Exactly one option MUST be checked. Without a stored choice, System MUST be checked. Choosing Light or Dark MUST apply that theme's design token values to the whole app at once, whatever the system color-scheme preference is. Choosing System MUST make the theme follow the system color-scheme preference, also when the system preference changes while the app is open. Inputs: the chosen option, the system color-scheme preference. Output: the active theme. Errors: none. <!-- implements FR4, UX5 of add-settings-page-and-device-time-location -->
 
