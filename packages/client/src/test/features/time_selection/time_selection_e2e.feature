@@ -3,7 +3,7 @@ Feature: Time selection in a real browser
   As a user I drag, tap or key a day track, every card follows, and the tracks
   are named, focusable and free of accessibility violations.
 
-  @add-time-sliders-to-location-cards @FR3 @NFR-R2
+  @add-time-sliders-to-location-cards @FR3 @NFR-R2 @fix-day-track-drag-continuity-and-smoothness @FR5
   Scenario: Dragging one track moves every card
     Given the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Almaty", "Moscow", "Kolkata", "New York"

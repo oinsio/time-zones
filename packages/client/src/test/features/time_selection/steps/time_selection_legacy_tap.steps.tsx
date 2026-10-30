@@ -63,7 +63,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     expect(world.shownInstant()).toBe(timestamp);
   };
 
-  // @support-legacy-ios-12-safari @FR8 @UX1
+  // @support-legacy-ios-12-safari @FR8 @UX1 @fix-day-track-drag-continuity-and-smoothness @FR5
   f.Scenario(
     "A tap selects a time without Pointer Events",
     ({ Given, And, When, Then }) => {
@@ -82,7 +82,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @support-legacy-ios-12-safari @FR8
+  // @support-legacy-ios-12-safari @FR8 @fix-day-track-drag-continuity-and-smoothness @FR5
   f.Scenario(
     "A click adds nothing where Pointer Events exist",
     ({ Given, And, When, Then }) => {

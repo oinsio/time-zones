@@ -1,34 +1,20 @@
-import type { KeyboardEvent, MouseEvent, PointerEvent } from "react";
+import type { KeyboardEvent } from "react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  MAX_TRACK_FRACTION,
-  MIN_TRACK_FRACTION,
-  TOUCH_POINTER_TYPE,
-  TRACK_VALUE_MIN_MINUTES,
-} from "@/constants";
+import { TRACK_VALUE_MIN_MINUTES } from "@/constants";
 import type { TrackMove } from "@/controller";
 import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import type { PresentedDayTrack } from "@/presenter";
 import { buildDayTrackGradient, formatPercent } from "./dayTrackGradient";
 import { getTrackMoveForKey } from "./dayTrackKeys";
-import {
-  getTouchGestureDecision,
-  TouchGestureDecision,
-  type TouchPoint,
-} from "./dayTrackTouch";
+import { useDayTrackDrag } from "./useDayTrackDrag";
+import { useDayTrackTouchFallback } from "./useDayTrackTouchFallback";
 
 type DayTrackProps = {
   track: PresentedDayTrack;
   city: string;
   onSelectFraction: (fraction: number) => void;
   onMoveTrack: (move: TrackMove) => void;
-};
-
-type TouchGesture = {
-  pointerId: number;
-  start: TouchPoint;
-  decision: TouchGestureDecision;
 };
 
 // Stryker disable all: not equivalent — label alignment is layout, untested in jsdom by design (D9), covered by time_selection_layout_e2e.feature
@@ -51,6 +37,10 @@ const LABEL_ALIGNMENT_CLASS_NAMES = [
  * support-legacy-ios-12-safari (a click selects where Pointer Events are missing).
  * Implements FR1, FR4, UX1 of fix-day-track-handle-overlap-and-end-of-day (D2:
  * from 768 px the bar and handle sit inside the slider by half the handle).
+ * Implements FR1, FR2, FR3, FR5, NFR-A1 of fix-day-track-drag-continuity-and-smoothness
+ * (a drag follows the pointer wherever it goes; the handle follows it between steps).
+ * Implements FR4, UX3 of fix-day-track-drag-continuity-and-smoothness (a finger drag
+ * without Pointer Events).
  */
 export function DayTrack({
   track,
@@ -59,60 +49,24 @@ export function DayTrack({
   onMoveTrack,
 }: DayTrackProps) {
   const { t } = useTranslation();
-  const touchGesture = useRef<TouchGesture | null>(null);
+  const sliderElement = useRef<HTMLDivElement>(null);
   const barElement = useRef<HTMLDivElement>(null);
 
-  const selectAt = (event: MouseEvent<HTMLDivElement>) => {
-    if (barElement.current === null) return;
-    const { left, width } = barElement.current.getBoundingClientRect();
-    if (width <= 0) return;
-    const fraction = (event.clientX - left) / width;
-    onSelectFraction(
-      Math.min(Math.max(fraction, MIN_TRACK_FRACTION), MAX_TRACK_FRACTION),
-    );
-  };
-
-  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === TOUCH_POINTER_TYPE) {
-      touchGesture.current = {
-        pointerId: event.pointerId,
-        start: { x: event.clientX, y: event.clientY },
-        decision: TouchGestureDecision.WAIT,
-      };
-      return;
-    }
-    event.currentTarget.setPointerCapture(event.pointerId);
-    selectAt(event);
-  };
-
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    const gesture = touchGesture.current;
-    if (gesture === null || gesture.pointerId !== event.pointerId) {
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-        selectAt(event);
-      }
-      return;
-    }
-    if (gesture.decision === TouchGestureDecision.WAIT) {
-      gesture.decision = getTouchGestureDecision(gesture.start, {
-        x: event.clientX,
-        y: event.clientY,
-      });
-      if (gesture.decision === TouchGestureDecision.SELECT) {
-        event.currentTarget.setPointerCapture(event.pointerId);
-      }
-    }
-    if (gesture.decision === TouchGestureDecision.SELECT) selectAt(event);
-  };
-
-  const handlePointerEnd = (event: PointerEvent<HTMLDivElement>) => {
-    const gesture = touchGesture.current;
-    touchGesture.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    if (gesture?.decision === TouchGestureDecision.WAIT) selectAt(event);
-  };
+  const {
+    dragFraction,
+    setDragFraction,
+    selectAt,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerEnd,
+    handlePointerCancel,
+  } = useDayTrackDrag(sliderElement, barElement, onSelectFraction);
+  const isClickAfterTouchDrag = useDayTrackTouchFallback(
+    sliderElement,
+    barElement,
+    onSelectFraction,
+    setDragFraction,
+  );
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const move = getTrackMoveForKey(event.key);
@@ -127,6 +81,7 @@ export function DayTrack({
       className="order-last flex basis-full flex-col md:order-none md:min-w-0 md:basis-0 md:flex-1"
     >
       <div
+        ref={sliderElement}
         role="slider"
         tabIndex={0}
         aria-label={t("locations.timeSliderLabel", { city })}
@@ -134,13 +89,17 @@ export function DayTrack({
         aria-valuemax={track.maxMinutes}
         aria-valuenow={track.valueMinutes}
         aria-valuetext={track.valueText}
-        onClick={IS_POINTER_EVENTS_SUPPORTED ? undefined : selectAt}
+        onClick={
+          IS_POINTER_EVENTS_SUPPORTED
+            ? undefined
+            : (event) => {
+                if (!isClickAfterTouchDrag()) selectAt(event);
+              }
+        }
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
-        onPointerCancel={() => {
-          touchGesture.current = null;
-        }}
+        onPointerCancel={handlePointerCancel}
         onKeyDown={handleKeyDown}
         className="group relative h-11 w-full cursor-pointer touch-pan-y select-none outline-none"
       >
@@ -157,7 +116,7 @@ export function DayTrack({
           <div
             data-day-track-handle
             className="pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-            style={{ left: formatPercent(track.fraction) }}
+            style={{ left: formatPercent(dragFraction ?? track.fraction) }}
           >
             <span className="h-7 w-7 rounded-full border-2 border-foreground bg-surface group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-accent md:h-8 md:w-8" />
           </div>

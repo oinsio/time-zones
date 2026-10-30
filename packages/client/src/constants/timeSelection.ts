@@ -15,6 +15,22 @@ export const TRACK_END_BEFORE_DAY_END_MINUTES = 1;
 /** Offset changes move local time by less than this; bounds the boundary search. */
 export const OFFSET_CHANGE_MARGIN_HOURS = 3;
 
+// Implements FR1, FR2, FR4 of fix-day-track-drag-continuity-and-smoothness (D1, D3, D4).
+export enum TrackTouchEvent {
+  START = "touchstart",
+  MOVE = "touchmove",
+  END = "touchend",
+  CANCEL = "touchcancel",
+}
+/** A touchstart listener that never cancels the browser's scroll. */
+export const TRACK_TOUCH_START_LISTENER_OPTIONS: AddEventListenerOptions = {
+  passive: true,
+};
+/** A touchmove listener that may cancel the browser's scroll. */
+export const TRACK_TOUCH_MOVE_LISTENER_OPTIONS: AddEventListenerOptions = {
+  passive: false,
+};
+
 // Implements FR2 of add-wall-time-input-with-hint (D1, D3).
 /** Accepted typed texts: `H`, `HH`; `H:MM`, `HH:MM`, `H.MM`, `HH.MM`; `HMM`, `HHMM`. */
 export const WALL_TIME_INPUT_PATTERNS: readonly RegExp[] = [
