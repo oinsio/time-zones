@@ -128,4 +128,4 @@ No changes.
 
 ## Open Questions
 
-None. Real devices (iOS 12 and a newer iOS) are checked once by the operator, as handoff item H2. If the drag cannot work on iOS 12 as FR4 says, iOS 12 keeps today's tap-only behaviour, as the owner allows (Why, item 3), and H2 names how to fall back.
+None. Real devices (iOS 12 and a newer iOS) are checked once by the operator, as handoff item H2. If the drag cannot work on iOS 12 as FR4 says, iOS 12 keeps today's tap-only behaviour, as the owner allows (Why, item 3), and H2 names how to fall back. Before archive, that fallback also revises this change (design, "Consequences"). The no-Pointer-Events finger drag leaves the spec delta. FR4, UX3, U3 and G1 are restated as "iOS 12 keeps tap-only selection", and M1 counts 4 E2E drag scenarios. FR4 and UX3 stay covered by the vertical swipe and the tap scenarios without Pointer Events, so M5 still holds.
