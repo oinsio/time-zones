@@ -65,3 +65,16 @@ Feature: Now button always visible in the date bar (browser)
       | 375   | dark  |
       | 1024  | light |
       | 1024  | dark  |
+
+  @keep-now-button-visible-when-live @NFR-R1 @UX2
+  Scenario Outline: A long date stays on one line at <width> px
+    Given the current time is "2026-09-27T07:30:00Z"
+    And the locations interface language is Russian
+    And the screen is <width> px wide for the locations
+    And the user opens the locations app
+    Then the date button stays one line high when the user moves to the next day
+
+    Examples:
+      | width |
+      | 768   |
+      | 1024  |

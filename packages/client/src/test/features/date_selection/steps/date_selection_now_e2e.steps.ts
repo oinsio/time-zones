@@ -5,6 +5,7 @@ import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import {
   type Box,
   computedColourOfVariable,
+  DATE_BUTTON_SELECTOR,
   MIN_TOUCH_TARGET_PX,
   nextDayButton,
   nowButton,
@@ -15,6 +16,8 @@ import {
 const { When, Then } = createBdd(test);
 
 const TAB_KEY = "Tab";
+const ENTER_KEY = "Enter";
+const NEXT_DAY_ISO_DATE = "2026-09-28";
 const MUTED_FILL_VARIABLE = "--color-muted";
 const MUTED_FOREGROUND_VARIABLE = "--color-muted-foreground";
 const MAX_POSITION_SHIFT_PX = 1;
@@ -94,5 +97,24 @@ Then(
     }
     expect(liveBox.width).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET_PX);
     expect(liveBox.height).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET_PX);
+  },
+);
+// Verifies NFR-R1, UX2 of keep-now-button-visible-when-live.
+Then(
+  "the date button stays one line high when the user moves to the next day",
+  async ({ locationsWorld }) => {
+    const { page } = locationsWorld;
+    const dateButtonOfBar = page.locator(DATE_BUTTON_SELECTOR);
+    const liveBox = await requireBox(dateButtonOfBar);
+    await dateButtonOfBar.focus();
+    await page.keyboard.press(TAB_KEY);
+    await page.keyboard.press(ENTER_KEY);
+    await expect(dateButtonOfBar.locator("time")).toHaveAttribute(
+      "datetime",
+      NEXT_DAY_ISO_DATE,
+    );
+    const pinnedBox = await requireBox(dateButtonOfBar);
+    expect(liveBox.height).toBeLessThanOrEqual(MIN_TOUCH_TARGET_PX + 1);
+    expect(pinnedBox.height).toBeLessThanOrEqual(MIN_TOUCH_TARGET_PX + 1);
   },
 );
