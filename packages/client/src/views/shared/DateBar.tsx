@@ -6,8 +6,8 @@ import { CalendarDialog } from "./CalendarDialog";
 
 const NOW_ICON_SIZE_PX = 16;
 
-// Stryker disable next-line StringLiteral: the arrow classes are checked by the "Each bar control is at least 44 by 44 px" scenario
 const arrowButtonClassName =
+  // Stryker disable next-line StringLiteral: the arrow classes are checked by the "Touch targets" scenario of date_selection_layout_e2e.feature
   "flex min-h-11 min-w-11 items-center justify-center rounded-md text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent";
 
 /**
