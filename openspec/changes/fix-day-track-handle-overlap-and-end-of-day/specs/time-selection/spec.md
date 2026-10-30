@@ -164,7 +164,7 @@ Below 768 px the track SHALL sit on its own line under the city and time line, s
 
 From 768 px the handle MUST NOT cover the elements beside its track at any position of the reference day: with the handle at the start of the day, its 44 × 44 px hit area stays inside the slider's hit area and at least 12 px of free space separates the visible handle from the row's time; with the handle at the track end, the same holds for the element right of the track (the location menu button of a location card). The time and the location menu button stay fully visible and operable. Below 768 px the track keeps spanning the card's content width.
 
-A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card in the list. A vertical swipe that starts on a track still scrolls the page and MUST NOT select a time; a finger tap on a track selects the time at that position. The page with tracks MUST NOT scroll horizontally at 320 px and 2560 px. The approved screenshots at 375 px and 1024 px in both themes MUST show the tracks: the "list", "pinned" and "calendar" states and a new "time-selected" state.
+A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card in the list. A vertical swipe that starts on a track still scrolls the page and MUST NOT select a time; a finger tap on a track selects the time at that position. The page with tracks MUST NOT scroll horizontally at 320 px, 768 px and 2560 px. The approved screenshots at 375 px and 1024 px in both themes MUST show the tracks: the "list", "pinned" and "calendar" states and a new "time-selected" state.
 
 <!-- implements FR3, NFR-R1, NFR-R2, NFR-R3, UX1, UX2, UX3 of add-time-sliders-to-location-cards; FR1, FR4, NFR-R1, NFR-R2, UX1 of fix-day-track-handle-overlap-and-end-of-day -->
 
@@ -226,7 +226,7 @@ A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card
 
 #### Scenario: Tracks fit narrow and wide screens
 - **GIVEN** the list is Almaty, Kathmandu, New York and Tokyo
-- **WHEN** the list is shown at 320 px or 2560 px
+- **WHEN** the list is shown at 320 px, 768 px or 2560 px
 - **THEN** the page does not scroll horizontally
 
 #### Scenario: Screenshots show the tracks

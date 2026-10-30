@@ -9,7 +9,7 @@ Driven by FR1–FR4, NFR-R2 and UX1 of `proposal.md` (motivation: proposal, Why)
 - **Constants**: `constants/timeSelection.ts` has `TRACK_STEP_MINUTES = 15`, `MIN_TRACK_FRACTION`, `MAX_TRACK_FRACTION` and `TRACK_VALUE_MIN_MINUTES`, re-exported by `constants/index.ts`.
 - **View**: `views/shared/DayTrack.tsx` (174 lines). The `role="slider"` element is `relative h-11 w-full`. Inside it, the bar `[data-day-track-bar]` is `absolute inset-x-0`, and the handle `[data-day-track-handle]` (`h-11 w-11 -translate-x-1/2`, visible circle `h-7 w-7 md:h-8 md:w-8`) is placed with `left: formatPercent(track.fraction)`. `selectAt` measures `event.currentTarget.getBoundingClientRect()`, the whole slider. The hour-label row (`hidden md:block`) places labels by percent of its own full width.
 - **Row layout**: `views/shared/ZoneRowContent.tsx` renders the place and time column, then the `DayTrack` wrapper (`md:flex-1`). `LocationRow` puts the `LocationMenu` button after it. The card's flex gap is `gap-x-3` (12 px). `HereEntryRow` uses the same `ZoneRowContent` and has nothing right of the track.
-- **Tests that read the old end**: `model/dayTrack.test.ts` (1425, 1365, 1485, `18:45`), `presenter/dayTrack.test.ts` (`maxMinutes` 1425), `views/shared/dayTrackFixture.tsx` and `LocationRow.test.tsx` (`maxMinutes: 1425`). The step files `timeSelectionWorld.tsx` (`dayBoundsOf`) and `time_selection_day_track.steps.tsx` ("Days of 23 and 25 hours") work out the day length as `track.maxMinutes + TRACK_STEP_MINUTES`. The features `time_selection_select_time.feature` (`18:45` rows) and `time_selection_e2e.feature` (`End | 1425`, `0 to 1425`, Almaty `23:45`) also use it.
+- **Tests that read the old end**: `model/dayTrack.test.ts` (1425, 1365, 1485, `18:45`), `presenter/dayTrack.test.ts` (`maxMinutes` 1425), `views/shared/dayTrackFixture.tsx` and `LocationRow.test.tsx` (`maxMinutes: 1425`). Three step files work out the day length the same way: `time_selection/steps/timeSelectionWorld.tsx` (`dayBoundsOf`, line 190), `time_selection/steps/time_selection_day_track.steps.tsx` ("Days of 23 and 25 hours", line 73) and `home_location/steps/homeLocationWorld.ts` (`thenTrackDay`, line 108, used by `home_location_reference_unit.steps.tsx`). They compute the day length as `track.maxMinutes + TRACK_STEP_MINUTES`. The features `time_selection_select_time.feature` (`18:45` rows) and `time_selection_e2e.feature` (`End | 1425`, `0 to 1425`, Almaty `23:45`) also use it.
 - **Tests that mock the slider's box**: `DayTrack.input.test.tsx`, `DayTrack.legacy.test.tsx`, `dayTrackFixture.tsx` and `time_selection_legacy_tap.steps.tsx` replace `slider.getBoundingClientRect`.
 - **E2E helpers**: `timeSelectionE2eHelpers.ts` already measures the bar (`barOf`, `pointOnBar`) and the visible handle (`visibleHandleOf`); `timeTextOf` finds the time button, and `menuButton` (`locations/steps/locationsE2eHelpers.ts`) finds the location menu button.
 
@@ -39,7 +39,7 @@ Geometry from 768 px: at the start of the day the visible 32 px circle begins at
 
 ### D3. Tests move with the owners
 
-Unit tests change their mocks from the slider's box to the bar's box. Steps that derive the day length use `track.maxMinutes + TRACK_END_BEFORE_DAY_END_MINUTES`. The layout check is a new E2E scenario in `time_selection_layout_e2e.feature`, because it needs real boxes (`bdd-e2e.md`, `bdd-unit.md`: "Responsive layout … E2E"). Arithmetic and key moves stay in unit BDD.
+Unit tests change their mocks from the slider's box to the bar's box. The three step files that derive the day length (`timeSelectionWorld.tsx`, `time_selection_day_track.steps.tsx`, `homeLocationWorld.ts`) use `track.maxMinutes + TRACK_END_BEFORE_DAY_END_MINUTES`. None of them uses `TRACK_STEP_MINUTES` anywhere else, so each import switches to the new constant. The layout check is a new E2E scenario in `time_selection_layout_e2e.feature`, because it needs real boxes (`bdd-e2e.md`, `bdd-unit.md`: "Responsive layout … E2E"). Arithmetic and key moves stay in unit BDD.
 
 ## Consequences
 
@@ -52,7 +52,7 @@ Positive:
 Negative (risks and their mitigation):
 
 
-- [The 1024 px screenshots change: every track gets 44 px shorter] → re-approve the 1024 px baselines once with `--update-snapshots`, and check that no 375 px baseline changed (task 5.3).
+- [The 1024 px screenshots change: every track gets 44 px shorter] → re-approve the 1024 px baselines once with `--update-snapshots`, and check that no 375 px baseline changed (task 5.5).
 - [The track end is not on the 15-minute grid, so one Next step from 23:45 moves 14 minutes] → intended (FR2). It is the only step that is shorter.
 - [A DST transition at local midnight makes the track end show another local time than 23:59] → the spec defines the track end in absolute time (one minute before the day's end). No zone in the scenarios has such a transition.
 
