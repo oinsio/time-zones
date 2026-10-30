@@ -47,7 +47,7 @@ None.
 - NG1: Changing the 15-minute track step or the pointer's rounding to the nearest step. Only the clamp at the right end changes.
 - NG2: Changing the layout below 768 px. There the track has its own line, and the handle at either end stays inside the card's padding without covering another element.
 - NG3: Changing the wall-time input. It already accepts 23:59.
-- NG4: New screens or a redesign of the track: sizes, colours, the handle and the hit areas stay as they are.
+- NG4: New screens or a redesign of the track: its height, colours, the handle's size and the hit areas stay as they are. From 768 px the visible bar becomes 44 px shorter, so that the handle fits inside the slider's hit area (FR4).
 
 ## Users & Scenarios
 
