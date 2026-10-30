@@ -153,6 +153,8 @@ jobs:
         if: steps.preview-secrets.outputs.available == 'true'
         with:
           node-version-file: .nvmrc
+          # packageManager in package.json would make setup-node look for pnpm, which this job never installs
+          package-manager-cache: false
 
       - uses: actions/download-artifact@v4
         if: steps.preview-secrets.outputs.available == 'true'

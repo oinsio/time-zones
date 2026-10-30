@@ -35,6 +35,8 @@ const NETLIFY_INPUTS = [
 ];
 const ALIAS_INPUT = /^\s+alias:/m;
 const ASSEMBLE_SCRIPT = "assemble-preview-site.mjs";
+const SETUP_NODE_ACTION = /^\s+(?:- )?uses:\s*actions\/setup-node@v5\s*$/m;
+const NO_PACKAGE_MANAGER_CACHE = /^\s+package-manager-cache:\s*false\s*$/m;
 const DOWNLOAD_ARTIFACT_ACTION =
   /^\s+(?:- )?uses:\s*actions\/download-artifact@v4\s*$/m;
 const UPLOAD_ARTIFACT_ACTION =
@@ -152,6 +154,13 @@ describe("CI preview job", () => {
     expect(downloadStep).toMatch(PREVIEW_ARTIFACT_INPUT);
     expect(previewJob).toContain(ASSEMBLE_SCRIPT);
     expect(previewJob).not.toMatch(INSTALL_OR_BUILD_COMMAND);
+  });
+
+  // FR2: setup-node must not look for pnpm, which this job never installs, of add-pr-preview-deploy
+  it("should set up Node without the package manager cache", () => {
+    const setupNodeStep =
+      previewSteps[findStepIndex(previewSteps, SETUP_NODE_ACTION)] ?? "";
+    expect(setupNodeStep).toMatch(NO_PACKAGE_MANAGER_CACHE);
   });
 
   // FR7: nothing waits for the preview job, of add-pr-preview-deploy
