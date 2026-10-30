@@ -40,7 +40,7 @@ Feature: Main page header in a real browser
     Given the stored locations are "Moscow"
     And the user opens the locations app
     When the user chooses the header button named "Settings"
-    And the user presses "/" on the main page
+    And the user presses "/"
     Then the settings page is shown
     And the search does not open
 
