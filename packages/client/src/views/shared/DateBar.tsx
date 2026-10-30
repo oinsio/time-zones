@@ -17,6 +17,8 @@ const arrowButtonClassName =
  * select-date-with-calendar-and-now (D6).
  * Implements FR1, FR2, FR3, FR4, NFR-A1 of keep-now-button-visible-when-live
  * (D1, D2).
+ * Implements FR15, NFR-R2, UX4 of add-settings-page-and-device-time-location
+ * (D13): one centred group at every width, with no jump at the edges.
  */
 export function DateBar() {
   const { t } = useTranslation();
@@ -36,8 +38,8 @@ export function DateBar() {
   };
 
   return (
-    <div role="group" aria-label={t("date.barLabel")} className="px-4 py-2">
-      <div className="flex items-center justify-between gap-2 md:justify-center md:gap-4">
+    <div role="group" aria-label={t("date.barLabel")} className="px-2 py-2">
+      <div className="flex items-center justify-center gap-3">
         <div className="flex items-center">
           <button
             type="button"

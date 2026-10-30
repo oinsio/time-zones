@@ -1,32 +1,38 @@
 // Verifies FR7, NFR-A2 of add-wall-time-input-with-hint (D4).
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 import { fakeClock, Temporal } from "@/lib/temporal";
 import {
+  buildDeviceTimeLocation,
   getUtcOffsetMinutes,
+  LocationKind,
   type WallClockNote,
   WallClockNotePlacement,
   WallClockStatus,
   WallTimeTargetKind,
 } from "@/model";
+import { HourFormat } from "@/preferences";
 import { buildReferenceDay } from "@/test/referenceDay";
-import { presentHereEntry } from "./presentHereEntry";
 import { presentLocationRows } from "./presentLocationRows";
 import type { LocationRowsContext } from "./presentZoneMoment";
 
 const MOSCOW = {
   id: "Europe/Moscow|Moscow",
+  kind: LocationKind.CITY,
   timeZoneId: "Europe/Moscow",
   label: "Moscow",
   countryCode: "RU",
 };
 const NEW_YORK = {
   id: "America/New_York|New York",
+  kind: LocationKind.CITY,
   timeZoneId: "America/New_York",
   label: "New York",
   countryCode: "US",
 };
+const DEVICE_TIME = buildDeviceTimeLocation("Asia/Almaty");
 const instant = fakeClock("2026-03-08T07:30:00Z").instant();
 
 const contextOf = (
@@ -34,6 +40,7 @@ const contextOf = (
   wallClockNote?: WallClockNote,
 ): LocationRowsContext => ({
   language,
+  hourFormat: HourFormat.H24,
   instant,
   translate: i18n.getFixedT(language),
   deviceTimeZoneId: "Asia/Almaty",
@@ -61,13 +68,12 @@ describe("the wall-time input name", () => {
     },
   );
 
-  it("names the Here entry by its city", () => {
-    const presented = presentHereEntry(
-      { timeZoneId: "Asia/Almaty" },
-      "Almaty",
-      contextOf("en"),
-    );
-    expect(presented.wallTimeInputLabel).toBe("Enter time — Almaty, 12:30");
+  it("names the device time location by its exemplar city", () => {
+    const [row] = presentLocationRows([DEVICE_TIME], {
+      ...contextOf("en"),
+      deviceTimeCityLabel: "Almaty",
+    });
+    expect(row?.wallTimeInputLabel).toBe("Enter time — Almaty, 12:30");
   });
 });
 
@@ -86,29 +92,20 @@ describe("the wall-time hint", () => {
     );
   });
 
-  it("shows on the Here entry for a Here entry target, not on locations", () => {
-    const hereNote: WallClockNote = {
+  it("shows on the device time location for its target, not on other locations", () => {
+    const deviceTimeNote: WallClockNote = {
       ...newYorkGap,
-      target: { kind: WallTimeTargetKind.HERE_ENTRY },
+      target: {
+        kind: WallTimeTargetKind.LOCATION,
+        locationId: DEVICE_TIME_LOCATION_ID,
+      },
     };
-    const context = contextOf("en", hereNote);
-    expect(
-      presentHereEntry({ timeZoneId: "America/New_York" }, "New York", context)
-        .wallTimeHint,
-    ).toContain("02:30 does not exist");
-    expect(presentLocationRows([NEW_YORK], context)[0]?.wallTimeHint).toBe(
-      undefined,
+    const rows = presentLocationRows(
+      [buildDeviceTimeLocation("America/New_York"), NEW_YORK],
+      contextOf("en", deviceTimeNote),
     );
-  });
-
-  it("shows no hint on the Here entry for a location target", () => {
-    expect(
-      presentHereEntry(
-        { timeZoneId: "America/New_York" },
-        "New York",
-        contextOf("en", newYorkGap),
-      ).wallTimeHint,
-    ).toBeUndefined();
+    expect(rows[0]?.wallTimeHint).toContain("02:30 does not exist");
+    expect(rows[1]?.wallTimeHint).toBeUndefined();
   });
 
   it.each([

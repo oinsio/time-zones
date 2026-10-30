@@ -5,6 +5,7 @@ import {
 } from "@/adapters";
 import { type Clock, systemClock } from "@/lib/temporal";
 import {
+  buildFirstLaunchLocations,
   createStore,
   INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
@@ -43,10 +44,16 @@ const statusOf = (result: LocationsLoadResult): LocationsStatus =>
     ? LocationsStatus.UNREADABLE
     : LocationsStatus.READY;
 
-const storedOf = (result: LocationsLoadResult): StoredLocations =>
+const storedOf = (
+  result: LocationsLoadResult,
+  deviceTimeZoneId: string,
+): StoredLocations =>
   result.status === LocationsLoadStatus.LOADED
     ? { locations: result.locations, homeLocationId: result.homeLocationId }
-    : { locations: [], homeLocationId: null };
+    : {
+        locations: buildFirstLaunchLocations(deviceTimeZoneId),
+        homeLocationId: null,
+      };
 
 function createLocationsStore(
   initialResult: LocationsLoadResult,
@@ -59,7 +66,7 @@ function createLocationsStore(
   });
   store.dispatch({
     type: LocationCommandType.REPLACE_LOCATIONS,
-    ...storedOf(initialResult),
+    ...storedOf(initialResult, deviceTimeZoneId),
   });
   return store;
 }
@@ -80,8 +87,10 @@ function createLocationsStore(
  * show-local-time-and-date-on-location-cards, D4).
  * Loads, applies and writes the home location with the list: FR8, FR10 of
  * set-home-location-and-show-differences (D6).
- * Hands the city data loader to the Here entry and the search: FR8 of
- * show-here-entry-for-device-time (D4).
+ * Hands the city data loader to the device time location and the search:
+ * FR8, NFR-P2 of add-settings-page-and-device-time-location (D4).
+ * An unwritten list is the first-launch list (FR12, D3).
+ * A stored empty list stays empty (FR13).
  */
 export function LocationsProvider({
   children,
@@ -117,7 +126,7 @@ export function LocationsProvider({
     const unsubscribe = repository.subscribe((result) => {
       store.dispatch({
         type: LocationCommandType.REPLACE_LOCATIONS,
-        ...storedOf(result),
+        ...storedOf(result, store.getSnapshot().deviceTimeZoneId),
       });
       setLoadStatus(statusOf(result));
     });
@@ -149,6 +158,7 @@ export function LocationsProvider({
       loadCitySearch,
       hasSaveFailed,
       addLocation: actions.addLocation,
+      addDeviceTimeLocation: actions.addDeviceTimeLocation,
       removeLocation: actions.removeLocation,
       moveLocation: actions.moveLocation,
       setHomeLocation: actions.setHomeLocation,

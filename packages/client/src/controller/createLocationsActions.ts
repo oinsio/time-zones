@@ -1,6 +1,6 @@
 import type { MutableRefObject } from "react";
 import { LOCATIONS_WRITE_DEBOUNCE_MS } from "@/constants";
-import { LocationCommandType } from "@/model";
+import { buildFirstLaunchLocations, LocationCommandType } from "@/model";
 import { type LocationRepository, SaveOutcome } from "@/ports";
 import {
   type LocationsContextValue,
@@ -21,6 +21,7 @@ type LocationsActionsDependencies = {
 type LocationsActions = Pick<
   LocationsContextValue,
   | "addLocation"
+  | "addDeviceTimeLocation"
   | "removeLocation"
   | "moveLocation"
   | "setHomeLocation"
@@ -35,6 +36,7 @@ type LocationsActions = Pick<
  * A move writes only when it changed the list (FR3 of
  * reorder-locations-by-drag-and-drop, D2).
  * Implements FR3, FR10 of set-home-location-and-show-differences (D1, D6).
+ * Implements FR11, FR12 of add-settings-page-and-device-time-location (D3, D12).
  */
 export function createLocationsActions({
   repository,
@@ -76,6 +78,10 @@ export function createLocationsActions({
     },
     addLocation: (input) =>
       dispatchAndSchedule({ type: LocationCommandType.ADD_LOCATION, ...input }),
+    addDeviceTimeLocation: () =>
+      dispatchAndSchedule({
+        type: LocationCommandType.ADD_DEVICE_TIME_LOCATION,
+      }),
     removeLocation: (id) =>
       dispatchAndSchedule({ type: LocationCommandType.REMOVE_LOCATION, id }),
     moveLocation: (id, targetIndex) =>
@@ -91,7 +97,9 @@ export function createLocationsActions({
       const outcome = repository.clear();
       store.dispatch({
         type: LocationCommandType.REPLACE_LOCATIONS,
-        locations: [],
+        locations: buildFirstLaunchLocations(
+          store.getSnapshot().deviceTimeZoneId,
+        ),
         homeLocationId: null,
       });
       setLoadStatus(LocationsStatus.READY);

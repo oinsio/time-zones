@@ -1,5 +1,5 @@
 import { LOCATIONS_SCHEMA_VERSION } from "@/constants";
-import { parseStoredLocations } from "@/model";
+import { LocationKind, parseStoredLocations } from "@/model";
 import {
   type LocationsLoadResult,
   LocationsLoadStatus,
@@ -17,9 +17,21 @@ export type PayloadMigrations = Readonly<
   Record<number, (payload: unknown) => unknown>
 >;
 
-/** Version 1 had no home location: the migration adds "no home" (FR8). */
+/**
+ * Version 1 had no home location: the migration adds "no home" (FR8). Version 2
+ * had the derived Here entry: the migration lists the device time location
+ * first (FR14 of add-settings-page-and-device-time-location, D2).
+ */
 export const LOCATION_MIGRATIONS: PayloadMigrations = {
   1: (payload) => ({ ...(payload as object), homeLocationId: null }),
+  2: (payload) => {
+    const stored = payload as { locations?: unknown };
+    if (!Array.isArray(stored?.locations)) return payload;
+    return {
+      ...stored,
+      locations: [{ kind: LocationKind.DEVICE_TIME }, ...stored.locations],
+    };
+  },
 };
 
 const UNREADABLE: LocationsLoadResult = {
@@ -33,11 +45,16 @@ export function serializeLocationsDocument(
   return JSON.stringify({
     schemaVersion,
     payload: {
-      locations: locations.map(({ timeZoneId, label, countryCode }) => ({
-        timeZoneId,
-        label,
-        countryCode,
-      })),
+      locations: locations.map((location) =>
+        location.kind === LocationKind.DEVICE_TIME
+          ? { kind: location.kind }
+          : {
+              kind: location.kind,
+              timeZoneId: location.timeZoneId,
+              label: location.label,
+              countryCode: location.countryCode,
+            },
+      ),
       homeLocationId,
     },
   });

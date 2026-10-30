@@ -4,11 +4,10 @@ import {
   WALL_TIME_COMMAND_PATTERN,
 } from "@/constants";
 import { Temporal } from "@/lib/temporal";
-import { getHereEntry } from "./hereEntry";
 import type { LocationCommand, LocationCommandType } from "./locationCommands";
 import { LocationErrorCode } from "./locationCommands";
 import type { LocationsReduceResult, WorldClockState } from "./locations";
-import { ReferenceMode, WallTimeTargetKind } from "./referenceMoment";
+import { ReferenceMode } from "./referenceMoment";
 import { resolveWallClock } from "./wallClock";
 
 type SetWallTimeCommand = Extract<
@@ -26,9 +25,6 @@ function findTargetZone(
   state: WorldClockState,
   target: SetWallTimeCommand["target"],
 ): string | undefined {
-  if (target.kind === WallTimeTargetKind.HERE_ENTRY) {
-    return getHereEntry(state)?.timeZoneId;
-  }
   return state.locations.find((location) => location.id === target.locationId)
     ?.timeZoneId;
 }

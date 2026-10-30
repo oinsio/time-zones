@@ -1,3 +1,4 @@
+// Verifies FR4, NFR-A3 of add-settings-page-and-device-time-location (D7).
 // Verifies NFR-A3 of keep-now-button-visible-when-live.
 // Verifies UX5, NFR-A1 of add-locations-via-search (D10).
 import { readFileSync } from "node:fs";
@@ -5,7 +6,11 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const TOKENS_FILE = join(process.cwd(), "src", "styles", "tokens.css");
-const DARK_THEME_MARKER = "@media (prefers-color-scheme: dark)";
+const LIGHT_SELECTOR = ":root {";
+const FORCED_DARK_SELECTOR = ':root[data-theme="dark"] {';
+const SYSTEM_DARK_SELECTOR = ':root:not([data-theme="light"]) {';
+const BLOCK_END = "}";
+const COLOR_TOKEN_PATTERN = /--color-[a-z-]+:\s*#[0-9a-fA-F]{6}\s*;/g;
 const NEW_TOKENS = ["surface", "border", "overlay", "danger", "muted"];
 const MIN_TEXT_CONTRAST = 4.5;
 const MIN_NON_TEXT_CONTRAST = 3;
@@ -22,11 +27,16 @@ const BLUE_WEIGHT = 0.0722;
 const CONTRAST_OFFSET = 0.05;
 
 const tokensCss = readFileSync(TOKENS_FILE, "utf8");
-const darkStart = tokensCss.indexOf(DARK_THEME_MARKER);
-const themeBlocks = {
-  light: tokensCss.slice(0, darkStart),
-  dark: tokensCss.slice(darkStart),
+const readBlock = (selector: string): string => {
+  const start = tokensCss.indexOf(selector);
+  if (start < 0) throw new Error(`${selector} missing in tokens.css`);
+  return tokensCss.slice(start, tokensCss.indexOf(BLOCK_END, start));
 };
+const themeBlocks = {
+  light: readBlock(LIGHT_SELECTOR),
+  dark: readBlock(FORCED_DARK_SELECTOR),
+};
+const systemDarkBlock = readBlock(SYSTEM_DARK_SELECTOR);
 
 const readToken = (theme: "light" | "dark", name: string): string | undefined =>
   themeBlocks[theme].match(
@@ -95,3 +105,24 @@ describe.each(["light", "dark"] as const)(
     });
   },
 );
+
+describe("theme blocks", () => {
+  it("should give the forced dark block and the system dark block the same values", () => {
+    const forcedDarkTokens = themeBlocks.dark.match(COLOR_TOKEN_PATTERN);
+    expect(forcedDarkTokens?.length).toBeGreaterThan(0);
+    expect(systemDarkBlock.match(COLOR_TOKEN_PATTERN)).toEqual(
+      forcedDarkTokens,
+    );
+  });
+
+  it.each(["light", "dark"] as const)(
+    "should declare color-scheme %s",
+    (theme) => {
+      expect(themeBlocks[theme]).toContain(`color-scheme: ${theme};`);
+    },
+  );
+
+  it("should declare color-scheme dark in the system dark block", () => {
+    expect(systemDarkBlock).toContain("color-scheme: dark;");
+  });
+});

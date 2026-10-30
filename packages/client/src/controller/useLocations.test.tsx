@@ -1,11 +1,17 @@
 // Verifies FR11–FR14 of add-locations-via-search (D3, D5).
 // Verifies FR2, FR4 of show-utc-offset-on-location-rows (D4).
+
 import { act, renderHook } from "@testing-library/react";
 import i18n from "i18next";
 import { createInMemoryLocationRepository } from "@/adapters";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { type Clock, fakeClock } from "@/lib/temporal";
 import { LocationsLoadStatus } from "@/ports";
-import { moscow, renderLocations } from "@/test/renderLocations";
+import {
+  moscow,
+  renderLocations,
+  storedEmptyList,
+} from "@/test/renderLocations";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationsStatus, useLocations } from "./useLocations";
 
@@ -22,7 +28,7 @@ describe("useLocations", () => {
       [
         "rows",
         "rowsContext",
-        "hereEntry",
+        "addDeviceTimeLocation",
         "loadCitySearch",
         "locations",
         "loadStatus",
@@ -91,7 +97,7 @@ describe("useLocations", () => {
         countryCode: "US",
       };
       const { result } = renderLocations(
-        createInMemoryLocationRepository(),
+        createInMemoryLocationRepository({ initialDocument: storedEmptyList }),
         immediateWriteScheduler,
         switchableClock,
       );
@@ -127,9 +133,11 @@ describe("useLocations", () => {
       await act(() => i18n.changeLanguage("ru"));
     });
 
-    it("should start empty and ready when nothing is stored", () => {
+    it("should start with the first-launch list and ready when nothing is stored", () => {
       const { result } = renderLocations(createInMemoryLocationRepository());
-      expect(result.current.locations).toEqual([]);
+      expect(result.current.rows.map((row) => row.id)).toEqual([
+        DEVICE_TIME_LOCATION_ID,
+      ]);
       expect(result.current.loadStatus).toBe(LocationsStatus.READY);
     });
 

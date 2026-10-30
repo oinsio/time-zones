@@ -1,5 +1,11 @@
 /** Version of the stored locations document (ADR-0004 envelope). */
-export const LOCATIONS_SCHEMA_VERSION = 2;
+export const LOCATIONS_SCHEMA_VERSION = 3;
+
+/**
+ * Id of the device time location; has no `|`, so it never equals a city id.
+ * Implements FR8 of add-settings-page-and-device-time-location (D1).
+ */
+export const DEVICE_TIME_LOCATION_ID = "device-time";
 
 /** Delay that collapses bursts of add/remove into one storage write. */
 export const LOCATIONS_WRITE_DEBOUNCE_MS = 300;

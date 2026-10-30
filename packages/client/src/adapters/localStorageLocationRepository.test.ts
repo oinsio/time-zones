@@ -1,6 +1,7 @@
 // Verifies FR9, FR11 (document) of add-locations-via-search (D4).
 // Verifies FR8 of set-home-location-and-show-differences (D6): home in the document.
 import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
+import { LocationKind } from "@/model";
 import { LocationsLoadStatus } from "@/ports";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
 import {
@@ -40,7 +41,12 @@ describe("local storage location repository document", () => {
       schemaVersion: LOCATIONS_SCHEMA_VERSION,
       payload: {
         locations: [
-          { timeZoneId: "Europe/Moscow", label: "Moscow", countryCode: "RU" },
+          {
+            kind: "CITY",
+            timeZoneId: "Europe/Moscow",
+            label: "Moscow",
+            countryCode: "RU",
+          },
         ],
         homeLocationId: null,
       },
@@ -106,7 +112,10 @@ describe("local storage location repository document", () => {
     });
     expect(createRepository().load()).toMatchObject({
       status: LocationsLoadStatus.LOADED,
-      locations: [{ timeZoneId: "Asia/Kolkata" }],
+      locations: [
+        { kind: LocationKind.DEVICE_TIME },
+        { timeZoneId: "Asia/Kolkata" },
+      ],
       homeLocationId: null,
     });
   });

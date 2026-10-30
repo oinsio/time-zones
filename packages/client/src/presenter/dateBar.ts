@@ -6,6 +6,7 @@ import {
 } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import type { HourFormat } from "@/preferences";
 import { formatWallClockTime } from "./localDateTime";
 
 export type DateBarGap = {
@@ -19,6 +20,7 @@ export type DateBarContext = {
   isPinned: boolean;
   gap: DateBarGap | undefined;
   language: SupportedLanguage;
+  hourFormat: HourFormat;
   translate: TFunction;
 };
 
@@ -49,6 +51,7 @@ export function presentDateBar({
   isPinned,
   gap,
   language,
+  hourFormat,
   translate,
 }: DateBarContext): PresentedDateBar {
   const yearOptions =
@@ -58,7 +61,7 @@ export function presentDateBar({
     FULL_DATE_FORMAT_OPTIONS,
   );
   const formatTime = (time: Temporal.PlainTime) =>
-    formatWallClockTime(time, language);
+    formatWallClockTime(time, language, hourFormat);
   return {
     shortLabel: effectiveDate.toLocaleString(language, {
       ...DATE_BAR_SHORT_FORMAT_OPTIONS,

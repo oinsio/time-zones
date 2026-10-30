@@ -1,9 +1,6 @@
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import type { WorldClockState } from "./locations";
-import {
-  getReferenceZone,
-  ReferenceMode,
-  WallTimeTargetKind,
-} from "./referenceMoment";
+import { getReferenceZone, ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
 /**
@@ -11,11 +8,12 @@ import { WallClockStatus } from "./wallClock";
  * pinned instant stays, its status becomes `UNIQUE` and the requested wall time
  * is the instant's wall time in the reference zone. The gap note of a date
  * change follows the reference zone. A wall-time hint on a location never
- * ends, because that row's zone does not change; a hint on the Here entry ends
+ * ends, because that row's zone does not change; a hint on the device time location ends
  * with a change of the device time zone. Every other state is returned
  * unchanged, with the same `reference` object.
  * Implements FR4 of set-home-location-and-show-differences (D2).
  * Implements FR7 of add-wall-time-input-with-hint (D2).
+ * Implements FR9 of add-settings-page-and-device-time-location (D1).
  */
 export function followReferenceZone(
   previous: WorldClockState,
@@ -33,7 +31,7 @@ export function followReferenceZone(
     wallTimeTarget === undefined
       ? reference.wallClockStatus === WallClockStatus.GAP &&
         getReferenceZone(previous) !== getReferenceZone(next)
-      : wallTimeTarget.kind === WallTimeTargetKind.HERE_ENTRY &&
+      : wallTimeTarget.locationId === DEVICE_TIME_LOCATION_ID &&
         previous.deviceTimeZoneId !== next.deviceTimeZoneId;
   if (!isNoteEnded) return next;
   const { wallTimeTarget: _endedTarget, ...plainMoment } = reference;

@@ -5,20 +5,24 @@ import {
 } from "@/constants";
 import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import { HourFormat } from "@/preferences";
 import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
 
 /**
- * Local time as two-digit 24-hour "HH:mm".
+ * Local time as "HH:mm" or "h:mm AM" by the hour format.
+ * Implements FR5 of add-settings-page-and-device-time-location (D8).
  * Implements FR1 of show-local-time-and-date-on-location-cards (D3).
  */
 export function formatLocalTime(
   localDateTime: Temporal.ZonedDateTime,
   language: SupportedLanguage,
+  hourFormat: HourFormat,
 ): string {
   return getDateTimeFormatter(
     language,
     localDateTime.timeZoneId,
     DateTimeLabelKind.LOCAL_TIME,
+    hourFormat,
   ).format(localDateTime.epochMilliseconds);
 }
 
@@ -34,11 +38,12 @@ export function formatLocalDate(
     language,
     localDateTime.timeZoneId,
     DateTimeLabelKind.LOCAL_DATE,
+    HourFormat.H24,
   ).format(localDateTime.epochMilliseconds);
 }
 
 /**
- * A requested wall-clock time as "HH:mm". It is not an instant, so it is read
+ * A requested wall-clock time in the hour format. It is not an instant, so it is read
  * as milliseconds since midnight through the cached UTC formatter; no zone is
  * looked up and no formatter is built per call.
  * Implements FR7 of add-wall-time-input-with-hint (D4), NFR-P1.
@@ -46,11 +51,13 @@ export function formatLocalDate(
 export function formatWallClockTime(
   time: Temporal.PlainTime,
   language: SupportedLanguage,
+  hourFormat: HourFormat,
 ): string {
   const minutesSinceMidnight = time.hour * MINUTES_PER_HOUR + time.minute;
   return getDateTimeFormatter(
     language,
     UTC_ZONE_ID,
     DateTimeLabelKind.LOCAL_TIME,
+    hourFormat,
   ).format(minutesSinceMidnight * MILLISECONDS_PER_MINUTE);
 }

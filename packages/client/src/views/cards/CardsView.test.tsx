@@ -5,6 +5,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createInMemoryLocationRepository } from "@/adapters";
+import { ADD_LOCATION_BUTTON_ID } from "@/constants";
 import { LocationsProvider } from "@/controller";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
@@ -21,6 +22,9 @@ const renderCards = (options: RepositoryOptions = {}) =>
       repository={createInMemoryLocationRepository(options)}
       writeScheduler={immediateWriteScheduler}
     >
+      <button type="button" id={ADD_LOCATION_BUTTON_ID}>
+        Add location
+      </button>
       <CardsView />
     </LocationsProvider>,
   );
@@ -51,23 +55,17 @@ describe("CardsView", () => {
     "should explain in $language that no locations are added",
     async ({ language, explanation }) => {
       await i18n.changeLanguage(language);
-      renderCards();
+      renderCards(savedLocations());
       expect(screen.getByText(explanation)).toBeInTheDocument();
     },
   );
 
-  it("should offer the Add location action in the empty state", () => {
-    renderCards();
-    expect(screen.getByRole("button", { name: "Add location" })).toBeVisible();
-  });
-
-  it("should list the saved locations and keep the action", () => {
+  it("should list the saved locations without the empty state", () => {
     renderCards(savedLocations("Alpha", "Beta"));
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
     expect(
       screen.queryByText("No locations added yet."),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add location" })).toBeVisible();
   });
 
   it("should show only the load error with Reset for an unreadable list", () => {
@@ -78,42 +76,19 @@ describe("CardsView", () => {
     expect(
       screen.queryByText("No locations added yet."),
     ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Add location" }),
-    ).not.toBeInTheDocument();
   });
 
-  it("should show the empty state after Reset", async () => {
+  it("should show the first-launch list, not the empty state, after Reset", async () => {
     renderCards({
       initialDocument: { status: LocationsLoadStatus.UNREADABLE },
     });
     await userEvent.click(
       screen.getByRole("button", { name: "Reset the list" }),
     );
-    expect(screen.getByText("No locations added yet.")).toBeInTheDocument();
-  });
-
-  it("should keep the same Add location button when the first location is added", async () => {
-    renderCards();
-    const buttonBefore = screen.getByRole("button", { name: "Add location" });
-    await userEvent.click(buttonBefore);
-    await userEvent.type(await screen.findByRole("combobox"), "Moscow");
-    await userEvent.click(screen.getByRole("option", { name: /Moscow/ }));
-    expect(screen.getByRole("button", { name: "Add location" })).toBe(
-      buttonBefore,
-    );
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
-  });
-
-  it("should announce an added location politely", async () => {
-    renderCards();
-    await userEvent.click(screen.getByRole("button", { name: "Add location" }));
-    await userEvent.type(await screen.findByRole("combobox"), "Moscow");
-    await userEvent.click(screen.getByRole("option", { name: /Moscow/ }));
-    expect(screen.getByText("Moscow added")).toHaveAttribute(
-      "aria-live",
-      "polite",
-    );
+    expect(
+      screen.queryByText("No locations added yet."),
+    ).not.toBeInTheDocument();
   });
 
   it("should announce a removed location politely", async () => {

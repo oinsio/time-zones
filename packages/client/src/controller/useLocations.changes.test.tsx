@@ -8,13 +8,16 @@ import {
   moscow,
   moscowInput,
   renderLocations,
+  storedEmptyList,
 } from "@/test/renderLocations";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 
 describe("useLocations", () => {
   describe("changes", () => {
     it("should add a location and save the list", () => {
-      const repository = createInMemoryLocationRepository();
+      const repository = createInMemoryLocationRepository({
+        initialDocument: storedEmptyList,
+      });
       const save = vi.spyOn(repository, "save");
       const { result } = renderLocations(repository);
       act(() => {

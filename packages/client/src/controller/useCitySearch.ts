@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { loadCitySearch } from "@/adapters";
+import {
+  loadCitySearch,
+  normalizeSearchText,
+  splitIntoWords,
+} from "@/adapters";
 import type { SupportedLanguage } from "@/i18n";
-import type { Location } from "@/model";
+import { isDeviceTimeLocation, type Location } from "@/model";
 import type { CitySearch, LoadCitySearch } from "@/ports";
-import { type PresentedSearchResult, presentSearchResults } from "@/presenter";
+import {
+  type PresentedSearchResult,
+  presentDeviceTimeOptionLabels,
+  presentSearchResults,
+} from "@/presenter";
 import { loadCitySearchOnce, readLoadedCitySearch } from "./cityDataCache";
 
 export enum CitySearchStatus {
@@ -18,6 +26,7 @@ export enum CitySearchStatus {
  * cached: `retry` calls the loader again. Shares the load with the Here entry
  * through `cityDataCache` (FR8 of show-here-entry-for-device-time).
  * Implements FR6, FR15, NFR-P2 of add-locations-via-search (D8, D9).
+ * Implements FR11 of add-settings-page-and-device-time-location (D12): `isDeviceTimeOptionShown`.
  */
 export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
   const { i18n } = useTranslation();
@@ -70,5 +79,24 @@ export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
       : isFailed
         ? CitySearchStatus.FAILED
         : CitySearchStatus.LOADING;
-  return { status, presentResults, retry };
+  const isDeviceTimeOptionShown = useCallback(
+    (query: string, locations: readonly Location[]): boolean => {
+      if (locations.some(isDeviceTimeLocation)) return false;
+      const normalizedQuery = normalizeSearchText(query);
+      if (normalizedQuery === "") return true;
+      const labels = presentDeviceTimeOptionLabels({
+        english: i18n.getFixedT("en"),
+        russian: i18n.getFixedT("ru"),
+      });
+      return labels.some(
+        (label) =>
+          normalizeSearchText(label).startsWith(normalizedQuery) ||
+          splitIntoWords(normalizeSearchText(label)).some((word) =>
+            word.startsWith(normalizedQuery),
+          ),
+      );
+    },
+    [i18n],
+  );
+  return { status, presentResults, retry, isDeviceTimeOptionShown };
 }

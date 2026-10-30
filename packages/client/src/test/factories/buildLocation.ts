@@ -1,4 +1,4 @@
-import { buildLocationId, type Location } from "@/model";
+import { buildLocationId, type Location, LocationKind } from "@/model";
 
 /** Builds a location with its derived id; every field can be overridden. */
 export function buildLocation(overrides: Partial<Location> = {}): Location {
@@ -6,6 +6,7 @@ export function buildLocation(overrides: Partial<Location> = {}): Location {
   const label = overrides.label ?? "Moscow";
   return {
     id: buildLocationId(timeZoneId, label),
+    kind: LocationKind.CITY,
     timeZoneId,
     label,
     countryCode: "RU",

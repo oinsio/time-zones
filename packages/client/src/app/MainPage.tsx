@@ -7,6 +7,8 @@ interface MainPageProps {
   notices: ReactNode;
   /** Content of the footer bar that stays at the bottom of the viewport. */
   bottomBar: ReactNode;
+  /** The Add location and Settings buttons; they carry their own header placement. */
+  headerActions?: ReactNode;
 }
 
 /**
@@ -16,14 +18,19 @@ interface MainPageProps {
  * fill the slots, they do not reshape the page.
  * Implements FR1, UX3 of add-main-page-scaffold (D3, D7) and FR8 of
  * select-date-with-calendar-and-now (D7).
+ * Implements FR1, FR2, UX1 of add-settings-page-and-device-time-location (D11):
+ * a three-column grid below 768 px (Add location, centred title, Settings) and
+ * a row from it (title, Add location, Settings); DOM order is the Tab order.
  */
-export function MainPage({ notices, bottomBar }: MainPageProps) {
+export function MainPage({ notices, bottomBar, headerActions }: MainPageProps) {
   const { t } = useTranslation();
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-screen-2xl flex-col px-4">
-      <header className="flex items-center justify-between gap-2 pt-6 pb-4">
-        <h1 className="text-2xl font-semibold">{t("app.title")}</h1>
-        <div className="flex items-center gap-2" />
+      <header className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-border pt-6 pb-4 md:flex md:gap-4">
+        <h1 className="order-2 col-start-2 text-center text-2xl font-semibold md:order-1 md:text-left">
+          {t("app.title")}
+        </h1>
+        {headerActions}
       </header>
       <main className="flex-1">
         <ViewHost />

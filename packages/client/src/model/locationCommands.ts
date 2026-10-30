@@ -15,6 +15,7 @@ export enum LocationCommandType {
   REPLACE_LOCATIONS = "REPLACE_LOCATIONS",
   MOVE_LOCATION = "MOVE_LOCATION",
   SET_DEVICE_TIME_ZONE = "SET_DEVICE_TIME_ZONE",
+  ADD_DEVICE_TIME_LOCATION = "ADD_DEVICE_TIME_LOCATION",
   SET_DATE = "SET_DATE",
   SHIFT_DATE = "SHIFT_DATE",
   RESET_TO_NOW = "RESET_TO_NOW",
@@ -55,6 +56,7 @@ export type LocationCommand =
     }
   | { type: LocationCommandType.SET_HOME_LOCATION; id: string | null }
   | { type: LocationCommandType.SET_DEVICE_TIME_ZONE; timeZoneId: string }
+  | { type: LocationCommandType.ADD_DEVICE_TIME_LOCATION }
   /** `date` is an ISO date, `now` an ISO 8601 timestamp with `Z`. */
   | { type: LocationCommandType.SET_DATE; date: string; now: string }
   | { type: LocationCommandType.SHIFT_DATE; days: number; now: string }

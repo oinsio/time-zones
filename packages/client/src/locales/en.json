@@ -35,8 +35,9 @@
     "hereMarkLabel": "You are here",
     "hereMarkCaption": "here",
     "deviceTimeMeta": "Device time · {{utcOffset}}",
-    "hereEntryName": "{{city}}, {{hereMark}}, Device time",
+    "deviceTimeName": "{{city}}, {{hereMark}}, Device time",
     "addLocation": "Add location",
+    "addShort": "Add",
     "homeMarkLabel": "Home location",
     "locationMenu": "Actions for {{city}}",
     "makeHome": "Make home",
@@ -83,7 +84,8 @@
     "resultCount_one": "{{count}} result",
     "resultCount_other": "{{count}} results",
     "resultCount_few": "{{count}} results",
-    "resultCount_many": "{{count}} results"
+    "resultCount_many": "{{count}} results",
+    "deviceTimeAddedAnnouncement": "Device time added"
   },
   "date": {
     "barLabel": "Date",
@@ -95,5 +97,23 @@
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "gapNote": "{{requestedTime}} does not exist on this day because of a clock change; showing {{shownTime}}."
+  },
+  "search": {
+    "deviceTimeOption": "Device time"
+  },
+  "settings": {
+    "open": "Settings",
+    "title": "Settings",
+    "back": "Back",
+    "themeLabel": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "hourFormatLabel": "Hour format",
+    "hourFormat12": "12-hour",
+    "hourFormat24": "24-hour",
+    "unreadable": "The saved settings could not be read. Defaults are used.",
+    "reset": "Reset settings",
+    "saveFailed": "Settings will not be saved on this device."
   }
 }

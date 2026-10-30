@@ -38,11 +38,17 @@ export {
   type ReferenceDay,
   TrackMove,
 } from "./dayTrack";
+// Implements FR8, FR9, FR12 of add-settings-page-and-device-time-location.
+export {
+  buildDeviceTimeLocation,
+  buildFirstLaunchLocations,
+  isDeviceTimeLocation,
+  withDeviceTimeZone,
+} from "./deviceTimeLocation";
 export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
-// Implements FR1, FR6 of show-here-entry-for-device-time.
-export { getHereEntry, type HereEntry } from "./hereEntry";
 // Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards.
 export { getLocalDateTime } from "./localDateTime";
+export { LocationKind } from "./locationKind";
 export { getLocationMarkKind, LocationMarkKind } from "./locationMark";
 export {
   buildLocationId,

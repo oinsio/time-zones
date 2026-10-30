@@ -3,13 +3,15 @@ import { useTranslation } from "react-i18next";
 import type { SupportedLanguage } from "@/i18n";
 import {
   getEffectiveInstant,
-  getHereEntry,
   getReferenceDay,
   getReferenceOffsetMinutes,
   getWallClockNote,
+  isDeviceTimeLocation,
 } from "@/model";
 import { type LocationRowsContext, presentLocationRows } from "@/presenter";
-import { LocationsContext, LocationsStatus } from "./locationsContext";
+import { LocationsContext } from "./locationsContext";
+import { useExemplarCity } from "./useExemplarCity";
+import { useHourFormat } from "./useHourFormat";
 
 export { LocationsStatus } from "./locationsContext";
 
@@ -32,8 +34,9 @@ const MISSING_PROVIDER_MESSAGE =
  * Implements FR1, FR2 of add-time-sliders-to-location-cards (D6).
  * Passes the home location and the reference offset, read once per
  * presentation: Implements FR5, FR7 of set-home-location-and-show-differences (D4).
- * Returns the rows context and the Here entry, none while the stored list is
- * unreadable: Implements FR1, FR9 of show-here-entry-for-device-time (D4).
+ * Returns the rows context. The device time location is a row like any other;
+ * its exemplar city is requested only while it is listed: Implements FR8,
+ * NFR-P2 of add-settings-page-and-device-time-location (D4).
  * Passes the wall-clock note: Implements FR7 of add-wall-time-input-with-hint (D2).
  */
 export function useLocations() {
@@ -42,31 +45,45 @@ export function useLocations() {
   const { store, clock, minuteTick, ...rest } = context;
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const { locations, deviceTimeZoneId, homeLocationId } = state;
+  const hourFormat = useHourFormat();
   const { i18n, t } = useTranslation();
   const language = (i18n.resolvedLanguage ??
     i18n.language) as SupportedLanguage;
+  const deviceTimeLocation = locations.find(isDeviceTimeLocation);
+  const deviceTimeCityLabel = useExemplarCity(
+    deviceTimeLocation?.timeZoneId,
+    rest.loadCitySearch,
+  );
   // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick re-presents the rows at each minute
   const { rows, rowsContext } = useMemo(() => {
     const now = clock.instant();
     const instant = getEffectiveInstant(state, now);
     const context: LocationRowsContext = {
       language,
+      hourFormat,
       instant,
       translate: t,
       deviceTimeZoneId,
       homeLocationId,
       referenceOffsetMinutes: getReferenceOffsetMinutes(state, instant),
       referenceDay: getReferenceDay(state, now),
+      deviceTimeCityLabel,
       wallClockNote: getWallClockNote(state),
     };
     return {
       rows: presentLocationRows(locations, context),
       rowsContext: context,
     };
-  }, [state, locations, deviceTimeZoneId, language, t, clock, minuteTick]);
-  const hereEntry =
-    rest.loadStatus === LocationsStatus.UNREADABLE
-      ? undefined
-      : getHereEntry(state);
-  return { rows, rowsContext, hereEntry, locations, ...rest };
+  }, [
+    state,
+    locations,
+    deviceTimeZoneId,
+    deviceTimeCityLabel,
+    language,
+    hourFormat,
+    t,
+    clock,
+    minuteTick,
+  ]);
+  return { rows, rowsContext, locations, ...rest };
 }

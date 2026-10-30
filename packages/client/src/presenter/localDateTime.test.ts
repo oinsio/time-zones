@@ -1,6 +1,7 @@
 // Verifies FR1, FR2 of show-local-time-and-date-on-location-cards (D3).
 import { describe, expect, it } from "vitest";
 import { fakeClock, Temporal } from "@/lib/temporal";
+import { HourFormat } from "@/preferences";
 import { startWorkCount } from "@/test/workCounters";
 import {
   formatLocalDate,
@@ -21,9 +22,13 @@ describe("formatLocalTime", () => {
   ] as const)(
     "should write %s %s at %s as %s",
     (language, zone, timestamp, expected) => {
-      expect(formatLocalTime(localDateTimeOf(zone, timestamp), language)).toBe(
-        expected,
-      );
+      expect(
+        formatLocalTime(
+          localDateTimeOf(zone, timestamp),
+          language,
+          HourFormat.H24,
+        ),
+      ).toBe(expected);
     },
   );
 });
@@ -62,7 +67,7 @@ describe("local labels (characterization)", () => {
       const localDateTime = localDateTimeOf(zone, timestamp);
 
       expect([
-        formatLocalTime(localDateTime, language),
+        formatLocalTime(localDateTime, language, HourFormat.H24),
         formatLocalDate(localDateTime, language),
       ]).toEqual([expectedTime, expectedDate]);
     },
@@ -77,16 +82,20 @@ describe("formatWallClockTime", () => {
     ["en", "00:00", "00:00"],
     ["en", "23:59", "23:59"],
   ] as const)("should write %s %s as %s", (language, time, expected) => {
-    expect(formatWallClockTime(Temporal.PlainTime.from(time), language)).toBe(
-      expected,
-    );
+    expect(
+      formatWallClockTime(
+        Temporal.PlainTime.from(time),
+        language,
+        HourFormat.H24,
+      ),
+    ).toBe(expected);
   });
 
   it("should build one formatter for repeated formatting", () => {
-    formatWallClockTime(Temporal.PlainTime.from("04:10"), "en");
+    formatWallClockTime(Temporal.PlainTime.from("04:10"), "en", HourFormat.H24);
     const workCount = startWorkCount();
-    formatWallClockTime(Temporal.PlainTime.from("02:30"), "en");
-    formatWallClockTime(Temporal.PlainTime.from("03:30"), "en");
+    formatWallClockTime(Temporal.PlainTime.from("02:30"), "en", HourFormat.H24);
+    formatWallClockTime(Temporal.PlainTime.from("03:30"), "en", HourFormat.H24);
     workCount.stop();
     expect(workCount.formatters()).toBe(0);
   });

@@ -37,6 +37,8 @@ export type LocationsContextValue = {
   loadCitySearch: LoadCitySearch;
   hasSaveFailed: boolean;
   addLocation: (input: AddLocationInput) => LocationsReduceResult;
+  /** Appends the device time location; fails when it is listed (FR11). */
+  addDeviceTimeLocation: () => LocationsReduceResult;
   removeLocation: (id: string) => LocationsReduceResult;
   /** Implements FR2 of reorder-locations-by-drag-and-drop. */
   moveLocation: (id: string, targetIndex: number) => LocationsReduceResult;

@@ -35,8 +35,9 @@
     "hereMarkLabel": "Вы здесь",
     "hereMarkCaption": "здесь",
     "deviceTimeMeta": "Время устройства · {{utcOffset}}",
-    "hereEntryName": "{{city}}, {{hereMark}}, Время устройства",
+    "deviceTimeName": "{{city}}, {{hereMark}}, Время устройства",
     "addLocation": "Добавить место",
+    "addShort": "Добавить",
     "homeMarkLabel": "Домашнее место",
     "locationMenu": "Действия: {{city}}",
     "makeHome": "Сделать домашним",
@@ -83,7 +84,8 @@
     "resultCount_one": "{{count}} результат",
     "resultCount_few": "{{count}} результата",
     "resultCount_many": "{{count}} результатов",
-    "resultCount_other": "{{count}} результата"
+    "resultCount_other": "{{count}} результата",
+    "deviceTimeAddedAnnouncement": "Время устройства добавлено"
   },
   "date": {
     "barLabel": "Дата",
@@ -95,5 +97,23 @@
     "previousMonth": "Предыдущий месяц",
     "nextMonth": "Следующий месяц",
     "gapNote": "{{requestedTime}} в этот день нет из-за перевода часов; показано {{shownTime}}."
+  },
+  "search": {
+    "deviceTimeOption": "Время устройства"
+  },
+  "settings": {
+    "open": "Настройки",
+    "title": "Настройки",
+    "back": "Назад",
+    "themeLabel": "Тема",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "themeSystem": "Системная",
+    "hourFormatLabel": "Формат времени",
+    "hourFormat12": "12 часов",
+    "hourFormat24": "24 часа",
+    "unreadable": "Сохранённые настройки не удалось прочитать. Используются значения по умолчанию.",
+    "reset": "Сбросить настройки",
+    "saveFailed": "Настройки не будут сохранены на этом устройстве."
   }
 }

@@ -1,9 +1,11 @@
 // Verifies FR5, FR7 of set-home-location-and-show-differences (D3-D5): home mark and differences in rows.
+
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
 import { getUtcOffsetMinutes, type Location } from "@/model";
+import { HourFormat } from "@/preferences";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
@@ -29,6 +31,7 @@ const present = (
   const referenceZone = home?.timeZoneId ?? deviceTimeZoneId;
   return presentLocationRows(locations, {
     language,
+    hourFormat: HourFormat.H24,
     instant,
     translate: i18n.getFixedT(language),
     deviceTimeZoneId,

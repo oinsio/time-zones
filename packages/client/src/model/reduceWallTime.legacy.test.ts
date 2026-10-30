@@ -1,6 +1,7 @@
 // Verifies FR13 of add-wall-time-input-with-hint (D1, M8): a renamed zone on outdated zone data.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createLegacyZoneDateTimeFormat } from "@/lib/legacy";
+import { LocationKind } from "@/model";
 
 const RENAMED_ZONE_ID = "Europe/Kyiv";
 const LEGACY_ZONE_ID = "Europe/Kiev";
@@ -39,6 +40,7 @@ describe("SET_WALL_TIME on an engine that knows Europe/Kyiv only as Europe/Kiev"
     const model = await import("@/model");
     const kyiv = {
       id: "Europe/Kyiv|Kyiv",
+      kind: LocationKind.CITY,
       timeZoneId: RENAMED_ZONE_ID,
       label: "Kyiv",
       countryCode: "UA",

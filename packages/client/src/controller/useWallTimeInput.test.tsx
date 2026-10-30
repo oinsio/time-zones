@@ -15,6 +15,7 @@ import { useReferenceMoment } from "./useReferenceMoment";
 import {
   useWallTimeInput,
   WallTimeInputOutcome,
+  type WallTimeTarget,
   WallTimeTargetKind,
 } from "./useWallTimeInput";
 
@@ -58,10 +59,7 @@ function setup() {
       ),
     },
   );
-  const confirm = (
-    target: typeof newYorkTarget | { kind: WallTimeTargetKind.HERE_ENTRY },
-    text: string,
-  ) => {
+  const confirm = (target: WallTimeTarget, text: string) => {
     let outcome: WallTimeInputOutcome | undefined;
     act(() => {
       outcome = rendered.result.current.wallTime.confirmWallTime(

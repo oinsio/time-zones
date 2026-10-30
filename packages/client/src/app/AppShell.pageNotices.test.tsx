@@ -39,6 +39,16 @@ const failUpdateCheck = async () => {
   });
 };
 
+// The notices region is the status region of the footer; the header search
+// and the hosted view have their own announcement regions.
+const getNoticesRegion = () => {
+  const region = screen
+    .getAllByRole("status")
+    .find((candidate) => candidate.closest("footer") !== null);
+  if (region === undefined) throw new Error("no notices region");
+  return region;
+};
+
 describe("AppShell page notices", () => {
   beforeEach(async () => {
     await i18n.changeLanguage("en");
@@ -58,21 +68,15 @@ describe("AppShell page notices", () => {
   it("should announce the update-check-failed note politely", async () => {
     render(<AppShell />);
     await failUpdateCheck();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      UPDATE_CHECK_FAILED_TEXT,
-    );
+    expect(getNoticesRegion()).toHaveTextContent(UPDATE_CHECK_FAILED_TEXT);
   });
 
   it("should keep the update notice next to the failed-check note", async () => {
     mockServiceWorker(true);
     render(<AppShell />);
     await failUpdateCheck();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "A new version is available.",
-    );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      UPDATE_CHECK_FAILED_TEXT,
-    );
+    expect(getNoticesRegion()).toHaveTextContent("A new version is available.");
+    expect(getNoticesRegion()).toHaveTextContent(UPDATE_CHECK_FAILED_TEXT);
   });
 
   it("should show no note when the browser merely goes offline", () => {
@@ -80,7 +84,7 @@ describe("AppShell page notices", () => {
     act(() => {
       window.dispatchEvent(new Event("offline"));
     });
-    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(getNoticesRegion()).toBeEmptyDOMElement();
   });
 
   it("should remove the note when the connection returns", async () => {
@@ -92,7 +96,7 @@ describe("AppShell page notices", () => {
     act(() => {
       window.dispatchEvent(new Event("online"));
     });
-    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(getNoticesRegion()).toBeEmptyDOMElement();
   });
 
   it("should show no storage warning when storage works", () => {
@@ -105,10 +109,8 @@ describe("AppShell page notices", () => {
       throw new DOMException("quota", "QuotaExceededError");
     });
     render(<AppShell />);
-    expect(screen.getByRole("status")).toHaveTextContent(STORAGE_WARNING_TEXT);
-    expect(
-      await screen.findByText("No locations added yet."),
-    ).toBeInTheDocument();
+    expect(getNoticesRegion()).toHaveTextContent(STORAGE_WARNING_TEXT);
+    expect(await screen.findByRole("list")).toBeInTheDocument();
   });
 
   it("should warn when only saving the list fails, after a location is added", async () => {

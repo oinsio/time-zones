@@ -42,3 +42,14 @@ export const MAX_WALL_TIME_HOUR = 23;
 export const MAX_WALL_TIME_MINUTE = 59;
 /** The canonical `HH:MM` shape of the `SET_WALL_TIME` command. */
 export const WALL_TIME_COMMAND_PATTERN = /^(?<hour>\d{2}):(?<minute>\d{2})$/;
+
+// Implements FR6 of add-settings-page-and-device-time-location (D9).
+/** Accepted typed 12-hour texts: `H`, `H:MM` or `H.MM` followed by a day-period marker. */
+export const TWELVE_HOUR_WALL_TIME_PATTERN =
+  /^(?<hour>\d{1,2})(?:[:.](?<minute>\d{2}))?\s?(?<marker>[^\d\s:.]+)$/u;
+export const MIN_TWELVE_HOUR = 1;
+export const MAX_TWELVE_HOUR = 12;
+/** The 12-hour clock hour that is 0 after midnight and 12 after noon. */
+export const TWELVE_HOUR_WRAP = 12;
+/** The day-period markers every language accepts next to its own. */
+export const UNIVERSAL_DAY_PERIOD_MARKERS = { am: "am", pm: "pm" } as const;

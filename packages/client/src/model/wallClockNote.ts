@@ -1,11 +1,6 @@
 import type { Temporal } from "@/lib/temporal";
-import { getHereEntry } from "./hereEntry";
 import type { WorldClockState } from "./locations";
-import {
-  ReferenceMode,
-  type WallTimeTarget,
-  WallTimeTargetKind,
-} from "./referenceMoment";
+import { ReferenceMode, type WallTimeTarget } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
 /** Where the one note about a wall-clock time is shown. */
@@ -34,9 +29,6 @@ function isTargetShown(
   state: WorldClockState,
   target: WallTimeTarget,
 ): boolean {
-  if (target.kind === WallTimeTargetKind.HERE_ENTRY) {
-    return getHereEntry(state) !== undefined;
-  }
   return state.locations.some((location) => location.id === target.locationId);
 }
 

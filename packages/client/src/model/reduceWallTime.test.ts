@@ -1,6 +1,9 @@
 // Verifies FR3, FR4, FR9, FR10, FR13 of add-wall-time-input-with-hint (D1).
 import { describe, expect, it } from "vitest";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { Temporal } from "@/lib/temporal";
+import { buildDeviceTimeLocation } from "./deviceTimeLocation";
+import { LocationKind } from "./locationKind";
 import {
   INITIAL_WORLD_CLOCK_STATE,
   type Location,
@@ -19,18 +22,21 @@ import { WallClockStatus } from "./wallClock";
 
 const newYork: Location = {
   id: "America/New_York|New York",
+  kind: LocationKind.CITY,
   timeZoneId: "America/New_York",
   label: "New York",
   countryCode: "US",
 };
 const moscow: Location = {
   id: "Europe/Moscow|Moscow",
+  kind: LocationKind.CITY,
   timeZoneId: "Europe/Moscow",
   label: "Moscow",
   countryCode: "RU",
 };
 const almaty: Location = {
   id: "Asia/Almaty|Almaty",
+  kind: LocationKind.CITY,
   timeZoneId: "Asia/Almaty",
   label: "Almaty",
   countryCode: "KZ",
@@ -39,7 +45,10 @@ const newYorkTarget = {
   kind: WallTimeTargetKind.LOCATION,
   locationId: newYork.id,
 } as const;
-const hereTarget = { kind: WallTimeTargetKind.HERE_ENTRY } as const;
+const deviceTimeTarget = {
+  kind: WallTimeTargetKind.LOCATION,
+  locationId: DEVICE_TIME_LOCATION_ID,
+} as const;
 
 const stateWith = (...locations: Location[]): WorldClockState => ({
   ...INITIAL_WORLD_CLOCK_STATE,
@@ -102,10 +111,10 @@ describe("SET_WALL_TIME resolves the typed wall-clock time", () => {
     );
   });
 
-  it("resolves the Here entry in the device time zone", () => {
+  it("resolves the device time location in the device time zone", () => {
     const result = reduceLocations(
-      stateWith(moscow),
-      setWallTime(hereTarget, "08:00", "2026-03-08"),
+      stateWith(moscow, buildDeviceTimeLocation("Asia/Almaty")),
+      setWallTime(deviceTimeTarget, "08:00", "2026-03-08"),
     );
     if (!result.ok) throw new Error("expected ok");
     expect(pinnedOf(result.state).instant.toString()).toBe(
@@ -113,10 +122,10 @@ describe("SET_WALL_TIME resolves the typed wall-clock time", () => {
     );
   });
 
-  it("rejects the Here entry while a location shows the device time", () => {
+  it("rejects the device time location when it is not listed", () => {
     const result = reduceLocations(
       stateWith(almaty),
-      setWallTime(hereTarget, "08:00", "2026-03-08"),
+      setWallTime(deviceTimeTarget, "08:00", "2026-03-08"),
     );
     expect(result).toEqual({
       ok: false,

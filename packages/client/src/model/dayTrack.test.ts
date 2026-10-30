@@ -13,6 +13,7 @@ import {
   type ReferenceDay,
   TrackMove,
 } from "./dayTrack";
+import { LocationKind } from "./locationKind";
 import { INITIAL_WORLD_CLOCK_STATE, type WorldClockState } from "./locations";
 import { ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
@@ -34,6 +35,7 @@ describe("getReferenceDay with a home location", () => {
   it("should span the day of home, not of the device zone", () => {
     const almaty = {
       id: "Asia/Almaty|Almaty",
+      kind: LocationKind.CITY,
       timeZoneId: "Asia/Almaty",
       label: "Almaty",
       countryCode: "KZ",

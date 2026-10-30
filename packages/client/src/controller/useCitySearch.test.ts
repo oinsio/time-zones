@@ -3,6 +3,7 @@
 import zoneCities from "virtual:zone-cities";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { createCompositeCitySearch } from "@/adapters";
+import { buildDeviceTimeLocation } from "@/model";
 import type { CitySearch, LoadCitySearch } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { CitySearchStatus, useCitySearch } from "./useCitySearch";
@@ -137,5 +138,49 @@ describe("useCitySearch", () => {
       const { result } = renderHook(() => useCitySearch(neverLoaded));
       expect(result.current.presentResults("Moscow", [])).toEqual([]);
     });
+  });
+});
+
+// Verifies FR11 of add-settings-page-and-device-time-location (D12).
+describe("useCitySearch isDeviceTimeOptionShown", () => {
+  const deviceTime = buildDeviceTimeLocation("Asia/Almaty");
+  const optionShown = (query: string, locations = [buildLocation()]) =>
+    renderHook(() =>
+      useCitySearch(createLoader()),
+    ).result.current.isDeviceTimeOptionShown(query, locations);
+
+  it.each(["", "  ", "dev", "time", "врем", "устр", "DEVICE", "Device time"])(
+    "should offer the option for %j while it is not listed",
+    (query) => {
+      expect(optionShown(query)).toBe(true);
+    },
+  );
+
+  it("should not offer the option for a city query", () => {
+    expect(optionShown("Moscow")).toBe(false);
+  });
+
+  it.each(["", "dev", "Moscow"])(
+    "should not offer the option for %j while it is listed",
+    (query) => {
+      expect(optionShown(query, [buildLocation(), deviceTime])).toBe(false);
+    },
+  );
+
+  it("should offer the option while the search data is loading", () => {
+    const { result } = renderHook(() => useCitySearch(createLoader()));
+    expect(result.current.status).toBe(CitySearchStatus.LOADING);
+    expect(result.current.isDeviceTimeOptionShown("", [])).toBe(true);
+  });
+
+  it("should offer the option after the search data failed to load", async () => {
+    const loader: LoadCitySearch = vi
+      .fn<LoadCitySearch>()
+      .mockRejectedValue(new Error("offline"));
+    const { result } = renderHook(() => useCitySearch(loader));
+    await waitFor(() =>
+      expect(result.current.status).toBe(CitySearchStatus.FAILED),
+    );
+    expect(result.current.isDeviceTimeOptionShown("dev", [])).toBe(true);
   });
 });
