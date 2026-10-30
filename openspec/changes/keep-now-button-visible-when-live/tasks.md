@@ -26,8 +26,10 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - add `it.each` over `["live", "pinned"]` "should give Now the clock icon and the label in the %s mode": one `svg` in the button and text `Now`;
   - add "should style the inactive Now with the muted tokens": the button's `className` contains `disabled:bg-muted` and `disabled:text-muted-foreground`, and still `bg-accent` and `text-accent-foreground`.
 
-  Put `// Verifies FR1, FR2, FR3, FR4 of keep-now-button-visible-when-live (D1, D2).` under the existing first line. Run `npx vitest run src/views/shared/DateBar.test.tsx` and see the new expectations fail.
-- [ ] 2.2 GREEN: in `views/shared/DateBar.tsx`, drop the `dateBar.isPinned &&` condition. Render the button always with `disabled={!dateBar.isPinned}`, and add `disabled:cursor-default disabled:bg-muted disabled:text-muted-foreground` to its class list. Keep `handleReturnToNow` as it is. In the JSDoc, change "and, while pinned, Now" to "and Now (active while pinned, inactive while live)", and add `Implements FR1, FR2, FR3, FR4, NFR-A1 of keep-now-button-visible-when-live (D1, D2).` Verify `npx vitest run src/views/shared/DateBar.test.tsx`.
+  - in `views/shared/CalendarDialog.test.tsx`, "should keep a live moment live when the shown date is picked" and "should change nothing when the calendar is closed without a pick" expect `screen.getByRole("button", { name: "Now" })` to be disabled instead of `not.toBeInTheDocument()`.
+
+  Put `// Verifies FR1, FR2, FR3, FR4 of keep-now-button-visible-when-live (D1, D2).` under the existing first line of both files. Run `npx vitest run src/views/shared/DateBar.test.tsx src/views/shared/CalendarDialog.test.tsx` and see the new expectations fail.
+- [ ] 2.2 GREEN: in `views/shared/DateBar.tsx`, drop the `dateBar.isPinned &&` condition. Render the button always with `disabled={!dateBar.isPinned}`, and add `disabled:cursor-default disabled:bg-muted disabled:text-muted-foreground` to its class list. Keep `handleReturnToNow` as it is. In the JSDoc, change "and, while pinned, Now" to "and Now (active while pinned, inactive while live)", and add `Implements FR1, FR2, FR3, FR4, NFR-A1 of keep-now-button-visible-when-live (D1, D2).` Verify `npx vitest run src/views/shared/DateBar.test.tsx src/views/shared/CalendarDialog.test.tsx`.
 
 ## 3. Unit BDD: shown/not shown becomes active/inactive (design D4)
 
