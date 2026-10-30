@@ -127,7 +127,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - false for `Moscow`;
   - false whenever the list has one.
 
-  Implement it with `normalizeSearchText` and `splitIntoWords`, which live in `adapters/city-search/normalizeSearchText.ts` and are exported from no module index today: add them to the exports of `adapters/city-search/index.ts` and `adapters/index.ts`, and with `i18n.getFixedT` for `search.deviceTimeOption` in `en` and `ru`. Add the key `search.deviceTimeOption` ("Device time" / «Время устройства») to both locale files. Verify `npx vitest run src/controller/useCitySearch.test.ts`.
+  Implement it with `normalizeSearchText` and `splitIntoWords`, which live in `adapters/city-search/normalizeSearchText.ts` and are exported from no module index today: add them to the exports of `adapters/city-search/index.ts` and `adapters/index.ts`, and with the labels of `presentDeviceTimeOptionLabels(translators)`, a new presenter function in `presenter/presentDeviceTimeOptionLabels.ts` exported through `presenter/index.ts` (design D12); `useCitySearch` passes it `i18n.getFixedT("en")` and `i18n.getFixedT("ru")`. First RED → GREEN `presenter/presentDeviceTimeOptionLabels.test.ts`: it returns `["Device time", "Время устройства"]`. Add the key `search.deviceTimeOption` ("Device time" / «Время устройства») to both locale files. Verify, one at a time: `npx vitest run src/presenter/presentDeviceTimeOptionLabels.test.ts`, then `npx vitest run src/controller/useCitySearch.test.ts`.
 - [ ] 4.6 Mutation (M8): `npx stryker run --mutate 'src/controller/PreferencesProvider.tsx,src/controller/useThemePreference.ts,src/controller/createLocationsActions.ts,src/controller/useCitySearch.ts,src/controller/LocationsProvider.tsx'`. Each file scores ≥ 95 % (minimum 90 %).
 
 ## 5. Theme tokens (design D7)
@@ -236,7 +236,7 @@ Accessible names, focus, keyboard, layout, colours and axe-core are asserted her
     - NEW **First-launch list** (*Code:* `buildFirstLaunchLocations`);
     - REMOVED **Here entry**;
     - CHANGED **Location** (two kinds) and **Location list** (schema version 3, the first-launch list);
-  - `docs/glossary/search.md`: NEW **Device time option** (*Code:* `isDeviceTimeOptionShown`);
+  - `docs/glossary/search.md`: NEW **Device time option** (*Code:* `isDeviceTimeOptionShown`; its labels: `presentDeviceTimeOptionLabels`);
   - new `docs/glossary/settings.md`: **Settings page** (`SettingsPage`, `AppPage.SETTINGS`, «Настройки»), **Settings button** (`SettingsButton`), **Preferences** (`Preferences`, `src/preferences/`, `PreferencesRepository`), **Theme preference** (`ThemePreference`, «Тема»: «Светлая», «Тёмная», «Системная»), **Hour format** (`HourFormat`, «Формат времени»: «12 часов», «24 часа»), and a row for it in `docs/glossary/README.md`;
   - `docs/glossary/architecture.md`: **Port**, **Repository** and **Tab sync** also cover the preferences (`createStorageDocumentSync`);
   - `docs/glossary/app-shell.md`: **Shell** holds the header actions;
