@@ -10,7 +10,7 @@ Feature: Day track of a location card
     When the user opens the app
     Then every card shows a track for the day from "2026-03-07T19:00:00Z" to "2026-03-08T19:00:00Z"
 
-  @add-time-sliders-to-location-cards @FR1 @M4
+  @add-time-sliders-to-location-cards @FR1 @M4 @fix-day-track-handle-overlap-and-end-of-day @FR3
   Scenario Outline: Days of 23 and 25 hours
     Given the device time zone is "America/New_York"
     And the list contains "New York"

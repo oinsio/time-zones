@@ -14,7 +14,7 @@ Feature: Time selection in a real browser
     And the time of "Kolkata" reads "18:30" with the ISO date "2026-03-08"
     And the time of "New York" reads "09:00" with the ISO date "2026-03-08"
 
-  @add-time-sliders-to-location-cards @FR3 @NFR-R2
+  @add-time-sliders-to-location-cards @FR3 @NFR-R2 @fix-day-track-handle-overlap-and-end-of-day @FR1 @UX2
   Scenario: Drag without scrolling or reordering
     Given the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Almaty", "Moscow", "New York"
@@ -22,7 +22,7 @@ Feature: Time selection in a real browser
     When the user drags the handle of "Moscow" to 100 percent of its track
     Then the page has not scrolled
     And the locations list order is "Almaty", "Moscow", "New York"
-    And the time of "Almaty" reads "23:45" with the ISO date "2026-03-08"
+    And the time of "Almaty" reads "23:59" with the ISO date "2026-03-08"
 
   @add-time-sliders-to-location-cards @FR4 @NFR-A2
   Scenario: Keyboard moves every card
@@ -38,7 +38,7 @@ Feature: Time selection in a real browser
     And the page has not scrolled
     And the locations list order is "Almaty", "Moscow"
 
-  @add-time-sliders-to-location-cards @FR4
+  @add-time-sliders-to-location-cards @FR4 @fix-day-track-handle-overlap-and-end-of-day @FR2
   Scenario Outline: Keys from a pinned quarter hour
     Given the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Almaty"
@@ -54,7 +54,7 @@ Feature: Time selection in a real browser
       | PageUp     | 810   |
       | PageDown   | 690   |
       | Home       | 0     |
-      | End        | 1425  |
+      | End        | 1439  |
 
   @add-time-sliders-to-location-cards @NFR-A2
   Scenario: Visible focus
@@ -63,15 +63,15 @@ Feature: Time selection in a real browser
     When the user focuses the slider of "Almaty" with the keyboard
     Then the handle of "Almaty" has an outline in the accent colour
 
-  @add-time-sliders-to-location-cards @NFR-A3 @FR9
+  @add-time-sliders-to-location-cards @NFR-A3 @FR9 @fix-day-track-handle-overlap-and-end-of-day @FR3
   Scenario: Slider name, range and value
     Given the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Almaty"
     And the user opens the locations app
-    Then the slider "Time in Almaty" has the value 750 within 0 to 1425 and the value text "12:30, Sun, Mar 8"
+    Then the slider "Time in Almaty" has the value 750 within 0 to 1439 and the value text "12:30, Sun, Mar 8"
     And the time of "Almaty" is not inside a live region
 
-  @add-time-sliders-to-location-cards @NFR-A1 @M9
+  @add-time-sliders-to-location-cards @NFR-A1 @M9 @fix-day-track-handle-overlap-and-end-of-day @NFR-A1
   Scenario Outline: No accessibility violations with tracks
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme
@@ -85,3 +85,12 @@ Feature: Time selection in a real browser
       | list          | dark  |
       | time-selected | light |
       | time-selected | dark  |
+
+  @fix-day-track-handle-overlap-and-end-of-day @FR3
+  Scenario: End of the day on the slider
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the stored locations are "Almaty"
+    And the user opens the locations app
+    When the user clicks 52 percent of the track of "Almaty"
+    And the user presses the key "End"
+    Then the slider "Time in Almaty" has the value 1439 within 0 to 1439 and the value text "23:59, Sun, Mar 8"

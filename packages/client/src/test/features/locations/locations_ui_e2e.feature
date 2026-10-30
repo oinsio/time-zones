@@ -127,6 +127,7 @@ Feature: Locations in a real browser
   @set-home-location-and-show-differences @NFR-R2
   @match-home-mark-to-design @NFR-R1 @M4
   @show-here-entry-for-device-time @NFR-R2
+  @fix-day-track-handle-overlap-and-end-of-day @NFR-R2
   @add-wall-time-input-with-hint @NFR-R2
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"

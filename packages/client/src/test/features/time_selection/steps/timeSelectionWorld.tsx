@@ -1,3 +1,4 @@
+// Verifies FR1, FR2, FR3, FR4 of fix-day-track-handle-overlap-and-end-of-day.
 import { act, cleanup, renderHook } from "@testing-library/react/pure";
 import i18n from "i18next";
 import type { ReactNode } from "react";
@@ -5,7 +6,6 @@ import {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
 } from "@/adapters";
-import { NANOSECONDS_PER_MINUTE, TRACK_STEP_MINUTES } from "@/constants";
 import {
   LocationsProvider,
   type TrackMove,
@@ -22,6 +22,7 @@ import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 import { cityEntry } from "../../locations/steps/locationsUiWorld";
+import { getDayBounds } from "./dayBounds";
 
 export const ENGLISH_LANGUAGE = "en";
 export const RUSSIAN_LANGUAGE = "ru";
@@ -184,27 +185,12 @@ export const createTimeSelectionWorld = () => {
     runTick: () => act(() => tickScheduler.runPending()),
     isNowShown: () => current().reference.dateBar.isPinned,
     shownInstant,
-    /** Start and end of the reference day, worked out from a card's track. */
-    dayBoundsOf: (city: string) => {
-      const track = trackOf(city);
-      const lengthMinutes = track.maxMinutes + TRACK_STEP_MINUTES;
-      const effective = Temporal.Instant.from(
+    dayBoundsOf: (city: string) =>
+      getDayBounds(
+        trackOf(city),
         current().reference.dateBar.isPinned
           ? shownInstant()
           : clock.instant().toString(),
-      );
-      const start = effective
-        .subtract({
-          nanoseconds: Math.round(
-            track.fraction * lengthMinutes * NANOSECONDS_PER_MINUTE,
-          ),
-        })
-        .round({ smallestUnit: "minute" });
-      return {
-        start,
-        end: start.add({ minutes: lengthMinutes }),
-        lengthMinutes,
-      };
-    },
+      ),
   };
 };

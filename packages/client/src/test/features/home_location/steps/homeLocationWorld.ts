@@ -1,3 +1,4 @@
+// Verifies FR1, FR2, FR3, FR4 of fix-day-track-handle-overlap-and-end-of-day.
 import { act, cleanup, screen, within } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -6,7 +7,7 @@ import { createLocalStorageLocationRepository } from "@/adapters";
 import {
   NANOSECONDS_PER_MINUTE,
   STORAGE_KEYS,
-  TRACK_STEP_MINUTES,
+  TRACK_END_BEFORE_DAY_END_MINUTES,
 } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import { createDateSelectionWorld } from "../../date_selection/steps/dateSelectionWorld";
@@ -105,7 +106,7 @@ export function createHomeLocationWorld() {
         const track = row.dayTrack;
         if (track === undefined)
           throw new Error(`no track for ${row.cityLabel}`);
-        const dayMinutes = track.maxMinutes + TRACK_STEP_MINUTES;
+        const dayMinutes = track.maxMinutes + TRACK_END_BEFORE_DAY_END_MINUTES;
         const dayStart = world
           .clock()
           .instant()

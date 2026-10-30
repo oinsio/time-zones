@@ -9,13 +9,13 @@ import {
   ReferenceMode,
   reduceLocations,
 } from "@/model";
-import { type CardTable, MOVE_BY_KEY_NAME } from "./selectTimeTables";
+import { createSelectTimeSteps } from "./selectTimeSteps";
+import type { CardTable } from "./selectTimeTables";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
+import { registerTrackEndScenarios } from "./trackEndScenarios";
 
 const feature = await loadFeature("../time_selection_select_time.feature");
 
-const PRECISION = 6;
-const QUARTER = 0.75;
 const MIDDLE = 0.5;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
@@ -29,28 +29,19 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
   f.AfterAllScenarios(world.finish);
 
-  const givenZone = (_ctx: unknown, zone: string) => world.setDeviceZone(zone);
-  const givenInstant = (_ctx: unknown, timestamp: string) =>
-    world.setInstant(timestamp);
-  const givenList = (_ctx: unknown, cities: string) =>
-    world.setStoredCities(cities);
-  const givenAppOpen = () => world.open();
-  const givenPinnedHere = () =>
-    world.selectFraction(world.rows()[0]?.dayTrack?.fraction ?? 0);
-  const selectQuarter = () => world.selectFraction(QUARTER);
-  const whenKey = (_ctx: unknown, keyName: string) =>
-    world.moveTrack(MOVE_BY_KEY_NAME[keyName]);
-  const thenPinned = (_ctx: unknown, timestamp: string) => {
-    expect(world.isNowShown()).toBe(true);
-    expect(world.shownInstant()).toBe(timestamp);
-  };
-  const thenCardShows = (_ctx: unknown, city: string, time: string) =>
-    expect(world.rowOf(city).localTimeLabel).toBe(time);
-  const thenEveryHandleAt = (_ctx: unknown, fraction: number) => {
-    for (const row of world.rows()) {
-      expect(row.dayTrack?.fraction).toBeCloseTo(fraction, PRECISION);
-    }
-  };
+  const steps = createSelectTimeSteps(world);
+  const {
+    givenZone,
+    givenInstant,
+    givenList,
+    givenAppOpen,
+    givenPinnedHere,
+    selectQuarter,
+    whenKey,
+    thenPinned,
+    thenCardShows,
+    thenEveryHandleAt,
+  } = steps;
 
   // @add-time-sliders-to-location-cards @FR3 @M2
   f.Scenario(
@@ -77,6 +68,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @FR3 @M2
+  // @fix-day-track-handle-overlap-and-end-of-day @FR1
   f.ScenarioOutline(
     "Selections snap to quarter hours and stay inside the day",
     ({ Given, And, When, Then }, variables) => {
@@ -135,6 +127,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @FR4 @M3
+  // @fix-day-track-handle-overlap-and-end-of-day @FR2
   f.ScenarioOutline(
     "Keys from a pinned quarter hour",
     ({ Given, And, When, Then }, variables) => {
@@ -173,6 +166,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @FR4
+  // @fix-day-track-handle-overlap-and-end-of-day @FR2
   f.Scenario(
     "Keys stop at the ends of the day",
     ({ Given, And, When, Then }) => {
@@ -187,4 +181,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Then("the moment is pinned to {string}", thenPinned);
     },
   );
+
+  registerTrackEndScenarios(f, world, steps);
 });

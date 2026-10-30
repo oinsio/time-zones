@@ -1,3 +1,4 @@
+// Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
 // FR8, NFR-A2, UX1 of support-legacy-ios-12-safari: tap selection without Pointer Events.
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -25,9 +26,12 @@ async function renderLegacyTrack() {
     />,
   );
   const slider = screen.getByRole("slider");
-  slider.getBoundingClientRect = () =>
+  const bar = slider.querySelector<HTMLElement>(
+    "[data-day-track-bar]",
+  ) as HTMLElement;
+  bar.getBoundingClientRect = () =>
     ({ left: 0, width: TRACK_WIDTH }) as DOMRect;
-  return { slider, onSelectFraction, onMoveTrack };
+  return { slider, bar, onSelectFraction, onMoveTrack };
 }
 
 describe("DayTrack without Pointer Events", () => {

@@ -1,3 +1,4 @@
+// Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
 // Verifies FR2, FR6, UX1, NFR-A2 of show-local-time-and-date-on-location-cards (D5).
 // Verifies FR1 of reorder-locations-by-drag-and-drop.
@@ -97,7 +98,7 @@ describe("LocationRow day track", () => {
   const dayTrack = {
     fraction: 0.5,
     valueMinutes: 720,
-    maxMinutes: 1425,
+    maxMinutes: 1439,
     valueText: "12:00, Sun, Mar 8",
     stops: [{ fraction: 0.3, period: DayPeriod.NIGHT }],
     hourLabels: [],

@@ -1,3 +1,4 @@
+// Verifies FR1, FR2, FR3, FR4 of fix-day-track-handle-overlap-and-end-of-day.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import {
@@ -50,7 +51,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       />,
     );
     const slider = screen.getByRole("slider");
-    slider.getBoundingClientRect = () =>
+    const bar = slider.querySelector<HTMLElement>(
+      "[data-day-track-bar]",
+    ) as HTMLElement;
+    bar.getBoundingClientRect = () =>
       ({ left: 0, width: TRACK_WIDTH_PX }) as DOMRect;
     fireEvent.click(slider, { clientX: TRACK_WIDTH_PX * THREE_QUARTERS });
   };

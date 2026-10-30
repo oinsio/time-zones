@@ -1,15 +1,16 @@
+// Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR3, FR4 of add-time-sliders-to-location-cards (D7).
 import { fireEvent } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { setupInteractiveTrack as setup, TRACK_WIDTH } from "./dayTrackFixture";
+import { BAR_BOX, setupInteractiveTrack as setup } from "./dayTrackFixture";
 
 describe("DayTrack input", () => {
   const pointer = (
-    pointerType: string,
+    type: string,
     clientX: number,
     clientY = 0,
     pointerId = 1,
-  ) => ({ pointerType, clientX, clientY, pointerId });
+  ) => ({ pointerType: type, clientX, clientY, pointerId });
 
   it("should select the pressed position for a mouse", () => {
     const { slider, onSelectFraction } = setup();
@@ -75,9 +76,8 @@ describe("DayTrack input", () => {
   });
 
   it("should measure the position from the left edge of the track", () => {
-    const { slider, onSelectFraction } = setup();
-    slider.getBoundingClientRect = () =>
-      ({ left: 100, width: TRACK_WIDTH }) as DOMRect;
+    const { slider, bar, onSelectFraction } = setup();
+    bar.getBoundingClientRect = () => BAR_BOX;
 
     fireEvent.pointerDown(slider, pointer("mouse", 300));
 
@@ -85,8 +85,8 @@ describe("DayTrack input", () => {
   });
 
   it("should select nothing on a track without width", () => {
-    const { slider, onSelectFraction } = setup();
-    slider.getBoundingClientRect = () => ({ left: 0, width: 0 }) as DOMRect;
+    const { slider, bar, onSelectFraction } = setup();
+    bar.getBoundingClientRect = () => ({ left: 0, width: 0 }) as DOMRect;
 
     fireEvent.pointerDown(slider, pointer("mouse", 300));
 
