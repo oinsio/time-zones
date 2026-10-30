@@ -127,7 +127,7 @@ No changes.
 - M2: The inactive label's contrast against the inactive fill is at least 4.5:1 in 2 of 2 themes. With the planned values it is 5.30:1 in the light theme and 5.08:1 in the dark theme.
 - M3: In 4 of 4 checks (375 px and 1024 px × light and dark theme), Now's box live and pinned differs by at most 1 px in x, y, width and height.
 - M4: axe-core reports 0 violations in 4 of 4 states: live and pinned × light and dark.
-- M5: In 3 of 3 attempts on a live moment (click, Enter, Space), the moment stays live and the shown date does not change.
+- M5: In 2 of 2 attempts to activate Now on a live moment (a click in jsdom and a forced click in a real browser), the moment stays live and the shown date does not change. Enter and Space cannot reach an inactive Now, because Tab skips it (NFR-A2).
 - M6: Stryker scoped to `views/shared/DateBar.tsx` scores at least 95% (minimum acceptable 90%).
 - M7: The traceability loop of task 5.1 prints nothing: each of FR1–FR4, NFR-A1–NFR-A3, NFR-R1, NFR-R2, UX1, UX2 has at least one test tagged with this change.
 
