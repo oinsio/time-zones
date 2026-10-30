@@ -23,6 +23,7 @@ Audience: every user of the app, on phones and wide screens, in both themes.
 - ADDED `home-location` "Device time location as home".
 - ADDED `location-search` "Device time in the search": the search offers "Device time" while the list has no device time location.
 - MODIFIED `date-selection` "Date bar layout": the arrows, the date and Now form one centred group at every width, so nothing jumps or sticks to the screen edges.
+- MODIFIED `date-selection` "Wall-clock resolution on the new date" and `time-selection` "Wall-time input is never stored": their text names the device time location instead of the Here entry. Behaviour and scenarios are unchanged.
 - MODIFIED `time-selection` "Local hour labels", "Accepted wall-time text", "Wall-time input on every row", and `locations` "Local time and date on location rows": time texts follow the hour format. MODIFIED `time-selection` "A wall-time input pins the reference moment" and "Wall-time hint lifetime", and `location-search` "Search is fast and lazy" and "Open the search with the slash key": the device time location takes the place of the Here entry, and the slash key belongs to the header button.
 - **BREAKING (stored data):** the locations document moves from schema version 2 to 3. Older documents are migrated on load: the device time location is put first, and the order and home are kept.
 
@@ -49,8 +50,8 @@ Glossary and documents. The implement stage writes only under `packages/`, so th
 - `locations`: MODIFIED "Location identity", "List in the Cards view", "List is kept on the device", "Unreadable stored list" and "Local time and date on location rows"; REMOVED the 14 "Here entry" requirements; ADDED the device time location requirements.
 - `home-location`: ADDED "Device time location as home".
 - `location-search`: MODIFIED "Search is fast and lazy" and "Open the search with the slash key" (the header button, the device time location instead of the Here entry); ADDED "Device time in the search".
-- `date-selection`: MODIFIED "Date bar layout".
-- `time-selection`: MODIFIED "Local hour labels", "Accepted wall-time text", "Wall-time input on every row", "A wall-time input pins the reference moment" and "Wall-time hint lifetime" (hour format, and the device time location instead of the Here entry).
+- `date-selection`: MODIFIED "Date bar layout" and "Wall-clock resolution on the new date" (the device time location instead of the Here entry).
+- `time-selection`: MODIFIED "Local hour labels", "Accepted wall-time text", "Wall-time input on every row", "A wall-time input pins the reference moment", "Wall-time hint lifetime" and "Wall-time input is never stored" (hour format, and the device time location instead of the Here entry).
 
 ## Goals
 

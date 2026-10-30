@@ -153,3 +153,26 @@ The wall-time hint SHALL stay until the next wall-time input, time selection, da
 - **THEN** no row shows a wall-time hint
 - **AND** the date bar shows no note
 - **AND** the moment is still pinned to `2026-03-08T07:30:00Z`
+
+### Requirement: Wall-time input is never stored
+A wall-time input SHALL NOT be written to storage and SHALL NOT be passed to other open tabs. A change of the list in another tab MUST keep the moment. When the typed row no longer exists (the location was removed), nothing MUST change and the field MUST close without a message. A command with a malformed time or date MUST be rejected and change nothing. <!-- implements FR9, FR10 of add-wall-time-input-with-hint; FR9 of add-settings-page-and-device-time-location -->
+
+#### Scenario: Nothing is stored or shared
+- **GIVEN** the list contains Almaty and New York
+- **WHEN** the user types 20 times in New York and then returns to now
+- **THEN** nothing is written to storage
+- **AND** no other tab receives a change
+
+#### Scenario: The location is gone while typing
+- **GIVEN** the user opened the wall-time input of Moscow
+- **AND** Moscow was removed in another tab
+- **WHEN** the user confirms `10:00`
+- **THEN** the field closes without a message
+- **AND** the reference moment is unchanged
+
+#### Scenario: A malformed command changes nothing
+- **GIVEN** the moment is live
+- **WHEN** a wall-time input arrives with the time `25:00` or the date `2026-13-01`
+- **THEN** it is rejected
+- **AND** the moment is still live
+
