@@ -15,6 +15,11 @@ export const UNREADABLE_DOCUMENT_TEXT = "{not json";
 const KNOWN_CITIES: Record<string, StoredLocation> = {
   Almaty: { timeZoneId: "Asia/Almaty", label: "Almaty", countryCode: "KZ" },
   Moscow: { timeZoneId: "Europe/Moscow", label: "Moscow", countryCode: "RU" },
+  Москва: {
+    timeZoneId: "Europe/Moscow",
+    label: "Москва",
+    countryCode: "RU",
+  },
   Kolkata: { timeZoneId: "Asia/Kolkata", label: "Kolkata", countryCode: "IN" },
   Kathmandu: {
     timeZoneId: "Asia/Kathmandu",

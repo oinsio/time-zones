@@ -56,6 +56,8 @@ export type PresentedZoneMoment = {
  * track of a zone. The subject is a location or the Here entry (no ID).
  * Implements FR2, FR3 of show-here-entry-for-device-time (D2); the code moved
  * from `presentLocationRows`.
+ * Implements FR7, NFR-A2 of add-wall-time-input-with-hint (D7): the time button name, the wall-time hint
+ * and the row note.
  */
 export function presentZoneMoment(
   subject: { id?: string; timeZoneId: string; cityLabel: string },

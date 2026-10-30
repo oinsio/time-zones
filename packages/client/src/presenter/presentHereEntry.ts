@@ -24,6 +24,7 @@ export type PresentedHereEntry = PresentedZoneMoment & {
  * Presents the Here entry: the zone moment of a row plus its mark, meta line
  * and accessible name.
  * Implements FR2, FR3, FR10, NFR-A2 of show-here-entry-for-device-time (D2, D8).
+ * Implements FR7, NFR-A2 of add-wall-time-input-with-hint (D7): passes `cityLabel` to the zone part.
  */
 export function presentHereEntry(
   hereEntry: HereEntry,

@@ -25,6 +25,7 @@ import {
  * announces a home change politely.
  * Implements FR1, FR7, FR9, UX2 of show-here-entry-for-device-time (D5, D6):
  * the Here entry comes first, outside the list, and also in the empty state.
+ * Implements FR1, FR3 of add-wall-time-input-with-hint (D6): wires `useWallTimeInput().confirmWallTime`.
  */
 export default function CardsView() {
   const { t } = useTranslation();

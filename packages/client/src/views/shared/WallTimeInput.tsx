@@ -1,5 +1,6 @@
 import { type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { KeyboardKey } from "@/constants";
 import { WallTimeInputOutcome } from "@/controller";
 
 type WallTimeInputProps = {
@@ -11,14 +12,14 @@ type WallTimeInputProps = {
   onClose: (shouldRestoreFocus: boolean) => void;
 };
 
-const KEYS_KEPT_IN_FIELD = new Set([
-  " ",
-  "Enter",
-  "Escape",
-  "ArrowUp",
-  "ArrowDown",
-  "ArrowLeft",
-  "ArrowRight",
+const KEYS_KEPT_IN_FIELD = new Set<string>([
+  KeyboardKey.SPACE,
+  KeyboardKey.ENTER,
+  KeyboardKey.ESCAPE,
+  KeyboardKey.ARROW_UP,
+  KeyboardKey.ARROW_DOWN,
+  KeyboardKey.ARROW_LEFT,
+  KeyboardKey.ARROW_RIGHT,
 ]);
 
 /**
@@ -56,10 +57,10 @@ export function WallTimeInput({
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (KEYS_KEPT_IN_FIELD.has(event.key)) event.stopPropagation();
-    if (event.key === "Enter") {
+    if (event.key === KeyboardKey.ENTER) {
       event.preventDefault();
       confirm(true);
-    } else if (event.key === "Escape") {
+    } else if (event.key === KeyboardKey.ESCAPE) {
       onClose(true);
     }
   };

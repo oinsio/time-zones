@@ -43,11 +43,17 @@ Feature: Wall-time input in a real browser
     And the Now button is shown
 
   @add-wall-time-input-with-hint @NFR-A2 @FR11
-  Scenario: Names in both languages
-    Given the locations interface language is Russian
-    And the stored locations are "Moscow"
+  Scenario: Names in English
+    Given the stored locations are "Moscow"
     When the user opens the locations app
-    Then the time button of "Moscow" is named "Ввести время — Moscow, 10:30"
+    Then the time button of "Moscow" is named "Enter time — Moscow, 10:30"
+
+  @add-wall-time-input-with-hint @NFR-A2 @FR11
+  Scenario: Names in Russian
+    Given the locations interface language is Russian
+    And the stored locations are "Москва"
+    When the user opens the locations app
+    Then the time button of "Москва" is named "Ввести время — Москва, 10:30"
 
   @add-wall-time-input-with-hint @NFR-A1 @NFR-A3 @UX1
   Scenario Outline: No accessibility violations of <state> in the <theme> theme

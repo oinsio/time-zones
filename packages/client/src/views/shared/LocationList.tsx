@@ -73,6 +73,7 @@ type LocationListProps = {
  * Pointer Events are missing.
  * Implements FR11 of set-home-location-and-show-differences (D7, D8): the
  * focus after a removal goes to a location menu button.
+ * Implements FR1, FR3 of add-wall-time-input-with-hint (D6): `onConfirmWallTime` per row.
  */
 export function LocationList({
   rows,
