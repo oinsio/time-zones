@@ -6,7 +6,7 @@ The user's own list of locations: which places the app shows, how they are added
 ## Requirements
 
 ### Requirement: Location identity
-A location SHALL consist of a canonical IANA time zone identifier, a city label and an ISO 3166-1 alpha-2 country code (empty for zones without a country, such as UTC). The list MUST NOT contain two locations with the same canonical identifier and the same label. A raw UTC offset MUST NOT be stored as a location's zone. <!-- implements FR8, FR9 of add-locations-via-search -->
+A location SHALL be of one of two kinds. A city location consists of a canonical IANA time zone identifier, a city label and an ISO 3166-1 alpha-2 country code (empty for zones without a country, such as UTC). The device time location consists of its kind only: its zone is always the device time zone, and it has no stored zone, label or country (see "Device time location"). The list MUST NOT contain two city locations with the same canonical identifier and the same label, and MUST NOT contain more than one device time location. A city location and the device time location are never duplicates of each other, also when they are in the same zone. A raw UTC offset MUST NOT be stored as a location's zone. <!-- implements FR8, FR9 of add-locations-via-search; FR8 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Legacy identifier is canonicalized on input
 - **WHEN** a location with the zone `Asia/Calcutta` is added
@@ -26,6 +26,12 @@ A location SHALL consist of a canonical IANA time zone identifier, a city label 
 #### Scenario: Unknown zone is rejected
 - **WHEN** a location with the zone `Mars/Olympus_Mons` is added
 - **THEN** the addition is rejected as an unknown time zone
+
+#### Scenario: The device's city next to the device time location
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list is the device time location
+- **WHEN** the user adds Almaty (`Asia/Almaty`)
+- **THEN** the list is the device time location, Almaty
 
 ### Requirement: Add a location
 Adding a location SHALL append it to the end of the list and MUST leave the order of existing locations unchanged. Inputs: time zone identifier, city label, country code. Effects: the list grows by one location at its end. Errors: duplicate location (same canonical zone and label already listed), unknown time zone (not a valid IANA identifier). <!-- implements FR8, UX4 of add-locations-via-search -->
@@ -66,7 +72,7 @@ Removing a location SHALL take it out of the list immediately and MUST keep the 
 - **AND** no location is home
 
 ### Requirement: List in the Cards view
-The Cards view SHALL show one row per location, in list order, with the city label, the country name in the interface language and a location menu whose accessible name includes the city ("Actions for Moscow", «Действия: Москва»). The menu holds the remove action "Remove" («Удалить») and the home action of the `home-location` capability. It MUST also offer an "Add location" action that opens the search. After a removal, focus MUST move to the next location's menu button, or the previous one, or the "Add location" action when the list becomes empty. Adding and removing MUST be announced politely without moving focus. Adding and removing a location are part of the view contract: these behaviours MUST hold for every registered view, not only Cards. <!-- implements FR10, FR17, NFR-A3, UX5 of add-locations-via-search ; FR11, NFR-A2 of set-home-location-and-show-differences -->
+The Cards view SHALL show one row per location, in list order, the device time location included. A city location's row shows the city label and the country name in the interface language. Every row has a location menu whose accessible name includes the city ("Actions for Moscow", «Действия: Москва»). The menu holds the remove action "Remove" («Удалить») and the home action of the `home-location` capability. The header's Add location button opens the search (see the `main-page` capability). After a removal, focus MUST move to the next location's menu button, or the previous one, or the header's Add location button when the list becomes empty. Adding and removing MUST be announced politely without moving focus. Adding and removing a location are part of the view contract: these behaviours MUST hold for every registered view, not only Cards. <!-- implements FR10, FR17, NFR-A3, UX5 of add-locations-via-search ; FR11, NFR-A2 of set-home-location-and-show-differences; FR2, FR9, FR13 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Rows show city and country
 - **GIVEN** the list is Almaty and Moscow and the interface language is English
@@ -76,7 +82,8 @@ The Cards view SHALL show one row per location, in list order, with the city lab
 #### Scenario: Empty state after the last removal
 - **GIVEN** the list contains only Moscow
 - **WHEN** the user removes Moscow
-- **THEN** the empty state with the "Add location" action is shown
+- **THEN** the empty-state explanation is shown
+- **AND** the header's Add location button is shown
 
 #### Scenario: Remove action names the city
 - **WHEN** the list contains Moscow
@@ -92,15 +99,15 @@ The Cards view SHALL show one row per location, in list order, with the city lab
 #### Scenario: Focus after the last removal
 - **GIVEN** the list contains only Moscow
 - **WHEN** the user removes Moscow with the keyboard
-- **THEN** focus is on the "Add location" action
+- **THEN** focus is on the header's Add location button
 
 ### Requirement: List is kept on the device
-The list SHALL be saved on the device as a versioned document, together with the home location, and restored in the same order when the app is opened again, also offline. A document of the previous version MUST be migrated on load: it keeps its locations and order and has no home. Nothing MUST be written for the list until the user first changes it or the home location. A stored identifier that is a known legacy alias MUST be canonicalized on load. <!-- implements FR9, FR11, FR16, UX4 of add-locations-via-search ; FR8 of set-home-location-and-show-differences -->
+The list SHALL be saved on the device as a versioned document, together with the home location, and restored in the same order when the app is opened again, also offline. The device time location is stored as an entry of its kind without a zone, so the device time zone itself is never stored. When no locations document is stored, the list MUST be the first-launch list (see "First-launch list"). A stored empty list MUST be restored as an empty list. A document of version 1 or 2 MUST be migrated on load: the device time location is put first, the other locations keep their order, a version 2 home is kept and a version 1 document has no home. Nothing MUST be written for the list until the user first changes it or the home location. A stored identifier that is a known legacy alias MUST be canonicalized on load. <!-- implements FR9, FR11, FR16, UX4 of add-locations-via-search ; FR8 of set-home-location-and-show-differences; FR12, FR13, FR14 of add-settings-page-and-device-time-location -->
 
 #### Scenario: List survives a reload
 - **GIVEN** the user added Almaty, then Moscow
 - **WHEN** the app is opened again
-- **THEN** the list is Almaty, Moscow in that order
+- **THEN** the list is the device time location, Almaty, Moscow in that order
 
 #### Scenario: First launch writes nothing
 - **WHEN** the user opens the app for the first time and adds nothing
@@ -119,12 +126,25 @@ The list SHALL be saved on the device as a versioned document, together with the
 #### Scenario: Previous document version is migrated
 - **GIVEN** the stored list is a version 1 document with Almaty, Moscow and Kolkata
 - **WHEN** the app is opened
-- **THEN** the list is Almaty, Moscow, Kolkata in that order
+- **THEN** the list is the device time location, Almaty, Moscow, Kolkata in that order
 - **AND** no location is home
 - **AND** the stored list was not written
 
+#### Scenario: Version 2 document is migrated
+- **GIVEN** the stored list is a version 2 document with Moscow and New York and Moscow as home
+- **WHEN** the app is opened
+- **THEN** the list is the device time location, Moscow, New York in that order
+- **AND** Moscow is home
+- **AND** the stored list was not written
+
+#### Scenario: The device time zone is not stored
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list is the device time location
+- **WHEN** the user adds Moscow and the list is written
+- **THEN** the stored document holds no `Asia/Almaty`
+
 ### Requirement: Unreadable stored list
-When the stored list is not valid JSON, does not match the expected document, contains an identifier that is not a valid IANA zone, or was written by a newer version of the app, the Cards view SHALL show an error message with a reset action and MUST NOT show a blank page. A stored home location that points to a location missing from the stored list MUST NOT make the list unreadable: home is cleared on load and the list is shown (see the `home-location` capability). A home that is not a location identifier at all (for example a number) MUST make the list unreadable. Reset MUST clear the stored list and show the empty state. <!-- implements FR12 of add-locations-via-search ; FR9 of set-home-location-and-show-differences -->
+When the stored list is not valid JSON, does not match the expected document, contains an identifier that is not a valid IANA zone, holds an entry of an unknown kind or more than one device time location, or was written by a newer version of the app, the Cards view SHALL show an error message with a reset action and MUST NOT show a blank page. A stored home location that points to a location missing from the stored list MUST NOT make the list unreadable: home is cleared on load and the list is shown (see the `home-location` capability). A home that is not a location identifier at all (for example a number) MUST make the list unreadable. Reset MUST clear the stored list and show the first-launch list without writing it. <!-- implements FR12 of add-locations-via-search ; FR9 of set-home-location-and-show-differences; FR12 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Corrupted document
 - **GIVEN** the stored list is not valid JSON
@@ -141,10 +161,15 @@ When the stored list is not valid JSON, does not match the expected document, co
 - **WHEN** the app is opened
 - **THEN** an error message with a reset action is shown
 
+#### Scenario: Two device time locations
+- **GIVEN** the stored list holds two device time location entries
+- **WHEN** the app is opened
+- **THEN** an error message with a reset action is shown
+
 #### Scenario: Reset
 - **GIVEN** the error message is shown
 - **WHEN** the user resets
-- **THEN** the empty state is shown
+- **THEN** the list is the device time location only
 - **AND** the stored list is cleared
 
 #### Scenario: Home of the wrong type
@@ -642,7 +667,7 @@ The accessible name of a row SHALL be its city, followed by its leading mark's a
 - **AND** the screen matches the re-approved screenshot
 
 ### Requirement: Local time and date on location rows
-Every location row in the Cards view SHALL show the location's local time and local date at the reference moment: the current instant while the moment is live, the pinned instant while it is pinned (see the `date-selection` capability). The time MUST be hours and minutes in 24-hour form with two-digit hours (`03:30`), without seconds. The date MUST be the short weekday, the day and the short month as written by the interface language's own conventions (English `Sun, Mar 8`, Russian `вс, 8 мар.`) and MUST carry the machine-readable ISO date (`2026-03-08`). Both MUST be derived from the location's canonical IANA identifier at the reference moment, so daylight saving time and :30 / :45 offsets are respected; a raw UTC offset MUST NOT be stored or used to compute them. Both MUST be computed whenever the list is presented: the app opens, a location is added, removed or moved, the list changes in another tab, the list is reset, the interface language changes, the reference moment changes. Inputs: the location's IANA identifier, the reference moment (ISO 8601 with `Z`), the interface language. Output: the time text, the date text and its ISO date. Errors: when the identifier is unknown to the browser, the row MUST be shown with its city and remove action but without time and date, and the rest of the list MUST be unaffected. Time and date need no network and behave the same offline; nothing about them is stored. <!-- implements FR1, FR2, FR5, FR6 of show-local-time-and-date-on-location-cards; FR5 of select-date-with-calendar-and-now -->
+Every location row in the Cards view SHALL show the location's local time and local date at the reference moment: the current instant while the moment is live, the pinned instant while it is pinned (see the `date-selection` capability). The time MUST be hours and minutes without seconds, written in the hour format (see the `settings` capability): in 24-hour format with two-digit hours (`03:30`), in 12-hour format with the hour and a day period marker by the interface language's conventions (`3:30 AM`). The date MUST be the short weekday, the day and the short month as written by the interface language's own conventions (English `Sun, Mar 8`, Russian `вс, 8 мар.`) and MUST carry the machine-readable ISO date (`2026-03-08`). Both MUST be derived from the location's canonical IANA identifier at the reference moment, so daylight saving time and :30 / :45 offsets are respected; a raw UTC offset MUST NOT be stored or used to compute them. Both MUST be computed whenever the list is presented: the app opens, a location is added, removed or moved, the list changes in another tab, the list is reset, the interface language or the hour format changes, the reference moment changes. Inputs: the location's IANA identifier, the reference moment (ISO 8601 with `Z`), the interface language, the hour format. Output: the time text, the date text and its ISO date. Errors: when the identifier is unknown to the browser, the row MUST be shown with its city and remove action but without time and date, and the rest of the list MUST be unaffected. Time and date need no network and behave the same offline; nothing about them is stored. <!-- implements FR1, FR2, FR5, FR6 of show-local-time-and-date-on-location-cards; FR5 of select-date-with-calendar-and-now; FR5 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Time and date of each location
 - **GIVEN** the interface language is English
@@ -651,6 +676,14 @@ Every location row in the Cards view SHALL show the location's local time and lo
 - **WHEN** the user opens the app
 - **THEN** the rows show Almaty `12:30` `Sun, Mar 8`, Moscow `10:30` `Sun, Mar 8`, Kathmandu `13:15` `Sun, Mar 8` and New York `03:30` `Sun, Mar 8`
 - **AND** every date carries the ISO date `2026-03-08`
+
+#### Scenario: Time in the 12-hour format
+- **GIVEN** the interface language is English
+- **AND** the hour format is 12-hour
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Kathmandu (`Asia/Kathmandu`) and New York (`America/New_York`)
+- **WHEN** the user opens the app
+- **THEN** the rows show Kathmandu `1:15 PM` and New York `3:30 AM`
 
 #### Scenario: Zones on both sides of midnight
 - **GIVEN** the interface language is English
@@ -942,292 +975,205 @@ The location menu SHALL keep the initial JavaScript of the build at most 150 KB 
 - **WHEN** the app is built with the location menu
 - **THEN** the initial JavaScript is at most 150 KB gzipped
 
-### Requirement: Here entry when no location matches
-The Cards view SHALL show a Here entry for the device time zone before the first location whenever no location in the location list has a canonical time zone ID equal to the device time zone. When at least one location matches, it MUST show no Here entry. Inputs: the locations' time zone IDs and the device time zone. Output: whether the Here entry is shown. Errors: none. <!-- implements FR1 of show-here-entry-for-device-time -->
+### Requirement: Device time location
+The device time location SHALL be a location of the list whose zone is the device time zone. Its row MUST show the Here mark with its "here" caption (the Home mark instead while it is home), the city of the device time zone, the meta line "Device time · {UTC offset}" («Время устройства · {UTC offset}») in place of the country and UTC offset, the local time and date at the effective instant, its offset difference by the rule of every location row, and a day track on the shared reference day. Its zone MUST change in the same render whenever the device time zone is read with a new value: at start, at every minute tick and when the page becomes visible. An unknown device time zone MUST be shown as `UTC`. Inputs: the device time zone, the effective instant, the reference zone. Output: the row. Errors: none. <!-- implements FR8, UX3 of add-settings-page-and-device-time-location -->
 
-#### Scenario: No location matches
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Moscow, Kolkata, New York
-- **WHEN** the user opens the app
-- **THEN** the first row is the Here entry for `Asia/Almaty`
-- **AND** Moscow, Kolkata and New York follow in list order
-
-#### Scenario: A location matches
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Almaty (`Asia/Almaty`), Moscow
-- **WHEN** the user opens the app
-- **THEN** no Here entry is shown
-- **AND** Almaty shows the Here mark
-
-#### Scenario: The home location matches
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Almaty (`Asia/Almaty`), Moscow
-- **AND** Almaty is the home location
-- **WHEN** the user opens the app
-- **THEN** no Here entry is shown
-- **AND** Almaty shows the Home mark
-
-#### Scenario: Matching is by time zone ID, not by offset
-- **GIVEN** the device time zone is `Europe/Minsk`
-- **AND** the list is Moscow (`Europe/Moscow`)
-- **WHEN** the user opens the app
-- **THEN** the Here entry for `Europe/Minsk` is shown before Moscow
-
-### Requirement: Here entry content
-The Here entry SHALL show the Here mark with its "here" caption, the city of the device time zone, the meta line "Device time · {UTC offset}" in place of the country and UTC offset, the local time and date at the effective instant, and a day track on the shared reference day. The UTC offset MUST be the device time zone's offset at the effective instant. <!-- implements FR2, UX1 of show-here-entry-for-device-time -->
-
-#### Scenario: Here entry on the design sample
+#### Scenario: Device time location on the design sample
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the interface language is Russian
 - **AND** the zone cities data is loaded
 - **AND** the current instant is `2026-03-08T07:30:00Z`
-- **AND** the list is Moscow, Kolkata, New York
+- **AND** the list is the device time location, Moscow, Kolkata, New York
 - **WHEN** the user opens the app
-- **THEN** the Here entry shows `Алматы`, the caption `здесь`, the meta line `Время устройства · UTC+5`, the time `12:30` and the date `вс, 8 мар.`
-- **AND** its handle stands at the same position as on every card
-
-#### Scenario: English meta line
-- **GIVEN** the device time zone is `Asia/Kolkata`
-- **AND** the interface language is English
-- **AND** the list is empty
-- **WHEN** the user opens the app
-- **THEN** the Here entry's meta line is `Device time · UTC+5:30`
-
-### Requirement: Offset difference on the Here entry
-The Here entry SHALL show an offset difference by the same rule as a location row. Without a home location it is the reference zone and MUST show no offset difference. With a home location it MUST show the offset difference from home, `0 h` when the UTC offsets are equal. <!-- implements FR3 of show-here-entry-for-device-time -->
-
-#### Scenario: No home
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** no home location is set
-- **AND** the interface language is Russian
-- **AND** the current instant is `2026-03-08T07:30:00Z`
-- **AND** the list is Moscow, Kolkata, New York
-- **WHEN** the user opens the app
-- **THEN** the Here entry shows no offset difference
+- **THEN** the first row shows `Алматы`, the caption `здесь`, the meta line `Время устройства · UTC+5`, the time `12:30`, the date `вс, 8 мар.` and no offset difference
 - **AND** Moscow shows `−2 ч`, Kolkata `+0:30` and New York `−9 ч`
-
-#### Scenario: Travelling with home set
-- **GIVEN** the home location is Almaty
-- **AND** the device time zone is `Europe/Moscow`
-- **AND** the interface language is Russian
-- **AND** the zone cities data is loaded
-- **AND** the current instant is `2026-03-08T07:30:00Z`
-- **AND** the list is Almaty, Kolkata, New York
-- **WHEN** the user opens the app
-- **THEN** the first row is the Here entry `Москва` with `−2 ч` and `Время устройства · UTC+3`
-- **AND** the reference day is `2026-03-07T19:00:00Z`–`2026-03-08T19:00:00Z`
-
-### Requirement: Here entry is not a location
-The Here entry SHALL NOT be stored and SHALL NOT be counted as a location. It MUST offer no remove action, no drag handle and no Location menu, so it cannot be removed, reordered or made home. A reorder MUST move locations only among themselves, the Here entry MUST stay first, and reorder announcements MUST count positions among locations only. <!-- implements FR4 of show-here-entry-for-device-time -->
-
-#### Scenario: Nothing to remove or move
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Moscow, New York
-- **WHEN** the user opens the app
-- **THEN** the Here entry has no remove action, no drag handle and no Location menu
-
-#### Scenario: Reorder keeps the Here entry first
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Moscow, New York
-- **WHEN** the user moves New York to the top of the list
-- **THEN** the rows are the Here entry, New York, Moscow
-- **AND** the announcement says New York is at position 1 of 2
-
-#### Scenario: Nothing is stored for the Here entry
-- **GIVEN** no location list is stored
-- **AND** the device time zone is `Asia/Almaty`
-- **WHEN** the user opens the app and selects a time on the Here entry's day track
-- **THEN** no location list is stored
-
-### Requirement: Select a time on the Here entry
-The Here entry's day track SHALL select a time exactly as a card's day track does, by pointer and by keys. A time selection on it MUST pin the reference moment and update every card in the same render, and the date bar's Now button MUST become active. <!-- implements FR5 of show-here-entry-for-device-time; FR3 of keep-now-button-visible-when-live -->
-
-#### Scenario: Time selection from the Here entry
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the current instant is `2026-03-08T07:30:00Z`
-- **AND** the list is Moscow
-- **WHEN** the user moves the Here entry's day track one hour forward
-- **THEN** the Here entry shows `13:30`
-- **AND** Moscow shows `11:30`
-- **AND** the Now button is active
-
-### Requirement: Here entry follows the device time zone
-The Here entry SHALL appear, change or disappear in the same render as the Here mark: when the device time zone is read (at start, at every minute tick, when the page becomes visible), and when locations are added, removed or reordered, changed in another tab or reset. An unknown device time zone MUST be shown as `UTC`. Errors: none. <!-- implements FR6 of show-here-entry-for-device-time -->
-
-#### Scenario: Adding the device's city hides the Here entry
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Moscow
-- **WHEN** the user adds Almaty
-- **THEN** no Here entry is shown
-- **AND** exactly 1 row shows the Here mark: Almaty
-
-#### Scenario: Removing the device's city shows the Here entry
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Almaty, Moscow
-- **WHEN** the user removes Almaty
-- **THEN** the first row is the Here entry for `Asia/Almaty`
 
 #### Scenario: The device moves to another zone
 - **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Moscow
+- **AND** the interface language is English
+- **AND** the list is the device time location, New York
 - **WHEN** the device time zone becomes `Europe/Moscow` and the minute tick reads it
-- **THEN** no Here entry is shown
-- **AND** Moscow shows the Here mark
+- **THEN** the first row shows `Moscow` and the meta line `Device time · UTC+3`
+- **AND** the list is still the device time location, New York
 
 #### Scenario: Unknown device time zone
 - **GIVEN** the device reports the time zone `Mars/Olympus_Mons`
 - **AND** the interface language is English
-- **AND** the list is Moscow
+- **AND** the list is the device time location
 - **WHEN** the user opens the app
-- **THEN** the Here entry shows `UTC`, the caption `here` and the meta line `Device time · UTC`
+- **THEN** the row shows `UTC`, the caption `here` and the meta line `Device time · UTC`
 
-### Requirement: Exemplar city of the Here entry
-The Here entry SHALL name the device time zone by its exemplar city in the interface language. The zone cities data MUST be loaded in the background only while the Here entry is shown, and showing the Here entry MUST NOT wait for it. Until the data is loaded, or when loading fails, the city MUST be derived from the time zone ID, with no error shown. The search MUST reuse data the Here entry loaded, so the page requests the data at most once while no load fails. <!-- implements FR8, NFR-P2, UX3 of show-here-entry-for-device-time -->
+### Requirement: Device time location has the controls of every card
+The device time location's row SHALL have the same controls as a city location's row: a drag handle, keyboard reorder and a location menu with the home action (Make home or Clear home) and Remove. It MUST be an item of the numbered location list, and reorder positions and announcements MUST count it like any location. Removing it MUST take it out of the list and keep the order of the others. Inputs: the user's reorder, home and remove actions. Effects: as for any location. Errors: location not found when it is no longer in the list. <!-- implements FR9, UX3 of add-settings-page-and-device-time-location -->
+
+#### Scenario: Same menu as a city card
+- **GIVEN** the interface language is English
+- **AND** the list is the device time location, Moscow
+- **WHEN** the user opens the device time location's menu
+- **THEN** it offers "Make home" and "Remove", the same items as Moscow's menu
+
+#### Scenario: Reorder below a city
+- **GIVEN** the list is the device time location, Moscow, New York
+- **WHEN** the user moves the device time location to the last position with the keyboard
+- **THEN** the list is Moscow, New York, the device time location
+- **AND** the announcement says it is at position 3 of 3
+
+#### Scenario: Remove the device time location
+- **GIVEN** the list is the device time location, Moscow
+- **WHEN** the user removes the device time location
+- **THEN** the list is Moscow
+
+### Requirement: Add the device time location
+Adding the device time location SHALL append it to the end of the list and MUST leave the order of existing locations unchanged. Inputs: none. Effects: the list grows by the device time location at its end. Errors: duplicate location when the list already holds the device time location. <!-- implements FR8, FR11 of add-settings-page-and-device-time-location -->
+
+#### Scenario: Add it back
+- **GIVEN** the list is Moscow
+- **WHEN** the user adds the device time location
+- **THEN** the list is Moscow, the device time location
+
+#### Scenario: Already listed
+- **GIVEN** the list is the device time location, Moscow
+- **WHEN** the device time location is added
+- **THEN** the addition is rejected as a duplicate location
+- **AND** the list is unchanged
+
+### Requirement: First-launch list
+When no locations document is stored, the location list SHALL be the first-launch list: the device time location only, with no home. Showing it MUST NOT write the list. The first-launch list MUST also be shown after Reset of an unreadable stored list and when another tab clears the stored list. <!-- implements FR12 of add-settings-page-and-device-time-location -->
+
+#### Scenario: First launch
+- **GIVEN** no locations document is stored
+- **AND** the device time zone is `Asia/Almaty`
+- **WHEN** the user opens the app
+- **THEN** the list is the device time location only
+- **AND** no location is home
+- **AND** no list document is stored
+
+### Requirement: An emptied list stays empty
+The user SHALL be able to remove every location, the device time location included. The empty list MUST be stored and restored as empty on the next launch, without the device time location. <!-- implements FR13 of add-settings-page-and-device-time-location -->
+
+#### Scenario: Remove everything and reopen
+- **GIVEN** the list is the device time location, Moscow
+- **WHEN** the user removes Moscow and the device time location
+- **AND** the app is opened again
+- **THEN** the list is empty
+- **AND** the empty-state explanation is shown
+
+### Requirement: Select a time on the device time location
+The device time location's day track and wall-time input SHALL select a time exactly as a city location's do, by pointer, by tap on engines without Pointer Events, and by keys. A wall-time hint on the device time location MUST end when the device time zone changes. <!-- implements FR8, FR9 of add-settings-page-and-device-time-location -->
+
+#### Scenario: Time selection from the device time location
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list is the device time location, Moscow
+- **WHEN** the user moves the device time location's day track one hour forward
+- **THEN** the device time location shows `13:30`
+- **AND** Moscow shows `11:30`
+- **AND** the Now button is active
+
+### Requirement: Exemplar city of the device time location
+The device time location SHALL be named by the exemplar city of the device time zone in the interface language. The zone cities data MUST be loaded in the background only while the device time location is in the list or the search is open, and showing the device time location MUST NOT wait for it. Until the data is loaded, or when loading fails, the city MUST be derived from the time zone ID, with no error shown. On an engine that rejects the canonical device time zone but accepts a legacy name of it, the exemplar city MUST be looked up by the canonical ID and the time, date and day track shown through the legacy name. The search MUST reuse data already loaded, so the page requests the data at most once while no load fails. <!-- implements FR8, NFR-P2 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Derived city first, exemplar city after loading
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the interface language is Russian
 - **AND** the zone cities data has not been loaded
+- **AND** the list is the device time location
 - **WHEN** the user opens the app
-- **THEN** the Here entry shows `Almaty`
+- **THEN** the device time location shows `Almaty`
 - **WHEN** the zone cities data finishes loading
-- **THEN** the Here entry shows `Алматы`
+- **THEN** the device time location shows `Алматы`
 
 #### Scenario: Loading fails
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** loading the zone cities data fails
+- **AND** the list is the device time location
 - **WHEN** the user opens the app
-- **THEN** the Here entry shows `Almaty`
+- **THEN** the device time location shows `Almaty`
 - **AND** no error is shown
 
-#### Scenario: No load without a Here entry
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Almaty
+#### Scenario: No load without the device time location
+- **GIVEN** the stored list is Almaty
 - **WHEN** the user opens the app and does not open the search
 - **THEN** the zone cities data is not requested
-
-#### Scenario: The search reuses the Here entry's data
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Moscow
-- **WHEN** the user opens the app, the zone cities data finishes loading, and the user opens the search
-- **THEN** the suggestions are shown
-- **AND** the zone cities data was requested exactly once
-
-### Requirement: Here entry in other page states
-The load error of an unreadable stored list SHALL show no Here entry and MUST NOT request the zone cities data. The view skeleton MUST stay unchanged, and the Here entry MUST appear together with the location rows. With storage unavailable, the Here entry MUST be shown as usual. <!-- implements FR9 of show-here-entry-for-device-time -->
-
-#### Scenario: Unreadable stored list
-- **GIVEN** the stored location list is unreadable
-- **WHEN** the user opens the app
-- **THEN** the load error with Reset is shown
-- **AND** no Here entry is shown
-- **AND** the zone cities data is not requested
-
-#### Scenario: Storage unavailable
-- **GIVEN** storage is unavailable
-- **AND** the device time zone is `Asia/Almaty`
-- **WHEN** the user opens the app
-- **THEN** the storage warning is shown
-- **AND** the Here entry for `Asia/Almaty` is shown
-
-### Requirement: Here entry on outdated zone data
-On an engine that rejects the canonical device time zone but accepts a legacy name of it, the Here entry SHALL show its time, date, UTC offset and day track through the legacy name, exactly like a location row in that zone. Its exemplar city MUST be looked up by the canonical time zone ID. On an engine without Pointer Events, its day track MUST select a time by tap like a card's day track. <!-- implements FR12 of show-here-entry-for-device-time -->
 
 #### Scenario: Renamed device time zone
 - **GIVEN** the engine rejects `Europe/Kyiv` and accepts `Europe/Kiev`
 - **AND** the device reports the time zone `Europe/Kiev`
 - **AND** the interface language is English
 - **AND** the current instant is `2026-03-08T07:30:00Z`
-- **AND** the list is Moscow
+- **AND** the list is the device time location
 - **WHEN** the user opens the app
-- **THEN** the Here entry shows `Kyiv`, the time `09:30` and the meta line `Device time · UTC+2`
-- **AND** the device time zone is kept as `Europe/Kyiv`
+- **THEN** the device time location shows `Kyiv`, the time `09:30` and the meta line `Device time · UTC+2`
 
-#### Scenario: Tap on the Here entry's day track without Pointer Events
-- **GIVEN** the engine has no Pointer Events
-- **AND** the device time zone is `Asia/Almaty`
-- **AND** the current instant is `2026-03-08T07:30:00Z`
-- **AND** the list is Moscow
-- **WHEN** the user taps three quarters of the Here entry's day track
-- **THEN** the Here entry shows `18:00`
-- **AND** Moscow shows `16:00`
-
-### Requirement: Here entry strings are localized
-Every string of the Here entry SHALL exist in English and Russian: the meta line "Device time" («Время устройства») and its accessible name. <!-- implements FR10 of show-here-entry-for-device-time -->
+### Requirement: Device time location strings are localized
+Every string of the device time location SHALL exist in English and Russian: the meta line "Device time" («Время устройства») and its accessible name. <!-- implements FR16 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Both languages
 - **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is empty
+- **AND** the list is the device time location
 - **WHEN** the interface language is switched between English and Russian
 - **THEN** the meta line reads `Device time · UTC+5` and `Время устройства · UTC+5`
 
-### Requirement: Here entry in every view
-Seeing the device time without a home location is part of the view contract (ADR-0002). For every registered view, with no home location and no location in the device time zone, the device time MUST be shown first, apart from the locations. <!-- implements FR11 of show-here-entry-for-device-time -->
+### Requirement: Device time location in every view
+Showing, reordering, making home and removing the device time location are part of the view contract (ADR-0002). For every registered view, the device time location MUST be shown at its list position with its time, and its remove, reorder and home actions MUST work. <!-- implements FR17 of add-settings-page-and-device-time-location -->
 
-#### Scenario: See the Here entry without home
+#### Scenario: Device time location under contract
 - **GIVEN** the view under contract is shown
 - **AND** the device time zone is `Asia/Almaty`
 - **AND** the current time is `2026-03-08T07:30:00Z`
-- **AND** the stored locations are Moscow
+- **AND** the stored locations are Moscow, the device time location
 - **WHEN** the user opens the app
-- **THEN** the first row is the Here entry showing `12:30`
-- **AND** Moscow shows `10:30`
+- **THEN** the second row is the device time location showing `12:30`
+- **WHEN** the user moves it to the first position, makes it home and then removes it
+- **THEN** the list is Moscow and no location is home
 
-### Requirement: Here entry is fast
-The Here entry SHALL cost no more work than one location row: presenting 50 location rows and the Here entry again MUST build no formatter, and the Here entry MUST use no more time zone transition lookups than one location row. <!-- implements NFR-P1 of show-here-entry-for-device-time -->
+### Requirement: Device time location is fast
+The device time location SHALL cost no more work than one city location row: presenting 50 location rows with the device time location again MUST build no formatter, and the device time location MUST use no more time zone transition lookups than one city location row. <!-- implements NFR-P1 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Presenting again builds no formatter
-- **GIVEN** 50 locations, none in the device time zone, have been presented with the Here entry
-- **WHEN** the same rows and the Here entry are presented again for the next minute tick
+- **GIVEN** 50 locations and the device time location have been presented
+- **WHEN** the same rows are presented again for the next minute tick
 - **THEN** no formatter is built
 
-### Requirement: Accessible Here entry
-The Here entry SHALL be outside the numbered location list, so assistive technology does not count it as a location. Its accessible name MUST include the city, the Here mark label and "Device time". Its time MUST be a wall-time input named like a card's (see the `time-selection` capability), and its day track MUST be one Tab stop named like a card's: Tab reaches the time button first, then the slider, then leaves the Here entry. axe-core MUST report no violations with the Here entry shown. <!-- implements NFR-A1, NFR-A2 of show-here-entry-for-device-time; NFR-A2 of add-wall-time-input-with-hint -->
+### Requirement: Accessible device time location
+The device time location's row SHALL be an item of the numbered location list. Its accessible name MUST include the city, the Here mark label (or the Home mark label while it is home) and "Device time". Its location menu button MUST be named like a city card's ("Actions for Almaty"). Its time MUST be a wall-time input and its day track one Tab stop, named like a city card's. axe-core MUST report no violations with the device time location shown, alone, above cities and as home, in the light and the dark theme. <!-- implements NFR-A1, NFR-A2 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Name and list size
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the interface language is Russian
 - **AND** the zone cities data is loaded
-- **AND** the list is Moscow, New York
+- **AND** the list is the device time location, Moscow, New York
 - **WHEN** the user opens the app
-- **THEN** the Here entry is named `Алматы, Вы здесь, Время устройства`
-- **AND** the location list has 2 items
-- **AND** the Here entry's slider is named `Время — Алматы`
-
-#### Scenario: One Tab stop on the Here entry
-- **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the interface language is Russian
-- **AND** the list is Moscow
-- **WHEN** the user moves the focus through the page with Tab
-- **THEN** exactly two elements of the Here entry take the focus, in this order: the time button whose name starts with `Ввести время — Алматы`, then the slider named `Время — Алматы`, so the day track is one Tab stop
-- **AND** the next Tab moves the focus out of the Here entry
+- **THEN** the first list item is named `Алматы, Вы здесь, Время устройства`
+- **AND** the location list has 3 items
+- **AND** its location menu button is named `Действия: Алматы`
 
 #### Scenario: No violations
-- **GIVEN** the Here entry is shown above a list, in the empty state, or while travelling with home set
+- **GIVEN** the device time location is shown alone, above a list, or as home
 - **WHEN** axe-core checks the page in the light and dark themes
 - **THEN** it reports no violations
 
-### Requirement: Here entry layout
-The Here entry SHALL use the card layout: text above the day track below 768 px, the day track right of the time with hour labels from 768 px. The page MUST NOT scroll horizontally at 320 px and 2560 px with the Here entry shown. Replacing the derived city with the exemplar city MUST NOT change the Here entry's height. <!-- implements NFR-R1, NFR-R2, UX1, UX3 of show-here-entry-for-device-time -->
+### Requirement: Device time location layout
+The device time location SHALL use the card layout of every location row: text above the day track below 768 px, the day track right of the time with hour labels from 768 px, the drag handle and the location menu at the same places. The page MUST NOT scroll horizontally at 320 px and 2560 px with it shown. Replacing the derived city with the exemplar city MUST NOT change its height. The approved screenshots of the states "device-time" (the device time location, Moscow, Kolkata, New York), "device-time-home" (the same list with the device time location as home) and "first-launch" at 375 px and 1024 px in the light and dark themes MUST match. <!-- implements NFR-R1, NFR-R3, UX3 of add-settings-page-and-device-time-location -->
 
 #### Scenario: Narrow and wide screens
-- **GIVEN** the Here entry is shown above Moscow
+- **GIVEN** the list is the device time location, Moscow
 - **WHEN** the viewport is 320 px and then 2560 px wide
 - **THEN** the page does not scroll horizontally
-- **AND** the Here entry's layout matches the Moscow card's layout
+- **AND** the device time location's layout matches the Moscow card's layout
 
 #### Scenario: The exemplar city keeps the height
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the interface language is Russian
 - **AND** the zone cities data is held back
-- **AND** the list is Moscow
-- **WHEN** the user opens the app and the Here entry shows `Almaty`
-- **AND** the zone cities data finishes loading and the Here entry shows `Алматы`
-- **THEN** the Here entry's height is the same as before the load
+- **AND** the list is the device time location, Moscow
+- **WHEN** the user opens the app and the device time location shows `Almaty`
+- **AND** the zone cities data finishes loading and it shows `Алматы`
+- **THEN** its height is the same as before the load
 - **AND** the Moscow card has not moved
 
 #### Scenario: Approved screenshots
 - **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the state is "here-entry" (list Moscow, Kolkata, New York), "here-entry-travel" (the same list with Moscow as home) or "empty"
+- **AND** the state is "device-time", "device-time-home" or "first-launch"
 - **WHEN** it is rendered at 375 px and 1024 px in the light and dark themes
 - **THEN** it matches the approved screenshot
