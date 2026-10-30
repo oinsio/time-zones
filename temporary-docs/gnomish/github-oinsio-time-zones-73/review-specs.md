@@ -72,7 +72,8 @@
 - Impact: The proposal contradicts its own design. A reviewer of the implementation, or the fix stage, could treat the shorter bar as scope creep under NG4. No wrong code would be built, because D2 and the tasks are explicit.
 - Fix: Reword NG4 to: "New screens or a redesign of the track: its height, colours, the handle's size and the hit areas stay as they are. From 768 px the visible bar becomes 44 px shorter, so that the handle fits inside the slider's hit area (FR4)."
 - Fix risk: none. The new wording matches D2, FR4 and task 4.2. No spec or test asserts the bar's width.
-- Status: open
+- Status: fixed
+- Resolution: reworded NG4 in proposal.md:50. The track's height, colours, handle size and hit areas still stay the same, and NG4 now says that from 768 px the visible bar becomes 44 px shorter so the handle fits inside the slider's hit area (FR4). This matches D2, design.md:50 and design.md:55.
 
 ### R2 — SUGGESTION — Task 6.2 reads `$scratch` in a separate command
 - Location: `openspec/changes/fix-day-track-handle-overlap-and-end-of-day/tasks.md:154-157`
@@ -81,7 +82,8 @@
 - Impact: As written, the grep looks at `/docs/glossary/time-selection.md` and fails with "No such file". The implementer must improvise, or report a failed verification for a patch that is correct.
 - Fix: Merge the two greps into the scratch command of the second bullet: append `&& test "$(grep -c "Track end" "$scratch/docs/glossary/time-selection.md")" -ge 1 && ! grep -q "getLastTrackStepMinutes" "$scratch/docs/glossary/time-selection.md"` inside the same command. Then drop the separate third bullet.
 - Fix risk: none. The checks stay the same, and only the command grouping changes. `git status --short docs` stays a separate command.
-- Status: open
+- Status: fixed
+- Resolution: in tasks.md task 6.2, the `Track end` / `getLastTrackStepMinutes` greps are now appended with `&&` to the scratch command that sets `$scratch`, and the separate grep bullet is gone. `git apply --check` and `git status --short docs` are still separate commands.
 
 ## Verdict
 
