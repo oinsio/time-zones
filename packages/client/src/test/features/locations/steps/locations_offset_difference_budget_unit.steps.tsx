@@ -1,3 +1,4 @@
+import { HourFormat } from "@/preferences";
 // Verifies NFR-P1 of set-home-location-and-show-differences.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
@@ -61,6 +62,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     return () =>
       presentLocationRows(locations, {
         language: WORK_LANGUAGE,
+        hourFormat: HourFormat.H24,
         instant,
         translate: i18n.getFixedT(WORK_LANGUAGE),
         deviceTimeZoneId: COMPARED_ZONE,

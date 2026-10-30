@@ -1,3 +1,4 @@
+import { HourFormat } from "@/preferences";
 // Verifies FR5 of match-here-mark-to-design.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
@@ -187,6 +188,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       workCount = startWorkCount();
       presentLocationRows(budgetLocations, {
         language: ENGLISH_LANGUAGE,
+        hourFormat: HourFormat.H24,
         instant: world.clock.instant(),
         translate: i18n.getFixedT(ENGLISH_LANGUAGE),
         deviceTimeZoneId: world.getDeviceZone(),

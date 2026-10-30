@@ -1,3 +1,4 @@
+import { HourFormat } from "@/preferences";
 import i18n from "i18next";
 import { expect } from "vitest";
 import { ONE_DAY } from "@/constants";
@@ -39,6 +40,7 @@ export const createTrackBudgetWorld = () => {
     const now = Temporal.Instant.from(startInstant);
     return presentLocationRows(next.locations, {
       language: ENGLISH_LANGUAGE,
+      hourFormat: HourFormat.H24,
       instant: getEffectiveInstant(next, now),
       translate: i18n.getFixedT(ENGLISH_LANGUAGE),
       deviceTimeZoneId: next.deviceTimeZoneId,

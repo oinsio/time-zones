@@ -1,3 +1,4 @@
+import { HourFormat } from "@/preferences";
 // Implements FR5, UX1 of replace-wall-clock-row-budgets-with-deterministic-checks (D4).
 import i18n from "i18next";
 import { expect } from "vitest";
@@ -27,6 +28,7 @@ export const createTrackLabelsCheck = () => {
     const instant = Temporal.Instant.from(dayStart);
     return presentLocationRows(locations, {
       language,
+      hourFormat: HourFormat.H24,
       instant,
       translate: i18n.getFixedT(language),
       deviceTimeZoneId: LABEL_DEVICE_TIME_ZONE,

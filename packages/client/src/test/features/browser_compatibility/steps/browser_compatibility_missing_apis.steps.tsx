@@ -1,3 +1,4 @@
+import { HourFormat } from "@/preferences";
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, renderHook, screen } from "@testing-library/react/pure";
@@ -79,6 +80,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       const instant = Temporal.Instant.from(SAMPLE_INSTANT);
       rows = presentLocationRows(locations, {
         language: LANGUAGE,
+        hourFormat: HourFormat.H24,
         instant,
         translate: i18n.t,
         deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,

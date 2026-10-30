@@ -1,3 +1,4 @@
+import { HourFormat } from "@/preferences";
 // Implements FR1, FR2, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D4).
 import i18n from "i18next";
 import { expect } from "vitest";
@@ -45,6 +46,7 @@ export function presentBudgetRows(
   const instant = fakeClock(timestamp).instant();
   return presentLocationRows(locations, {
     language,
+    hourFormat: HourFormat.H24,
     instant,
     translate: i18n.getFixedT(language),
     deviceTimeZoneId,

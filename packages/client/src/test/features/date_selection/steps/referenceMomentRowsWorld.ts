@@ -1,3 +1,4 @@
+import { HourFormat } from "@/preferences";
 import i18n from "i18next";
 import { expect } from "vitest";
 import { ONE_DAY } from "@/constants";
@@ -72,6 +73,7 @@ export const createRowBudgetWorld = () => {
   ) =>
     presentLocationRows(locations, {
       language: ENGLISH_LANGUAGE,
+      hourFormat: HourFormat.H24,
       instant,
       translate: i18n.getFixedT(ENGLISH_LANGUAGE),
       deviceTimeZoneId: state.deviceTimeZoneId,

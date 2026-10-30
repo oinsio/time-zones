@@ -1,3 +1,4 @@
+import { HourFormat } from "@/preferences";
 import i18n from "i18next";
 import { fakeClock } from "@/lib/temporal";
 import {
@@ -57,6 +58,7 @@ export const presentBudgetState = (state: WorldClockState) => {
   const instant = getEffectiveInstant(state, now);
   return presentLocationRows(state.locations, {
     language: BUDGET_LANGUAGE,
+    hourFormat: HourFormat.H24,
     instant,
     translate: i18n.getFixedT(BUDGET_LANGUAGE),
     deviceTimeZoneId: state.deviceTimeZoneId,
