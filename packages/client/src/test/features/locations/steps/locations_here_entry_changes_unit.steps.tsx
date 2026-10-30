@@ -80,6 +80,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @show-here-entry-for-device-time @FR5
+  // @keep-now-button-visible-when-live @FR3
   f.Scenario(
     "Time selection from the Here entry",
     ({ Given, And, When, Then }) => {
@@ -96,8 +97,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         (_ctx: unknown, time: string) => expectHereEntryShows(time),
       );
       And("the {string} row shows the time {string}", expectCardTime);
-      And("the Now button is shown", () =>
-        expect(world.nowButton()).toBeInTheDocument(),
+      And("the Now button is active", () =>
+        expect(world.nowButton()).toBeEnabled(),
       );
     },
   );

@@ -183,7 +183,7 @@ export const createTimeSelectionWorld = () => {
     showNextDay: () => act(() => current().reference.showNextDay()),
     returnToNow: () => act(() => current().reference.returnToNow()),
     runTick: () => act(() => tickScheduler.runPending()),
-    isNowShown: () => current().reference.dateBar.isPinned,
+    isNowActive: () => current().reference.dateBar.isPinned,
     shownInstant,
     dayBoundsOf: (city: string) =>
       getDayBounds(

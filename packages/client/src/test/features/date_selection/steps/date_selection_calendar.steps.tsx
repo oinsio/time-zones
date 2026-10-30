@@ -90,6 +90,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @select-date-with-calendar-and-now @FR3
+  // @keep-now-button-visible-when-live @FR3
   f.Scenario(
     "Closing the calendar changes nothing",
     ({ Given, And, When, Then }) => {
@@ -109,8 +110,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the shown date is {string}", (_ctx, isoDate: string) =>
         expect(world.shownIsoDate()).toBe(isoDate),
       );
-      And("the Now button is shown", () =>
-        expect(world.isNowShown()).toBe(true),
+      And("the Now button is active", () =>
+        expect(world.isNowActive()).toBe(true),
       );
     },
   );

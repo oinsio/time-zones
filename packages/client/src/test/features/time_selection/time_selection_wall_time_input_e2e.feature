@@ -34,13 +34,14 @@ Feature: Wall-time input in a real browser
     And the wall-time field requests a numeric keyboard
 
   @add-wall-time-input-with-hint @NFR-A4 @FR3
+  @keep-now-button-visible-when-live @FR3
   Scenario: Tab confirms the field
     Given the stored locations are "Almaty", "New York"
     And the user opens the locations app
     And the user opens the wall-time input of "New York"
     When the user types "1040" and presses Tab
     Then the card of "New York" shows the time "10:40"
-    And the Now button is shown
+    And the Now button is active
 
   @add-wall-time-input-with-hint @NFR-A2 @FR11
   Scenario: Names in English

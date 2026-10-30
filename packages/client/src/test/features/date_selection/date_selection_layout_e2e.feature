@@ -94,6 +94,7 @@ Feature: Date bar layout in a real browser
     And the calendar does not scroll horizontally
 
   @select-date-with-calendar-and-now @NFR-R1 @M7
+  @keep-now-button-visible-when-live @NFR-R1
   Scenario Outline: No horizontal scrolling at <width> px in the <bar state> state
     Given the current time is "2026-03-08T07:30:00Z"
     And the screen is <width> px wide for the locations

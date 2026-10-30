@@ -1,4 +1,5 @@
 // Verifies FR2, FR4, FR6, FR7 of select-date-with-calendar-and-now (D6).
+// Verifies FR1, FR2, FR3, FR4 of keep-now-button-visible-when-live (D1, D2).
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -36,7 +37,7 @@ describe("DateBar", () => {
   beforeEach(() => i18n.changeLanguage("en"));
   afterEach(() => i18n.changeLanguage("ru"));
 
-  it("should show the date without Now while live", () => {
+  it("should show the date with an inactive Now while live", () => {
     const { container } = renderBar("2026-03-08T07:30:00Z", "Asia/Almaty");
 
     expect(shownIsoDate(container)).toBe("2026-03-08");
@@ -46,25 +47,55 @@ describe("DateBar", () => {
     expect(
       container.querySelector('[data-date-label="long"]'),
     ).toHaveTextContent("Sunday, March 8");
-    expect(
-      screen.queryByRole("button", { name: "Now" }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Now" })).toBeDisabled();
   });
 
-  it("should show Now after the next day and hide it after Now", async () => {
+  it("should activate Now after the next day and deactivate it after Now", async () => {
     const { container } = renderBar("2026-03-08T07:30:00Z", "Asia/Almaty");
 
     await click("Next day");
     expect(shownIsoDate(container)).toBe("2026-03-09");
-    expect(screen.getByRole("button", { name: "Now" })).toHaveTextContent(
-      "Now",
-    );
+    expect(screen.getByRole("button", { name: "Now" })).toBeEnabled();
 
     await click("Now");
     expect(shownIsoDate(container)).toBe("2026-03-08");
-    expect(
-      screen.queryByRole("button", { name: "Now" }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Now" })).toBeDisabled();
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: /^Choose date/ }),
+    );
+  });
+
+  it("should keep the moment live when the inactive Now is clicked", async () => {
+    const { container } = renderBar("2026-03-08T07:30:00Z", "Asia/Almaty");
+
+    await userEvent.click(screen.getByRole("button", { name: "Now" }));
+
+    expect(shownIsoDate(container)).toBe("2026-03-08");
+    expect(screen.getByRole("button", { name: "Now" })).toBeDisabled();
+  });
+
+  it.each(["live", "pinned"])(
+    "should give Now the clock icon and the label in the %s mode",
+    async (mode) => {
+      renderBar("2026-03-08T07:30:00Z", "Asia/Almaty");
+      if (mode === "pinned") await click("Next day");
+
+      const nowButton = screen.getByRole("button", { name: "Now" });
+
+      expect(nowButton.querySelectorAll("svg")).toHaveLength(1);
+      expect(nowButton).toHaveTextContent("Now");
+    },
+  );
+
+  it("should style the inactive Now with the muted tokens", () => {
+    renderBar("2026-03-08T07:30:00Z", "Asia/Almaty");
+
+    const { className } = screen.getByRole("button", { name: "Now" });
+
+    expect(className).toContain("disabled:bg-muted");
+    expect(className).toContain("disabled:text-muted-foreground");
+    expect(className).toContain("bg-accent");
+    expect(className).toContain("text-accent-foreground");
   });
 
   it("should show the previous day", async () => {
