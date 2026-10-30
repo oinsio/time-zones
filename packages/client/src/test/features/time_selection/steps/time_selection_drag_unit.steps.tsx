@@ -206,7 +206,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("every row is the same object as before the move", () => {
         const rowsAfter = world.rows();
         expect(rowsAfter).toHaveLength(rowsBefore.length);
-        rowsAfter.forEach((row, index) => expect(row).toBe(rowsBefore[index]));
+        for (const [index, row] of rowsAfter.entries()) {
+          expect(row).toBe(rowsBefore[index]);
+        }
       });
       And("no formatter is built", () =>
         expect(workCount.formatters()).toBe(0),
