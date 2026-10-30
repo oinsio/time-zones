@@ -1182,7 +1182,7 @@ The Here entry SHALL cost no more work than one location row: presenting 50 loca
 - **THEN** no formatter is built
 
 ### Requirement: Accessible Here entry
-The Here entry SHALL be outside the numbered location list, so assistive technology does not count it as a location. Its accessible name MUST include the city, the Here mark label and "Device time". Its day track MUST be one Tab stop named like a card's. axe-core MUST report no violations with the Here entry shown. <!-- implements NFR-A1, NFR-A2 of show-here-entry-for-device-time -->
+The Here entry SHALL be outside the numbered location list, so assistive technology does not count it as a location. Its accessible name MUST include the city, the Here mark label and "Device time". Its time MUST be a wall-time input named like a card's (see the `time-selection` capability), and its day track MUST be one Tab stop named like a card's: Tab reaches the time button first, then the slider, then leaves the Here entry. axe-core MUST report no violations with the Here entry shown. <!-- implements NFR-A1, NFR-A2 of show-here-entry-for-device-time; NFR-A2 of add-wall-time-input-with-hint -->
 
 #### Scenario: Name and list size
 - **GIVEN** the device time zone is `Asia/Almaty`
@@ -1199,7 +1199,7 @@ The Here entry SHALL be outside the numbered location list, so assistive technol
 - **AND** the interface language is Russian
 - **AND** the list is Moscow
 - **WHEN** the user moves the focus through the page with Tab
-- **THEN** exactly one element of the Here entry takes the focus: the slider named `Время — Алматы`
+- **THEN** exactly two elements of the Here entry take the focus, in this order: the time button whose name starts with `Ввести время — Алматы`, then the slider named `Время — Алматы`, so the day track is one Tab stop
 - **AND** the next Tab moves the focus out of the Here entry
 
 #### Scenario: No violations
