@@ -43,7 +43,7 @@ Feature: Time selection and the reference moment
     Then the moment is pinned to "2026-03-08T13:00:00Z"
     And the "Moscow" card shows "16:00"
 
-  @add-time-sliders-to-location-cards @NFR-P1 @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
+  @add-time-sliders-to-location-cards @NFR-P1 @replace-wall-clock-row-budgets-with-deterministic-checks @FR1 @fix-day-track-handle-overlap-and-end-of-day @NFR-P1
   Scenario: 50 rows within the time-selection budget
     Given 50 locations whose rows have been presented at "2026-03-08T07:30:00Z" with the device time zone "UTC"
     When a time selection pins "2026-03-08T18:00:00Z" and the rows are presented again

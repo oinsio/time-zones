@@ -1,7 +1,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { TRACK_STEP_MINUTES } from "@/constants";
+import { TRACK_END_BEFORE_DAY_END_MINUTES } from "@/constants";
 import { createDayTrackSteps, UNKNOWN_ZONE_LABEL } from "./dayTrackSteps";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
 import { createTrackBudgetWorld } from "./trackBudgetWorld";
@@ -59,6 +59,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @add-time-sliders-to-location-cards @FR1 @M4
+  // @fix-day-track-handle-overlap-and-end-of-day @FR3
   f.ScenarioOutline(
     "Days of 23 and 25 hours",
     ({ Given, And, When, Then }, variables) => {
@@ -70,7 +71,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       });
       Then("the reference day is <minutes> minutes long", () => {
         const track = world.trackOf("New York");
-        expect(track.maxMinutes + TRACK_STEP_MINUTES).toBe(
+        expect(track.maxMinutes + TRACK_END_BEFORE_DAY_END_MINUTES).toBe(
           Number(variables.minutes),
         );
       });

@@ -49,6 +49,8 @@ const LABEL_ALIGNMENT_CLASS_NAMES = [
  * Implements FR1, FR2, FR3, FR4, FR6, FR7, FR9, UX1, UX2, UX3, NFR-A2, NFR-A3,
  * NFR-R2 of add-time-sliders-to-location-cards (D7), FR8, NFR-A2, UX1 of
  * support-legacy-ios-12-safari (a click selects where Pointer Events are missing).
+ * Implements FR1, FR4, UX1 of fix-day-track-handle-overlap-and-end-of-day (D2:
+ * from 768 px the bar and handle sit inside the slider by half the handle).
  */
 export function DayTrack({
   track,
@@ -58,9 +60,11 @@ export function DayTrack({
 }: DayTrackProps) {
   const { t } = useTranslation();
   const touchGesture = useRef<TouchGesture | null>(null);
+  const barElement = useRef<HTMLDivElement>(null);
 
   const selectAt = (event: MouseEvent<HTMLDivElement>) => {
-    const { left, width } = event.currentTarget.getBoundingClientRect();
+    if (barElement.current === null) return;
+    const { left, width } = barElement.current.getBoundingClientRect();
     if (width <= 0) return;
     const fraction = (event.clientX - left) / width;
     onSelectFraction(
@@ -141,21 +145,27 @@ export function DayTrack({
         className="group relative h-11 w-full cursor-pointer touch-pan-y select-none outline-none"
       >
         <div
-          data-day-track-bar
-          className="absolute inset-x-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full md:h-3"
-          style={{ backgroundImage: buildDayTrackGradient(track.stops) }}
-        />
-        <div
-          data-day-track-handle
-          className="pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-          style={{ left: formatPercent(track.fraction) }}
+          data-day-track-inset
+          className="absolute inset-x-0 inset-y-0 md:inset-x-[22px]"
         >
-          <span className="h-7 w-7 rounded-full border-2 border-foreground bg-surface group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-accent md:h-8 md:w-8" />
+          <div
+            ref={barElement}
+            data-day-track-bar
+            className="absolute inset-x-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full md:h-3"
+            style={{ backgroundImage: buildDayTrackGradient(track.stops) }}
+          />
+          <div
+            data-day-track-handle
+            className="pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+            style={{ left: formatPercent(track.fraction) }}
+          >
+            <span className="h-7 w-7 rounded-full border-2 border-foreground bg-surface group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-accent md:h-8 md:w-8" />
+          </div>
         </div>
       </div>
       <div
         aria-hidden="true"
-        className="relative hidden h-4 text-xs tabular-nums text-muted-foreground md:block"
+        className="relative hidden h-4 text-xs tabular-nums text-muted-foreground md:mx-[22px] md:block"
       >
         {track.hourLabels.map((hourLabel, labelIndex) => (
           <span

@@ -7,7 +7,7 @@ export const ALMATY_LABELS = ["00", "06", "12", "18", "00"];
 export const ALMATY_TRACK: PresentedDayTrack = {
   fraction: 0.520833,
   valueMinutes: 750,
-  maxMinutes: 1425,
+  maxMinutes: 1439,
   valueText: "12:30, Sun, Mar 8",
   stops: [
     { fraction: 0.270833, period: DayPeriod.NIGHT },
@@ -45,10 +45,13 @@ export const setupInteractiveTrack = () => {
     />,
   );
   const slider = getByRole("slider");
-  slider.getBoundingClientRect = () =>
+  const bar = slider.querySelector<HTMLElement>(
+    "[data-day-track-bar]",
+  ) as HTMLElement;
+  bar.getBoundingClientRect = () =>
     ({ left: 0, width: TRACK_WIDTH }) as DOMRect;
   slider.setPointerCapture = vi.fn();
   slider.releasePointerCapture = vi.fn();
   slider.hasPointerCapture = () => true;
-  return { slider, onSelectFraction, onMoveTrack };
+  return { slider, bar, onSelectFraction, onMoveTrack };
 };

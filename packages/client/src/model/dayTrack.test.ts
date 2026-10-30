@@ -5,8 +5,8 @@ import { Temporal } from "@/lib/temporal";
 import {
   getInstantAfterTrackMove,
   getInstantAtTrackFraction,
-  getLastTrackStepMinutes,
   getReferenceDay,
+  getTrackEndMinutes,
   getTrackFraction,
   getTrackValueMinutes,
   type ReferenceDay,
@@ -83,12 +83,12 @@ describe("getReferenceDay", () => {
 });
 
 describe("track position", () => {
-  it("should give the fraction, value and last step of Almaty", () => {
+  it("should give the fraction, value and track end of Almaty", () => {
     const instant = instantOf("2026-03-08T07:30:00Z");
 
     expect(getTrackFraction(ALMATY_DAY, instant)).toBeCloseTo(0.520833, 6);
     expect(getTrackValueMinutes(ALMATY_DAY, instant)).toBe(750);
-    expect(getLastTrackStepMinutes(ALMATY_DAY)).toBe(1425);
+    expect(getTrackEndMinutes(ALMATY_DAY)).toBe(1439);
   });
 
   it("should floor the value minutes", () => {
@@ -108,10 +108,12 @@ describe("track position", () => {
   it.each([
     [0.75, "2026-03-08T13:00:00Z"],
     [0.52, "2026-03-08T07:30:00Z"],
-    [1, "2026-03-08T18:45:00Z"],
+    [0.99, "2026-03-08T18:45:00Z"],
+    [0.996, "2026-03-08T18:59:00Z"],
+    [1, "2026-03-08T18:59:00Z"],
     [0, "2026-03-07T19:00:00Z"],
     [-0.3, "2026-03-07T19:00:00Z"],
-    [7, "2026-03-08T18:45:00Z"],
+    [7, "2026-03-08T18:59:00Z"],
   ])("should pick fraction %f at %s", (fraction, expected) => {
     expect(getInstantAtTrackFraction(ALMATY_DAY, fraction).toString()).toBe(
       expected,
@@ -121,18 +123,16 @@ describe("track position", () => {
   it("should pick half of a 23-hour New York day at 12:30", () => {
     const day = dayOf("America/New_York", "2026-03-08T12:00:00Z");
 
-    expect(getLastTrackStepMinutes(day)).toBe(1365);
+    expect(getTrackEndMinutes(day)).toBe(1379);
     expect(getInstantAtTrackFraction(day, 0.5).toString()).toBe(
       "2026-03-08T16:30:00Z",
     );
   });
 
-  it("should have a last step of 1485 on a 25-hour day", () => {
+  it("should have a track end of 1499 on a 25-hour day", () => {
     expect(
-      getLastTrackStepMinutes(
-        dayOf("America/New_York", "2026-11-01T12:00:00Z"),
-      ),
-    ).toBe(1485);
+      getTrackEndMinutes(dayOf("America/New_York", "2026-11-01T12:00:00Z")),
+    ).toBe(1499);
   });
 });
 
@@ -143,10 +143,14 @@ describe("getInstantAfterTrackMove", () => {
     [TrackMove.HOUR_FORWARD, "2026-03-08T07:30:00Z", "2026-03-08T08:30:00Z"],
     [TrackMove.HOUR_BACK, "2026-03-08T07:30:00Z", "2026-03-08T06:30:00Z"],
     [TrackMove.DAY_START, "2026-03-08T07:30:00Z", "2026-03-07T19:00:00Z"],
-    [TrackMove.DAY_END, "2026-03-08T07:30:00Z", "2026-03-08T18:45:00Z"],
+    [TrackMove.DAY_END, "2026-03-08T07:30:00Z", "2026-03-08T18:59:00Z"],
     [TrackMove.NEXT_STEP, "2026-03-08T07:37:00Z", "2026-03-08T07:45:00Z"],
     [TrackMove.PREVIOUS_STEP, "2026-03-08T07:37:00Z", "2026-03-08T07:30:00Z"],
-    [TrackMove.NEXT_STEP, "2026-03-08T18:45:00Z", "2026-03-08T18:45:00Z"],
+    [TrackMove.NEXT_STEP, "2026-03-08T18:45:00Z", "2026-03-08T18:59:00Z"],
+    [TrackMove.NEXT_STEP, "2026-03-08T18:59:00Z", "2026-03-08T18:59:00Z"],
+    [TrackMove.HOUR_FORWARD, "2026-03-08T18:30:00Z", "2026-03-08T18:59:00Z"],
+    [TrackMove.PREVIOUS_STEP, "2026-03-08T18:59:00Z", "2026-03-08T18:45:00Z"],
+    [TrackMove.HOUR_BACK, "2026-03-08T18:59:00Z", "2026-03-08T18:00:00Z"],
     [TrackMove.PREVIOUS_STEP, "2026-03-07T19:00:00Z", "2026-03-07T19:00:00Z"],
     [TrackMove.HOUR_FORWARD, "2026-03-08T07:37:00Z", "2026-03-08T08:30:00Z"],
     [TrackMove.HOUR_BACK, "2026-03-08T07:37:00Z", "2026-03-08T06:45:00Z"],

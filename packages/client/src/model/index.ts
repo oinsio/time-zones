@@ -31,8 +31,8 @@ export {
 export {
   getInstantAfterTrackMove,
   getInstantAtTrackFraction,
-  getLastTrackStepMinutes,
   getReferenceDay,
+  getTrackEndMinutes,
   getTrackFraction,
   getTrackValueMinutes,
   type ReferenceDay,

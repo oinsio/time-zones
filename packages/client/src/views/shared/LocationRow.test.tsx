@@ -97,7 +97,7 @@ describe("LocationRow day track", () => {
   const dayTrack = {
     fraction: 0.5,
     valueMinutes: 720,
-    maxMinutes: 1425,
+    maxMinutes: 1439,
     valueText: "12:00, Sun, Mar 8",
     stops: [{ fraction: 0.3, period: DayPeriod.NIGHT }],
     hourLabels: [],

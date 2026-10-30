@@ -106,6 +106,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @add-time-sliders-to-location-cards @NFR-P1
   // @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
+  // @fix-day-track-handle-overlap-and-end-of-day @NFR-P1
   f.Scenario(
     "50 rows within the time-selection budget",
     ({ Given, When, Then, And }) => {

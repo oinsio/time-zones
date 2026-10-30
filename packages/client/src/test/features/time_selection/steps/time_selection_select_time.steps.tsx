@@ -1,6 +1,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
+import { MAX_TRACK_FRACTION } from "@/constants";
 import {
   createStore,
   INITIAL_WORLD_CLOCK_STATE,
@@ -9,13 +10,12 @@ import {
   ReferenceMode,
   reduceLocations,
 } from "@/model";
-import { type CardTable, MOVE_BY_KEY_NAME } from "./selectTimeTables";
+import { createSelectTimeSteps } from "./selectTimeSteps";
+import type { CardTable } from "./selectTimeTables";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
 
 const feature = await loadFeature("../time_selection_select_time.feature");
 
-const PRECISION = 6;
-const QUARTER = 0.75;
 const MIDDLE = 0.5;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
@@ -29,28 +29,18 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
   f.AfterAllScenarios(world.finish);
 
-  const givenZone = (_ctx: unknown, zone: string) => world.setDeviceZone(zone);
-  const givenInstant = (_ctx: unknown, timestamp: string) =>
-    world.setInstant(timestamp);
-  const givenList = (_ctx: unknown, cities: string) =>
-    world.setStoredCities(cities);
-  const givenAppOpen = () => world.open();
-  const givenPinnedHere = () =>
-    world.selectFraction(world.rows()[0]?.dayTrack?.fraction ?? 0);
-  const selectQuarter = () => world.selectFraction(QUARTER);
-  const whenKey = (_ctx: unknown, keyName: string) =>
-    world.moveTrack(MOVE_BY_KEY_NAME[keyName]);
-  const thenPinned = (_ctx: unknown, timestamp: string) => {
-    expect(world.isNowShown()).toBe(true);
-    expect(world.shownInstant()).toBe(timestamp);
-  };
-  const thenCardShows = (_ctx: unknown, city: string, time: string) =>
-    expect(world.rowOf(city).localTimeLabel).toBe(time);
-  const thenEveryHandleAt = (_ctx: unknown, fraction: number) => {
-    for (const row of world.rows()) {
-      expect(row.dayTrack?.fraction).toBeCloseTo(fraction, PRECISION);
-    }
-  };
+  const {
+    givenZone,
+    givenInstant,
+    givenList,
+    givenAppOpen,
+    givenPinnedHere,
+    selectQuarter,
+    whenKey,
+    thenPinned,
+    thenCardShows,
+    thenEveryHandleAt,
+  } = createSelectTimeSteps(world);
 
   // @add-time-sliders-to-location-cards @FR3 @M2
   f.Scenario(
@@ -77,6 +67,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @FR3 @M2
+  // @fix-day-track-handle-overlap-and-end-of-day @FR1
   f.ScenarioOutline(
     "Selections snap to quarter hours and stay inside the day",
     ({ Given, And, When, Then }, variables) => {
@@ -135,6 +126,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @FR4 @M3
+  // @fix-day-track-handle-overlap-and-end-of-day @FR2
   f.ScenarioOutline(
     "Keys from a pinned quarter hour",
     ({ Given, And, When, Then }, variables) => {
@@ -173,6 +165,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @add-time-sliders-to-location-cards @FR4
+  // @fix-day-track-handle-overlap-and-end-of-day @FR2
   f.Scenario(
     "Keys stop at the ends of the day",
     ({ Given, And, When, Then }) => {
@@ -185,6 +178,43 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         whenKey(undefined, "next step"),
       );
       Then("the moment is pinned to {string}", thenPinned);
+    },
+  );
+
+  // @fix-day-track-handle-overlap-and-end-of-day @FR1 @UX2
+  f.ScenarioOutline(
+    "The right end reaches the last minute of 23- and 25-hour days",
+    ({ Given, And, When, Then }, variables) => {
+      Given("the device time zone is {string}", givenZone);
+      And("the current instant is <instant>", () =>
+        givenInstant(undefined, variables.instant),
+      );
+      And("the list contains {string}", givenList);
+      And("the app is open", givenAppOpen);
+      When("the user selects the fraction 1.0 of the track", () =>
+        world.selectFraction(MAX_TRACK_FRACTION),
+      );
+      Then("the {string} card shows {string}", thenCardShows);
+    },
+  );
+
+  // @fix-day-track-handle-overlap-and-end-of-day @FR2
+  f.ScenarioOutline(
+    "Keys around the track end",
+    ({ Given, And, When, Then }, variables) => {
+      Given("the device time zone is {string}", givenZone);
+      And("the current instant is <from>", () =>
+        givenInstant(undefined, variables.from),
+      );
+      And("the list contains {string}", givenList);
+      And("the app is open", givenAppOpen);
+      And("the moment is pinned at its current position", givenPinnedHere);
+      When("the user moves the handle with <key>", () =>
+        whenKey(undefined, variables.key),
+      );
+      Then("the moment is pinned to <pinned>", () =>
+        thenPinned(undefined, variables.pinned),
+      );
     },
   );
 });

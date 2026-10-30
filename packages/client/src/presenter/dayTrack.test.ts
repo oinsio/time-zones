@@ -67,7 +67,7 @@ describe("presentDayTrack", () => {
 
     expect(track.fraction).toBeCloseTo(0.520833, PRECISION);
     expect(track.valueMinutes).toBe(750);
-    expect(track.maxMinutes).toBe(1425);
+    expect(track.maxMinutes).toBe(1439);
   });
 
   it("should reuse the stops of the model", () => {

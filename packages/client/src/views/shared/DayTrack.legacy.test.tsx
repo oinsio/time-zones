@@ -25,9 +25,12 @@ async function renderLegacyTrack() {
     />,
   );
   const slider = screen.getByRole("slider");
-  slider.getBoundingClientRect = () =>
+  const bar = slider.querySelector<HTMLElement>(
+    "[data-day-track-bar]",
+  ) as HTMLElement;
+  bar.getBoundingClientRect = () =>
     ({ left: 0, width: TRACK_WIDTH }) as DOMRect;
-  return { slider, onSelectFraction, onMoveTrack };
+  return { slider, bar, onSelectFraction, onMoveTrack };
 }
 
 describe("DayTrack without Pointer Events", () => {

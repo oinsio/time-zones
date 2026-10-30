@@ -50,7 +50,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       />,
     );
     const slider = screen.getByRole("slider");
-    slider.getBoundingClientRect = () =>
+    const bar = slider.querySelector<HTMLElement>(
+      "[data-day-track-bar]",
+    ) as HTMLElement;
+    bar.getBoundingClientRect = () =>
       ({ left: 0, width: TRACK_WIDTH_PX }) as DOMRect;
     fireEvent.click(slider, { clientX: TRACK_WIDTH_PX * THREE_QUARTERS });
   };

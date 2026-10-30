@@ -9,6 +9,9 @@ export const TOUCH_POINTER_TYPE = "touch";
 export const MIN_TRACK_FRACTION = 0;
 export const MAX_TRACK_FRACTION = 1;
 export const TRACK_VALUE_MIN_MINUTES = 0;
+// Implements FR1 of fix-day-track-handle-overlap-and-end-of-day (D1).
+/** The track end lies this many minutes before the end of the reference day. */
+export const TRACK_END_BEFORE_DAY_END_MINUTES = 1;
 /** Offset changes move local time by less than this; bounds the boundary search. */
 export const OFFSET_CHANGE_MARGIN_HOURS = 3;
 

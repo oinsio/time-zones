@@ -1,13 +1,15 @@
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
-import { listRow } from "../../locations/steps/locationsE2eHelpers";
+import { listRow, menuButton } from "../../locations/steps/locationsE2eHelpers";
 import {
   barOf,
   centreOfBox,
+  handleOf,
   hourLabelsOf,
   readTokenStyle,
   requireBox,
+  sliderOf,
   timeTextOf,
   visibleHandleOf,
 } from "./timeSelectionE2eHelpers";
@@ -102,5 +104,30 @@ Then(
       );
       expect(numericVariant).toContain("tabular-nums");
     }
+  },
+);
+
+const MIN_CLEARANCE_PX = 12;
+
+// Verifies FR4, UX1 of fix-day-track-handle-overlap-and-end-of-day: the handle covers nothing.
+Then(
+  "the handle of {string} lies inside its slider and clear of its time and its menu",
+  async ({ locationsWorld }, city: string) => {
+    const { page } = locationsWorld;
+    const slider = await requireBox(sliderOf(page, city));
+    const hitArea = await requireBox(handleOf(page, city));
+    const visibleHandle = await requireBox(visibleHandleOf(page, city));
+    const time = await requireBox(timeTextOf(page, city));
+    const menu = await requireBox(menuButton(page, city));
+    expect(hitArea.x).toBeGreaterThanOrEqual(slider.x - TOLERANCE_PX);
+    expect(hitArea.x + hitArea.width).toBeLessThanOrEqual(
+      slider.x + slider.width + TOLERANCE_PX,
+    );
+    expect(visibleHandle.x).toBeGreaterThanOrEqual(
+      time.x + time.width + MIN_CLEARANCE_PX,
+    );
+    expect(visibleHandle.x + visibleHandle.width).toBeLessThanOrEqual(
+      menu.x - MIN_CLEARANCE_PX,
+    );
   },
 );

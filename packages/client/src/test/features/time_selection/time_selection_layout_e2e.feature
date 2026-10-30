@@ -66,6 +66,11 @@ Feature: Day track layout in a real browser
       | 320   |
       | 2560  |
 
+    @fix-day-track-handle-overlap-and-end-of-day @NFR-R1
+    Examples:
+      | width |
+      | 768   |
+
   @add-time-sliders-to-location-cards @FR6
   Scenario Outline: Colours come from the <theme> theme tokens
     Given the stored locations are "Almaty"
@@ -83,3 +88,19 @@ Feature: Day track layout in a real browser
     Given the stored locations are "Almaty"
     When the user opens the locations app
     Then the visible handle of "Almaty" is filled with the surface colour and outlined with the foreground colour
+
+  @fix-day-track-handle-overlap-and-end-of-day @FR4 @UX1
+  Scenario Outline: The handle stays clear of the time and the menu at <width> px with <key>
+    Given the stored locations are "Almaty", "Moscow"
+    And the screen is <width> px wide for the locations
+    When the user opens the locations app
+    And the user focuses the slider of "Almaty" with the keyboard
+    And the user presses the key "<key>"
+    Then the handle of "Almaty" lies inside its slider and clear of its time and its menu
+
+    Examples:
+      | width | key  |
+      | 768   | Home |
+      | 768   | End  |
+      | 1024  | Home |
+      | 1024  | End  |

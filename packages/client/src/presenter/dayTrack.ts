@@ -5,7 +5,7 @@ import type { Temporal } from "@/lib/temporal";
 import {
   type DayPeriodStop,
   getDayPeriodStops,
-  getLastTrackStepMinutes,
+  getTrackEndMinutes,
   getTrackFraction,
   getTrackValueMinutes,
   type ReferenceDay,
@@ -24,7 +24,7 @@ export type PresentedDayTrack = {
   fraction: number;
   /** `aria-valuenow`: minutes since the start of the reference day. */
   valueMinutes: number;
-  /** `aria-valuemax`: the last step of the reference day. */
+  /** `aria-valuemax`: the track end, the last minute of the reference day (FR3 of fix-day-track-handle-overlap-and-end-of-day). */
   maxMinutes: number;
   /** `aria-valuetext`: local time and date of the card. */
   valueText: string;
@@ -102,7 +102,7 @@ export function presentDayTrack({
   return {
     fraction: getTrackFraction(day, instant),
     valueMinutes: getTrackValueMinutes(day, instant),
-    maxMinutes: getLastTrackStepMinutes(day),
+    maxMinutes: getTrackEndMinutes(day),
     valueText: translate("locations.timeSliderValue", {
       time: localTimeLabel,
       date: localDateLabel,

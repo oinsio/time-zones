@@ -1,5 +1,6 @@
 import {
   NANOSECONDS_PER_MINUTE,
+  TRACK_END_BEFORE_DAY_END_MINUTES,
   TRACK_HOUR_MOVE_MINUTES,
   TRACK_STEP_MINUTES,
 } from "@/constants";
@@ -12,6 +13,7 @@ import { getEffectiveInstant, getReferenceZone } from "./referenceMoment";
  * and keyboard moves. Pure; all lengths come from absolute instants, so days
  * of 23 and 25 hours work.
  * Implements FR1, FR2, FR3, FR4 of add-time-sliders-to-location-cards (D2).
+ * Implements FR1, FR2, FR3 of fix-day-track-handle-overlap-and-end-of-day (D1).
  */
 
 export type ReferenceDay = {
@@ -63,15 +65,16 @@ export function getTrackValueMinutes(
   return Math.floor(getElapsedMinutes(day, instant));
 }
 
-export function getLastTrackStepMinutes(day: ReferenceDay): number {
-  return day.lengthMinutes - TRACK_STEP_MINUTES;
+/** The last minute of the reference day: the right end of a day track. */
+export function getTrackEndMinutes(day: ReferenceDay): number {
+  return day.lengthMinutes - TRACK_END_BEFORE_DAY_END_MINUTES;
 }
 
 function getInstantAtMinutes(
   day: ReferenceDay,
   minutes: number,
 ): Temporal.Instant {
-  const clamped = Math.min(Math.max(minutes, 0), getLastTrackStepMinutes(day));
+  const clamped = Math.min(Math.max(minutes, 0), getTrackEndMinutes(day));
   return day.start.add({ nanoseconds: clamped * NANOSECONDS_PER_MINUTE });
 }
 
@@ -84,7 +87,7 @@ export function getInstantAtTrackFraction(
   return getInstantAtMinutes(day, steps * TRACK_STEP_MINUTES);
 }
 
-/** The instant after a keyboard move, clamped to the day. */
+/** The instant after a keyboard move, clamped to the day start and the track end. */
 export function getInstantAfterTrackMove(
   day: ReferenceDay,
   instant: Temporal.Instant,
@@ -100,7 +103,7 @@ export function getInstantAfterTrackMove(
     [TrackMove.HOUR_FORWARD]: floorStep + TRACK_HOUR_MOVE_MINUTES,
     [TrackMove.HOUR_BACK]: ceilStep - TRACK_HOUR_MOVE_MINUTES,
     [TrackMove.DAY_START]: 0,
-    [TrackMove.DAY_END]: getLastTrackStepMinutes(day),
+    [TrackMove.DAY_END]: getTrackEndMinutes(day),
   };
   return getInstantAtMinutes(day, targetMinutes[move]);
 }

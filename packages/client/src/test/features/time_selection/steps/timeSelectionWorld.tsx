@@ -5,7 +5,10 @@ import {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
 } from "@/adapters";
-import { NANOSECONDS_PER_MINUTE, TRACK_STEP_MINUTES } from "@/constants";
+import {
+  NANOSECONDS_PER_MINUTE,
+  TRACK_END_BEFORE_DAY_END_MINUTES,
+} from "@/constants";
 import {
   LocationsProvider,
   type TrackMove,
@@ -187,7 +190,7 @@ export const createTimeSelectionWorld = () => {
     /** Start and end of the reference day, worked out from a card's track. */
     dayBoundsOf: (city: string) => {
       const track = trackOf(city);
-      const lengthMinutes = track.maxMinutes + TRACK_STEP_MINUTES;
+      const lengthMinutes = track.maxMinutes + TRACK_END_BEFORE_DAY_END_MINUTES;
       const effective = Temporal.Instant.from(
         current().reference.dateBar.isPinned
           ? shownInstant()
