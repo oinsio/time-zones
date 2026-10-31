@@ -104,6 +104,7 @@
     "open": "Settings",
     "title": "Settings",
     "back": "Back",
+    "gnomishFactoryCredit": "Built with Gnomish Factory",
     "themeLabel": "Theme",
     "themeLight": "Light",
     "themeDark": "Dark",
