@@ -1,4 +1,5 @@
 // Verifies FR17 of add-locations-via-search.
+// Verifies FR3 of fix-location-card-and-header-layout (D3).
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -50,18 +51,17 @@ describe("AddLocationButton header label", () => {
     );
   });
 
-  it("should show the short label only from the wide breakpoint", () => {
+  it("should show no visible text on any width", async () => {
     render(<AddLocationButton />);
-    const shortLabel = screen.getByText("Add");
-    expect(shortLabel.tagName).toBe("SPAN");
-    expect(shortLabel).toHaveClass("hidden", "md:inline");
+    expect(screen.getByRole("button").textContent).toBe("");
+    await i18n.changeLanguage("ru");
+    expect(screen.getByRole("button").textContent).toBe("");
   });
 
-  it("should keep the accessible name Add location in both languages of the label", async () => {
+  it("should keep the accessible name Add location in both languages", async () => {
     await i18n.changeLanguage("ru");
     render(<AddLocationButton />);
-    expect(
-      screen.getByRole("button", { name: "Добавить место" }),
-    ).toHaveTextContent("Добавить");
+    const button = screen.getByRole("button", { name: "Добавить место" });
+    expect(button.textContent).toBe("");
   });
 });

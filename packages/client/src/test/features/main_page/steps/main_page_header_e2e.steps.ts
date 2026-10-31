@@ -14,7 +14,8 @@ const BANNER_ROLE = "banner";
 const HEADING_ROLE = "heading";
 const BUTTON_ROLE = "button";
 const MIN_TARGET_SIZE_PX = 44;
-const MAX_ADJACENT_GAP_PX = 24;
+const CENTRE_TOLERANCE_PX = 1;
+const MAX_TAB_PRESSES = 12;
 const SETTINGS_HEADING = englishLocale.settings.title;
 
 const headerOf = (page: Page) => page.getByRole(BANNER_ROLE);
@@ -47,19 +48,6 @@ Then(
   },
 );
 
-// Verifies NFR-R1 of add-settings-page-and-device-time-location: both buttons group at the right.
-Then(
-  "the button named {string} is directly before the button named {string}",
-  async ({ locationsWorld }, firstName: string, secondName: string) => {
-    const { page } = locationsWorld;
-    const first = await requireBox(headerButton(page, firstName));
-    const second = await requireBox(headerButton(page, secondName));
-    const gap = second.x - (first.x + first.width);
-    expect(gap).toBeGreaterThanOrEqual(0);
-    expect(gap).toBeLessThanOrEqual(MAX_ADJACENT_GAP_PX);
-  },
-);
-
 Then(
   "the button named {string} shows no visible text",
   async ({ locationsWorld }, name: string) => {
@@ -68,15 +56,6 @@ Then(
       name,
     ).innerText();
     expect(visibleText).toBe("");
-  },
-);
-
-Then(
-  "the button named {string} shows the visible text {string}",
-  async ({ locationsWorld }, name: string, visibleText: string) => {
-    await expect(headerButton(locationsWorld.page, name)).toHaveText(
-      visibleText,
-    );
   },
 );
 
@@ -149,5 +128,55 @@ Then(
       expect(box.width).toBeGreaterThanOrEqual(minWidth);
       expect(box.height).toBeGreaterThanOrEqual(minHeight);
     }
+  },
+);
+
+// Verifies FR4, UX2 of fix-location-card-and-header-layout: the title is centred on the page.
+Then(
+  "the centre of the title is the centre of the page width",
+  async ({ locationsWorld }) => {
+    const { page } = locationsWorld;
+    const titleBox = await requireBox(headerOf(page).getByRole(HEADING_ROLE));
+    const pageWidth = await page.evaluate(
+      () => document.documentElement.clientWidth,
+    );
+    expect(
+      Math.abs(titleBox.x + titleBox.width / 2 - pageWidth / 2),
+    ).toBeLessThanOrEqual(CENTRE_TOLERANCE_PX);
+  },
+);
+
+// Verifies FR4, UX2 of fix-location-card-and-header-layout: Settings stays at the right edge.
+Then(
+  "the button named {string} is the rightmost header control",
+  async ({ locationsWorld }, name: string) => {
+    const { page } = locationsWorld;
+    const buttonBox = await requireBox(headerButton(page, name));
+    const titleBox = await requireBox(headerOf(page).getByRole(HEADING_ROLE));
+    expect(buttonBox.x).toBeGreaterThan(titleBox.x + titleBox.width);
+    const headerBox = await requireBox(headerOf(page));
+    expect(
+      Math.abs(buttonBox.x + buttonBox.width - (headerBox.x + headerBox.width)),
+    ).toBeLessThanOrEqual(CENTRE_TOLERANCE_PX);
+  },
+);
+
+// Verifies NFR-A1 of fix-location-card-and-header-layout: DOM order is the Tab order.
+Then(
+  "Tab reaches the button named {string} before the button named {string}",
+  async ({ locationsWorld }, firstName: string, secondName: string) => {
+    const { page } = locationsWorld;
+    const reachedNames: string[] = [];
+    for (let press = 0; press < MAX_TAB_PRESSES; press += 1) {
+      await page.keyboard.press("Tab");
+      reachedNames.push(
+        await page.evaluate(
+          () => document.activeElement?.getAttribute("aria-label") ?? "",
+        ),
+      );
+    }
+    const firstIndex = reachedNames.indexOf(firstName);
+    expect(firstIndex).toBeGreaterThanOrEqual(0);
+    expect(reachedNames.indexOf(secondName)).toBeGreaterThan(firstIndex);
   },
 );

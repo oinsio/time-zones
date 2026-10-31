@@ -87,7 +87,7 @@ Feature: Wall-time input in a real browser
     When the page shows a GAP hint
     Then the hint is a status outside any live region with no time in it
 
-  @add-wall-time-input-with-hint @NFR-R1 @UX3
+  @add-wall-time-input-with-hint @NFR-R1 @UX3 @fix-location-card-and-header-layout @FR1
   Scenario Outline: No horizontal scrolling at <width> px
     Given the screen is <width> px wide for the locations
     And the stored locations are "Almaty", "New York"
@@ -96,7 +96,7 @@ Feature: Wall-time input in a real browser
     When the user opens the wall-time input of "Almaty"
     Then the locations screen does not scroll horizontally
     And the card of "Almaty" keeps its size
-    And the hint sits below the place column and above the day track
+    And the hint is the bottom line of the card of "New York"
 
     Examples:
       | width |

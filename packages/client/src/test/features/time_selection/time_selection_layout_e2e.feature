@@ -83,11 +83,11 @@ Feature: Day track layout in a real browser
       | light |
       | dark  |
 
-  @add-time-sliders-to-location-cards @UX1
-  Scenario: The visible handle follows the surface and foreground tokens
+  @add-time-sliders-to-location-cards @UX1 @fix-location-card-and-header-layout @FR2
+  Scenario: The visible handle follows its card and the foreground token
     Given the stored locations are "Almaty"
     When the user opens the locations app
-    Then the visible handle of "Almaty" is filled with the surface colour and outlined with the foreground colour
+    Then the visible handle of "Almaty" is filled with its card's fill and outlined with the foreground colour
 
   @fix-day-track-handle-overlap-and-end-of-day @FR4 @UX1
   Scenario Outline: The handle stays clear of the time and the menu at <width> px with <key>

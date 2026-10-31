@@ -16,6 +16,7 @@ import { DragHandle } from "./DragHandle";
 import { LocationMenu, type LocationMenuItem } from "./LocationMenu";
 import { getReorderTransition } from "./reorderTransition";
 import { useDropSettleAnimation } from "./useDropSettleAnimation";
+import { WallTimeHint } from "./WallTimeHint";
 import { ZoneRowContent } from "./ZoneRowContent";
 
 type LocationRowProps = {
@@ -57,6 +58,8 @@ type LocationRowProps = {
  * Implements FR2, FR4 of show-here-entry-for-device-time (D5): the place
  * column, time and day track live in `ZoneRowContent`.
  * Implements FR1, FR7 of add-wall-time-input-with-hint (D6): binds the location target.
+ * Implements FR1, NFR-A2, UX1 of fix-location-card-and-header-layout (D1): the
+ * wall-time hint is the last child of the card.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -162,7 +165,6 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           localDateLabel={row.localDateLabel}
           localIsoDate={row.localIsoDate}
           wallTimeInputLabel={row.wallTimeInputLabel}
-          wallTimeHint={row.wallTimeHint}
           onConfirmWallTime={(text, date) =>
             onConfirmWallTime(
               { kind: WallTimeTargetKind.LOCATION, locationId: row.id },
@@ -179,6 +181,9 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           city={row.cityLabel}
           items={menuItems}
         />
+        {row.wallTimeHint !== undefined && (
+          <WallTimeHint text={row.wallTimeHint} />
+        )}
       </li>
     );
   },

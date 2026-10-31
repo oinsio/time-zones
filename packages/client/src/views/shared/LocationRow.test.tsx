@@ -3,7 +3,8 @@
 // Verifies FR2, FR6, UX1, NFR-A2 of show-local-time-and-date-on-location-cards (D5).
 // Verifies FR1 of reorder-locations-by-drag-and-drop.
 // Verifies FR1 of add-time-sliders-to-location-cards (D8).
-import { screen } from "@testing-library/react";
+// Verifies FR1, NFR-A2 of fix-location-card-and-header-layout (D1).
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { WallTimeInputOutcome, WallTimeTargetKind } from "@/controller";
@@ -145,5 +146,29 @@ describe("LocationRow day track", () => {
     renderRow({ wallTimeHint: "02:30 не существует" });
 
     expect(screen.getByText("02:30 не существует")).toBeInTheDocument();
+  });
+
+  it("should render the wall-time hint as the card's last element, after the location menu button", () => {
+    renderRow({ wallTimeHint: "02:30 не существует" });
+
+    const card = screen.getByRole("listitem");
+    const hint = within(card).getByRole("status");
+    const menuButton = screen.getByRole("button", {
+      name: "Actions for Kolkata",
+    });
+    expect(card.lastElementChild).toBe(hint);
+    expect(hint).toHaveTextContent("02:30 не существует");
+    expect(
+      menuButton.compareDocumentPosition(hint) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("should render no status element without a hint", () => {
+    renderRow();
+
+    expect(
+      within(screen.getByRole("listitem")).queryByRole("status"),
+    ).not.toBeInTheDocument();
   });
 });

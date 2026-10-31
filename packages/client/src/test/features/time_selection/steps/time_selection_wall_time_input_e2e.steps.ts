@@ -26,10 +26,7 @@ const { When, Then } = createBdd(test);
 
 const MIN_TOUCH_TARGET_PX = 44;
 const SIZE_TOLERANCE_PX = 1;
-const PLACE_COLUMN_XPATH =
-  "xpath=ancestor::span[contains(@class,'flex-col')][1]";
 const LIVE_REGION_SELECTOR = "[aria-live]";
-const DAY_TRACK_SELECTOR = "[data-day-track-bar]";
 const cardBoxesBeforeOpening = new WeakMap<object, Box>();
 const scrollBeforeTyping = new WeakMap<object, number>();
 
@@ -246,34 +243,6 @@ Then(
     expect(
       Math.abs(after.height - (before?.height ?? Number.NaN)),
     ).toBeLessThanOrEqual(SIZE_TOLERANCE_PX);
-  },
-);
-
-// Verifies NFR-R1, UX3 of add-wall-time-input-with-hint: the hint's place in the card.
-Then(
-  "the hint sits below the place column and above the day track",
-  async ({ locationsWorld }) => {
-    const { page } = locationsWorld;
-    const row = listRow(page, HINT_CITY);
-    const hintBox = await requireBox(wallTimeHintOf(page));
-    const cardBox = await requireBox(row);
-    const placeBox = await requireBox(
-      row
-        .getByText(HINT_CITY, { exact: true })
-        .first()
-        .locator(PLACE_COLUMN_XPATH),
-    );
-    const trackBox = await requireBox(row.locator(DAY_TRACK_SELECTOR));
-    expect(hintBox.y).toBeGreaterThanOrEqual(
-      placeBox.y + placeBox.height - SIZE_TOLERANCE_PX,
-    );
-    expect(hintBox.y + hintBox.height).toBeLessThanOrEqual(
-      trackBox.y + SIZE_TOLERANCE_PX,
-    );
-    expect(hintBox.x).toBeGreaterThanOrEqual(cardBox.x - SIZE_TOLERANCE_PX);
-    expect(hintBox.x + hintBox.width).toBeLessThanOrEqual(
-      cardBox.x + cardBox.width + SIZE_TOLERANCE_PX,
-    );
   },
 );
 

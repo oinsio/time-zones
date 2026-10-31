@@ -37,7 +37,6 @@
     "deviceTimeMeta": "Device time · {{utcOffset}}",
     "deviceTimeName": "{{city}}, {{hereMark}}, Device time",
     "addLocation": "Add location",
-    "addShort": "Add",
     "homeMarkLabel": "Home location",
     "locationMenu": "Actions for {{city}}",
     "makeHome": "Make home",

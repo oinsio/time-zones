@@ -19,15 +19,17 @@ interface MainPageProps {
  * Implements FR1, UX3 of add-main-page-scaffold (D3, D7) and FR8 of
  * select-date-with-calendar-and-now (D7).
  * Implements FR1, FR2, UX1 of add-settings-page-and-device-time-location (D11):
- * a three-column grid below 768 px (Add location, centred title, Settings) and
- * a row from it (title, Add location, Settings); DOM order is the Tab order.
+ * a three-column grid on every width (Add location, centred title, Settings);
+ * DOM order is the Tab order.
+ * Implements FR3, FR4, UX2 of fix-location-card-and-header-layout (D3): one
+ * header layout on every width, the title centred on the page.
  */
 export function MainPage({ notices, bottomBar, headerActions }: MainPageProps) {
   const { t } = useTranslation();
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-screen-2xl flex-col px-4">
-      <header className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-border pt-6 pb-4 md:flex md:gap-4">
-        <h1 className="order-2 col-start-2 text-center text-2xl font-semibold md:order-1 md:mr-auto md:text-left">
+      <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border pt-6 pb-4">
+        <h1 className="order-2 col-start-2 text-center text-2xl font-semibold">
           {t("app.title")}
         </h1>
         {headerActions}
