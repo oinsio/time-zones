@@ -55,7 +55,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 4. E2E: place, colour, size and keyboard in a real browser (FR1–FR3, NFR-A1, NFR-A2, NFR-R1, UX1, UX2)
 
-- [ ] 4.1 In `test/features/settings/steps/settingsCreditE2eHelpers.ts`, add these helpers (design D4):
+- [x] 4.1 In `test/features/settings/steps/settingsCreditE2eHelpers.ts`, add these helpers (design D4):
   - `FORMER_CREDIT_FONT_SIZE_PX = 14`, `MIN_CREDIT_FONT_SIZE_RATIO = 1.15`, `MAX_CREDIT_FONT_SIZE_RATIO = 1.2` and `TAB_KEY = "Tab"`;
   - `themeIconOf(page)`: the first `svg` in the radio group named "Theme" or «Тема», found by `RADIOGROUP_ROLE` from `settingsE2eHelpers.ts` and a name pattern like `ANY_LANGUAGE_BACK_BUTTON_NAME`;
   - `readThemeIconColour(page)`: the icon's computed `color`;
@@ -63,7 +63,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `isCreditDirectlyAboveThemeGroup(page)`: the credit's `nextElementSibling` contains the theme radio group.
 
   Verify `wc -l` of the file stays under 200 and `pnpm --filter @time-zones/client typecheck` passes.
-- [ ] 4.2 Update `test/features/settings/settings_factory_credit_e2e.feature` and `steps/settings_factory_credit_e2e.steps.ts`. Each new or changed step gets its `// Verifies … of move-and-restyle-gnomish-factory-credit` comment. If the steps file would pass 200 lines, put the steps of the new place and size checks into `steps/settings_factory_credit_layout_e2e.steps.ts`, with the same `createBdd(test)` import.
+- [x] 4.2 Update `test/features/settings/settings_factory_credit_e2e.feature` and `steps/settings_factory_credit_e2e.steps.ts`. Each new or changed step gets its `// Verifies … of move-and-restyle-gnomish-factory-credit` comment. If the steps file would pass 200 lines, put the steps of the new place and size checks into `steps/settings_factory_credit_layout_e2e.steps.ts`, with the same `createBdd(test)` import.
   - Outline "The credit in both languages" (add `@move-and-restyle-gnomish-factory-credit @FR1 @UX1`):
     - "the first line of the settings page is the link {string} to the Gnomish Factory" becomes "the settings page shows the link {string} to the Gnomish Factory" (same check);
     - "the credit stands above the back button and the settings heading" becomes "the credit stands below the settings heading and directly above the theme group". The credit's box top is ≥ the heading's box bottom, `isCreditDirectlyAboveThemeGroup` is true, and the credit's centre is within `CENTRE_TOLERANCE_PX` of the theme group's centre.
@@ -80,11 +80,11 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - Outline "The full credit at <width> px in <language>": add `@move-and-restyle-gnomish-factory-credit @NFR-R1`, steps unchanged.
 
   Verify `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_factory_credit_e2e.feature` passes, and `wc -l` of every changed steps file is under 200.
-- [ ] 4.3 In `test/features/settings/settings_e2e.feature`, add the tags `@move-and-restyle-gnomish-factory-credit @NFR-A2` above "Settings have no accessibility violations in the <theme> theme" and above "No violations with the unreadable note". Verify `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_e2e.feature --grep "accessibility violations|No violations with the unreadable note"` passes.
+- [x] 4.3 In `test/features/settings/settings_e2e.feature`, add the tags `@move-and-restyle-gnomish-factory-credit @NFR-A2` above "Settings have no accessibility violations in the <theme> theme" and above "No violations with the unreadable note". Verify `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_e2e.feature --grep "accessibility violations|No violations with the unreadable note"` passes.
 
 ## 5. Screenshots (NFR-R2)
 
-- [ ] 5.1 Add the tags `@move-and-restyle-gnomish-factory-credit @NFR-R2` above "Approved screenshots of the settings at <width> px in the <theme> theme" in `test/features/settings/settings_e2e.feature`.
+- [x] 5.1 Add the tags `@move-and-restyle-gnomish-factory-credit @NFR-R2` above "Approved screenshots of the settings at <width> px in the <theme> theme" in `test/features/settings/settings_e2e.feature`.
   - Re-approve: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_e2e.feature --grep "Approved screenshots of the settings" --update-snapshots`.
   - Open the changed 375 px PNGs under `src/test/features/__screenshots__/chromium/` with the Read tool. Confirm that the header holds only the back button and the heading. Confirm that the credit is centred right above the theme group, underlined and in the colour of the theme icons (the size relation is asserted by "The larger credit text" in 4.2).
   - Verify by running the same command again without `--update-snapshots`: it passes. `git status --short src/test/features/__screenshots__` lists the 4 settings PNGs of each project that runs them (chromium, mobile-chrome) and no other file.
