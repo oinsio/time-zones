@@ -125,6 +125,8 @@ A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card
 #### Scenario: Tracks in the 12-hour format fit narrow and wide screens
 - **GIVEN** the hour format is 12-hour
 - **AND** the list is Almaty, Kathmandu, New York and Tokyo
+- **AND** the current time is `2026-03-08T07:30:00Z`
+- **AND** New York shows a wall-time hint
 - **WHEN** the list is shown at 320 px, 768 px or 2560 px
 - **THEN** the page does not scroll horizontally
 
