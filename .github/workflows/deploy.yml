@@ -13,6 +13,12 @@ permissions:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
+    # A called workflow may not request more than its caller grants, even for
+    # jobs it skips: the PR preview job in ci.yml asks for pull-requests: write
+    # and never runs on push, but without this grant the run fails at startup
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       upload-pages-artifact: true
 
