@@ -41,6 +41,7 @@ const LABEL_ALIGNMENT_CLASS_NAMES = [
  * (a drag follows the pointer wherever it goes; the handle follows it between steps).
  * Implements FR4, UX3 of fix-day-track-drag-continuity-and-smoothness (a finger drag
  * without Pointer Events).
+ * Implements FR6 of fix-location-card-and-header-layout (D5): hour labels never wrap.
  */
 export function DayTrack({
   track,
@@ -131,7 +132,7 @@ export function DayTrack({
             key={hourLabel.fraction}
             data-hour-label
             // Stryker disable next-line StringLiteral: equivalent — every label index has a class
-            className={`absolute top-0 ${LABEL_ALIGNMENT_CLASS_NAMES[labelIndex] ?? ""}`}
+            className={`absolute top-0 whitespace-nowrap ${LABEL_ALIGNMENT_CLASS_NAMES[labelIndex] ?? ""}`}
             style={{ left: formatPercent(hourLabel.fraction) }}
           >
             {hourLabel.label}

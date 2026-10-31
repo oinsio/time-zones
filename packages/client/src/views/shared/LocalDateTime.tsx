@@ -18,7 +18,9 @@ type LocalDateTimeProps = Pick<
  * minute updates are not announced.
  * Implements FR2, FR6, UX1, UX2, NFR-A2 of
  * show-local-time-and-date-on-location-cards (D5).
- * Implements FR1, FR5, FR13, NFR-A2, UX1 of add-wall-time-input-with-hint (D6).
+  * Implements FR1, FR5, FR13, NFR-A2, UX1 of add-wall-time-input-with-hint (D6).
+ * Implements FR5, UX3 of fix-location-card-and-header-layout (D4): a fixed
+ * column width from 768 px, so every track is equally long.
  */
 export function LocalDateTime({
   localTimeLabel,
@@ -42,14 +44,14 @@ export function LocalDateTime({
     setOpenedDate(undefined);
   };
   return (
-    <span className="flex shrink-0 flex-col items-end md:items-start">
+    <span className="flex shrink-0 flex-col items-end md:w-44 md:items-start">
       {openedDate === undefined ? (
         <button
           ref={buttonRef}
           type="button"
           aria-label={wallTimeInputLabel}
           onClick={() => setOpenedDate(localIsoDate)}
-          className="min-h-11 min-w-11 cursor-text rounded-md text-2xl font-bold leading-none tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent md:text-4xl"
+          className="min-h-11 min-w-11 cursor-text rounded-md text-2xl font-bold leading-none whitespace-nowrap tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent md:text-4xl"
         >
           {localTimeLabel}
         </button>
