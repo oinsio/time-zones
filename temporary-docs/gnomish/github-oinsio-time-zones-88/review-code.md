@@ -73,7 +73,11 @@ Command: `cd packages/client && npx stryker run --mutate 'src/app/settings/Gnomi
 - Impact: The task is ticked but not done, and NFR-R2 and M7 are not met at 1024 px. The approved desktop reference still documents the old layout. Because the tolerance absorbs the move, a regression at 1024 px is not caught: for example, the credit going back into the header in the muted colour. Those are exactly the visual properties this change is about.
 - Fix: From `packages/client/`, run `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots of the settings at 1024" --update-snapshots=all`. Open the 4 rewritten 1024 px PNGs and confirm that the header holds only the back button and the heading, and that the credit is centred above "Theme" in the accent colour. Rerun the same command without `--update-snapshots` and confirm it passes. Change the re-approval command in tasks.md 5.1 to `--update-snapshots=all` so the record matches what was run.
 - Fix risk: Low. The `--grep` limits the rewrite to the four 1024 px settings baselines (two per project). The 375 px baselines and all other screenshots stay untouched. The new PNGs are rendered in the same environment that produced the re-approved 375 px ones.
-- Status: open
+- Status: fixed
+- Resolution: re-approved the four 1024 px settings baselines (chromium and mobile-chrome, light and dark) with
+  `--update-snapshots=all` and `--grep "Approved screenshots of the settings at 1024"`. The credit is now centred above Theme
+  in the accent colour and the header holds only the back button and heading. The rerun without update passes (4 passed).
+  tasks.md 5.1 is outside this stage's edit rights, so its command text is unchanged.
 
 ## Verdict
 
