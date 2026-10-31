@@ -28,12 +28,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 4. Header E2E (FR3, FR4, NFR-A1, UX2)
 
-- [ ] 4.1 In `test/features/main_page/main_page_header_e2e.feature`:
+- [x] 4.1 In `test/features/main_page/main_page_header_e2e.feature`:
   - "Narrow header": add `And the centre of the title is the centre of the page width`, tags `@fix-location-card-and-header-layout @FR3 @FR4 @UX2`;
   - turn "Wide header" into a `Scenario Outline: Wide header at <width> px` with widths 768, 1024, 1440 and 2560: the header shows, from left to right, the button named "Добавить место", the title "Часовые пояса" and the button named "Настройки"; the button named "Добавить место" shows no visible text; the centre of the title is the centre of the page width. Tags `@fix-location-card-and-header-layout @FR3 @FR4 @UX2`;
   - "No Add location button on an unreadable list": make it an outline at 375, 768, 1024, 1440 and 2560 px (M2) and add the centre check and `And the button named "Settings" is the rightmost header control`, tags `@fix-location-card-and-header-layout @FR4`;
   - "Header sizes and accessibility …": add `And Tab reaches the button named "Add location" before the button named "Settings"`, tag `@fix-location-card-and-header-layout @NFR-A1`.
-- [ ] 4.2 In `test/features/main_page/steps/main_page_header_e2e.steps.ts`, add the steps "the centre of the title is the centre of the page width" (the `<h1>` box centre against `document.documentElement.clientWidth / 2`, within 1 px), "the button named {string} is the rightmost header control" and the Tab order step; remove the now unused steps "shows the visible text" and "is directly before" and the constant `MAX_ADJACENT_GAP_PX`. Each new step carries `// Verifies FR4, UX2 of fix-location-card-and-header-layout` (or `NFR-A1`). Verify `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/main_page/main_page_header_e2e.feature`.
+- [x] 4.2 In `test/features/main_page/steps/main_page_header_e2e.steps.ts`, add the steps "the centre of the title is the centre of the page width" (the `<h1>` box centre against `document.documentElement.clientWidth / 2`, within 1 px), "the button named {string} is the rightmost header control" and the Tab order step; remove the now unused steps "shows the visible text" and "is directly before" and the constant `MAX_ADJACENT_GAP_PX`. Each new step carries `// Verifies FR4, UX2 of fix-location-card-and-header-layout` (or `NFR-A1`). Verify `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/main_page/main_page_header_e2e.feature`.
 
 ## 5. Card layout E2E (FR1, FR2, FR5, FR6, NFR-A1, NFR-A2, NFR-R1, UX1, UX3, UX4)
 
