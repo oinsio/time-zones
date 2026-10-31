@@ -6,7 +6,9 @@ type SettingsButtonProps = { onClick: () => void };
 
 /**
  * The header button that opens the settings page, in the top right corner.
- * Implements FR1, UX1 of add-settings-page-and-device-time-location (D11).
+  * Implements FR1, UX1 of add-settings-page-and-device-time-location (D11).
+ * Implements FR3, FR4, UX2 of fix-location-card-and-header-layout (D3): one
+ * header layout on every width.
  */
 export const SettingsButton = forwardRef<
   HTMLButtonElement,
