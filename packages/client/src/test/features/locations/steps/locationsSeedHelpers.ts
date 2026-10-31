@@ -1,5 +1,11 @@
 // Implements FR8, FR10, FR13 of add-settings-page-and-device-time-location: seeding helpers of the locations states.
 import { expect } from "@playwright/test";
+import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
+import {
+  HOUR_FORMAT_VALUES,
+  seedPreferences,
+  THEME_VALUES,
+} from "../../settings/steps/settingsE2eHelpers";
 import {
   openWallTimeInput,
   typeWallTime,
@@ -82,4 +88,28 @@ export async function seedWallTimeState(
   } else {
     await openWallTimeInput(world.page, WALL_TIME_CITY_NAME);
   }
+}
+
+const TWELVE_HOUR_CITY_NAMES = ["Almaty", "Moscow", "Kolkata", "New York"];
+
+/**
+ * The list with the 12-hour format stored in the preferences.
+ * Implements NFR-R2 of fix-location-card-and-header-layout.
+ */
+export async function seedTwelveHourState(world: LocationsWorld) {
+  await seedPreferences(
+    world.page,
+    JSON.stringify({
+      schemaVersion: PREFERENCES_SCHEMA_VERSION,
+      payload: {
+        theme: THEME_VALUES.System,
+        hourFormat: HOUR_FORMAT_VALUES["12-hour"],
+      },
+    }),
+  );
+  await world.seedList(buildStoredLocations(TWELVE_HOUR_CITY_NAMES));
+  await world.reloadIfOpen();
+  await expect(world.page.getByRole("listitem")).toHaveCount(
+    TWELVE_HOUR_CITY_NAMES.length,
+  );
 }

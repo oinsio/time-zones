@@ -24,6 +24,7 @@ import {
 import {
   seedDeviceTimeState,
   seedHomeList,
+  seedTwelveHourState,
   seedWallTimeState,
   storeDeviceCity,
 } from "./locationsSeedHelpers";
@@ -64,6 +65,7 @@ export enum WorldClockState {
   FIRST_LAUNCH = "first-launch",
   WALL_TIME_INPUT = "wall-time-input",
   WALL_TIME_HINT = "wall-time-hint",
+  TWELVE_HOUR = "12-hour",
 }
 
 /**
@@ -76,7 +78,8 @@ export enum WorldClockState {
  * NFR-A1, NFR-R2 of set-home-location-and-show-differences (home, travelling
  * and menu open states); FR8, FR10, FR13, NFR-A1, NFR-R3 of add-settings-page-and-device-time-location
  * (device-time, device-time-home and first-launch states); NFR-R2 of
- * add-wall-time-input-with-hint (wall-time-input and wall-time-hint states).
+ * add-wall-time-input-with-hint (wall-time-input and wall-time-hint states);
+ * NFR-R2 of fix-location-card-and-header-layout (12-hour state).
  */
 export async function enterLocationsState(
   world: LocationsWorld,
@@ -173,6 +176,9 @@ export async function enterLocationsState(
     case WorldClockState.WALL_TIME_INPUT:
     case WorldClockState.WALL_TIME_HINT:
       await seedWallTimeState(world, state === WorldClockState.WALL_TIME_HINT);
+      break;
+    case WorldClockState.TWELVE_HOUR:
+      await seedTwelveHourState(world);
       break;
     case WorldClockState.TRAVELLING:
       await seedHomeList(world, LIST_CITY_NAMES, TRAVELLING_HOME_CITY_NAME);
