@@ -82,7 +82,8 @@
 - Impact: the archived proposal records a false fact about the code, and the one real loading state, while the settings chunk loads, is left undescribed. The implementer is not told that the credit belongs inside the lazy chunk. `GnomishFactoryCredit` has to be imported only by `SettingsPage`, not by `AppShell` or a shared module, so that it adds nothing to the initial JavaScript budget.
 - Fix: replace the row with `| offline or online | settings chunk loading | the existing ViewSkeleton fallback of AppShell's Suspense; the credit appears with the settings page, because it ships in the lazily loaded settings chunk |`. Then add one sentence to design D2 (`design.md:32`): "Being imported only by `SettingsPage`, the credit ships in the lazily loaded settings chunk (`AppShell.tsx:25`) and adds nothing to the initial JavaScript."
 - Fix risk: none. D2 already keeps the component out of `app/settings/index.ts` and `views/shared/`, so the edit only records what that layout does, and no task changes.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md UI States Matrix row is now "settings chunk loading" — the shell's existing skeleton fallback while the lazily loaded settings page arrives, the credit appearing with it; design.md D2 adds that the credit ships in the lazy settings chunk (AppShell lazy + Suspense ViewSkeleton) and that neither AppShell nor views/shared/ imports it.
 
 ### R2 — SUGGESTION — The MODIFIED localization requirement names a Russian form no string uses
 - Location: `openspec/changes/add-gnomish-factory-credit/specs/settings/spec.md:75`
@@ -91,7 +92,8 @@
 - Impact: read literally, the SHALL clause cannot be met. A check that looks for the listed names in `ru.json` would never find «Гномская фабрика», and the archived requirement would name the wrong form as the binding Russian text.
 - Fix: in `specs/settings/spec.md:75`, replace «Гномская фабрика» in the list with «Создано с помощью Гномской фабрики». In `proposal.md:12`, write "Russian uses the glossary name «Создано с помощью Гномской фабрики» (the Gnomish Factory credit)".
 - Fix risk: none. The **Gnomish Factory** glossary entry keeps its nominative *RU:* «Гномская фабрика» (task 1.1), and no test text changes.
-- Status: open
+- Status: fixed
+- Resolution: specs/settings/spec.md MODIFIED "Settings strings are localized" now lists «Создано с помощью Гномской фабрики» instead of «Гномская фабрика», and proposal.md What Changes says Russian uses that glossary name (the Gnomish Factory credit); the glossary entry for Gnomish Factory keeps its nominative RU name.
 
 ### R3 — SUGGESTION — The offline row and "works the same offline" have no scenario
 - Location: `openspec/changes/add-gnomish-factory-credit/specs/settings/spec.md:4`
@@ -100,7 +102,8 @@
 - Impact: the offline state of the credit line stays untested. If, for example, an icon or font were fetched from the factory's site, nothing would catch the break offline.
 - Fix: add the spec scenario "The credit offline" (GIVEN the app is installed for offline use, WHEN the user reopens the app without network and opens the settings, THEN the credit is "Built with Gnomish Factory"). In task 5.1 (`tasks.md:34`), add a scenario `@add-gnomish-factory-credit @FR3` that reuses "the app is installed for offline use" (`settings_theme_e2e.steps.ts:50`), "the user reopens the locations app without network" (`locations_tabs_offline_e2e.steps.ts:56`), "the user opens the settings" and the task 5.2 step `the Gnomish Factory credit is "Built with Gnomish Factory"`.
 - Fix risk: one more E2E scenario in both projects adds run time. It relies on the settings chunk being precached, and it is: `vite.config.ts:63` precaches `**/*.js`.
-- Status: open
+- Status: fixed
+- Resolution: added scenario "The credit offline" to the ADDED requirement in specs/settings/spec.md; task 5.1 gets an `@FR3` E2E scenario reusing "the app is installed for offline use", "the user reopens the locations app without network" and "the user opens the settings", and defines the step `the Gnomish Factory credit is "<credit>"` that task 5.2 now reuses; proposal Behavior lists it.
 
 ## Verdict
 
