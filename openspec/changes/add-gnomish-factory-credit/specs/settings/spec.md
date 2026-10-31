@@ -28,6 +28,12 @@ The credit MUST be exposed as a link named exactly by its visible text. It MUST 
 - **WHEN** the user goes back
 - **THEN** the main page is shown with Moscow at `10:30`
 
+#### Scenario: The credit offline
+- **GIVEN** the app is installed for offline use
+- **WHEN** the user reopens the app without network
+- **AND** the user opens the settings
+- **THEN** the credit is "Built with Gnomish Factory"
+
 #### Scenario: Token colours in both themes
 - **GIVEN** the `<theme>` theme is active
 - **WHEN** the user opens the settings

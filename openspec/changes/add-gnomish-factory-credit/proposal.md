@@ -92,7 +92,7 @@ The credit is static; it loads no data. Its behaviour in the states of the setti
 
 `packages/client/src/test/features/settings/`, tagged `@add-gnomish-factory-credit`:
 
-- `settings_factory_credit_e2e.feature` (new): the credit line, text and link in both languages (FR1, FR2, NFR-A1), the new tab and the unchanged app (FR3, UX3), the token colours in both themes (FR4, UX2), keyboard order, focus and target size (NFR-A1, NFR-A2), full text at 320 px (NFR-R1);
+- `settings_factory_credit_e2e.feature` (new): the credit line, text and link in both languages (FR1, FR2, NFR-A1), the new tab and the unchanged app (FR3, UX3), the credit offline (FR3), the token colours in both themes (FR4, UX2), keyboard order, focus and target size (NFR-A1, NFR-A2), full text at 320 px (NFR-R1);
 - `settings_e2e.feature`: the existing axe-core, width and screenshot outlines get this change's tags (NFR-A1, NFR-R1, NFR-R2).
 
 ## Visual Reference
