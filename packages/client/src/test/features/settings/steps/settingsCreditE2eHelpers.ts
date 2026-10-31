@@ -92,8 +92,17 @@ export async function readCreditFontSizeRatio(page: Page) {
 
 export const isCreditDirectlyAboveThemeGroup = (page: Page) =>
   creditOf(page).evaluate(
-    (element, groupRole) =>
-      (element.nextElementSibling?.querySelector(`[role="${groupRole}"]`) ??
-        null) !== null,
-    RADIOGROUP_ROLE,
+    (element, { groupRole, themeNamePattern }) => {
+      const themeNameRegExp = new RegExp(themeNamePattern);
+      const groups = element.nextElementSibling?.querySelectorAll(
+        `[role="${groupRole}"]`,
+      );
+      return Array.from(groups ?? []).some((group) =>
+        themeNameRegExp.test(group.getAttribute("aria-label") ?? ""),
+      );
+    },
+    {
+      groupRole: RADIOGROUP_ROLE,
+      themeNamePattern: ANY_LANGUAGE_THEME_GROUP_NAME.source,
+    },
   );
