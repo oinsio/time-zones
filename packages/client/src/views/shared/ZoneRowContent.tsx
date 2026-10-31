@@ -3,7 +3,6 @@ import type { PresentedDayTrack, PresentedLocationMark } from "@/presenter";
 import { DayTrack } from "./DayTrack";
 import { LocalDateTime } from "./LocalDateTime";
 import { LocationMarkIcon } from "./LocationMarkIcon";
-import { WallTimeHint } from "./WallTimeHint";
 
 type ZoneRowContentProps = {
   cityLabel: string;
@@ -18,8 +17,6 @@ type ZoneRowContentProps = {
   localDateLabel: string;
   localIsoDate: string;
   wallTimeInputLabel: string;
-  /** The wall-time hint of this row; shown under the place column. */
-  wallTimeHint?: string;
   /** `date` is the local ISO date the row showed when the field opened. */
   onConfirmWallTime: (text: string, date: string) => WallTimeInputOutcome;
   dayTrack?: PresentedDayTrack;
@@ -33,7 +30,9 @@ type ZoneRowContentProps = {
  * Implements FR2, FR4, UX1, UX3 of show-here-entry-for-device-time (D5); the
  * layout moved from `LocationRow`.
  * Implements FR1, FR7, UX3 of add-wall-time-input-with-hint (D6): the time
- * button and the wall-time hint before the day track.
+ * button before the day track.
+ * Implements FR1, NFR-A2, UX1 of fix-location-card-and-header-layout (D1): the
+ * hint moved to `LocationRow`, the card's last element.
  */
 export function ZoneRowContent({
   cityLabel,
@@ -46,7 +45,6 @@ export function ZoneRowContent({
   localDateLabel,
   localIsoDate,
   wallTimeInputLabel,
-  wallTimeHint,
   onConfirmWallTime,
   dayTrack,
   onSelectTrackFraction,
@@ -105,7 +103,6 @@ export function ZoneRowContent({
           onConfirmWallTime={onConfirmWallTime}
         />
       </span>
-      {wallTimeHint !== undefined && <WallTimeHint text={wallTimeHint} />}
       {dayTrack && (
         <DayTrack
           track={dayTrack}
