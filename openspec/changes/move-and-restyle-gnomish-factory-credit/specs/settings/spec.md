@@ -40,7 +40,7 @@ The credit MUST be exposed as a link named exactly by its visible text. It MUST 
 - **AND** the user opens the settings
 - **THEN** the credit is "Built with Gnomish Factory"
 
-#### Scenario: The icon colour in both themes
+#### Scenario: Token colours in both themes
 - **GIVEN** the `<theme>` theme is active
 - **WHEN** the user opens the settings
 - **THEN** the credit text has the colour of the theme option icons and is underlined
