@@ -40,31 +40,20 @@ Feature: Location card layout in a real browser
       | 1024 | light | the system colour scheme is light | the stored preferences are theme Light and hour format 24-hour |
 
   @fix-location-card-and-header-layout @FR2 @UX4
-  Scenario Outline: In the dark theme the handle is not the page background at <width> px
-    Given the system colour scheme is dark
+  Scenario Outline: In the dark theme the handle is not the page background at <width> px with <source>
+    Given <system>
+    And <preferences>
     And the stored locations are "Almaty"
     And the screen is <width> px wide for the locations
     When the user opens the locations app
     Then the visible handle of "Almaty" is not filled with the page background colour
 
     Examples:
-      | width |
-      | 375   |
-      | 1024  |
-
-  @fix-location-card-and-header-layout @FR2 @UX4
-  Scenario Outline: With the Dark preference the handle is not the page background at <width> px
-    Given the system colour scheme is light
-    And the stored preferences are theme Dark and hour format 24-hour
-    And the stored locations are "Almaty"
-    And the screen is <width> px wide for the locations
-    When the user opens the locations app
-    Then the visible handle of "Almaty" is not filled with the page background colour
-
-    Examples:
-      | width |
-      | 375   |
-      | 1024  |
+      | width | source | system | preferences |
+      | 375 | dark system | the system colour scheme is dark | the stored preferences are theme System and hour format 24-hour |
+      | 1024 | dark system | the system colour scheme is dark | the stored preferences are theme System and hour format 24-hour |
+      | 375 | dark preference | the system colour scheme is light | the stored preferences are theme Dark and hour format 24-hour |
+      | 1024 | dark preference | the system colour scheme is light | the stored preferences are theme Dark and hour format 24-hour |
 
   @fix-location-card-and-header-layout @FR5 @FR6 @UX3
   Scenario Outline: Equal tracks in the 12-hour format at <width> px

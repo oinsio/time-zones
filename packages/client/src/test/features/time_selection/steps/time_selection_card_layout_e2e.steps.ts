@@ -3,9 +3,16 @@ import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import { listRow } from "../../locations/steps/locationsE2eHelpers";
 import {
+  boxesOfCard,
+  expectHourLabelsOnOneLine,
+  measureTimeButton,
+  parseCities,
+  TIME_COLUMN_XPATH,
+  TOLERANCE_PX,
+  TRACK_SELECTOR,
+} from "./cardLayoutE2eHelpers";
+import {
   type Box,
-  HOUR_LABEL_SELECTOR,
-  hourLabelsOf,
   requireBox,
   visibleHandleOf,
 } from "./timeSelectionE2eHelpers";
@@ -20,28 +27,7 @@ import {
 const { Given, When, Then } = createBdd(test);
 
 const GAP_TYPED_TEXT_12_HOUR = "2:30 AM";
-const TOLERANCE_PX = 1;
-const HOUR_LABEL_ROW_HEIGHT_PX = 16;
-const TIME_COLUMN_XPATH = "xpath=..";
-const MENU_BUTTON_SELECTOR = "button[aria-haspopup]";
-const TRACK_SELECTOR = "[data-day-track-bar]";
 const noteBoxes = new WeakMap<object, Record<string, Box>>();
-
-const parseCities = (quotedNames: string) =>
-  [...quotedNames.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
-
-const boxesOfCard = async (
-  page: Parameters<typeof listRow>[0],
-  city: string,
-) => {
-  const row = listRow(page, city);
-  return {
-    city: await requireBox(row.getByText(city, { exact: true }).first()),
-    time: await requireBox(wallTimeButtonOf(page, city)),
-    track: await requireBox(row.locator(TRACK_SELECTOR)),
-    menu: await requireBox(row.locator(MENU_BUTTON_SELECTOR).last()),
-  };
-};
 
 // Verifies FR1, UX1 of fix-location-card-and-header-layout: the line is the same before and after the hint.
 Given(
@@ -172,21 +158,7 @@ Then(
   async ({ locationsWorld }, quotedNames: string) => {
     const { page } = locationsWorld;
     for (const city of parseCities(quotedNames)) {
-      await expect(hourLabelsOf(page, city).first()).toBeVisible();
-      const labels = await hourLabelsOf(page, city).all();
-      expect(labels.length).toBeGreaterThan(0);
-      for (const label of labels) {
-        expect((await requireBox(label)).height).toBeLessThanOrEqual(
-          HOUR_LABEL_ROW_HEIGHT_PX,
-        );
-      }
-      const bar = await requireBox(listRow(page, city).locator(TRACK_SELECTOR));
-      const last = await requireBox(
-        listRow(page, city).locator(HOUR_LABEL_SELECTOR).last(),
-      );
-      expect(
-        Math.abs(last.x + last.width - (bar.x + bar.width)),
-      ).toBeLessThanOrEqual(TOLERANCE_PX);
+      await expectHourLabelsOnOneLine(page, city);
     }
   },
 );
@@ -196,17 +168,7 @@ Then(
   /^the time buttons of (.+) show their time on one line in full$/,
   async ({ locationsWorld }, quotedNames: string) => {
     for (const city of parseCities(quotedNames)) {
-      const shape = await wallTimeButtonOf(locationsWorld.page, city).evaluate(
-        (button) => {
-          const range = document.createRange();
-          range.selectNodeContents(button);
-          const tops = [...range.getClientRects()].map((rect) => rect.top);
-          return {
-            lineSpread: Math.max(...tops) - Math.min(...tops),
-            isClipped: button.scrollWidth > button.clientWidth,
-          };
-        },
-      );
+      const shape = await measureTimeButton(locationsWorld.page, city);
       expect(shape.lineSpread).toBeLessThanOrEqual(TOLERANCE_PX);
       expect(shape.isClipped).toBe(false);
     }

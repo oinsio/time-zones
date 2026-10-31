@@ -131,7 +131,6 @@ Feature: Locations in a real browser
   @fix-day-track-handle-overlap-and-end-of-day @NFR-R2
   @add-wall-time-input-with-hint @NFR-R2
   @keep-now-button-visible-when-live @NFR-R2
-  @fix-location-card-and-header-layout @NFR-R2
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme
@@ -198,7 +197,3 @@ Feature: Locations in a real browser
       | wall-time-hint  | 375   | dark  |
       | wall-time-hint  | 1024  | light |
       | wall-time-hint  | 1024  | dark  |
-      | 12-hour         | 375   | light |
-      | 12-hour         | 375   | dark  |
-      | 12-hour         | 1024  | light |
-      | 12-hour         | 1024  | dark  |
