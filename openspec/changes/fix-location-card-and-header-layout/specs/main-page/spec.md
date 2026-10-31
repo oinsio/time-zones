@@ -63,4 +63,7 @@ The header SHALL hold the Add location button, which opens the location search, 
 | width |
 |---|
 | 375 |
+| 768 |
 | 1024 |
+| 1440 |
+| 2560 |
