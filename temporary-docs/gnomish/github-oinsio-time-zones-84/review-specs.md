@@ -83,7 +83,8 @@
 - Impact: Implemented as written, 24-hour users with Kolkata or Kathmandu in the list see overlapping hour labels between 768 px and about 820 px. This regresses the default format, no artifact names it, and no scenario checks label overlap, so the owner approves the PR without knowing.
 - Fix: Declare it. In `design.md` D4 and its Negative consequences, add: "From 768 px to about 820 px, 24-hour hour labels with minutes (`05:30`) now touch or overlap, as 12-hour labels already do; accepted for equal tracks." Extend NG3 in `proposal.md:51` with "in both hour formats, including 24-hour labels with minutes that the wider time column brings closer between 768 and about 820 px".
 - Fix risk: The regression stays and is only declared, so the owner may reject it in review. Making the width depend on the hour format instead was rejected in `design.md:69` for ADR-0002 reasons and would cost a presenter change.
-- Status: open
+- Status: fixed
+- Resolution: declared the regression as accepted: design.md D4 now states the bar drops to about 90 px at 768 px and 24-hour labels with minutes (`05:30`, from `formatHourLabel`) touch or overlap up to about 820 px; the same line is in its Negative consequences, and proposal NG3 now names this case in both hour formats.
 
 ### R2 — WARNING — NFR-R1's "hint shown and 12-hour format" condition is never tested
 - Location: `openspec/changes/fix-location-card-and-header-layout/tasks.md:42`
@@ -92,7 +93,8 @@
 - Impact: The NFR is ticked by tasks that never create its stated condition. An overflow caused by the moved hint together with 12-hour times at 768 px would pass every check.
 - Fix: In task 5.3, make the outline "Tracks in the 12-hour format fit <width> px" pin the current time to `2026-03-08T07:30:00Z`. Add `And the page shows a GAP hint` (the existing step at `time_selection_wall_time_input_e2e.steps.ts:148-165`, which types into New York, already in the outline's list) before "the locations screen does not scroll horizontally". Add the same Given and "AND New York shows a wall-time hint" to the delta scenario "Tracks in the 12-hour format fit narrow and wide screens" (`specs/time-selection/spec.md:125-129`).
 - Fix risk: `GAP_HINT_PATTERN` (`/does not exist on this day/`, `wallTimeE2eHelpers.ts:5`) does not depend on the hour format, but the step types `0230` (`GAP_TYPED_TEXT`, `:8`). If the wall-time input reads that differently in the 12-hour format, the implementer must type `2:30 AM` instead. Three E2E runs get slightly longer.
-- Status: open
+- Status: fixed
+- Resolution: the delta scenario "Tracks in the 12-hour format fit narrow and wide screens" (specs/time-selection/spec.md) now pins `2026-03-08T07:30:00Z` and shows the New York wall-time hint; task 5.3 runs that outline with the stored list and the existing "the page shows a GAP hint" step before the no-scroll check, with a `2:30 AM` fallback.
 
 ### R3 — WARNING — M2's "without the Add location button at 5 widths" has no test
 - Location: `openspec/changes/fix-location-card-and-header-layout/proposal.md:127`
@@ -101,7 +103,8 @@
 - Impact: The metric cannot be reported as written. The case without the button (two of the three grid columns occupied) stays unmeasured at 768, 1440 and 2560 px.
 - Fix: In task 4.1 and in the delta scenario's table (`specs/main-page/spec.md:63-66`), run "No Add location button on an unreadable list" at 375, 768, 1024, 1440 and 2560 px.
 - Fix risk: Three more E2E examples; no other cost.
-- Status: open
+- Status: fixed
+- Resolution: the delta scenario "No Add location button on an unreadable list" (specs/main-page/spec.md) and task 4.1 now run at 375, 768, 1024, 1440 and 2560 px, so M2 is measured at 5 widths with and without the button.
 
 ### R4 — WARNING — Task 5.3's one-line bound cannot hold for the time button
 - Location: `openspec/changes/fix-location-card-and-header-layout/tasks.md:42`
@@ -110,7 +113,8 @@
 - Impact: Taken literally, the FR5 one-line time check fails on a correct implementation, because no time button can be 16 px high. The implementer has to make up a different assertion, so FR5's "shows each time … in full, on one line" (`proposal.md:70`) and the delta's "each time is shown in full on one line" (`specs/locations/spec.md:28`) end up tested by an unplanned check, or not at all.
 - Fix: In task 5.3, split the assertion. Each hour label's box height is at most the line height of a 24-hour label (16 px). Each time button's text is on one line: a DOM `Range` over the button's text gives client rects that all share one `top`, within 1 px. Keep `scrollWidth <= clientWidth` only as the "shown in full" (not clipped) check for the time.
 - Fix risk: none. The check stays in the playwright-bdd E2E that task 5.3 already plans (layout needs a real browser, `bdd-unit.md`), and no other artifact names this bound.
-- Status: open
+- Status: fixed
+- Resolution: task 5.3 now splits the check: hour labels are at most 16 px high (the 24-hour label line height), each time button has its text on one line (DOM `Range` client rects share one `top` within 1 px), and `scrollWidth <= clientWidth` stays only as the not-clipped check.
 
 ### R5 — SUGGESTION — NFR-A1's Cards-view axe check has no spec scenario
 - Location: `openspec/changes/fix-location-card-and-header-layout/specs/time-selection/spec.md:131`
@@ -119,7 +123,8 @@
 - Impact: After archiving, the stable spec does not say the hint/12-hour layout is axe-clean, so a later change may drop the test without contradicting any spec.
 - Fix: Add to the delta "Wall-time input layout" (`specs/time-selection/spec.md:131`) a scenario "No accessibility violations with a hint in the 12-hour format": 12-hour format, New York shows the GAP hint, 375/1024 px, light/dark, and axe-core reports no violations. Add NFR-A1 to its traceability comment.
 - Fix risk: none
-- Status: open
+- Status: fixed
+- Resolution: added the scenario "No accessibility violations with a hint in the 12-hour format" (375/1024 px, light/dark) to the delta "Wall-time input layout" in specs/time-selection/spec.md, an axe-core sentence to its requirement text, and NFR-A1 to its traceability comment; task 5.3 already implements it.
 
 ## Verdict
 
