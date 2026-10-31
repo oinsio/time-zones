@@ -40,7 +40,7 @@ Feature: Settings page in a real browser
     And the option "24-hour" of the group "Hour format" is checked
     And the options "Light", "Dark" and "System" are named in the group "Theme"
 
-  @add-settings-page-and-device-time-location @add-gnomish-factory-credit @FR16 @FR2
+  @add-settings-page-and-device-time-location @FR16 @add-gnomish-factory-credit @FR2
   Scenario Outline: Both languages
     Given the locations interface language is <language>
     And the user opens the settings

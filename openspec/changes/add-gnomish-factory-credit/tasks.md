@@ -48,7 +48,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 7. Final checks
 
-- [x] 7.1 Stryker, scoped: `npx stryker run --mutate 'src/app/settings/GnomishFactoryCredit.tsx,src/app/settings/SettingsPage.tsx,src/constants/api.ts'`. Read `reports/mutation/mutation-report.json`; kill survivors with Vitest tests in `app/settings/` until the score of each of the three files is at least 95% (minimum acceptable 90%), and note the scores in this task.
+- [x] 7.1 Stryker, scoped: `npx stryker run --mutate 'src/app/settings/GnomishFactoryCredit.tsx,src/app/settings/SettingsPage.tsx,src/constants/api.ts'`. Read `reports/mutation/mutation-report.json`; kill survivors with Vitest tests in `app/settings/` until the score of each of the three files is at least 95% (minimum acceptable 90%), and note the scores in this task. Scores: GnomishFactoryCredit.tsx 100%, constants/api.ts 100%, SettingsPage.tsx 91.67% (the 2 survivors, lines 53-54, are the pre-existing heading-focus effect: an optional chain on a ref that is always set and the effect dependency array — equivalent mutants, not part of this change).
 - [x] 7.2 Run, one at a time: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build` (from the repository root), then `pnpm --filter @time-zones/client test:bdd`. All pass.
 - [x] 7.3 Traceability, from `packages/client/`: `for id in FR1 FR2 FR3 FR4 NFR-A1 NFR-A2 NFR-R1 NFR-R2 UX1 UX2 UX3; do grep -rlE "add-gnomish-factory-credit.*\b$id\b|\b$id\b.*add-gnomish-factory-credit" src >/dev/null || echo "missing $id"; done` prints nothing. (Gherkin tags put the change and the id on one line, as `@add-gnomish-factory-credit @FR1`.)
 
