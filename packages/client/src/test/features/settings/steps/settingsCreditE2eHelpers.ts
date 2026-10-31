@@ -48,5 +48,21 @@ export async function followCredit(page: Page, activate: () => Promise<void>) {
   await activate();
   return popupPromise;
 }
+
 /** The back button is named «Назад» in Russian, so scenarios in both languages find it. */
 export const ANY_LANGUAGE_BACK_BUTTON_NAME = /^(Back|Назад)$/;
+
+/** Measures the credit: its text is neither clipped nor pushed past the viewport. */
+export async function measureCreditFit(page: Page) {
+  const credit = creditOf(page);
+  const { scrollWidth, clientWidth } = await credit.evaluate((element) => ({
+    scrollWidth: element.scrollWidth,
+    clientWidth: element.clientWidth,
+  }));
+  const box = await boxOf(credit);
+  return {
+    isClipped: scrollWidth > clientWidth,
+    isInsideViewport:
+      box.x >= 0 && box.x + box.width <= (page.viewportSize()?.width ?? 0),
+  };
+}

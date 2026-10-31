@@ -15,6 +15,7 @@ import {
   followCredit,
   LINK_ROLE,
   MUTED_FOREGROUND_TOKEN,
+  measureCreditFit,
   NO_OUTLINE_STYLE,
   OUTLINE_COLOR_PROPERTY,
   readStyle,
@@ -193,15 +194,6 @@ When("the user presses Enter", async ({ locationsWorld }) => {
 
 // Verifies NFR-R1 of add-gnomish-factory-credit: the text is not cut off.
 Then("the credit text is shown in full", async ({ locationsWorld }) => {
-  const { page } = locationsWorld;
-  const credit = creditOf(page);
-  const { scrollWidth, clientWidth } = await credit.evaluate((element) => ({
-    scrollWidth: element.scrollWidth,
-    clientWidth: element.clientWidth,
-  }));
-  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
-  const box = await boxOf(credit);
-  const viewportWidth = page.viewportSize()?.width ?? 0;
-  expect(box.x).toBeGreaterThanOrEqual(0);
-  expect(box.x + box.width).toBeLessThanOrEqual(viewportWidth);
+  const fit = await measureCreditFit(locationsWorld.page);
+  expect(fit).toEqual({ isClipped: false, isInsideViewport: true });
 });
