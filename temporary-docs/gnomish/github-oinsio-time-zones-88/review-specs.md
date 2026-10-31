@@ -79,7 +79,8 @@ None.
 - Impact: Read literally, the requirement is false in the note state that FR1 and the UI States Matrix (`proposal.md:87`) define. An implementer who writes a keyboard check for "The credit below a settings note" scenario from NFR-A1 gets a failing assertion, or may think the notes must come after the credit, which D1 rejects.
 - Fix: In `proposal.md:66`, change "Shift+Tab from it reaches the back button." to "Shift+Tab from it reaches the back button when no settings note is shown, and the Reset button when the unreadable note is shown."
 - Fix risk: none. It matches D1 and the delta spec, and no task asserts the note-state Tab order.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md NFR-A1 now says Shift+Tab from the credit reaches the back button when no settings note is shown, and the Reset button when the unreadable note is shown, matching design D1 and the delta spec.
 
 ### R2 — SUGGESTION — UX1's size relation has no automated assertion
 - Location: `openspec/changes/move-and-restyle-gnomish-factory-credit/proposal.md:76`
@@ -88,7 +89,8 @@ None.
 - Impact: That half of UX1 rests on a visual look, not an assertion. The approved screenshot only freezes what was approved. Today the FR3 ratio implies "larger than the legends" only because the legends happen to be 14 px, and "smaller than the heading" is not checked at all.
 - Fix: In `tasks.md` 4.2, add to the scenario "The larger credit text" (tag it `@UX1` too) the step "the credit is larger than the group legends and smaller than the settings heading". It compares the credit's computed `font-size` with that of the theme group's `legend` (strictly greater) and with `settingsHeading(page)` (strictly smaller). Put the step in `steps/settings_factory_credit_layout_e2e.steps.ts` if the main steps file would pass 200 lines, as 4.2 already allows. In 5.1, drop "and larger than the group legends" from the visual confirmation.
 - Fix risk: one more E2E step in a steps area near the 200-line cap. The split file that task 4.2 already provides absorbs it. It stays in playwright-bdd, where computed styles belong (ADR-0001).
-- Status: open
+- Status: fixed
+- Resolution: the delta spec requirement text and scenario "The larger credit text" (specs/settings/spec.md) now state that the credit is larger than the group legends and smaller than the "Settings" heading (UX1 added to the implements comment); tasks.md 4.2 tags that scenario @UX1 and adds the E2E step comparing computed font sizes with the theme legend and settingsHeading(page); 5.1 drops the visual size check.
 
 ### R3 — SUGGESTION — The new step "the user presses Tab" duplicates an existing generic key step
 - Location: `openspec/changes/move-and-restyle-gnomish-factory-credit/tasks.md:79`
@@ -97,7 +99,8 @@ None.
 - Impact: The change adds a second step definition for the same action. It does so in `settings_factory_credit_e2e.steps.ts`, which is already at 199 lines, so the file split becomes more likely.
 - Fix: In `tasks.md` 4.2 "Keyboard order and focus", use `When the user presses the key "Tab"` (both times) instead of the new "the user presses Tab". Drop the definition of that new step. Keep `TAB_KEY` for "the credit gets the keyboard focus". In `design.md:22` and `:76`, replace "a new step 'the user presses Tab'" with a reference to the existing `the user presses the key {string}`.
 - Fix risk: the scenario reads a little more mechanically, as does the existing time-selection usage. The delta-spec scenario text ("the user presses Tab") needs no change.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 4.2 "Keyboard order and focus" uses the existing step `the user presses the key "Tab"` and defines no new Tab step; design.md Context (line 22) and D4 Keyboard name that existing step instead of a new one. TAB_KEY stays for "the credit gets the keyboard focus".
 
 ## Verdict
 
