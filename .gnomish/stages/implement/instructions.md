@@ -114,16 +114,19 @@ code.
 
 Tick each task in `tasks.md` (`- [ ]` → `- [x]`) as you finish it. That file is
 the only thing under `openspec/` you may edit: the proposal, the specs and the
-design are the contract you implement, not yours to rewrite. Do not touch
-`.gnomish/`, `.github/`, `.claude/`, `docs/adr/` or anything under
-`openspec/specs/` or `openspec/changes/archive/`.
+design are the contract you implement, not yours to rewrite. Glossary entries,
+architecture docs and design notes the tasks name you edit directly under
+`docs/`, in this branch. Do not touch `.gnomish/`, `.github/`, `.claude/`,
+`docs/adr/`, `CLAUDE.md` or anything under `openspec/specs/` or
+`openspec/changes/archive/`.
 
 **Handoff.** A change that needs one of those paths plans it as handoff items
 (`H1`, `H2`, …). Write each item as `.gnomish/stages/specify/handoff.md`
-describes: a patch and a README section under the change's `handoff/` folder,
-which is the only other place under `openspec/` you may write. Edit the target
-files only to produce the diff, then restore them. The stage checks that every
-patch applies and that the target paths are unchanged. The plain bullets under
+describes: a patch and a README section under
+`temporary-docs/gnomish/<task>/handoff/`, the only place under
+`temporary-docs/` you may write. Edit the target files only to produce the
+diff, then restore them. The stage checks that every patch applies and that
+the target paths are unchanged. The plain bullets under
 `## Human follow-up` in `tasks.md` are for the human. Leave them as they are,
 and do not turn them into checkboxes.
 

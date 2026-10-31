@@ -179,7 +179,7 @@ Rules this stage adds on top of the skill:
   Read that file in full before writing `tasks.md`. Replace every human step
   with an automated one where you can, in the order it gives. Plan whatever
   is left as handoff items: the implement stage writes each one as a patch
-  under the change's `handoff/` folder, and `## Human follow-up` lists each
+  under `temporary-docs/gnomish/<task>/handoff/`, and `## Human follow-up` lists each
   one with its `Why manual:` reason. Never write a checkbox task that edits a
   forbidden path, asks the user for something, or depends on a handoff item.
 - Scope the change to what the task asks and nothing more. If the task is a

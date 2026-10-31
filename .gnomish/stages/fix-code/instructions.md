@@ -106,12 +106,13 @@ not the other sections. It is the reviewer's record plus your answers.
 
 ## Rules
 
-- You may edit `packages/client/` and the `Status`/`Resolution` lines of
-  `review-code.md`. You may also regenerate files in the change's `handoff/`
-  folder, as `.gnomish/stages/specify/handoff.md` describes, when a finding is
-  about one of them. `proposal.md`, `design.md`, `specs/`, `tasks.md`,
+- You may edit `packages/client/`, `docs/` other than `docs/adr/`, and the
+  `Status`/`Resolution` lines of `review-code.md`. You may also regenerate
+  files in `temporary-docs/gnomish/<task>/handoff/`, as
+  `.gnomish/stages/specify/handoff.md` describes, when a finding is about one
+  of them. `proposal.md`, `design.md`, `specs/`, `tasks.md`,
   `openspec/specs/`, `openspec/changes/archive/`, `.gnomish/`, `.github/`,
-  `.claude/` and `docs/adr/` stay untouched.
+  `.claude/`, `docs/adr/` and `CLAUDE.md` stay untouched.
 - **Nobody is going to answer you.** Decide within the specs and the rules.
 - Before you stop, run one at a time what CI runs — the stage re-runs exactly
   these: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`,

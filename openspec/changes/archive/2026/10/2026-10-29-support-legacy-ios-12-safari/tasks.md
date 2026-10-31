@@ -175,6 +175,6 @@ The operator reviews these on the PR that the deliver stage opens, then applies 
 - H3 (FR4, FR10): apply `handoff/H3-glossary-browser-compatibility.patch` — adds the `browser-compatibility` glossary context and **Update recheck**, and adds `getLegacyZoneNames` to the owners of **Legacy zone name**.
   Why manual: the implement stage writes only under `packages/`, and the glossary lives in `docs/glossary/`.
   Automated part: none; `git apply --check` in task 11.3 proves the patch applies.
-- H4 (FR1, M7): run the device acceptance in the `handoff/README.md` section H4 on the owner's iOS 12.5.7 device.
+- H4 (FR1, M7): device acceptance on the owner's iOS 12.5.7 device: (1) deploy the branch; (2) open the deployed app in Safari; (3) add it to the home screen and open the installed app online once; (4) U1: the cards are shown, Kyiv included; (5) U2: tapping a day track selects a time; (6) U3: reordering cards by finger works without the page scrolling; (7) U5: search for Kyiv and add it; (8) after a later deploy, U4: the update notice appears on return to the app. Verify: the Safari Web Inspector console shows 0 errors during steps 2–8; record any tuning of `REORDER_TOUCH_ACTIVATION_DELAY_MS` on the PR. Why manual: no automated runner provides iOS Safari 12 (NG9).
   Why manual: no automated runner provides iOS Safari 12 (NG9), and the check needs the owner's physical device.
   Automated part: every fallback is tested with the API removed in jsdom, and the touch paths run in Chromium with Pointer Events suppressed (tasks 6.5, 6.6, 10.2).

@@ -88,8 +88,9 @@ verify:
   # BDD E2E via playwright-bdd; needs Chromium from `playwright install chromium` on this host.
   - type: command
     command: pnpm --filter @time-zones/client test:bdd
-  # The fixer edits only packages/client/ and the resolutions in review-code.md; the
-  # contract and the process files stay as they were when the stage started.
+  # The fixer edits only packages/client/, docs/ outside docs/adr/, the handoff/ folder of the
+  # reports and the resolutions in review-code.md; the contract and the process files stay as
+  # they were when the stage started.
   - type: command
     command: |
       . .gnomish/lib/task-change.sh
@@ -97,8 +98,17 @@ verify:
       start=$(git log --format='%H %s' | awk '$2 == "gnomish:" && $3 == "task" && $4 == "started" { print $1; exit }')
       [ -n "$since" ] || since=$(git rev-parse "$start^" 2>/dev/null || git merge-base HEAD origin/main)
       changed=$({ git diff --name-only "$since"; git ls-files -o --exclude-standard; } | sort -u | grep -v '^\.gnomish-task/' || true)
-      outside=$(printf '%s\n' "$changed" | grep . | grep -v '^packages/client/' | grep -vxF "$reports/review-code.md" || true)
-      [ -z "$outside" ] || { echo "$outside"; echo "the fix-code stage edits only packages/client/ and the resolutions in $reports/review-code.md - restore the files above with: git checkout $since -- <file>"; exit 1; }
+      outside=$(printf '%s\n' "$changed" | grep . | grep -E -v '^(packages/client/|docs/)' | grep -vxF "$reports/review-code.md" | grep -v "^$reports/handoff/" || true)
+      outside=$(printf '%s\n' "$outside" $(printf '%s\n' "$changed" | grep '^docs/adr/') | grep . || true)
+      [ -z "$outside" ] || { echo "$outside"; echo "the fix-code stage edits only packages/client/, docs/ outside docs/adr/, $reports/handoff/ and the resolutions in $reports/review-code.md - restore the files above with: git checkout $since -- <file>"; exit 1; }
+  # A regenerated handoff patch still applies to the branch as committed.
+  - type: command
+    command: |
+      . .gnomish/lib/task-change.sh
+      for patch in "$reports"/handoff/*.patch; do
+        [ -e "$patch" ] || continue
+        git apply --check "$patch" || { echo "$patch does not apply to the branch - regenerate it as .gnomish/stages/specify/handoff.md describes"; exit 1; }
+      done
   # review-code.md is the reviewer's record: only its Status lines and the added Resolution
   # lines change.
   - type: command
