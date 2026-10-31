@@ -154,6 +154,10 @@ Then(
     const buttonBox = await requireBox(headerButton(page, name));
     const titleBox = await requireBox(headerOf(page).getByRole(HEADING_ROLE));
     expect(buttonBox.x).toBeGreaterThan(titleBox.x + titleBox.width);
+    const headerBox = await requireBox(headerOf(page));
+    expect(
+      Math.abs(buttonBox.x + buttonBox.width - (headerBox.x + headerBox.width)),
+    ).toBeLessThanOrEqual(CENTRE_TOLERANCE_PX);
   },
 );
 

@@ -171,6 +171,7 @@ Then(
       const shape = await measureTimeButton(locationsWorld.page, city);
       expect(shape.lineSpread).toBeLessThanOrEqual(TOLERANCE_PX);
       expect(shape.isClipped).toBe(false);
+      expect(shape.overflowPx).toBeLessThanOrEqual(TOLERANCE_PX);
     }
   },
 );

@@ -42,6 +42,9 @@ export const measureTimeButton = (
     return {
       lineSpread: Math.max(...tops) - Math.min(...tops),
       isClipped: button.scrollWidth > button.clientWidth,
+      overflowPx:
+        button.getBoundingClientRect().right -
+        (button.parentElement?.getBoundingClientRect().right ?? 0),
     };
   });
 
