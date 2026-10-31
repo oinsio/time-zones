@@ -63,7 +63,7 @@ No performance requirement: the credit is static text with no formatter, lookup 
 
 #### Accessibility
 
-- NFR-A1: The credit stays a link named exactly by its visible text. In the Tab order it comes after the back button and before the theme group, which is its visual order. From the focused heading, Tab reaches it when no settings note is shown. Shift+Tab from it reaches the back button. Enter opens it. It shows the accent focus outline and stays at least 44 px high. Opening the settings page still moves the focus to the heading.
+- NFR-A1: The credit stays a link named exactly by its visible text. In the Tab order it comes after the back button and before the theme group, which is its visual order. From the focused heading, Tab reaches it when no settings note is shown. Shift+Tab from it reaches the back button when no settings note is shown, and the Reset button when the unreadable note is shown. Enter opens it. It shows the accent focus outline and stays at least 44 px high. Opening the settings page still moves the focus to the heading.
 - NFR-A2: The credit text has a contrast of at least 4.5:1 against the page background in both themes. The accent token gives 5.50:1 in light and 8.82:1 in dark. axe-core reports no violations on the settings page in the light and the dark theme.
 
 #### Responsive
