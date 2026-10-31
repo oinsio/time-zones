@@ -92,7 +92,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 6. Final checks
 
 - [x] 6.1 Stryker, scoped: `npx stryker run --mutate 'src/app/settings/GnomishFactoryCredit.tsx,src/app/settings/SettingsPage.tsx'`. Read `reports/mutation/mutation-report.json`. Kill survivors with Vitest tests in `app/settings/` until each file scores at least 95 % (minimum acceptable 90 %), and note the scores in this task. A survivor that was in the score of `add-gnomish-factory-credit` before this change may be noted as pre-existing, with its line.
-- [ ] 6.2 Run, one at a time:
+- [x] 6.2 Run, one at a time:
   - `pnpm --filter @time-zones/client typecheck`;
   - `pnpm --filter @time-zones/client lint`;
   - `pnpm --filter @time-zones/client test`;
@@ -100,7 +100,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `pnpm --filter @time-zones/client test:bdd`.
 
   All pass.
-- [ ] 6.3 Traceability, from `packages/client/`: `for id in FR1 FR2 FR3 NFR-A1 NFR-A2 NFR-R1 NFR-R2 UX1 UX2; do grep -rlE "move-and-restyle-gnomish-factory-credit.*\b$id\b|\b$id\b.*move-and-restyle-gnomish-factory-credit" src >/dev/null || echo "missing $id"; done` prints nothing.
+- [x] 6.3 Traceability, from `packages/client/`: `for id in FR1 FR2 FR3 NFR-A1 NFR-A2 NFR-R1 NFR-R2 UX1 UX2; do grep -rlE "move-and-restyle-gnomish-factory-credit.*\b$id\b|\b$id\b.*move-and-restyle-gnomish-factory-credit" src >/dev/null || echo "missing $id"; done` prints nothing.
 
 ## Human follow-up
 
