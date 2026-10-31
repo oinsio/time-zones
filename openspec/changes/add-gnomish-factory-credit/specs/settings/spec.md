@@ -72,7 +72,7 @@ The credit MUST be exposed as a link named exactly by its visible text. It MUST 
 ## MODIFIED Requirements
 
 ### Requirement: Settings strings are localized
-Every string of the settings button, the settings page, its options, its notes, its Reset action and its Gnomish Factory credit SHALL exist in English and Russian, and Russian MUST use the glossary names: «Настройки», «Тема», «Светлая», «Тёмная», «Системная», «Формат времени», «12 часов», «24 часа», «Гномская фабрика». <!-- implements FR16 of add-settings-page-and-device-time-location; implements FR2 of add-gnomish-factory-credit -->
+Every string of the settings button, the settings page, its options, its notes, its Reset action and its Gnomish Factory credit SHALL exist in English and Russian, and Russian MUST use the glossary names: «Настройки», «Тема», «Светлая», «Тёмная», «Системная», «Формат времени», «12 часов», «24 часа», «Создано с помощью Гномской фабрики». <!-- implements FR16 of add-settings-page-and-device-time-location; implements FR2 of add-gnomish-factory-credit -->
 
 #### Scenario: Both languages
 - **WHEN** the settings page is shown in `<language>`

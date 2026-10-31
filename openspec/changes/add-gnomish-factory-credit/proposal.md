@@ -9,7 +9,7 @@ The app is written with the help of the Gnomish Factory («Гномская фа
 ## What Changes
 
 - ADDED `settings` requirement "Gnomish Factory credit": the top line of the settings page is one link, "Built with Gnomish Factory" («Создано с помощью Гномской фабрики»), that opens the factory's landing page in a new browser tab and leaves the app as it was. It takes the app's design tokens and follows the light and the dark theme.
-- MODIFIED `settings` requirement "Settings strings are localized": the credit is one of the settings page strings that exist in English and Russian, and Russian uses the glossary name «Гномская фабрика».
+- MODIFIED `settings` requirement "Settings strings are localized": the credit is one of the settings page strings that exist in English and Russian, and Russian uses the glossary name «Создано с помощью Гномской фабрики» (the Gnomish Factory credit).
 - The approved settings page screenshots (375 px and 1024 px, light and dark) are re-approved with the credit line.
 - No stored data, no new state, no network request by the app, no change of the main page or of any view. The reference moment, the locations and the preferences keep their owners (ADR-0002, ADR-0003, ADR-0004).
 
