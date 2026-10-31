@@ -75,7 +75,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
     - after hover, "the credit text has the accent colour" becomes "the credit text keeps the colour of the theme icons".
     - Remove step definitions no scenario uses any more (`MUTED_FOREGROUND_TOKEN` too, if unused).
   - "The credit follows a theme change" (add `@move-and-restyle-gnomish-factory-credit @FR2`): its last step becomes "the credit text has the colour of the theme icons and is underlined". The icon's colour is read after the change, so it is the dark one.
-  - New scenario "The larger credit text" (`@move-and-restyle-gnomish-factory-credit @FR3`): "the user opens the settings", then "the credit's font size is 15 to 20 % larger than before" (`readCreditFontSizeRatio` is between `MIN_CREDIT_FONT_SIZE_RATIO` and `MAX_CREDIT_FONT_SIZE_RATIO`).
+  - New scenario "The larger credit text" (`@move-and-restyle-gnomish-factory-credit @FR3 @UX1`): "the user opens the settings", then "the credit's font size is 15 to 20 % larger than before" (`readCreditFontSizeRatio` is between `MIN_CREDIT_FONT_SIZE_RATIO` and `MAX_CREDIT_FONT_SIZE_RATIO`), then "the credit is larger than the group legends and smaller than the settings heading" (the credit's computed `font-size` is strictly greater than that of the theme group's `legend` and strictly smaller than that of `settingsHeading(page)`).
   - "Keyboard order and focus" (add `@move-and-restyle-gnomish-factory-credit @NFR-A1`): "the focus is on the settings heading". Then a new "the user presses Tab" (presses `TAB_KEY`), then "the credit has the focus" and "the credit is at least 44 px high". Then "the user presses Shift+Tab" and "the focus is on the back button". Then "the user presses Tab" and "the user presses Enter", then "a new tab opens at the Gnomish Factory landing page".
   - Outline "The full credit at <width> px in <language>": add `@move-and-restyle-gnomish-factory-credit @NFR-R1`, steps unchanged.
 
@@ -86,7 +86,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 - [ ] 5.1 Add the tags `@move-and-restyle-gnomish-factory-credit @NFR-R2` above "Approved screenshots of the settings at <width> px in the <theme> theme" in `test/features/settings/settings_e2e.feature`.
   - Re-approve: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_e2e.feature --grep "Approved screenshots of the settings" --update-snapshots`.
-  - Open the changed 375 px PNGs under `src/test/features/__screenshots__/chromium/` with the Read tool. Confirm that the header holds only the back button and the heading. Confirm that the credit is centred right above the theme group, underlined, in the colour of the theme icons, and larger than the group legends.
+  - Open the changed 375 px PNGs under `src/test/features/__screenshots__/chromium/` with the Read tool. Confirm that the header holds only the back button and the heading. Confirm that the credit is centred right above the theme group, underlined and in the colour of the theme icons (the size relation is asserted by "The larger credit text" in 4.2).
   - Verify by running the same command again without `--update-snapshots`: it passes. `git status --short src/test/features/__screenshots__` lists the 4 settings PNGs of each project that runs them (chromium, mobile-chrome) and no other file.
 
 ## 6. Final checks
