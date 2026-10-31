@@ -37,7 +37,7 @@ The `<header>` becomes `grid grid-cols-[1fr_auto_1fr] items-center gap-2` on eve
 
 ### D4. A fixed time column from 768 px (FR5, UX3)
 
-`LocalDateTime`'s outer span gets `md:w-44` (176 px), and the time button gets `whitespace-nowrap`. 176 px holds the widest 12-hour time (`12:59 PM`, `text-4xl` bold with tabular figures) and the open field (`md:w-36`). With the place column (`md:w-64`), the time column, the drag handle and the menu button all fixed from 768 px, the remaining width given to the `md:flex-1 md:basis-0` track is the same on every card. If the E2E check of one-line times shows that 176 px clips a time, the implementer takes the next Tailwind width that fits and records it in the task; the check is the source of truth. The 24-hour format uses the same width, so the tracks there get shorter by the difference; the 1024 px screenshots are re-approved (NFR-R2). Below 768 px nothing changes.
+`LocalDateTime`'s outer span gets `md:w-44` (176 px), and the time button gets `whitespace-nowrap`. 176 px holds the widest 12-hour time (`12:59 PM`, `text-4xl` bold with tabular figures) and the open field (`md:w-36`). With the place column (`md:w-64`), the time column, the drag handle and the menu button all fixed from 768 px, the remaining width given to the `md:flex-1 md:basis-0` track is the same on every card. If the E2E check of one-line times shows that 176 px clips a time, the implementer takes the next Tailwind width that fits and records it in the task; the check is the source of truth. The 24-hour format uses the same width, so the tracks there get shorter by the difference; the 1024 px screenshots are re-approved (NFR-R2). At 768 px the bar shrinks from about 166 px to about 90 px, so the five hour labels stand about 22 px apart: from 768 px to about 820 px, 24-hour labels with minutes (`05:30`, shown for zones whose day boundaries fall at :30 or :45, `formatHourLabel` in `presenter/dayTrack.ts`) now touch or overlap, as 12-hour labels already do; this is accepted for equal tracks (proposal NG3). Below 768 px nothing changes.
 
 ### D5. Hour labels never wrap (FR6)
 
@@ -58,7 +58,7 @@ Positive:
 
 Negative:
 
-- In the 24-hour format the time column is wider than its text, so each track is shorter from 768 px.
+- In the 24-hour format the time column is wider than its text, so each track is shorter from 768 px. From 768 px to about 820 px, 24-hour hour labels with minutes (`05:30`, e.g. Kolkata or Kathmandu) now touch or overlap their neighbours, as 12-hour labels already do; accepted for equal tracks (NG3).
 - Every 1024 px screenshot changes and must be re-approved.
 - D2 changes no production code unless the check fails; the owner's report is not reproduced from the repository (proposal Q1).
 

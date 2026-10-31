@@ -48,7 +48,7 @@ None.
 
 - NG1: The texts, lifetime and colours of the wall-time hint and of the gap note in the date bar stay as they are.
 - NG2: The settings page header (back button and "Settings" heading) is not changed.
-- NG3: The hour labels keep their count, positions and texts; only their wrapping changes. Labels that touch each other on the narrowest wide layouts are not addressed here.
+- NG3: The hour labels keep their count, positions and texts; only their wrapping changes. Labels that touch each other on the narrowest wide layouts are not addressed here, in both hour formats, including 24-hour labels with minutes (`05:30`) that the wider time column brings closer between 768 and about 820 px.
 - NG4: Below 768 px the track layout (own line, full content width, no hour labels) stays as it is.
 - NG5: No new design token, no new colour, no change of the handle's size, outline or hit area.
 
