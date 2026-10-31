@@ -131,7 +131,7 @@ A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card
 - **THEN** the page does not scroll horizontally
 
 ### Requirement: Wall-time input layout
-With the field open or a hint shown, the page SHALL NOT scroll horizontally at 320 px and 2560 px. The open field MUST take the place of the time and MUST NOT change the card's size. The hint MUST be the last element of its card on every width: under the day track (and its hour labels from 768 px) and under the location menu button, spanning the card's content width. It MUST wrap inside the card and take colours from design tokens. While a hint is shown, the city, the time, the day track and the location menu button of that card MUST keep their positions and sizes, within 1 px, compared to the same card without the hint; only the card's height grows by the hint. The hint MUST stay a polite status, and its place in the card MUST NOT change what is announced. Screenshots at 375 and 1024 px, in both themes, MUST include an open field and a hint. <!-- implements NFR-R1, NFR-R2, UX2, UX3 of add-wall-time-input-with-hint; FR1, NFR-A2, NFR-R1, UX1 of fix-location-card-and-header-layout -->
+With the field open or a hint shown, the page SHALL NOT scroll horizontally at 320 px and 2560 px. The open field MUST take the place of the time and MUST NOT change the card's size. The hint MUST be the last element of its card on every width: under the day track (and its hour labels from 768 px) and under the location menu button, spanning the card's content width. It MUST wrap inside the card and take colours from design tokens. While a hint is shown, the city, the time, the day track and the location menu button of that card MUST keep their positions and sizes, within 1 px, compared to the same card without the hint; only the card's height grows by the hint. The hint MUST stay a polite status, and its place in the card MUST NOT change what is announced. With a hint shown in the 12-hour format, axe-core MUST report no violations at 375 and 1024 px in the light and the dark theme. Screenshots at 375 and 1024 px, in both themes, MUST include an open field and a hint. <!-- implements NFR-R1, NFR-R2, UX2, UX3 of add-wall-time-input-with-hint; FR1, NFR-A1, NFR-A2, NFR-R1, UX1 of fix-location-card-and-header-layout -->
 
 #### Scenario: No horizontal scrolling
 - **GIVEN** the viewport is `<width>` px wide
@@ -158,6 +158,19 @@ With the field open or a hint shown, the page SHALL NOT scroll horizontally at 3
 |---|
 | 375 |
 | 1024 |
+
+#### Scenario: No accessibility violations with a hint in the 12-hour format
+- **GIVEN** the hour format is 12-hour
+- **AND** New York shows the GAP hint
+- **WHEN** the page is shown `<width>` px wide in the `<theme>` theme
+- **THEN** axe-core reports no violations
+
+| width | theme |
+|---|---|
+| 375 | light |
+| 375 | dark |
+| 1024 | light |
+| 1024 | dark |
 
 #### Scenario: Hint screenshots
 - **GIVEN** New York shows the GAP hint
