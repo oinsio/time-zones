@@ -139,6 +139,7 @@ Then(
   },
 );
 
+// Verifies NFR-A1 of add-gnomish-factory-credit: focus is moved back to the heading before the next keyboard step.
 When(
   "the focus returns to the settings heading",
   async ({ locationsWorld }) => {
@@ -151,6 +152,7 @@ When("the pointer rests on the credit", async ({ locationsWorld }) => {
   await creditOf(locationsWorld.page).hover();
 });
 
+// Verifies FR4, UX2 of add-gnomish-factory-credit: the hovered text is in the accent colour.
 Then("the credit text has the accent colour", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
   const expected = await readTokenStyle(page, COLOR_PROPERTY, ACCENT_TOKEN);
@@ -162,21 +164,25 @@ When("the user presses Shift+Tab", async ({ locationsWorld }) => {
   await locationsWorld.page.keyboard.press(SHIFT_TAB_KEY);
 });
 
+// Verifies NFR-A1 of add-gnomish-factory-credit: Shift+Tab from the credit reaches the back button.
 Then("the focus is on the back button", async ({ locationsWorld }) => {
   await expect(
     locationsWorld.page.getByRole(BUTTON_ROLE, { name: BACK_BUTTON_NAME }),
   ).toBeFocused();
 });
 
+// Verifies NFR-A1 of add-gnomish-factory-credit: the credit is a keyboard stop.
 Then("the credit has the focus", async ({ locationsWorld }) => {
   await expect(creditOf(locationsWorld.page)).toBeFocused();
 });
 
+// Verifies NFR-A1 of add-gnomish-factory-credit: the touch target is at least 44 px.
 Then("the credit is at least 44 px high", async ({ locationsWorld }) => {
   const box = await boxOf(creditOf(locationsWorld.page));
   expect(box.height).toBeGreaterThanOrEqual(MIN_OPTION_HEIGHT_PX);
 });
 
+// Verifies NFR-A1, FR3 of add-gnomish-factory-credit: Enter follows the credit link.
 When("the user presses Enter", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
   creditPopups.set(
