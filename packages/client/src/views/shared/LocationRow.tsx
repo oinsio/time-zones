@@ -57,7 +57,7 @@ type LocationRowProps = {
  * device time location shows its meta line and accessible name.
  * Implements FR2, FR4 of show-here-entry-for-device-time (D5): the place
  * column, time and day track live in `ZoneRowContent`.
-  * Implements FR1, FR7 of add-wall-time-input-with-hint (D6): binds the location target.
+ * Implements FR1, FR7 of add-wall-time-input-with-hint (D6): binds the location target.
  * Implements FR1, NFR-A2, UX1 of fix-location-card-and-header-layout (D1): the
  * wall-time hint is the last child of the card.
  */

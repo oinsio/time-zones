@@ -18,7 +18,7 @@ type LocalDateTimeProps = Pick<
  * minute updates are not announced.
  * Implements FR2, FR6, UX1, UX2, NFR-A2 of
  * show-local-time-and-date-on-location-cards (D5).
-  * Implements FR1, FR5, FR13, NFR-A2, UX1 of add-wall-time-input-with-hint (D6).
+ * Implements FR1, FR5, FR13, NFR-A2, UX1 of add-wall-time-input-with-hint (D6).
  * Implements FR5, UX3 of fix-location-card-and-header-layout (D4): a fixed
  * column width from 768 px, so every track is equally long.
  */

@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
+import { listRow } from "../../locations/steps/locationsE2eHelpers";
 import {
   allSliders,
   barOf,
@@ -124,16 +125,17 @@ Then(
   },
 );
 
-// Verifies UX1 of add-time-sliders-to-location-cards: fill and outline come from tokens.
+// Verifies UX1 of add-time-sliders-to-location-cards: outline comes from a token.
+// Verifies FR2 of fix-location-card-and-header-layout: the fill is the card's.
 Then(
-  "the visible handle of {string} is filled with the surface colour and outlined with the foreground colour",
+  "the visible handle of {string} is filled with its card's fill and outlined with the foreground colour",
   async ({ locationsWorld }, city: string) => {
     const { page } = locationsWorld;
     const handle = visibleHandleOf(page, city);
-    await expect(handle).toHaveCSS(
-      "background-color",
-      await readTokenStyle(page, "background-color", "--color-surface"),
+    const cardFill = await listRow(page, city).evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
     );
+    await expect(handle).toHaveCSS("background-color", cardFill);
     await expect(handle).toHaveCSS(
       "border-top-color",
       await readTokenStyle(page, "color", "--color-foreground"),
