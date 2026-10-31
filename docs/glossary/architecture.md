@@ -11,7 +11,7 @@ Layers, the data flow between them, and the test stand-ins. Decisions: ADR-0002 
 - **Controller** — React hooks and providers that connect the store, the ports and the views, and run side effects (ticks, writes, sync). *Code:* `src/controller/`.
 - **Port** — an interface the model or controller needs from the outside world. *Code:* `src/ports/` (`CitySearch`, `LocationRepository`, `StorageAvailability`), and `Clock` in `@/lib/temporal`. *Never:* service, gateway.
 - **Adapter** — an implementation of a port for one technology. *Code:* `src/adapters/`.
-- **Repository** — the adapter that owns reading and writing one stored model (ADR-0004). Only repositories write to storage. *Code:* `LocationRepository`, `localStorageLocationRepository`.
+- **Repository** — the adapter that owns reading and writing one stored model (ADR-0004). Only repositories write to storage. *Code:* `LocationRepository`, `localStorageLocationRepository`; the preferences have `PreferencesRepository`, and both share `createStorageDocumentSync` (tab sync).
 - **Tab sync** — passing a changed location list to the other open tabs, through `BroadcastChannel` or `storage` events. *Never:* replication.
 - **Preview deploy** — a deploy of one pull request's tested build to the preview host, under the same `APP_BASE_PATH`, with its own address linked from one PR comment. *Code:* the `preview` job in `.github/workflows/ci.yml`, `scripts/previewSite/buildPreviewSiteFiles.ts`. *Never:* staging, QA build.
 - **Work bound** — a deterministic count (formatters built, lookups, passes) that a performance requirement is checked by in unit tests, instead of measured time (ADR-0008). *Code:* `test/workCounters.ts`. *Never:* wall-clock budget in a unit test.

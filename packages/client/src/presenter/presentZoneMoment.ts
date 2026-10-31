@@ -63,7 +63,7 @@ export type PresentedZoneMoment = {
  * and the row note.
  */
 export function presentZoneMoment(
-  subject: { id?: string; timeZoneId: string; cityLabel: string },
+  subject: { id: string; timeZoneId: string; cityLabel: string },
   {
     language,
     hourFormat,

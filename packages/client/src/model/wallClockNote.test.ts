@@ -113,7 +113,7 @@ describe("getWallClockNote", () => {
     ).toBe(WallClockNotePlacement.ROW);
   });
 
-  it("shows a location target while the Here entry does not exist", () => {
+  it("shows a location target in the device time zone", () => {
     const almatyTarget: WallTimeTarget = {
       kind: WallTimeTargetKind.LOCATION,
       locationId: almaty.id,

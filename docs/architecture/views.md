@@ -76,22 +76,24 @@ Used by every view, implemented once in `views/shared/`:
 
 | Block | Content |
 |---|---|
-| Row header | home icon, "here" icon (location arrow) or difference from the reference zone (`-2`, `-2:30`); city; country and zone abbreviation or `GMT+N`; date with a day-shift hint |
-| Here entry | derived row for the device zone, shown first when no location matches it; not removable; meta line "Device time · GMT+5" ([ADR-0007](../adr/0007-reference-zone-and-device-time.md)) |
-| Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — the Now button signals a pinned moment |
+| Row header | home icon (wins) or "here" icon (location arrow); city; difference from the reference zone (`−2 h`, `+0:30`, `0 h`); caption "here"; country and zone abbreviation or `GMT+N`; date with a day-shift hint |
+| Location menu | «⋯» button with a hit area of 44 px; opens on click, so it works without Pointer Events; items "Make home" / "Clear home" and "Remove" |
+| Device time location | a location of the list for the device zone; removable, reorderable, can be home; meta line "Device time · UTC+5" ([ADR-0010](../adr/0010-device-time-location.md)) |
+| Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — an active Now button signals a pinned moment |
 | Day-period colors | four pastel bands: night, morning, working hours, evening — from design tokens. Soft gradient transitions: 1 hour around night boundaries, 15 minutes around working hours, so 09:00 and 18:00 stay readable. Colors also differ in lightness, not only in hue |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
-| Now button | returns to `LIVE`; visible only when the moment is pinned |
-| Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 doesn't exist on this day — clocks moved forward. Showing 03:30" / "01:30 occurs twice — showing the first (GMT-4)"; stays until the next change; announced via `aria-live="polite"`; text comes from the presenter |
+| Now button | returns to `LIVE`; always shown, active when the moment is pinned, inactive and grey while live |
+| Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 does not exist on this day — clocks moved forward. Showing 03:30." / "01:30 occurs twice — showing the first (UTC−4)."; stays until the next change; `role="status"` (polite); text comes from the presenter |
 | Date bar | bottom bar `[<] Mon, 28 Sep [>]  [Now]`: arrows switch to the previous / next day, tapping the date opens a calendar for distant dates; placed at the bottom for thumb reach. Grid may reuse it or replace it with a day strip |
 
 ## Visual style
 
 Screens: [docs/design](../design/README.md). Values become design tokens.
 
-- One layout for light and dark themes; only token values differ. The theme follows the system.
+- One layout for light and dark themes; only token values differ. The theme follows the theme preference (System by default).
 - Font: Manrope; time uses tabular figures.
 - Accent: `#2F5BD3` (light), `#5EC2E8` (dark).
+- Inactive control (the Now button while live): fill `#E4E4E7` (light), `#2A3550` (dark), label in the muted foreground colour.
 - Day track (pastel, 10 px on phones, 12 px on tablets):
 
 | Period | Light | Dark |
@@ -106,7 +108,7 @@ Screens: [docs/design](../design/README.md). Values become design tokens.
 | Overlay | Content |
 |---|---|
 | Search | full screen on phones, dialog on wide screens; input plus results as "City, Region, Country" (region once a richer source is added, [ADR-0006](../adr/0006-city-data-sources.md)); suggestions are shown before typing (never an empty screen) |
-| Settings | language (including dialects), hour format `12 / 24 / System`, view mode `Auto / Grid / Cards` |
+| Settings | theme (Light, Dark, System) and hour format (12 / 24); language and view mode later |
 
 ## View contract
 
@@ -114,8 +116,8 @@ Every view must pass the same BDD E2E scenarios:
 
 - select a time, select a date, return to now;
 - add and remove a location, set and clear home;
-- see the Here entry without home, and the "here" mark when a location matches the device zone;
-- open settings and switch hour format, language and view mode;
+- see the device time location, and the "here" mark when a location matches the device zone;
+- open settings and switch the theme and the hour format;
 - show loading, error, empty and offline states;
 - pass axe-core and be operable with Tab, Enter, Esc and arrows.
 
@@ -125,8 +127,8 @@ Every view must pass the same BDD E2E scenarios:
 |---|---|---|
 | Loading | city search data is being loaded | skeleton in search results |
 | Error | stored data is corrupted or city data failed to load | message with a recovery action (reset, retry) |
-| Empty | no locations in the list | the Here entry plus an explanation and an "Add location" action |
+| Empty | no locations in the list | an explanation and the header "Add location" action |
 | Offline | no network | the app works fully; only a note when an update cannot be fetched |
 | Storage unavailable | private mode, quota | warning that changes will not be saved |
 
-On first launch nothing is added to the list: the Here entry shows the device time, so a new user never starts on a blank screen and nothing is stored until the user acts.
+On first launch the list holds the device time location; after that the stored list is the truth, also when it is empty.

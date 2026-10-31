@@ -19,8 +19,8 @@ export type PayloadMigrations = Readonly<
 
 /**
  * Version 1 had no home location: the migration adds "no home" (FR8). Version 2
- * had the derived Here entry: the migration lists the device time location
- * first (FR14 of add-settings-page-and-device-time-location, D2).
+ * showed the device time as a derived row outside the list: the migration
+ * lists the device time location first (FR14 of add-settings-page-and-device-time-location, D2).
  */
 export const LOCATION_MIGRATIONS: PayloadMigrations = {
   1: (payload) => ({ ...(payload as object), homeLocationId: null }),

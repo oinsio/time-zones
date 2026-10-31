@@ -23,8 +23,9 @@ export enum CitySearchStatus {
 
 /**
  * Loads the city search data and presents its results. A failed load is not
- * cached: `retry` calls the loader again. Shares the load with the Here entry
- * through `cityDataCache` (FR8 of show-here-entry-for-device-time).
+ * cached: `retry` calls the loader again. Shares the load with the device time
+ * location's city label (`useExemplarCity`) through `cityDataCache` (FR8 of
+ * show-here-entry-for-device-time).
  * Implements FR6, FR15, NFR-P2 of add-locations-via-search (D8, D9).
  * Implements FR11 of add-settings-page-and-device-time-location (D12): `isDeviceTimeOptionShown`.
  */

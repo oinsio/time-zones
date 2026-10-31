@@ -8,5 +8,5 @@ Interchangeable interfaces over the same model. Decisions: ADR-0002 (model, pres
 - **Cards view** — the view with one card per location, the exact time in large digits and a day track. *Code:* `CardsView`. *RU:* «Карточки».
 - **Grid view** *(planned)* — the view with hour cells aligned across all locations, for planning.
 - **Card** — how the Cards view shows one location row. *Not:* a location.
-- **Shared block** — a building block every view reuses, implemented once in `views/shared/`: the date bar, the day track, the Here mark icon, the search. *Never:* common component (for these blocks).
+- **Shared block** — a building block every view reuses, implemented once in `views/shared/`: the date bar, the day track, the Here mark icon, the home mark icon, the location menu, the search. *Never:* common component (for these blocks).
 - **View contract** — the BDD E2E scenarios every registered view must pass: select a time, select a date, return to now, add and remove a location, the Here mark, and all UI states. *Code:* `@view-contract` features.
