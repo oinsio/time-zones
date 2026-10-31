@@ -1,4 +1,5 @@
 // Verifies FR1, FR2, FR3, NFR-A1 of add-gnomish-factory-credit (D2, D4).
+// Verifies FR2, FR3, UX2 of move-and-restyle-gnomish-factory-credit (D2, D3).
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import { GNOMISH_FACTORY_LANDING_URL } from "@/constants";
@@ -30,6 +31,15 @@ describe("GnomishFactoryCredit", () => {
     expect(GNOMISH_FACTORY_LANDING_URL).toBe(
       "https://oinsio.github.io/gnomish-factory/",
     );
+  });
+
+  it("should use the accent colour and the credit font size", async () => {
+    await i18n.changeLanguage("en");
+    render(<GnomishFactoryCredit />);
+    const link = screen.getByRole("link");
+    expect(link).toHaveClass("text-accent", "text-credit");
+    expect(link).not.toHaveClass("text-muted-foreground");
+    expect(link).not.toHaveClass("text-sm");
   });
 
   it("should open the landing page in a new tab without an opener", async () => {

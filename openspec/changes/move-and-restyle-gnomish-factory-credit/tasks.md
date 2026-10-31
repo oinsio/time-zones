@@ -13,7 +13,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Glossary and architecture docs (FR1)
 
-- [ ] 1.1 Update the docs (repository root):
+- [x] 1.1 Update the docs (repository root):
   - In `docs/glossary/settings.md`, change the **Gnomish Factory credit** entry from "the top line of the settings page, one link …" to "the line of the settings page above the theme preference, one link "Built with Gnomish Factory" to the factory's landing page, opened in a new tab". Keep its *Code:* and *RU:* parts.
   - In `docs/architecture/views.md`, change the Settings overlay row from "the Gnomish Factory credit as the top line;" to "the Gnomish Factory credit above the theme;".
 
@@ -21,7 +21,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 2. The credit's place on the settings page (FR1, NFR-A1, UX1; TDD, design D1)
 
-- [ ] 2.1 RED: in `app/settings/SettingsPage.credit.test.tsx`:
+- [x] 2.1 RED: in `app/settings/SettingsPage.credit.test.tsx`:
   - Add `// Verifies FR1, NFR-A1, UX1 of move-and-restyle-gnomish-factory-credit (D1).`
   - Replace the test "should show the Gnomish Factory credit as the first element of the header" with:
     - "should not show the credit in the header": `within(screen.getByRole("banner")).queryByRole("link")` is `null`.
@@ -30,7 +30,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - Keep "should keep the focus on the heading with the credit shown".
 
   Run `npx vitest run src/app/settings/SettingsPage.credit.test.tsx` and see the new tests fail.
-- [ ] 2.2 GREEN: in `app/settings/SettingsPage.tsx`, apply design D1:
+- [x] 2.2 GREEN: in `app/settings/SettingsPage.tsx`, apply design D1:
   - The `<header>` becomes `grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-border pt-6 pb-4`, with the back button, the heading and the spacer as its direct children. The inner `<div>` goes away.
   - `<GnomishFactoryCredit />` moves into `<main>`, right after the save-failed note and right before the theme `SettingsOptionGroup`.
   - Add `Implements FR1, NFR-A1, UX1 of move-and-restyle-gnomish-factory-credit (D1).` to the JSDoc.
@@ -39,13 +39,13 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 3. Colour and size of the credit (FR2, FR3, UX2, NFR-A2; TDD, design D2, D3)
 
-- [ ] 3.1 In `tailwind.config.ts` (`packages/client/`), add the constants `CREDIT_FONT_SIZE = "1.03125rem"` and `CREDIT_LINE_HEIGHT = "1.5rem"` next to `MANROPE_FONT_FAMILY`, each with a JSDoc that names `FR3 of move-and-restyle-gnomish-factory-credit (D3)`. Add `fontSize: { credit: [CREDIT_FONT_SIZE, CREDIT_LINE_HEIGHT] }` to `theme.extend`. Verify `pnpm --filter @time-zones/client typecheck` passes.
-- [ ] 3.2 RED: in `app/settings/GnomishFactoryCredit.test.tsx`:
+- [x] 3.1 In `tailwind.config.ts` (`packages/client/`), add the constants `CREDIT_FONT_SIZE = "1.03125rem"` and `CREDIT_LINE_HEIGHT = "1.5rem"` next to `MANROPE_FONT_FAMILY`, each with a JSDoc that names `FR3 of move-and-restyle-gnomish-factory-credit (D3)`. Add `fontSize: { credit: [CREDIT_FONT_SIZE, CREDIT_LINE_HEIGHT] }` to `theme.extend`. Verify `pnpm --filter @time-zones/client typecheck` passes.
+- [x] 3.2 RED: in `app/settings/GnomishFactoryCredit.test.tsx`:
   - Add `// Verifies FR2, FR3, UX2 of move-and-restyle-gnomish-factory-credit (D2, D3).`
   - Add the test "should use the accent colour and the credit font size": the link has the classes `text-accent` and `text-credit`, and has neither `text-muted-foreground` nor `text-sm`.
 
   Run `npx vitest run src/app/settings/GnomishFactoryCredit.test.tsx` and see it fail.
-- [ ] 3.3 GREEN: in `app/settings/GnomishFactoryCredit.tsx`, apply D2 and D3 to the class string:
+- [x] 3.3 GREEN: in `app/settings/GnomishFactoryCredit.tsx`, apply D2 and D3 to the class string:
   - `text-sm` → `text-credit`;
   - `text-muted-foreground` → `text-accent`;
   - drop `hover:text-accent` and `focus-visible:text-accent`;
