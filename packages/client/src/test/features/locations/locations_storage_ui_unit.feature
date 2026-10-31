@@ -13,7 +13,7 @@ Feature: Locations storage states in the Cards view
     Given the stored list is not valid JSON
     And the user opened the app
     When the user resets the list
-    Then the empty state with the "Add location" action is shown
+    Then the first-launch list is shown without an explanation
     And no list document is stored
 
   @add-locations-via-search @FR13

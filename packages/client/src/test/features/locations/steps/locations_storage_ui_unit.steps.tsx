@@ -9,9 +9,9 @@ import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import {
   cityEntry,
   closeApp,
-  expectEmptyState,
   expectListContains,
   failStorageWrites,
+  listedCityLabels,
   NOT_JSON,
   openApp,
   searchAndChoose,
@@ -26,8 +26,6 @@ vi.mock(
 );
 
 const feature = await loadFeature("../locations_storage_ui_unit.feature");
-const EMPTY_STATE_STEP =
-  'the empty state with the "Add location" action is shown';
 const USER_OPENED_APP_STEP = "the user opened the app";
 const SEARCH_AND_CHOOSE_STEP =
   "the user searches for {string} and chooses {string}";
@@ -73,7 +71,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         screen.getByRole("button", { name: i18n.t("locations.reset") }),
       ),
     );
-    Then(EMPTY_STATE_STEP, expectEmptyState);
+    Then("the first-launch list is shown without an explanation", () => {
+      expect(listedCityLabels()).toHaveLength(1);
+      expect(
+        screen.queryByText(i18n.t("views.cardsEmptyState")),
+      ).not.toBeInTheDocument();
+    });
     And("no list document is stored", () => {
       expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).toBeNull();
     });

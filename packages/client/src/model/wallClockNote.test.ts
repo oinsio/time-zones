@@ -1,6 +1,9 @@
 // Verifies FR7, FR9 of add-wall-time-input-with-hint (D2).
 import { describe, expect, it } from "vitest";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { Temporal } from "@/lib/temporal";
+import { buildDeviceTimeLocation } from "./deviceTimeLocation";
+import { LocationKind } from "./locationKind";
 import {
   INITIAL_WORLD_CLOCK_STATE,
   type Location,
@@ -16,12 +19,14 @@ import { getWallClockNote, WallClockNotePlacement } from "./wallClockNote";
 
 const newYork: Location = {
   id: "America/New_York|New York",
+  kind: LocationKind.CITY,
   timeZoneId: "America/New_York",
   label: "New York",
   countryCode: "US",
 };
 const almaty: Location = {
   id: "Asia/Almaty|Almaty",
+  kind: LocationKind.CITY,
   timeZoneId: "Asia/Almaty",
   label: "Almaty",
   countryCode: "KZ",
@@ -31,7 +36,10 @@ const newYorkTarget: WallTimeTarget = {
   kind: WallTimeTargetKind.LOCATION,
   locationId: newYork.id,
 };
-const hereTarget: WallTimeTarget = { kind: WallTimeTargetKind.HERE_ENTRY };
+const deviceTimeTarget: WallTimeTarget = {
+  kind: WallTimeTargetKind.LOCATION,
+  locationId: DEVICE_TIME_LOCATION_ID,
+};
 
 const pinned = (
   status: WallClockStatus,
@@ -66,8 +74,8 @@ describe("getWallClockNote", () => {
       pinned(WallClockStatus.GAP, newYorkTarget, [almaty]),
     ],
     [
-      "a Here entry target after a location shows the device time",
-      pinned(WallClockStatus.GAP, hereTarget, [almaty]),
+      "a wall-time GAP on a removed device time location",
+      pinned(WallClockStatus.GAP, deviceTimeTarget, [almaty]),
     ],
   ])("is none for %s", (_name, state) => {
     expect(getWallClockNote(state).placement).toBe(WallClockNotePlacement.NONE);
@@ -83,7 +91,11 @@ describe("getWallClockNote", () => {
   it.each([
     [WallClockStatus.GAP, newYorkTarget, [newYork]],
     [WallClockStatus.AMBIGUOUS, newYorkTarget, [newYork]],
-    [WallClockStatus.GAP, hereTarget, [newYork]],
+    [
+      WallClockStatus.GAP,
+      deviceTimeTarget,
+      [buildDeviceTimeLocation("Asia/Almaty")],
+    ],
   ])("puts a wall-time %s for %j in the row", (status, target, locations) => {
     expect(getWallClockNote(pinned(status, target, locations))).toEqual({
       placement: WallClockNotePlacement.ROW,
@@ -101,7 +113,7 @@ describe("getWallClockNote", () => {
     ).toBe(WallClockNotePlacement.ROW);
   });
 
-  it("shows a location target while the Here entry does not exist", () => {
+  it("shows a location target in the device time zone", () => {
     const almatyTarget: WallTimeTarget = {
       kind: WallTimeTargetKind.LOCATION,
       locationId: almaty.id,

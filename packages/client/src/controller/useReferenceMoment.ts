@@ -12,8 +12,10 @@ import {
   WallClockNotePlacement,
   type WorldClockState,
 } from "@/model";
+import type { HourFormat } from "@/preferences";
 import { type PresentedDateBar, presentDateBar } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
+import { useHourFormat } from "./useHourFormat";
 
 const MISSING_PROVIDER_MESSAGE =
   "useReferenceMoment must be used inside a LocationsProvider";
@@ -22,6 +24,7 @@ function buildDateBar(
   state: WorldClockState,
   clock: Clock,
   language: SupportedLanguage,
+  hourFormat: HourFormat,
   translate: Parameters<typeof presentDateBar>[0]["translate"],
 ): PresentedDateBar {
   const now = clock.instant();
@@ -41,6 +44,7 @@ function buildDateBar(
     isPinned: state.reference.mode === ReferenceMode.PINNED,
     gap,
     language,
+    hourFormat,
     translate,
   });
 }
@@ -62,12 +66,13 @@ export function useReferenceMoment() {
   const { i18n, t } = useTranslation();
   const language = (i18n.resolvedLanguage ??
     i18n.language) as SupportedLanguage;
+  const hourFormat = useHourFormat();
   const [announcement, setAnnouncement] = useState("");
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick moves a live bar past local midnight
   const dateBar = useMemo(
-    () => buildDateBar(state, clock, language, t),
-    [state, clock, language, t, minuteTick],
+    () => buildDateBar(state, clock, language, hourFormat, t),
+    [state, clock, language, hourFormat, t, minuteTick],
   );
 
   const actions = useMemo(() => {
@@ -79,7 +84,8 @@ export function useReferenceMoment() {
       const outcome = store.dispatch(command);
       if (outcome.ok && store.getSnapshot() !== stateBefore) {
         setAnnouncement(
-          buildDateBar(store.getSnapshot(), clock, language, t).fullDateLabel,
+          buildDateBar(store.getSnapshot(), clock, language, hourFormat, t)
+            .fullDateLabel,
         );
       }
     };
@@ -105,7 +111,7 @@ export function useReferenceMoment() {
       returnToNow: () =>
         dispatchAndAnnounce({ type: LocationCommandType.RESET_TO_NOW }),
     };
-  }, [store, clock, language, t]);
+  }, [store, clock, language, hourFormat, t]);
 
   return { dateBar, announcement, ...actions };
 }

@@ -1,5 +1,6 @@
 // Verifies FR1, FR2, FR3, FR10 of set-home-location-and-show-differences: home location in the state (D1).
 import { describe, expect, it } from "vitest";
+import { LocationKind } from "./locationKind";
 import {
   canonicalizeLocationId,
   INITIAL_WORLD_CLOCK_STATE,
@@ -13,12 +14,14 @@ import {
 
 const moscow: Location = {
   id: "Europe/Moscow|Moscow",
+  kind: LocationKind.CITY,
   timeZoneId: "Europe/Moscow",
   label: "Moscow",
   countryCode: "RU",
 };
 const almaty: Location = {
   id: "Asia/Almaty|Almaty",
+  kind: LocationKind.CITY,
   timeZoneId: "Asia/Almaty",
   label: "Almaty",
   countryCode: "KZ",
@@ -79,6 +82,7 @@ describe("SET_HOME_LOCATION", () => {
     const unknownZone: Location = {
       ...moscow,
       id: "Mars/Base|Base",
+      kind: LocationKind.CITY,
       timeZoneId: "Mars/Base",
     };
     const state = { ...listState, locations: [unknownZone] };

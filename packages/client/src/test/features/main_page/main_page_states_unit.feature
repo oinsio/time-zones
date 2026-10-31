@@ -23,19 +23,32 @@ Feature: Main page view states
     Then the view is shown
 
   @add-main-page-scaffold @FR7 @UX1
-  @show-here-entry-for-device-time @FR7 @UX2
+  @add-settings-page-and-device-time-location @FR2 @FR13
+  Scenario: Empty list
+    Given the stored location list is empty
+    When the user opens the app
+    Then the explanation is shown in the current language
+    And no location row is shown
+    And the header shows the Add location button
+
+  @add-main-page-scaffold @FR7 @UX1
+  @add-settings-page-and-device-time-location @FR13
   Scenario: First launch
-    Given the active UI language is en
-    When the user opens the app with no locations
-    Then the Here entry for the device time zone is shown first
-    And the empty state explanation is shown in the current language below it
-    And the "Add location" action is offered below it
+    Given no location list is stored
+    When the user opens the app
+    Then the device time location is shown
+    And the explanation is not shown
     And no location list is stored
 
+  @add-settings-page-and-device-time-location @FR13
+  Scenario: No explanation with locations
+    Given the stored list is the device time location and Moscow
+    When the user opens the app
+    Then the explanation is not shown
+
   @add-locations-via-search @FR17
+  @add-settings-page-and-device-time-location @FR2
   Scenario: Add location from the empty state
-    Given the active UI language is en
-    And the app is open with no locations
-    When the user adds Moscow from the search
-    Then Moscow is in the list
-    And the empty state explanation is gone
+    Given the location list is empty
+    When the user chooses the header's Add location button
+    Then the search opens with popular suggestions

@@ -21,17 +21,23 @@ Feature: Locations in every registered view
 
   @add-locations-via-search @view-contract @NFR-A2 @FR17
   Scenario: Add the first location with the keyboard
+    Given the stored list is empty
     When the user opens the search with Enter, types "Tokyo", presses Down and Enter
     Then the locations list shows "Tokyo"
     And the locations list holds 1 location
     And focus is on the "Add location" action
 
-  @show-here-entry-for-device-time @view-contract @FR11
-  Scenario: See the Here entry without home
+  @add-settings-page-and-device-time-location @view-contract @FR17
+  Scenario: Device time location under contract
     Given the current time is "2026-03-08T07:30:00Z"
-    And the stored locations are "Moscow"
-    Then the first row is the Here entry showing "12:30"
-    And the card of "Moscow" shows the time "10:30"
+    And the stored locations are "Moscow", "the device time location"
+    Then the second row is the device time location showing "12:30"
+    When the user picks up "Almaty" with the keyboard
+    And the user moves the picked-up card up 1 time
+    And the user drops the picked-up card with the keyboard
+    And the user makes the device time location home and then removes it
+    Then the locations list order is "Moscow"
+    And no location is home
 
   @add-locations-via-search @view-contract @NFR-A2
   Scenario: Close with Esc

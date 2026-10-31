@@ -155,8 +155,9 @@ export function registerHintScenarios(
   });
 
   // @add-wall-time-input-with-hint @FR7 @FR9
+  // @add-settings-page-and-device-time-location @FR9
   f.Scenario(
-    "A device time zone change ends the hint on the Here entry",
+    "A device time zone change ends the hint on the device time location",
     ({ Given, And, When, Then }) => {
       Given("the device time zone is {string}", givenZone);
       And("the interface language is {string}", givenLanguage);
@@ -164,10 +165,10 @@ export function registerHintScenarios(
       And("the list contains {string}", givenList);
       And("the app is open", givenAppOpen);
       And(
-        "the user typed {string} in the Here entry, so it shows a wall-time hint",
+        "the user typed {string} in the device time location, so it shows a wall-time hint",
         (_ctx, text: string) => {
-          world.typeInHereEntry(text);
-          expect(world.hintOfHereEntry()).toBeDefined();
+          world.typeInDeviceTime(text);
+          expect(world.hintOfDeviceTime()).toBeDefined();
         },
       );
       When("the device time zone changes to {string}", (_ctx, zone: string) => {

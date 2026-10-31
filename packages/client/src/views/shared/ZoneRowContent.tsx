@@ -25,13 +25,11 @@ type ZoneRowContentProps = {
   dayTrack?: PresentedDayTrack;
   onSelectTrackFraction: (fraction: number) => void;
   onMoveTrack: (move: TrackMove) => void;
-  /** The city is one truncated line instead of wrapping (the Here entry). */
-  isCityOneLine?: boolean;
 };
 
 /**
- * The place column, local time and day track shared by location cards and
- * the Here entry. Renders into the card's flex row, around its own extras.
+ * The place column, local time and day track of a location card. Renders
+ * into the card's flex row, around its own extras.
  * Implements FR2, FR4, UX1, UX3 of show-here-entry-for-device-time (D5); the
  * layout moved from `LocationRow`.
  * Implements FR1, FR7, UX3 of add-wall-time-input-with-hint (D6): the time
@@ -53,22 +51,15 @@ export function ZoneRowContent({
   dayTrack,
   onSelectTrackFraction,
   onMoveTrack,
-  isCityOneLine = false,
 }: ZoneRowContentProps) {
   const hasDifference = offsetDifferenceLabel !== "";
-  const cityLineClassName = isCityOneLine
-    ? "flex items-center gap-x-2"
-    : "flex flex-wrap items-center gap-x-2";
-  const cityClassName = isCityOneLine
-    ? "min-w-0 truncate font-semibold"
-    : "font-semibold";
   return (
     <>
       <span className="flex min-w-0 flex-1 items-start gap-3 md:flex-none">
         <span className="flex min-w-0 flex-1 flex-col break-words md:w-64 md:flex-none">
-          <span className={cityLineClassName}>
+          <span className="flex flex-wrap items-center gap-x-2">
             {mark && <LocationMarkIcon mark={mark} id={ids.mark} />}
-            <span id={ids.city} className={cityClassName}>
+            <span id={ids.city} className="font-semibold">
               {cityLabel}
             </span>
             {hasDifference && (

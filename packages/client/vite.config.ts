@@ -16,12 +16,21 @@ import { mainChunkPreloadPlugin } from "./scripts/legacyBoot/mainChunkPreloadPlu
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 
+const SHARED_VIEWS_PATH = "/src/views/shared/";
+
 export default defineConfig({
   base: APP_BASE_PATH,
   build: {
     outDir: BUILD_OUT_DIR,
     target: BUILD_TARGETS,
     cssTarget: BUILD_TARGETS,
+    rollupOptions: {
+      // The shared view blocks have no import-time effects: unused ones stay
+      // out of the initial JavaScript, which keeps it under the NFR-P1 budget.
+      treeshake: {
+        moduleSideEffects: (moduleId) => !moduleId.includes(SHARED_VIEWS_PATH),
+      },
+    },
   },
   plugins: [
     react(),

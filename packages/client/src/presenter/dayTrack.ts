@@ -10,6 +10,7 @@ import {
   getTrackValueMinutes,
   type ReferenceDay,
 } from "@/model";
+import type { HourFormat } from "@/preferences";
 import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
 
 /**
@@ -37,6 +38,7 @@ export type DayTrackContext = {
   instant: Temporal.Instant;
   day: ReferenceDay;
   language: SupportedLanguage;
+  hourFormat: HourFormat;
   translate: TFunction;
   localTimeLabel: string;
   localDateLabel: string;
@@ -48,14 +50,18 @@ const LABEL_COUNT = 4;
 export function formatHourLabel(
   localDateTime: Temporal.ZonedDateTime,
   language: SupportedLanguage,
+  hourFormat: HourFormat,
 ): string {
   const kind =
     localDateTime.minute === 0
       ? DateTimeLabelKind.HOUR
       : DateTimeLabelKind.LOCAL_TIME;
-  return getDateTimeFormatter(language, localDateTime.timeZoneId, kind).format(
-    localDateTime.epochMilliseconds,
-  );
+  return getDateTimeFormatter(
+    language,
+    localDateTime.timeZoneId,
+    kind,
+    hourFormat,
+  ).format(localDateTime.epochMilliseconds);
 }
 
 let cachedLabelsKey: string | undefined;
@@ -65,8 +71,9 @@ function getHourLabels(
   timeZoneId: string,
   day: ReferenceDay,
   language: SupportedLanguage,
+  hourFormat: HourFormat,
 ): readonly HourLabel[] {
-  const labelsKey = `${day.start.toString()}|${day.end.toString()}|${language}`;
+  const labelsKey = `${day.start.toString()}|${day.end.toString()}|${language}|${hourFormat}`;
   if (labelsKey !== cachedLabelsKey) {
     cachedLabelsKey = labelsKey;
     cachedLabelsByZone = new Map();
@@ -84,6 +91,7 @@ function getHourLabels(
     label: formatHourLabel(
       labelInstant.toZonedDateTimeISO(timeZoneId),
       language,
+      hourFormat,
     ),
   }));
   cachedLabelsByZone.set(timeZoneId, labels);
@@ -95,6 +103,7 @@ export function presentDayTrack({
   instant,
   day,
   language,
+  hourFormat,
   translate,
   localTimeLabel,
   localDateLabel,
@@ -108,6 +117,6 @@ export function presentDayTrack({
       date: localDateLabel,
     }),
     stops: getDayPeriodStops(timeZoneId, day),
-    hourLabels: getHourLabels(timeZoneId, day, language),
+    hourLabels: getHourLabels(timeZoneId, day, language, hourFormat),
   };
 }

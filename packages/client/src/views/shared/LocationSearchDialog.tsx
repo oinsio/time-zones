@@ -23,6 +23,8 @@ type LocationSearchDialogProps = {
   query: string;
   onQueryChange: (query: string) => void;
   onChoose: (result: PresentedSearchResult) => void;
+  /** The Device time option, first in the list while it is offered (FR11). */
+  deviceTimeOption?: { label: string; onChoose: () => void };
   onRetry: () => void;
   onClose: () => void;
   onCloseAutoFocus?: (event: Event) => void;
@@ -32,6 +34,8 @@ type LocationSearchDialogProps = {
  * The search overlay: a combobox over a listbox of presented results. It
  * receives presenter output and callbacks only.
  * Implements FR5–FR8, FR15, UX1–UX3, NFR-A2 of add-locations-via-search (D10).
+ * Implements FR11 of add-settings-page-and-device-time-location (D12): the
+ * Device time option is the first option, also while loading or after an error.
  */
 export function LocationSearchDialog({
   isOpen,
@@ -40,6 +44,7 @@ export function LocationSearchDialog({
   query,
   onQueryChange,
   onChoose,
+  deviceTimeOption,
   onRetry,
   onClose,
   onCloseAutoFocus,
@@ -51,7 +56,8 @@ export function LocationSearchDialog({
   const [activeIndex, setActiveIndex] = useState(FIRST_OPTION_INDEX);
   const hasQuery = query.trim() !== "";
   const isReady = status === CitySearchStatus.READY;
-  const lastIndex = presentedResults.length - 1;
+  const optionOffset = deviceTimeOption ? 1 : 0;
+  const lastIndex = presentedResults.length + optionOffset - 1;
   const activeOptionIndex = Math.min(activeIndex, lastIndex);
 
   useEffect(() => {
@@ -69,7 +75,11 @@ export function LocationSearchDialog({
       event.preventDefault();
       setActiveIndex(Math.max(activeOptionIndex - 1, FIRST_OPTION_INDEX));
     } else if (event.key === KeyboardKey.ENTER) {
-      const activeResult = presentedResults[activeOptionIndex];
+      if (deviceTimeOption && activeOptionIndex === FIRST_OPTION_INDEX) {
+        deviceTimeOption.onChoose();
+        return;
+      }
+      const activeResult = presentedResults[activeOptionIndex - optionOffset];
       if (activeResult && !activeResult.isAdded) onChoose(activeResult);
     }
   };
@@ -100,7 +110,7 @@ export function LocationSearchDialog({
           type="text"
           role="combobox"
           aria-label={t("locations.searchLabel")}
-          aria-expanded={presentedResults.length > 0}
+          aria-expanded={lastIndex >= FIRST_OPTION_INDEX}
           aria-controls={listboxId}
           aria-autocomplete="list"
           aria-activedescendant={
@@ -128,11 +138,13 @@ export function LocationSearchDialog({
             {t("locations.suggestionsHeading")}
           </h3>
         )}
-        {isReady && presentedResults.length > 0 && (
+        {(deviceTimeOption !== undefined ||
+          (isReady && presentedResults.length > 0)) && (
           <LocationSearchResults
             listboxId={listboxId}
             optionIdPrefix={optionIdPrefix}
-            results={presentedResults}
+            results={isReady ? presentedResults : []}
+            deviceTimeOption={deviceTimeOption}
             activeIndex={activeOptionIndex}
             onChoose={onChoose}
           />

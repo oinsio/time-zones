@@ -10,11 +10,14 @@ import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
 import {
   addCity,
   cityEntry,
+  DEVICE_TIME_NAME,
   labelsOf,
   NOT_JSON,
+  namesOf,
   type OpenedApp,
   openApp,
   storeDocument,
+  storeVersion1Document,
   UNREADABLE_DOCUMENTS,
 } from "./locationsPersistenceWorld";
 
@@ -48,9 +51,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       app = openApp();
     });
     Then(
-      "the list is {string}, {string} in that order",
+      "the list is the device time location, {string}, {string} in that order",
       (_ctx, first: string, second: string) => {
-        expect(labelsOf(app)).toEqual([first, second]);
+        expect(namesOf(app)).toEqual([DEVICE_TIME_NAME, first, second]);
       },
     );
   });
@@ -72,7 +75,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Given(
         "the stored list holds {string} in {string}",
         (_ctx, label: string, zone: string) => {
-          storeDocument([{ ...cityEntry(label), timeZoneId: zone }]);
+          storeVersion1Document([{ ...cityEntry(label), timeZoneId: zone }]);
         },
       );
       When("the app is opened", () => {
@@ -81,9 +84,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Then(
         "the list holds {string} in {string}",
         (_ctx, label: string, zone: string) => {
-          expect(app.result.current.locations).toEqual([
+          expect(app.result.current.locations).toContainEqual(
             buildLocation({ ...cityEntry(label), timeZoneId: zone }),
-          ]);
+          );
         },
       );
     },
@@ -119,8 +122,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the user resets the list", () => {
       act(() => app.result.current.resetLocations());
     });
-    Then("the list is empty", () => {
-      expect(app.result.current.locations).toEqual([]);
+    Then("the list is the device time location only", () => {
+      expect(namesOf(app)).toEqual([DEVICE_TIME_NAME]);
       expect(app.result.current.loadStatus).toBe(LocationsStatus.READY);
     });
     And("no list document is stored", () => {
@@ -141,7 +144,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then(
       "the second tab shows {string} without a reload",
       (_ctx, label: string) => {
-        expect(labelsOf(secondApp)).toEqual([label]);
+        expect(labelsOf(secondApp)).toContain(label);
       },
     );
   });
@@ -155,8 +158,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         const hub = createInMemoryChannelHub();
         app = openApp(hub.createChannel);
         secondApp = openApp(hub.createChannel);
-        expect(labelsOf(app)).toEqual([label]);
-        expect(labelsOf(secondApp)).toEqual([label]);
+        expect(labelsOf(app)).toContain(label);
+        expect(labelsOf(secondApp)).toContain(label);
       },
     );
     When(

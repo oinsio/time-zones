@@ -1,4 +1,8 @@
 import { DEVICE_TIME_ZONE_FALLBACK_ID } from "@/constants";
+import {
+  reduceAddDeviceTimeLocation,
+  withDeviceTimeZone,
+} from "./deviceTimeLocation";
 import { followReferenceZone } from "./followReferenceZone";
 import {
   type LocationCommand,
@@ -6,6 +10,7 @@ import {
   LocationErrorCode,
 } from "./locationCommands";
 import { buildLocationId } from "./locationId";
+import { LocationKind } from "./locationKind";
 import { moveLocationInList } from "./moveLocation";
 import { reduceHomeLocation } from "./reduceHomeLocation";
 import { reduceReferenceMoment } from "./reduceReferenceMoment";
@@ -20,6 +25,7 @@ export {
   LocationErrorCode,
 } from "./locationCommands";
 export { buildLocationId, canonicalizeLocationId } from "./locationId";
+export { LocationKind } from "./locationKind";
 
 /**
  * World clock state, commands and reducer.
@@ -34,6 +40,7 @@ export { buildLocationId, canonicalizeLocationId } from "./locationId";
 export type Location = {
   /** Derived from the canonical zone and the label; unique by invariant. */
   id: string;
+  kind: LocationKind;
   timeZoneId: string;
   label: string;
   /** ISO 3166-1 alpha-2 code; empty for zones without a country. */
@@ -91,6 +98,7 @@ function reduceCommand(
       }
       const added: Location = {
         id,
+        kind: LocationKind.CITY,
         timeZoneId,
         label: command.label,
         countryCode: command.countryCode,
@@ -124,7 +132,10 @@ function reduceCommand(
         ok: true,
         state: {
           ...state,
-          locations: command.locations,
+          locations: withDeviceTimeZone(
+            command.locations,
+            state.deviceTimeZoneId,
+          ),
           homeLocationId: isHomeListed ? command.homeLocationId : null,
         },
       };
@@ -138,8 +149,17 @@ function reduceCommand(
       if (deviceTimeZoneId === state.deviceTimeZoneId) {
         return { ok: true, state };
       }
-      return { ok: true, state: { ...state, deviceTimeZoneId } };
+      return {
+        ok: true,
+        state: {
+          ...state,
+          deviceTimeZoneId,
+          locations: withDeviceTimeZone(state.locations, deviceTimeZoneId),
+        },
+      };
     }
+    case LocationCommandType.ADD_DEVICE_TIME_LOCATION:
+      return reduceAddDeviceTimeLocation(state);
     case LocationCommandType.MOVE_LOCATION:
       return moveLocationInList(state, command.id, command.targetIndex);
     case LocationCommandType.SET_DATE:

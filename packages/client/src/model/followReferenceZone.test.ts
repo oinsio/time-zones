@@ -1,7 +1,9 @@
 // Verifies FR4 of set-home-location-and-show-differences (D2): the gap note follows the reference zone.
 import { describe, expect, it } from "vitest";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import { followReferenceZone } from "./followReferenceZone";
+import { LocationKind } from "./locationKind";
 import {
   INITIAL_WORLD_CLOCK_STATE,
   type Location,
@@ -18,10 +20,15 @@ import { WallClockStatus } from "./wallClock";
 
 const almaty: Location = {
   id: "Asia/Almaty|Almaty",
+  kind: LocationKind.CITY,
   timeZoneId: "Asia/Almaty",
   label: "Almaty",
   countryCode: "KZ",
 };
+const deviceTimeTarget = {
+  kind: WallTimeTargetKind.LOCATION,
+  locationId: DEVICE_TIME_LOCATION_ID,
+} as const;
 const NEW_YORK_WALL_TIME = "03:30:00";
 const PINNED_INSTANT = "2026-03-08T07:30:00Z";
 
@@ -183,14 +190,11 @@ describe("followReferenceZone", () => {
       expect(reduceOk(before, command).reference).toBe(before.reference);
     });
 
-    it("on the Here entry turns into a plain moment when the device zone changes", () => {
-      const state = reduceOk(
-        withTarget({ kind: WallTimeTargetKind.HERE_ENTRY }),
-        {
-          type: LocationCommandType.SET_DEVICE_TIME_ZONE,
-          timeZoneId: "Asia/Tokyo",
-        },
-      );
+    it("on the device time location turns into a plain moment when the device zone changes", () => {
+      const state = reduceOk(withTarget(deviceTimeTarget), {
+        type: LocationCommandType.SET_DEVICE_TIME_ZONE,
+        timeZoneId: "Asia/Tokyo",
+      });
 
       expectGapNoteDropped(state, "16:30:00");
       expect(
@@ -199,8 +203,8 @@ describe("followReferenceZone", () => {
       ).toBeUndefined();
     });
 
-    it("on the Here entry keeps its hint when home is set", () => {
-      const before = withTarget({ kind: WallTimeTargetKind.HERE_ENTRY });
+    it("on the device time location keeps its hint when home is set", () => {
+      const before = withTarget(deviceTimeTarget);
 
       expect(
         reduceOk(before, {

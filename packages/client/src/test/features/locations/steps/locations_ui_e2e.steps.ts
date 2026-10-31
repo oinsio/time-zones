@@ -105,9 +105,9 @@ Then("the page has requested the search data", async ({ locationsWorld }) => {
     .toBeGreaterThan(0);
 });
 
-// Verifies FR8, NFR-P2 of show-here-entry-for-device-time (D4): the Here entry loads the data once.
+// Verifies FR8, NFR-P2 of add-settings-page-and-device-time-location (D4): the device time location loads the data once.
 When(
-  "the Here entry has loaded the zone cities data",
+  "the device time location has loaded the zone cities data",
   async ({ locationsWorld }) => {
     await expect
       .poll(() => locationsWorld.searchDataRequestUrls.length)

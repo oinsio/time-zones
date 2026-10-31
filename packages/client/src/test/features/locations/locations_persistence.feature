@@ -6,7 +6,7 @@ Feature: Locations persistence
   Scenario: List survives a reload
     Given the user added "Almaty", then "Moscow"
     When the app is opened again
-    Then the list is "Almaty", "Moscow" in that order
+    Then the list is the device time location, "Almaty", "Moscow" in that order
 
   @add-locations-via-search @FR11
   Scenario: First launch writes nothing
@@ -37,7 +37,7 @@ Feature: Locations persistence
     Given the stored list is not valid JSON
     And the app is opened
     When the user resets the list
-    Then the list is empty
+    Then the list is the device time location only
     And no list document is stored
 
   @add-locations-via-search @FR14

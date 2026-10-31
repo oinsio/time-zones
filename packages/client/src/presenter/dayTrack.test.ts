@@ -9,6 +9,7 @@ import {
   getReferenceDay,
   INITIAL_WORLD_CLOCK_STATE,
 } from "@/model";
+import { HourFormat } from "@/preferences";
 import { formatHourLabel, presentDayTrack } from "./dayTrack";
 
 const INSTANT = Temporal.Instant.from("2026-03-08T07:30:00Z");
@@ -29,6 +30,7 @@ const present = (
     instant: INSTANT,
     day: DAY,
     language,
+    hourFormat: HourFormat.H24,
     translate: i18n.getFixedT(language),
     localTimeLabel,
     localDateLabel,
@@ -109,7 +111,9 @@ describe("formatHourLabel (characterization)", () => {
       const localDateTime =
         Temporal.Instant.from(timestamp).toZonedDateTimeISO(zone);
 
-      expect(formatHourLabel(localDateTime, language)).toBe(expected);
+      expect(formatHourLabel(localDateTime, language, HourFormat.H24)).toBe(
+        expected,
+      );
     },
   );
 });

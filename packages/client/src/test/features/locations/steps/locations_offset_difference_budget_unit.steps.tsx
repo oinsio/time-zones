@@ -5,6 +5,7 @@ import i18n from "i18next";
 import { expect, vi } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import { getReferenceOffsetMinutes, INITIAL_WORLD_CLOCK_STATE } from "@/model";
+import { HourFormat } from "@/preferences";
 import { presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
@@ -61,6 +62,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     return () =>
       presentLocationRows(locations, {
         language: WORK_LANGUAGE,
+        hourFormat: HourFormat.H24,
         instant,
         translate: i18n.getFixedT(WORK_LANGUAGE),
         deviceTimeZoneId: COMPARED_ZONE,

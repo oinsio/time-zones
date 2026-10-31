@@ -52,6 +52,8 @@ type LocationRowProps = {
  * set-home-location-and-show-differences (D3, D5, D7, D8): the offset difference
  * after the city, the home mark, and the location menu in place of the
  * remove button.
+ * Implements FR8, UX3 of add-settings-page-and-device-time-location (D4): the
+ * device time location shows its meta line and accessible name.
  * Implements FR2, FR4 of show-here-entry-for-device-time (D5): the place
  * column, time and day track live in `ZoneRowContent`.
  * Implements FR1, FR7 of add-wall-time-input-with-hint (D6): binds the location target.
@@ -130,7 +132,12 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           transition: dropSettle.transition ?? transition,
         }}
         onTransitionEnd={dropSettle.onTransitionEnd}
-        aria-labelledby={labelIds.filter(Boolean).join(" ")}
+        aria-label={row.accessibleName}
+        aria-labelledby={
+          row.accessibleName === undefined
+            ? labelIds.filter(Boolean).join(" ")
+            : undefined
+        }
         className={`flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-border bg-surface px-4 py-3${draggingClassName}`}
       >
         {isReorderable && (
@@ -147,9 +154,10 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           mark={row.mark}
           offsetDifferenceLabel={row.offsetDifferenceLabel}
           offsetDifferenceAccessibleLabel={row.offsetDifferenceAccessibleLabel}
-          secondaryTexts={[row.countryName, row.utcOffsetLabel].filter(
-            (text) => text !== "",
-          )}
+          secondaryTexts={(row.metaLabel === undefined
+            ? [row.countryName, row.utcOffsetLabel]
+            : [row.metaLabel]
+          ).filter((text) => text !== "")}
           localTimeLabel={row.localTimeLabel}
           localDateLabel={row.localDateLabel}
           localIsoDate={row.localIsoDate}

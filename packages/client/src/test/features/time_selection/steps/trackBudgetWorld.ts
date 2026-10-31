@@ -10,6 +10,7 @@ import {
   reduceLocations,
   type WorldClockState,
 } from "@/model";
+import { HourFormat } from "@/preferences";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
 import {
@@ -39,6 +40,7 @@ export const createTrackBudgetWorld = () => {
     const now = Temporal.Instant.from(startInstant);
     return presentLocationRows(next.locations, {
       language: ENGLISH_LANGUAGE,
+      hourFormat: HourFormat.H24,
       instant: getEffectiveInstant(next, now),
       translate: i18n.getFixedT(ENGLISH_LANGUAGE),
       deviceTimeZoneId: next.deviceTimeZoneId,

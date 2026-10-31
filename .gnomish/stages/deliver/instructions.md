@@ -45,11 +45,23 @@ Steps:
      (`<task>`: the branch name without its `gnomish/` prefix). For each, how many findings per severity were
      fixed and rejected, and every rejected finding by id with its reason in
      one line — the human decides whether they agree;
-   - if the archived change has a `handoff/` folder, a "Human follow-up"
-     section. For each `H<n>` item in its `README.md`, give the title, the
-     requirement ids, the `Why manual:` reason, and the exact apply and
-     verify commands, with paths pointing at the archived folder. These are
-     changes the factory prepared but was not allowed to make itself;
+   - if the reports held a `handoff/` folder, a "Human follow-up" section.
+     Read it from the same commit as the reviews:
+     `git show <commit>:temporary-docs/gnomish/<task>/handoff/README.md`, and
+     list the patches with
+     `git ls-tree --name-only <commit> temporary-docs/gnomish/<task>/handoff/`,
+     where `<commit>` is the full hash the review command above resolves
+     (`git log -1 --format=%H --diff-filter=D -- temporary-docs/gnomish/<task>`,
+     then its parent). For each `H<n>` item give the title, the requirement
+     ids, the `Why manual:` reason and the verify commands. For each patch add
+     the command that applies it to the checked-out pull request branch, with
+     the hash written out:
+     `git show <commit>:temporary-docs/gnomish/<task>/handoff/H<n>-<slug>.patch | git apply`,
+     and the patch itself in a collapsed block
+     (`<details><summary>H<n>-<slug>.patch</summary>`, then a `diff` code
+     block, then `</details>`). Say that the patches are applied on this
+     branch before merging. These are changes the factory prepared but was
+     not allowed to make itself;
    - a pointer to the archived OpenSpec change;
    - a final `Refs #<issue>` line. Use `Refs`, not `Closes` — this project
      closes its issues itself.

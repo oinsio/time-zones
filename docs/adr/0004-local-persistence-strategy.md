@@ -53,6 +53,7 @@ flowchart TD
 
 - Migrations are pure functions `vN -> vN+1`, each covered by tests with fixtures of old data.
 - Validation checks the whole payload, including that every time zone ID is still valid and canonical ([ADR-0003](0003-reference-instant-time-model.md)).
+- Load normalization: a reference that no longer resolves (the stored home location points to a missing location) is cleared silently instead of making the document unreadable; a value of the wrong type stays unreadable.
 - Invalid data never crashes the app: the UI shows the error state with a reset action.
 
 ### Degraded mode

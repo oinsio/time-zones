@@ -115,7 +115,7 @@ describe("local storage location repository without BroadcastChannel", () => {
     repository.subscribe(listener);
     localStorage.setItem(
       STORAGE_KEYS.LOCATIONS,
-      JSON.stringify({ schemaVersion: 1, payload: { locations: [] } }),
+      JSON.stringify({ schemaVersion: 3, payload: { locations: [] } }),
     );
     dispatchStorageEvent(STORAGE_KEYS.LOCATIONS);
     expect(listener).toHaveBeenCalledWith({

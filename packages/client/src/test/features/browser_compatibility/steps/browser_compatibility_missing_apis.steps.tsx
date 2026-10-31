@@ -6,6 +6,7 @@ import { expect, vi } from "vitest";
 import { usePrefersReducedMotion } from "@/controller";
 import { loadLegacySupport } from "@/lib/legacy";
 import { Temporal } from "@/lib/temporal";
+import { HourFormat } from "@/preferences";
 import type { PresentedSearchResult } from "@/presenter";
 import { presentLocationRows, presentSearchResults } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
@@ -79,6 +80,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       const instant = Temporal.Instant.from(SAMPLE_INSTANT);
       rows = presentLocationRows(locations, {
         language: LANGUAGE,
+        hourFormat: HourFormat.H24,
         instant,
         translate: i18n.t,
         deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
@@ -133,7 +135,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         expect(globalThis.ResizeObserver).toBeTypeOf("function");
       });
       And("the Cards view is shown", () => {
-        expect(screen.getByText(i18n.t("views.cardsEmptyState"))).toBeVisible();
+        expect(screen.getAllByRole("listitem")).toHaveLength(1);
       });
     },
   );

@@ -29,6 +29,9 @@ const CDP_KEY_DOWN_TYPE = "keyDown";
 // Verifies FR1, FR5, UX1 of open-location-search-with-slash-shortcut.
 When(/^the user presses "\/" on the main page$/, async ({ locationsWorld }) => {
   const { page } = locationsWorld;
+  await expect(
+    page.getByRole("button", { name: englishLocale.settings.open }),
+  ).toBeVisible();
   await blurActiveElement(page);
   await installDefaultPreventedRecorder(page);
   await page.keyboard.press(SHORTCUT_KEY);

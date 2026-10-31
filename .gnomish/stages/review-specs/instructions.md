@@ -95,7 +95,10 @@ Severity is about impact:
    - every human step that the "Automate first" order could replace has been
      replaced;
    - every `## Human follow-up` item has a `Why manual:` reason that really
-     holds, and a checkbox task that writes its patch under `handoff/`.
+     holds, and a checkbox task that writes its patch in the task's handoff
+     folder;
+   - no glossary or architecture doc change is a handoff item: those are
+     ordinary tasks under `docs/`.
 
    A checkbox task outside the limits blocks the implement stage. A human step
    that could have been automated, or one with no valid reason, leaves work

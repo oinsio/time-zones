@@ -5,6 +5,7 @@ import {
   INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
   LocationErrorCode,
+  LocationKind,
   reduceLocations,
   type WorldClockState,
 } from "./locations";
@@ -37,7 +38,7 @@ describe("reduceLocations ADD_LOCATION", () => {
   it("should append the location with an id derived from zone and label", () => {
     const state = expectOk(add(emptyState, moscow));
     expect(state.locations).toEqual([
-      { id: "Europe/Moscow|Moscow", ...moscow },
+      { id: "Europe/Moscow|Moscow", kind: LocationKind.CITY, ...moscow },
     ]);
   });
 
@@ -131,7 +132,9 @@ describe("reduceLocations REMOVE_LOCATION", () => {
 
 describe("reduceLocations REPLACE_LOCATIONS", () => {
   it("should replace the whole list", () => {
-    const locations = [{ id: "Asia/Almaty|Almaty", ...almaty }];
+    const locations = [
+      { id: "Asia/Almaty|Almaty", kind: LocationKind.CITY, ...almaty },
+    ];
     const state = expectOk(
       reduceLocations(emptyState, {
         type: LocationCommandType.REPLACE_LOCATIONS,

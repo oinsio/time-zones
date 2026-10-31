@@ -12,4 +12,9 @@ export {
   SaveOutcome,
   type StoredLocations,
 } from "./locationRepository";
+export {
+  type PreferencesLoadResult,
+  PreferencesLoadStatus,
+  type PreferencesRepository,
+} from "./preferencesRepository";
 export type { StorageAvailability } from "./storageAvailability";

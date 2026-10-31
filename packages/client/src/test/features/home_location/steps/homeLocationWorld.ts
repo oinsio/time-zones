@@ -5,12 +5,14 @@ import i18n from "i18next";
 import { expect, vi } from "vitest";
 import { createLocalStorageLocationRepository } from "@/adapters";
 import {
+  DEVICE_TIME_LOCATION_ID,
   NANOSECONDS_PER_MINUTE,
   STORAGE_KEYS,
   TRACK_END_BEFORE_DAY_END_MINUTES,
 } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import { createDateSelectionWorld } from "../../date_selection/steps/dateSelectionWorld";
+import { DEVICE_TIME_LIST_TOKEN } from "../../locations/steps/deviceTimeQueries";
 import { cityEntry } from "../../locations/steps/locationsUiWorld";
 
 const SCHEMA_VERSION_BEFORE_HOME = 1;
@@ -34,7 +36,14 @@ export function createHomeLocationWorld() {
   const idOf = (city: string) => `${cityEntry(city).timeZoneId}|${city}`;
   const entriesOf = (cities: string) =>
     cities.split(CITY_SEPARATOR).map(cityEntry);
-  const rowTexts = () => world.getLocations().rows.map((row) => row.cityLabel);
+  const rowTexts = () =>
+    world
+      .getLocations()
+      .rows.map((row) =>
+        row.id === DEVICE_TIME_LOCATION_ID
+          ? DEVICE_TIME_LIST_TOKEN
+          : row.cityLabel,
+      );
   const menuButtonOf = (city: string) =>
     within(world.rowOf(city)).getByRole("button", {
       name: i18n.t("locations.locationMenu", { city }),

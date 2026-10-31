@@ -11,16 +11,16 @@ export enum ReferenceMode {
 /** Which row a wall-time input was typed in. */
 export enum WallTimeTargetKind {
   LOCATION = "LOCATION",
-  HERE_ENTRY = "HERE_ENTRY",
 }
 
 /**
- * The row a wall-time input was typed in: a listed location or the Here entry.
+ * The row a wall-time input was typed in: a listed location (the device time location included).
  * Implements FR3, FR7 of add-wall-time-input-with-hint (D2).
  */
-export type WallTimeTarget =
-  | { kind: WallTimeTargetKind.LOCATION; locationId: string }
-  | { kind: WallTimeTargetKind.HERE_ENTRY };
+export type WallTimeTarget = {
+  kind: WallTimeTargetKind.LOCATION;
+  locationId: string;
+};
 /**
  * The one moment every location's time is derived from (ADR-0003). The
  * instant exists only while pinned; it is never stored.

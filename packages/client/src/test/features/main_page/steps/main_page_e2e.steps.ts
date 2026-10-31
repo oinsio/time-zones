@@ -68,16 +68,19 @@ async function enterState(mainPageWorld: MainPageWorld, state: string) {
       await expect(page.getByRole("alert")).toContainText(ERROR_TEXT);
       break;
     case MainPageState.EMPTY:
+      await mainPageWorld.seedEmptyList();
       await page.goto(APP_ROOT_URL);
       await expect(page.getByText(EMPTY_STATE_TEXT)).toBeVisible();
       break;
     case MainPageState.OFFLINE:
+      await mainPageWorld.seedEmptyList();
       await installServiceWorker(mainPageWorld);
       await page.context().setOffline(true);
       await page.reload();
       await expect(page.getByText(EMPTY_STATE_TEXT)).toBeVisible();
       break;
     case MainPageState.STORAGE_UNAVAILABLE:
+      await mainPageWorld.seedEmptyList();
       await page.addInitScript(failStorageWrites);
       await page.goto(APP_ROOT_URL);
       await expect(page.getByText(STORAGE_WARNING_TEXT)).toBeVisible();

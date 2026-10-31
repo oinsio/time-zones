@@ -1,8 +1,10 @@
 // Verifies FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).
+
 import i18n, { type TFunction } from "i18next";
 import { describe, expect, it } from "vitest";
 import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
+import { HourFormat } from "@/preferences";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 
@@ -22,6 +24,7 @@ const present = (
 ) =>
   presentLocationRows(locations, {
     language,
+    hourFormat: HourFormat.H24,
     instant: options.instant ?? july,
     deviceTimeZoneId: options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,
     homeLocationId: null,

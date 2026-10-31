@@ -1,5 +1,9 @@
 import type { Page, Route } from "@playwright/test";
-import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
+import {
+  DEVICE_TIME_LOCATION_ID,
+  LOCATIONS_SCHEMA_VERSION,
+  STORAGE_KEYS,
+} from "@/constants";
 import { test as contractTest } from "../../view_contract/steps/view_contract_e2e.fixtures";
 
 const SEARCH_DATA_URL_PATTERN = /\/city-search-[^/]+\.json$/;
@@ -13,6 +17,16 @@ export type StoredLocation = {
   label: string;
   countryCode: string;
 };
+
+/** The stored entry of the device time location: a kind without a zone (the value of `LocationKind.DEVICE_TIME`). */
+export const DEVICE_TIME_ENTRY = { kind: "DEVICE_TIME" } as const;
+
+export type StoredEntry = StoredLocation | typeof DEVICE_TIME_ENTRY;
+
+const storedIdOf = (entry: StoredEntry) =>
+  "kind" in entry
+    ? DEVICE_TIME_LOCATION_ID
+    : `${entry.timeZoneId}|${entry.label}`;
 
 /**
  * State of one locations scenario: the stored list seeded before the app
@@ -79,16 +93,14 @@ export class LocationsWorld {
     return this.otherTab;
   }
 
-  /** Seeds the current document once, before the app reads it; home is a stored location or none. */
-  async seedList(locations: StoredLocation[], homeLocation?: StoredLocation) {
+  /** Seeds the current document once, before the app reads it; home is a stored location, the device time location or none. */
+  async seedList(locations: StoredEntry[], homeLocation?: StoredEntry) {
     await this.seedDocument(
       JSON.stringify({
         schemaVersion: LOCATIONS_SCHEMA_VERSION,
         payload: {
           locations,
-          homeLocationId: homeLocation
-            ? `${homeLocation.timeZoneId}|${homeLocation.label}`
-            : null,
+          homeLocationId: homeLocation ? storedIdOf(homeLocation) : null,
         },
       }),
     );

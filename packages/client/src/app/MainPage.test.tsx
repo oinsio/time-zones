@@ -45,12 +45,8 @@ describe("MainPage", () => {
 
   it("should host the view in the main landmark", async () => {
     renderMainPage(null);
-    expect(
-      await screen.findByText("No locations added yet."),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("main")).toHaveTextContent(
-      "No locations added yet.",
-    );
+    expect(await screen.findByRole("list")).toBeInTheDocument();
+    expect(screen.getByRole("main")).toContainElement(screen.getByRole("list"));
   });
 
   it("should keep the title out of the main landmark", () => {

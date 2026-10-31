@@ -7,10 +7,11 @@ import { expect, vi } from "vitest";
 import { LocationMarkKind } from "@/model";
 import {
   cityEntry,
-  labelsOf,
+  DEVICE_TIME_NAME,
+  namesOf,
   type OpenedApp,
   openApp,
-  storeDocument,
+  storeVersion1Document,
 } from "./locationsPersistenceWorld";
 
 const feature = await loadFeature("../locations_migration_unit.feature");
@@ -34,16 +35,24 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Given(
         "the stored list is a version 1 document with Almaty, Moscow and Kolkata",
         () => {
-          storeDocument(["Almaty", "Moscow", "Kolkata"].map(cityEntry));
+          storeVersion1Document(["Almaty", "Moscow", "Kolkata"].map(cityEntry));
           vi.spyOn(localStorage, "setItem");
         },
       );
       When("the app is opened", () => {
         app = openApp();
       });
-      Then("the list is Almaty, Moscow, Kolkata in that order", () => {
-        expect(labelsOf(app)).toEqual(["Almaty", "Moscow", "Kolkata"]);
-      });
+      Then(
+        "the list is the device time location, Almaty, Moscow, Kolkata in that order",
+        () => {
+          expect(namesOf(app)).toEqual([
+            DEVICE_TIME_NAME,
+            "Almaty",
+            "Moscow",
+            "Kolkata",
+          ]);
+        },
+      );
       And("no location is home", () => {
         expect(
           app.result.current.rows.map(({ mark }) => mark?.kind),

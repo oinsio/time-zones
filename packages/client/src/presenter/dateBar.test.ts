@@ -3,6 +3,7 @@ import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import type { SupportedLanguage } from "@/i18n";
 import { Temporal } from "@/lib/temporal";
+import { HourFormat } from "@/preferences";
 import { presentDateBar } from "./dateBar";
 
 const present = (
@@ -16,6 +17,7 @@ const present = (
     isPinned: false,
     gap: undefined,
     language,
+    hourFormat: HourFormat.H24,
     translate: i18n.getFixedT(language),
     ...overrides,
   });
@@ -66,5 +68,21 @@ describe("presentDateBar", () => {
 
   it("should give no note without a gap", () => {
     expect(present("2026-03-08").gapNote).toBeUndefined();
+  });
+});
+
+// Verifies FR5 of add-settings-page-and-device-time-location (D8).
+describe("presentDateBar gap note in the 12-hour format", () => {
+  it("should write both times with a day period", () => {
+    const { gapNote } = present("2026-03-08", "en", {
+      hourFormat: HourFormat.H12,
+      gap: {
+        requestedWallTime: Temporal.PlainTime.from("02:30"),
+        shownWallTime: Temporal.PlainTime.from("03:30"),
+      },
+    });
+    const normalizedNote = gapNote?.replace(/\s/g, " ");
+    expect(normalizedNote).toContain("2:30 AM");
+    expect(normalizedNote).toContain("3:30 AM");
   });
 });

@@ -1,9 +1,11 @@
 // Verifies FR1, FR2, FR3, FR4, FR6, FR7 of select-date-with-calendar-and-now (D5).
+
 import { act, renderHook } from "@testing-library/react";
 import i18n from "i18next";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createInMemoryLocationRepository } from "@/adapters";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
@@ -185,6 +187,11 @@ describe("useReferenceMoment", () => {
 });
 
 // Verifies FR7 of add-wall-time-input-with-hint (D2).
+const deviceTimeTarget = {
+  kind: WallTimeTargetKind.LOCATION,
+  locationId: DEVICE_TIME_LOCATION_ID,
+} as const;
+
 describe("useReferenceMoment and a wall-time input", () => {
   beforeEach(() => i18n.changeLanguage("en"));
   afterEach(() => i18n.changeLanguage("ru"));
@@ -218,7 +225,7 @@ describe("useReferenceMoment and a wall-time input", () => {
 
     act(() => {
       result.current.wallTime.confirmWallTime(
-        { kind: WallTimeTargetKind.HERE_ENTRY },
+        deviceTimeTarget,
         "10:00",
         "2026-03-08",
       );
@@ -232,7 +239,7 @@ describe("useReferenceMoment and a wall-time input", () => {
 
     act(() => {
       result.current.wallTime.confirmWallTime(
-        { kind: WallTimeTargetKind.HERE_ENTRY },
+        deviceTimeTarget,
         "02:30",
         "2026-03-08",
       );

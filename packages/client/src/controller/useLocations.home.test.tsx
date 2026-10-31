@@ -1,4 +1,5 @@
 // Verifies FR3, FR4, FR8, FR10 of set-home-location-and-show-differences (D1, D6).
+
 import { act, renderHook } from "@testing-library/react";
 import i18n from "i18next";
 import type { ReactNode } from "react";
@@ -7,6 +8,7 @@ import {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
 } from "@/adapters";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { LocationsLoadStatus, type StoredLocations } from "@/ports";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { createSwitchableClock } from "@/test/switchableClock";
@@ -149,12 +151,14 @@ describe("useLocations home location", () => {
   });
 
   it("should leave no home after the reset", () => {
-    const { result, markOf } = setup(almaty.id);
+    const { result } = setup(almaty.id);
 
     act(() => result.current.locations.resetLocations());
 
-    expect(result.current.locations.rows).toEqual([]);
-    expect(markOf("Almaty")).toBeUndefined();
+    expect(result.current.locations.rows.map((row) => row.id)).toEqual([
+      DEVICE_TIME_LOCATION_ID,
+    ]);
+    expect(result.current.locations.rows[0]?.mark?.kind).toBe("here");
   });
 
   it("should keep a pinned instant when home changes", () => {

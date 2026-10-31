@@ -4,6 +4,7 @@ import { expect } from "vitest";
 import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
 import { getUtcOffsetMinutes, type Location } from "@/model";
+import { HourFormat } from "@/preferences";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
@@ -45,6 +46,7 @@ export function presentBudgetRows(
   const instant = fakeClock(timestamp).instant();
   return presentLocationRows(locations, {
     language,
+    hourFormat: HourFormat.H24,
     instant,
     translate: i18n.getFixedT(language),
     deviceTimeZoneId,

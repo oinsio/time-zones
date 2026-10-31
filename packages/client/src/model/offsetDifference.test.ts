@@ -16,7 +16,7 @@ const INSTANT = "2026-01-15T10:30:00Z";
 
 /** Difference of a row against a reference zone, as `useLocations` feeds it. */
 function differenceOf(
-  location: { id?: string; timeZoneId: string },
+  location: { id: string; timeZoneId: string },
   referenceZone: string,
   context: { deviceTimeZoneId: string; homeLocationId: string | null },
   iso = INSTANT,
@@ -82,30 +82,6 @@ describe("getOffsetDifferenceMinutes", () => {
     };
 
     expect(differenceOf(city("Minsk"), "Europe/Moscow", context)).toBe(0);
-  });
-
-  // @show-here-entry-for-device-time @FR3: a subject without an ID (the Here entry)
-  it("should give none for a subject without an ID in the device zone and no home", () => {
-    const context = { deviceTimeZoneId: "Europe/Moscow", homeLocationId: null };
-
-    expect(
-      differenceOf({ timeZoneId: "Europe/Moscow" }, "Europe/Moscow", context),
-    ).toBeUndefined();
-  });
-
-  it("should give the difference of a subject without an ID while home is set", () => {
-    expect(
-      differenceOf({ timeZoneId: "Europe/Moscow" }, "Asia/Almaty", homeContext),
-    ).toBe(-120);
-  });
-
-  it("should give 0 for a subject without an ID with the offset of home", () => {
-    expect(
-      differenceOf({ timeZoneId: "Europe/Minsk" }, "Europe/Moscow", {
-        deviceTimeZoneId: "Europe/Minsk",
-        homeLocationId: city("Moscow").id,
-      }),
-    ).toBe(0);
   });
 
   it.each([

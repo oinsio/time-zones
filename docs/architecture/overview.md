@@ -15,6 +15,8 @@ Time Zones is a client-only, offline-first PWA. The architecture separates a vie
 | [ADR-0004](../adr/0004-local-persistence-strategy.md) | Persistence, migrations, cross-tab sync |
 | [ADR-0005](../adr/0005-view-registry.md) | View registry: adding a view without touching other layers |
 | [ADR-0006](../adr/0006-city-data-sources.md) | Pluggable city data sources for search |
+| [ADR-0009](../adr/0009-supported-browser-engines.md) | Supported browser engines, boot-time polyfills, no BigInt, legacy zone shim |
+| [ADR-0010](../adr/0010-device-time-location.md) | Device time location: a removable, stored kind of location |
 
 ## Layers
 
@@ -76,7 +78,7 @@ src/
   styles/                  design tokens (light/dark) and globals (exists)
   model/                   pure TS: state, commands, reducer, selectors, invariants
     index.ts               public API of the model (exists, empty)
-  preferences/             preferences model (language, hour format, view mode)
+  preferences/             preferences model (theme, hour format; exists)
   ports/                   repository and search interfaces
   adapters/                localStorage, in-memory implementations
     city-search/           composite adapter + city sources (zone cities, abbreviations, ...)

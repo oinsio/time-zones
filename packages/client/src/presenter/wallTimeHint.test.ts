@@ -4,6 +4,7 @@ import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { WallClockStatus } from "@/model";
+import { HourFormat } from "@/preferences";
 import { presentWallTimeHint } from "./wallTimeHint";
 
 const hintFor = (
@@ -17,6 +18,7 @@ const hintFor = (
     shownTimeLabel: "03:30",
     utcOffsetLabel: "UTC−4",
     language,
+    hourFormat: HourFormat.H24,
     translate: i18n.getFixedT(language),
   });
 
@@ -52,5 +54,21 @@ describe("presentWallTimeHint", () => {
 
   it("writes no hint for a UNIQUE time", () => {
     expect(hintFor("en", WallClockStatus.UNIQUE, "10:40")).toBeUndefined();
+  });
+});
+
+// Verifies FR5 of add-settings-page-and-device-time-location (D8).
+describe("presentWallTimeHint in the 12-hour format", () => {
+  it("should write the requested time with a day period", () => {
+    const hint = presentWallTimeHint({
+      status: WallClockStatus.GAP,
+      requestedWallTime: Temporal.PlainTime.from("02:30"),
+      shownTimeLabel: "3:30 AM",
+      utcOffsetLabel: "UTC−4",
+      language: "en",
+      hourFormat: HourFormat.H12,
+      translate: i18n.getFixedT("en"),
+    });
+    expect(hint?.replace(/\s/g, " ")).toContain("2:30 AM does not exist");
   });
 });

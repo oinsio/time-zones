@@ -111,3 +111,68 @@ Then(
     ).toBeLessThanOrEqual(1);
   },
 );
+
+const RESIZED_SCREEN_HEIGHT_PX = 800;
+const GROUP_GAP_TOLERANCE_PX = 1;
+let recordedGapPx = 0;
+
+const gapBetweenNextDayAndNow = async (page: Page) => {
+  const next = await requireBox(nextDayButton(page));
+  const now = await requireBox(nowButton(page));
+  return now.x - (next.x + next.width);
+};
+
+// Verifies FR15, M5 of add-settings-page-and-device-time-location: the gap at 375 px.
+Given(
+  "the gap between the next-day button and Now is recorded",
+  async ({ locationsWorld }) => {
+    recordedGapPx = await gapBetweenNextDayAndNow(locationsWorld.page);
+  },
+);
+
+When(
+  "the screen is resized to {int} px wide",
+  async ({ locationsWorld }, width: number) => {
+    await locationsWorld.page.setViewportSize({
+      width,
+      height: RESIZED_SCREEN_HEIGHT_PX,
+    });
+  },
+);
+
+// Verifies FR15, UX4 of add-settings-page-and-device-time-location: free space left and right.
+Then(
+  "the left and right free space of the group within the bar differ by at most {int} px",
+  async ({ locationsWorld }, tolerance: number) => {
+    const { page } = locationsWorld;
+    const first = await requireBox(previousDayButton(page));
+    const last = await requireBox(nowButton(page));
+    const bar = await footerBox(page);
+    const freeLeft = first.x - bar.x;
+    const freeRight = bar.x + bar.width - (last.x + last.width);
+    expect(Math.abs(freeLeft - freeRight)).toBeLessThanOrEqual(tolerance);
+  },
+);
+
+Then(
+  "the gap between the next-day button and Now is the recorded gap within {int} px",
+  async ({ locationsWorld }, tolerance: number) => {
+    expect(tolerance).toBe(GROUP_GAP_TOLERANCE_PX);
+    const gap = await gapBetweenNextDayAndNow(locationsWorld.page);
+    expect(Math.abs(gap - recordedGapPx)).toBeLessThanOrEqual(tolerance);
+  },
+);
+
+Then(
+  "the group is at least {int} px from each side of the viewport",
+  async ({ locationsWorld }, minDistance: number) => {
+    const { page } = locationsWorld;
+    const viewportWidth = page.viewportSize()?.width ?? 0;
+    const first = await requireBox(previousDayButton(page));
+    const last = await requireBox(nowButton(page));
+    expect(first.x).toBeGreaterThanOrEqual(minDistance);
+    expect(viewportWidth - (last.x + last.width)).toBeGreaterThanOrEqual(
+      minDistance,
+    );
+  },
+);

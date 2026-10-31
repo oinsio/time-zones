@@ -8,8 +8,8 @@ import {
   type ReferenceDay,
   type WallClockNote,
   WallClockNotePlacement,
-  WallTimeTargetKind,
 } from "@/model";
+import type { HourFormat } from "@/preferences";
 import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
 import { formatLocalDate, formatLocalTime } from "./localDateTime";
 import { formatOffsetDifference } from "./offsetDifference";
@@ -18,6 +18,7 @@ import { presentWallTimeHint } from "./wallTimeHint";
 
 export type LocationRowsContext = {
   language: SupportedLanguage;
+  hourFormat: HourFormat;
   instant: Temporal.Instant;
   translate: TFunction;
   deviceTimeZoneId: string;
@@ -25,11 +26,13 @@ export type LocationRowsContext = {
   /** Offset of the reference zone, read once per presentation (NFR-P1). */
   referenceOffsetMinutes: number | undefined;
   referenceDay: ReferenceDay;
+  /** Exemplar city of the device zone; `undefined` until known (FR8 of add-settings-page-and-device-time-location). */
+  deviceTimeCityLabel?: string;
   /** The one wall-clock note of the moment; absent means none. */
   wallClockNote?: WallClockNote;
 };
 
-/** What a time zone shows at the reference moment: shared by rows and the Here entry. */
+/** What a time zone shows at the reference moment: shared by the location rows. */
 export type PresentedZoneMoment = {
   /** "UTC+3" style label; empty when the offset cannot be computed. */
   utcOffsetLabel: string;
@@ -53,16 +56,17 @@ export type PresentedZoneMoment = {
 
 /**
  * The one owner of UTC offset, offset difference, local time and date and day
- * track of a zone. The subject is a location or the Here entry (no ID).
+ * track of a zone. The subject is a location.
  * Implements FR2, FR3 of show-here-entry-for-device-time (D2); the code moved
  * from `presentLocationRows`.
  * Implements FR7, NFR-A2 of add-wall-time-input-with-hint (D7): the time button name, the wall-time hint
  * and the row note.
  */
 export function presentZoneMoment(
-  subject: { id?: string; timeZoneId: string; cityLabel: string },
+  subject: { id: string; timeZoneId: string; cityLabel: string },
   {
     language,
+    hourFormat,
     instant,
     translate,
     deviceTimeZoneId,
@@ -85,7 +89,7 @@ export function presentZoneMoment(
       : formatOffsetDifference(differenceMinutes, translate);
   const localDateTime = getLocalDateTime(subject.timeZoneId, instant);
   const localTimeLabel = localDateTime
-    ? formatLocalTime(localDateTime, language)
+    ? formatLocalTime(localDateTime, language, hourFormat)
     : "";
   const localDateLabel = localDateTime
     ? formatLocalDate(localDateTime, language)
@@ -108,6 +112,7 @@ export function presentZoneMoment(
           instant,
           day: referenceDay,
           language,
+          hourFormat,
           translate,
           localTimeLabel,
           localDateLabel,
@@ -126,6 +131,7 @@ export function presentZoneMoment(
             shownTimeLabel: localTimeLabel,
             utcOffsetLabel,
             language,
+            hourFormat,
             translate,
           }),
   };
@@ -136,15 +142,12 @@ type RowNote = Extract<
   { placement: WallClockNotePlacement.ROW }
 >;
 
-/** The note when it is a row note about this subject: a location by id, the Here entry by having none. */
+/** The note when it is a row note about this subject: a location by id. */
 function findRowNoteOf(
   note: WallClockNote | undefined,
   subjectId: string | undefined,
 ): RowNote | undefined {
   if (note?.placement !== WallClockNotePlacement.ROW) return undefined;
-  const isAboutSubject =
-    note.target.kind === WallTimeTargetKind.HERE_ENTRY
-      ? subjectId === undefined
-      : subjectId === note.target.locationId;
+  const isAboutSubject = subjectId === note.target.locationId;
   return isAboutSubject ? note : undefined;
 }

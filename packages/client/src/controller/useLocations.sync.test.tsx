@@ -1,15 +1,18 @@
 // Verifies FR11–FR14 of add-locations-via-search (D3, D5).
+
 import { act } from "@testing-library/react";
 import {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
 } from "@/adapters";
+import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { LocationsLoadStatus, SaveOutcome } from "@/ports";
 import {
   almaty,
   moscow,
   moscowInput,
   renderLocations,
+  storedEmptyList,
 } from "@/test/renderLocations";
 import { LocationsStatus } from "./useLocations";
 
@@ -48,7 +51,9 @@ describe("useLocations", () => {
       act(() => {
         other.clear();
       });
-      expect(view.result.current.locations).toEqual([]);
+      expect(view.result.current.rows.map((row) => row.id)).toEqual([
+        DEVICE_TIME_LOCATION_ID,
+      ]);
     });
 
     it("should leave the unreadable state when the other instance clears", () => {
@@ -102,7 +107,9 @@ describe("useLocations", () => {
       });
       expect(clear).toHaveBeenCalledTimes(1);
       expect(result.current.loadStatus).toBe(LocationsStatus.READY);
-      expect(result.current.locations).toEqual([]);
+      expect(result.current.rows.map((row) => row.id)).toEqual([
+        DEVICE_TIME_LOCATION_ID,
+      ]);
     });
 
     it("should report a failed clear and still end ready", () => {
@@ -122,6 +129,7 @@ describe("useLocations", () => {
   describe("save failure", () => {
     it("should keep the list and flag a failed save", () => {
       const repository = createInMemoryLocationRepository({
+        initialDocument: storedEmptyList,
         isWritable: false,
       });
       const { result } = renderLocations(repository);

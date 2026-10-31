@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createRef } from "react";
+import { ADD_LOCATION_BUTTON_ID } from "@/constants";
 import { AddLocationButton } from "./AddLocationButton";
 
 describe("AddLocationButton", () => {
@@ -32,5 +33,35 @@ describe("AddLocationButton shortcut announcement", () => {
     expect(
       screen.getByRole("button", { name: "Add location" }),
     ).toHaveAttribute("aria-keyshortcuts", "/");
+  });
+});
+
+// Verifies FR2, FR16 of add-settings-page-and-device-time-location (D11).
+describe("AddLocationButton header label", () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
+  });
+
+  it("should carry the id the cards view focuses after the last removal", () => {
+    render(<AddLocationButton />);
+    expect(screen.getByRole("button")).toHaveAttribute(
+      "id",
+      ADD_LOCATION_BUTTON_ID,
+    );
+  });
+
+  it("should show the short label only from the wide breakpoint", () => {
+    render(<AddLocationButton />);
+    const shortLabel = screen.getByText("Add");
+    expect(shortLabel.tagName).toBe("SPAN");
+    expect(shortLabel).toHaveClass("hidden", "md:inline");
+  });
+
+  it("should keep the accessible name Add location in both languages of the label", async () => {
+    await i18n.changeLanguage("ru");
+    render(<AddLocationButton />);
+    expect(
+      screen.getByRole("button", { name: "Добавить место" }),
+    ).toHaveTextContent("Добавить");
   });
 });

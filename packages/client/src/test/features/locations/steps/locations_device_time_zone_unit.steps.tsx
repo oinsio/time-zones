@@ -4,6 +4,7 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { cleanup } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect, vi } from "vitest";
+import { HourFormat } from "@/preferences";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
@@ -187,6 +188,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       workCount = startWorkCount();
       presentLocationRows(budgetLocations, {
         language: ENGLISH_LANGUAGE,
+        hourFormat: HourFormat.H24,
         instant: world.clock.instant(),
         translate: i18n.getFixedT(ENGLISH_LANGUAGE),
         deviceTimeZoneId: world.getDeviceZone(),

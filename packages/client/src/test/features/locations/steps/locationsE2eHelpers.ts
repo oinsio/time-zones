@@ -1,6 +1,10 @@
 import { expect, type Page } from "@playwright/test";
 import { englishLocale } from "../../main_page/steps/englishTexts";
-import type { StoredLocation } from "./locations_ui_e2e.fixtures";
+import {
+  DEVICE_TIME_ENTRY,
+  type StoredEntry,
+  type StoredLocation,
+} from "./locations_ui_e2e.fixtures";
 
 export const ADD_LOCATION_NAME = englishLocale.locations.addLocation;
 export const SEARCH_LABEL = englishLocale.locations.searchLabel;
@@ -34,9 +38,13 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
   },
 };
 
+/** The scenario phrase for the device time location in a stored list. */
+export const DEVICE_TIME_LIST_PHRASE = "the device time location";
+
 /** Turns city names into stored entries; fails on a city the table lacks. */
-export function buildStoredLocations(cityNames: string[]): StoredLocation[] {
+export function buildStoredLocations(cityNames: string[]): StoredEntry[] {
   return cityNames.map((cityName) => {
+    if (cityName === DEVICE_TIME_LIST_PHRASE) return DEVICE_TIME_ENTRY;
     const knownCity = KNOWN_CITIES[cityName];
     if (!knownCity) throw new Error(`Unknown city in a scenario: ${cityName}`);
     return knownCity;

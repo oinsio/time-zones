@@ -149,5 +149,15 @@ verify:
           grep -qw "$finding" pr-body.md || { echo "$review rejects $finding, and the body never names it - list every rejected finding with its reason"; exit 1; }
         done
       done
+      # Every handoff item reaches the human: its id in the body, and each patch by its file name
+      # (the apply command and the diff block name it).
+      if [ -n "$removed_in" ] && handoff=$(git show "$removed_in^:$reports/handoff/README.md" 2>/dev/null); then
+        for item in $(printf '%s\n' "$handoff" | sed -n 's/^## \(H[0-9][0-9]*\):.*/\1/p'); do
+          grep -qw "$item" pr-body.md || { echo "the handoff README lists $item, and the body never names it - put every item into the Human follow-up section"; exit 1; }
+        done
+        for patch in $(git ls-tree --name-only "$removed_in^" "$reports/handoff/" | grep '\.patch$'); do
+          grep -qF "$(basename "$patch")" pr-body.md || { echo "the body never gives $(basename "$patch") - add its diff block and its apply command"; exit 1; }
+        done
+      fi
 # auto = go to next stage; manual = wait for a human.
 advancement: auto

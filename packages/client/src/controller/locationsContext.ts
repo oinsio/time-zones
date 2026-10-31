@@ -33,10 +33,12 @@ export type LocationsContextValue = {
   /** Counts minute ticks; re-presents the rows. Implements FR3 of show-local-time-and-date-on-location-cards (D4). */
   minuteTick: number;
   loadStatus: LocationsStatus;
-  /** Loads the city data once for the Here entry and the search. Implements FR8 of show-here-entry-for-device-time (D4). */
+  /** Loads the city data once for the device time location's city label and the search. Implements FR8 of show-here-entry-for-device-time (D4). */
   loadCitySearch: LoadCitySearch;
   hasSaveFailed: boolean;
   addLocation: (input: AddLocationInput) => LocationsReduceResult;
+  /** Appends the device time location; fails when it is listed (FR11). */
+  addDeviceTimeLocation: () => LocationsReduceResult;
   removeLocation: (id: string) => LocationsReduceResult;
   /** Implements FR2 of reorder-locations-by-drag-and-drop. */
   moveLocation: (id: string, targetIndex: number) => LocationsReduceResult;

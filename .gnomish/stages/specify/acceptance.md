@@ -44,8 +44,10 @@ spec delta — but only when the task genuinely changes no behaviour.
   criterion.
 - Human steps are automated as far as possible. Each `## Human follow-up`
   item has an `H<n>` id, a requirement id, a checkbox task that writes its
-  patch and README section under `handoff/`, a `Why manual:` reason that holds,
-  and an `Automated part:`. An item that the "Automate first" order in
+  patch and README section in the task's handoff folder, a `Why manual:`
+  reason that holds, and an `Automated part:`. A glossary or architecture doc
+  change planned as a handoff item fails this criterion: it is an ordinary
+  task under `docs/`. An item that the "Automate first" order in
   `handoff.md` could still replace fails this criterion: a scoped Stryker run
   instead of a full one, local CI commands instead of "CI is green", or
   leaving the push and the PR to the deliver stage. So does an item whose

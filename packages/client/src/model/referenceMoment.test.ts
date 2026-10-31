@@ -11,6 +11,7 @@ import {
   setDate,
   shift,
 } from "@/test/referenceMomentSupport";
+import { LocationKind } from "./locationKind";
 import {
   INITIAL_WORLD_CLOCK_STATE,
   type LocationCommand,
@@ -28,6 +29,7 @@ import { WallClockStatus } from "./wallClock";
 
 const ALMATY = {
   id: "Asia/Almaty|Almaty",
+  kind: LocationKind.CITY,
   timeZoneId: "Asia/Almaty",
   label: "Almaty",
   countryCode: "KZ",

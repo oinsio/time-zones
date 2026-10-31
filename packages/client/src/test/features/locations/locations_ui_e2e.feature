@@ -37,10 +37,11 @@ Feature: Locations in a real browser
     When the user opens the search
     Then the page has requested the search data
 
-  @show-here-entry-for-device-time @FR8 @NFR-P2 @M5
-  Scenario: The Here entry's request is the only one
-    Given the user opens the locations app
-    When the Here entry has loaded the zone cities data
+  @add-settings-page-and-device-time-location @FR8 @NFR-P2
+  Scenario: The device time location's request is the only one
+    Given the stored locations are "the device time location"
+    And the user opens the locations app
+    When the device time location has loaded the zone cities data
     And the user opens the search
     Then the suggestions are shown
     And the page has requested the search data exactly 1 time
@@ -126,7 +127,7 @@ Feature: Locations in a real browser
   @match-here-mark-to-design @NFR-R2 @M5
   @set-home-location-and-show-differences @NFR-R2
   @match-home-mark-to-design @NFR-R1 @M4
-  @show-here-entry-for-device-time @NFR-R2
+  @add-settings-page-and-device-time-location @NFR-R3
   @fix-day-track-handle-overlap-and-end-of-day @NFR-R2
   @add-wall-time-input-with-hint @NFR-R2
   @keep-now-button-visible-when-live @NFR-R2
@@ -176,14 +177,18 @@ Feature: Locations in a real browser
       | travelling  | 375   | dark  |
       | travelling  | 1024  | light |
       | travelling  | 1024  | dark  |
-      | here-entry        | 375   | light |
-      | here-entry        | 375   | dark  |
-      | here-entry        | 1024  | light |
-      | here-entry        | 1024  | dark  |
-      | here-entry-travel | 375   | light |
-      | here-entry-travel | 375   | dark  |
-      | here-entry-travel | 1024  | light |
-      | here-entry-travel | 1024  | dark  |
+      | device-time       | 375   | light |
+      | device-time       | 375   | dark  |
+      | device-time       | 1024  | light |
+      | device-time       | 1024  | dark  |
+      | device-time-home  | 375   | light |
+      | device-time-home  | 375   | dark  |
+      | device-time-home  | 1024  | light |
+      | device-time-home  | 1024  | dark  |
+      | first-launch      | 375   | light |
+      | first-launch      | 375   | dark  |
+      | first-launch      | 1024  | light |
+      | first-launch      | 1024  | dark  |
       | wall-time-input | 375   | light |
       | wall-time-input | 375   | dark  |
       | wall-time-input | 1024  | light |

@@ -1,6 +1,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
+import { HourFormat } from "@/preferences";
 import {
   addLocationTo,
   checkAlmatyDayStops,
@@ -125,7 +126,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       const local = model.getLocalDateTime(zone, instant);
       const offsetMinutes = model.getUtcOffsetMinutes(zone, instant);
       card = {
-        time: local ? presenter.formatLocalTime(local, LANGUAGE) : "",
+        time: local
+          ? presenter.formatLocalTime(local, LANGUAGE, HourFormat.H24)
+          : "",
         offset:
           offsetMinutes === undefined
             ? ""

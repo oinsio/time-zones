@@ -1,6 +1,6 @@
 Feature: Type an exact time in any row
   Implements change add-wall-time-input-with-hint.
-  As a user I type a wall-clock time in a location or the Here entry and every row follows.
+  As a user I type a wall-clock time in a location or the device time location and every row follows.
 
   @add-wall-time-input-with-hint @FR1
   Scenario: No input for an unknown zone
@@ -76,12 +76,13 @@ Feature: Type an exact time in any row
       | 2026-11-01T07:30:00Z | 01:30 | 2026-11-01T05:30:00Z | AMBIGUOUS |
 
   @add-wall-time-input-with-hint @FR3 @M2
-  Scenario: Type a time in the Here entry
+  @add-settings-page-and-device-time-location @FR9
+  Scenario: Type a time in the device time location
     Given the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
-    And the list contains "Moscow"
+    And the list contains "the device time location, Moscow"
     And the app is open
-    When the user types "08:00" in the Here entry
+    When the user types "08:00" in the device time location
     Then the moment is pinned to "2026-03-08T03:00:00Z" with the status "UNIQUE"
     And the "Moscow" card shows "06:00"
 
@@ -212,13 +213,14 @@ Feature: Type an exact time in any row
     And the date bar shows no note
 
   @add-wall-time-input-with-hint @FR7 @FR9
-  Scenario: A device time zone change ends the hint on the Here entry
+  @add-settings-page-and-device-time-location @FR9
+  Scenario: A device time zone change ends the hint on the device time location
     Given the device time zone is "America/New_York"
     And the interface language is "en"
     And the current instant is "2026-03-08T07:30:00Z"
-    And the list contains "Moscow"
+    And the list contains "the device time location, Moscow"
     And the app is open
-    And the user typed "02:30" in the Here entry, so it shows a wall-time hint
+    And the user typed "02:30" in the device time location, so it shows a wall-time hint
     When the device time zone changes to "Asia/Almaty"
     Then no row shows a wall-time hint
     And the date bar shows no note

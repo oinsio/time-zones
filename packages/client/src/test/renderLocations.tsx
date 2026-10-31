@@ -3,7 +3,11 @@ import type { ReactNode } from "react";
 import type { TickScheduler, WriteScheduler } from "@/controller";
 import { LocationsProvider, useLocations } from "@/controller";
 import type { Clock } from "@/lib/temporal";
-import type { LocationRepository } from "@/ports";
+import {
+  type LocationRepository,
+  type LocationsLoadResult,
+  LocationsLoadStatus,
+} from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
@@ -38,3 +42,10 @@ export const renderLocations = (
       </LocationsProvider>
     ),
   });
+
+/** A stored list the user emptied: it stays empty, unlike a missing document. */
+export const storedEmptyList: LocationsLoadResult = {
+  status: LocationsLoadStatus.LOADED,
+  locations: [],
+  homeLocationId: null,
+};

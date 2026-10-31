@@ -3,6 +3,8 @@
 ## Status
 Accepted (2026-09-28)
 
+Partly superseded by [ADR-0010](0010-device-time-location.md): the derived Here entry and First launch.
+
 Refines [ADR-0003](0003-reference-instant-time-model.md): every place where ADR-0003 says "home location" now means the **reference zone** defined here.
 
 ## Context
