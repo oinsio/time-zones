@@ -108,7 +108,7 @@ Screens: [docs/design](../design/README.md). Values become design tokens.
 | Overlay | Content |
 |---|---|
 | Search | full screen on phones, dialog on wide screens; input plus results as "City, Region, Country" (region once a richer source is added, [ADR-0006](../adr/0006-city-data-sources.md)); suggestions are shown before typing (never an empty screen) |
-| Settings | theme (Light, Dark, System) and hour format (12 / 24); language and view mode later |
+| Settings | the Gnomish Factory credit as the top line; theme (Light, Dark, System) and hour format (12 / 24); language and view mode later |
 
 ## View contract
 
