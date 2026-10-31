@@ -91,7 +91,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 6. Final checks
 
-- [ ] 6.1 Stryker, scoped: `npx stryker run --mutate 'src/app/settings/GnomishFactoryCredit.tsx,src/app/settings/SettingsPage.tsx'`. Read `reports/mutation/mutation-report.json`. Kill survivors with Vitest tests in `app/settings/` until each file scores at least 95 % (minimum acceptable 90 %), and note the scores in this task. A survivor that was in the score of `add-gnomish-factory-credit` before this change may be noted as pre-existing, with its line.
+- [x] 6.1 Stryker, scoped: `npx stryker run --mutate 'src/app/settings/GnomishFactoryCredit.tsx,src/app/settings/SettingsPage.tsx'`. Read `reports/mutation/mutation-report.json`. Kill survivors with Vitest tests in `app/settings/` until each file scores at least 95 % (minimum acceptable 90 %), and note the scores in this task. A survivor that was in the score of `add-gnomish-factory-credit` before this change may be noted as pre-existing, with its line.
 - [ ] 6.2 Run, one at a time:
   - `pnpm --filter @time-zones/client typecheck`;
   - `pnpm --filter @time-zones/client lint`;
