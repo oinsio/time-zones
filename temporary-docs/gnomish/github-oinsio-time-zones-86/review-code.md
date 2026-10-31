@@ -72,7 +72,8 @@ Measured with `npx stryker run --mutate 'src/app/settings/GnomishFactoryCredit.t
 - Impact: A ticked task is not done and NFR-R2 / M6 are unmet. The 1024 px baselines — the wide-screen reference the proposal says "become the reference" — do not contain the credit, so a regression that drops or misplaces the credit at 1024 px would be compared against a baseline that never had it and could pass within the 2.5 % tolerance.
 - Fix: From `packages/client/`, run `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_e2e.feature --grep "Approved screenshots of the settings" --update-snapshots=all`, open the 1024 px PNGs with the Read tool to confirm the credit line is centred above the back button and heading in both themes, then re-run without the flag and confirm `git status --short src/test/features/__screenshots__` lists the 1024 px PNGs of `chromium` and `mobile-chrome`. Commit only the settings PNGs (revert any other PNG that `all` rewrites, since `--grep` limits the run to the settings outline).
 - Fix risk: `--update-snapshots=all` rewrites the 375 px baselines too; they should come out pixel-identical or near-identical, but if they differ only by anti-aliasing noise, keep the committed ones to avoid churn. No production code is touched.
-- Status: open
+- Status: fixed
+- Resolution: re-approved the four 1024 px settings baselines (chromium and mobile-chrome, light and dark) with --update-snapshots=all scoped by --grep; only those PNGs changed and the dark one shows the credit centred above the heading.
 
 ## Verdict
 
