@@ -86,7 +86,7 @@ The credit is static; it loads no data. Its behaviour in the states of the setti
 | offline | any preferences | the same credit line; the new tab shows the browser's offline page, the app tab is unchanged (NG3) |
 | offline or online | unreadable preferences (note with Reset) | the credit line on top, the note below the header as today |
 | offline or online | storage unavailable (save-failed note) | the credit line on top, the note below the header as today |
-| offline or online | settings page loading | none: the settings page renders synchronously with the shell, there is no loading state to cover |
+| offline or online | settings chunk loading | the existing skeleton fallback the shell shows while the lazily loaded settings page arrives; the credit appears together with the settings page, as part of it |
 
 ## Behavior
 
