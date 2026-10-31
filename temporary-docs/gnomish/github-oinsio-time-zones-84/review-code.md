@@ -104,7 +104,8 @@ No file is below 90%.
 - Impact: FR5 requires every time to be shown "in full, on one line" inside a fixed column, and design D4 makes "the E2E check of one-line times" the source of truth for whether 176 px is wide enough. If the column becomes too narrow (a font, size or width change), the time text runs over the day track's left edge and both steps stay green, so the regression ships undetected.
 - Fix: in `measureTimeButton`, also return whether the button's right edge passes its column's right edge, e.g. `overflowsColumn: button.getBoundingClientRect().right > (button.parentElement?.getBoundingClientRect().right ?? 0) + 1` (the button is a direct child of the `md:w-44` span), and in the step at `time_selection_card_layout_e2e.steps.ts:173` assert `overflowsColumn` is false (keeping or replacing the `isClipped` assertion).
 - Fix risk: low — the 1024 px 12-hour screenshot shows the widest tested time, `12:30 PM`, about 157 px wide in the 176 px column, and the time size is `md:text-4xl` from 768 px on, so the strengthened check should pass at 768/1024/1440; if it fails at some width, that is a real FR5 defect to fix by widening `md:w-44` as design D4 already prescribes. The test stays in the playwright-bdd step file, where `bdd-unit.md` puts responsive layout.
-- Status: open
+- Status: fixed
+- Resolution: measureTimeButton now returns overflowPx (button right edge minus its column right edge) and the step "show their time on one line in full" asserts it is within TOLERANCE_PX.
 
 ### R2 — SUGGESTION — "rightmost header control" only checks that Settings is right of the title
 - Location: `packages/client/src/test/features/main_page/steps/main_page_header_e2e.steps.ts:156`
@@ -113,7 +114,8 @@ No file is below 90%.
 - Impact: a regression of FR4's "settings button stays the rightmost control / at the right" would not be caught by the step written for it; low stakes because the screenshots of the main-page states would still show the change.
 - Fix: in that step, also assert that the button's right edge equals the header's right edge within the existing `CENTRE_TOLERANCE_PX` (`Math.abs(buttonBox.x + buttonBox.width - (headerBox.x + headerBox.width)) <= 1`, with `headerBox` from `requireBox(headerOf(page))`).
 - Fix risk: none — the `<header>` has no horizontal padding (`MainPage.tsx:31`: `border-b … pt-6 pb-4`) and `SettingsButton` is `justify-self-end` in the last grid column, so its right edge is the header's right edge today.
-- Status: open
+- Status: fixed
+- Resolution: the rightmost-header-control step now also asserts the button right edge equals the header right edge within CENTRE_TOLERANCE_PX.
 
 ## Verdict
 
