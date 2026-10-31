@@ -19,7 +19,7 @@ Driven by FR1–FR3, NFR-A1, NFR-A2, NFR-R1, NFR-R2, UX1 and UX2 of `proposal.md
   - "the settings show the unreadable note with Reset" and "the locations screen has no accessibility violations" (used by `settings_e2e.feature`);
   - "the user presses Shift+Tab" and "the focus is on the back button" (`settings_factory_credit_e2e.steps.ts`);
   - `RADIOGROUP_ROLE`, `settingsHeading` (`settingsE2eHelpers.ts`) and `readTokenStyle` (`time_selection/steps/timeSelectionE2eHelpers.ts`).
-  - No step "the user presses Tab" exists (`grep -rn '"the user presses Tab"' src/test/features` finds nothing).
+  - "the user presses the key {string}" (`time_selection/steps/time_selection_pointer_e2e.steps.ts`, same `locations_ui_e2e.fixtures` `test`, picked up by the step glob `src/test/features/**/steps/*_e2e.{steps,fixtures}.ts`). No step with the exact text "the user presses Tab" exists, and none is added.
 
 Binding decisions:
 - ADR-0002: the page renders i18n text only, with no domain logic.
@@ -73,7 +73,7 @@ Alternatives:
   - **Colour:** the credit's computed `color` equals the computed `color` of the first `svg` in the theme radio group (the sun icon of Light), at rest, on focus, on hover and after a system theme change. This checks "the colour of the theme icons" directly, not only the token.
   - **Font size:** `parseFloat(getComputedStyle(credit).fontSize) / FORMER_CREDIT_FONT_SIZE_PX`, with the constant `14`, is between `1.15` and `1.20`.
   - **Place:** the credit's box top is at least the heading's box bottom. The credit's `nextElementSibling` contains the radio group named by the theme legend. With the note, the note's box bottom is at most the credit's box top.
-  - **Keyboard:** a new step "the user presses Tab".
+  - **Keyboard:** Tab is pressed with the existing step `the user presses the key "Tab"`, so no second step definition for the same key press is added.
 - **Step file size:** `settings_factory_credit_e2e.steps.ts` is at 199 lines. Its new measurement helpers go into `settingsCreditE2eHelpers.ts`, so the steps file stays under 200 lines. If it would still pass 200, the steps of the new place and size checks go into `steps/settings_factory_credit_layout_e2e.steps.ts`.
 - Class strings stay under the existing `// Stryker disable next-line StringLiteral` comment, whose reason is still true.
 
