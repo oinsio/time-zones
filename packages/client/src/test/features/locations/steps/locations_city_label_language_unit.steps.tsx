@@ -44,6 +44,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     await i18n.changeLanguage("ru");
   });
 
+  // @show-city-labels-in-interface-language @FR1 @FR2 @UX2
   f.Scenario(
     "Added in Russian, shown in English",
     ({ Given, And, When, Then }) => {
@@ -65,6 +66,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @show-city-labels-in-interface-language @FR1 @FR2 @UX2
   f.Scenario(
     "Added in English, shown in Russian",
     ({ Given, And, When, Then }) => {
@@ -81,6 +83,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @show-city-labels-in-interface-language @FR2
   f.Scenario("A switch keeps the stored list", ({ Given, And, When, Then }) => {
     Given("the interface language is {string}", world.givenLanguage);
     And("the zone cities data is loaded", world.givenData(DataMode.LOADED));
@@ -118,6 +121,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
+  // @show-city-labels-in-interface-language @FR4 @UX1
   f.Scenario(
     "Stored label until the data is loaded",
     ({ Given, And, When, Then }) => {
@@ -137,6 +141,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @show-city-labels-in-interface-language @FR4
   f.Scenario("Loading fails", ({ Given, And, When, Then }) => {
     Given("the interface language is {string}", world.givenLanguage);
     And(
@@ -151,6 +156,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
+  // @show-city-labels-in-interface-language @FR1
   f.Scenario("A label the data does not know", ({ Given, And, When, Then }) => {
     Given("the interface language is {string}", world.givenLanguage);
     And("the zone cities data is loaded", world.givenData(DataMode.LOADED));
@@ -159,6 +165,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then("the row reads {string}", expectRowReads);
   });
 
+  // @show-city-labels-in-interface-language @FR1
   f.Scenario(
     "A dialect reads its base language",
     ({ Given, And, When, Then }) => {
@@ -184,6 +191,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @show-city-labels-in-interface-language @FR3
   f.Scenario(
     "Removal is announced with the new city label",
     ({ Given, And, When, Then }) => {

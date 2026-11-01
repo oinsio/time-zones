@@ -2,7 +2,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import i18n from "i18next";
 import { createCompositeCitySearch } from "@/adapters";
-import { city } from "@/adapters/city-search/compositeCityFixtures";
 import { buildDeviceTimeLocation, type Location } from "@/model";
 import type { CitySearch, LoadCitySearch } from "@/ports";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
@@ -10,6 +9,15 @@ import { buildLocation } from "@/test/factories/buildLocation";
 import { loadCitySearchOnce } from "./cityDataCache";
 import { useCityLabels } from "./useCityLabels";
 import { useExemplarCity } from "./useExemplarCity";
+
+type ZoneCityData = Parameters<typeof createCompositeCitySearch>[0][number];
+
+const city = (
+  timeZoneId: string,
+  en: string,
+  ru: string,
+  countryCode: string,
+): ZoneCityData => ({ timeZoneId, names: { en, ru }, countryCode });
 
 const search = createCompositeCitySearch([
   city("Asia/Tokyo", "Tokyo", "Токио", "JP"),
