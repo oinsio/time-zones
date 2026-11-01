@@ -15,6 +15,7 @@ const THEME_GROUP_NAME = /^(Theme|Тема)$/;
 const MIN_ROW_HEIGHT_PX = 44;
 const WIDTH_TOLERANCE_PX = 1;
 const COLLAPSED = "collapsed";
+const CURRENT_LANGUAGE_NAME = "English";
 
 const languageGroup = (page: Page) =>
   page.getByRole(GROUP_ROLE, { name: LANGUAGE_GROUP_NAME });
@@ -180,6 +181,12 @@ Then(
       "aria-expanded",
       state === COLLAPSED ? "false" : "true",
     );
+    if (state === COLLAPSED) return;
+    const controlsId = await button.getAttribute("aria-controls");
+    const list = locationsWorld.page.locator(`[id="${controlsId}"]`);
+    await expect(
+      list.getByRole(BUTTON_ROLE, { name: CURRENT_LANGUAGE_NAME, exact: true }),
+    ).toHaveAttribute("aria-current", "true");
   },
 );
 

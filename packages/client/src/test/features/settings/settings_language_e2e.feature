@@ -74,6 +74,7 @@ Feature: Interface language choice in a real browser
   Scenario: Escape collapses first
     Given the user opens the settings
     When the user expands the language group
+    And the user presses the key "Tab"
     And the user presses the key "Escape"
     Then no language list is shown
     And the focus is on the language button
