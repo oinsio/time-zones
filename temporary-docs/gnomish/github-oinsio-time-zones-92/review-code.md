@@ -6,8 +6,8 @@
 |---|---|
 | Tasks verified | 40/43 |
 | Requirements traced | 81/82 |
-| CRITICAL | 0 |
-| WARNING | 1 |
+| CRITICAL | 1 |
+| WARNING | 0 |
 | SUGGESTION | 3 |
 
 ## Tasks
@@ -56,7 +56,7 @@ All paths below are under `packages/client/src/` unless they start with `docs/`.
 - ✅ 10.4 `app_shell_smoke_e2e.feature:17` is tagged `@add-interface-language-selection @FR7`.
 - ✅ 11.1 The scores are recorded in `tasks.md:295`. My own runs confirm 100 % for every killable (non-static) mutant except equivalent ones (see Mutation).
 - ✅ 11.2 The stage reports CI green.
-- ❌ 11.3 The traceability grep finds every id. However, the second check of the task, "`wc -l` of every new or changed file under `src/` is under 200", fails. Four new files exceed it: `app/settings/InterfaceLanguageGroup.test.tsx` (254), `test/features/settings/steps/settings_language_unit.steps.tsx` (279), `test/features/app_shell/steps/app_shell_locale_registry_unit.steps.ts` (269) and `test/features/settings/steps/settings_language_e2e.steps.ts` (234). `controller/PreferencesProvider.test.tsx` grew from 188 to 206 lines (R1).
+- ❌ 11.3 The traceability grep finds every id. However, the second check of the task, "`wc -l` of every new or changed file under `src/` is under 200", fails. Four new files exceed it: `app/settings/InterfaceLanguageGroup.test.tsx` (254), `test/features/settings/steps/settings_language_unit.steps.tsx` (279), `test/features/app_shell/steps/app_shell_locale_registry_unit.steps.ts` (269) and `test/features/settings/steps/settings_language_e2e.steps.ts` (234). `controller/PreferencesProvider.test.tsx` grew from 188 to 206 lines. Two more changed files are over 200 lines, but they were already that long before the branch, which changed one line in each (a rename): `test/features/settings/steps/settings_hour_format_unit.steps.tsx` (216) and `test/features/time_selection/steps/time_selection_wall_time_input_unit.steps.tsx` (284) (R1).
 
 ## Requirements
 
@@ -178,7 +178,7 @@ I did not measure the other 18 files of M6 (the rename-only hooks, the presenter
 
 ## Findings
 
-### R1 — WARNING — New test files exceed the 200-line limit the tasks required splitting
+### R1 — CRITICAL — Tasks 7.4, 8.2 and 11.3 are ticked but their file-size conditions are not met
 - Location: `packages/client/src/test/features/settings/steps/settings_language_unit.steps.tsx:1`
 - Rule: `.claude/rules/process-invariants.md` ("Target 100–200 lines per file; 300 is a hard cap, used only when splitting would hurt clarity"), `CLAUDE.md` ("Files must stay under 200 lines for AI context quality")
 - Problem: Four files this branch added are over 200 lines:
@@ -187,14 +187,16 @@ I did not measure the other 18 files of M6 (the rename-only hooks, the presenter
   - `app/settings/InterfaceLanguageGroup.test.tsx` (254);
   - `test/features/settings/steps/settings_language_e2e.steps.ts` (234).
 
-  `controller/PreferencesProvider.test.tsx` also grew past the limit, from 188 to 206 lines. Tasks 7.4 ("split the steps file if it passes 200 lines") and 8.2 ("split into `InterfaceLanguageGroup.keyboard.test.tsx` if it passes 200 lines") required splits that were not done. Task 11.3 ("check that `wc -l` of every new or changed file under `src/` is under 200") is ticked although this check fails. No user-visible behaviour is affected, so this is a broken project rule rather than a CRITICAL.
-- Impact: Three tasks are ticked although one of their stated conditions is not met. The files break the project's AI-context size rule, and splitting them would not hurt clarity: each has natural aspect seams (keyboard vs rendering, storage vs choice, start language vs registry).
+  `controller/PreferencesProvider.test.tsx` also grew past the limit, from 188 to 206 lines. Tasks 7.4 ("split the steps file if it passes 200 lines") and 8.2 ("split into `InterfaceLanguageGroup.keyboard.test.tsx` if it passes 200 lines") required splits that were not done. Task 11.3 ("check that `wc -l` of every new or changed file under `src/` is under 200") is ticked although this check fails. The check also fails on two changed files that were already oversize before the branch: `settings_hour_format_unit.steps.tsx` (216) and `time_selection_wall_time_input_unit.steps.tsx` (284). The branch changed one line in each.
+- Impact: Three tasks are marked `[x]` in `tasks.md`, yet a condition each one states is not met. The review-code instructions treat a ticked-but-undone task as CRITICAL, because a ticked task is a claim that the work was done. The files also break the project's AI-context size rule, and splitting them would not hurt clarity: each has natural aspect seams (keyboard vs rendering, storage vs choice, start language vs registry). No user-visible behaviour is affected.
 - Fix: Split each file along its aspect seams:
   - Move the keyboard cases of `InterfaceLanguageGroup.test.tsx` (`:119-190`, `:236-244`) into `InterfaceLanguageGroup.keyboard.test.tsx`, as task 8.2 names it.
   - Move the keyboard and layout steps of `settings_language_e2e.steps.ts` (focus, 44 px height, width, "sits right under") into `settings_language_layout_e2e.steps.ts`, as task 10.3 names it. playwright-bdd steps are global, so the feature file stays as it is.
   - Split `settings_language_unit.feature` by aspect: keep choice, names, reload and not-registered, and move Migration, Legacy key, Reset, Language without storage and Another tab into a new `settings_language_storage_unit.feature`. Give each feature its own steps file, because `bdd-unit.md` asks for "one steps file per feature file".
   - Split `app_shell_locale_registry_unit.feature` the same way, moving the start-language and dialect scenarios into `app_shell_interface_language_unit.feature` with its own steps file.
   - Move the `setInterfaceLanguage` case of `PreferencesProvider.test.tsx` into a separate file, or trim shared setup.
+  - Do not split the two pre-existing oversize files: they belong to other features, and splitting them would widen the change's scope. Instead, reword task 11.3 honestly to "every file under `src/` that this change adds or grows is under 200 lines". Both files changed by a one-line rename, so this wording excludes them and still covers the five files above.
+  - Re-run the `wc -l` check, and leave 7.4, 8.2 and 11.3 ticked only once it passes.
   - List the new feature paths in the proposal's Behavior section only if the next stage may edit it; the code split itself needs no spec change.
 - Fix risk: Scenario names in the steps files must keep matching the feature text exactly, and every moved scenario must keep its `@add-interface-language-selection @FR-X` tags and `// @… @FR-X` comments. Otherwise vitest-cucumber fails or traceability greps miss ids. The new feature files are not listed in `proposal.md`'s Behavior section, which is a small documentation drift. Moving shared world helpers must keep `settingsLanguageWorld.tsx` as the single world, without duplicating it.
 - Status: open
@@ -228,4 +230,4 @@ I did not measure the other 18 files of M6 (the rename-only hooks, the presenter
 
 ## Verdict
 
-Ready. No CRITICAL finding blocks the change: every requirement and scenario is implemented and tested, and the behaviour matches the specs and design D1–D9. R1 (WARNING) should be fixed so that tasks 7.4, 8.2 and 11.3 match their text. R2–R4 are low-stakes improvements.
+Not ready. Blocking: R1 (CRITICAL). Tasks 7.4, 8.2 and 11.3 are ticked, but the file splits they require were not done, and the 11.3 size check fails (40/43 tasks verified). The change is not ready until the five files are split, 11.3 is reworded honestly for the two pre-existing oversize files, and the three tasks match their text. Every requirement and scenario is implemented and tested, and the behaviour matches the specs and design D1–D9. R2–R4 are low-stakes improvements and do not block.
