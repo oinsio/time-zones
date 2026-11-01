@@ -200,8 +200,7 @@ I did not measure the other 18 files of M6 (the rename-only hooks, the presenter
   - List the new feature paths in the proposal's Behavior section only if the next stage may edit it; the code split itself needs no spec change.
 - Fix risk: Scenario names in the steps files must keep matching the feature text exactly, and every moved scenario must keep its `@add-interface-language-selection @FR-X` tags and `// @… @FR-X` comments. Otherwise vitest-cucumber fails or traceability greps miss ids. The new feature files are not listed in `proposal.md`'s Behavior section, which is a small documentation drift. Moving shared world helpers must keep `settingsLanguageWorld.tsx` as the single world, without duplicating it.
 - Status: fixed
-- Resolution:  Split by aspect: InterfaceLanguageGroup.keyboard.test.tsx (182+98 lines), settings_language_storage_unit.feature/steps, app_shell_interface_language_unit.feature/steps, settings_language_layout_e2e.steps.ts with settingsLanguageE2eHelpers.ts, PreferencesProvider.interfaceLanguage.test.tsx. All five files are now under 200 lines; tags and scenario names are unchanged. tasks.md is outside this stage's remit and the two pre-existing oversize files are left as the review advised.
-
+- Resolution: Split by aspect: InterfaceLanguageGroup.keyboard.test.tsx (182+98 lines), settings_language_storage_unit.feature/steps, app_shell_interface_language_unit.feature/steps, settings_language_layout_e2e.steps.ts with settingsLanguageE2eHelpers.ts, PreferencesProvider.interfaceLanguage.test.tsx. All five files are now under 200 lines; tags and scenario names are unchanged. tasks.md is outside this stage's remit and the two pre-existing oversize files are left as the review advised.
 
 ### R2 — SUGGESTION — E2E "Name and state of the button" does not check what its spec scenario states
 - Location: `packages/client/src/test/features/settings/steps/settings_language_e2e.steps.ts:172`
@@ -211,8 +210,7 @@ I did not measure the other 18 files of M6 (the rename-only hooks, the presenter
 - Fix: In that step, when the state is expanded, read `aria-controls` from the button. Then assert that `page.locator(`[id="${controlsId}"]`)` is the list and that its button named "English" has `aria-current="true"`.
 - Fix risk: The `useId` value contains colons, so use an attribute selector rather than `#id`. Otherwise none.
 - Status: fixed
-- Resolution:  The "Name and state" step now reads aria-controls and asserts the English row in that list has aria-current="true" (settings_language_e2e.steps.ts), using an attribute selector for the useId value.
-
+- Resolution: The "Name and state" step now reads aria-controls and asserts the English row in that list has aria-current="true" (settings_language_e2e.steps.ts), using an attribute selector for the useId value.
 
 ### R3 — SUGGESTION — Language-tag canonicalisation is written twice in the locales module
 - Location: `packages/client/src/locales/resolveInterfaceLanguage.ts:8`
@@ -222,8 +220,7 @@ I did not measure the other 18 files of M6 (the rename-only hooks, the presenter
 - Fix: Keep one helper, for example `toCanonicalLanguageTag(tag): string | undefined` in `localeMetadata.ts` (not exported from `index.ts`). Make `isCanonicalLanguageTag(code)` return `toCanonicalLanguageTag(code) === code`, and import the helper in `resolveInterfaceLanguage.ts` from `./localeMetadata`, which is the same module and allowed.
 - Fix risk: Behaviour is unchanged. The existing tests in `localeMetadata.test.ts` and `resolveInterfaceLanguage.test.ts` (`en-us`, `ru_RU`, `en_pirate`) cover both callers.
 - Status: fixed
-- Resolution:  One helper toCanonicalLanguageTag in localeMetadata.ts; isCanonicalLanguageTag and resolveInterfaceLanguage.ts use it. Covered by the existing localeMetadata.test.ts and resolveInterfaceLanguage.test.ts.
-
+- Resolution: One helper toCanonicalLanguageTag in localeMetadata.ts; isCanonicalLanguageTag and resolveInterfaceLanguage.ts use it. Covered by the existing localeMetadata.test.ts and resolveInterfaceLanguage.test.ts.
 
 ### R4 — SUGGESTION — E2E "Escape collapses first" presses Escape from the button, not from a row
 - Location: `packages/client/src/test/features/settings/settings_language_e2e.feature:74`
@@ -233,8 +230,7 @@ I did not measure the other 18 files of M6 (the rename-only hooks, the presenter
 - Fix: Add `And the user presses the key "Tab"` after `When the user expands the language group` in that scenario. The step already exists, and the next Tab stop after the button is the first row. Then keep the existing Then steps.
 - Fix risk: none. The step is already used by "Choosing with the keyboard" in the same feature.
 - Status: fixed
-- Resolution:  The "Escape collapses first" scenario in settings_language_e2e.feature now presses Tab after expanding, so Escape is sent from the first row.
-
+- Resolution: The "Escape collapses first" scenario in settings_language_e2e.feature now presses Tab after expanding, so Escape is sent from the first row.
 
 ## Verdict
 
