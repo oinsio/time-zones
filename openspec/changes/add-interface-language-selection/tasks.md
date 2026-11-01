@@ -109,7 +109,13 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - Initialization uses `lng: resolveStartInterfaceLanguage()`, an exported function returning `resolveInterfaceLanguage(readStoredInterfaceLanguage(), readBrowserLanguages())`. `readStoredInterfaceLanguage` returns `preferences.interfaceLanguage` of a `LOADED` `localStoragePreferencesRepository.load()` and `null` otherwise. Until task 6 lands, it returns `null`; task 6.6 completes it.
   - Remove `LanguageDetector`, `LANGUAGE_STORAGE_KEY`, `languageResolutionOptions`, `localeResources` and the hand-written `SUPPORTED_LANGUAGES` / `SupportedLanguage` / `DEFAULT_LANGUAGE`. They now come from `@/locales`; `i18n.ts` keeps re-exporting `DEFAULT_LANGUAGE`, `SUPPORTED_LANGUAGES` and the `InterfaceLanguageCode` type for existing importers until task 4 moves them.
 
-  Run `pnpm --filter @time-zones/client remove i18next-browser-languagedetector`. Verify `npx vitest run src/i18n.test.ts` passes and `grep -rn "languagedetector" src package.json` prints nothing.
+  - `test/setup.ts` imports `languageResolutionOptions` and `localeResources` from `@/i18n` for the global i18next init that every Vitest test runs (design D8). Change it to import `createI18nOptions` from `@/i18n` and `localeRegistry` from `@/locales`, and init with `{ ...createI18nOptions(localeRegistry), lng: "ru", fallbackLng: "ru" }`, so jsdom tests keep the translation resources and today's fallback.
+
+  Run `pnpm --filter @time-zones/client remove i18next-browser-languagedetector`. Verify, one at a time:
+  - `npx vitest run src/i18n.test.ts` passes;
+  - `grep -rn "languageResolutionOptions\|localeResources\|languagedetector" src package.json` prints nothing;
+  - `pnpm --filter @time-zones/client typecheck` passes;
+  - `npx vitest run src/app/settings` passes (jsdom suites that render translated text through `test/setup.ts`, so they fail if the setup loses its resources).
 - [ ] 3.4 Add "Fallback order of a dialect" to `test/features/app_shell/app_shell_locale_registry_unit.feature`, with steps using `createI18nOptions` and the `ru-KZ` fixture. Verify that steps file passes.
 
 ## 4. One active interface language; city names and weeks through the fallback order (FR5, FR10; design D3, D5)

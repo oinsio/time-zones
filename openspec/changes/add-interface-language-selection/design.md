@@ -177,6 +177,7 @@ Formatter caches in `src/presenter/dateTimeFormatters.ts` and `countryName.ts` a
 - E2E (playwright-bdd) covers what needs a real browser (`bdd-unit.md` table): the accessible name, `aria-expanded`, focus, the keyboard, layout widths, axe-core and screenshots.
 - Existing tests that the change touches:
   - `i18n.test.ts` is rewritten for `createI18nOptions`. "should store the chosen language under the language key" is removed on purpose (D2).
+  - `test/setup.ts`, the Vitest setup file every jsdom test runs, imports `languageResolutionOptions` and `localeResources` from `@/i18n` for its global i18next init (`lng: "ru"`, `fallbackLng: "ru"`). Both disappear with D3, so it builds its options with `createI18nOptions(localeRegistry)` and keeps the `lng: "ru"` and `fallbackLng: "ru"` overrides.
   - `adapters/preferencesRepository.test.ts` expectations of `schemaVersion: 1` become 2.
   - The E2E seeds that write the current version with the old payload add `interfaceLanguage: null`: `test/features/settings/steps/settings_theme_e2e.steps.ts` and `test/features/locations/steps/locationsSeedHelpers.ts`.
   - `seedLanguage` keeps writing the legacy key, which D2 migrates, and so also covers FR8 end to end.
