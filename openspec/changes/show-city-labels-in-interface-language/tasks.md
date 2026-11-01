@@ -4,7 +4,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
 ## 1. Glossary and architecture docs (FR1, FR4, FR5)
 
-- [ ] 1.1 Update the glossary in the same change (`.claude/rules/glossary.md`):
+- [x] 1.1 Update the glossary in the same change (`.claude/rules/glossary.md`):
   - `docs/glossary/locations.md` **City label**: "the city name a location is shown with, in the nominative case. Stored as the user added it; a row shows the name of its zone's city record in the interface language when the stored label is one of that record's names, otherwise the stored label." *Code:* `label` (stored), `cityLabel` (row), `CitySearch.getCityLabel`, `isCityNameOfRecord`, `useCityLabels`. Keep the *Never:* list.
   - `docs/glossary/settings.md` **Interface language**: add "city label of a city location" to the list of what it governs.
   - `docs/glossary/settings.md` **Dialect**: add "dates, weekdays, months and country names formatted through `Intl` use the same order as their locale list".

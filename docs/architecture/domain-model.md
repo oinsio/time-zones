@@ -15,7 +15,7 @@ classDiagram
     class Location {
         LocationId id
         string timeZoneId  "canonical IANA ID"
-        string label       "city name"
+        string label       "city name, stored as added; the presenter shows it in the interface language"
         string countryCode "ISO 3166-1 alpha-2"
         LocationKind kind  "CITY | DEVICE_TIME"
     }
