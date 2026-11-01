@@ -233,12 +233,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 9. Performance bound (NFR-P1; design D7)
 
-- [ ] 9.1 Add `test/features/settings/settings_language_budget_unit.feature` for the two language scenarios of the MODIFIED requirement "Preferences are fast" (settings spec delta), with steps in `steps/settings_language_budget_unit.steps.ts` that reuse `hourFormatBudgetWorld.ts` and `startWorkCount()`:
+- [x] 9.1 Add `test/features/settings/settings_language_budget_unit.feature` for the two language scenarios of the MODIFIED requirement "Preferences are fast" (settings spec delta), with steps in `steps/settings_language_budget_unit.steps.ts` that reuse `hourFormatBudgetWorld.ts` and `startWorkCount()`:
   - "Presenting again with the same language builds no formatter" (50 locations in `en`, presented again: 0 formatter builds);
   - "Switching the language builds one formatter per zone and kind" (50 locations in 50 zones in `en`, then `ru`: at most one formatter per zone and label kind in use).
 
   Tag both `@add-interface-language-selection @NFR-P1`. Verify the steps file passes.
-- [ ] 9.2 Add a case "present 50 rows after a language switch" to `test/benchmarks/rowPresenting.bench.ts`, with a `// Verifies NFR-P1 of add-interface-language-selection` comment. Verify `pnpm --filter @time-zones/client bench` runs it; it reports timings and never fails on them.
+- [x] 9.2 Add a case "present 50 rows after a language switch" to `test/benchmarks/rowPresenting.bench.ts`, with a `// Verifies NFR-P1 of add-interface-language-selection` comment. Verify `pnpm --filter @time-zones/client bench` runs it; it reports timings and never fails on them.
 
 ## 10. E2E in a real browser (FR2, FR5, FR7, FR8, NFR-A1–NFR-A3, NFR-R1, NFR-R2)
 

@@ -1,4 +1,4 @@
-// Implements NFR-P1 of add-settings-page-and-device-time-location: counts the formatters built when rows are presented in an hour format.
+// Implements NFR-P1 of add-settings-page-and-device-time-location and add-interface-language-selection: counts the formatters built when rows are presented in an hour format.
 import i18n from "i18next";
 import { expect } from "vitest";
 import { fakeClock } from "@/lib/temporal";
@@ -28,13 +28,14 @@ const presentIn = (
   locations: readonly Location[],
   timestamp: string,
   hourFormat: HourFormat,
+  language: string,
 ) => {
   const instant = fakeClock(timestamp).instant();
   presentLocationRows(locations, {
-    language: LANGUAGE,
+    language,
     hourFormat,
     instant,
-    translate: i18n.getFixedT(LANGUAGE),
+    translate: i18n.getFixedT(language),
     deviceTimeZoneId: BUDGET_DEVICE_ZONE,
     homeLocationId: null,
     referenceOffsetMinutes: getUtcOffsetMinutes(BUDGET_DEVICE_ZONE, instant),
@@ -47,17 +48,21 @@ export function createHourFormatBudgetCheck() {
   let workCount: WorkCount | undefined;
   let locations: readonly Location[] = [];
   return {
-    presentOnce: (hourFormat: HourFormat, hasDistinctZones = false) => {
+    presentOnce: (
+      hourFormat: HourFormat,
+      hasDistinctZones = false,
+      language = LANGUAGE,
+    ) => {
       locations = hasDistinctZones
         ? TIME_ZONES_IN_USE.map((timeZoneId) =>
             buildLocation({ timeZoneId, label: timeZoneId }),
           )
         : buildBudgetLocations(BUDGET_ROW_COUNT);
-      presentIn(locations, BUDGET_FIRST_MOMENT, hourFormat);
+      presentIn(locations, BUDGET_FIRST_MOMENT, hourFormat, language);
     },
-    presentAgain: (hourFormat: HourFormat) => {
+    presentAgain: (hourFormat: HourFormat, language = LANGUAGE) => {
       workCount = startWorkCount();
-      presentIn(locations, BUDGET_SECOND_MOMENT, hourFormat);
+      presentIn(locations, BUDGET_SECOND_MOMENT, hourFormat, language);
       workCount.stop();
     },
     expectNoFormatter: () => expect(workCount?.formatters()).toBe(0),
