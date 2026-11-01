@@ -136,7 +136,8 @@
 - Impact: the metric's link to its file list points nowhere, so whoever checks M6 has to guess which list it means.
 - Fix: in `proposal.md:127` replace "task 8.1" with "task 7.1".
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: M6 in proposal.md now reads "(task 7.1 lists them)", the Stryker task of tasks.md that holds the two file lists.
 
 ## Verdict
 

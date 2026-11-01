@@ -124,7 +124,7 @@ No changes: `docs/ia/` does not exist.
 - M3: A minute-tick re-presentation of 50 city rows makes 0 city-label lookups and builds 0 formatters. A language switch makes at most 50 lookups (unit BDD).
 - M4: For a dialect fixture with a code `Intl` does not support and the base language `ru`, 3 of 3 outputs equal the Russian output: the country name of `KZ`, the local date of a row and the date bar weekday (unit tests).
 - M5: axe-core reports 0 violations on the main page after a switch, in 2 of 2 themes (E2E).
-- M6: Stryker scores at least 95 % (minimum acceptable 90 %) on each production file this change adds logic to (task 8.1 lists them).
+- M6: Stryker scores at least 95 % (minimum acceptable 90 %) on each production file this change adds logic to (task 7.1 lists them).
 
 ## Open Questions
 
