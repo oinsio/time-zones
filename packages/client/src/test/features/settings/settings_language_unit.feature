@@ -3,7 +3,7 @@ Feature: Interface language in the preferences
   As a user I choose the interface language on the settings page; it applies at
   once, is kept on the device and follows the same rules as the other settings.
 
-  @add-interface-language-selection @FR5 @UX3
+  @add-interface-language-selection @show-city-labels-in-interface-language @FR5 @FR2 @UX3
   Scenario: Choosing Russian applies at once
     Given the interface language is English
     And the current instant is "2026-03-08T07:30:00Z"
@@ -11,7 +11,7 @@ Feature: Interface language in the preferences
     When the user chooses «Русский» in the language group
     Then the list collapses and the button shows "🇷🇺 Русский"
     And the settings heading reads «Настройки» without a reload
-    And after going back Almaty keeps its city label and shows the country «Казахстан»
+    And after going back Almaty reads «Алматы» and shows the country «Казахстан»
     And the date shows the Russian weekday
     And searching "Алм" offers «Алматы»
 
