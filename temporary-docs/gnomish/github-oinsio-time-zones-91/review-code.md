@@ -4,11 +4,11 @@
 
 | Item | Value |
 |---|---|
-| Tasks verified | 10/10 |
+| Tasks verified | 9/10 |
 | Requirements traced | 24/24 |
-| CRITICAL | 0 |
+| CRITICAL | 1 |
 | WARNING | 0 |
-| SUGGESTION | 1 |
+| SUGGESTION | 0 |
 
 ## Tasks
 
@@ -18,7 +18,7 @@
 - ✅ 2.3 — `packages/client/src/locales/ru.json:107` is `"Создано с помощью Gnomish Factory"`; `en.json` and `GnomishFactoryCredit.tsx` are not in the branch diff. `npx vitest run` on the steps file, the component test and `src/locales` passes (3 files, 13 tests).
 - ✅ 3.1 — `packages/client/src/test/features/settings/settings_factory_credit_e2e.feature:6` tags `@FR1 @NFR-A1 @UX1`, `:16` Russian cell `Создано с помощью Gnomish Factory`, `:76` tag `@NFR-R1`; step comments at `steps/settings_factory_credit_e2e.steps.ts:35` and `:176`; file is 181 lines.
 - ✅ 3.2 — `packages/client/src/test/features/settings/settings_e2e.feature:43` tag `@FR1`, `:53` Russian cell, `:56` tag `@NFR-A1`; step comment at `steps/settings_factory_credit_e2e.steps.ts:78`. No file under `src/test/features/__screenshots__` is changed by the branch.
-- ✅ 4.1 — measured in this review: Stryker scoped to `src/app/settings/GnomishFactoryCredit.tsx` scores 100 % (see Mutation). The task's "Note it in this task" is not done (R1).
+- ❌ 4.1 — ticked but not done: `tasks.md:62` says "Note it in this task." and no score is noted there. The score itself, measured in this review, is 100 % for `src/app/settings/GnomishFactoryCredit.tsx` (see Mutation); the missing note is R1.
 - ✅ 4.2 — CI is green for the branch (stage precondition); the targeted Vitest files pass in this review.
 - ✅ 4.3 — `grep -rn "Гномск" packages/client/src docs/glossary` prints nothing (run in this review).
 - ✅ 4.4 — the traceability loop for FR1, FR2, NFR-A1, NFR-R1, UX1 prints nothing (run in this review from `packages/client/`).
@@ -58,15 +58,15 @@ The only production change is `packages/client/src/locales/ru.json`, which Stryk
 
 ## Findings
 
-### R1 — SUGGESTION — Stryker score of task 4.1 not recorded
+### R1 — CRITICAL — Task 4.1 ticked but its required score note is missing
 - Location: `openspec/changes/keep-gnomish-factory-name-untranslated-in-credit/tasks.md:62`
-- Rule: `—`
-- Problem: Task 4.1 says "Read `reports/mutation/mutation-report.json`. The score must be at least 95 % (minimum acceptable 90 %). Note it in this task." It is ticked, but no score is written in the task.
-- Impact: The M7 measurement is not recorded in the change, so after archiving nobody can see what score was measured without running Stryker again. The score itself is fine (100 %, measured in this review).
+- Rule: task 4.1 in `openspec/changes/keep-gnomish-factory-name-untranslated-in-credit/tasks.md:62` — "The score must be at least 95 % (minimum acceptable 90 %). Note it in this task."
+- Problem: Task 4.1 says "Read `reports/mutation/mutation-report.json`. The score must be at least 95 % (minimum acceptable 90 %). Note it in this task." It is ticked `[x]`, but no score is written in the task, so the task is ticked but not done.
+- Impact: A ticked-but-undone task: the M7 measurement is not recorded in the change, so after archiving (archives are immutable) nobody can see what score was measured without running Stryker again. The score itself is fine (100 %, measured in this review).
 - Fix: Append to task 4.1 in `tasks.md`: "Measured: 100 % (2 killed, 0 survived)."
 - Fix risk: none — one line of documentation in an active (not archived) change; no code or test changes.
 - Status: open
 
 ## Verdict
 
-Ready. No CRITICAL or WARNING findings; R1 is a non-blocking SUGGESTION.
+Not ready. Blocking: R1 (CRITICAL — task 4.1 ticked but not done). The fix is one line in `tasks.md`; no code change is needed.
