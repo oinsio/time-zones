@@ -183,7 +183,7 @@ Formatter caches in `src/presenter/dateTimeFormatters.ts` and `countryName.ts` a
   - Between the registry (task 3.3) and the retyped city data (task 4.2), `SUPPORTED_LANGUAGES` is `readonly string[]` and `i18n.ts` keeps a temporary `SupportedLanguage` alias; the typecheck is verified once all importers moved (task 4.4).
   - `adapters/preferencesRepository.test.ts` expectations of `schemaVersion: 1` become 2.
   - `test/features/settings/steps/settings_storage_unit.steps.tsx` compares the whole stored payload with `toEqual`, which does not skip `null` properties, so its expected payload adds `interfaceLanguage: null`.
-  - The E2E seeds that write the current version with the old payload add `interfaceLanguage: null`: `test/features/settings/steps/settings_theme_e2e.steps.ts` and `test/features/locations/steps/locationsSeedHelpers.ts`.
+  - The E2E seeds that write the current version with the old payload add `interfaceLanguage`: `test/features/settings/steps/settings_theme_e2e.steps.ts` and `test/features/locations/steps/locationsSeedHelpers.ts`. A version 2 document ignores the legacy key (D2), so the seeds write the language a preceding `seedLanguage` recorded on the world, or `null` without one. Otherwise "Hour labels on one line in Russian" (`time_selection_card_layout_e2e.feature`), which seeds both, would run in English; it also gains a `<html lang>` assertion.
   - `seedLanguage` keeps writing the legacy key, which D2 migrates, and so also covers FR8 end to end. Its local `LANGUAGE_STORAGE_KEY` gives way to `LEGACY_STORAGE_KEYS.LANGUAGE`.
 
 ### D9. Glossary owners
