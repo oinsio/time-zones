@@ -190,7 +190,9 @@ Presenting 50 location rows again at another minute of the same reference day SH
 - **AND** the noted parts of the Belgrade card keep their positions and sizes within 1 px
 
 #### Scenario: No accessibility violations with notes
-- **GIVEN** the list contains Almaty, Belgrade and New York with a clock change note and a wall-time hint shown
+- **GIVEN** the device time zone is `Asia/Almaty` and the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Almaty, New York and Chicago
+- **AND** the user typed `02:30` in New York, so New York shows the wall-time hint and Chicago its clock change note
 - **WHEN** the list is shown in the light or the dark theme
 - **THEN** axe-core reports no violations
 
