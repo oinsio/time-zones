@@ -9,7 +9,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `// @add-interface-language-selection @FR-X` above `f.Scenario` in unit steps;
   - `// Verifies FR-X of add-interface-language-selection` above E2E steps and in Vitest files;
   - `Implements FR-X of add-interface-language-selection (Dn)` in the JSDoc of new or changed production code.
-- **Glossary:** use the terms of `docs/glossary/`: interface language, locale metadata, locale registry, dialect, preferences, settings page, city label, country code. Never call the language list a "dropdown", "picker" or "popover".
+- **Glossary:** use the terms of `docs/glossary/`: interface language, locale metadata, locale registry, dialect, preferences, settings page, city label, country code.
 - **File size:** every file stays under 200 lines; split by aspect when one would grow past it.
 - **TDD:** for production code, write the named test first, run it and see it fail, then implement (`.claude/rules/tdd-workflow.md`).
 
@@ -17,7 +17,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 - [ ] 1.1 Update the docs (repository root), design D9:
   - `docs/glossary/settings.md`:
-    - add **Interface language** — the language of every interface text, date, country name and city name of search results. It is chosen in the language group of the settings page, or, when none is chosen, it follows the browser language and then falls back to English. *Code:* the owners of design D9. *RU:* «Язык интерфейса»; the group caption is «Язык». *Never:* locale (for the user's choice), UI language.
+    - add **Interface language** — the language of every interface text, date, country name and city name of search results. It is chosen in the language group of the settings page, or, when none is chosen, it follows the browser language and then falls back to English. *Code:* the owners of design D9. *RU:* «Язык интерфейса»; the group caption is «Язык».
     - add **Locale metadata** — the `_meta` block of a locale file: `code` (equal to the file name, a canonical language tag), `name` (English name, the sort key), `nativeName`, `baseLanguage`, `emoji`. It is never a translation. *Code:* `LocaleMetadata`, `parseLocaleMetadata`.
     - add **Locale registry** — every locale file whose locale metadata is complete and valid, collected automatically and sorted by `name`. It is the only source of the supported languages, the i18next resources and the settings list. City data is kept for `CITY_NAME_LANGUAGES` only. *Code:* `localeRegistry`, `buildLocaleRegistry`, `RegisteredLocale`, `SUPPORTED_LANGUAGES`.
     - add **Dialect** — a locale whose `baseLanguage` differs from its `code`; easter-egg languages are dialects. A missing text or language-keyed value comes from the base language, then English. *Code:* `resolveLanguageFallbacks`, `pickByLanguageFallback`.
@@ -202,6 +202,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
   Verify `npx vitest run src/locales/locales.test.ts` passes (identical key sets).
 - [ ] 8.2 RED: `app/settings/InterfaceLanguageGroup.test.tsx` (RTL, jsdom; split into `InterfaceLanguageGroup.keyboard.test.tsx` if it passes 200 lines):
+  - header comment `// Verifies FR2, FR3, FR4, FR6, NFR-A1, NFR-A2, UX1, UX4 of add-interface-language-selection (D6).`;
   - collapsed: one button whose text holds "🇺🇸" and "English", `aria-expanded="false"`, no list;
   - expanding → `aria-expanded="true"`, `aria-controls` equals the list `id`, the rows "English" then "Русский" by accessible name (emoji `aria-hidden`), the active row has `aria-current="true"` and the classes `border-accent` and a check icon, the other has `border-border`;
   - the chevron has `rotate-180` only while expanded;
@@ -217,7 +218,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 - [ ] 8.3 GREEN: `app/settings/InterfaceLanguageGroup.tsx` and `app/settings/InterfaceLanguageList.tsx` per design D6. In `SettingsPage.tsx`, render `<InterfaceLanguageGroup activeCode={useActiveInterfaceLanguage().code} onChoose={setInterfaceLanguage} />` after the hour format group, and extend the JSDoc. Verify, one at a time:
   - `npx vitest run src/app/settings` passes;
   - `npx vitest run src/app/AppShell.settings.test.tsx` passes.
-- [ ] 8.4 Unit BDD `test/features/settings/settings_language_search_unit.feature`, steps in `steps/settings_language_search_unit.steps.tsx`: "No search field below the threshold", "Filtering at the threshold" (all 5 rows, with the 10-locale fixture through the `locales` prop) and "Nothing found". Add "Collapsed group", "Expand and collapse" and "Names are not translated" to `settings_language_unit.feature` (task 7.4). Verify both steps files pass, one at a time.
+- [ ] 8.4 Unit BDD `test/features/settings/settings_language_search_unit.feature`, steps in `steps/settings_language_search_unit.steps.tsx`: "No search field below the threshold", "Filtering at the threshold" (all 5 rows, with the 10-locale fixture through the `locales` prop) and "Nothing found". Add "Names are not translated" (`@add-interface-language-selection @FR3 @UX1`) to `settings_language_unit.feature` (task 7.4). "Collapsed group" and "Expand and collapse" assert the place of the group and of the list, so they live in the E2E feature (task 10.3). Verify both steps files pass, one at a time.
 
 ## 9. Performance bound (NFR-P1; design D7)
 
@@ -239,7 +240,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   Add `@add-interface-language-selection @NFR-R2` to "Approved screenshots of the settings at <width> px in the <theme> theme" and re-approve: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_e2e.feature --grep "Approved screenshots of the settings" --update-snapshots`. Then run the same command without `--update-snapshots` and see it pass.
 - [ ] 10.3 New `test/features/settings/settings_language_e2e.feature` with steps in `steps/settings_language_e2e.steps.ts` (keyboard and layout steps in `steps/settings_language_layout_e2e.steps.ts` if needed), using `settingsE2eHelpers.ts`, `AxeBuilder` as in `locations_view_a11y_e2e.steps.ts`, and the existing steps "the locations screen uses the <theme> theme", "the screen is {int} px wide for the locations", "the locations screen matches the approved screenshot" and `the user presses the key {string}`. Scenarios:
   - "Collapsed group" (FR1, FR2; the group follows the hour format group by box position);
-  - "Choosing Russian applies at once" (FR5, M2: count `framenavigated` events of the main frame during the choice, expecting 0);
+  - "Expand and collapse" (FR2, FR3, FR4, UX2: the list's box top is at or below the button's box bottom, and the box of the following content moves down by the list's height);
+  - "Choosing Russian applies at once" (FR5, M2, UX3: count `framenavigated` events of the main frame during the choice, expecting 0, and `window.scrollY` is unchanged by the choice);
   - "The language survives a reload" (FR7; also the `<html lang>` `ru` and the title «Часовые пояса» right after reload);
   - "Legacy key without a document" (FR8, via `seedLanguage("ru")` and browser `en-US`);
   - "The language changes while the app is open" (app-shell);

@@ -104,7 +104,7 @@ None. The language choice is part of `settings`, and the registry is part of `ap
 
 #### Performance
 
-- NFR-P1: Expanding or collapsing the list and presenting the location rows again with an unchanged language builds no formatter. After a language change, presenting 50 rows builds at most one formatter per time zone and label kind in use. These bounds are counted, never timed (ADR-0008).
+- NFR-P1: Presenting the location rows again with an unchanged language builds no formatter. After a language change, presenting 50 rows builds at most one formatter per time zone and label kind in use. These bounds are counted, never timed (ADR-0008).
 
 #### Accessibility
 
@@ -150,6 +150,7 @@ Every locale is bundled, so offline behaves exactly like online. The registry al
 
 - `packages/client/src/test/features/settings/settings_language_unit.feature` — choice, persistence, migration, states (`@add-interface-language-selection`).
 - `packages/client/src/test/features/settings/settings_language_search_unit.feature` — the search threshold and filtering.
+- `packages/client/src/test/features/settings/settings_language_budget_unit.feature` — the formatter bound of NFR-P1.
 - `packages/client/src/test/features/app_shell/app_shell_locale_registry_unit.feature` — the registry, the start language, the dialect fallback.
 - `packages/client/src/test/features/settings/settings_language_e2e.feature` — switching and reloading, keyboard, axe-core, layout, screenshots.
 
