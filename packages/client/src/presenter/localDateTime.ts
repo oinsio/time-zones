@@ -3,7 +3,7 @@ import {
   MINUTES_PER_HOUR,
   UTC_ZONE_ID,
 } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
+import type { SupportedLanguage } from "@/locales";
 import type { Temporal } from "@/lib/temporal";
 import { HourFormat } from "@/preferences";
 import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
