@@ -18,13 +18,16 @@ const LOCALE_METADATA_FIELDS = [
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
 
-const isCanonicalLanguageTag = (code: string): boolean => {
+export const toCanonicalLanguageTag = (tag: string): string | undefined => {
   try {
-    return Intl.getCanonicalLocales(code)[0] === code;
+    return Intl.getCanonicalLocales(tag)[0];
   } catch {
-    return false;
+    return undefined;
   }
 };
+
+const isCanonicalLanguageTag = (code: string): boolean =>
+  toCanonicalLanguageTag(code) === code;
 
 /**
  * Reads locale metadata, or returns `undefined` when a field is missing or empty,

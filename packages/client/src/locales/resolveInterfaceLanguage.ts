@@ -4,20 +4,13 @@ import {
   localeRegistry,
   type RegisteredLocale,
 } from "./localeRegistry";
-
-const toCanonicalTag = (browserLanguage: string): string | undefined => {
-  try {
-    return Intl.getCanonicalLocales(browserLanguage)[0];
-  } catch {
-    return undefined;
-  }
-};
+import { toCanonicalLanguageTag } from "./localeMetadata";
 
 const matchBrowserLanguage = (
   browserLanguage: string,
   registry: readonly RegisteredLocale[],
 ): string | undefined => {
-  const canonicalTag = toCanonicalTag(browserLanguage);
+  const canonicalTag = toCanonicalLanguageTag(browserLanguage);
   if (canonicalTag === undefined) return undefined;
   if (findRegisteredLocale(canonicalTag, registry)) return canonicalTag;
   const primarySubtag = canonicalTag.split("-")[0] ?? canonicalTag;
