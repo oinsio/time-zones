@@ -16,9 +16,12 @@ executor:
   # Only these four keys are accepted.
   settings:
     # Agent turns per round. Every claim about the codebase is checked by grep/read.
-    maxTurns: 60
+    # 60 ran out on task #96 (a change touching four capabilities): all six rounds spent
+    # 60-63 turns on the required reading and ended before review-specs.md was written.
+    maxTurns: 120
     # Round is killed after this; counts as infra failure, not an attempt.
-    roundTimeout: 1200s
+    # 60 turns took about 5.5 minutes on task #96; doubled along with the turns.
+    roundTimeout: 2400s
     # Cannot widen what .claude/settings.json denies. Bash is for git, grep and the
     # OpenSpec CLI; the scope check below rejects any edit outside review-specs.md.
     allowedTools:
@@ -50,6 +53,8 @@ verify:
       for section in '## Summary' '## Freshness' '## Coverage' '## Consistency' '## Findings' '## Verdict'; do
         grep -q "^$section" "$review" || { echo "$review has no '$section' section"; exit 1; }
       done
+      pending=$(grep -n '_pending_' "$review" || true)
+      [ -z "$pending" ] || { echo "$pending"; echo "$review still has unfilled skeleton sections - replace every '_pending_' line"; exit 1; }
       bad=$(grep -n '^### ' "$review" | grep -vE '^[0-9]+:### R[0-9]+ — (CRITICAL|WARNING|SUGGESTION) — .+' || true)
       [ -z "$bad" ] || { echo "$bad"; echo "level-3 headings are findings only and read '### R<n> — CRITICAL|WARNING|SUGGESTION — <title>'"; exit 1; }
       duplicates=$(grep -oE '^### R[0-9]+ ' "$review" | sort | uniq -d)

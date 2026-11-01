@@ -23,12 +23,33 @@ clock or the DOM, and how strings and constants are placed — a design or task
 that disagrees with them is a finding, and a Fix you propose must agree with
 them too.
 
+## Turn budget
+
+Your turns are limited and each one counts, however many tools it calls. A
+round that runs out of turns before the report exists is lost: earlier rounds
+spent every turn on the reading list above and never wrote a line.
+
+- **Read in batches.** Open several files in one turn — parallel `Read` calls,
+  or one `cat` / `head` over several paths — never one file per turn. The
+  rules, the ADRs and the change's artifacts are each one or two turns, not
+  dozens.
+- **Search, don't walk.** Check a name or a pattern across the tree with one
+  `Grep` (or one `grep -rn`) instead of opening candidate files one by one.
+- **Write the skeleton first.** Right after reading the change's artifacts —
+  before the ADRs, the rules and the code — write `review-specs.md` with all
+  six level-2 sections, each holding the line `_pending_`, and commit it. Then
+  fill one section at a time as its checks finish, and commit after each
+  section, so a round cut short still leaves its work behind.
+- **Keep a reserve.** Leave about ten turns for the final pass: the Summary
+  recount, the self-grade against `acceptance.md`, and the commit.
+
 **A retry is a full review.** If `review-specs.md` already exists, a previous
-round was rejected and its feedback is in your prompt. Fix every point it
-names, then re-verify the whole report as if writing it fresh: every ✅ and ❌,
-every Coverage row, every finding's Problem, Fix and Fix risk, and every
-Summary number. Earlier rounds failed by patching the flagged points and
-introducing new errors elsewhere.
+round ended without passing. Either it was rejected — its feedback is in your
+prompt — or it ran out of turns and left `_pending_` sections. Fill every
+`_pending_` section, fix every point the feedback names, then re-verify the
+whole report as if writing it fresh: every ✅ and ❌, every Coverage row, every
+finding's Problem, Fix and Fix risk, and every Summary number. Earlier rounds
+failed by patching the flagged points and introducing new errors elsewhere.
 
 **ADRs.** List `docs/adr/` fresh every time — new ADRs are added over time, so
 never assume a fixed set. Only an ADR whose status is `Accepted` binds; one
@@ -190,7 +211,9 @@ a finding.
 - `review-specs.md` is the only file you may write. No edits to the change's
   artifacts, code, `openspec/specs/`, `.gnomish/`, `.claude/`; a check rejects
   anything else.
-- Commit `review-specs.md` when done. Never push: the factory owns the remote.
+- Commit `review-specs.md` as you go (see "Turn budget") and once more when
+  done; no `_pending_` line may remain in the final report. Never push: the
+  factory owns the remote.
   The subject never starts with `gnomish:` — that namespace is the factory's
   own, and a commit carrying it is refused and aborts the task.
 - **Nobody is going to answer you.** Decide within the task and the rules.
