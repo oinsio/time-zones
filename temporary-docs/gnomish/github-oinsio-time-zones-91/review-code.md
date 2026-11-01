@@ -65,7 +65,8 @@ The only production change is `packages/client/src/locales/ru.json`, which Stryk
 - Impact: A ticked-but-undone task: the M7 measurement is not recorded in the change, so after archiving (archives are immutable) nobody can see what score was measured without running Stryker again. The score itself is fine (100 %, measured in this review).
 - Fix: Append to task 4.1 in `tasks.md`: "Measured: 100 % (2 killed, 0 survived)."
 - Fix risk: none — one line of documentation in an active (not archived) change; no code or test changes.
-- Status: open
+- Status: rejected (contradicts-spec)
+- Resolution: the fix edits tasks.md, which the fix-code stage instructions forbid (tasks.md stays untouched and as implement left it, enforced by the stage checks). The measured score is recorded here instead: GnomishFactoryCredit.tsx 100 % (2 killed, 0 survived), above the 95 % target; no code defect exists.
 
 ## Verdict
 
