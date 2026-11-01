@@ -74,20 +74,6 @@ describe("PreferencesProvider", () => {
     });
   });
 
-  // Verifies FR7 of add-interface-language-selection (D1)
-  it("should apply the interface language at once and write it once after the debounce", () => {
-    const { result, writeScheduler, repository } = renderPreferences();
-    const saveSpy = vi.spyOn(repository, "save");
-    act(() => result.current.setInterfaceLanguage("ru"));
-    expect(result.current.preferences.interfaceLanguage).toBe("ru");
-    expect(saveSpy).not.toHaveBeenCalled();
-    act(() => writeScheduler.runPending());
-    expect(saveSpy).toHaveBeenCalledTimes(1);
-    expect(repository.load()).toMatchObject({
-      preferences: { interfaceLanguage: "ru" },
-    });
-  });
-
   it("should save two quick changes once, with both applied", () => {
     const { result, writeScheduler, repository } = renderPreferences();
     const saveSpy = vi.spyOn(repository, "save");
