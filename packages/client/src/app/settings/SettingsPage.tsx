@@ -1,9 +1,14 @@
 import { ChevronLeft, Monitor, Moon, Sun } from "lucide-react";
 import { type ReactNode, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { PreferencesStatus, usePreferences } from "@/controller";
+import {
+  PreferencesStatus,
+  useActiveInterfaceLanguage,
+  usePreferences,
+} from "@/controller";
 import { HourFormat, ThemePreference } from "@/preferences";
 import { GnomishFactoryCredit } from "./GnomishFactoryCredit";
+import { InterfaceLanguageGroup } from "./InterfaceLanguageGroup";
 import { SettingsOptionGroup } from "./SettingsOptionGroup";
 
 type SettingsPageProps = {
@@ -30,13 +35,14 @@ const HOUR_FORMAT_LABEL_KEYS = {
 } as const;
 
 /**
- * The settings page: the theme preference and the hour format. It handles an
+ * The settings page: the theme preference, the hour format and the interface language. It handles an
  * unreadable stored document (a note with Reset) and a failed save (a note).
  * Focus goes to its heading when it opens.
  * Implements FR3, FR4, FR5, FR7, FR16, NFR-A1, NFR-R1 of
  * add-settings-page-and-device-time-location (D10).
  * Implements FR1, NFR-A1, NFR-A2, UX1 of add-gnomish-factory-credit (D1).
  * Implements FR1, NFR-A1, UX1 of move-and-restyle-gnomish-factory-credit (D1).
+ * Implements FR1, FR13 of add-interface-language-selection (D6).
  */
 export function SettingsPage({ notices, onBack }: SettingsPageProps) {
   const { t } = useTranslation();
@@ -46,8 +52,10 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
     hasSaveFailed,
     setTheme,
     setHourFormat,
+    setInterfaceLanguage,
     resetPreferences,
   } = usePreferences();
+  const activeLanguage = useActiveInterfaceLanguage();
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -114,6 +122,10 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
           }))}
           selectedValue={preferences.hourFormat}
           onSelect={setHourFormat}
+        />
+        <InterfaceLanguageGroup
+          activeCode={activeLanguage.code}
+          onChoose={setInterfaceLanguage}
         />
       </main>
       <footer className="sticky bottom-0 -mx-4">

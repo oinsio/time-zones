@@ -1,3 +1,4 @@
+import type { CityNameLanguage } from "@/constants";
 import type { ZoneCityData } from "./citySource";
 import { createCompositeCitySearch } from "./createCompositeCitySearch";
 
@@ -23,5 +24,5 @@ export const zoneCities: ZoneCityData[] = [
   city("UTC", "UTC", "UTC"),
 ];
 export const search = createCompositeCitySearch(zoneCities);
-export const idsOf = (query: string, language: "en" | "ru" = "en") =>
+export const idsOf = (query: string, language: CityNameLanguage = "en") =>
   search.search(query, language).map((result) => result.record.timeZoneId);

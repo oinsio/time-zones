@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { deriveCityNameFromTimeZoneId } from "@/adapters";
-import type { SupportedLanguage } from "@/i18n";
 import type { LoadCitySearch } from "@/ports";
 import { loadCitySearchOnce, readLoadedCitySearch } from "./cityDataCache";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 
 /**
  * The exemplar city of a zone: the name derived from the zone ID at once, the
@@ -11,14 +10,13 @@ import { loadCitySearchOnce, readLoadedCitySearch } from "./cityDataCache";
  * render and a failed load keeps the derived name: no error state, no retry.
  * `undefined` for an `undefined` zone, which never starts a load.
  * Implements FR8, NFR-P2 of show-here-entry-for-device-time (D4).
+ * Implements FR5 of add-interface-language-selection (D5): the name follows the active language.
  */
 export function useExemplarCity(
   timeZoneId: string | undefined,
   load: LoadCitySearch,
 ): string | undefined {
-  const { i18n } = useTranslation();
-  const language = (i18n.resolvedLanguage ??
-    i18n.language) as SupportedLanguage;
+  const { cityNameLanguage } = useActiveInterfaceLanguage();
   const [loadedSearch, setLoadedSearch] = useState(() =>
     readLoadedCitySearch(load),
   );
@@ -32,7 +30,7 @@ export function useExemplarCity(
   return (
     (loadedSearch ?? readLoadedCitySearch(load))?.getExemplarCity(
       timeZoneId,
-      language,
+      cityNameLanguage,
     ) ?? deriveCityNameFromTimeZoneId(timeZoneId)
   );
 }

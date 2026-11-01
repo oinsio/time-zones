@@ -1,5 +1,6 @@
 // Verifies FR1, FR2, FR3, NFR-A1 of add-gnomish-factory-credit (D2, D4).
 // Verifies FR2, FR3, UX2 of move-and-restyle-gnomish-factory-credit (D2, D3).
+// Verifies FR1, UX1 of keep-gnomish-factory-name-untranslated-in-credit (D1).
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import { GNOMISH_FACTORY_LANDING_URL } from "@/constants";
@@ -12,7 +13,7 @@ describe("GnomishFactoryCredit", () => {
 
   it.each([
     ["en", "Built with Gnomish Factory"],
-    ["ru", "Создано с помощью Гномской фабрики"],
+    ["ru", "Создано с помощью Gnomish Factory"],
   ])(
     "should render one link named by the whole credit text in %s",
     async (language, creditText) => {

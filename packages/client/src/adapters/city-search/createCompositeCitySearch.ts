@@ -1,5 +1,5 @@
+import type { CityNameLanguage } from "@/constants";
 import { MAX_SEARCH_RESULTS, POPULAR_TIME_ZONE_IDS } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import {
   type CitySearch,
   type CitySearchResult,
@@ -44,6 +44,7 @@ function keepFirstResultPerZone(
  * ranks them: kind, then popularity, then name (abbreviations keep the order
  * of the abbreviation table).
  * Implements FR1–FR7, NFR-P1 of add-locations-via-search (D7, ADR-0006).
+ * Implements FR5 of add-interface-language-selection (D5): matches names of the active language.
  */
 export function createCompositeCitySearch(
   zoneCityRecords: readonly ZoneCityData[],
@@ -55,7 +56,7 @@ export function createCompositeCitySearch(
   );
 
   return {
-    search(query: string, language: SupportedLanguage) {
+    search(query: string, language: CityNameLanguage) {
       const normalizedQuery = normalizeSearchText(query);
       if (normalizedQuery === "") return [];
       const collator = new Intl.Collator(language);

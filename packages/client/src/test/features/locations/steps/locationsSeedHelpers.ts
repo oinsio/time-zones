@@ -104,6 +104,7 @@ export async function seedTwelveHourState(world: LocationsWorld) {
       payload: {
         theme: THEME_VALUES.System,
         hourFormat: HOUR_FORMAT_VALUES["12-hour"],
+        interfaceLanguage: world.seededInterfaceLanguage,
       },
     }),
   );

@@ -9,6 +9,7 @@ export {
   type CalendarWeekday,
   type PresentedCalendarMonth,
   presentCalendarMonth,
+  resolveFirstDayOfWeek,
 } from "./calendarMonth";
 export { presentClockChangeNote } from "./clockChangeNote";
 export {

@@ -78,7 +78,7 @@ Feature: Location card layout in a real browser
       | 1024  |
       | 1440  |
 
-  @fix-location-card-and-header-layout @FR6
+  @fix-location-card-and-header-layout @FR6 @add-interface-language-selection @FR8
   Scenario: Hour labels on one line in Russian
     Given the locations interface language is Russian
     And the stored preferences are theme System and hour format 12-hour
@@ -86,6 +86,7 @@ Feature: Location card layout in a real browser
     And the screen is 1024 px wide for the locations
     When the user opens the locations app
     Then the hour labels of "Москва", "Kolkata" are on one line and end at the track's right edge
+    And the locations page language is "ru"
 
   @fix-location-card-and-header-layout @NFR-R1
   Scenario Outline: Tracks in the 12-hour format fit <width> px

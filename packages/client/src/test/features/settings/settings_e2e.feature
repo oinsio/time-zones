@@ -40,20 +40,20 @@ Feature: Settings page in a real browser
     And the option "24-hour" of the group "Hour format" is checked
     And the options "Light", "Dark" and "System" are named in the group "Theme"
 
-  @add-settings-page-and-device-time-location @FR16 @add-gnomish-factory-credit @FR2
+  @add-settings-page-and-device-time-location @FR16 @add-gnomish-factory-credit @FR2 @keep-gnomish-factory-name-untranslated-in-credit @FR1 @add-interface-language-selection @FR13
   Scenario Outline: Both languages
     Given the locations interface language is <language>
     And the user opens the settings
     Then the settings heading is "<heading>"
-    And the groups are named "<theme>" and "<hour format>"
+    And the groups are named "<theme>", "<hour format>" and "<language group>"
     And the Gnomish Factory credit is "<credit>"
 
     Examples:
-      | language | heading   | theme | hour format    | credit                             |
-      | Russian  | Настройки | Тема  | Формат времени | Создано с помощью Гномской фабрики |
-      | English  | Settings  | Theme | Hour format    | Built with Gnomish Factory         |
+      | language | heading   | theme | hour format    | language group | credit                            |
+      | Russian  | Настройки | Тема  | Формат времени | Язык           | Создано с помощью Gnomish Factory |
+      | English  | Settings  | Theme | Hour format    | Language       | Built with Gnomish Factory        |
 
-  @add-settings-page-and-device-time-location @NFR-A1 @NFR-A3 @add-gnomish-factory-credit @NFR-A1 @move-and-restyle-gnomish-factory-credit @NFR-A2
+  @add-settings-page-and-device-time-location @NFR-A1 @NFR-A3 @add-gnomish-factory-credit @NFR-A1 @move-and-restyle-gnomish-factory-credit @NFR-A2 @keep-gnomish-factory-name-untranslated-in-credit @NFR-A1
   Scenario Outline: Settings have no accessibility violations in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the user opens the settings
@@ -83,7 +83,7 @@ Feature: Settings page in a real browser
       | 320   |
       | 2560  |
 
-  @add-settings-page-and-device-time-location @NFR-R3 @M6 @add-gnomish-factory-credit @NFR-R2 @move-and-restyle-gnomish-factory-credit @NFR-R2
+  @add-settings-page-and-device-time-location @NFR-R3 @M6 @add-gnomish-factory-credit @NFR-R2 @move-and-restyle-gnomish-factory-credit @NFR-R2 @add-interface-language-selection @NFR-R2
   Scenario Outline: Approved screenshots of the settings at <width> px in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the screen is <width> px wide for the locations

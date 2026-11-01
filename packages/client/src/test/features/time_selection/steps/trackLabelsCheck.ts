@@ -5,26 +5,27 @@ import {
   HOUR_LABEL_FORMAT_OPTIONS,
   LOCAL_TIME_FORMAT_OPTIONS,
 } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import { Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import { HourFormat } from "@/preferences";
 import { type HourLabel, presentLocationRows } from "@/presenter";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 
 const LABEL_CITIES = ["Kolkata", "Kathmandu", "New York"];
-const LABEL_LANGUAGES: SupportedLanguage[] = ["en", "ru"];
+const LABEL_LANGUAGES: InterfaceLanguageCode[] = ["en", "ru"];
 const LABEL_DEVICE_TIME_ZONE = "UTC";
 
 /** Hour labels of three zones with :30 and :45 offsets, as the presenter writes them. */
 export const createTrackLabelsCheck = () => {
   let dayStart = "";
-  let presentedByLanguage: [SupportedLanguage, (readonly HourLabel[])[]][] = [];
+  let presentedByLanguage: [InterfaceLanguageCode, (readonly HourLabel[])[]][] =
+    [];
   const locations = LABEL_CITIES.map((label) =>
     buildLocation({ label, ...KNOWN_CITIES[label] }),
   );
 
-  const presentLabels = (language: SupportedLanguage) => {
+  const presentLabels = (language: InterfaceLanguageCode) => {
     const instant = Temporal.Instant.from(dayStart);
     return presentLocationRows(locations, {
       language,
@@ -40,7 +41,7 @@ export const createTrackLabelsCheck = () => {
 
   /** The platform's own formatting of the instant at a label's fraction of the day. */
   const platformLabel = (
-    language: SupportedLanguage,
+    language: InterfaceLanguageCode,
     timeZoneId: string,
     fraction: number,
   ) => {

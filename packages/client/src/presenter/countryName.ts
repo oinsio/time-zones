@@ -1,9 +1,12 @@
 import { REGION_DISPLAY_FALLBACK, REGION_DISPLAY_TYPE } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
+import type { InterfaceLanguageCode } from "@/locales";
 
-const displayNamesByLanguage = new Map<SupportedLanguage, Intl.DisplayNames>();
+const displayNamesByLanguage = new Map<
+  InterfaceLanguageCode,
+  Intl.DisplayNames
+>();
 
-function getDisplayNames(language: SupportedLanguage): Intl.DisplayNames {
+function getDisplayNames(language: InterfaceLanguageCode): Intl.DisplayNames {
   const cachedDisplayNames = displayNamesByLanguage.get(language);
   if (cachedDisplayNames) return cachedDisplayNames;
   const displayNames = new Intl.DisplayNames(language, {
@@ -21,7 +24,7 @@ function getDisplayNames(language: SupportedLanguage): Intl.DisplayNames {
  */
 export function presentCountryName(
   countryCode: string,
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
 ): string {
   if (countryCode === "" || typeof Intl.DisplayNames !== "function") return "";
   return getDisplayNames(language).of(countryCode) ?? "";

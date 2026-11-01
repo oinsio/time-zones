@@ -4,8 +4,8 @@ import {
   DATE_BAR_SHORT_FORMAT_OPTIONS,
   FULL_DATE_FORMAT_OPTIONS,
 } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import type { HourFormat } from "@/preferences";
 import { formatWallClockTime } from "./localDateTime";
 
@@ -19,7 +19,7 @@ export type DateBarContext = {
   today: Temporal.PlainDate;
   isPinned: boolean;
   gap: DateBarGap | undefined;
-  language: SupportedLanguage;
+  language: InterfaceLanguageCode;
   hourFormat: HourFormat;
   translate: TFunction;
 };

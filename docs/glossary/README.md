@@ -21,7 +21,7 @@ The normative dictionary of the project's ubiquitous language. If a term is here
 | Time selection | [time-selection.md](time-selection.md) | the reference day, day tracks, day periods |
 | Date selection | [date-selection.md](date-selection.md) | the date bar, the calendar, Now, DST notes |
 | Search | [search.md](search.md) | finding a city and adding it as a location |
-| Settings | [settings.md](settings.md) | the settings page, the theme preference, the hour format |
+| Settings | [settings.md](settings.md) | the settings page, the theme preference, the hour format, the interface language, the locale registry |
 | Browser compatibility | [browser-compatibility.md](browser-compatibility.md) | supported engines, legacy engines, legacy support, the legacy zone shim |
 | Views | [views.md](views.md) | interchangeable interfaces over the model |
 | App shell | [app-shell.md](app-shell.md) | notices, recovery, storage and offline states |

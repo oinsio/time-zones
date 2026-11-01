@@ -92,6 +92,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           expect(JSON.parse(world.storedDocument() ?? "{}").payload).toEqual({
             theme: ThemePreference.DARK,
             hourFormat: HourFormat.H12,
+            interfaceLanguage: null,
           });
         },
       );

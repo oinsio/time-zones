@@ -1,6 +1,7 @@
 // Implements FR6, verifies NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D5).
 // Implements NFR-P1 of set-home-location-and-show-differences: rows with a home location.
 // Implements NFR-P1 of add-settings-page-and-device-time-location: the device time location next to the rows.
+// Implements NFR-P1 of add-interface-language-selection: rows after an interface language switch.
 import { bench, describe } from "vitest";
 import { ONE_DAY } from "@/constants";
 import {
@@ -54,6 +55,7 @@ await dateChangeWorld.prepare(
   DATE_CHANGE_START_MOMENT,
   DATE_CHANGE_DEVICE_TIME_ZONE,
 );
+let isRussianNext = false;
 // Alternating days keep every sample on a day the stop cache does not hold.
 let dateShiftDays = -ONE_DAY;
 
@@ -117,6 +119,18 @@ describe("row presenting", () => {
     "wall-time input on 50 rows",
     () => {
       presentBudgetState(typeInNewYork(wallTimeState, WALL_TIME_BENCH_TEXT));
+    },
+    options,
+  );
+  // Verifies NFR-P1 of add-interface-language-selection: the first presentation after a language switch.
+  bench(
+    "present 50 rows after a language switch",
+    () => {
+      isRussianNext = !isRussianNext;
+      presentBudgetRows(locations, {
+        timestamp: BUDGET_FIRST_MOMENT,
+        language: isRussianNext ? "ru" : "en",
+      });
     },
     options,
   );

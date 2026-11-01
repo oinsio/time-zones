@@ -39,6 +39,17 @@ Given(
   },
 );
 
+// Verifies FR5, FR8 of add-interface-language-selection.
+Then(
+  "the locations page language is {string}",
+  async ({ locationsWorld }, language: string) => {
+    await expect(locationsWorld.page.locator("html")).toHaveAttribute(
+      "lang",
+      language,
+    );
+  },
+);
+
 // Verifies FR11, NFR-A2 of set-home-location-and-show-differences.
 When(
   "the user focuses the location menu button of {string} and presses Enter",

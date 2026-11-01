@@ -1,4 +1,4 @@
-import type { SupportedLanguage } from "@/i18n";
+import type { CityNameLanguage } from "@/constants";
 
 /** Why a result matched, best kind first (ranking follows this order). */
 export enum SearchMatchKind {
@@ -15,7 +15,7 @@ export type CityRecord = {
   /** The canonical time zone identifier. */
   id: string;
   timeZoneId: string;
-  names: Record<SupportedLanguage, string>;
+  names: Record<CityNameLanguage, string>;
   /** ISO 3166-1 alpha-2 code; empty for zones without a country. */
   countryCode: string;
   /** Abbreviations that map to this zone. */
@@ -39,14 +39,14 @@ export type CitySearchResult = {
 export interface CitySearch {
   search(
     query: string,
-    language: SupportedLanguage,
+    language: CityNameLanguage,
   ): readonly CitySearchResult[];
   /**
    * The city a time zone stands for, in the interface language; the name
    * derived from the zone ID when the data has none.
    * Implements FR8, FR12 of show-here-entry-for-device-time.
    */
-  getExemplarCity(timeZoneId: string, language: SupportedLanguage): string;
+  getExemplarCity(timeZoneId: string, language: CityNameLanguage): string;
   /** Popular locations, shown for an empty query. */
   suggest(): readonly CitySearchResult[];
 }

@@ -4,7 +4,7 @@ import {
   TWELVE_HOUR_WRAP,
   UTC_ZONE_ID,
 } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
+import type { InterfaceLanguageCode } from "@/locales";
 import { HourFormat } from "@/preferences";
 import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
 
@@ -14,9 +14,9 @@ export type DayPeriodMarkers = { am: string; pm: string };
 const DAY_PERIOD_PART_TYPE = "dayPeriod";
 const NO_MARKER = "";
 
-const markersByLanguage = new Map<SupportedLanguage, DayPeriodMarkers>();
+const markersByLanguage = new Map<InterfaceLanguageCode, DayPeriodMarkers>();
 
-function readMarker(language: SupportedLanguage, hour: number): string {
+function readMarker(language: InterfaceLanguageCode, hour: number): string {
   const parts = getDateTimeFormatter(
     language,
     UTC_ZONE_ID,
@@ -35,7 +35,7 @@ function readMarker(language: SupportedLanguage, hour: number): string {
  * Implements FR6 of add-settings-page-and-device-time-location (D9).
  */
 export function getDayPeriodMarkers(
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
 ): DayPeriodMarkers {
   const cachedMarkers = markersByLanguage.get(language);
   if (cachedMarkers !== undefined) return cachedMarkers;

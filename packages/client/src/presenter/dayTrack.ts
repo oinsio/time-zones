@@ -1,7 +1,7 @@
 import type { TFunction } from "i18next";
 import { HOUR_LABEL_INTERVAL_HOURS } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import {
   type DayPeriodStop,
   getDayPeriodStops,
@@ -37,7 +37,7 @@ export type DayTrackContext = {
   timeZoneId: string;
   instant: Temporal.Instant;
   day: ReferenceDay;
-  language: SupportedLanguage;
+  language: InterfaceLanguageCode;
   hourFormat: HourFormat;
   translate: TFunction;
   localTimeLabel: string;
@@ -49,7 +49,7 @@ const LABEL_COUNT = 4;
 /** Two-digit hours, with minutes when they are not zero. */
 export function formatHourLabel(
   localDateTime: Temporal.ZonedDateTime,
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
   hourFormat: HourFormat,
 ): string {
   const kind =
@@ -70,7 +70,7 @@ let cachedLabelsByZone = new Map<string, readonly HourLabel[]>();
 function getHourLabels(
   timeZoneId: string,
   day: ReferenceDay,
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
   hourFormat: HourFormat,
 ): readonly HourLabel[] {
   const labelsKey = `${day.start.toString()}|${day.end.toString()}|${language}|${hourFormat}`;

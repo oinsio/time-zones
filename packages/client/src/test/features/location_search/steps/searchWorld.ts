@@ -1,6 +1,6 @@
 import zoneCities from "virtual:zone-cities";
 import { createCompositeCitySearch } from "@/adapters/city-search";
-import type { SupportedLanguage } from "@/i18n";
+import type { CityNameLanguage } from "@/constants";
 import type { CitySearchResult } from "@/ports";
 import { startWorkCount } from "@/test/workCounters";
 
@@ -11,7 +11,7 @@ const citySearch = createCompositeCitySearch(zoneCities);
 export const buildCitySearch = () => createCompositeCitySearch(zoneCities);
 
 export type SearchWorld = {
-  language: SupportedLanguage;
+  language: CityNameLanguage;
   results: readonly CitySearchResult[];
   /** Replaces the shared search, e.g. one built on an engine without `Intl.DisplayNames`. */
   citySearch?: ReturnType<typeof buildCitySearch>;

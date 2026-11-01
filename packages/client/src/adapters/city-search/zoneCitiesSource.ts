@@ -1,10 +1,10 @@
 import {
+  CITY_NAME_LANGUAGES,
   POPULAR_TIME_ZONE_IDS,
   REGION_DISPLAY_FALLBACK,
   REGION_DISPLAY_TYPE,
   UTC_ZONE_ID,
 } from "@/constants";
-import { SUPPORTED_LANGUAGES } from "@/i18n";
 import { canonicalizeTimeZoneId } from "@/model";
 import {
   type CityRecord,
@@ -15,12 +15,6 @@ import type { CitySource, ZoneCityData } from "./citySource";
 import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
 import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
 import { findAbbreviationsOfZone } from "./timeZoneAbbreviations";
-
-/**
- * One record per browser-known IANA zone, joined with the build-time CLDR
- * city names.
- * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
- */
 
 /** Zones the browser knows, or `undefined` when it cannot list them. */
 export type ListTimeZones = () => readonly string[] | undefined;
@@ -80,7 +74,7 @@ function buildRecord(
 /** Implements FR5 of support-legacy-ios-12-safari (no texts without Intl.DisplayNames). */
 function readCountryTexts(countryCode: string): SearchableText[] {
   if (countryCode === "" || typeof Intl.DisplayNames !== "function") return [];
-  return SUPPORTED_LANGUAGES.flatMap((language) => {
+  return CITY_NAME_LANGUAGES.flatMap((language) => {
     const countryName = new Intl.DisplayNames(language, {
       type: REGION_DISPLAY_TYPE,
       fallback: REGION_DISPLAY_FALLBACK,
@@ -89,6 +83,12 @@ function readCountryTexts(countryCode: string): SearchableText[] {
   });
 }
 
+/**
+ * One record per browser-known IANA zone, joined with the build-time CLDR
+ * city names.
+ * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
+ * Implements FR5, FR10 of add-interface-language-selection (D5): names in the language fallback order.
+ */
 export function createZoneCitiesSource(
   zoneCities: readonly ZoneCityData[],
   listTimeZones: ListTimeZones = listBrowserTimeZones,
@@ -103,7 +103,7 @@ export function createZoneCitiesSource(
   );
   const searchableRecords = records.map((record) => ({
     record,
-    cityTexts: SUPPORTED_LANGUAGES.map((language) =>
+    cityTexts: CITY_NAME_LANGUAGES.map((language) =>
       toSearchableText(record.names[language]),
     ),
     countryTexts: readCountryTexts(record.countryCode),

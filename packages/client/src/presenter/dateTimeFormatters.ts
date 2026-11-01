@@ -4,7 +4,7 @@ import {
   LOCAL_DATE_FORMAT_OPTIONS,
   LOCAL_TIME_FORMAT_OPTIONS_BY_HOUR_FORMAT,
 } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
+import type { InterfaceLanguageCode } from "@/locales";
 import { HourFormat } from "@/preferences";
 
 export enum DateTimeLabelKind {
@@ -43,7 +43,7 @@ const formattersByKey = new Map<string, Intl.DateTimeFormat>();
  * Implements FR5, NFR-P1 of add-settings-page-and-device-time-location (D8).
  */
 export function getDateTimeFormatter(
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
   timeZoneId: string,
   kind: DateTimeLabelKind,
   hourFormat: HourFormat,

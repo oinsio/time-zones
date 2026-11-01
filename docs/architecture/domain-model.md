@@ -26,7 +26,7 @@ classDiagram
     class Preferences {
         ThemePreference theme  "LIGHT | DARK | SYSTEM"
         HourFormat hourFormat  "H12 | H24"
-        string language        "planned: ru | en | dialect code"
+        string? interfaceLanguage "registered locale code; null = follow the browser"
         ViewMode viewMode      "planned: AUTO | registered ViewId"
     }
     WorldClockState "1" o-- "*" Location
@@ -38,7 +38,7 @@ classDiagram
 - `homeLocationId` is optional; the app never assigns it.
 - `deviceTimeZoneId` is environment state: the controller reads it from the `Clock` port and sends `SET_DEVICE_TIME_ZONE`; it is not persisted.
 - `Preferences` is a separate model with its own repository.
-- Commands: `ADD_DEVICE_TIME_LOCATION` (locations), `SET_THEME`, `SET_HOUR_FORMAT` (preferences). `getRows` derives no extra entry.
+- Commands: `ADD_DEVICE_TIME_LOCATION` (locations), `SET_THEME`, `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE` (preferences). `getRows` derives no extra entry.
 - `viewMode` (planned) holds `AUTO` or an id from the view registry ([ADR-0005](../adr/0005-view-registry.md)); an unknown id falls back to `AUTO` on load.
 
 ## Invariants
@@ -67,7 +67,7 @@ Commands are serializable objects with a `type` enum. The reducer returns either
 | `SHIFT_DATE(days)` | previous / next day | — |
 | `RESET_TO_NOW()` | switches to `LIVE` | — |
 
-Preferences commands: `SET_HOUR_FORMAT`, `SET_LANGUAGE`, `SET_VIEW_MODE`.
+Preferences commands: `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE`, `SET_VIEW_MODE`.
 
 `SET_WALL_TIME` and `SET_DATE` resolve wall-clock time with `disambiguation: "compatible"` and report `UNIQUE | GAP | AMBIGUOUS`, so a view can explain why the time moved.
 

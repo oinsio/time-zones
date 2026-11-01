@@ -60,6 +60,7 @@ function toLoadedPreferences(result: PreferencesLoadResult): LoadedPreferences {
  * once, writes it debounced (flushed on `pagehide`) and never on load, applies
  * changes made by other tabs, and reports a failed save.
  * Implements FR4, FR5, FR7 of add-settings-page-and-device-time-location (D5).
+ * Implements FR5, FR7 of add-interface-language-selection (D1): `setInterfaceLanguage` chooses and stores the language.
  */
 export function PreferencesProvider({
   children,
@@ -131,6 +132,12 @@ export function PreferencesProvider({
         applyChange({
           type: PreferencesCommandType.SET_HOUR_FORMAT,
           hourFormat,
+        }),
+      // Implements FR5, FR7 of add-interface-language-selection (D1).
+      setInterfaceLanguage: (interfaceLanguage: string) =>
+        applyChange({
+          type: PreferencesCommandType.SET_INTERFACE_LANGUAGE,
+          interfaceLanguage,
         }),
       resetPreferences: () => {
         discardPendingWrite();

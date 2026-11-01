@@ -3,8 +3,8 @@
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { DEVICE_TIME_LOCATION_ID } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import { fakeClock, Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import {
   buildDeviceTimeLocation,
   getUtcOffsetMinutes,
@@ -37,7 +37,7 @@ const DEVICE_TIME = buildDeviceTimeLocation("Asia/Almaty");
 const instant = fakeClock("2026-03-08T07:30:00Z").instant();
 
 const contextOf = (
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
   wallClockNote?: WallClockNote,
 ): LocationRowsContext => ({
   language,

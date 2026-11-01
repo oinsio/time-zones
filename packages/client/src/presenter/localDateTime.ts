@@ -3,8 +3,8 @@ import {
   MINUTES_PER_HOUR,
   UTC_ZONE_ID,
 } from "@/constants";
-import type { SupportedLanguage } from "@/locales";
 import type { Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import { HourFormat } from "@/preferences";
 import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
 
@@ -15,7 +15,7 @@ import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
  */
 export function formatLocalTime(
   localDateTime: Temporal.ZonedDateTime,
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
   hourFormat: HourFormat,
 ): string {
   return getDateTimeFormatter(
@@ -32,7 +32,7 @@ export function formatLocalTime(
  */
 export function formatLocalDate(
   localDateTime: Temporal.ZonedDateTime,
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
 ): string {
   return getDateTimeFormatter(
     language,
@@ -50,7 +50,7 @@ export function formatLocalDate(
  */
 export function formatWallClockTime(
   time: Temporal.PlainTime,
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
   hourFormat: HourFormat,
 ): string {
   const minutesSinceMidnight = time.hour * MINUTES_PER_HOUR + time.minute;

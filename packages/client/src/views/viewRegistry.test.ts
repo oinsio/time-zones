@@ -1,7 +1,7 @@
 // Verifies FR3 of add-main-page-scaffold: the registry holds the lazy Cards view.
 
 import i18n from "i18next";
-import { SUPPORTED_LANGUAGES } from "@/i18n";
+import { SUPPORTED_LANGUAGES } from "@/locales";
 import { ViewId, viewRegistry } from ".";
 
 describe("viewRegistry", () => {
