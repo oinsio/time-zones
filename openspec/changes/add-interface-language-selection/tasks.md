@@ -248,7 +248,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Hour labels on one line in Russian" gets a last step `And the locations page language is "ru"`, a new step next to "the locations interface language is Russian" in `test/features/home_location/steps/home_location_e2e.steps.ts` that asserts `<html lang>` on `locationsWorld.page`, so the scenario cannot pass in English.
 
   Keep `seedLanguage` writing the legacy key, but replace its local `const LANGUAGE_STORAGE_KEY = "language"` with `LEGACY_STORAGE_KEYS.LANGUAGE` from `@/constants` (task 6.2), and change its comment to "the legacy key, migrated by the app (FR8 of add-interface-language-selection)". Then `grep -rn "LANGUAGE_STORAGE_KEY" src` prints nothing. Verify, one at a time: `pnpm --filter @time-zones/client typecheck` passes; `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/time_selection/time_selection_card_layout_e2e.feature --grep "Hour labels on one line in Russian"` passes.
-- [ ] 10.2 In `test/features/settings/settings_e2e.feature`, change the outline "Both languages":
+- [x] 10.2 In `test/features/settings/settings_e2e.feature`, change the outline "Both languages":
   - add the column `language group` (Language / Язык);
   - "the groups are named "<theme>" and "<hour format>"" becomes "the groups are named "<theme>", "<hour format>" and "<language group>"" (update the step in `settings_e2e.steps.ts`);
   - add `@add-interface-language-selection @FR13`.

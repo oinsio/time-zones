@@ -124,14 +124,23 @@ Then(
   },
 );
 
+// Verifies FR13 of add-interface-language-selection: the language group is named too.
 Then(
-  "the groups are named {string} and {string}",
-  async ({ locationsWorld }, themeName: string, hourFormatName: string) => {
+  "the groups are named {string}, {string} and {string}",
+  async (
+    { locationsWorld },
+    themeName: string,
+    hourFormatName: string,
+    languageGroupName: string,
+  ) => {
     for (const groupName of [themeName, hourFormatName]) {
       await expect(
         locationsWorld.page.getByRole(RADIOGROUP_ROLE, { name: groupName }),
       ).toBeVisible();
     }
+    await expect(
+      locationsWorld.page.getByRole("group", { name: languageGroupName }),
+    ).toBeVisible();
   },
 );
 
