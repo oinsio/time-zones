@@ -32,7 +32,7 @@ None. The language choice is part of `settings`, and the registry is part of `ap
 
 - `settings`:
   - ADDED "Interface language choice", "Language list search", "Accessible language choice", "Language choice layout";
-  - MODIFIED "Open the settings page", "Preferences are kept on the device", "Unreadable stored preferences", "Preferences without storage", "Preferences are shared between open tabs", "Settings strings are localized", "Settings page layout".
+  - MODIFIED "Open the settings page", "Preferences are kept on the device", "Unreadable stored preferences", "Preferences without storage", "Preferences are shared between open tabs", "Settings strings are localized", "Settings page layout", "Preferences are fast".
 - `app-shell`:
   - ADDED "Interface language at start" and "Dialect fallback";
   - MODIFIED "Shell shows the app title in the active language" and "Locale files describe themselves".
@@ -169,7 +169,7 @@ No changes: `docs/ia/` does not exist; the settings page keeps its place.
 - M3: axe-core reports 0 violations in 4 states: light and dark, collapsed and expanded.
 - M4: A registry built from a fixture of 3 locale files lists 3 languages, with no other input. Fixtures with incomplete `_meta` or a foreign `code` add 0 entries.
 - M5: For a dialect fixture, 3 of 3 lookups resolve in order: a key of the dialect, a key of its base language only, and a key of English only.
-- M6: Stryker scores at least 95 % (minimum acceptable 90 %) on every new or changed production file of this change.
+- M6: Stryker scores at least 95 % (minimum acceptable 90 %) on each of the 33 production files to which this change adds or changes logic (task 11.1 lists them). Files that only get a type rename, types or constants have no new mutant and are not counted.
 - M7: 4 new approved screenshots per Playwright project (375 px × collapsed / expanded × light / dark), and 4 re-approved existing ones.
 
 ## Open Questions

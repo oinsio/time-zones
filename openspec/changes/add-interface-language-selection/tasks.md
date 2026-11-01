@@ -84,7 +84,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `deu` → `de`; `GERMAN` → `de`; ` ru ` → `ru`; `рус` → `ru`; `francais` → `fr`;
   - `zzz` → none; an empty text → all 10, in registry order.
 - [ ] 2.8 `locales/index.ts` exports the public API of tasks 2.2–2.7, then add the unit BDD feature:
-  - `test/features/app_shell/app_shell_locale_registry_unit.feature`, with the scenarios "Registry from locale files", "Rejected locale files" (all 4 rows), "Metadata is not a translation", "American flag for English" and "Browser language decides without a choice" (all 4 rows);
+  - `test/features/app_shell/app_shell_locale_registry_unit.feature`, with the scenarios "Registry from locale files" (its step asserts the exact order `en`, `de`, `ru`), "Rejected locale files" (all 4 rows), "Metadata is not a translation", "American flag for English" and "Browser language decides without a choice" (all 4 rows);
   - "A chosen language wins over the browser" and "A dialect is not picked by its base language" assert the resolved code here (the first render is checked in 7.4 and 10.3);
   - steps in `steps/app_shell_locale_registry_unit.steps.ts`, using `buildLocaleRegistry` with fixture module maps and `resolveInterfaceLanguage`.
 
@@ -232,7 +232,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 9. Performance bound (NFR-P1; design D7)
 
-- [ ] 9.1 Add `test/features/settings/settings_language_budget_unit.feature`, with steps in `steps/settings_language_budget_unit.steps.ts` that reuse `hourFormatBudgetWorld.ts` and `startWorkCount()`:
+- [ ] 9.1 Add `test/features/settings/settings_language_budget_unit.feature` for the two language scenarios of the MODIFIED requirement "Preferences are fast" (settings spec delta), with steps in `steps/settings_language_budget_unit.steps.ts` that reuse `hourFormatBudgetWorld.ts` and `startWorkCount()`:
   - "Presenting again with the same language builds no formatter" (50 locations in `en`, presented again: 0 formatter builds);
   - "Switching the language builds one formatter per zone and kind" (50 locations in 50 zones in `en`, then `ru`: at most one formatter per zone and label kind in use).
 
@@ -278,7 +278,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `npx stryker run --mutate 'src/locales/localeMetadata.ts,src/locales/localeRegistry.ts,src/locales/languageFallbacks.ts,src/locales/resolveInterfaceLanguage.ts,src/locales/filterLocales.ts'`;
   - `npx stryker run --mutate 'src/i18n.ts,src/lib/browserLanguages.ts,src/adapters/preferencesDocument.ts,src/adapters/payloadMigrations.ts,src/adapters/localStoragePreferencesRepository.ts'`;
   - `npx stryker run --mutate 'src/preferences/preferencesCommands.ts,src/preferences/parseStoredPreferences.ts,src/controller/useInterfaceLanguage.ts,src/controller/useActiveInterfaceLanguage.ts,src/controller/PreferencesProvider.tsx'`;
-  - `npx stryker run --mutate 'src/app/settings/InterfaceLanguageGroup.tsx,src/app/settings/InterfaceLanguageList.tsx,src/app/settings/SettingsPage.tsx,src/presenter/presentSearchResults.ts,src/presenter/calendarMonth.ts'`.
+  - `npx stryker run --mutate 'src/app/settings/InterfaceLanguageGroup.tsx,src/app/settings/InterfaceLanguageList.tsx,src/app/settings/SettingsPage.tsx,src/presenter/presentSearchResults.ts,src/presenter/calendarMonth.ts'`;
+  - `npx stryker run --mutate 'src/adapters/locationsDocument.ts,src/preferences/preferences.ts,src/adapters/city-search/zoneCitiesSource.ts,src/adapters/city-search/createCompositeCitySearch.ts,src/locales/index.ts'`;
+  - `npx stryker run --mutate 'src/controller/useCitySearch.ts,src/controller/useWallTimeInput.ts,src/controller/useExemplarCity.ts,src/controller/useReferenceMoment.ts,src/controller/useCalendarMonth.ts'`;
+  - `npx stryker run --mutate 'src/controller/useLocations.ts,src/controller/useDocumentLanguage.ts,src/app/AppShell.tsx'`.
+
+  These 33 files are every production file of this change with new or changed logic (M6). Left out, because the change adds no mutable code to them: the files touched only by the `SupportedLanguage` → `InterfaceLanguageCode` type rename (the other `presenter/` files, `ports/citySearch.ts`), the type-only `controller/preferencesContext.ts`, the constants-only `constants/date.ts`, `constants/preferences.ts`, `constants/storage.ts`, and the re-export barrels `constants/index.ts`, `controller/index.ts`, `preferences/index.ts`.
 
   After each run, read `reports/mutation/mutation-report.json`. Kill survivors with tests until each file scores at least 95 % (minimum acceptable 90 %), and note the scores in this task (M6). A survivor that existed before this change may be noted as pre-existing, with its line.
 - [ ] 11.2 Run, one at a time:

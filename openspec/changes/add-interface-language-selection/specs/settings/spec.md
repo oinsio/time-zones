@@ -275,3 +275,26 @@ The settings page SHALL use the app's design tokens: the page background, the gr
 | 375 | dark |
 | 1024 | light |
 | 1024 | dark |
+
+### Requirement: Preferences are fast
+Presenting the location rows again with unchanged preferences and an unchanged interface language SHALL build no formatter. After the hour format or the interface language changes, presenting the rows MUST build at most one formatter per time zone and label kind in use. These bounds are checked by counting work, never by measuring time (ADR-0008). <!-- implements NFR-P1 of add-settings-page-and-device-time-location; implements NFR-P1 of add-interface-language-selection -->
+
+#### Scenario: Presenting again builds no formatter
+- **GIVEN** 50 locations have been presented in the hour format 24-hour
+- **WHEN** the same rows are presented again for the next minute tick
+- **THEN** no formatter is built
+
+#### Scenario: Switching the hour format builds one formatter per zone and kind
+- **GIVEN** 50 locations in 50 different time zones have been presented in the hour format 24-hour
+- **WHEN** the hour format becomes 12-hour and the rows are presented
+- **THEN** at most one formatter per time zone and label kind in use is built
+
+#### Scenario: Presenting again with the same language builds no formatter
+- **GIVEN** 50 locations have been presented in English
+- **WHEN** the same rows are presented again in English
+- **THEN** no formatter is built
+
+#### Scenario: Switching the language builds one formatter per zone and kind
+- **GIVEN** 50 locations in 50 different time zones have been presented in English
+- **WHEN** the interface language becomes Russian and the rows are presented
+- **THEN** at most one formatter per time zone and label kind in use is built

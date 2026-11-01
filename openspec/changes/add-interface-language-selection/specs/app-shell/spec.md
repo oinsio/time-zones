@@ -82,7 +82,7 @@ Every locale file SHALL carry a metadata block with `code`, `name`, `nativeName`
 #### Scenario: Registry from locale files
 - **GIVEN** locale files `en`, `ru` and `de` with complete metadata
 - **WHEN** the registry is built
-- **THEN** it lists `de`, `en` and `ru`, sorted by `name`
+- **THEN** it lists `en`, `de` and `ru`, in this order, sorted by `name` (English, German, Russian)
 - **AND** no other source names the languages
 
 #### Scenario: Rejected locale files
