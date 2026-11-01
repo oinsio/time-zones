@@ -2,8 +2,8 @@
 import i18n from "i18next";
 import type { MockInstance } from "vitest";
 import { DEVICE_TIME_LOCATION_ID } from "@/constants";
-import type { SupportedLanguage } from "@/locales";
 import { fakeClock } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import {
   buildDeviceTimeLocation,
   getEffectiveInstant,
@@ -29,7 +29,7 @@ const DEFAULT_NOW = "2026-03-08T07:30:00Z";
 const ISO_DATE_LENGTH = "YYYY-MM-DD".length;
 const NARROW_NO_BREAK_SPACE = /\u202f/g;
 
-export const LANGUAGES: Record<string, SupportedLanguage> = {
+export const LANGUAGES: Record<string, InterfaceLanguageCode> = {
   Russian: "ru",
   English: "en",
 };
@@ -48,7 +48,7 @@ const split = (text: string) => text.split(",").map((part) => part.trim());
 export function createClockChangeNoteWorld() {
   let state: WorldClockState = INITIAL_WORLD_CLOCK_STATE;
   let now = DEFAULT_NOW;
-  let language: SupportedLanguage = "en";
+  let language: InterfaceLanguageCode = "en";
   let hourFormat: HourFormat = HourFormat.H24;
   let spies: MockInstance[] = [];
 

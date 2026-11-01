@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import { MINUTES_PER_HOUR } from "@/constants";
-import type { SupportedLanguage } from "@/locales";
+import type { InterfaceLanguageCode } from "@/locales";
 import {
   type ClockChange,
   ClockChangeDirection,
@@ -26,7 +26,7 @@ const SENTENCE_KEYS: Record<
 export type ClockChangeNoteContext = {
   clockChange: ClockChange;
   tense: ClockChangeTense;
-  language: SupportedLanguage;
+  language: InterfaceLanguageCode;
   hourFormat: HourFormat;
   translate: TFunction;
 };

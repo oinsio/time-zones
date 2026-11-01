@@ -1,4 +1,7 @@
-import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
+import type {
+  FeatureDescriibeCallbackParams,
+  StepTest,
+} from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { createSearchWorld, runSearch, zoneIdsOf } from "./searchWorld";
@@ -14,12 +17,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Object.assign(world, createSearchWorld());
   });
 
-  const whenUserSearches = ({ When }: { When: Function }) =>
+  const whenUserSearches = ({ When }: Pick<StepTest, "When">) =>
     When("the user searches for {string}", (_ctx: unknown, query: string) =>
       runSearch(world, query),
     );
 
-  const firstResultIsIn = ({ Then }: { Then: Function }) =>
+  const firstResultIsIn = ({ Then }: Pick<StepTest, "Then">) =>
     Then("the first result is in {string}", (_ctx: unknown, zoneId: string) => {
       expect(zoneIdsOf(world)[0]).toBe(zoneId);
     });

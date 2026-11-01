@@ -70,7 +70,7 @@ export function formatWallClockTime(
  */
 export function formatWallClockDate(
   date: Temporal.PlainDate,
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
 ): string {
   return getDateTimeFormatter(
     language,
