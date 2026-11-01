@@ -1,11 +1,11 @@
 import type { Page } from "@playwright/test";
 import { GNOMISH_FACTORY_LANDING_URL } from "@/constants";
+import { RADIOGROUP_ROLE } from "./settingsE2eHelpers";
 
 export const LINK_ROLE = "link";
 export const LANDING_ORIGIN_PATTERN = "https://oinsio.github.io/**";
 export const LANDING_STUB_HTML =
   "<!doctype html><title>Gnomish Factory</title>";
-export const MUTED_FOREGROUND_TOKEN = "--color-muted-foreground";
 export const ACCENT_TOKEN = "--color-accent";
 export const COLOR_PROPERTY = "color";
 export const OUTLINE_COLOR_PROPERTY = "outline-color";
@@ -14,6 +14,11 @@ export const UNDERLINE = "underline";
 export const SHIFT_TAB_KEY = "Shift+Tab";
 export const ENTER_KEY = "Enter";
 export const CENTRE_TOLERANCE_PX = 1;
+export const FORMER_CREDIT_FONT_SIZE_PX = 14;
+export const MIN_CREDIT_FONT_SIZE_RATIO = 1.15;
+export const MAX_CREDIT_FONT_SIZE_RATIO = 1.2;
+export const TAB_KEY = "Tab";
+const ANY_LANGUAGE_THEME_GROUP_NAME = /^(Theme|Тема)$/;
 
 /** The tab and the address left by the last follow of the credit, per page. */
 export const creditPopups = new WeakMap<Page, Page>();
@@ -66,3 +71,38 @@ export async function measureCreditFit(page: Page) {
       box.x >= 0 && box.x + box.width <= (page.viewportSize()?.width ?? 0),
   };
 }
+
+export const themeGroupOf = (page: Page) =>
+  page.getByRole(RADIOGROUP_ROLE, { name: ANY_LANGUAGE_THEME_GROUP_NAME });
+
+export const themeIconOf = (page: Page) =>
+  themeGroupOf(page).locator("svg").first();
+
+export const readThemeIconColour = (page: Page) =>
+  themeIconOf(page).evaluate((element) =>
+    getComputedStyle(element).getPropertyValue("color"),
+  );
+
+export async function readCreditFontSizeRatio(page: Page) {
+  const fontSizePx = await creditOf(page).evaluate((element) =>
+    Number.parseFloat(getComputedStyle(element).fontSize),
+  );
+  return fontSizePx / FORMER_CREDIT_FONT_SIZE_PX;
+}
+
+export const isCreditDirectlyAboveThemeGroup = (page: Page) =>
+  creditOf(page).evaluate(
+    (element, { groupRole, themeNamePattern }) => {
+      const themeNameRegExp = new RegExp(themeNamePattern);
+      const groups = element.nextElementSibling?.querySelectorAll(
+        `[role="${groupRole}"]`,
+      );
+      return Array.from(groups ?? []).some((group) =>
+        themeNameRegExp.test(group.getAttribute("aria-label") ?? ""),
+      );
+    },
+    {
+      groupRole: RADIOGROUP_ROLE,
+      themeNamePattern: ANY_LANGUAGE_THEME_GROUP_NAME.source,
+    },
+  );

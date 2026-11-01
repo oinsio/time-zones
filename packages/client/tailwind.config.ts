@@ -5,6 +5,12 @@ import animate from "tailwindcss-animate";
 /** Font family name registered by @fontsource-variable/manrope. */
 const MANROPE_FONT_FAMILY = "Manrope Variable";
 
+/** Font size of the Gnomish Factory credit: 16.5 px, 15-20 % above 14 px. Implements FR3 of move-and-restyle-gnomish-factory-credit (D3). */
+const CREDIT_FONT_SIZE = "1.03125rem";
+
+/** Line height of the Gnomish Factory credit. Implements FR3 of move-and-restyle-gnomish-factory-credit (D3). */
+const CREDIT_LINE_HEIGHT = "1.5rem";
+
 const DVH_WITH_VH_FALLBACK = ["100vh", "100dvh"];
 
 const config: Config = {
@@ -12,6 +18,7 @@ const config: Config = {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      fontSize: { credit: [CREDIT_FONT_SIZE, CREDIT_LINE_HEIGHT] },
       colors: {
         background: "var(--color-background)",
         foreground: "var(--color-foreground)",

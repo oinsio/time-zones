@@ -36,6 +36,7 @@ const HOUR_FORMAT_LABEL_KEYS = {
  * Implements FR3, FR4, FR5, FR7, FR16, NFR-A1, NFR-R1 of
  * add-settings-page-and-device-time-location (D10).
  * Implements FR1, NFR-A1, NFR-A2, UX1 of add-gnomish-factory-credit (D1).
+ * Implements FR1, NFR-A1, UX1 of move-and-restyle-gnomish-factory-credit (D1).
  */
 export function SettingsPage({ notices, onBack }: SettingsPageProps) {
   const { t } = useTranslation();
@@ -55,26 +56,23 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-screen-2xl flex-col px-4">
-      <header className="flex flex-col gap-2 border-b border-border pt-6 pb-4">
-        <GnomishFactoryCredit />
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label={t("settings.back")}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
-          >
-            <ChevronLeft aria-hidden="true" />
-          </button>
-          <h1
-            ref={headingRef}
-            tabIndex={-1}
-            className="text-center text-2xl font-semibold focus:outline-none"
-          >
-            {t("settings.title")}
-          </h1>
-          <span aria-hidden="true" className="min-w-11" />
-        </div>
+      <header className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-border pt-6 pb-4">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label={t("settings.back")}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+        >
+          <ChevronLeft aria-hidden="true" />
+        </button>
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-center text-2xl font-semibold focus:outline-none"
+        >
+          {t("settings.title")}
+        </h1>
+        <span aria-hidden="true" className="min-w-11" />
       </header>
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 py-6">
         {loadStatus === PreferencesStatus.UNREADABLE && (
@@ -97,6 +95,7 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
             {t("settings.saveFailed")}
           </p>
         )}
+        <GnomishFactoryCredit />
         <SettingsOptionGroup
           legend={t("settings.themeLabel")}
           options={Object.values(ThemePreference).map((theme) => ({

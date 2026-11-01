@@ -8,4 +8,4 @@ The user's preferences and the page that changes them. Stored by their own repos
 - **Theme preference** — light, dark or system. System follows the system color scheme. *Code:* `ThemePreference`. *RU:* «Тема»: «Светлая», «Тёмная», «Системная».
 - **Hour format** — how times of day are written, 12-hour or 24-hour. *Code:* `HourFormat`. *RU:* «Формат времени»: «12 часов», «24 часа».
 - **Gnomish Factory** — the tool the app is built with; its landing page is linked from the settings page. *Code:* `GNOMISH_FACTORY_LANDING_URL`. *RU:* «Гномская фабрика».
-- **Gnomish Factory credit** — the top line of the settings page, one link "Built with Gnomish Factory" to the factory's landing page, opened in a new tab. *Code:* `GnomishFactoryCredit`, `settings.gnomishFactoryCredit`. *RU:* «Создано с помощью Гномской фабрики».
+- **Gnomish Factory credit** — the line of the settings page above the theme preference, one link "Built with Gnomish Factory" to the factory's landing page, opened in a new tab. *Code:* `GnomishFactoryCredit`, `settings.gnomishFactoryCredit`. *RU:* «Создано с помощью Гномской фабрики».

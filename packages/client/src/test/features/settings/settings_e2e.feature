@@ -53,7 +53,7 @@ Feature: Settings page in a real browser
       | Russian  | Настройки | Тема  | Формат времени | Создано с помощью Гномской фабрики |
       | English  | Settings  | Theme | Hour format    | Built with Gnomish Factory         |
 
-  @add-settings-page-and-device-time-location @NFR-A1 @NFR-A3 @add-gnomish-factory-credit @NFR-A1
+  @add-settings-page-and-device-time-location @NFR-A1 @NFR-A3 @add-gnomish-factory-credit @NFR-A1 @move-and-restyle-gnomish-factory-credit @NFR-A2
   Scenario Outline: Settings have no accessibility violations in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the user opens the settings
@@ -64,7 +64,7 @@ Feature: Settings page in a real browser
       | light |
       | dark  |
 
-  @add-settings-page-and-device-time-location @NFR-A1 @FR7
+  @add-settings-page-and-device-time-location @NFR-A1 @FR7 @move-and-restyle-gnomish-factory-credit @NFR-A2
   Scenario: No violations with the unreadable note
     Given the stored preferences are unreadable
     And the user opens the settings
@@ -83,7 +83,7 @@ Feature: Settings page in a real browser
       | 320   |
       | 2560  |
 
-  @add-settings-page-and-device-time-location @NFR-R3 @M6 @add-gnomish-factory-credit @NFR-R2
+  @add-settings-page-and-device-time-location @NFR-R3 @M6 @add-gnomish-factory-credit @NFR-R2 @move-and-restyle-gnomish-factory-credit @NFR-R2
   Scenario Outline: Approved screenshots of the settings at <width> px in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the screen is <width> px wide for the locations

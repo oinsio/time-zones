@@ -5,22 +5,21 @@ import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import { readTokenStyle } from "../../time_selection/steps/timeSelectionE2eHelpers";
 import {
   ACCENT_TOKEN,
-  ANY_LANGUAGE_BACK_BUTTON_NAME,
   boxOf,
-  CENTRE_TOLERANCE_PX,
   COLOR_PROPERTY,
   creditOf,
   creditPopups,
   ENTER_KEY,
   followCredit,
   LINK_ROLE,
-  MUTED_FOREGROUND_TOKEN,
   measureCreditFit,
   NO_OUTLINE_STYLE,
   OUTLINE_COLOR_PROPERTY,
   readStyle,
+  readThemeIconColour,
   SHIFT_TAB_KEY,
   settingsUrlBeforeCredit,
+  TAB_KEY,
   UNDERLINE,
 } from "./settingsCreditE2eHelpers";
 import {
@@ -32,33 +31,15 @@ import {
 
 const { When, Then } = createBdd(test);
 
-// Verifies FR1, FR2, NFR-A1, UX1 of add-gnomish-factory-credit: the first line of the page.
+// Verifies FR1, FR2, NFR-A1, UX1 of add-gnomish-factory-credit and FR1, UX1 of move-and-restyle-gnomish-factory-credit: the page shows the credit link.
 Then(
-  "the first line of the settings page is the link {string} to the Gnomish Factory",
+  "the settings page shows the link {string} to the Gnomish Factory",
   async ({ locationsWorld }, creditText: string) => {
     const credit = locationsWorld.page.getByRole(LINK_ROLE, {
       name: creditText,
       exact: true,
     });
     await expect(credit).toHaveAttribute("href", GNOMISH_FACTORY_LANDING_URL);
-  },
-);
-
-// Verifies FR1, UX1 of add-gnomish-factory-credit: above the back button and the heading.
-Then(
-  "the credit stands above the back button and the settings heading",
-  async ({ locationsWorld }) => {
-    const { page } = locationsWorld;
-    const credit = await boxOf(creditOf(page));
-    const back = await boxOf(
-      page.getByRole(BUTTON_ROLE, { name: ANY_LANGUAGE_BACK_BUTTON_NAME }),
-    );
-    const heading = await boxOf(settingsHeading(page));
-    expect(credit.y + credit.height).toBeLessThanOrEqual(back.y);
-    expect(credit.y + credit.height).toBeLessThanOrEqual(heading.y);
-    expect(
-      Math.abs(credit.x + credit.width / 2 - (heading.x + heading.width / 2)),
-    ).toBeLessThanOrEqual(CENTRE_TOLERANCE_PX);
   },
 );
 
@@ -100,16 +81,12 @@ Then(
   },
 );
 
-// Verifies FR4, UX2 of add-gnomish-factory-credit: muted colour, underlined.
+// Verifies FR2, UX2, NFR-A2 of move-and-restyle-gnomish-factory-credit: the colour of the theme icons, underlined.
 Then(
-  "the credit text has the muted foreground colour and is underlined",
+  "the credit text has the colour of the theme icons and is underlined",
   async ({ locationsWorld }) => {
     const { page } = locationsWorld;
-    const expected = await readTokenStyle(
-      page,
-      COLOR_PROPERTY,
-      MUTED_FOREGROUND_TOKEN,
-    );
+    const expected = await readThemeIconColour(page);
     await expect.poll(() => readStyle(page, COLOR_PROPERTY)).toBe(expected);
     expect(await readStyle(page, "text-decoration-line")).toContain(UNDERLINE);
   },
@@ -118,17 +95,16 @@ Then(
 // Verifies NFR-A1 of add-gnomish-factory-credit: the credit is reachable by keyboard.
 When("the credit gets the keyboard focus", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
-  await page.keyboard.press(SHIFT_TAB_KEY);
-  await page.keyboard.press(SHIFT_TAB_KEY);
+  await page.keyboard.press(TAB_KEY);
   await expect(creditOf(page)).toBeFocused();
 });
 
-// Verifies FR4, UX2 of add-gnomish-factory-credit: accent colour and focus outline.
+// Verifies FR2, UX2 of move-and-restyle-gnomish-factory-credit: icon colour kept, accent focus outline.
 Then(
-  "the credit text has the accent colour with an accent focus outline",
+  "the credit text keeps the colour of the theme icons with an accent focus outline",
   async ({ locationsWorld }) => {
     const { page } = locationsWorld;
-    const expected = await readTokenStyle(page, COLOR_PROPERTY, ACCENT_TOKEN);
+    const expected = await readThemeIconColour(page);
     await expect.poll(() => readStyle(page, COLOR_PROPERTY)).toBe(expected);
     const expectedOutline = await readTokenStyle(
       page,
@@ -153,12 +129,15 @@ When("the pointer rests on the credit", async ({ locationsWorld }) => {
   await creditOf(locationsWorld.page).hover();
 });
 
-// Verifies FR4, UX2 of add-gnomish-factory-credit: the hovered text is in the accent colour.
-Then("the credit text has the accent colour", async ({ locationsWorld }) => {
-  const { page } = locationsWorld;
-  const expected = await readTokenStyle(page, COLOR_PROPERTY, ACCENT_TOKEN);
-  await expect.poll(() => readStyle(page, COLOR_PROPERTY)).toBe(expected);
-});
+// Verifies FR2, UX2 of move-and-restyle-gnomish-factory-credit: hover keeps the icon colour.
+Then(
+  "the credit text keeps the colour of the theme icons",
+  async ({ locationsWorld }) => {
+    const { page } = locationsWorld;
+    const expected = await readThemeIconColour(page);
+    await expect.poll(() => readStyle(page, COLOR_PROPERTY)).toBe(expected);
+  },
+);
 
 // Verifies NFR-A1, NFR-A2 of add-gnomish-factory-credit: keyboard order.
 When("the user presses Shift+Tab", async ({ locationsWorld }) => {
