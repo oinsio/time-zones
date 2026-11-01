@@ -41,20 +41,21 @@ Feature: Clock change note in a real browser
       | dark  |
 
   @show-clock-change-note-on-location-cards @NFR-R1 @UX1
+  @show-city-labels-in-interface-language @FR1
   Scenario Outline: No horizontal scrolling with notes at <width> px at <moment>
     Given the current time is "<moment>"
     And the locations interface language is Russian
     And the screen is <width> px wide for the locations
-    And the stored locations are "Almaty", "Belgrade", "Lord Howe Island"
+    And the stored locations are "Алматы", "Белград", "Лорд-Хау"
     When the user opens the locations app
     Then the locations screen does not scroll horizontally
     And the clock change note of "<city>" is the bottom line of its card
 
     Examples:
       | width | moment               | city             |
-      | 320   | 2026-10-20T08:00:00Z | Belgrade         |
-      | 320   | 2026-10-01T08:00:00Z | Lord Howe Island |
-      | 768   | 2026-10-20T08:00:00Z | Belgrade         |
-      | 768   | 2026-10-01T08:00:00Z | Lord Howe Island |
-      | 2560  | 2026-10-20T08:00:00Z | Belgrade         |
-      | 2560  | 2026-10-01T08:00:00Z | Lord Howe Island |
+      | 320   | 2026-10-20T08:00:00Z | Белград           |
+      | 320   | 2026-10-01T08:00:00Z | Лорд-Хау          |
+      | 768   | 2026-10-20T08:00:00Z | Белград           |
+      | 768   | 2026-10-01T08:00:00Z | Лорд-Хау          |
+      | 2560  | 2026-10-20T08:00:00Z | Белград           |
+      | 2560  | 2026-10-01T08:00:00Z | Лорд-Хау          |

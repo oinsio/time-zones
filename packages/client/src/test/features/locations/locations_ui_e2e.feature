@@ -30,16 +30,18 @@ Feature: Locations in a real browser
 
   @add-locations-via-search @NFR-P2
   @show-here-entry-for-device-time @FR8
+  @show-city-labels-in-interface-language @FR4
   Scenario: Data loads only when the search opens
-    Given the stored locations are "Almaty"
+    Given the stored list is empty
     When the user opens the locations app
     Then the page has not requested the search data
     When the user opens the search
     Then the page has requested the search data
 
   @add-settings-page-and-device-time-location @FR8 @NFR-P2
+  @show-city-labels-in-interface-language @FR4 @M2
   Scenario: The device time location's request is the only one
-    Given the stored locations are "the device time location"
+    Given the stored locations are "the device time location", "Tokyo"
     And the user opens the locations app
     When the device time location has loaded the zone cities data
     And the user opens the search

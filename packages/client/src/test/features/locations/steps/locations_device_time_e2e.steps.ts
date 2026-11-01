@@ -20,6 +20,7 @@ import {
 const { When, Then } = createBdd(test);
 
 const MOSCOW = "Moscow";
+const MOSCOW_IN_RUSSIAN = "Москва";
 const LIST_ITEM_ROLE = "listitem";
 const OPTION_ROLE = "option";
 const DEVICE_CITY = "Almaty";
@@ -131,7 +132,7 @@ When("the zone cities data finishes loading", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
   heightRecords.set(page, {
     deviceTimeHeight: (await requireBox(deviceTimeRowOf(page))).height,
-    locationCardY: (await requireBox(listRow(page, MOSCOW))).y,
+    locationCardY: (await requireBox(listRow(page, MOSCOW_IN_RUSSIAN))).y,
   });
   await locationsWorld.releaseHeldRequests();
 });
@@ -148,7 +149,7 @@ Then(
 
 Then("the Moscow card has not moved", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
-  expect((await requireBox(listRow(page, MOSCOW))).y).toBe(
+  expect((await requireBox(listRow(page, MOSCOW_IN_RUSSIAN))).y).toBe(
     heightRecords.get(page)?.locationCardY,
   );
 });
