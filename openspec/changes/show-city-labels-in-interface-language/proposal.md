@@ -67,7 +67,7 @@ None.
 ### Functional
 
 - FR1: A city location's row SHALL show as its city label the name of its zone's city record in the city-name language of the interface language, when the stored label is one of that record's names in any city-name language. Otherwise the row shows the stored label. The city-name language follows the dialect fallback: the interface language, its base language, then English.
-- FR2: Switching the interface language SHALL change the city label of every listed city location at once, without a reload and without a loading state. The stored list, each location ID, the order and the home location stay unchanged, and nothing is written to storage.
+- FR2: Switching the interface language SHALL change the city label of every listed city location at once, without a reload and without a loading state. The stored list, each location ID, the order and the home location stay unchanged, and the location list is not written to storage (the interface language choice itself is still saved, as the settings capability requires).
 - FR3: Every text that names a row's city SHALL use the city label of FR1: the location menu name, the time button and field name, and the removal, home and reorder announcements.
 - FR4: The zone cities data SHALL be loaded in the background after the first render while the list holds at least one location of any kind. Showing the rows never waits for it. Until it is loaded, or when loading fails, a city location shows its stored label, with no error and no retry. The page requests the data at most once while no load fails, and the search reuses it. While the list is empty, the data is requested only when the search first opens.
 - FR5: Dates, weekdays, months and country names formatted through `Intl` SHALL use the fallback order of the interface language (the language, its base language, English) as their locale list. A dialect whose code `Intl` does not support is then formatted in its base language, or else in English, never in the device's own locale.
@@ -119,7 +119,7 @@ No changes: `docs/ia/` does not exist.
 
 ## Success Metrics
 
-- M1: With Tokyo added in Russian, 2 of 2 switches relabel the row: English shows "Tokyo", and Russian again shows «Токио». The stored document is identical before and after both switches (unit BDD and E2E).
+- M1: With Tokyo added in Russian, 2 of 2 switches relabel the row: English shows "Tokyo", and Russian again shows «Токио». The stored location document is identical before and after both switches (unit BDD and E2E).
 - M2: With the list holding Tokyo, the page requests the zone cities data exactly 1 time across the first render and a later opening of the search. With an empty list it requests it 0 times before the search opens (E2E).
 - M3: A minute-tick re-presentation of 50 city rows makes 0 city-label lookups and builds 0 formatters. A language switch makes at most 50 lookups (unit BDD).
 - M4: For a dialect fixture with a code `Intl` does not support and the base language `ru`, 3 of 3 outputs equal the Russian output: the country name of `KZ`, the local date of a row and the date bar weekday (unit tests).

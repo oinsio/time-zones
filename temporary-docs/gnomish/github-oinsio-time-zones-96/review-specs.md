@@ -96,7 +96,8 @@
 - Impact: a test written to the SHALL (no `localStorage.setItem` during a switch) fails against correct behaviour, or the implementer suppresses the preference write and breaks the stored language choice; the scenario as written never verifies the switch.
 - Fix: in `specs/locations/spec.md:78` replace "and MUST NOT write to storage" with "and MUST NOT write the stored location list"; in `proposal.md:70` replace "and nothing is written to storage" with "and the location list is not written to storage". In the scenario at line 96 add, after the first THEN, "**WHEN** the user switches the interface language to Russian and back to English" and change "nothing was written to storage" to "the stored location list was not written".
 - Fix risk: none; task 5.1 already compares the location repository's document, and 6.1 the `localStorage` locations document.
-- Status: open
+- Status: fixed
+- Resolution: `specs/locations/spec.md` requirement now says "MUST NOT write the stored location list" and the scenario "A switch keeps the stored list" switches to Russian and back before checking "the stored location list was not written"; FR2 and M1 in `proposal.md` and tasks 5.1/6.1 name the location list/document only, leaving the saved language choice of the settings spec intact.
 
 ### R3 — WARNING — The device time location + Tokyo request scenarios have no test
 - Location: `openspec/changes/show-city-labels-in-interface-language/specs/locations/spec.md:60`, `specs/location-search/spec.md:17`
