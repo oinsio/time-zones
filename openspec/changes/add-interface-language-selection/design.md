@@ -125,11 +125,12 @@ Why the legacy value counts as a choice: the detector cached the language every 
 `resolveLanguageFallbacks(code, registry = localeRegistry): readonly string[]` returns `[code, baseLanguage, DEFAULT_LANGUAGE]` without duplicates, and `[DEFAULT_LANGUAGE]` for an unknown code. It is the single owner of the order:
 
 - i18next's `fallbackLng` map is built from it (D4).
-- `pickByLanguageFallback(code, valuesByLanguage)` returns the first value along it. It is used for `FIRST_DAY_OF_WEEK_BY_LANGUAGE` (now `Readonly<Record<string, number>>`, still `{ en: 7, ru: 1 }`) by `presenter/calendarMonth.ts` and `controller/useCalendarMonth.ts`.
-- `resolveCityNameLanguage(code): CityNameLanguage` picks along the order among `CITY_NAME_LANGUAGES = ["en", "ru"]`, a new constant in `src/constants/search.ts` for the languages of the build-time city data.
+- `pickByLanguageFallback(code, valuesByLanguage, registry = localeRegistry)` returns the first value along it. It is used for `FIRST_DAY_OF_WEEK_BY_LANGUAGE` (now `Readonly<Record<string, number>>`, still `{ en: 7, ru: 1 }`) by `presenter/calendarMonth.ts` and `controller/useCalendarMonth.ts`.
+- `resolveCityNameLanguage(code, registry = localeRegistry): CityNameLanguage` picks along the order among `CITY_NAME_LANGUAGES = ["en", "ru"]`, a new constant in `src/constants/search.ts` for the languages of the build-time city data.
   - `CityRecord.names` and `ZoneCityData.names` become `Record<CityNameLanguage, string>`.
   - `CitySearch.search` and `getExemplarCity` and `presentSearchResults` take the city-name language for `names[...]`.
   - `zoneCitiesSource.ts` iterates `CITY_NAME_LANGUAGES` instead of `SUPPORTED_LANGUAGES` for city and country texts. Matching therefore stays "English and Russian whatever the interface language" (location-search spec).
+- Both take the same optional `registry` as `resolveLanguageFallbacks` and pass it on. Production call sites omit it and read the real registry. Tests pass a fixture registry with a dialect, because no real dialect exists (NG1): the dialect order of language-keyed data is tested at these owners, and the presenter's use of `pickByLanguageFallback` is tested with `ru` and `en`.
 - Every `Intl` formatter (dates, country names, day-period markers) keeps receiving the interface language code itself. `Intl` resolves an unknown region or private-use subtag to the nearest locale it has.
 
 After this change no module under `src/adapters/` or `src/ports/` imports from `@/i18n`, so `i18n.ts` can import the preferences adapter (D3) without a cycle.
