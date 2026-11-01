@@ -13,7 +13,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 1. Glossary (FR1, FR2; design D3)
 
 - [ ] 1.1 In `docs/glossary/settings.md` (repository root):
-  - **Gnomish Factory**: after "linked from the settings page." add "A brand name: written `Gnomish Factory` in every interface language, never translated." Change *RU:* «Гномская фабрика» to *RU:* «Gnomish Factory».  - **Gnomish Factory credit**: change *RU:* «Создано с помощью Гномской фабрики» to *RU:* «Создано с помощью Gnomish Factory». Keep the rest of the entry.
+  - **Gnomish Factory**: after "linked from the settings page." add "A brand name: written `Gnomish Factory` in every interface language, never translated." Change *RU:* «Гномская фабрика» to *RU:* «Gnomish Factory».
+  - **Gnomish Factory credit**: change *RU:* «Создано с помощью Гномской фабрики» to *RU:* «Создано с помощью Gnomish Factory». Keep the rest of the entry.
 
   Verify from the repository root: `grep -c "Создано с помощью Gnomish Factory" docs/glossary/settings.md` prints `1`, `grep -c "never translated" docs/glossary/settings.md` prints `1`, and `grep -n "Гномск" docs/glossary/settings.md` prints nothing.
 
