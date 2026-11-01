@@ -117,7 +117,8 @@ The proposal defines no `Q` ids ("Open Questions: None", proposal.md:177). The s
 - Impact: The failure first shows up in the full run of task 11.2, after the preferences tasks are ticked. The fix is a one-line expectation change, so the stakes are low, but the plan does not name it.
 - Fix: In task 6.5 (and the list in design.md D8), add: "in `test/features/settings/steps/settings_storage_unit.steps.tsx`, the expected payload adds `interfaceLanguage: null`", and add `npx vitest run src/test/features/settings/steps/settings_storage_unit.steps.tsx` to 6.5's verification.
 - Fix risk: none
-- Status: open
+- Status: fixed
+- Resolution: task 6.5 now updates the expected payload in `test/features/settings/steps/settings_storage_unit.steps.tsx` with `interfaceLanguage: null` and runs that steps file in its verification; design.md D8's list of touched tests names the file and why `toEqual` breaks.
 
 ## Verdict
 

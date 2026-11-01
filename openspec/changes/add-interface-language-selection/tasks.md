@@ -170,9 +170,10 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 - [ ] 6.5 Update the existing tests:
   - in `adapters/preferencesRepository.contract.ts` and `adapters/preferencesRepository.test.ts`, the stored document is version 2 with `interfaceLanguage`;
   - add "should load the legacy key without a document and write nothing", "should remove the legacy key on save" and "should remove the legacy key on clear" for the local-storage adapter;
-  - add an `interfaceLanguage` round trip to the shared contract, for both adapters.
+  - add an `interfaceLanguage` round trip to the shared contract, for both adapters;
+  - in `test/features/settings/steps/settings_storage_unit.steps.tsx`, the expected payload of "then the stored document holds the theme Dark and the hour format 12-hour" adds `interfaceLanguage: null`.
 
-  Verify `npx vitest run src/adapters` passes.
+  Verify, one at a time: `npx vitest run src/adapters` passes; `npx vitest run src/test/features/settings/steps/settings_storage_unit.steps.tsx` passes.
 - [ ] 6.6 Complete `readStoredInterfaceLanguage` in `i18n.ts` (task 3.3) with `localStoragePreferencesRepository.load()`. Add to `i18n.test.ts`: with `localStorage` holding a version 2 document with `"ru"` and browser `en-US` (stubbed with `vi.spyOn(navigator, "languages", "get")`, as `i18n.test.ts` does today), the start language computed by the exported `resolveStartInterfaceLanguage()` is `ru`; with only the legacy key `"ru"` it is `ru` too. Verify `npx vitest run src/i18n.test.ts` passes.
 
 ## 7. Controller: choose, apply, reset (FR5, FR7, FR12; design D1, D3)
