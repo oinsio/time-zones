@@ -54,7 +54,7 @@ None. The language choice is part of `settings`, and the registry is part of `ap
 
 ## Users & Scenarios
 
-- U1: A Russian speaker on an English laptop opens the settings, expands «Language», chooses «🇷🇺 Русский». The page, the dates and the city names switch to Russian at once. They stay Russian after a reload.
+- U1: A Russian speaker on an English laptop opens the settings, expands «Language», chooses «🇷🇺 Русский». The page, the dates, the country names and the search results switch to Russian at once. They stay Russian after a reload.
 - U2: A user who does not read the current interface language looks for their flag and native name in the list and finds it, because names are never translated.
 - U3: A keyboard user tabs to the language button, presses Enter to expand, moves with the arrow keys, chooses with Enter, or closes with Escape and is back on the button.
 - U4: An existing user whose app showed Russian before the update still sees Russian after it, and can now change it.
@@ -71,7 +71,7 @@ None. The language choice is part of `settings`, and the registry is part of `ap
   - every interface text;
   - country names;
   - dates, month and weekday names;
-  - city names in search results and location rows;
+  - city names in the search results and the exemplar city of the device time location (a city location keeps the city label it was added with);
   - `<html lang>` and the document title.
 - FR6: When the registry holds at least `LANGUAGE_SEARCH_MIN_LOCALES` (10) locales, a search field stands above the list. It keeps the rows whose `nativeName`, `name` or `code` contains the typed text, ignoring letter case and diacritics. If no row matches, the list shows "No languages found" («Языки не найдены»). Below the threshold there is no search field. With today's 2 locales it is not shown, but its behaviour is covered by tests.
 - FR7: The chosen language is saved on the device and is in force from the first render after a reload, also offline. Without a chosen language, or when the chosen code is no longer registered, the app uses the first browser language that matches:
@@ -86,7 +86,7 @@ None. The language choice is part of `settings`, and the registry is part of `ap
 - FR9: The locale registry is built from every `src/locales/*.json` file, with no hand-written list:
   - It reads each file's `_meta` and gives i18next only the translations, without `_meta`.
   - It is the single source of the supported languages and of the settings list.
-  - A file whose `_meta` lacks any of `code`, `name`, `nativeName`, `baseLanguage`, `emoji` as a non-empty string is left out, and so is a file whose `code` differs from its file name.
+  - A file whose `_meta` lacks any of `code`, `name`, `nativeName`, `baseLanguage`, `emoji` as a non-empty string is left out, and so is a file whose `code` differs from its file name or is not a canonical language tag (it becomes `<html lang>` and an `Intl` locale).
 - FR10: A locale whose `baseLanguage` differs from its `code` is a dialect (easter eggs included). For each key, the text comes from the dialect itself, then from its base language, then from English. Language-keyed data with no entry for the dialect, such as city names or the first day of the week, follows the same order.
 - FR11: `locales/en.json` has `_meta.emoji` 🇺🇸.
 - FR12: The existing settings states cover the language:

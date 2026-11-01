@@ -69,7 +69,7 @@ The shell SHALL render the app title as the only page heading. The heading, the 
 - **THEN** the document title reads "Часовые пояса" and the page `lang` attribute is `ru` without a reload
 
 ### Requirement: Locale files describe themselves
-Every locale file SHALL carry a metadata block with `code`, `name`, `nativeName`, `baseLanguage` and `emoji`, each a non-empty string. The `code` MUST equal the locale file name. Every shell string MUST exist in every locale file. The English locale MUST have the emoji 🇺🇸. The locale registry SHALL collect every locale file in the locales folder with no hand-written list of languages. A file whose metadata misses a field or has an empty one, or whose `code` differs from its file name, MUST be left out of the registry. The registry MUST always contain English. The metadata block MUST NOT be part of the translations. The registry SHALL be the only source of the supported languages and of the language list on the settings page. Inputs: the locale files. Output: the registered locales, sorted by `name`. Errors: none at run time; a rejected file is simply absent. <!-- implements FR10, FR2 of setup-app-shell-and-pages-deploy; implements FR9, FR11 of add-interface-language-selection -->
+Every locale file SHALL carry a metadata block with `code`, `name`, `nativeName`, `baseLanguage` and `emoji`, each a non-empty string. The `code` MUST equal the locale file name. Every shell string MUST exist in every locale file. The English locale MUST have the emoji 🇺🇸. The locale registry SHALL collect every locale file in the locales folder with no hand-written list of languages. A file whose metadata misses a field or has an empty one, or whose `code` differs from its file name or is not a canonical language tag, MUST be left out of the registry. The registry MUST always contain English. The metadata block MUST NOT be part of the translations. The registry SHALL be the only source of the supported languages and of the language list on the settings page. Inputs: the locale files. Output: the registered locales, sorted by `name`. Errors: none at run time; a rejected file is simply absent. <!-- implements FR10, FR2 of setup-app-shell-and-pages-deploy; implements FR9, FR11 of add-interface-language-selection -->
 
 #### Scenario: Locale metadata matches the file
 - **WHEN** the locale files are loaded
@@ -95,6 +95,7 @@ Every locale file SHALL carry a metadata block with `code`, `name`, `nativeName`
 | `de` | has no `nativeName` |
 | `fr` | has an empty `emoji` |
 | `es` | has the code `pt` |
+| `en_pirate` | has the code `en_pirate`, not a language tag |
 
 #### Scenario: Metadata is not a translation
 - **WHEN** the registry gives the English translations to the interface
