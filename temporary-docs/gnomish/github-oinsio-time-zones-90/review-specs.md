@@ -87,7 +87,8 @@
 - Impact: the assertion as written fails on a correct implementation (or is rewritten ad hoc by the implementer), so UX1's "nothing moves" clause ends up either red or untested, and the archived spec keeps a SHALL without a scenario.
 - Fix: in `specs/locations/spec.md` under "Clock change note is fast, accessible and fits every screen" add a scenario "Showing the note moves nothing in its card": GIVEN the device time zone is `Asia/Almaty`, the current instant is `2026-10-10T08:00:00Z` and the list contains Almaty and Belgrade (Belgrade shows no note) AND the positions and sizes of the Belgrade city, time, day track and location menu button are noted, WHEN the user picks 20 October 2026 in the calendar, THEN Belgrade shows its clock change note AND the noted parts keep their positions and sizes within 1 px. Tag it `@show-clock-change-note-on-location-cards @UX1`. In task 6.1 replace "the city, time, track and menu button boxes equal those of a card without a note within 1 px, compared with the Almaty card at 1024 px" with this scenario at 1024 px, reusing the existing steps `the place, time, track and menu of {string} are noted` / `... have not moved` (`time_selection_card_layout_e2e.steps.ts:34,64`) and `the user picks {string} in the calendar` (as in `date_selection_view_contract_e2e.feature:15`, here `"Tuesday, October 20, 2026"`).
 - Fix risk: low. The picked date changes the Belgrade date label, but from 768 px the time column has one fixed width on every card (`openspec/specs/locations/spec.md:775`), and the Belgrade offset difference (+2 h vs +5 h) and time (10:00) are the same on both dates, so only the card height changes. The Almaty card above shows no note on either date. The scenario adds one E2E run of a few seconds.
-- Status: open
+- Status: fixed
+- Resolution: added scenario "Showing the note moves nothing in its card" (Almaty device zone, 1024 px, 2026-10-10T08:00:00Z, the user picks 20 October 2026, the same Belgrade card compared before and after within 1 px) to specs/locations/spec.md under "Clock change note is fast, accessible and fits every screen"; task 6.1 drops the Almaty-card comparison and adds this scenario (@UX1) reusing the existing steps "the place, time, track and menu of {string} are noted / have not moved" and "the user picks {string} in the calendar" (both on the locationsWorld fixture).
 
 ### R2 — SUGGESTION — The E2E accessibility scenario lists different cities in the spec and the task, and Chicago is never added to the E2E city table
 - Location: `openspec/changes/show-clock-change-note-on-location-cards/specs/locations/spec.md:183–186`; `openspec/changes/show-clock-change-note-on-location-cards/tasks.md:48`; `openspec/changes/show-clock-change-note-on-location-cards/design.md:58`
@@ -96,7 +97,8 @@
 - Impact: followed literally, task 6.1's outline throws on the unknown city "Chicago" in `buildStoredLocations`; and the archived spec scenario describes a list that no test runs.
 - Fix: rewrite the spec scenario as: GIVEN the device time zone is `Asia/Almaty` and the current instant is `2026-03-08T07:30:00Z`, AND the list contains Almaty, New York and Chicago, AND the user typed `02:30` in New York, so New York shows the wall-time hint and Chicago its clock change note, WHEN the list is shown in the light or the dark theme, THEN axe-core reports no violations. In task 6.1 add Chicago (`America/Chicago`, `US`) to the E2E `KNOWN_CITIES` next to Belgrade and Lord Howe Island.
 - Fix risk: none — Chicago's change on `2026-03-08T08:00:00Z` lies in the Almaty window of that date, matching the unit scenario "Other rows keep their notes next to a hint" (`spec.md:121–127`).
-- Status: open
+- Status: fixed
+- Resolution: rewrote spec scenario "No accessibility violations with notes" in specs/locations/spec.md to the list task 6.1 runs (Asia/Almaty, 2026-03-08T07:30:00Z, Almaty, New York and Chicago, 02:30 typed in New York: hint in New York, clock change note in Chicago); task 6.1 now adds Chicago (America/Chicago, US) to the E2E KNOWN_CITIES next to Belgrade and Lord Howe Island, matching design D8.
 
 ### R3 — SUGGESTION — Metric M1 (15 of 15 dates) is not measured by any task
 - Location: `openspec/changes/show-clock-change-note-on-location-cards/proposal.md:130`; `openspec/changes/show-clock-change-note-on-location-cards/tasks.md:42`
@@ -105,7 +107,8 @@
 - Impact: M1 cannot be reported as met from the test run; the archived change claims a measurement nobody takes.
 - Fix: in task 5.1 say that the "Window bounds" Scenario Outline gets one example per date from `2026-10-17` to `2026-11-02` (17 rows: 15 "yes", 2 "no") in addition to the March rows, and add those rows to the table in `spec.md:31–39`.
 - Fix risk: none — 12 more examples of an in-memory unit scenario.
-- Status: open
+- Status: fixed
+- Resolution: the "Window bounds" table in specs/locations/spec.md now has one row per date from 2026-10-17 to 2026-11-02 (15 yes, 2 no) plus the March rows, and task 5.1 says the outline carries these examples as the M1 count.
 
 ## Verdict
 
