@@ -12,11 +12,19 @@ export interface CitySearchScenario {
   }[];
   /** A canonical zone without CLDR data and its derived name. */
   derivedZone: { timeZoneId: string; cityName: string };
+  /** Stored labels of a zone with data, and the label expected per language. */
+  cityLabels: readonly {
+    timeZoneId: string;
+    storedLabel: string;
+    language: CityNameLanguage;
+    cityLabel: string;
+  }[];
 }
 
 /**
  * Contract every `CitySearch` must satisfy for the exemplar city (ADR-0006).
  * Verifies FR8, FR12 of show-here-entry-for-device-time.
+ * Verifies FR1 of show-city-labels-in-interface-language (D2).
  */
 export const describeCitySearchContract = (
   searchName: string,
@@ -41,5 +49,16 @@ export const describeCitySearchContract = (
         cityName,
       );
     });
+    // FR1: city label in the city-name language
+    it.each(scenario.cityLabels)(
+      "should label $timeZoneId stored as «$storedLabel» as «$cityLabel» in $language",
+      ({ timeZoneId, storedLabel, language, cityLabel }) => {
+        expect(
+          scenario
+            .createSearch()
+            .getCityLabel(timeZoneId, storedLabel, language),
+        ).toBe(cityLabel);
+      },
+    );
   });
 };
