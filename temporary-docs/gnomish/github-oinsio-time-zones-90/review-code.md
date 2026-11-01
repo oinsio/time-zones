@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | Tasks verified | 22/22 |
-| Requirements traced | 42/43 |
+| Requirements traced | 43/43 |
 | CRITICAL | 0 |
 | WARNING | 1 |
 | SUGGESTION | 0 |
@@ -33,7 +33,7 @@ All paths below are under `packages/client/src/` unless they start with `docs/`.
 - ✅ 6.1 — `locations_clock_change_note_e2e.feature:6,16,28,44` has the four scenarios. The steps are in `steps/locations_clock_change_note_e2e.steps.ts`: lines 57-64 check no live region and no status role, and lines 70-84 check the accessible name. The cities are in `steps/locationsE2eHelpers.ts`.
 - ✅ 6.2 — The tag is at `locations_ui_e2e.feature:135` and `locations_12_hour_screenshots_e2e.feature:6`. 20 PNGs under `test/features/__screenshots__/` are re-approved.
 - ✅ 6.3 — The stage brief says CI is green. The re-approved screenshots are the only expectation changes in the diff.
-- ✅ 7.1 — My scoped Stryker runs score ≥95% on every file that finished (see Mutation). `dayPeriodWindows.ts` could not finish inside the 10-minute tool limit (70/86 tested, 0 survived).
+- ✅ 7.1 — My scoped Stryker runs score ≥95% on every file the task names (see Mutation). For `dayPeriodWindows.ts` I scoped the run to the lines this change touched (`--mutate 'src/model/dayPeriodWindows.ts:44-65'`, `findOffsetTransitions`; the other changed hunk, line 14, is a type-only import with no mutants): 100% (13 killed, 1 timeout, 0 survived).
 - ✅ 7.2 — The stage brief says CI is green (typecheck, lint, tests, build, legacy scan). I did not re-run them.
 - ✅ 7.3 — I ran the task's traceability loop from `packages/client/` and it prints nothing. The glossary grep over locales, presenter and model also prints nothing.
 
@@ -56,7 +56,7 @@ All paths below are under `packages/client/src/` unless they start with `docs/`.
 - ✅ UX2 — One plain sentence from four keys (`presenter/clockChangeNote.ts:12-25`). Tested by "Texts in both languages" (`@UX2`).
 - ✅ M1 — The window-bounds outline (`locations_clock_change_note_unit.feature:25-52`) has one example per date from `2026-10-17` to `2026-11-02`: 15 yes, 2 no.
 - ✅ M2 — The budget steps assert 0 lookups and 0 formatters on a minute re-presentation (`locations_clock_change_note_budget.steps.ts:73` ff.) and ≤ 2 per zone on a date change (lines 105-115).
-- ⚠️ M3 — Measured by me: clockChange 95.31%, rowNote 100%, dayPeriodStops 97.78%, dayTrack 100%, clockChangeNote 100%, localDateTime 100%, dateTimeFormatters 100%, presentZoneMoment 100%. `dayPeriodWindows.ts` did not finish within the tool's 10-minute limit (70/86 tested, 0 survived, 15 timed out), so its score is unmeasured. This is a measurement gap, not a code defect, so it is not a finding.
+- ✅ M3 — Measured by me: clockChange 95.31%, rowNote 100%, dayPeriodStops 97.78%, dayTrack 100%, dayPeriodWindows (changed lines 44-65) 100%, clockChangeNote 100%, localDateTime 100%, dateTimeFormatters 100%, presentZoneMoment 100%. Every changed model and presenter file is ≥95%.
 - ✅ M4 — The axe-core outline covers 2 themes and the no-scroll outline covers 3 widths (`locations_clock_change_note_e2e.feature:28,44`).
 - ✅ M5 — I ran the task 7.3 traceability loop and it prints nothing for any of the 15 ids.
 - ✅ Scenario: A past change at the lower bound of the window — `locations_clock_change_note_unit.feature:6`, steps `locations_clock_change_note_unit.steps.ts:41`.
@@ -93,7 +93,7 @@ I ran Stryker myself, scoped with `--mutate`, one run at a time, from `packages/
 | `src/model/rowNote.ts` | 100% | — |
 | `src/model/dayPeriodStops.ts` | 97.78% | 1 survivor at line 74 (`< until` → `<= until`): a transition exactly at `day.end + 3 h`, which has no observable effect on the stops. |
 | `src/model/dayTrack.ts` | 100% | — |
-| `src/model/dayPeriodWindows.ts` | not measured | Two runs, alone and paired with `dayPeriodStops.ts`, were stopped by the tool's 10-minute limit. The last one reached 70/86 tested, 0 survived, 15 timed out (the timeouts are infinite-loop mutants of the `while` walk). No score is reported. |
+| `src/model/dayPeriodWindows.ts` (lines 44-65) | 100% | Whole-file runs did not finish inside the tool's 10-minute limit, so I scoped the run to the lines this change touched, `--mutate 'src/model/dayPeriodWindows.ts:44-65'` (`findOffsetTransitions`). 14 mutants: 13 killed, 1 timeout (an infinite-loop mutant of the `while` walk), 0 survived. The other changed hunk (line 14) is a type-only import with no mutants. The untouched rest of the file is not measured. |
 | `src/presenter/clockChangeNote.ts` | 100% | — |
 | `src/presenter/localDateTime.ts` | 100% | — |
 | `src/presenter/dateTimeFormatters.ts` | 100% | — |
@@ -108,10 +108,10 @@ I ran Stryker myself, scoped with `--mutate`, one run at a time, from `packages/
 - Rule: `CLAUDE.md` ("Files must stay under 200 lines for AI context quality"), `.claude/rules/process-invariants.md` ("Target 100–200 lines per file; 300 is a hard cap, used only when splitting would hurt clarity"), and the change's own `tasks.md` ("every file stays under 200 lines; a steps file that would pass it gets a helper next to it")
 - Problem: The new unit BDD steps file has 271 lines and `model/dayTrack.test.ts` now has 219. Commit 7792fca already split the unit feature once, to the 300-line hard cap, not to the 200-line limit the project and `tasks.md` set. Splitting would not hurt clarity here. The change already has the pattern: `locations_clock_change_note_placement.feature` with its own steps file, and `presentZoneMoment.wallTime.test.ts` as a topic-named test file.
 - Impact: It breaks the file-size invariant of `CLAUDE.md` and the change's own cross-cutting rule in `tasks.md`. It also lowers the AI context quality those rules protect for later work on these tests.
-- Fix: Move the scenarios "Nearest of two changes", "A change of 30 minutes" and "A permanent change of the offset" (with their `@show-clock-change-note-on-location-cards @FR…` tags) from `locations_clock_change_note_unit.feature` into a new `locations_clock_change_note_changes_unit.feature`. Move their step definitions (`locations_clock_change_note_unit.steps.ts:133-214`, including the `stubZoneRules` setup and `MINUTES_PER_TEST_HOUR`) into a new `steps/locations_clock_change_note_changes_unit.steps.ts` built on the existing `createClockChangeNoteWorld` and `createClockChangeNoteHandlers`. Move the `clockChangeWindow` tests at `model/dayTrack.test.ts:175-219` into a new `model/dayTrack.clockChangeWindow.test.ts` with its `// Verifies FR1 of show-clock-change-note-on-location-cards (D1).` comment.
+- Fix: Move the scenarios "Nearest of two changes", "A change of 30 minutes" and "A permanent change of the offset" (with their `@show-clock-change-note-on-location-cards @FR…` tags) from `locations_clock_change_note_unit.feature` into a new `locations_clock_change_note_changes.feature` (no `_unit` suffix: `.claude/rules/bdd-unit.md` says "The `_unit` suffix is added only when a paired `_e2e` file exists for the same aspect", and no `_e2e` file exists for this aspect — the same naming as the change's `locations_clock_change_note_placement.feature`). Move their step definitions (`locations_clock_change_note_unit.steps.ts:133-214`, including the `stubZoneRules` setup and `MINUTES_PER_TEST_HOUR`) into a new `steps/locations_clock_change_note_changes.steps.ts` built on the existing `createClockChangeNoteWorld` and `createClockChangeNoteHandlers`. Move the `clockChangeWindow` tests at `model/dayTrack.test.ts:175-219` into a new `model/dayTrack.clockChangeWindow.test.ts` with its `// Verifies FR1 of show-clock-change-note-on-location-cards (D1).` comment.
 - Fix risk: Low. The scenarios keep their names, tags and steps, so the traceability loop of task 7.3 and the unit BDD runs are unaffected. The proposal's "Behavior" list would then name one more unit feature file than it does now; that is a documentation drift only, since `proposal.md` is not code. The new feature file must stay in the `locations` folder so the vitest-cucumber `loadFeature` path and the `@show-clock-change-note-on-location-cards` tag convention of `.claude/rules/bdd-unit.md` still hold.
 - Status: open
 
 ## Verdict
 
-Ready. No CRITICAL findings. R1 (WARNING) is a file-size rule breach in test code and does not block. The model, presenter and view meet every requirement and spec scenario. The one gap is that I could not measure the mutation score of `dayPeriodWindows.ts` inside the tool limit (0 survivors among the 70 mutants tested).
+Ready. No CRITICAL findings. R1 (WARNING) is a file-size rule breach in test code and does not block. The model, presenter and view meet every requirement and spec scenario. Every changed model and presenter file scores ≥95% under scoped Stryker (`dayPeriodWindows.ts` measured on its changed lines 44-65).
