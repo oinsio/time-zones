@@ -35,14 +35,14 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
 ## 4. Presenter: `Intl` uses the fallback order (FR5; TDD, design D5)
 
-- [ ] 4.1 RED: create `presenter/intlDialectFallback.test.ts` (`// Verifies FR5, M4 of show-city-labels-in-interface-language (D5).`). It uses `vi.mock("@/locales/localeRegistry", …)`, adding a `tlh` locale with base `ru` built by `buildRegisteredLocale` (`test/factories/localeFixtures.ts`). First it asserts `Intl.DateTimeFormat.supportedLocalesOf(["tlh"])` is empty. Then, with `it.each`:
+- [x] 4.1 RED: create `presenter/intlDialectFallback.test.ts` (`// Verifies FR5, M4 of show-city-labels-in-interface-language (D5).`). It uses `vi.mock("@/locales/localeRegistry", …)`, adding a `tlh` locale with base `ru` built by `buildRegisteredLocale` (`test/factories/localeFixtures.ts`). First it asserts `Intl.DateTimeFormat.supportedLocalesOf(["tlh"])` is empty. Then, with `it.each`:
   - `presentCountryName("KZ", "tlh")` equals `presentCountryName("KZ", "ru")`;
   - `formatLocalDate` of a fixed `ZonedDateTime` with `tlh` equals it with `ru`;
   - the `presentDateBar` weekday labels and the `presentCalendarMonth` weekday labels with `tlh` equal those with `ru`;
   - `en`, `ru` and `ru-KZ` outputs are unchanged.
 
   Run `npx vitest run src/presenter/intlDialectFallback.test.ts` and see the `tlh` cases fail.
-- [ ] 4.2 GREEN: pass `[...resolveLanguageFallbacks(language)]` as the locale argument in `presenter/countryName.ts`, `presenter/dateTimeFormatters.ts`, `presenter/dateBar.ts` and `presenter/calendarMonth.ts` (design D5), keeping the cache keys. Add `Implements FR5 of show-city-labels-in-interface-language (D5).` to each touched JSDoc. Verify, one at a time: `npx vitest run src/presenter/intlDialectFallback.test.ts`, `npx vitest run src/presenter`, `npx vitest run src/test/features/settings/steps/settings_language_budget_unit.steps.ts` (the formatter bounds of the language switch still hold), and `pnpm --filter @time-zones/client typecheck`.
+- [x] 4.2 GREEN: pass `[...resolveLanguageFallbacks(language)]` as the locale argument in `presenter/countryName.ts`, `presenter/dateTimeFormatters.ts`, `presenter/dateBar.ts` and `presenter/calendarMonth.ts` (design D5), keeping the cache keys. Add `Implements FR5 of show-city-labels-in-interface-language (D5).` to each touched JSDoc. Verify, one at a time: `npx vitest run src/presenter/intlDialectFallback.test.ts`, `npx vitest run src/presenter`, `npx vitest run src/test/features/settings/steps/settings_language_budget_unit.steps.ts` (the formatter bounds of the language switch still hold), and `pnpm --filter @time-zones/client typecheck`.
 
 ## 5. Unit BDD (FR1–FR5, NFR-P1, UX1, UX2)
 

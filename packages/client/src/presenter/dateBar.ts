@@ -5,7 +5,10 @@ import {
   FULL_DATE_FORMAT_OPTIONS,
 } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
-import type { InterfaceLanguageCode } from "@/locales";
+import {
+  type InterfaceLanguageCode,
+  resolveLanguageFallbacks,
+} from "@/locales";
 import type { HourFormat } from "@/preferences";
 import { formatWallClockTime } from "./localDateTime";
 
@@ -43,6 +46,7 @@ const YEAR_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { year: "numeric" };
  * Texts of the date bar in the interface language; the year is appended when
  * it differs from today's.
  * Implements FR4, FR7, FR9 of select-date-with-calendar-and-now (D4).
+ * Implements FR5 of show-city-labels-in-interface-language (D5): dates along the fallback order.
  * Implements NFR-P1 of add-wall-time-input-with-hint (D5): the time comes from `formatWallClockTime`.
  */
 export function presentDateBar({
@@ -54,20 +58,21 @@ export function presentDateBar({
   hourFormat,
   translate,
 }: DateBarContext): PresentedDateBar {
+  const intlLocales = [...resolveLanguageFallbacks(language)];
   const yearOptions =
     effectiveDate.year === today.year ? {} : YEAR_FORMAT_OPTIONS;
   const fullDateLabel = effectiveDate.toLocaleString(
-    language,
+    intlLocales,
     FULL_DATE_FORMAT_OPTIONS,
   );
   const formatTime = (time: Temporal.PlainTime) =>
     formatWallClockTime(time, language, hourFormat);
   return {
-    shortLabel: effectiveDate.toLocaleString(language, {
+    shortLabel: effectiveDate.toLocaleString(intlLocales, {
       ...DATE_BAR_SHORT_FORMAT_OPTIONS,
       ...yearOptions,
     }),
-    longLabel: effectiveDate.toLocaleString(language, {
+    longLabel: effectiveDate.toLocaleString(intlLocales, {
       ...DATE_BAR_LONG_FORMAT_OPTIONS,
       ...yearOptions,
     }),

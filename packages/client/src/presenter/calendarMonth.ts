@@ -6,7 +6,11 @@ import {
   FULL_DATE_FORMAT_OPTIONS,
 } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
-import { type InterfaceLanguageCode, pickByLanguageFallback } from "@/locales";
+import {
+  type InterfaceLanguageCode,
+  pickByLanguageFallback,
+  resolveLanguageFallbacks,
+} from "@/locales";
 import {
   CalendarMove,
   getCalendarFocusTarget,
@@ -58,6 +62,7 @@ const WEEKDAY_LONG_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
  * interface language. The heading is formatted from a `PlainDate`, because
  * `PlainYearMonth.toLocaleString` throws for the ISO calendar.
  * Implements FR3, FR9 of select-date-with-calendar-and-now (D4).
+ * Implements FR5 of show-city-labels-in-interface-language (D5): labels along the fallback order.
  */
 export function presentCalendarMonth({
   focusedDate,
@@ -65,6 +70,7 @@ export function presentCalendarMonth({
   today,
   language,
 }: CalendarMonthContext): PresentedCalendarMonth {
+  const intlLocales = [...resolveLanguageFallbacks(language)];
   const firstDayOfWeek = resolveFirstDayOfWeek(language);
   const weekStart = getCalendarFocusTarget(
     focusedDate,
@@ -75,16 +81,19 @@ export function presentCalendarMonth({
     const weekday = weekStart.add({ days: dayIndex });
     return {
       shortLabel: weekday.toLocaleString(
-        language,
+        intlLocales,
         CALENDAR_WEEKDAY_SHORT_FORMAT_OPTIONS,
       ),
-      fullLabel: weekday.toLocaleString(language, WEEKDAY_LONG_FORMAT_OPTIONS),
+      fullLabel: weekday.toLocaleString(
+        intlLocales,
+        WEEKDAY_LONG_FORMAT_OPTIONS,
+      ),
     };
   });
   return {
     heading: focusedDate
       .with({ day: 1 })
-      .toLocaleString(language, CALENDAR_MONTH_FORMAT_OPTIONS),
+      .toLocaleString(intlLocales, CALENDAR_MONTH_FORMAT_OPTIONS),
     weekdays,
     weeks: getCalendarWeeks(focusedDate, firstDayOfWeek).map((week) =>
       week.map((day) =>
@@ -93,7 +102,10 @@ export function presentCalendarMonth({
           : {
               isoDate: day.toString(),
               dayNumber: day.day,
-              fullLabel: day.toLocaleString(language, FULL_DATE_FORMAT_OPTIONS),
+              fullLabel: day.toLocaleString(
+                intlLocales,
+                FULL_DATE_FORMAT_OPTIONS,
+              ),
               isToday: day.equals(today),
               isSelected: day.equals(selectedDate),
               isFocused: day.equals(focusedDate),
