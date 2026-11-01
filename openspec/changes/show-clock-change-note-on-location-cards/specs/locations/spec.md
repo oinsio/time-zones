@@ -32,7 +32,19 @@ Every row whose zone qualifies shows the note, including the home location and t
 |---|---|
 | 2026-10-17 | no |
 | 2026-10-18 | yes |
+| 2026-10-19 | yes |
+| 2026-10-20 | yes |
+| 2026-10-21 | yes |
+| 2026-10-22 | yes |
+| 2026-10-23 | yes |
+| 2026-10-24 | yes |
 | 2026-10-25 | yes |
+| 2026-10-26 | yes |
+| 2026-10-27 | yes |
+| 2026-10-28 | yes |
+| 2026-10-29 | yes |
+| 2026-10-30 | yes |
+| 2026-10-31 | yes |
 | 2026-11-01 | yes |
 | 2026-11-02 | no |
 | 2027-03-20 | no |
