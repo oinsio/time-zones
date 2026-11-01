@@ -2,7 +2,7 @@
 import i18n from "i18next";
 import type { MockInstance } from "vitest";
 import { DEVICE_TIME_LOCATION_ID } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
+import type { SupportedLanguage } from "@/locales";
 import { fakeClock } from "@/lib/temporal";
 import {
   buildDeviceTimeLocation,
