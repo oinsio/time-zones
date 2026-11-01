@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import { MINUTES_PER_HOUR } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
+import type { SupportedLanguage } from "@/locales";
 import {
   type ClockChange,
   ClockChangeDirection,
