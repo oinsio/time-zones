@@ -5,6 +5,7 @@ import {
   LocationsStatus,
   PreferencesProvider,
   useDocumentLanguage,
+  useInterfaceLanguage,
   useLocations,
   usePwaUpdateStatus,
   useStorageAvailability,
@@ -51,6 +52,7 @@ export function AppShell({ clock = systemClock }: { clock?: Clock }) {
 function AppShellContent({ clock }: { clock: Clock }) {
   useDocumentLanguage();
   useThemePreference();
+  useInterfaceLanguage();
   const { hasSaveFailed, loadStatus } = useLocations();
   const {
     isOfflineReady,

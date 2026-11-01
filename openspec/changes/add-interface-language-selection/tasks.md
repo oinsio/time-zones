@@ -179,17 +179,17 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 7. Controller: choose, apply, reset (FR5, FR7, FR12; design D1, D3)
 
 - [x] 7.1 RED → GREEN: in `controller/PreferencesProvider.test.tsx`, `setInterfaceLanguage("ru")` updates `preferences.interfaceLanguage` at once and writes once after the debounce. Then add `setInterfaceLanguage` to `PreferencesContextValue` (`controller/preferencesContext.ts`) and `PreferencesProvider`.
-- [ ] 7.2 RED: `controller/useInterfaceLanguage.test.tsx`. With a test i18next instance, the in-memory preferences repository and the browser languages stubbed per test with `vi.spyOn(navigator, "languages", "get").mockReturnValue([...])` (this overrides the setup pin of task 7.3):
+- [x] 7.2 RED: `controller/useInterfaceLanguage.test.tsx`. With a test i18next instance, the in-memory preferences repository and the browser languages stubbed per test with `vi.spyOn(navigator, "languages", "get").mockReturnValue([...])` (this overrides the setup pin of task 7.3):
   - a choice of `ru` switches `i18n.language` to `ru` before the next paint (`useLayoutEffect`; assert right after `act`);
   - Reset with browser `en-US` brings back `en`;
   - an external change to `ru` through a shared backend applies `ru`;
   - an unchanged resolved language does not call `changeLanguage` again (spy).
 
   Run it and see it fail.
-- [ ] 7.3 GREEN: `controller/useInterfaceLanguage.ts`. Export it from `controller/index.ts` and call it in `AppShellContent` (`app/AppShell.tsx`) next to `useThemePreference()`. Pin the browser languages for jsdom (design D8). jsdom reports `navigator.languages` as `["en-US"]`, so without a pin every rendered `AppShell` with no chosen language would switch i18next to `en`, while the jsdom suites set the language themselves with `i18n.changeLanguage("ru")` or `("en")` before rendering `AppShell` (for example `app/AppShell.test.tsx`, `app/AppShell.settings.test.tsx`, `app/AppShell.notices.test.tsx`, `app/AppShell.pageNotices.test.tsx`, `test/features/locations/steps/deviceTimeWorld.tsx`, `test/features/main_page/steps/main_page_unit.steps.ts`, `test/features/app_shell/steps/app_shell_update_recheck.steps.ts`). In `test/setup.ts`, after the i18next init, define `navigator.languages` and `navigator.language` as configurable getters returning the active i18next language (`[i18n.language]` and `i18n.language`). With no chosen language, the resolved language then equals the one the test set, so `useInterfaceLanguage` calls nothing, and today's behaviour holds. Tests that need a specific browser language override the getter with `vi.spyOn` (tasks 6.6, 7.2, 7.4); restoring the spy (`vi.restoreAllMocks()` in `afterEach`) brings the pin back.
+- [x] 7.3 GREEN: `controller/useInterfaceLanguage.ts`. Export it from `controller/index.ts` and call it in `AppShellContent` (`app/AppShell.tsx`) next to `useThemePreference()`. Pin the browser languages for jsdom (design D8). jsdom reports `navigator.languages` as `["en-US"]`, so without a pin every rendered `AppShell` with no chosen language would switch i18next to `en`, while the jsdom suites set the language themselves with `i18n.changeLanguage("ru")` or `("en")` before rendering `AppShell` (for example `app/AppShell.test.tsx`, `app/AppShell.settings.test.tsx`, `app/AppShell.notices.test.tsx`, `app/AppShell.pageNotices.test.tsx`, `test/features/locations/steps/deviceTimeWorld.tsx`, `test/features/main_page/steps/main_page_unit.steps.ts`, `test/features/app_shell/steps/app_shell_update_recheck.steps.ts`). In `test/setup.ts`, after the i18next init, define `navigator.languages` and `navigator.language` as configurable getters returning the active i18next language (`[i18n.language]` and `i18n.language`). With no chosen language, the resolved language then equals the one the test set, so `useInterfaceLanguage` calls nothing, and today's behaviour holds. Tests that need a specific browser language override the getter with `vi.spyOn` (tasks 6.6, 7.2, 7.4); restoring the spy (`vi.restoreAllMocks()` in `afterEach`) brings the pin back.
 
   Verify, one at a time, that these pass: `npx vitest run src/controller/useInterfaceLanguage.test.tsx`; `npx vitest run src/app`; `npx vitest run src/test/features/main_page src/test/features/locations src/test/features/app_shell` (unit BDD worlds that render `AppShell`).
-- [ ] 7.4 Unit BDD `test/features/settings/settings_language_unit.feature`, steps in `steps/settings_language_unit.steps.tsx` (reuse `settingsWorld.tsx`; split the steps file if it passes 200 lines). Scenarios from the spec delta:
+- [x] 7.4 Unit BDD `test/features/settings/settings_language_unit.feature`, steps in `steps/settings_language_unit.steps.tsx` (reuse `settingsWorld.tsx`; split the steps file if it passes 200 lines). Scenarios from the spec delta:
   - "Choosing Russian applies at once" — rendered `AppShell` in jsdom: the heading «Настройки», then after going back the country «Казахстан», the Russian weekday, and the search offering «Алматы»;
   - "The language survives a reload" — re-render a new `AppShell` over the same storage: the main heading «Часовые пояса» in the first commit;
   - "Migration of the previous document";
@@ -205,14 +205,14 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 8. The language group on the settings page (FR1–FR6, FR13, NFR-A1, NFR-A2, UX1–UX4; design D6)
 
-- [ ] 8.1 Add the keys to every locale file:
+- [x] 8.1 Add the keys to every locale file:
   - `settings.languageLabel`: "Language" / «Язык»;
   - `settings.languageButton`: "Language: {{language}}" / «Язык: {{language}}»;
   - `settings.languageSearch`: "Search languages" / «Поиск языка»;
   - `settings.languageNotFound`: "No languages found" / «Языки не найдены».
 
   Verify `npx vitest run src/locales/locales.test.ts` passes (identical key sets).
-- [ ] 8.2 RED: `app/settings/InterfaceLanguageGroup.test.tsx` (RTL, jsdom; split into `InterfaceLanguageGroup.keyboard.test.tsx` if it passes 200 lines):
+- [x] 8.2 RED: `app/settings/InterfaceLanguageGroup.test.tsx` (RTL, jsdom; split into `InterfaceLanguageGroup.keyboard.test.tsx` if it passes 200 lines):
   - header comment `// Verifies FR2, FR3, FR4, FR6, NFR-A1, NFR-A2, UX1, UX4 of add-interface-language-selection (D6).`;
   - collapsed: one button whose text holds "🇺🇸" and "English", `aria-expanded="false"`, no list;
   - expanding → `aria-expanded="true"`, `aria-controls` equals the list `id`, the rows "English" then "Русский" by accessible name (emoji `aria-hidden`), the active row has `aria-current="true"` and the classes `border-accent` and a check icon, the other has `border-border`;
@@ -226,10 +226,10 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - no class name contains `gray-`.
 
   Run it and see it fail.
-- [ ] 8.3 GREEN: `app/settings/InterfaceLanguageGroup.tsx` and `app/settings/InterfaceLanguageList.tsx` per design D6. In `SettingsPage.tsx`, render `<InterfaceLanguageGroup activeCode={useActiveInterfaceLanguage().code} onChoose={setInterfaceLanguage} />` after the hour format group, and extend the JSDoc. Verify, one at a time:
+- [x] 8.3 GREEN: `app/settings/InterfaceLanguageGroup.tsx` and `app/settings/InterfaceLanguageList.tsx` per design D6. In `SettingsPage.tsx`, render `<InterfaceLanguageGroup activeCode={useActiveInterfaceLanguage().code} onChoose={setInterfaceLanguage} />` after the hour format group, and extend the JSDoc. Verify, one at a time:
   - `npx vitest run src/app/settings` passes;
   - `npx vitest run src/app/AppShell.settings.test.tsx` passes.
-- [ ] 8.4 Unit BDD `test/features/settings/settings_language_search_unit.feature`, steps in `steps/settings_language_search_unit.steps.tsx`: "No search field below the threshold", "Filtering at the threshold" (all 5 rows, with the 10-locale fixture through the `locales` prop) and "Nothing found". Add "Names are not translated" (`@add-interface-language-selection @FR3 @UX1`) to `settings_language_unit.feature` (task 7.4). "Collapsed group" and "Expand and collapse" assert the place of the group and of the list, so they live in the E2E feature (task 10.3). Verify both steps files pass, one at a time.
+- [x] 8.4 Unit BDD `test/features/settings/settings_language_search_unit.feature`, steps in `steps/settings_language_search_unit.steps.tsx`: "No search field below the threshold", "Filtering at the threshold" (all 5 rows, with the 10-locale fixture through the `locales` prop) and "Nothing found". Add "Names are not translated" (`@add-interface-language-selection @FR3 @UX1`) to `settings_language_unit.feature` (task 7.4). "Collapsed group" and "Expand and collapse" assert the place of the group and of the list, so they live in the E2E feature (task 10.3). Verify both steps files pass, one at a time.
 
 ## 9. Performance bound (NFR-P1; design D7)
 

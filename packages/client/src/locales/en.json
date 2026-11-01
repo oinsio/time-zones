@@ -112,6 +112,10 @@
     "hourFormatLabel": "Hour format",
     "hourFormat12": "12-hour",
     "hourFormat24": "24-hour",
+    "languageLabel": "Language",
+    "languageButton": "Language: {{language}}",
+    "languageSearch": "Search languages",
+    "languageNotFound": "No languages found",
     "unreadable": "The saved settings could not be read. Defaults are used.",
     "reset": "Reset settings",
     "saveFailed": "Settings will not be saved on this device."
