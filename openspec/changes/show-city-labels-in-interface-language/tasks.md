@@ -20,9 +20,9 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
 ## 3. Controller and presenter: rows follow the language (FR1–FR4, NFR-P1; TDD, design D3, D4)
 
-- [ ] 3.1 RED: in `presenter/presentLocationRows.test.ts` add (`// Verifies FR1, FR3 of show-city-labels-in-interface-language (D4).`): with `cityLabels` mapping Tokyo's ID to "Tokyo", a Tokyo location stored as «Токио» gets `cityLabel` "Tokyo" and a `wallTimeInputLabel` starting "Enter time — Tokyo"; without `cityLabels`, or with no entry for its ID, it keeps «Токио»; the device time location ignores `cityLabels`. Run `npx vitest run src/presenter/presentLocationRows.test.ts` and see them fail.
-- [ ] 3.2 GREEN: add `cityLabels?: ReadonlyMap<string, string>` to `LocationRowsContext` (`presenter/presentZoneMoment.ts`) and use it in `presentLocationRows` (design D4). Add `Implements FR1, FR3 of show-city-labels-in-interface-language (D4).` to its JSDoc. Verify `npx vitest run src/presenter`.
-- [ ] 3.3 RED: create `controller/useCityLabels.test.tsx` (`// Verifies FR1, FR2, FR4, NFR-P1 of show-city-labels-in-interface-language (D3).`). Use `renderHook` with a loader resolving to `createCompositeCitySearch` over fixture zone cities that include Tokyo, and a counting `vi.fn` loader. Cases:
+- [x] 3.1 RED: in `presenter/presentLocationRows.test.ts` add (`// Verifies FR1, FR3 of show-city-labels-in-interface-language (D4).`): with `cityLabels` mapping Tokyo's ID to "Tokyo", a Tokyo location stored as «Токио» gets `cityLabel` "Tokyo" and a `wallTimeInputLabel` starting "Enter time — Tokyo"; without `cityLabels`, or with no entry for its ID, it keeps «Токио»; the device time location ignores `cityLabels`. Run `npx vitest run src/presenter/presentLocationRows.test.ts` and see them fail.
+- [x] 3.2 GREEN: add `cityLabels?: ReadonlyMap<string, string>` to `LocationRowsContext` (`presenter/presentZoneMoment.ts`) and use it in `presentLocationRows` (design D4). Add `Implements FR1, FR3 of show-city-labels-in-interface-language (D4).` to its JSDoc. Verify `npx vitest run src/presenter`.
+- [x] 3.3 RED: create `controller/useCityLabels.test.tsx` (`// Verifies FR1, FR2, FR4, NFR-P1 of show-city-labels-in-interface-language (D3).`). Use `renderHook` with a loader resolving to `createCompositeCitySearch` over fixture zone cities that include Tokyo, and a counting `vi.fn` loader. Cases:
   - `undefined` before the load resolves;
   - the map in English, then in Russian after `i18n.changeLanguage("ru")`;
   - a rejected load keeps `undefined` and starts no second load on re-render, nor after removing or reordering a location;
@@ -31,7 +31,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
   - one load shared with `useExemplarCity` (the loader called once).
 
   Run `npx vitest run src/controller/useCityLabels.test.tsx` and see it fail.
-- [ ] 3.4 GREEN: create `controller/useCityLabels.ts` (design D3), export it from `controller/index.ts`, and call it from `useLocations` with `rest.loadCitySearch`. Pass the map in the rows context and add it to the `useMemo` dependencies. Extend the JSDoc of both with `Implements FR1, FR2, FR4, NFR-P1 of show-city-labels-in-interface-language (D3).` Verify `npx vitest run src/controller/useCityLabels.test.tsx`, then `npx vitest run src/controller`. A test there that asserted "no load for a city list" is updated to an empty list, with a `// Verifies FR4 of show-city-labels-in-interface-language` comment.
+- [x] 3.4 GREEN: create `controller/useCityLabels.ts` (design D3), export it from `controller/index.ts`, and call it from `useLocations` with `rest.loadCitySearch`. Pass the map in the rows context and add it to the `useMemo` dependencies. Extend the JSDoc of both with `Implements FR1, FR2, FR4, NFR-P1 of show-city-labels-in-interface-language (D3).` Verify `npx vitest run src/controller/useCityLabels.test.tsx`, then `npx vitest run src/controller`. A test there that asserted "no load for a city list" is updated to an empty list, with a `// Verifies FR4 of show-city-labels-in-interface-language` comment.
 
 ## 4. Presenter: `Intl` uses the fallback order (FR5; TDD, design D5)
 
