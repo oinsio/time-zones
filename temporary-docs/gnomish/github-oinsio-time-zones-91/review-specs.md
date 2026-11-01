@@ -75,7 +75,9 @@
   
   The sentence "A brand name: written `Gnomish Factory` in every interface language, never translated." and the *RU:* «Gnomish Factory» stay, and so does the D2 guard.
 - Fix risk: The glossary loses an explicit ban on the Russian rendering. The brand rule still lives in the glossary sentence, in the *RU:* name and in the D2 unit BDD guard, which fails for any language whose credit lacks `Gnomish Factory`. With tasks 1.1-3.2 done, the grep in M3 and task 4.3 really prints 0 lines (Freshness shows the 5 current hits are all edited). No code, spec or other task depends on the *Never:* entry.
-- Status: open
+- Status: fixed
+- Resolution: dropped the *Never:* «Гномская фабрика» addition: design.md D3 now says the entry gets no *Never:* word (README.ru.md keeps it, NG5),
+  proposal.md What Changes no longer adds it, M3 expects 0 lines; tasks.md 1.1 drops the append and its grep prints nothing; task 4.3 prints nothing (M3).
 
 ### R2 — SUGGESTION — design.md cites the wrong task for the `it.each` rows
 - Location: `openspec/changes/keep-gnomish-factory-name-untranslated-in-credit/design.md:30`

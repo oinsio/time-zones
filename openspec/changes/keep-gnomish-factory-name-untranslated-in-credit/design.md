@@ -12,7 +12,7 @@ The change stays inside the existing owners named by the glossary (`GnomishFacto
 
 **D2: One guard over every supported language.** A unit BDD feature `src/test/features/settings/settings_factory_name.feature` has one scenario, "The factory name in every supported interface language". Its steps (`steps/settings_factory_name.steps.ts`) loop over `SUPPORTED_LANGUAGES` from `@/i18n`. For each language they read the credit with `i18n.getFixedT(language)("settings.gnomishFactoryCredit")`, using the real resources that `src/test/setup.ts` loads from `localeResources`. Each credit must contain `Gnomish Factory`. A failing assertion names the language. `src/locales/locales.test.ts` already checks that every locale file matches a `SUPPORTED_LANGUAGES` entry ("should have one locale file per supported language"), so a new language file is covered by D2 without any edit to the test.
 
-**D3: The glossary owns the spelling.** In `docs/glossary/settings.md`, **Gnomish Factory** gets *RU:* «Gnomish Factory». It also gets the sentence "A brand name: written `Gnomish Factory` in every interface language, never translated." and *Never:* «Гномская фабрика». **Gnomish Factory credit** gets *RU:* «Создано с помощью Gnomish Factory».
+**D3: The glossary owns the spelling.** In `docs/glossary/settings.md`, **Gnomish Factory** gets *RU:* «Gnomish Factory». It also gets the sentence "A brand name: written `Gnomish Factory` in every interface language, never translated." It gets no *Never:* word: `README.ru.md` keeps «Гномская фабрика» for its tooling section (NG5). **Gnomish Factory credit** gets *RU:* «Создано с помощью Gnomish Factory».
 
 ## Consequences
 

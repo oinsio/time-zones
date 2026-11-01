@@ -11,7 +11,7 @@ The Gnomish Factory credit on the settings page reads «Создано с пом
 - MODIFIED `settings` requirement "Gnomish Factory credit": the Russian credit text is «Создано с помощью Gnomish Factory». The factory name stays `Gnomish Factory` in every language. Unchanged: the English text "Built with Gnomish Factory", the place, colour, size, address, new tab, keyboard order and offline behaviour.
 - MODIFIED `settings` requirement "Settings strings are localized": the Russian glossary name of the credit becomes «Создано с помощью Gnomish Factory». The factory name is a brand name: the credit of every interface language, English, Russian and any later one, contains `Gnomish Factory` exactly, in Latin letters.
 - Glossary (`docs/glossary/settings.md`):
-  - **Gnomish Factory**: *RU:* «Гномская фабрика» becomes «Gnomish Factory». The entry also says the name is never translated, and «Гномская фабрика» is added under *Never:*.
+  - **Gnomish Factory**: *RU:* «Гномская фабрика» becomes «Gnomish Factory». The entry also says the name is never translated.
   - **Gnomish Factory credit**: *RU:* «Создано с помощью Гномской фабрики» becomes «Создано с помощью Gnomish Factory».
   - No new term. Terms used as they are: settings page, Gnomish Factory, Gnomish Factory credit.
 - No stored data, no new state, no network request, no change of layout or of any other string.
@@ -100,7 +100,7 @@ No changes (`docs/ia/` does not exist).
 
 - M1: In Russian, the settings page shows the credit «Создано с помощью Gnomish Factory» in 2 of 2 E2E checks ("The credit in both languages" checks it as the link name, "Both languages" as the text) and «Создано с помощью Гномской фабрики» in 0 of 2.
 - M2: The unit BDD check finds `Gnomish Factory` in the credit of 2 of 2 supported languages (`en`, `ru`). It covers 100 % of `SUPPORTED_LANGUAGES`, so a third language is checked with no edit to the test.
-- M3: `grep -rn "Гномск" packages/client/src docs/glossary` finds 1 line: the *Never:* list of the glossary entry **Gnomish Factory**.
+- M3: `grep -rn "Гномск" packages/client/src docs/glossary` finds 0 lines.
 - M4: axe-core reports 0 violations on the settings page in 2 of 2 themes.
 - M5: 0 px of horizontal scroll and 0 clipped credit text in 2 of 2 Russian checks (320 px, 2560 px).
 - M6: 0 of the 8 approved settings screenshots (4 per Playwright project, chromium and mobile-chrome) change.

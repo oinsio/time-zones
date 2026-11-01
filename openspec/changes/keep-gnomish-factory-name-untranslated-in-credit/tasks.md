@@ -13,10 +13,9 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 1. Glossary (FR1, FR2; design D3)
 
 - [ ] 1.1 In `docs/glossary/settings.md` (repository root):
-  - **Gnomish Factory**: after "linked from the settings page." add "A brand name: written `Gnomish Factory` in every interface language, never translated." Change *RU:* «Гномская фабрика» to *RU:* «Gnomish Factory». Append *Never:* «Гномская фабрика».
-  - **Gnomish Factory credit**: change *RU:* «Создано с помощью Гномской фабрики» to *RU:* «Создано с помощью Gnomish Factory». Keep the rest of the entry.
+  - **Gnomish Factory**: after "linked from the settings page." add "A brand name: written `Gnomish Factory` in every interface language, never translated." Change *RU:* «Гномская фабрика» to *RU:* «Gnomish Factory».  - **Gnomish Factory credit**: change *RU:* «Создано с помощью Гномской фабрики» to *RU:* «Создано с помощью Gnomish Factory». Keep the rest of the entry.
 
-  Verify from the repository root: `grep -c "Создано с помощью Gnomish Factory" docs/glossary/settings.md` prints `1`, `grep -c "never translated" docs/glossary/settings.md` prints `1`, and `grep -n "Гномск" docs/glossary/settings.md` prints only the *Never:* part of the **Gnomish Factory** line.
+  Verify from the repository root: `grep -c "Создано с помощью Gnomish Factory" docs/glossary/settings.md` prints `1`, `grep -c "never translated" docs/glossary/settings.md` prints `1`, and `grep -n "Гномск" docs/glossary/settings.md` prints nothing.
 
 ## 2. The Russian credit and the guard for every language (FR1, FR2, UX1; TDD, design D1, D2)
 
@@ -68,7 +67,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `pnpm --filter @time-zones/client test:bdd`.
 
   All pass.
-- [ ] 4.3 From the repository root, `grep -rn "Гномск" packages/client/src docs/glossary` prints exactly 1 line: the **Gnomish Factory** entry in `docs/glossary/settings.md`, with its *Never:* part (M3).
+- [ ] 4.3 From the repository root, `grep -rn "Гномск" packages/client/src docs/glossary` prints nothing (M3).
 - [ ] 4.4 Traceability, from `packages/client/`: `for id in FR1 FR2 NFR-A1 NFR-R1 UX1; do grep -rlE "keep-gnomish-factory-name-untranslated-in-credit.*\b$id\b|\b$id\b.*keep-gnomish-factory-name-untranslated-in-credit" src >/dev/null || echo "missing $id"; done` prints nothing.
 
 ## Human follow-up
