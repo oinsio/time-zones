@@ -91,7 +91,7 @@ src/
     grid/                  GridView (next)
     shared/                row header, time display, day-period colors
   components/ui/           shadcn/ui primitives
-  locales/                 ru.json, en.json (exist), dialects
+  locales/                 locale files and the locale registry (index.ts), dialects
 ```
 
 Each folder is a module with an `index.ts`; imports go only through it.

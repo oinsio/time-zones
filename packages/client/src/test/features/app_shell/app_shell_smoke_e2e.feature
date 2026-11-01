@@ -14,7 +14,7 @@ Feature: App shell smoke check against the production build
     When the user opens the app
     Then the service worker scope is the app base path
 
-  @setup-app-shell-and-pages-deploy @FR2
+  @setup-app-shell-and-pages-deploy @FR2 @add-interface-language-selection @FR7
   Scenario Outline: User sees the app in their browser language
     Given the user's browser language is "<browser language>"
     When the user opens the app

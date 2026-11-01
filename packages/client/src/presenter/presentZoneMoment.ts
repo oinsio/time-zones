@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
-import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import {
   getLocalDateTime,
   getOffsetDifferenceMinutes,
@@ -17,7 +17,7 @@ import { formatUtcOffset } from "./utcOffset";
 import { presentWallTimeHint } from "./wallTimeHint";
 
 export type LocationRowsContext = {
-  language: SupportedLanguage;
+  language: InterfaceLanguageCode;
   hourFormat: HourFormat;
   instant: Temporal.Instant;
   translate: TFunction;

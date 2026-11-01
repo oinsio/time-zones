@@ -25,3 +25,7 @@ export const POPULAR_TIME_ZONE_IDS: readonly string[] = [
   "Asia/Tokyo",
   "Australia/Sydney",
 ];
+
+/** Languages of the build-time city data (names and country texts). Implements FR10 of add-interface-language-selection (D5). */
+export const CITY_NAME_LANGUAGES = ["en", "ru"] as const;
+export type CityNameLanguage = (typeof CITY_NAME_LANGUAGES)[number];

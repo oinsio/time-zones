@@ -13,9 +13,9 @@ import {
 import {
   deserializeLocationsDocument,
   LOCATION_MIGRATIONS,
-  type PayloadMigrations,
   serializeLocationsDocument,
 } from "./locationsDocument";
+import type { PayloadMigrations } from "./payloadMigrations";
 import {
   createStorageDocumentSync,
   type StorageSyncChannel,

@@ -25,12 +25,15 @@ const resultFor = (
   matchedAbbreviation,
 });
 
+const IN_EN = { language: "en", cityNameLanguage: "en" } as const;
+const IN_RU = { language: "ru", cityNameLanguage: "ru" } as const;
+
 describe("present search results", () => {
   it("should show the city and country in the interface language", () => {
     const [presented] = presentSearchResults(
       [resultFor(moscowRecord)],
       [],
-      "ru",
+      IN_RU,
     );
     expect(presented).toMatchObject({
       timeZoneId: "Europe/Moscow",
@@ -44,7 +47,7 @@ describe("present search results", () => {
     const [presented] = presentSearchResults(
       [resultFor(moscowRecord)],
       [],
-      "en",
+      IN_EN,
     );
     expect(presented).toMatchObject({
       cityName: "Moscow",
@@ -56,7 +59,7 @@ describe("present search results", () => {
     const [presented] = presentSearchResults(
       [resultFor(moscowRecord, "MSK")],
       [],
-      "en",
+      IN_EN,
     );
     expect(presented?.matchedAbbreviation).toBe("MSK");
   });
@@ -69,7 +72,7 @@ describe("present search results", () => {
       countryCode: "",
     };
     expect(
-      presentSearchResults([resultFor(utcRecord)], [], "en")[0]?.countryName,
+      presentSearchResults([resultFor(utcRecord)], [], IN_EN)[0]?.countryName,
     ).toBe("");
   });
 
@@ -85,7 +88,7 @@ describe("present search results", () => {
       const [presented] = presentSearchResults(
         [resultFor(moscowRecord)],
         locations,
-        "en",
+        IN_EN,
       );
       expect(presented?.isAdded).toBe(expected);
     },
@@ -93,7 +96,7 @@ describe("present search results", () => {
 
   it("should not mark a result added when the list is empty", () => {
     expect(
-      presentSearchResults([resultFor(moscowRecord)], [], "en")[0]?.isAdded,
+      presentSearchResults([resultFor(moscowRecord)], [], IN_EN)[0]?.isAdded,
     ).toBe(false);
   });
 });

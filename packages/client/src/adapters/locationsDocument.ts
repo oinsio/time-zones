@@ -5,17 +5,13 @@ import {
   LocationsLoadStatus,
   type StoredLocations,
 } from "@/ports";
+import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
 
 /**
  * The stored locations document: `{ schemaVersion, payload }` (ADR-0004).
  * Implements FR9, FR11, FR12 of add-locations-via-search (D4).
  * Implements FR8, FR9 of set-home-location-and-show-differences (D6).
  */
-
-/** Upgrades a payload from the version it is keyed by to the next one. */
-export type PayloadMigrations = Readonly<
-  Record<number, (payload: unknown) => unknown>
->;
 
 /**
  * Version 1 had no home location: the migration adds "no home" (FR8). Version 2
@@ -58,22 +54,6 @@ export function serializeLocationsDocument(
       homeLocationId,
     },
   });
-}
-
-/** Upgrades to the current version; `undefined` when a step is missing. */
-function migratePayload(
-  storedVersion: number,
-  payload: unknown,
-  currentVersion: number,
-  migrations: PayloadMigrations,
-): unknown {
-  let migratedPayload = payload;
-  for (let version = storedVersion; version < currentVersion; version += 1) {
-    const migrate = migrations[version];
-    if (!migrate) return undefined;
-    migratedPayload = migrate(migratedPayload);
-  }
-  return migratedPayload;
 }
 
 /** Any document that cannot be read as a valid one is `UNREADABLE`. */

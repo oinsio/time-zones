@@ -1,8 +1,8 @@
 import { useContext, useMemo, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { ONE_DAY } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import type { Clock } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import {
   getEffectiveInstant,
   getReferenceZone,
@@ -15,6 +15,7 @@ import {
 import type { HourFormat } from "@/preferences";
 import { type PresentedDateBar, presentDateBar } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 import { useHourFormat } from "./useHourFormat";
 
 const MISSING_PROVIDER_MESSAGE =
@@ -23,7 +24,7 @@ const MISSING_PROVIDER_MESSAGE =
 function buildDateBar(
   state: WorldClockState,
   clock: Clock,
-  language: SupportedLanguage,
+  language: InterfaceLanguageCode,
   hourFormat: HourFormat,
   translate: Parameters<typeof presentDateBar>[0]["translate"],
 ): PresentedDateBar {
@@ -57,15 +58,15 @@ function buildDateBar(
  * select-date-with-calendar-and-now (D5).
  * Implements FR7 of add-wall-time-input-with-hint (D2): the gap note comes
  * from `getWallClockNote`.
+ * Implements FR5 of add-interface-language-selection (D3): dates and weekdays follow the active interface language.
  */
 export function useReferenceMoment() {
   const context = useContext(LocationsContext);
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
   const { store, clock, minuteTick } = context;
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
-  const { i18n, t } = useTranslation();
-  const language = (i18n.resolvedLanguage ??
-    i18n.language) as SupportedLanguage;
+  const { t } = useTranslation();
+  const { code: language } = useActiveInterfaceLanguage();
   const hourFormat = useHourFormat();
   const [announcement, setAnnouncement] = useState("");
 

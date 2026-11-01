@@ -4,7 +4,7 @@ import i18n from "i18next";
 import { expect } from "vitest";
 import { DEVICE_TIME_LOCATION_ID } from "@/constants";
 import { WallTimeInputOutcome } from "@/controller";
-import { DEFAULT_LANGUAGE } from "@/i18n";
+import { DEFAULT_LANGUAGE } from "@/locales";
 import {
   createStore,
   INITIAL_WORLD_CLOCK_STATE,

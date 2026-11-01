@@ -5,8 +5,8 @@ import {
   FIRST_DAY_OF_WEEK_BY_LANGUAGE,
   FULL_DATE_FORMAT_OPTIONS,
 } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import { type InterfaceLanguageCode, pickByLanguageFallback } from "@/locales";
 import {
   CalendarMove,
   getCalendarFocusTarget,
@@ -30,11 +30,23 @@ export type PresentedCalendarMonth = {
   weeks: (CalendarDayCell | null)[][];
 };
 
+/**
+ * ISO weekday the weeks start on in an interface language, along its dialect
+ * fallback order.
+ * Implements FR10 of add-interface-language-selection (D5).
+ */
+export function resolveFirstDayOfWeek(language: InterfaceLanguageCode): number {
+  return (
+    pickByLanguageFallback(language, FIRST_DAY_OF_WEEK_BY_LANGUAGE) ??
+    FIRST_DAY_OF_WEEK_BY_LANGUAGE.en
+  );
+}
+
 export type CalendarMonthContext = {
   focusedDate: Temporal.PlainDate;
   selectedDate: Temporal.PlainDate;
   today: Temporal.PlainDate;
-  language: SupportedLanguage;
+  language: InterfaceLanguageCode;
 };
 
 const WEEKDAY_LONG_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -53,7 +65,7 @@ export function presentCalendarMonth({
   today,
   language,
 }: CalendarMonthContext): PresentedCalendarMonth {
-  const firstDayOfWeek = FIRST_DAY_OF_WEEK_BY_LANGUAGE[language];
+  const firstDayOfWeek = resolveFirstDayOfWeek(language);
   const weekStart = getCalendarFocusTarget(
     focusedDate,
     CalendarMove.WEEK_START,

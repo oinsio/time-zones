@@ -30,7 +30,11 @@ Given(
       locationsWorld.page,
       JSON.stringify({
         schemaVersion: PREFERENCES_SCHEMA_VERSION,
-        payload: { theme: THEME_VALUES[themeName], hourFormat },
+        payload: {
+          theme: THEME_VALUES[themeName],
+          hourFormat,
+          interfaceLanguage: locationsWorld.seededInterfaceLanguage,
+        },
       }),
     );
   },

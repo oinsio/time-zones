@@ -1,9 +1,10 @@
+import type { CityNameLanguage } from "@/constants";
 import type { CityRecord, CitySearchResult } from "@/ports";
 
 /** A zone-city record as extracted from CLDR at build time (D6). */
 export type ZoneCityData = {
   timeZoneId: string;
-  names: { en: string; ru: string };
+  names: Record<CityNameLanguage, string>;
   countryCode: string;
 };
 

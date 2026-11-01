@@ -105,7 +105,11 @@ describe("SettingsPage", () => {
     writeScheduler.runPending();
     expect(repository.load()).toEqual({
       status: PreferencesLoadStatus.LOADED,
-      preferences: { theme: ThemePreference.DARK, hourFormat: HourFormat.H12 },
+      preferences: {
+        theme: ThemePreference.DARK,
+        hourFormat: HourFormat.H12,
+        interfaceLanguage: null,
+      },
     });
   });
 

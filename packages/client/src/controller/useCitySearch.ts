@@ -5,7 +5,6 @@ import {
   normalizeSearchText,
   splitIntoWords,
 } from "@/adapters";
-import type { SupportedLanguage } from "@/i18n";
 import { isDeviceTimeLocation, type Location } from "@/model";
 import type { CitySearch, LoadCitySearch } from "@/ports";
 import {
@@ -14,6 +13,7 @@ import {
   presentSearchResults,
 } from "@/presenter";
 import { loadCitySearchOnce, readLoadedCitySearch } from "./cityDataCache";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 
 export enum CitySearchStatus {
   LOADING = "LOADING",
@@ -28,11 +28,11 @@ export enum CitySearchStatus {
  * show-here-entry-for-device-time).
  * Implements FR6, FR15, NFR-P2 of add-locations-via-search (D8, D9).
  * Implements FR11 of add-settings-page-and-device-time-location (D12): `isDeviceTimeOptionShown`.
+ * Implements FR5 of add-interface-language-selection (D5): results follow the active language.
  */
 export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
   const { i18n } = useTranslation();
-  const language = (i18n.resolvedLanguage ??
-    i18n.language) as SupportedLanguage;
+  const { code: language, cityNameLanguage } = useActiveInterfaceLanguage();
   const [search, setSearch] = useState<CitySearch | undefined>(() =>
     readLoadedCitySearch(load),
   );
@@ -68,10 +68,15 @@ export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
     ): PresentedSearchResult[] => {
       if (search === undefined) return [];
       const results =
-        query.trim() === "" ? search.suggest() : search.search(query, language);
-      return presentSearchResults(results, locations, language);
+        query.trim() === ""
+          ? search.suggest()
+          : search.search(query, cityNameLanguage);
+      return presentSearchResults(results, locations, {
+        language,
+        cityNameLanguage,
+      });
     },
-    [search, language],
+    [search, language, cityNameLanguage],
   );
 
   const status =

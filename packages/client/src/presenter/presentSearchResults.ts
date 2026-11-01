@@ -1,7 +1,17 @@
-import type { SupportedLanguage } from "@/i18n";
+import type { CityNameLanguage } from "@/constants";
+import type { InterfaceLanguageCode } from "@/locales";
 import type { Location } from "@/model";
 import type { CitySearchResult } from "@/ports";
 import { presentCountryName } from "./countryName";
+
+/**
+ * The interface language and the language of the city data it reads.
+ * Implements FR5, FR10 of add-interface-language-selection (D5).
+ */
+export type SearchPresentationContext = {
+  language: InterfaceLanguageCode;
+  cityNameLanguage: CityNameLanguage;
+};
 
 export type PresentedSearchResult = {
   timeZoneId: string;
@@ -20,11 +30,12 @@ export type PresentedSearchResult = {
 export function presentSearchResults(
   results: readonly CitySearchResult[],
   locations: readonly Location[],
-  language: SupportedLanguage,
+  context: SearchPresentationContext,
 ): PresentedSearchResult[] {
+  const { language, cityNameLanguage } = context;
   return results.map(({ record, matchedAbbreviation }) => ({
     timeZoneId: record.timeZoneId,
-    cityName: record.names[language],
+    cityName: record.names[cityNameLanguage],
     countryCode: record.countryCode,
     countryName: presentCountryName(record.countryCode, language),
     matchedAbbreviation,

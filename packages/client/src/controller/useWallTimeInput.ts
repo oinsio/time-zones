@@ -1,9 +1,8 @@
 import { useContext, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import type { SupportedLanguage } from "@/i18n";
 import { LocationCommandType, type WallTimeTarget } from "@/model";
 import { getDayPeriodMarkers, parseWallTimeInput } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 
 export { type WallTimeTarget, WallTimeTargetKind } from "@/model";
 
@@ -25,14 +24,13 @@ export enum WallTimeInputOutcome {
  * Implements FR3, FR6, FR8, FR9, FR10 of add-wall-time-input-with-hint (D5).
  * Implements FR6 of add-settings-page-and-device-time-location (D9): reads
  * the 12-hour texts of the interface language.
+ * Implements FR5 of add-interface-language-selection (D3): follows the active interface language.
  */
 export function useWallTimeInput() {
   const context = useContext(LocationsContext);
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
   const { store } = context;
-  const { i18n } = useTranslation();
-  const language = (i18n.resolvedLanguage ??
-    i18n.language) as SupportedLanguage;
+  const { code: language } = useActiveInterfaceLanguage();
   return useMemo(
     () => ({
       confirmWallTime: (

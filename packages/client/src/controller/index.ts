@@ -3,11 +3,16 @@ export { LocationsProvider } from "./LocationsProvider";
 // Implements FR4, FR5, FR7 of add-settings-page-and-device-time-location.
 export { PreferencesProvider } from "./PreferencesProvider";
 export type { TickScheduler } from "./tickScheduler";
+export {
+  type ActiveInterfaceLanguage,
+  useActiveInterfaceLanguage,
+} from "./useActiveInterfaceLanguage";
 export { useCalendarMonth } from "./useCalendarMonth";
 export { CitySearchStatus, useCitySearch } from "./useCitySearch";
 export { useContainerWidth } from "./useContainerWidth";
 export { useDocumentLanguage } from "./useDocumentLanguage";
 export { useHourFormat } from "./useHourFormat";
+export { useInterfaceLanguage } from "./useInterfaceLanguage";
 // Implements FR2, FR6, FR8 of show-here-entry-for-device-time.
 export { LocationsStatus, useLocations } from "./useLocations";
 export { useOnlineStatus } from "./useOnlineStatus";

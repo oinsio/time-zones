@@ -1,6 +1,6 @@
 // Verifies FR2, FR10 of setup-app-shell-and-pages-deploy: locale files describe
 // themselves and share one set of keys.
-import { SUPPORTED_LANGUAGES } from "@/i18n";
+import { SUPPORTED_LANGUAGES } from "@/locales";
 
 type LocaleFile = Record<string, unknown> & {
   _meta?: Record<string, unknown>;

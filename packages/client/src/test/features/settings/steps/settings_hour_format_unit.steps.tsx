@@ -5,7 +5,7 @@ import { screen, within } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { expect } from "vitest";
-import { DEFAULT_LANGUAGE } from "@/i18n";
+import { DEFAULT_LANGUAGE } from "@/locales";
 import { getDayPeriodMarkers, parseWallTimeInput } from "@/presenter";
 import { getCardOf } from "../../locations/steps/deviceTimeQueries";
 import { createHourFormatBudgetCheck } from "./hourFormatBudgetWorld";

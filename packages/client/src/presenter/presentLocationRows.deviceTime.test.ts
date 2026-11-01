@@ -2,8 +2,8 @@
 // Verifies FR5 of add-settings-page-and-device-time-location (D8): the 12-hour rows.
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
-import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import { buildDeviceTimeLocation } from "@/model";
 import { HourFormat } from "@/preferences";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
@@ -15,7 +15,7 @@ const DEVICE_ZONE = "Asia/Almaty";
 
 const present = (
   locations: Parameters<typeof presentLocationRows>[0],
-  language: SupportedLanguage = "en",
+  language: InterfaceLanguageCode = "en",
   overrides: Partial<Parameters<typeof presentLocationRows>[1]> = {},
 ) =>
   presentLocationRows(locations, {

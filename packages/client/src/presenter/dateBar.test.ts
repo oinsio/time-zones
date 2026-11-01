@@ -1,14 +1,14 @@
 // Verifies FR4, FR7, FR9 of select-date-with-calendar-and-now (D4).
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
-import type { SupportedLanguage } from "@/i18n";
 import { Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import { HourFormat } from "@/preferences";
 import { presentDateBar } from "./dateBar";
 
 const present = (
   effectiveDate: string,
-  language: SupportedLanguage = "en",
+  language: InterfaceLanguageCode = "en",
   overrides: Partial<Parameters<typeof presentDateBar>[0]> = {},
 ) =>
   presentDateBar({

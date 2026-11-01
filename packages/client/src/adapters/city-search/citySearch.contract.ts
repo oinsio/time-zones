@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { SupportedLanguage } from "@/i18n";
+import type { CityNameLanguage } from "@/constants";
 import type { CitySearch } from "@/ports";
 
 export interface CitySearchScenario {
@@ -7,7 +7,7 @@ export interface CitySearchScenario {
   /** Zones with CLDR data and the names expected per language. */
   namedZones: readonly {
     timeZoneId: string;
-    language: SupportedLanguage;
+    language: CityNameLanguage;
     cityName: string;
   }[];
   /** A canonical zone without CLDR data and its derived name. */

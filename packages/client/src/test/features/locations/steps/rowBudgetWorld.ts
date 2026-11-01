@@ -1,8 +1,8 @@
 // Implements FR1, FR2, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D4).
 import i18n from "i18next";
 import { expect } from "vitest";
-import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import { getUtcOffsetMinutes, type Location } from "@/model";
 import { HourFormat } from "@/preferences";
 import { type LocationRow, presentLocationRows } from "@/presenter";
@@ -19,7 +19,7 @@ export const BUDGET_ROW_COUNT = 50;
 export const BUDGET_FIRST_MOMENT = "2026-07-15T12:00:00Z";
 /** Another minute of the same reference day. */
 export const BUDGET_SECOND_MOMENT = "2026-07-15T12:07:00Z";
-const BUDGET_LANGUAGE: SupportedLanguage = "en";
+const BUDGET_LANGUAGE: InterfaceLanguageCode = "en";
 
 export const buildBudgetLocations = (count: number) =>
   Array.from({ length: count }, (_, index) =>
@@ -28,7 +28,7 @@ export const buildBudgetLocations = (count: number) =>
 
 type BudgetPresenting = {
   timestamp?: string;
-  language?: SupportedLanguage;
+  language?: InterfaceLanguageCode;
   deviceTimeZoneId?: string;
   /** Presents the rows with this location as home (set-home-location-and-show-differences). */
   homeLocation?: Location;

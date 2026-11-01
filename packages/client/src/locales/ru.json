@@ -112,6 +112,10 @@
     "hourFormatLabel": "Формат времени",
     "hourFormat12": "12 часов",
     "hourFormat24": "24 часа",
+    "languageLabel": "Язык",
+    "languageButton": "Язык: {{language}}",
+    "languageSearch": "Поиск языка",
+    "languageNotFound": "Языки не найдены",
     "unreadable": "Сохранённые настройки не удалось прочитать. Используются значения по умолчанию.",
     "reset": "Сбросить настройки",
     "saveFailed": "Настройки не будут сохранены на этом устройстве."

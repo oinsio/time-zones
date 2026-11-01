@@ -1,6 +1,5 @@
 import { useContext, useMemo, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
-import type { SupportedLanguage } from "@/i18n";
 import {
   getEffectiveInstant,
   getReferenceDay,
@@ -10,6 +9,7 @@ import {
 } from "@/model";
 import { type LocationRowsContext, presentLocationRows } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 import { useExemplarCity } from "./useExemplarCity";
 import { useHourFormat } from "./useHourFormat";
 
@@ -22,6 +22,7 @@ const MISSING_PROVIDER_MESSAGE =
  * The locations the user keeps, as presenter rows for views and as the model
  * list for search, with the persistence state and the commands.
  * Implements FR10, FR12, FR13, FR14 of add-locations-via-search (D3).
+ * Implements FR5 of add-interface-language-selection (D3): presents in the active interface language.
  * Reads the instant when the rows are presented: FR2, FR4 of
  * show-utc-offset-on-location-rows (D4).
  * Passes the device zone to the presenter: FR1, FR2 of
@@ -46,9 +47,8 @@ export function useLocations() {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const { locations, deviceTimeZoneId, homeLocationId } = state;
   const hourFormat = useHourFormat();
-  const { i18n, t } = useTranslation();
-  const language = (i18n.resolvedLanguage ??
-    i18n.language) as SupportedLanguage;
+  const { t } = useTranslation();
+  const { code: language } = useActiveInterfaceLanguage();
   const deviceTimeLocation = locations.find(isDeviceTimeLocation);
   const deviceTimeCityLabel = useExemplarCity(
     deviceTimeLocation?.timeZoneId,
