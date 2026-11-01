@@ -27,6 +27,7 @@ export {
 export { KeyboardKey } from "./keyboard";
 export { LEGACY_ZONE_PROBE_ID } from "./legacy";
 export {
+  CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
   HOUR_LABEL_FORMAT_OPTIONS,
   HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT,
   LOCAL_DATE_FORMAT_OPTIONS,
@@ -68,6 +69,7 @@ export {
   STORAGE_KEYS,
 } from "./storage";
 export {
+  CLOCK_CHANGE_WINDOW_DAYS,
   GRADIENT_PERCENT_DIGITS,
   HOUR_LABEL_INTERVAL_HOURS,
   MAX_TRACK_FRACTION,

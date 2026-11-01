@@ -172,3 +172,48 @@ describe("getReferenceDay length", () => {
     expect(day.lengthMinutes).toBe(1440);
   });
 });
+
+// Verifies FR1 of show-clock-change-note-on-location-cards (D1).
+describe("getReferenceDay clock change window", () => {
+  it("should span 7 days before to 8 days after the start of the date", () => {
+    const day = dayOf("Europe/Belgrade", "2026-11-01T09:00:00Z");
+
+    expect(day.clockChangeWindow.start.toString()).toBe("2026-10-24T22:00:00Z");
+    expect(day.clockChangeWindow.end.toString()).toBe("2026-11-08T23:00:00Z");
+  });
+
+  it("should count the window in the home zone, not the device zone", () => {
+    const belgrade = {
+      id: "Europe/Belgrade|Belgrade",
+      kind: LocationKind.CITY,
+      timeZoneId: "Europe/Belgrade",
+      label: "Belgrade",
+      countryCode: "RS",
+    };
+    const state: WorldClockState = {
+      ...stateIn("Asia/Almaty"),
+      locations: [belgrade],
+      homeLocationId: belgrade.id,
+    };
+
+    const day = getReferenceDay(state, instantOf("2026-11-01T20:00:00Z"));
+
+    expect(day.clockChangeWindow.start.toString()).toBe("2026-10-24T22:00:00Z");
+  });
+
+  it("should use the pinned date", () => {
+    const state: WorldClockState = {
+      ...stateIn("Europe/Belgrade"),
+      reference: {
+        mode: ReferenceMode.PINNED,
+        instant: instantOf("2027-03-21T09:00:00Z"),
+        wallClockStatus: WallClockStatus.UNIQUE,
+        requestedWallTime: Temporal.PlainTime.from("09:00"),
+      },
+    };
+
+    const day = getReferenceDay(state, instantOf("2026-11-01T09:00:00Z"));
+
+    expect(day.clockChangeWindow.start.toString()).toBe("2027-03-13T23:00:00Z");
+  });
+});

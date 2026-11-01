@@ -1,4 +1,5 @@
 import {
+  CLOCK_CHANGE_WINDOW_DAYS,
   NANOSECONDS_PER_MINUTE,
   TRACK_END_BEFORE_DAY_END_MINUTES,
   TRACK_HOUR_MOVE_MINUTES,
@@ -14,12 +15,19 @@ import { getEffectiveInstant, getReferenceZone } from "./referenceMoment";
  * of 23 and 25 hours work.
  * Implements FR1, FR2, FR3, FR4 of add-time-sliders-to-location-cards (D2).
  * Implements FR1, FR2, FR3 of fix-day-track-handle-overlap-and-end-of-day (D1).
+ * Implements FR1 of show-clock-change-note-on-location-cards (D1).
  */
+
+export type ClockChangeWindow = {
+  start: Temporal.Instant;
+  end: Temporal.Instant;
+};
 
 export type ReferenceDay = {
   start: Temporal.Instant;
   end: Temporal.Instant;
   lengthMinutes: number;
+  clockChangeWindow: ClockChangeWindow;
 };
 
 export enum TrackMove {
@@ -45,6 +53,16 @@ export function getReferenceDay(
     start: start.toInstant(),
     end: end.toInstant(),
     lengthMinutes: start.until(end).total({ unit: "minute" }),
+    clockChangeWindow: {
+      start: zoned
+        .subtract({ days: CLOCK_CHANGE_WINDOW_DAYS })
+        .startOfDay()
+        .toInstant(),
+      end: zoned
+        .add({ days: CLOCK_CHANGE_WINDOW_DAYS + 1 })
+        .startOfDay()
+        .toInstant(),
+    },
   };
 }
 

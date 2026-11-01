@@ -11,7 +11,7 @@ import {
   type DayPeriodBoundary,
   getDayPeriod,
 } from "./dayPeriods";
-import type { ReferenceDay } from "./dayTrack";
+import type { ClockChangeWindow, ReferenceDay } from "./dayTrack";
 
 /**
  * Where the day periods of a zone change inside a reference day: blend
@@ -36,21 +36,27 @@ export type OffsetEdge = {
 
 const HALF = 2;
 
-/** Offset changes from just before the day to just after it, in order. */
+/**
+ * Offset changes `marginHours` before the span start (included) to `marginHours`
+ * after its end (excluded), in order.
+ * Implements FR2 of show-clock-change-note-on-location-cards (D2).
+ */
 export function findOffsetTransitions(
   timeZoneId: string,
-  day: ReferenceDay,
+  span: ClockChangeWindow,
+  marginHours: number = OFFSET_CHANGE_MARGIN_HOURS,
 ): Temporal.Instant[] {
-  const margin = { hours: OFFSET_CHANGE_MARGIN_HOURS };
-  const limit = day.end.add(margin);
+  const margin = { hours: marginHours };
+  const limit = span.end.add(margin);
   const transitions: Temporal.Instant[] = [];
-  let transition = day.start
+  let transition = span.start
     .subtract(margin)
+    .subtract({ nanoseconds: 1 })
     .toZonedDateTimeISO(timeZoneId)
     .getTimeZoneTransition("next");
   while (
     transition !== null &&
-    Temporal.Instant.compare(transition.toInstant(), limit) <= 0
+    Temporal.Instant.compare(transition.toInstant(), limit) < 0
   ) {
     transitions.push(transition.toInstant());
     transition = transition.getTimeZoneTransition("next");

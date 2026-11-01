@@ -83,7 +83,8 @@ Used by every view, implemented once in `views/shared/`:
 | Day-period colors | four pastel bands: night, morning, working hours, evening — from design tokens. Soft gradient transitions: 1 hour around night boundaries, 15 minutes around working hours, so 09:00 and 18:00 stay readable. Colors also differ in lightness, not only in hue |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
 | Now button | returns to `LIVE`; always shown, active when the moment is pinned, inactive and grey while live |
-| Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 does not exist on this day — clocks moved forward. Showing 03:30." / "01:30 occurs twice — showing the first (UTC−4)."; stays until the next change; `role="status"` (polite); text comes from the presenter |
+| Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 does not exist on this day — clocks moved forward. Showing 03:30." / "01:30 occurs twice — showing the first (UTC−4)."; stays until the next change; `role="status"` (polite); text comes from the presenter; hides the clock change note of its row |
+| Clock change note | shown after the day track of a card whose zone changes its UTC offset within seven days of the date in the date bar: "On Oct 25 at 03:00 clocks will go back 1 h"; same place and look as the wall-time hint, but not a live region and not part of the row's accessible name; hidden in a row with a wall-time hint; text comes from the presenter |
 | Date bar | bottom bar `[<] Mon, 28 Sep [>]  [Now]`: arrows switch to the previous / next day, tapping the date opens a calendar for distant dates; placed at the bottom for thumb reach. Grid may reuse it or replace it with a day strip |
 
 ## Visual style

@@ -10,6 +10,7 @@ export {
   type PresentedCalendarMonth,
   presentCalendarMonth,
 } from "./calendarMonth";
+export { presentClockChangeNote } from "./clockChangeNote";
 export {
   type DateBarGap,
   type PresentedDateBar,

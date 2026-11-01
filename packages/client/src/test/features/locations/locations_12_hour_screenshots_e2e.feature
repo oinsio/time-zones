@@ -3,6 +3,7 @@ Feature: Locations screenshots in the 12-hour format
   The cards keep their layout in the 12-hour format on narrow and wide screens.
 
   @fix-location-card-and-header-layout @NFR-R2
+  @show-clock-change-note-on-location-cards @NFR-R2
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme

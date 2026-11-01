@@ -6,6 +6,7 @@ import { startWorkCount } from "@/test/workCounters";
 import {
   formatLocalDate,
   formatLocalTime,
+  formatWallClockDate,
   formatWallClockTime,
 } from "./localDateTime";
 
@@ -98,5 +99,28 @@ describe("formatWallClockTime", () => {
     formatWallClockTime(Temporal.PlainTime.from("03:30"), "en", HourFormat.H24);
     workCount.stop();
     expect(workCount.formatters()).toBe(0);
+  });
+});
+
+// Verifies FR2 of show-clock-change-note-on-location-cards (D5).
+describe("formatWallClockDate", () => {
+  it.each([
+    ["ru", "2026-10-25", "25 окт."],
+    ["en", "2026-10-25", "Oct 25"],
+    ["en", "2027-03-28", "Mar 28"],
+  ] as const)("should write %s %s as %s", (language, date, expected) => {
+    expect(formatWallClockDate(Temporal.PlainDate.from(date), language)).toBe(
+      expected,
+    );
+  });
+
+  it("should build no formatter for a second call", () => {
+    formatWallClockDate(Temporal.PlainDate.from("2026-10-25"), "en");
+    const work = startWorkCount();
+
+    formatWallClockDate(Temporal.PlainDate.from("2026-10-26"), "en");
+
+    expect(work.formatters()).toBe(0);
+    work.stop();
   });
 });

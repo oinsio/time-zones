@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+import { RowNoteBox } from "./RowNoteBox";
 
 type WallTimeHintProps = {
   text: string;
@@ -12,13 +12,5 @@ type WallTimeHintProps = {
  * `order-last` keeps it after the day track.
  */
 export function WallTimeHint({ text }: WallTimeHintProps) {
-  return (
-    <p
-      role="status"
-      className="order-last flex w-full items-start gap-2 rounded-md bg-notice px-3 py-2 text-[13px] leading-snug text-notice-foreground"
-    >
-      <Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
-      <span>{text}</span>
-    </p>
-  );
+  return <RowNoteBox text={text} role="status" />;
 }

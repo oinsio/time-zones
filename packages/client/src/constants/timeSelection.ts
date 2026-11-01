@@ -14,6 +14,9 @@ export const TRACK_VALUE_MIN_MINUTES = 0;
 export const TRACK_END_BEFORE_DAY_END_MINUTES = 1;
 /** Offset changes move local time by less than this; bounds the boundary search. */
 export const OFFSET_CHANGE_MARGIN_HOURS = 3;
+// Implements FR1 of show-clock-change-note-on-location-cards (D1).
+/** The clock change window reaches this many days before and after the reference date. */
+export const CLOCK_CHANGE_WINDOW_DAYS = 7;
 
 // Implements FR1, FR2, FR4 of fix-day-track-drag-continuity-and-smoothness (D1, D3, D4).
 export enum TrackTouchEvent {
