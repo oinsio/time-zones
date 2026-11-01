@@ -28,6 +28,7 @@ export enum CitySearchStatus {
  * show-here-entry-for-device-time).
  * Implements FR6, FR15, NFR-P2 of add-locations-via-search (D8, D9).
  * Implements FR11 of add-settings-page-and-device-time-location (D12): `isDeviceTimeOptionShown`.
+ * Implements FR5 of add-interface-language-selection (D5): results follow the active language.
  */
 export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
   const { i18n } = useTranslation();

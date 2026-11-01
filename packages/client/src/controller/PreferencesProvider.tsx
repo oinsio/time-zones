@@ -132,6 +132,7 @@ export function PreferencesProvider({
           type: PreferencesCommandType.SET_HOUR_FORMAT,
           hourFormat,
         }),
+      // Implements FR5, FR7 of add-interface-language-selection (D1).
       setInterfaceLanguage: (interfaceLanguage: string) =>
         applyChange({
           type: PreferencesCommandType.SET_INTERFACE_LANGUAGE,

@@ -10,6 +10,7 @@ import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
  * render and a failed load keeps the derived name: no error state, no retry.
  * `undefined` for an `undefined` zone, which never starts a load.
  * Implements FR8, NFR-P2 of show-here-entry-for-device-time (D4).
+ * Implements FR5 of add-interface-language-selection (D5): the name follows the active language.
  */
 export function useExemplarCity(
   timeZoneId: string | undefined,

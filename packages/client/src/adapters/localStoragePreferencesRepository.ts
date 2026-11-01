@@ -30,6 +30,7 @@ export type LocalStoragePreferencesRepositoryOptions = {
  * `PreferencesRepository` over Web Storage, synced across tabs through the
  * shared `createStorageDocumentSync`.
  * Implements FR7 of add-settings-page-and-device-time-location (D5, D6).
+ * Implements FR8 of add-interface-language-selection (D2): reads, migrates and clears the legacy `language` key.
  */
 export function createLocalStoragePreferencesRepository({
   getStorage,

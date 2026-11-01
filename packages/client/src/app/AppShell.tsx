@@ -49,6 +49,7 @@ export function AppShell({ clock = systemClock }: { clock?: Clock }) {
   );
 }
 
+/** Implements FR5, FR7 of add-interface-language-selection (D3): `useInterfaceLanguage` applies the language. */
 function AppShellContent({ clock }: { clock: Clock }) {
   useDocumentLanguage();
   useThemePreference();

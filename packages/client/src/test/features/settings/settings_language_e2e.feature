@@ -62,13 +62,12 @@ Feature: Interface language choice in a real browser
   @add-interface-language-selection @NFR-A2
   Scenario: Choosing with the keyboard
     Given the user opens the settings
-    When the user focuses the language button
-    And the user presses the key "Enter"
-    And the user presses the key "ArrowDown"
+    When the user expands the language group
+    And the user presses the key "Tab"
     And the user presses the key "ArrowDown"
     And the user presses the key "Enter"
     Then the locations page language is "ru"
-    And the focus is on the language button
+    And the focus is on the language button named "Язык: Русский"
     And no language list is shown
 
   @add-interface-language-selection @NFR-A2
@@ -116,16 +115,16 @@ Feature: Interface language choice in a real browser
       | 2560  |
 
   @add-interface-language-selection @NFR-R2 @M7
-  Scenario Outline: Approved language screenshots at <width> px in the <theme> theme
+  Scenario Outline: Approved language screenshots in the <theme> theme with the list <state>
     Given the locations screen uses the <theme> theme
-    And the screen is <width> px wide for the locations
+    And the screen is 375 px wide for the locations
     And the user opens the settings
-    When the user expands the language group
+    When the language group is <state>
     Then the locations screen matches the approved screenshot
 
     Examples:
-      | width | theme |
-      | 375   | light |
-      | 375   | dark  |
-      | 1024  | light |
-      | 1024  | dark  |
+      | theme | state     |
+      | light | collapsed |
+      | light | expanded  |
+      | dark  | collapsed |
+      | dark  | expanded  |

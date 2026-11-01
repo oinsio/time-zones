@@ -4,7 +4,10 @@ import type { Location } from "@/model";
 import type { CitySearchResult } from "@/ports";
 import { presentCountryName } from "./countryName";
 
-/** The interface language and the language of the city data it reads. */
+/**
+ * The interface language and the language of the city data it reads.
+ * Implements FR5, FR10 of add-interface-language-selection (D5).
+ */
 export type SearchPresentationContext = {
   language: InterfaceLanguageCode;
   cityNameLanguage: CityNameLanguage;

@@ -220,3 +220,15 @@ Then(
     );
   },
 );
+
+// Verifies NFR-A2 of add-interface-language-selection: the button name follows the choice.
+Then(
+  "the focus is on the language button named {string}",
+  async ({ locationsWorld }, name: string) => {
+    const button = locationsWorld.page.getByRole(BUTTON_ROLE, {
+      name,
+      exact: true,
+    });
+    await expect(button).toBeFocused();
+  },
+);

@@ -4,13 +4,10 @@ import { type Preferences, parseStoredPreferences } from "@/preferences";
 import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
 
 /**
- * The stored preferences document: `{ schemaVersion, payload }` (ADR-0004).
- * Implements FR8 of add-interface-language-selection (D2).
- */
-
-/**
  * Version 1 had no interface language: the step adds the one the legacy
  * `language` key held (or "not chosen"), so an existing user keeps their language.
+ * The stored preferences document is `{ schemaVersion, payload }` (ADR-0004).
+ * Implements FR8 of add-interface-language-selection (D2).
  */
 export const createPreferencesMigrations = (
   legacyInterfaceLanguage: string | null,

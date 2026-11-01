@@ -12,6 +12,7 @@ Feature: Interface language in the preferences
     Then the list collapses and the button shows "🇷🇺 Русский"
     And the settings heading reads «Настройки» without a reload
     And after going back Almaty keeps its city label and shows the country «Казахстан»
+    And the date shows the Russian weekday
     And searching "Алм" offers «Алматы»
 
   @add-interface-language-selection @FR3 @UX1
@@ -32,7 +33,7 @@ Feature: Interface language in the preferences
   Scenario: Migration of the previous document
     Given the previous version stored the theme Dark and the hour format 12-hour, and the legacy language key holds "ru"
     When the app is opened again
-    Then the language «Русский» is in force
+    Then the theme Dark, the hour format 12-hour and the language «Русский» are in force
     When the user chooses the hour format "24 часа"
     Then the stored document holds the theme Dark, the hour format 24-hour and the language "ru"
     And the legacy language key is gone

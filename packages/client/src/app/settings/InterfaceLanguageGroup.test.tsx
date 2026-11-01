@@ -139,6 +139,32 @@ describe("InterfaceLanguageGroup", () => {
     expect(onChoose).toHaveBeenCalledWith("ru");
   });
 
+  // Verifies NFR-A2 of add-interface-language-selection: Tab and Shift+Tab reach every row.
+  it("should reach the button and every row with Tab and Shift+Tab", async () => {
+    renderGroup();
+    await expand();
+    const rows = within(screen.getByRole("list")).getAllByRole("button");
+    for (const row of rows) {
+      await userEvent.tab();
+      expect(row).toHaveFocus();
+    }
+    for (const row of rows.slice(0, -1).reverse()) {
+      await userEvent.tab({ shift: true });
+      expect(row).toHaveFocus();
+    }
+    await userEvent.tab({ shift: true });
+    expect(toggleButton()).toHaveFocus();
+  });
+
+  // Verifies NFR-A2 of add-interface-language-selection: Space chooses.
+  it("should choose with Space on a focused row", async () => {
+    const { onChoose } = renderGroup();
+    await expand();
+    screen.getByRole("button", { name: "Русский" }).focus();
+    await userEvent.keyboard(" ");
+    expect(onChoose).toHaveBeenCalledWith("ru");
+  });
+
   it("should collapse on Escape without letting the page see it", async () => {
     renderGroup();
     const pageListener = vi.fn();

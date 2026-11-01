@@ -44,6 +44,7 @@ function keepFirstResultPerZone(
  * ranks them: kind, then popularity, then name (abbreviations keep the order
  * of the abbreviation table).
  * Implements FR1–FR7, NFR-P1 of add-locations-via-search (D7, ADR-0006).
+ * Implements FR5 of add-interface-language-selection (D5): matches names of the active language.
  */
 export function createCompositeCitySearch(
   zoneCityRecords: readonly ZoneCityData[],

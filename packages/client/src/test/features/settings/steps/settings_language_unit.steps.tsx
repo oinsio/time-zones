@@ -5,6 +5,8 @@ import { screen, waitFor } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { expect, vi } from "vitest";
+import { Temporal } from "@/lib/temporal";
+import { formatLocalDate } from "@/presenter";
 import { createSettingsLanguageWorld } from "./settingsLanguageWorld";
 
 vi.mock(
@@ -20,9 +22,13 @@ const RUSSIAN_SETTINGS_HEADING = "Настройки";
 const RUSSIAN_BUTTON_LABEL = "Язык: Русский";
 const FLAG_TEXT_ENGLISH = "🇺🇸English";
 const FLAG_TEXT_RUSSIAN = "🇷🇺Русский";
+const ALMATY_ZONE_ID = "Asia/Almaty";
+const RUSSIAN_THEME_DARK = "Тёмная";
+const RUSSIAN_HOUR_FORMAT_12 = "12 часов";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createSettingsLanguageWorld();
+  let instant = "";
   const expectMainHeadingInRussian = () =>
     expect(
       screen.getByRole("heading", { name: RUSSIAN_MAIN_HEADING }),
@@ -36,9 +42,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "Choosing Russian applies at once",
     ({ Given, And, When, Then }) => {
       Given("the interface language is English", () => undefined);
-      And("the current instant is {string}", (_ctx, isoInstant: string) =>
-        world.setInstant(isoInstant),
-      );
+      And("the current instant is {string}", (_ctx, isoInstant: string) => {
+        instant = isoInstant;
+        world.setInstant(isoInstant);
+      });
       And("the list is Almaty", () => world.storeAlmatyList());
       When("the user chooses «Русский» in the language group", async () => {
         world.openApp();
@@ -63,6 +70,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           expect(document.documentElement.lang).toBe("ru");
         },
       );
+      And("the date shows the Russian weekday", () => {
+        const russianDate = formatLocalDate(
+          Temporal.Instant.from(instant).toZonedDateTimeISO(ALMATY_ZONE_ID),
+          "ru",
+        );
+        expect(screen.getAllByText(russianDate).length).toBeGreaterThan(0);
+      });
       And("searching {string} offers «Алматы»", async (_ctx, query: string) => {
         await userEvent.click(
           screen.getByRole("button", { name: i18n.t("locations.addLocation") }),
@@ -126,13 +140,22 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         },
       );
       When("the app is opened again", world.reopenApp);
-      Then("the language «Русский» is in force", async () => {
-        expectMainHeadingInRussian();
-        await world.openSettings();
-        expect(world.languageButton()).toHaveAccessibleName(
-          RUSSIAN_BUTTON_LABEL,
-        );
-      });
+      Then(
+        "the theme Dark, the hour format 12-hour and the language «Русский» are in force",
+        async () => {
+          expectMainHeadingInRussian();
+          await world.openSettings();
+          expect(world.languageButton()).toHaveAccessibleName(
+            RUSSIAN_BUTTON_LABEL,
+          );
+          expect(
+            screen.getByRole("radio", { name: RUSSIAN_THEME_DARK }),
+          ).toBeChecked();
+          expect(
+            screen.getByRole("radio", { name: RUSSIAN_HOUR_FORMAT_12 }),
+          ).toBeChecked();
+        },
+      );
       When(
         "the user chooses the hour format {string}",
         async (_ctx, name: string) => {
