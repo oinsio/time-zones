@@ -1,14 +1,13 @@
 import type { Page, Route } from "@playwright/test";
 import {
   DEVICE_TIME_LOCATION_ID,
+  LEGACY_STORAGE_KEYS,
   LOCATIONS_SCHEMA_VERSION,
   STORAGE_KEYS,
 } from "@/constants";
 import { test as contractTest } from "../../view_contract/steps/view_contract_e2e.fixtures";
 
 const SEARCH_DATA_URL_PATTERN = /\/city-search-[^/]+\.json$/;
-/** The key of `src/i18n.ts`, which Playwright cannot import. */
-const LANGUAGE_STORAGE_KEY = "language";
 const BLANK_PAGE_URL = "about:blank";
 const APP_ROOT_URL = ".";
 
@@ -39,6 +38,8 @@ export class LocationsWorld {
   /** URLs of the search data the page itself requested, from its first navigation. */
   readonly searchDataRequestUrls: string[] = [];
   otherTab: Page | undefined;
+  /** The language `seedLanguage` recorded, for seeds that write the preferences document. */
+  seededInterfaceLanguage: string | null = null;
 
   constructor(readonly page: Page) {
     page.on("request", (pageRequest) => {
@@ -106,11 +107,15 @@ export class LocationsWorld {
     );
   }
 
-  /** Makes the app start in the given interface language. */
+  /**
+   * Makes the app start in the given interface language through the legacy key,
+   * migrated by the app (FR8 of add-interface-language-selection).
+   */
   async seedLanguage(language: string) {
+    this.seededInterfaceLanguage = language;
     await this.page.addInitScript(
       ({ key, value }) => window.localStorage.setItem(key, value),
-      { key: LANGUAGE_STORAGE_KEY, value: language },
+      { key: LEGACY_STORAGE_KEYS.LANGUAGE, value: language },
     );
   }
 
