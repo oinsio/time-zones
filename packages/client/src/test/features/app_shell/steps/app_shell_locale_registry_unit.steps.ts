@@ -44,22 +44,13 @@ const brokenMetadata = (file: string, defect: string) => {
   return metadata;
 };
 
-
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let registry: readonly RegisteredLocale[] = [];
   let modules: Record<string, unknown> = {};
-  let _chosenLanguage: string | null = null;
-  let _resolvedLanguage = "";
-  let _translationsByCode: Record<string, Record<string, string>> = {};
-  let _dialectRegistry: readonly RegisteredLocale[] = [];
 
   f.BeforeEachScenario(() => {
     registry = [];
     modules = {};
-    _chosenLanguage = null;
-    _resolvedLanguage = "";
-    _translationsByCode = {};
-    _dialectRegistry = [];
   });
 
   // @add-interface-language-selection @FR9
