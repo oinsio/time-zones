@@ -86,7 +86,8 @@
 - Impact: An implementer who follows the cross-reference lands on the wrong task. It is low stakes, because task 2.2 itself is explicit.
 - Fix: In `design.md:30`, replace "(task 2.1)" with "(task 2.2)".
 - Fix risk: none
-- Status: open
+- Status: fixed
+- Resolution: design.md:30 now cites task 2.2, the task that edits the `it.each` rows of GnomishFactoryCredit.test.tsx.
 
 ## Verdict
 

@@ -27,4 +27,4 @@ Negative:
 
 **Interpolate the name from a constant (`{{factoryName}}` with a `GNOMISH_FACTORY_NAME` constant):** this would keep one copy of the name in code. But it changes the component and adds a constant and an interpolation argument. A translator can still drop the placeholder and write a local name, so a guard test is still needed. Rejected as more change for the same guarantee.
 
-**Assert only `en` and `ru` in `GnomishFactoryCredit.test.tsx`:** this covers FR1 but not "languages added later" (FR2). The existing `it.each` keeps its fixed rows for FR1 (task 2.1). D2 adds the open-ended check.
+**Assert only `en` and `ru` in `GnomishFactoryCredit.test.tsx`:** this covers FR1 but not "languages added later" (FR2). The existing `it.each` keeps its fixed rows for FR1 (task 2.2). D2 adds the open-ended check.
