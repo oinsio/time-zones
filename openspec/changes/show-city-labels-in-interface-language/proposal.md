@@ -107,7 +107,7 @@ None. The row layout does not change (NG5), and the existing layout scenarios ke
 - `packages/client/src/test/features/locations/locations_city_label_language_unit.feature`: re-labelling on a switch, the stored-label fallbacks, the load rule, storage unchanged, the dialect (`@show-city-labels-in-interface-language`).
 - `packages/client/src/test/features/locations/locations_city_label_budget_unit.feature`: the counted bounds of NFR-P1.
 - `packages/client/src/test/features/locations/locations_city_label_language_e2e.feature`: switching in a real browser, the accessible names and axe-core.
-- `packages/client/src/test/features/app_shell/app_shell_interface_language_unit.feature`: the `Intl` dialect fallback (FR5).
+- `packages/client/src/test/features/app_shell/app_shell_dialect_intl_unit.feature`: the `Intl` dialect fallback (FR5).
 
 ## Visual Reference
 
