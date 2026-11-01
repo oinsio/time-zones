@@ -180,6 +180,15 @@ Presenting 50 location rows again at another minute of the same reference day SH
 - **AND** the Belgrade row's accessible name does not contain the note
 - **AND** the Almaty card shows no note
 
+#### Scenario: Showing the note moves nothing in its card
+- **GIVEN** the device time zone is `Asia/Almaty` and the screen is 1024 px wide
+- **AND** the current instant is `2026-10-10T08:00:00Z`
+- **AND** the list contains Almaty and Belgrade, and the Belgrade card shows no clock change note
+- **AND** the positions and sizes of the Belgrade city, time, day track and location menu button are noted
+- **WHEN** the user picks 20 October 2026 in the calendar
+- **THEN** the Belgrade card shows its clock change note
+- **AND** the noted parts of the Belgrade card keep their positions and sizes within 1 px
+
 #### Scenario: No accessibility violations with notes
 - **GIVEN** the list contains Almaty, Belgrade and New York with a clock change note and a wall-time hint shown
 - **WHEN** the list is shown in the light or the dark theme
