@@ -106,7 +106,8 @@
 - Impact: a double request when both hooks start in the same commit (for example an effect that calls the loader without going through `loadCitySearchOnce`) passes every planned test, though FR4 and M2 forbid it.
 - Fix: in task 5.5 add a scenario "One request for city labels and the device time location" (`@show-city-labels-in-interface-language @FR4 @M2`) to `locations_device_time_data_unit.feature`, reusing `the list is {string}` with "the device time location, Tokyo" (the unit worlds already resolve Tokyo through `KNOWN_CITIES` of `test/factories/buildLocation.ts:29`, and the loader of `steps/deviceTimeDataLoader.ts` serves the real zone cities data), the existing "When the user opens the app, the zone cities data finishes loading, and the user opens the search" and "the zone cities data was requested exactly once" steps. In task 6.2 change `locations_ui_e2e.feature:42` to `Given the stored locations are "the device time location", "Tokyo"` (an existing entry, `locationsE2eHelpers.ts:33`) and tag it `@show-city-labels-in-interface-language @FR4`.
 - Fix risk: none for ordering (both entries exist today); the E2E scenario then also relabels Tokyo if the interface is Russian, which its request count does not look at.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 5.5 adds "One request for city labels and the device time location" (`@FR4 @M2`) to `locations_device_time_data_unit.feature` with the existing steps, and 6.2 changes `locations_ui_e2e.feature` "The device time location's request is the only one" to store "the device time location", "Tokyo" and tags it `@show-city-labels-in-interface-language @FR4 @M2`.
 
 ### R4 — WARNING — Task 7.3's glossary grep cannot pass with the designed hook
 - Location: `openspec/changes/show-city-labels-in-interface-language/tasks.md:87`
