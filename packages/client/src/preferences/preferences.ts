@@ -19,9 +19,12 @@ export enum HourFormat {
 export type Preferences = {
   theme: ThemePreference;
   hourFormat: HourFormat;
+  /** Registered locale code; `null` = not chosen, the browser decides. Implements FR7 of add-interface-language-selection (D1). */
+  interfaceLanguage: string | null;
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
   theme: ThemePreference.SYSTEM,
   hourFormat: HourFormat.H24,
+  interfaceLanguage: null,
 };

@@ -1,5 +1,6 @@
 import i18n, { type InitOptions } from "i18next";
 import { initReactI18next } from "react-i18next";
+import { localStoragePreferencesRepository } from "@/adapters";
 import { readBrowserLanguages } from "@/lib/browserLanguages";
 import {
   DEFAULT_LANGUAGE,
@@ -8,6 +9,7 @@ import {
   resolveInterfaceLanguage,
   resolveLanguageFallbacks,
 } from "@/locales";
+import { PreferencesLoadStatus } from "@/ports";
 
 /**
  * i18next options built from the locale registry: resources without `_meta`,
@@ -38,7 +40,12 @@ export const createI18nOptions = (
   interpolation: { escapeValue: false },
 });
 
-const readStoredInterfaceLanguage = (): string | null => null;
+const readStoredInterfaceLanguage = (): string | null => {
+  const loaded = localStoragePreferencesRepository.load();
+  return loaded.status === PreferencesLoadStatus.LOADED
+    ? loaded.preferences.interfaceLanguage
+    : null;
+};
 
 /**
  * The interface language the app starts in: the chosen one, else the browser's.

@@ -13,6 +13,8 @@ export type PreferencesContextValue = {
   hasSaveFailed: boolean;
   setTheme: (theme: ThemePreference) => void;
   setHourFormat: (hourFormat: HourFormat) => void;
+  /** Implements FR7 of add-interface-language-selection (D1). */
+  setInterfaceLanguage: (interfaceLanguage: string) => void;
   /** Clears the stored document and returns to the defaults. */
   resetPreferences: () => void;
 };

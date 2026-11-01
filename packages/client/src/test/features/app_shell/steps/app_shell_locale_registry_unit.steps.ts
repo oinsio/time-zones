@@ -121,9 +121,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("Metadata is not a translation", ({ When, Then }) => {
     let translations: Record<string, unknown> = {};
     When("the registry gives the English translations to the interface", () => {
-      translations =
-        createI18nOptions(localeRegistry).resources?.[ENGLISH]?.translation ??
-        {};
+      translations = (createI18nOptions(localeRegistry).resources?.[ENGLISH]
+        ?.translation ?? {}) as Record<string, unknown>;
     });
     Then('they contain no "_meta" key', () => {
       expect(translations).not.toHaveProperty("_meta");

@@ -1,7 +1,8 @@
 // Verifies FR7, FR9, FR10 of add-interface-language-selection: the i18next options
 // come from the locale registry; no detector decides the language.
 import i18next from "i18next";
-import { createI18nOptions } from "@/i18n";
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants";
+import { createI18nOptions, resolveStartInterfaceLanguage } from "@/i18n";
 import { localeRegistry, type RegisteredLocale } from "@/locales";
 import {
   buildRegisteredLocale,
@@ -84,5 +85,42 @@ describe("createI18nOptions", () => {
     ];
     const i18nInstance = await createInstance(registry, "xx");
     expect(i18nInstance.t("a")).toBe("en a");
+  });
+});
+
+// Verifies FR7, FR8 of add-interface-language-selection (D2, D3).
+describe("resolveStartInterfaceLanguage", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.spyOn(navigator, "languages", "get").mockReturnValue(["en-US"]);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("should start in the language of the stored document", () => {
+    localStorage.setItem(
+      STORAGE_KEYS.PREFERENCES,
+      JSON.stringify({
+        schemaVersion: 2,
+        payload: { theme: "DARK", hourFormat: "H12", interfaceLanguage: "ru" },
+      }),
+    );
+    expect(resolveStartInterfaceLanguage()).toBe("ru");
+  });
+
+  it("should start in the language of the legacy key", () => {
+    localStorage.setItem(LEGACY_STORAGE_KEYS.LANGUAGE, "ru");
+    expect(resolveStartInterfaceLanguage()).toBe("ru");
+  });
+
+  it("should follow the browser without a choice", () => {
+    expect(resolveStartInterfaceLanguage()).toBe("en");
+  });
+
+  it("should follow the browser when the stored document is unreadable", () => {
+    localStorage.setItem(STORAGE_KEYS.PREFERENCES, "{not json");
+    expect(resolveStartInterfaceLanguage()).toBe("en");
   });
 });

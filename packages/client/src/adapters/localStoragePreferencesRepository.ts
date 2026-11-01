@@ -1,5 +1,5 @@
 import {
-  PREFERENCES_SCHEMA_VERSION,
+  LEGACY_STORAGE_KEYS,
   PREFERENCES_SYNC_CHANNEL_NAME,
   STORAGE_KEYS,
 } from "@/constants";
@@ -9,7 +9,11 @@ import {
   type PreferencesRepository,
   SaveOutcome,
 } from "@/ports";
-import { type Preferences, parseStoredPreferences } from "@/preferences";
+import { DEFAULT_PREFERENCES } from "@/preferences";
+import {
+  deserializePreferencesDocument,
+  serializePreferencesDocument,
+} from "./preferencesDocument";
 import {
   createStorageDocumentSync,
   type StorageSyncChannel,
@@ -21,37 +25,6 @@ export type LocalStoragePreferencesRepositoryOptions = {
   /** Returns `undefined` where cross-tab messaging is unavailable. */
   createChannel?: () => StorageSyncChannel | undefined;
 };
-
-const serializePreferencesDocument = (preferences: Preferences): string =>
-  JSON.stringify({
-    schemaVersion: PREFERENCES_SCHEMA_VERSION,
-    payload: {
-      theme: preferences.theme,
-      hourFormat: preferences.hourFormat,
-    },
-  });
-
-/** Any document that cannot be read as a valid one is `UNREADABLE`. */
-function deserializePreferencesDocument(
-  rawDocument: string | null,
-): PreferencesLoadResult {
-  if (rawDocument === null) return { status: PreferencesLoadStatus.EMPTY };
-  try {
-    const { schemaVersion, payload } = JSON.parse(rawDocument);
-    if (schemaVersion !== PREFERENCES_SCHEMA_VERSION) {
-      return { status: PreferencesLoadStatus.UNREADABLE };
-    }
-    const parsed = parseStoredPreferences(payload);
-    return parsed.ok
-      ? {
-          status: PreferencesLoadStatus.LOADED,
-          preferences: parsed.preferences,
-        }
-      : { status: PreferencesLoadStatus.UNREADABLE };
-  } catch {
-    return { status: PreferencesLoadStatus.UNREADABLE };
-  }
-}
 
 /**
  * `PreferencesRepository` over Web Storage, synced across tabs through the
@@ -70,8 +43,22 @@ export function createLocalStoragePreferencesRepository({
 
   const load = (): PreferencesLoadResult => {
     try {
+      const storage = getStorage();
+      const legacyLanguage = storage.getItem(LEGACY_STORAGE_KEYS.LANGUAGE);
+      const legacyInterfaceLanguage = legacyLanguage || null;
+      const rawDocument = storage.getItem(STORAGE_KEYS.PREFERENCES);
+      if (rawDocument === null && legacyInterfaceLanguage !== null) {
+        return {
+          status: PreferencesLoadStatus.LOADED,
+          preferences: {
+            ...DEFAULT_PREFERENCES,
+            interfaceLanguage: legacyInterfaceLanguage,
+          },
+        };
+      }
       return deserializePreferencesDocument(
-        getStorage().getItem(STORAGE_KEYS.PREFERENCES),
+        rawDocument,
+        legacyInterfaceLanguage,
       );
     } catch {
       return { status: PreferencesLoadStatus.EMPTY };
@@ -91,14 +78,18 @@ export function createLocalStoragePreferencesRepository({
   return {
     load,
     save: (preferences) =>
-      write((storage) =>
+      write((storage) => {
         storage.setItem(
           STORAGE_KEYS.PREFERENCES,
           serializePreferencesDocument(preferences),
-        ),
-      ),
+        );
+        storage.removeItem(LEGACY_STORAGE_KEYS.LANGUAGE);
+      }),
     clear: () =>
-      write((storage) => storage.removeItem(STORAGE_KEYS.PREFERENCES)),
+      write((storage) => {
+        storage.removeItem(STORAGE_KEYS.PREFERENCES);
+        storage.removeItem(LEGACY_STORAGE_KEYS.LANGUAGE);
+      }),
     subscribe: (onExternalChange) =>
       sync.subscribe(() => onExternalChange(load())),
   };

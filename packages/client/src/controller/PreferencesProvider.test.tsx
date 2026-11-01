@@ -18,7 +18,11 @@ import { PreferencesStatus, usePreferences } from "./usePreferences";
 
 const storedDarkTwelveHour = {
   status: PreferencesLoadStatus.LOADED,
-  preferences: { theme: ThemePreference.DARK, hourFormat: HourFormat.H12 },
+  preferences: {
+    theme: ThemePreference.DARK,
+    hourFormat: HourFormat.H12,
+    interfaceLanguage: null,
+  },
 } as const;
 
 function renderPreferences(
@@ -67,6 +71,20 @@ describe("PreferencesProvider", () => {
     expect(repository.load()).toEqual({
       status: PreferencesLoadStatus.LOADED,
       preferences: { ...DEFAULT_PREFERENCES, hourFormat: HourFormat.H12 },
+    });
+  });
+
+  // Verifies FR7 of add-interface-language-selection (D1)
+  it("should apply the interface language at once and write it once after the debounce", () => {
+    const { result, writeScheduler, repository } = renderPreferences();
+    const saveSpy = vi.spyOn(repository, "save");
+    act(() => result.current.setInterfaceLanguage("ru"));
+    expect(result.current.preferences.interfaceLanguage).toBe("ru");
+    expect(saveSpy).not.toHaveBeenCalled();
+    act(() => writeScheduler.runPending());
+    expect(saveSpy).toHaveBeenCalledTimes(1);
+    expect(repository.load()).toMatchObject({
+      preferences: { interfaceLanguage: "ru" },
     });
   });
 

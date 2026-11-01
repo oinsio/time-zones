@@ -16,6 +16,7 @@ export interface PreferencesRepositoryScenario {
 const darkTwelveHour: Preferences = {
   theme: ThemePreference.DARK,
   hourFormat: HourFormat.H12,
+  interfaceLanguage: null,
 };
 
 /**
@@ -39,6 +40,17 @@ export const describePreferencesRepositoryContract = (
       expect(first.load()).toEqual({
         status: PreferencesLoadStatus.LOADED,
         preferences: darkTwelveHour,
+      });
+    });
+
+    // Verifies FR8 of add-interface-language-selection
+    it("should load the saved interface language", () => {
+      const { first } = scenario.createPair();
+      const russian = { ...darkTwelveHour, interfaceLanguage: "ru" };
+      first.save(russian);
+      expect(first.load()).toEqual({
+        status: PreferencesLoadStatus.LOADED,
+        preferences: russian,
       });
     });
 

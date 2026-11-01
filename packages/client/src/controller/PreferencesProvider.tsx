@@ -132,6 +132,11 @@ export function PreferencesProvider({
           type: PreferencesCommandType.SET_HOUR_FORMAT,
           hourFormat,
         }),
+      setInterfaceLanguage: (interfaceLanguage: string) =>
+        applyChange({
+          type: PreferencesCommandType.SET_INTERFACE_LANGUAGE,
+          interfaceLanguage,
+        }),
       resetPreferences: () => {
         discardPendingWrite();
         latestPreferences.current = DEFAULT_PREFERENCES;

@@ -141,19 +141,19 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 5. Preferences model (FR7, FR8; design D1)
 
-- [ ] 5.1 RED: in `preferences/preferences.test.ts`:
+- [x] 5.1 RED: in `preferences/preferences.test.ts`:
   - `DEFAULT_PREFERENCES.interfaceLanguage` is `null`;
   - `SET_INTERFACE_LANGUAGE` sets the code, and the same code returns the same object;
   - `parseStoredPreferences` accepts `interfaceLanguage` `null` or `"ru"`, and rejects a missing field, `""`, `42` and `{}`.
 
   Run `npx vitest run src/preferences` and see it fail.
-- [ ] 5.2 GREEN: add `interfaceLanguage: string | null` to `Preferences` and `DEFAULT_PREFERENCES`, `SET_INTERFACE_LANGUAGE` to `PreferencesCommandType` / `PreferencesCommand` / `reducePreferences`, and the check to `parseStoredPreferences`. Export the type through `preferences/index.ts`. Verify `npx vitest run src/preferences` passes.
+- [x] 5.2 GREEN: add `interfaceLanguage: string | null` to `Preferences` and `DEFAULT_PREFERENCES`, `SET_INTERFACE_LANGUAGE` to `PreferencesCommandType` / `PreferencesCommand` / `reducePreferences`, and the check to `parseStoredPreferences`. Export the type through `preferences/index.ts`. Verify `npx vitest run src/preferences` passes.
 
 ## 6. Preferences document version 2 and the legacy key (FR8, FR12; design D2)
 
-- [ ] 6.1 Move `PayloadMigrations` and `migratePayload` from `adapters/locationsDocument.ts` to a new `adapters/payloadMigrations.ts` (exported), and import them back in `locationsDocument.ts`. No behaviour change. Verify `npx vitest run src/adapters/localStorageLocationRepository.migration.test.ts` passes.
-- [ ] 6.2 In `constants/preferences.ts`, set `PREFERENCES_SCHEMA_VERSION = 2`, add `LANGUAGE_SEARCH_MIN_LOCALES = 10` (with JSDoc naming FR6). In `constants/storage.ts`, add `LEGACY_STORAGE_KEYS = { LANGUAGE: "language" } as const`, with JSDoc saying i18next wrote it before this change. Export all three by name from `constants/index.ts`.
-- [ ] 6.3 RED: `adapters/preferencesDocument.test.ts` with fixtures of old data:
+- [x] 6.1 Move `PayloadMigrations` and `migratePayload` from `adapters/locationsDocument.ts` to a new `adapters/payloadMigrations.ts` (exported), and import them back in `locationsDocument.ts`. No behaviour change. Verify `npx vitest run src/adapters/localStorageLocationRepository.migration.test.ts` passes.
+- [x] 6.2 In `constants/preferences.ts`, set `PREFERENCES_SCHEMA_VERSION = 2`, add `LANGUAGE_SEARCH_MIN_LOCALES = 10` (with JSDoc naming FR6). In `constants/storage.ts`, add `LEGACY_STORAGE_KEYS = { LANGUAGE: "language" } as const`, with JSDoc saying i18next wrote it before this change. Export all three by name from `constants/index.ts`.
+- [x] 6.3 RED: `adapters/preferencesDocument.test.ts` with fixtures of old data:
   - version 1 `{ theme: "DARK", hourFormat: "H12" }` with legacy `"ru"` → `LOADED`, `interfaceLanguage` `"ru"`;
   - the same with no legacy value → `interfaceLanguage` `null`;
   - version 2 round-trips through `serializePreferencesDocument`;
@@ -161,24 +161,24 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `null` → `EMPTY`.
 
   Run it and see it fail.
-- [ ] 6.4 GREEN: `adapters/preferencesDocument.ts` with `serializePreferencesDocument`, `deserializePreferencesDocument(rawDocument, legacyInterfaceLanguage)` and `createPreferencesMigrations(legacyInterfaceLanguage)`, built on `payloadMigrations.ts`. Then change `adapters/localStoragePreferencesRepository.ts`:
+- [x] 6.4 GREEN: `adapters/preferencesDocument.ts` with `serializePreferencesDocument`, `deserializePreferencesDocument(rawDocument, legacyInterfaceLanguage)` and `createPreferencesMigrations(legacyInterfaceLanguage)`, built on `payloadMigrations.ts`. Then change `adapters/localStoragePreferencesRepository.ts`:
   - `load` reads the legacy key too: no document plus a non-empty legacy key → `LOADED` with defaults and that language;
   - `save` writes the document and removes `LEGACY_STORAGE_KEYS.LANGUAGE`;
   - `clear` removes both.
 
   Verify `npx vitest run src/adapters/preferencesDocument.test.ts` passes.
-- [ ] 6.5 Update the existing tests:
+- [x] 6.5 Update the existing tests:
   - in `adapters/preferencesRepository.contract.ts` and `adapters/preferencesRepository.test.ts`, the stored document is version 2 with `interfaceLanguage`;
   - add "should load the legacy key without a document and write nothing", "should remove the legacy key on save" and "should remove the legacy key on clear" for the local-storage adapter;
   - add an `interfaceLanguage` round trip to the shared contract, for both adapters;
   - in `test/features/settings/steps/settings_storage_unit.steps.tsx`, the expected payload of "then the stored document holds the theme Dark and the hour format 12-hour" adds `interfaceLanguage: null`.
 
   Verify, one at a time: `npx vitest run src/adapters` passes; `npx vitest run src/test/features/settings/steps/settings_storage_unit.steps.tsx` passes.
-- [ ] 6.6 Complete `readStoredInterfaceLanguage` in `i18n.ts` (task 3.3) with `localStoragePreferencesRepository.load()`. Add to `i18n.test.ts`: with `localStorage` holding a version 2 document with `"ru"` and browser `en-US` (stubbed with `vi.spyOn(navigator, "languages", "get")`, as `i18n.test.ts` does today), the start language computed by the exported `resolveStartInterfaceLanguage()` is `ru`; with only the legacy key `"ru"` it is `ru` too. Verify `npx vitest run src/i18n.test.ts` passes.
+- [x] 6.6 Complete `readStoredInterfaceLanguage` in `i18n.ts` (task 3.3) with `localStoragePreferencesRepository.load()`. Add to `i18n.test.ts`: with `localStorage` holding a version 2 document with `"ru"` and browser `en-US` (stubbed with `vi.spyOn(navigator, "languages", "get")`, as `i18n.test.ts` does today), the start language computed by the exported `resolveStartInterfaceLanguage()` is `ru`; with only the legacy key `"ru"` it is `ru` too. Verify `npx vitest run src/i18n.test.ts` passes.
 
 ## 7. Controller: choose, apply, reset (FR5, FR7, FR12; design D1, D3)
 
-- [ ] 7.1 RED → GREEN: in `controller/PreferencesProvider.test.tsx`, `setInterfaceLanguage("ru")` updates `preferences.interfaceLanguage` at once and writes once after the debounce. Then add `setInterfaceLanguage` to `PreferencesContextValue` (`controller/preferencesContext.ts`) and `PreferencesProvider`.
+- [x] 7.1 RED → GREEN: in `controller/PreferencesProvider.test.tsx`, `setInterfaceLanguage("ru")` updates `preferences.interfaceLanguage` at once and writes once after the debounce. Then add `setInterfaceLanguage` to `PreferencesContextValue` (`controller/preferencesContext.ts`) and `PreferencesProvider`.
 - [ ] 7.2 RED: `controller/useInterfaceLanguage.test.tsx`. With a test i18next instance, the in-memory preferences repository and the browser languages stubbed per test with `vi.spyOn(navigator, "languages", "get").mockReturnValue([...])` (this overrides the setup pin of task 7.3):
   - a choice of `ru` switches `i18n.language` to `ru` before the next paint (`useLayoutEffect`; assert right after `act`);
   - Reset with browser `en-US` brings back `en`;

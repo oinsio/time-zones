@@ -1,7 +1,11 @@
 // Verifies FR7 of add-settings-page-and-device-time-location: one contract, every adapter.
-import { STORAGE_KEYS } from "@/constants";
+import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants";
 import { PreferencesLoadStatus, SaveOutcome } from "@/ports";
-import { HourFormat, ThemePreference } from "@/preferences";
+import {
+  DEFAULT_PREFERENCES,
+  HourFormat,
+  ThemePreference,
+} from "@/preferences";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
 import {
   createInMemoryPreferencesBackend,
@@ -53,15 +57,15 @@ describe("localStorage preferences repository", () => {
     [
       "a newer schema version",
       JSON.stringify({
-        schemaVersion: 2,
-        payload: { theme: "DARK", hourFormat: "H12" },
+        schemaVersion: 3,
+        payload: { theme: "DARK", hourFormat: "H12", interfaceLanguage: null },
       }),
     ],
     [
       "an unknown value",
       JSON.stringify({
-        schemaVersion: 1,
-        payload: { theme: "SEPIA", hourFormat: "H12" },
+        schemaVersion: 2,
+        payload: { theme: "SEPIA", hourFormat: "H12", interfaceLanguage: null },
       }),
     ],
   ])("should load %s as unreadable", (_name, rawDocument) => {
@@ -80,6 +84,7 @@ describe("localStorage preferences repository", () => {
       repository.save({
         theme: ThemePreference.LIGHT,
         hourFormat: HourFormat.H24,
+        interfaceLanguage: null,
       }),
     ).toBe(SaveOutcome.FAILED);
   });
@@ -95,13 +100,67 @@ describe("localStorage preferences repository", () => {
 
   it("should store the schema version with the payload", () => {
     const { storage, first } = createStorageScenario();
-    first.save({ theme: ThemePreference.DARK, hourFormat: HourFormat.H12 });
+    first.save({
+      theme: ThemePreference.DARK,
+      hourFormat: HourFormat.H12,
+      interfaceLanguage: "ru",
+    });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
-        schemaVersion: 1,
-        payload: { theme: "DARK", hourFormat: "H12" },
+        schemaVersion: 2,
+        payload: { theme: "DARK", hourFormat: "H12", interfaceLanguage: "ru" },
       },
     );
+  });
+});
+
+describe("legacy language key", () => {
+  // Verifies FR8 of add-interface-language-selection (D2)
+  it("should load the legacy key without a document and write nothing", () => {
+    const { storage, first } = createStorageScenario();
+    const setItem = vi.spyOn(storage, "setItem");
+    storage.setItem(LEGACY_STORAGE_KEYS.LANGUAGE, "ru");
+    setItem.mockClear();
+    expect(first.load()).toMatchObject({
+      status: PreferencesLoadStatus.LOADED,
+      preferences: { interfaceLanguage: "ru" },
+    });
+    expect(setItem).not.toHaveBeenCalled();
+  });
+
+  it("should load an empty legacy key as empty", () => {
+    const { storage, first } = createStorageScenario();
+    storage.setItem(LEGACY_STORAGE_KEYS.LANGUAGE, "");
+    expect(first.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });
+  });
+
+  it("should migrate a version 1 document with the legacy key", () => {
+    const { storage, first } = createStorageScenario();
+    storage.setItem(LEGACY_STORAGE_KEYS.LANGUAGE, "ru");
+    storage.setItem(
+      STORAGE_KEYS.PREFERENCES,
+      JSON.stringify({
+        schemaVersion: 1,
+        payload: { theme: "DARK", hourFormat: "H12" },
+      }),
+    );
+    expect(first.load()).toMatchObject({
+      preferences: { theme: "DARK", interfaceLanguage: "ru" },
+    });
+  });
+
+  it("should remove the legacy key on save", () => {
+    const { storage, first } = createStorageScenario();
+    storage.setItem(LEGACY_STORAGE_KEYS.LANGUAGE, "ru");
+    first.save({ ...DEFAULT_PREFERENCES, interfaceLanguage: "ru" });
+    expect(storage.getItem(LEGACY_STORAGE_KEYS.LANGUAGE)).toBeNull();
+  });
+
+  it("should remove the legacy key on clear", () => {
+    const { storage, first } = createStorageScenario();
+    storage.setItem(LEGACY_STORAGE_KEYS.LANGUAGE, "ru");
+    first.clear();
+    expect(storage.getItem(LEGACY_STORAGE_KEYS.LANGUAGE)).toBeNull();
   });
 });
 
@@ -113,6 +172,7 @@ describe("in-memory preferences repository", () => {
     const outcome = repository.save({
       theme: ThemePreference.DARK,
       hourFormat: HourFormat.H12,
+      interfaceLanguage: null,
     });
     expect(outcome).toBe(SaveOutcome.FAILED);
     expect(repository.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });

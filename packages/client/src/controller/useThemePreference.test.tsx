@@ -12,7 +12,7 @@ import { useThemePreference } from "./useThemePreference";
 const storedTheme = (theme: ThemePreference) =>
   ({
     status: PreferencesLoadStatus.LOADED,
-    preferences: { theme, hourFormat: HourFormat.H24 },
+    preferences: { theme, hourFormat: HourFormat.H24, interfaceLanguage: null },
   }) as const;
 
 const wrapperFor =
