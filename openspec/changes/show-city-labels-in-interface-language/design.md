@@ -72,6 +72,13 @@ These change in this change, each tagged also with `@show-city-labels-in-interfa
 - `locations_ui_e2e.feature` "Data loads only when the search opens" and `locations_search_shortcut_e2e.feature` "The slash key loads the search data only when it opens the search": use the existing `Given the stored list is empty` step (`locations_view_contract_e2e.steps.ts`).
 - `settings_language_unit.feature` "Choosing Russian applies at once": the step reads `after going back Almaty reads «Алматы» and shows the country «Казахстан»`.
 
+Five more scenarios store a label in another language than the interface, let the zone cities data load (FR4), and then find a row by its stored label. Under FR1 the row then reads the localized name, so they would fail, and the E2E ones would race the load. Each is rewritten to the FR1 rule, tagged also `@FR1`, and never fixed in the code:
+
+- E2E, the stored label becomes the label in the scenario's interface language, so no row changes when the data arrives (UX1): `home_location_e2e.feature` "Russian interface" ("Алматы", "Москва", the menu «Действия: Москва», the row of «Алматы»); `locations_clock_change_note_e2e.feature` "No horizontal scrolling with notes at <width> px at <moment>" («Алматы», «Белград», «Остров Лорд-Хау», and the same in the `city` column); `time_selection_card_layout_e2e.feature` "Hour labels on one line in Russian" («Москва», «Калькутта»); `locations_device_time_e2e.feature` "The exemplar city keeps the height at <width> px" («Москва», with the two card lookups of its steps using a constant for «Москва»; the English scenario keeps `MOSCOW`).
+- Unit: `locations_device_time_unit.feature` "Device time location on the design sample" loads the real zone cities data before its check, so it expects the localized names in its offset differences (the `names.ru` of the Moscow, Kolkata and New York records).
+
+`KNOWN_CITIES` of `locationsE2eHelpers.ts` gets «Алматы» and «Калькутта». Each Russian entry used is checked against the `names.ru` of its zone's record in `virtual:zone-cities`; an entry that is none of the record's names would keep the row stable but no longer exercise FR1.
+
 ## Consequences
 
 Positive:
