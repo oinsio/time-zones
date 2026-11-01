@@ -15,7 +15,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Glossary and architecture docs (FR1, FR9, FR10)
 
-- [ ] 1.1 Update the docs (repository root), design D9:
+- [x] 1.1 Update the docs (repository root), design D9:
   - `docs/glossary/settings.md`:
     - add **Interface language** — the language of every interface text, date, country name and city name of search results. It is chosen in the language group of the settings page, or, when none is chosen, it follows the browser language and then falls back to English. *Code:* the owners of design D9. *RU:* «Язык интерфейса»; the group caption is «Язык».
     - add **Locale metadata** — the `_meta` block of a locale file: `code` (equal to the file name, a canonical language tag), `name` (English name, the sort key), `nativeName`, `baseLanguage`, `emoji`. It is never a translation. *Code:* `LocaleMetadata`, `parseLocaleMetadata`.
