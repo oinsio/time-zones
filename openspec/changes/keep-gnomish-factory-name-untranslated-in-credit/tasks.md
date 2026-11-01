@@ -12,7 +12,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 1. Glossary (FR1, FR2; design D3)
 
-- [ ] 1.1 In `docs/glossary/settings.md` (repository root):
+- [x] 1.1 In `docs/glossary/settings.md` (repository root):
   - **Gnomish Factory**: after "linked from the settings page." add "A brand name: written `Gnomish Factory` in every interface language, never translated." Change *RU:* «Гномская фабрика» to *RU:* «Gnomish Factory».
   - **Gnomish Factory credit**: change *RU:* «Создано с помощью Гномской фабрики» to *RU:* «Создано с помощью Gnomish Factory». Keep the rest of the entry.
 
@@ -20,7 +20,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 2. The Russian credit and the guard for every language (FR1, FR2, UX1; TDD, design D1, D2)
 
-- [ ] 2.1 RED, unit BDD for FR2 (design D2):
+- [x] 2.1 RED, unit BDD for FR2 (design D2):
   - Create `test/features/settings/settings_factory_name.feature`: `Feature: The Gnomish Factory name in every interface language`, the line `Implements change keep-gnomish-factory-name-untranslated-in-credit.`, and one scenario tagged `@keep-gnomish-factory-name-untranslated-in-credit @FR2 @UX1`:
 
     ```gherkin
@@ -34,22 +34,22 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
     - The Then step asserts, for each entry, `expect(creditText, language).toContain(factoryName)`, so a failure names the language. It also asserts that the list has `SUPPORTED_LANGUAGES.length` entries.
 
   Run `npx vitest run src/test/features/settings/steps/settings_factory_name.steps.ts` and see it fail for `ru`.
-- [ ] 2.2 RED, component test for FR1: in `app/settings/GnomishFactoryCredit.test.tsx`, change the `ru` row of the `it.each` to `["ru", "Создано с помощью Gnomish Factory"]`. Add `// Verifies FR1, UX1 of keep-gnomish-factory-name-untranslated-in-credit (D1).` under the header comments. Run `npx vitest run src/app/settings/GnomishFactoryCredit.test.tsx` and see the `ru` case fail.
-- [ ] 2.3 GREEN: in `locales/ru.json`, set `settings.gnomishFactoryCredit` to `"Создано с помощью Gnomish Factory"`. Leave `locales/en.json` and `app/settings/GnomishFactoryCredit.tsx` unchanged (D1). Verify, one at a time:
+- [x] 2.2 RED, component test for FR1: in `app/settings/GnomishFactoryCredit.test.tsx`, change the `ru` row of the `it.each` to `["ru", "Создано с помощью Gnomish Factory"]`. Add `// Verifies FR1, UX1 of keep-gnomish-factory-name-untranslated-in-credit (D1).` under the header comments. Run `npx vitest run src/app/settings/GnomishFactoryCredit.test.tsx` and see the `ru` case fail.
+- [x] 2.3 GREEN: in `locales/ru.json`, set `settings.gnomishFactoryCredit` to `"Создано с помощью Gnomish Factory"`. Leave `locales/en.json` and `app/settings/GnomishFactoryCredit.tsx` unchanged (D1). Verify, one at a time:
   - `npx vitest run src/test/features/settings/steps/settings_factory_name.steps.ts` passes;
   - `npx vitest run src/app/settings/GnomishFactoryCredit.test.tsx` passes;
   - `npx vitest run src/locales` passes.
 
 ## 3. E2E: the new Russian text in a real browser (FR1, NFR-A1, NFR-R1, UX1)
 
-- [ ] 3.1 In `test/features/settings/settings_factory_credit_e2e.feature`:
+- [x] 3.1 In `test/features/settings/settings_factory_credit_e2e.feature`:
   - In the outline "The credit in both languages", change the Russian `credit` cell to `Создано с помощью Gnomish Factory` and add the tags `@keep-gnomish-factory-name-untranslated-in-credit @FR1 @NFR-A1 @UX1`.
   - Add the tags `@keep-gnomish-factory-name-untranslated-in-credit @NFR-R1` above "The full credit at <width> px in <language>". Its steps and rows do not change.
 
   In `test/features/settings/steps/settings_factory_credit_e2e.steps.ts`, add `// Verifies FR1, NFR-A1, UX1 of keep-gnomish-factory-name-untranslated-in-credit: the Russian credit keeps the brand name.` above "the settings page shows the link {string} to the Gnomish Factory". Add `// Verifies NFR-R1 of keep-gnomish-factory-name-untranslated-in-credit.` above "the credit text is shown in full". Step bodies do not change. The file stays under 200 lines (178 now).
 
   Verify `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_factory_credit_e2e.feature` passes.
-- [ ] 3.2 In `test/features/settings/settings_e2e.feature`:
+- [x] 3.2 In `test/features/settings/settings_e2e.feature`:
   - In the outline "Both languages", change the Russian `credit` cell to `Создано с помощью Gnomish Factory` and add the tags `@keep-gnomish-factory-name-untranslated-in-credit @FR1`.
   - Add the tags `@keep-gnomish-factory-name-untranslated-in-credit @NFR-A1` above "Settings have no accessibility violations in the <theme> theme".
 
@@ -59,8 +59,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 4. Final checks
 
-- [ ] 4.1 Stryker, scoped: `npx stryker run --mutate 'src/app/settings/GnomishFactoryCredit.tsx'`. Read `reports/mutation/mutation-report.json`. The score must be at least 95 % (minimum acceptable 90 %). Note it in this task.
-- [ ] 4.2 Run, one at a time:
+- [x] 4.1 Stryker, scoped: `npx stryker run --mutate 'src/app/settings/GnomishFactoryCredit.tsx'`. Read `reports/mutation/mutation-report.json`. The score must be at least 95 % (minimum acceptable 90 %). Note it in this task.
+- [x] 4.2 Run, one at a time:
   - `pnpm --filter @time-zones/client typecheck`;
   - `pnpm --filter @time-zones/client lint`;
   - `pnpm --filter @time-zones/client test`;
@@ -68,8 +68,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `pnpm --filter @time-zones/client test:bdd`.
 
   All pass.
-- [ ] 4.3 From the repository root, `grep -rn "Гномск" packages/client/src docs/glossary` prints nothing (M3).
-- [ ] 4.4 Traceability, from `packages/client/`: `for id in FR1 FR2 NFR-A1 NFR-R1 UX1; do grep -rlE "keep-gnomish-factory-name-untranslated-in-credit.*\b$id\b|\b$id\b.*keep-gnomish-factory-name-untranslated-in-credit" src >/dev/null || echo "missing $id"; done` prints nothing.
+- [x] 4.3 From the repository root, `grep -rn "Гномск" packages/client/src docs/glossary` prints nothing (M3).
+- [x] 4.4 Traceability, from `packages/client/`: `for id in FR1 FR2 NFR-A1 NFR-R1 UX1; do grep -rlE "keep-gnomish-factory-name-untranslated-in-credit.*\b$id\b|\b$id\b.*keep-gnomish-factory-name-untranslated-in-credit" src >/dev/null || echo "missing $id"; done` prints nothing.
 
 ## Human follow-up
 
