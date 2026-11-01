@@ -94,7 +94,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
   Read `reports/mutation/mutation-report.json` after each. Kill survivors, including the memo mutants of `useCityLabels` with the budget scenario (ADR-0008), until each run scores at least 95 % (minimum acceptable 90 %, M6).
 - [ ] 7.2 Run, one at a time: `pnpm --filter @time-zones/client typecheck`, `pnpm --filter @time-zones/client lint`, `pnpm --filter @time-zones/client test`, `pnpm run build` (from the repository root), `node scripts/check-legacy-build.mjs` and `node scripts/check-bundle-size.mjs`. All pass.
-- [ ] 7.3 Traceability, from `packages/client/`: `for id in FR1 FR2 FR3 FR4 FR5 NFR-P1 NFR-A1 UX1 UX2 M1 M2 M3 M4 M5; do grep -rlE "show-city-labels-in-interface-language.*\b$id\b|\b$id\b.*show-city-labels-in-interface-language" src >/dev/null || echo "missing $id"; done` prints nothing. Glossary check: `grep -rniE "city ?title|cityName" src/presenter/presentLocationRows.ts src/controller/useCityLabels.ts` prints nothing (the row concept is `cityLabel`).
+- [ ] 7.3 Traceability, from `packages/client/`: `for id in FR1 FR2 FR3 FR4 FR5 NFR-P1 NFR-A1 UX1 UX2 M1 M2 M3 M4 M5; do grep -rlE "show-city-labels-in-interface-language.*\b$id\b|\b$id\b.*show-city-labels-in-interface-language" src >/dev/null || echo "missing $id"; done` prints nothing. Glossary check: `grep -rniwE "city ?title|cityName" src/presenter/presentLocationRows.ts src/controller/useCityLabels.ts` prints nothing (the row concept is `cityLabel`; `-w` lets the existing `cityNameLanguage` through).
 
 ## Human follow-up
 

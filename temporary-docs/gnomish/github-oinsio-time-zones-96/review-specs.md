@@ -116,7 +116,8 @@
 - Impact: the final check fails on correct code, so the implementer either renames the existing `CityNameLanguage` concept in the hook (a glossary violation) or cannot tick 7.3.
 - Fix: make the pattern whole-word: `grep -rniwE "city ?title|cityName" src/presenter/presentLocationRows.ts src/controller/useCityLabels.ts`.
 - Fix risk: none; `cityName` as a whole word still fails the check, and neither file uses it today.
-- Status: open
+- Status: fixed
+- Resolution: task 7.3's glossary check in tasks.md is now `grep -rniwE "city ?title|cityName" …`, whole-word, so `cityNameLanguage` (the existing `CityNameLanguage` concept used by D3) no longer matches while a bare `cityName` still fails.
 
 ### R5 — SUGGESTION — "No retry" depends on effect dependencies D3 does not fix
 - Location: `openspec/changes/show-city-labels-in-interface-language/design.md:49`
