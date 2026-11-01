@@ -1,10 +1,10 @@
+import { toCanonicalLanguageTag } from "./localeMetadata";
 import {
   DEFAULT_LANGUAGE,
   findRegisteredLocale,
   localeRegistry,
   type RegisteredLocale,
 } from "./localeRegistry";
-import { toCanonicalLanguageTag } from "./localeMetadata";
 
 const matchBrowserLanguage = (
   browserLanguage: string,
