@@ -126,7 +126,8 @@
 - Impact: offline with uncached data, each list change re-requests the file, contrary to FR4's "no retry"; the planned test does not catch it.
 - Fix: in D3 state the effect's dependencies as `[hasCityLocation, load]` (a boolean computed from `locations`), and in task 3.3 add the case "after a rejected load, removing or reordering a location starts no second load".
 - Fix risk: none; opening the search still retries through `useCitySearch`, as today.
-- Status: open
+- Status: fixed
+- Resolution: design.md D3 now fixes the load effect's dependencies as `[hasCityLocation, load]` and says why (a rejected load is dropped from the cache), and task 3.3 in tasks.md tests that a rejected load starts no second load after removing or reordering a location.
 
 ### R6 — SUGGESTION — M6 points to a task that does not exist
 - Location: `openspec/changes/show-city-labels-in-interface-language/proposal.md:127`

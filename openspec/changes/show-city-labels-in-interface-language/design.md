@@ -46,7 +46,7 @@ Alternatives considered:
 `controller/useCityLabels.ts`:
 `useCityLabels(locations: readonly Location[], load: LoadCitySearch): ReadonlyMap<string, string> | undefined`.
 
-- It mirrors `useExemplarCity`. It reads `readLoadedCitySearch(load)` on the first render. After the first render, it starts `loadCitySearchOnce(load)` in an effect when `locations` holds at least one location of `LocationKind.CITY`. A rejection is swallowed: no error state, no retry.
+- It mirrors `useExemplarCity`. It reads `readLoadedCitySearch(load)` on the first render. After the first render, it starts `loadCitySearchOnce(load)` in an effect when `locations` holds at least one location of `LocationKind.CITY`. The effect depends on `[hasCityLocation, load]`, a boolean computed from `locations`, not on `locations` itself: `loadCitySearchOnce` drops a rejected load, so an effect over the list would request again on every removal or reorder. A rejection is swallowed: no error state, no retry (opening the search still retries through `useCitySearch`, as today).
 - It returns `undefined` until the search is loaded. After that it returns a map from location ID to `getCityLabel(location.timeZoneId, location.label, cityNameLanguage)`, built in a `useMemo` over `[locations, cityNameLanguage, loadedSearch]`. A minute tick changes none of these, so it does no lookup (NFR-P1). A language switch does one lookup per city location.
 - `useLocations` calls it with `rest.loadCitySearch` and puts the map into the rows context. The existing `useExemplarCity` keeps its own trigger (the device time location). Together the two triggers load the data whenever the list holds any location (FR4). Both go through `loadCitySearchOnce`, so one request is shared with the search.
 

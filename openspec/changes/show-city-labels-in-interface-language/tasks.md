@@ -25,7 +25,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 - [ ] 3.3 RED: create `controller/useCityLabels.test.tsx` (`// Verifies FR1, FR2, FR4, NFR-P1 of show-city-labels-in-interface-language (D3).`). Use `renderHook` with a loader resolving to `createCompositeCitySearch` over fixture zone cities that include Tokyo, and a counting `vi.fn` loader. Cases:
   - `undefined` before the load resolves;
   - the map in English, then in Russian after `i18n.changeLanguage("ru")`;
-  - a rejected load keeps `undefined` and starts no second load on re-render;
+  - a rejected load keeps `undefined` and starts no second load on re-render, nor after removing or reordering a location;
   - no load for an empty list or a list with only the device time location;
   - a re-render with the same inputs returns the same map instance and calls `getCityLabel` 0 times (`vi.spyOn` on the loaded search);
   - one load shared with `useExemplarCity` (the loader called once).
