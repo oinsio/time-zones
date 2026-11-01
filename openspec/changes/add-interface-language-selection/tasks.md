@@ -254,7 +254,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - add `@add-interface-language-selection @FR13`.
 
   Add `@add-interface-language-selection @NFR-R2` to "Approved screenshots of the settings at <width> px in the <theme> theme" and re-approve: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_e2e.feature --grep "Approved screenshots of the settings" --update-snapshots`. Then run the same command without `--update-snapshots` and see it pass.
-- [ ] 10.3 New `test/features/settings/settings_language_e2e.feature` with steps in `steps/settings_language_e2e.steps.ts` (keyboard and layout steps in `steps/settings_language_layout_e2e.steps.ts` if needed), using `settingsE2eHelpers.ts`, `AxeBuilder` as in `locations_view_a11y_e2e.steps.ts`, and the existing steps "the locations screen uses the <theme> theme", "the screen is {int} px wide for the locations", "the locations screen matches the approved screenshot" and `the user presses the key {string}`. Scenarios:
+- [x] 10.3 New `test/features/settings/settings_language_e2e.feature` with steps in `steps/settings_language_e2e.steps.ts` (keyboard and layout steps in `steps/settings_language_layout_e2e.steps.ts` if needed), using `settingsE2eHelpers.ts`, `AxeBuilder` as in `locations_view_a11y_e2e.steps.ts`, and the existing steps "the locations screen uses the <theme> theme", "the screen is {int} px wide for the locations", "the locations screen matches the approved screenshot" and `the user presses the key {string}`. Scenarios:
   - "Collapsed group" (FR1, FR2; the group follows the hour format group by box position);
   - "Expand and collapse" (FR2, FR3, FR4, UX2: the list's box top is at or below the button's box bottom, and the box of the following content moves down by the list's height);
   - "Choosing Russian applies at once" (FR5, M2, UX3: count `framenavigated` events of the main frame during the choice, expecting 0, and `window.scrollY` is unchanged by the choice);
@@ -276,7 +276,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - the flag glyph for English is the one the runner draws for 🇺🇸.
 
   Verify `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_language_e2e.feature` passes.
-- [ ] 10.4 Add `@add-interface-language-selection @FR7` to the outline "User sees the app in their browser language" of `test/features/app_shell/app_shell_smoke_e2e.feature`. Run that feature: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/app_shell/app_shell_smoke_e2e.feature`. It must pass with the detector gone, because the browser language is now read by `readBrowserLanguages`.
+- [x] 10.4 Add `@add-interface-language-selection @FR7` to the outline "User sees the app in their browser language" of `test/features/app_shell/app_shell_smoke_e2e.feature`. Run that feature: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/app_shell/app_shell_smoke_e2e.feature`. It must pass with the detector gone, because the browser language is now read by `readBrowserLanguages`.
 
 ## 11. Final checks
 

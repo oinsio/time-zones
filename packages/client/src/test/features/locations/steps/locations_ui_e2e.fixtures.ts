@@ -40,6 +40,10 @@ export class LocationsWorld {
   otherTab: Page | undefined;
   /** The language `seedLanguage` recorded, for seeds that write the preferences document. */
   seededInterfaceLanguage: string | null = null;
+  /** Navigations and scroll positions around a language choice (FR5, UX3). */
+  languageChoice:
+    | { navigationCount: number; scrollBefore: number; scrollAfter: number }
+    | undefined;
 
   constructor(readonly page: Page) {
     page.on("request", (pageRequest) => {
