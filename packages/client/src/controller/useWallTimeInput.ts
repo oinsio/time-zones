@@ -24,6 +24,7 @@ export enum WallTimeInputOutcome {
  * Implements FR3, FR6, FR8, FR9, FR10 of add-wall-time-input-with-hint (D5).
  * Implements FR6 of add-settings-page-and-device-time-location (D9): reads
  * the 12-hour texts of the interface language.
+ * Implements FR5 of add-interface-language-selection (D3): follows the active interface language.
  */
 export function useWallTimeInput() {
   const context = useContext(LocationsContext);

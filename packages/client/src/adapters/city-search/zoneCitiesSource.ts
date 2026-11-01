@@ -16,13 +16,6 @@ import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
 import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
 import { findAbbreviationsOfZone } from "./timeZoneAbbreviations";
 
-/**
- * One record per browser-known IANA zone, joined with the build-time CLDR
- * city names.
- * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
- * Implements FR5, FR10 of add-interface-language-selection (D5): names in the language fallback order.
- */
-
 /** Zones the browser knows, or `undefined` when it cannot list them. */
 export type ListTimeZones = () => readonly string[] | undefined;
 
@@ -90,6 +83,12 @@ function readCountryTexts(countryCode: string): SearchableText[] {
   });
 }
 
+/**
+ * One record per browser-known IANA zone, joined with the build-time CLDR
+ * city names.
+ * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
+ * Implements FR5, FR10 of add-interface-language-selection (D5): names in the language fallback order.
+ */
 export function createZoneCitiesSource(
   zoneCities: readonly ZoneCityData[],
   listTimeZones: ListTimeZones = listBrowserTimeZones,

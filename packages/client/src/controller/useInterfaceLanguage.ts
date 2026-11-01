@@ -2,6 +2,7 @@ import { useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { readBrowserLanguages } from "@/lib/browserLanguages";
 import { resolveInterfaceLanguage } from "@/locales";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 import { usePreferences } from "./usePreferences";
 
 /**
@@ -13,14 +14,15 @@ import { usePreferences } from "./usePreferences";
  */
 export function useInterfaceLanguage(): void {
   const { preferences } = usePreferences();
+  const { code: activeCode } = useActiveInterfaceLanguage();
   const { i18n } = useTranslation();
   const resolvedCode = resolveInterfaceLanguage(
     preferences.interfaceLanguage,
     readBrowserLanguages(),
   );
   useLayoutEffect(() => {
-    if (resolvedCode !== (i18n.resolvedLanguage ?? i18n.language)) {
+    if (resolvedCode !== activeCode) {
       void i18n.changeLanguage(resolvedCode);
     }
-  }, [resolvedCode, i18n]);
+  }, [resolvedCode, activeCode, i18n]);
 }

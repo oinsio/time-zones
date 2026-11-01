@@ -58,6 +58,7 @@ function buildDateBar(
  * select-date-with-calendar-and-now (D5).
  * Implements FR7 of add-wall-time-input-with-hint (D2): the gap note comes
  * from `getWallClockNote`.
+ * Implements FR5 of add-interface-language-selection (D3): dates and weekdays follow the active interface language.
  */
 export function useReferenceMoment() {
   const context = useContext(LocationsContext);

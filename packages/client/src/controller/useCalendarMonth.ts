@@ -17,6 +17,8 @@ const MISSING_PROVIDER_MESSAGE =
  * The month of the focused day for the calendar, with the selected and today
  * marks of the reference zone, and the day the focus moves to on a key.
  * Implements FR3, FR9 of select-date-with-calendar-and-now (D5).
+ * Implements FR5, FR10 of add-interface-language-selection (D3): reads the
+ * active interface language and its first day of the week.
  */
 export function useCalendarMonth(focusedIsoDate: string) {
   const context = useContext(LocationsContext);

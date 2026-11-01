@@ -22,6 +22,7 @@ const MISSING_PROVIDER_MESSAGE =
  * The locations the user keeps, as presenter rows for views and as the model
  * list for search, with the persistence state and the commands.
  * Implements FR10, FR12, FR13, FR14 of add-locations-via-search (D3).
+ * Implements FR5 of add-interface-language-selection (D3): presents in the active interface language.
  * Reads the instant when the rows are presented: FR2, FR4 of
  * show-utc-offset-on-location-rows (D4).
  * Passes the device zone to the presenter: FR1, FR2 of
