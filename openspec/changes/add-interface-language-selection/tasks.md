@@ -107,14 +107,14 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 - [ ] 3.3 GREEN: rewrite `i18n.ts`:
   - `createI18nOptions(registry)` builds `resources`, `supportedLngs`, `fallbackLng` (from `resolveLanguageFallbacks(code, registry).slice(1)` per code, plus `default: [DEFAULT_LANGUAGE]`), `load: "currentOnly"` and `interpolation`.
   - Initialization uses `lng: resolveStartInterfaceLanguage()`, an exported function returning `resolveInterfaceLanguage(readStoredInterfaceLanguage(), readBrowserLanguages())`. `readStoredInterfaceLanguage` returns `preferences.interfaceLanguage` of a `LOADED` `localStoragePreferencesRepository.load()` and `null` otherwise. Until task 6 lands, it returns `null`; task 6.6 completes it.
-  - Remove `LanguageDetector`, `LANGUAGE_STORAGE_KEY`, `languageResolutionOptions`, `localeResources` and the hand-written `SUPPORTED_LANGUAGES` / `SupportedLanguage` / `DEFAULT_LANGUAGE`. They now come from `@/locales`; `i18n.ts` keeps re-exporting `DEFAULT_LANGUAGE`, `SUPPORTED_LANGUAGES` and the `InterfaceLanguageCode` type for existing importers until task 4 moves them.
+  - Remove `LanguageDetector`, `LANGUAGE_STORAGE_KEY`, `languageResolutionOptions`, `localeResources` and the hand-written `SUPPORTED_LANGUAGES` / `SupportedLanguage` / `DEFAULT_LANGUAGE`. They now come from `@/locales`. Until task 4.4 moves the importers, `i18n.ts` keeps temporary re-exports for them: `DEFAULT_LANGUAGE`, `SUPPORTED_LANGUAGES`, the `InterfaceLanguageCode` type, and the alias `export type SupportedLanguage = InterfaceLanguageCode`, so the ~20 modules that `import type { SupportedLanguage } from "@/i18n"` still resolve.
+  - The registry types `SUPPORTED_LANGUAGES` as `readonly string[]`, so `zoneCitiesSource.ts` (indexing `names: { en; ru }`) does not typecheck again until task 4.2 retypes the city data. `pnpm --filter @time-zones/client typecheck` is therefore verified at the end of task 4.4, not here; Vitest (esbuild, no type check) runs the suites in between.
 
   - `test/setup.ts` imports `languageResolutionOptions` and `localeResources` from `@/i18n` for the global i18next init that every Vitest test runs (design D8). Change it to import `createI18nOptions` from `@/i18n` and `localeRegistry` from `@/locales`, and init with `{ ...createI18nOptions(localeRegistry), lng: "ru", fallbackLng: "ru" }`, so jsdom tests keep the translation resources and today's fallback.
 
   Run `pnpm --filter @time-zones/client remove i18next-browser-languagedetector`. Verify, one at a time:
   - `npx vitest run src/i18n.test.ts` passes;
   - `grep -rn "languageResolutionOptions\|localeResources\|languagedetector" src package.json` prints nothing;
-  - `pnpm --filter @time-zones/client typecheck` passes;
   - `npx vitest run src/app/settings` passes (jsdom suites that render translated text through `test/setup.ts`, so they fail if the setup loses its resources).
 - [ ] 3.4 Add "Fallback order of a dialect" to `test/features/app_shell/app_shell_locale_registry_unit.feature`, with steps using `createI18nOptions` and the `ru-KZ` fixture. Verify that steps file passes.
 
@@ -133,7 +133,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `npx vitest run src/adapters/city-search` passes;
   - `npx vitest run src/presenter` passes.
 - [ ] 4.3 `FIRST_DAY_OF_WEEK_BY_LANGUAGE` (`constants/date.ts`) becomes `Readonly<Record<string, number>>`. `presenter/calendarMonth.ts` and `controller/useCalendarMonth.ts` read it through `pickByLanguageFallback`. Add a test to `presenter/calendarMonth.test.ts`: with the `ru-KZ` fixture dialect, weeks start on Monday. Verify `npx vitest run src/presenter` passes.
-- [ ] 4.4 Replace the cast `(i18n.resolvedLanguage ?? i18n.language) as SupportedLanguage` with `useActiveInterfaceLanguage()` in `useCitySearch`, `useWallTimeInput`, `useExemplarCity`, `useReferenceMoment`, `useCalendarMonth`, `useLocations`, and use its `code` in `useDocumentLanguage`. `useExemplarCity` and `useCitySearch` pass `cityNameLanguage` to the search. Rename every remaining `SupportedLanguage` to `InterfaceLanguageCode` (imported from `@/locales`) in `presenter/` and in `test/features/**/steps/`. Every import of `SUPPORTED_LANGUAGES`, `DEFAULT_LANGUAGE` or the language type from `@/i18n` (for example `views/viewRegistry.test.ts` and the steps under `test/features/`) moves to `@/locales`; the default `i18n` export stays in `@/i18n`. Remove the temporary re-exports from `i18n.ts`. Verify, one at a time:
+- [ ] 4.4 Replace the cast `(i18n.resolvedLanguage ?? i18n.language) as SupportedLanguage` with `useActiveInterfaceLanguage()` in `useCitySearch`, `useWallTimeInput`, `useExemplarCity`, `useReferenceMoment`, `useCalendarMonth`, `useLocations`, and use its `code` in `useDocumentLanguage`. `useExemplarCity` and `useCitySearch` pass `cityNameLanguage` to the search. Rename every remaining `SupportedLanguage` to `InterfaceLanguageCode` (imported from `@/locales`) in `presenter/` (production and test files), `adapters/city-search/`, `ports/`, `constants/date.ts` and `test/features/**/steps/` (task 4.2 retypes the city-name uses to `CityNameLanguage` first). Every import of `SUPPORTED_LANGUAGES`, `DEFAULT_LANGUAGE` or the language type from `@/i18n` (for example `views/viewRegistry.test.ts` and the steps under `test/features/`) moves to `@/locales`; the default `i18n` export stays in `@/i18n`. Remove the temporary re-exports from `i18n.ts`, the `SupportedLanguage` alias included. Verify, one at a time (this is the first typecheck since task 3.3):
   - `grep -rn "SupportedLanguage\|as SupportedLanguage\|resolvedLanguage ??" src` lists only `controller/useActiveInterfaceLanguage.ts`;
   - `pnpm --filter @time-zones/client typecheck` passes;
   - `npx vitest run src/controller` passes.
@@ -152,7 +152,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 ## 6. Preferences document version 2 and the legacy key (FR8, FR12; design D2)
 
 - [ ] 6.1 Move `PayloadMigrations` and `migratePayload` from `adapters/locationsDocument.ts` to a new `adapters/payloadMigrations.ts` (exported), and import them back in `locationsDocument.ts`. No behaviour change. Verify `npx vitest run src/adapters/localStorageLocationRepository.migration.test.ts` passes.
-- [ ] 6.2 In `constants/preferences.ts`, set `PREFERENCES_SCHEMA_VERSION = 2`, add `LANGUAGE_SEARCH_MIN_LOCALES = 10` (with JSDoc naming FR6) and export both via `constants/index.ts`. In `constants/storage.ts`, add `LEGACY_STORAGE_KEYS = { LANGUAGE: "language" } as const`, with JSDoc saying i18next wrote it before this change.
+- [ ] 6.2 In `constants/preferences.ts`, set `PREFERENCES_SCHEMA_VERSION = 2`, add `LANGUAGE_SEARCH_MIN_LOCALES = 10` (with JSDoc naming FR6). In `constants/storage.ts`, add `LEGACY_STORAGE_KEYS = { LANGUAGE: "language" } as const`, with JSDoc saying i18next wrote it before this change. Export all three by name from `constants/index.ts`.
 - [ ] 6.3 RED: `adapters/preferencesDocument.test.ts` with fixtures of old data:
   - version 1 `{ theme: "DARK", hourFormat: "H12" }` with legacy `"ru"` → `LOADED`, `interfaceLanguage` `"ru"`;
   - the same with no legacy value → `interfaceLanguage` `null`;
@@ -173,19 +173,21 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - add an `interfaceLanguage` round trip to the shared contract, for both adapters.
 
   Verify `npx vitest run src/adapters` passes.
-- [ ] 6.6 Complete `readStoredInterfaceLanguage` in `i18n.ts` (task 3.3) with `localStoragePreferencesRepository.load()`. Add to `i18n.test.ts`: with `localStorage` holding a version 2 document with `"ru"` and browser `en-US`, the start language computed by the exported `resolveStartInterfaceLanguage()` is `ru`; with only the legacy key `"ru"` it is `ru` too. Verify `npx vitest run src/i18n.test.ts` passes.
+- [ ] 6.6 Complete `readStoredInterfaceLanguage` in `i18n.ts` (task 3.3) with `localStoragePreferencesRepository.load()`. Add to `i18n.test.ts`: with `localStorage` holding a version 2 document with `"ru"` and browser `en-US` (stubbed with `vi.spyOn(navigator, "languages", "get")`, as `i18n.test.ts` does today), the start language computed by the exported `resolveStartInterfaceLanguage()` is `ru`; with only the legacy key `"ru"` it is `ru` too. Verify `npx vitest run src/i18n.test.ts` passes.
 
 ## 7. Controller: choose, apply, reset (FR5, FR7, FR12; design D1, D3)
 
 - [ ] 7.1 RED → GREEN: in `controller/PreferencesProvider.test.tsx`, `setInterfaceLanguage("ru")` updates `preferences.interfaceLanguage` at once and writes once after the debounce. Then add `setInterfaceLanguage` to `PreferencesContextValue` (`controller/preferencesContext.ts`) and `PreferencesProvider`.
-- [ ] 7.2 RED: `controller/useInterfaceLanguage.test.tsx`. With a test i18next instance, the in-memory preferences repository and a stubbed `readBrowserLanguages`:
+- [ ] 7.2 RED: `controller/useInterfaceLanguage.test.tsx`. With a test i18next instance, the in-memory preferences repository and the browser languages stubbed per test with `vi.spyOn(navigator, "languages", "get").mockReturnValue([...])` (this overrides the setup pin of task 7.3):
   - a choice of `ru` switches `i18n.language` to `ru` before the next paint (`useLayoutEffect`; assert right after `act`);
   - Reset with browser `en-US` brings back `en`;
   - an external change to `ru` through a shared backend applies `ru`;
   - an unchanged resolved language does not call `changeLanguage` again (spy).
 
   Run it and see it fail.
-- [ ] 7.3 GREEN: `controller/useInterfaceLanguage.ts`. Export it from `controller/index.ts` and call it in `AppShellContent` (`app/AppShell.tsx`) next to `useThemePreference()`. Verify `npx vitest run src/controller/useInterfaceLanguage.test.tsx` passes, then `npx vitest run src/app` passes.
+- [ ] 7.3 GREEN: `controller/useInterfaceLanguage.ts`. Export it from `controller/index.ts` and call it in `AppShellContent` (`app/AppShell.tsx`) next to `useThemePreference()`. Pin the browser languages for jsdom (design D8). jsdom reports `navigator.languages` as `["en-US"]`, so without a pin every rendered `AppShell` with no chosen language would switch i18next to `en`, while the jsdom suites set the language themselves with `i18n.changeLanguage("ru")` or `("en")` before rendering `AppShell` (for example `app/AppShell.test.tsx`, `app/AppShell.settings.test.tsx`, `app/AppShell.notices.test.tsx`, `app/AppShell.pageNotices.test.tsx`, `test/features/locations/steps/deviceTimeWorld.tsx`, `test/features/main_page/steps/main_page_unit.steps.ts`, `test/features/app_shell/steps/app_shell_update_recheck.steps.ts`). In `test/setup.ts`, after the i18next init, define `navigator.languages` and `navigator.language` as configurable getters returning the active i18next language (`[i18n.language]` and `i18n.language`). With no chosen language, the resolved language then equals the one the test set, so `useInterfaceLanguage` calls nothing, and today's behaviour holds. Tests that need a specific browser language override the getter with `vi.spyOn` (tasks 6.6, 7.2, 7.4); restoring the spy (`vi.restoreAllMocks()` in `afterEach`) brings the pin back.
+
+  Verify, one at a time, that these pass: `npx vitest run src/controller/useInterfaceLanguage.test.tsx`; `npx vitest run src/app`; `npx vitest run src/test/features/main_page src/test/features/locations src/test/features/app_shell` (unit BDD worlds that render `AppShell`).
 - [ ] 7.4 Unit BDD `test/features/settings/settings_language_unit.feature`, steps in `steps/settings_language_unit.steps.tsx` (reuse `settingsWorld.tsx`; split the steps file if it passes 200 lines). Scenarios from the spec delta:
   - "Choosing Russian applies at once" — rendered `AppShell` in jsdom: the heading «Настройки», then after going back the country «Казахстан», the Russian weekday, and the search offering «Алматы»;
   - "The language survives a reload" — re-render a new `AppShell` over the same storage: the main heading «Часовые пояса» in the first commit;
@@ -195,6 +197,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - "Reset returns to the browser language";
   - "Language without storage";
   - "Another tab changes the language".
+
+  Scenarios that name a browser language ("Reset returns to the browser language", "Legacy key without a document") stub it with `vi.spyOn(navigator, "languages", "get")` over the setup pin of task 7.3.
 
   Verify `npx vitest run src/test/features/settings/steps/settings_language_unit.steps.tsx` passes.
 
@@ -237,7 +241,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 10. E2E in a real browser (FR2, FR5, FR7, FR8, NFR-A1–NFR-A3, NFR-R1, NFR-R2)
 
-- [ ] 10.1 Fix the seeds that write the current preferences version with the old payload: add `interfaceLanguage: null` in `test/features/settings/steps/settings_theme_e2e.steps.ts` and `test/features/locations/steps/locationsSeedHelpers.ts`. Keep `seedLanguage` in `locations_ui_e2e.fixtures.ts` writing the legacy key, with its comment changed to "the legacy key, migrated by the app (FR8 of add-interface-language-selection)". Verify `pnpm --filter @time-zones/client typecheck` passes.
+- [ ] 10.1 Fix the seeds that write the current preferences version with the old payload: add `interfaceLanguage: null` in `test/features/settings/steps/settings_theme_e2e.steps.ts` and `test/features/locations/steps/locationsSeedHelpers.ts`. Keep `seedLanguage` in `locations_ui_e2e.fixtures.ts` writing the legacy key, but replace its local `const LANGUAGE_STORAGE_KEY = "language"` with `LEGACY_STORAGE_KEYS.LANGUAGE` from `@/constants` (task 6.2), and change its comment to "the legacy key, migrated by the app (FR8 of add-interface-language-selection)". Then `grep -rn "LANGUAGE_STORAGE_KEY" src` prints nothing. Verify `pnpm --filter @time-zones/client typecheck` passes.
 - [ ] 10.2 In `test/features/settings/settings_e2e.feature`, change the outline "Both languages":
   - add the column `language group` (Language / Язык);
   - "the groups are named "<theme>" and "<hour format>"" becomes "the groups are named "<theme>", "<hour format>" and "<language group>"" (update the step in `settings_e2e.steps.ts`);

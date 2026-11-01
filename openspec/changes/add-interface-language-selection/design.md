@@ -178,9 +178,11 @@ Formatter caches in `src/presenter/dateTimeFormatters.ts` and `countryName.ts` a
 - Existing tests that the change touches:
   - `i18n.test.ts` is rewritten for `createI18nOptions`. "should store the chosen language under the language key" is removed on purpose (D2).
   - `test/setup.ts`, the Vitest setup file every jsdom test runs, imports `languageResolutionOptions` and `localeResources` from `@/i18n` for its global i18next init (`lng: "ru"`, `fallbackLng: "ru"`). Both disappear with D3, so it builds its options with `createI18nOptions(localeRegistry)` and keeps the `lng: "ru"` and `fallbackLng: "ru"` overrides.
+  - The overrides alone do not keep today's behaviour once `useInterfaceLanguage` runs in `AppShellContent`. jsdom reports `navigator.languages` as `["en-US"]`, so with no chosen language every rendered `AppShell` would switch i18next to `en`, while many jsdom suites set the language with `i18n.changeLanguage("ru")` or `("en")` before rendering `AppShell` (`app/AppShell*.test.tsx`, `deviceTimeWorld.tsx`, `main_page_unit.steps.ts`, `app_shell_update_recheck.steps.ts` and others). So `test/setup.ts` also pins the browser languages to the active i18next language, as configurable `navigator.languages` / `navigator.language` getters. With no choice, the resolved language is the one the test set and nothing is switched. Tests of the browser-language rule override the getter with `vi.spyOn`, as `i18n.test.ts` already does.
+  - Between the registry (task 3.3) and the retyped city data (task 4.2), `SUPPORTED_LANGUAGES` is `readonly string[]` and `i18n.ts` keeps a temporary `SupportedLanguage` alias; the typecheck is verified once all importers moved (task 4.4).
   - `adapters/preferencesRepository.test.ts` expectations of `schemaVersion: 1` become 2.
   - The E2E seeds that write the current version with the old payload add `interfaceLanguage: null`: `test/features/settings/steps/settings_theme_e2e.steps.ts` and `test/features/locations/steps/locationsSeedHelpers.ts`.
-  - `seedLanguage` keeps writing the legacy key, which D2 migrates, and so also covers FR8 end to end.
+  - `seedLanguage` keeps writing the legacy key, which D2 migrates, and so also covers FR8 end to end. Its local `LANGUAGE_STORAGE_KEY` gives way to `LEGACY_STORAGE_KEYS.LANGUAGE`.
 
 ### D9. Glossary owners
 
