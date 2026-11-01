@@ -1,6 +1,6 @@
 // Verifies FR3, FR9, FR11 of add-interface-language-selection (D4).
+import { buildLocaleRegistry } from "./buildLocaleRegistry";
 import {
-  buildLocaleRegistry,
   DEFAULT_LANGUAGE,
   findRegisteredLocale,
   localeRegistry,

@@ -1,10 +1,8 @@
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { LANGUAGE_BUTTON_CLASS_NAME } from "@/constants";
 import type { RegisteredLocale } from "@/locales";
 import { cn } from "@/shared/lib/cn";
-
-export const LANGUAGE_BUTTON_CLASS_NAME =
-  "flex min-h-11 w-full items-center gap-3 rounded-md border bg-surface px-4 py-2 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent";
 
 type InterfaceLanguageListProps = {
   listId: string;

@@ -280,7 +280,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 11. Final checks
 
-- [ ] 11.1 Stryker, scoped, one run at a time, at most 5 files per run:
+- [x] 11.1 Stryker, scoped, one run at a time, at most 5 files per run:
   - `npx stryker run --mutate 'src/locales/localeMetadata.ts,src/locales/localeRegistry.ts,src/locales/languageFallbacks.ts,src/locales/resolveInterfaceLanguage.ts,src/locales/filterLocales.ts'`;
   - `npx stryker run --mutate 'src/i18n.ts,src/lib/browserLanguages.ts,src/adapters/preferencesDocument.ts,src/adapters/payloadMigrations.ts,src/adapters/localStoragePreferencesRepository.ts'`;
   - `npx stryker run --mutate 'src/preferences/preferencesCommands.ts,src/preferences/parseStoredPreferences.ts,src/controller/useInterfaceLanguage.ts,src/controller/useActiveInterfaceLanguage.ts,src/controller/PreferencesProvider.tsx'`;
@@ -292,7 +292,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   These 33 files are every production file of this change with new or changed logic (M6). Left out, because the change adds no mutable code to them: the files touched only by the `SupportedLanguage` → `InterfaceLanguageCode` type rename (the other `presenter/` files, `ports/citySearch.ts`), the type-only `controller/preferencesContext.ts`, the constants-only `constants/date.ts`, `constants/preferences.ts`, `constants/storage.ts`, and the re-export barrels `constants/index.ts`, `controller/index.ts`, `preferences/index.ts`.
 
   After each run, read `reports/mutation/mutation-report.json`. Kill survivors with tests until each file scores at least 95 % (minimum acceptable 90 %), and note the scores in this task (M6). A survivor that existed before this change may be noted as pre-existing, with its line.
-- [ ] 11.2 Run, one at a time:
+  Scores (M6), run with `--ignoreStatic` because the vitest runner cannot kill import-time mutants; the locales registry is split into `buildLocaleRegistry.ts` (mutated) and `localeRegistry.ts` (glob, Stryker-disabled because Vite parses the glob statically): locales 97–100 %, i18n 100 % after the fallback test, payloadMigrations 100 %, preferences/controller 100 %, InterfaceLanguageGroup 93.9 % (optional-chaining on refs, equivalent), InterfaceLanguageList 100 %, other files 94.6–100 %.
+- [x] 11.2 Run, one at a time:
   - `pnpm --filter @time-zones/client typecheck`;
   - `pnpm --filter @time-zones/client lint`;
   - `pnpm --filter @time-zones/client test`;
@@ -302,7 +303,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `pnpm --filter @time-zones/client test:bdd`.
 
   All pass.
-- [ ] 11.3 Traceability, from `packages/client/`: `for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 FR9 FR10 FR11 FR12 FR13 NFR-P1 NFR-A1 NFR-A2 NFR-A3 NFR-R1 NFR-R2 UX1 UX2 UX3 UX4; do grep -rlE "add-interface-language-selection.*\b$id\b|\b$id\b.*add-interface-language-selection" src >/dev/null || echo "missing $id"; done` prints nothing. Also check that `wc -l` of every new or changed file under `src/` is under 200.
+- [x] 11.3 Traceability, from `packages/client/`: `for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 FR9 FR10 FR11 FR12 FR13 NFR-P1 NFR-A1 NFR-A2 NFR-A3 NFR-R1 NFR-R2 UX1 UX2 UX3 UX4; do grep -rlE "add-interface-language-selection.*\b$id\b|\b$id\b.*add-interface-language-selection" src >/dev/null || echo "missing $id"; done` prints nothing. Also check that `wc -l` of every new or changed file under `src/` is under 200.
 
 ## Human follow-up
 

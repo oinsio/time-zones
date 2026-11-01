@@ -1,7 +1,13 @@
 import { ChevronDown } from "lucide-react";
 import { type KeyboardEvent, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { KeyboardKey, LANGUAGE_SEARCH_MIN_LOCALES } from "@/constants";
+import {
+  KeyboardKey,
+  LANGUAGE_BUTTON_CLASS_NAME,
+  LANGUAGE_LIST_ARROW_STEP_BY_KEY,
+  LANGUAGE_LIST_FOCUSABLE_SELECTOR,
+  LANGUAGE_SEARCH_MIN_LOCALES,
+} from "@/constants";
 import {
   filterLocales,
   findRegisteredLocale,
@@ -9,22 +15,13 @@ import {
   type RegisteredLocale,
 } from "@/locales";
 import { cn } from "@/shared/lib/cn";
-import {
-  InterfaceLanguageList,
-  LANGUAGE_BUTTON_CLASS_NAME,
-} from "./InterfaceLanguageList";
+import { InterfaceLanguageList } from "./InterfaceLanguageList";
 
 type InterfaceLanguageGroupProps = {
   locales?: readonly RegisteredLocale[];
   activeCode: string;
   onChoose: (code: string) => void;
 };
-
-const ARROW_STEP_BY_KEY: Partial<Record<string, number>> = {
-  [KeyboardKey.ARROW_DOWN]: 1,
-  [KeyboardKey.ARROW_UP]: -1,
-};
-const FOCUSABLE_SELECTOR = "input[type='search'], li button";
 
 /**
  * The interface language group of the settings page: a button with the current
@@ -59,10 +56,12 @@ export function InterfaceLanguageGroup({
       collapse();
       return;
     }
-    const step = ARROW_STEP_BY_KEY[event.key];
+    const step = LANGUAGE_LIST_ARROW_STEP_BY_KEY[event.key];
     if (step === undefined || !isExpanded) return;
     const focusables = Array.from(
-      groupRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR) ?? [],
+      groupRef.current?.querySelectorAll<HTMLElement>(
+        LANGUAGE_LIST_FOCUSABLE_SELECTOR,
+      ) ?? [],
     );
     const currentIndex = focusables.indexOf(
       document.activeElement as HTMLElement,

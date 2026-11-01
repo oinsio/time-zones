@@ -37,6 +37,15 @@ describe("createI18nOptions", () => {
     ]);
   });
 
+  it("should fall back from a dialect to its base language, then English", () => {
+    const { fallbackLng } = createI18nOptions(DIALECT_REGISTRY);
+    expect(fallbackLng).toMatchObject({
+      "ru-KZ": ["ru", "en"],
+      ru: ["en"],
+      default: ["en"],
+    });
+  });
+
   it("should keep a regional language as it is", () => {
     expect(createI18nOptions(localeRegistry).load).toBe("currentOnly");
   });
