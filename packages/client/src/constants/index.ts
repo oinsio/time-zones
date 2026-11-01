@@ -42,6 +42,7 @@ export {
 } from "./locations";
 export { VISIBILITY_CHANGE_EVENT, VISIBLE_STATE } from "./pageVisibility";
 export {
+  LANGUAGE_SEARCH_MIN_LOCALES,
   PREFERENCES_SCHEMA_VERSION,
   PREFERENCES_WRITE_DEBOUNCE_MS,
 } from "./preferences";
@@ -55,6 +56,8 @@ export {
   REORDER_TRANSITION_EASING,
 } from "./reorder";
 export {
+  CITY_NAME_LANGUAGES,
+  type CityNameLanguage,
   MAX_SEARCH_RESULTS,
   POPULAR_TIME_ZONE_IDS,
   REGION_DISPLAY_FALLBACK,
@@ -62,6 +65,7 @@ export {
   UTC_ZONE_ID,
 } from "./search";
 export {
+  LEGACY_STORAGE_KEYS,
   LOCATIONS_SYNC_CHANNEL_NAME,
   PREFERENCES_SYNC_CHANNEL_NAME,
   STORAGE_AVAILABILITY_PROBE_KEY,

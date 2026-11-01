@@ -1,5 +1,5 @@
+import type { CityNameLanguage } from "@/constants";
 import { MAX_SEARCH_RESULTS, POPULAR_TIME_ZONE_IDS } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import {
   type CitySearch,
   type CitySearchResult,
@@ -55,7 +55,7 @@ export function createCompositeCitySearch(
   );
 
   return {
-    search(query: string, language: SupportedLanguage) {
+    search(query: string, language: CityNameLanguage) {
       const normalizedQuery = normalizeSearchText(query);
       if (normalizedQuery === "") return [];
       const collator = new Intl.Collator(language);

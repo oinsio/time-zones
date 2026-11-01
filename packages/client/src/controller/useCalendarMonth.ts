@@ -1,7 +1,4 @@
 import { useContext, useMemo, useSyncExternalStore } from "react";
-import { useTranslation } from "react-i18next";
-import { FIRST_DAY_OF_WEEK_BY_LANGUAGE } from "@/constants";
-import type { SupportedLanguage } from "@/i18n";
 import { Temporal } from "@/lib/temporal";
 import {
   type CalendarMove,
@@ -9,8 +6,9 @@ import {
   getEffectiveInstant,
   getReferenceZone,
 } from "@/model";
-import { presentCalendarMonth } from "@/presenter";
+import { presentCalendarMonth, resolveFirstDayOfWeek } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 
 const MISSING_PROVIDER_MESSAGE =
   "useCalendarMonth must be used inside a LocationsProvider";
@@ -25,9 +23,7 @@ export function useCalendarMonth(focusedIsoDate: string) {
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
   const { store, clock, minuteTick } = context;
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
-  const { i18n } = useTranslation();
-  const language = (i18n.resolvedLanguage ??
-    i18n.language) as SupportedLanguage;
+  const { code: language } = useActiveInterfaceLanguage();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick keeps "today" current
   const month = useMemo(() => {
@@ -47,7 +43,7 @@ export function useCalendarMonth(focusedIsoDate: string) {
     getCalendarFocusTarget(
       Temporal.PlainDate.from(focusedIsoDate),
       move,
-      FIRST_DAY_OF_WEEK_BY_LANGUAGE[language],
+      resolveFirstDayOfWeek(language),
     ).toString();
 
   return { month, getFocusTarget };

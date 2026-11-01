@@ -39,7 +39,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 2. Locale registry (FR3, FR9, FR11; design D4)
 
-- [ ] 2.1 RED: `locales/localeMetadata.test.ts` for `parseLocaleMetadata(meta, fileCode)`. Cases, with `it.each`:
+- [x] 2.1 RED: `locales/localeMetadata.test.ts` for `parseLocaleMetadata(meta, fileCode)`. Cases, with `it.each`:
   - complete metadata → returned;
   - each of the 5 fields missing, empty, or not a string → `undefined`;
   - `code` ≠ `fileCode` → `undefined`;
@@ -48,8 +48,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `meta` `null` or a string → `undefined`.
 
   Run `npx vitest run src/locales/localeMetadata.test.ts` and see it fail.
-- [ ] 2.2 GREEN: `locales/localeMetadata.ts` with `LocaleMetadata` and `parseLocaleMetadata`; the tag check is `Intl.getCanonicalLocales(code)[0] === code` inside `try`. Verify the test passes.
-- [ ] 2.3 RED: `locales/localeRegistry.test.ts` for `buildLocaleRegistry(localeModules)`, with fixture module maps keyed `./<code>.json`:
+- [x] 2.2 GREEN: `locales/localeMetadata.ts` with `LocaleMetadata` and `parseLocaleMetadata`; the tag check is `Intl.getCanonicalLocales(code)[0] === code` inside `try`. Verify the test passes.
+- [x] 2.3 RED: `locales/localeRegistry.test.ts` for `buildLocaleRegistry(localeModules)`, with fixture module maps keyed `./<code>.json`:
   - 3 valid files `ru` (Russian), `de` (German), `en` (English) → codes `en`, `de`, `ru`, sorted by `name`;
   - translations contain no `_meta` key, and other keys are kept;
   - an invalid file is skipped while the others stay;
@@ -63,27 +63,27 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `findRegisteredLocale("xx")` is `undefined`.
 
   Run it and see it fail.
-- [ ] 2.4 GREEN: `locales/localeRegistry.ts`:
+- [x] 2.4 GREEN: `locales/localeRegistry.ts`:
   - `RegisteredLocale`, `buildLocaleRegistry` (sorting with one `Intl.Collator(DEFAULT_LANGUAGE)`);
   - `localeRegistry` from `import.meta.glob("./*.json", { eager: true, import: "default" })`;
   - `DEFAULT_LANGUAGE = "en"`, `type InterfaceLanguageCode = string`, `SUPPORTED_LANGUAGES`, `findRegisteredLocale`.
 
   In `locales/en.json`, change `_meta.emoji` to 🇺🇸. Verify the test passes.
-- [ ] 2.5 RED → GREEN: `locales/languageFallbacks.test.ts`, then `locales/languageFallbacks.ts` (design D5). Use a fixture registry with `en`, `ru` and a dialect `ru-KZ` (`baseLanguage` `ru`), passed as the `registry` argument:
+- [x] 2.5 RED → GREEN: `locales/languageFallbacks.test.ts`, then `locales/languageFallbacks.ts` (design D5). Use a fixture registry with `en`, `ru` and a dialect `ru-KZ` (`baseLanguage` `ru`), passed as the `registry` argument:
   - `resolveLanguageFallbacks`: `ru-KZ` → `["ru-KZ", "ru", "en"]`; `ru` → `["ru", "en"]`; `en` → `["en"]`; `xx` → `["en"]`.
   - `pickByLanguageFallback`: picks the first defined value along the order, so `ru-KZ` over `{ en: 7, ru: 1 }` → `1`; with the real `FIRST_DAY_OF_WEEK_BY_LANGUAGE` and the fixture registry, `ru-KZ` → `1` (Monday); without the `registry` argument, `ru-KZ` (absent from the real registry) → `7`.
   - `resolveCityNameLanguage`: `ru-KZ` → `"ru"`; `de` (registered in the fixture, base `de`) → `"en"`.
   - `CITY_NAME_LANGUAGES = ["en", "ru"] as const` and `type CityNameLanguage` go into `constants/search.ts`.
-- [ ] 2.6 RED → GREEN: `locales/resolveInterfaceLanguage.test.ts`, then `locales/resolveInterfaceLanguage.ts` (design D3). Cases with a fixture registry `en`, `ru`, `ru-KZ`:
+- [x] 2.6 RED → GREEN: `locales/resolveInterfaceLanguage.test.ts`, then `locales/resolveInterfaceLanguage.ts` (design D3). Cases with a fixture registry `en`, `ru`, `ru-KZ`:
   - the chosen `ru` with browser `en-US` → `ru`;
   - the chosen `xx` with browser `ru-RU` → `ru`;
   - no choice with browser `ru-RU` → `ru`; `de-DE`, `ru` → `ru`; `en-US` → `en`; `de-DE` → `en`; `[]` → `en`;
   - `ru-KZ` → `ru-KZ` (exact match); `ru-kz` → `ru-KZ` (canonicalized);
   - a malformed browser value such as `"ru_RU"` is skipped without throwing.
-- [ ] 2.7 RED → GREEN: `locales/filterLocales.test.ts`, then `locales/filterLocales.ts`. It uses `normalizeSearchText` from `@/adapters`. The fixture is the 10 locales of the spec: `en` English, `ru` Русский/Russian, `de` Deutsch/German, `fr` Français/French, `es` Español/Spanish, `it` Italiano/Italian, `pt` Português/Portuguese, `ja` 日本語/Japanese, `uk` Українська/Ukrainian, `pl` Polski/Polish. Put the fixture in `test/factories/localeFixtures.ts`, so tasks 2.8, 8.4 and 9.2 reuse it. Expected results:
+- [x] 2.7 RED → GREEN: `locales/filterLocales.test.ts`, then `locales/filterLocales.ts`. It uses `normalizeSearchText` from `@/adapters`. The fixture is the 10 locales of the spec: `en` English, `ru` Русский/Russian, `de` Deutsch/German, `fr` Français/French, `es` Español/Spanish, `it` Italiano/Italian, `pt` Português/Portuguese, `ja` 日本語/Japanese, `uk` Українська/Ukrainian, `pl` Polski/Polish. Put the fixture in `test/factories/localeFixtures.ts`, so tasks 2.8, 8.4 and 9.2 reuse it. Expected results:
   - `deu` → `de`; `GERMAN` → `de`; ` ru ` → `ru`; `рус` → `ru`; `francais` → `fr`;
   - `zzz` → none; an empty text → all 10, in registry order.
-- [ ] 2.8 `locales/index.ts` exports the public API of tasks 2.2–2.7, then add the unit BDD feature:
+- [x] 2.8 `locales/index.ts` exports the public API of tasks 2.2–2.7, then add the unit BDD feature:
   - `test/features/app_shell/app_shell_locale_registry_unit.feature`, with the scenarios "Registry from locale files" (its step asserts the exact order `en`, `de`, `ru`), "Rejected locale files" (all 4 rows), "Metadata is not a translation", "American flag for English" and "Browser language decides without a choice" (all 4 rows);
   - "A chosen language wins over the browser" and "A dialect is not picked by its base language" assert the resolved code here (the first render is checked in 7.4 and 10.3);
   - steps in `steps/app_shell_locale_registry_unit.steps.ts`, using `buildLocaleRegistry` with fixture module maps and `resolveInterfaceLanguage`.
@@ -94,8 +94,8 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
 
 ## 3. i18next from the registry, dialect fallback, no detector (FR7, FR9, FR10; design D3, D4, D5)
 
-- [ ] 3.1 `lib/browserLanguages.ts` exports `readBrowserLanguages(navigatorLike = globalThis.navigator)`. It returns `navigatorLike.languages` when non-empty, else `[navigatorLike.language]`, and `[]` when neither exists. Test it first in `lib/browserLanguages.test.ts` with fake navigator objects, then implement.
-- [ ] 3.2 RED: rewrite `i18n.test.ts` for `createI18nOptions(registry)`, with `i18next.createInstance().init(createI18nOptions(fixture))` and no detector:
+- [x] 3.1 `lib/browserLanguages.ts` exports `readBrowserLanguages(navigatorLike = globalThis.navigator)`. It returns `navigatorLike.languages` when non-empty, else `[navigatorLike.language]`, and `[]` when neither exists. Test it first in `lib/browserLanguages.test.ts` with fake navigator objects, then implement.
+- [x] 3.2 RED: rewrite `i18n.test.ts` for `createI18nOptions(registry)`, with `i18next.createInstance().init(createI18nOptions(fixture))` and no detector:
   - the resources hold no `_meta`;
   - `supportedLngs` are the registry codes;
   - `load` is `currentOnly`;
@@ -104,7 +104,7 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - the dialect fallback with the `ru-KZ` fixture: key `a` from `ru-KZ`, `b` from `ru`, `c` from `en` (M5).
 
   Remove the test "should store the chosen language under the language key" (design D2). Run `npx vitest run src/i18n.test.ts` and see it fail.
-- [ ] 3.3 GREEN: rewrite `i18n.ts`:
+- [x] 3.3 GREEN: rewrite `i18n.ts`:
   - `createI18nOptions(registry)` builds `resources`, `supportedLngs`, `fallbackLng` (from `resolveLanguageFallbacks(code, registry).slice(1)` per code, plus `default: [DEFAULT_LANGUAGE]`), `load: "currentOnly"` and `interpolation`.
   - Initialization uses `lng: resolveStartInterfaceLanguage()`, an exported function returning `resolveInterfaceLanguage(readStoredInterfaceLanguage(), readBrowserLanguages())`. `readStoredInterfaceLanguage` returns `preferences.interfaceLanguage` of a `LOADED` `localStoragePreferencesRepository.load()` and `null` otherwise. Until task 6 lands, it returns `null`; task 6.6 completes it.
   - Remove `LanguageDetector`, `LANGUAGE_STORAGE_KEY`, `languageResolutionOptions`, `localeResources` and the hand-written `SUPPORTED_LANGUAGES` / `SupportedLanguage` / `DEFAULT_LANGUAGE`. They now come from `@/locales`. Until task 4.4 moves the importers, `i18n.ts` keeps temporary re-exports for them: `DEFAULT_LANGUAGE`, `SUPPORTED_LANGUAGES`, the `InterfaceLanguageCode` type, and the alias `export type SupportedLanguage = InterfaceLanguageCode`, so the ~20 modules that `import type { SupportedLanguage } from "@/i18n"` still resolve.
@@ -116,12 +116,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `npx vitest run src/i18n.test.ts` passes;
   - `grep -rn "languageResolutionOptions\|localeResources\|languagedetector" src package.json` prints nothing;
   - `npx vitest run src/app/settings` passes (jsdom suites that render translated text through `test/setup.ts`, so they fail if the setup loses its resources).
-- [ ] 3.4 Add "Fallback order of a dialect" to `test/features/app_shell/app_shell_locale_registry_unit.feature`, with steps using `createI18nOptions` and the `ru-KZ` fixture. Verify that steps file passes.
+- [x] 3.4 Add "Fallback order of a dialect" to `test/features/app_shell/app_shell_locale_registry_unit.feature`, with steps using `createI18nOptions` and the `ru-KZ` fixture. Verify that steps file passes.
 
 ## 4. One active interface language; city names and weeks through the fallback order (FR5, FR10; design D3, D5)
 
-- [ ] 4.1 RED → GREEN: `controller/useActiveInterfaceLanguage.ts` (with `useActiveInterfaceLanguage.test.tsx`) returns `{ code, locale, cityNameLanguage }` from `i18n.resolvedLanguage ?? i18n.language` via `findRegisteredLocale` and `resolveCityNameLanguage`. Test it with a test i18next instance switched between `en` and `ru`. Export it from `controller/index.ts`.
-- [ ] 4.2 Retype the city data:
+- [x] 4.1 RED → GREEN: `controller/useActiveInterfaceLanguage.ts` (with `useActiveInterfaceLanguage.test.tsx`) returns `{ code, locale, cityNameLanguage }` from `i18n.resolvedLanguage ?? i18n.language` via `findRegisteredLocale` and `resolveCityNameLanguage`. Test it with a test i18next instance switched between `en` and `ru`. Export it from `controller/index.ts`.
+- [x] 4.2 Retype the city data:
   - `CityRecord.names` (`ports/citySearch.ts`) and `ZoneCityData.names` (`adapters/city-search/citySource.ts`) become `Record<CityNameLanguage, string>`;
   - `CitySearch.search(query, cityNameLanguage)` and `getExemplarCity(timeZoneId, cityNameLanguage)` take `CityNameLanguage`;
   - `zoneCitiesSource.ts` iterates `CITY_NAME_LANGUAGES` instead of `SUPPORTED_LANGUAGES`;
@@ -132,12 +132,12 @@ All source paths are under `packages/client/src/`. Commands run from `packages/c
   - `grep -rn "@/i18n" src/ports src/adapters` prints nothing;
   - `npx vitest run src/adapters/city-search` passes;
   - `npx vitest run src/presenter` passes.
-- [ ] 4.3 `FIRST_DAY_OF_WEEK_BY_LANGUAGE` (`constants/date.ts`) becomes `Readonly<Record<string, number>>`. `presenter/calendarMonth.ts` and `controller/useCalendarMonth.ts` read it through `pickByLanguageFallback`. Add tests to `presenter/calendarMonth.test.ts`: with the language `ru` weeks start on Monday, with `en` on Sunday. The presenter reads the value through `pickByLanguageFallback`; the dialect order is tested at that owner (task 2.5, design D5). Verify `npx vitest run src/presenter` passes.
-- [ ] 4.4 Replace the cast `(i18n.resolvedLanguage ?? i18n.language) as SupportedLanguage` with `useActiveInterfaceLanguage()` in `useCitySearch`, `useWallTimeInput`, `useExemplarCity`, `useReferenceMoment`, `useCalendarMonth`, `useLocations`, and use its `code` in `useDocumentLanguage`. `useExemplarCity` and `useCitySearch` pass `cityNameLanguage` to the search. Rename every remaining `SupportedLanguage` to `InterfaceLanguageCode` (imported from `@/locales`) in `presenter/` (production and test files), `adapters/city-search/`, `ports/`, `constants/date.ts` and `test/features/**/steps/` (task 4.2 retypes the city-name uses to `CityNameLanguage` first). Every import of `SUPPORTED_LANGUAGES`, `DEFAULT_LANGUAGE` or the language type from `@/i18n` (for example `views/viewRegistry.test.ts` and the steps under `test/features/`) moves to `@/locales`; the default `i18n` export stays in `@/i18n`. Remove the temporary re-exports from `i18n.ts`, the `SupportedLanguage` alias included. Verify, one at a time (this is the first typecheck since task 3.3):
+- [x] 4.3 `FIRST_DAY_OF_WEEK_BY_LANGUAGE` (`constants/date.ts`) becomes `Readonly<Record<string, number>>`. `presenter/calendarMonth.ts` and `controller/useCalendarMonth.ts` read it through `pickByLanguageFallback`. Add tests to `presenter/calendarMonth.test.ts`: with the language `ru` weeks start on Monday, with `en` on Sunday. The presenter reads the value through `pickByLanguageFallback`; the dialect order is tested at that owner (task 2.5, design D5). Verify `npx vitest run src/presenter` passes.
+- [x] 4.4 Replace the cast `(i18n.resolvedLanguage ?? i18n.language) as SupportedLanguage` with `useActiveInterfaceLanguage()` in `useCitySearch`, `useWallTimeInput`, `useExemplarCity`, `useReferenceMoment`, `useCalendarMonth`, `useLocations`, and use its `code` in `useDocumentLanguage`. `useExemplarCity` and `useCitySearch` pass `cityNameLanguage` to the search. Rename every remaining `SupportedLanguage` to `InterfaceLanguageCode` (imported from `@/locales`) in `presenter/` (production and test files), `adapters/city-search/`, `ports/`, `constants/date.ts` and `test/features/**/steps/` (task 4.2 retypes the city-name uses to `CityNameLanguage` first). Every import of `SUPPORTED_LANGUAGES`, `DEFAULT_LANGUAGE` or the language type from `@/i18n` (for example `views/viewRegistry.test.ts` and the steps under `test/features/`) moves to `@/locales`; the default `i18n` export stays in `@/i18n`. Remove the temporary re-exports from `i18n.ts`, the `SupportedLanguage` alias included. Verify, one at a time (this is the first typecheck since task 3.3):
   - `grep -rn "SupportedLanguage\|as SupportedLanguage\|resolvedLanguage ??" src` lists only `controller/useActiveInterfaceLanguage.ts`;
   - `pnpm --filter @time-zones/client typecheck` passes;
   - `npx vitest run src/controller` passes.
-- [ ] 4.5 Add "Language-keyed data of a dialect" to `app_shell_locale_registry_unit.feature`. Its steps build a fixture registry with `en`, `ru` and the dialect `ru-KZ` (base `ru`) and pass it as the `registry` argument (design D5): with the city search built by `createCompositeCitySearch(zoneCities)` from `virtual:zone-cities`, as `controller/useExemplarCity.test.tsx` does, `getExemplarCity("Asia/Almaty", resolveCityNameLanguage("ru-KZ", fixtureRegistry))` is «Алматы», and `pickByLanguageFallback("ru-KZ", FIRST_DAY_OF_WEEK_BY_LANGUAGE, fixtureRegistry)` is `1` (Monday first). Verify the steps file passes.
+- [x] 4.5 Add "Language-keyed data of a dialect" to `app_shell_locale_registry_unit.feature`. Its steps build a fixture registry with `en`, `ru` and the dialect `ru-KZ` (base `ru`) and pass it as the `registry` argument (design D5): with the city search built by `createCompositeCitySearch(zoneCities)` from `virtual:zone-cities`, as `controller/useExemplarCity.test.tsx` does, `getExemplarCity("Asia/Almaty", resolveCityNameLanguage("ru-KZ", fixtureRegistry))` is «Алматы», and `pickByLanguageFallback("ru-KZ", FIRST_DAY_OF_WEEK_BY_LANGUAGE, fixtureRegistry)` is `1` (Monday first). Verify the steps file passes.
 
 ## 5. Preferences model (FR7, FR8; design D1)
 

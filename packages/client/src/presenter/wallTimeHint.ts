@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
-import type { SupportedLanguage } from "@/i18n";
 import type { Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import { WallClockStatus } from "@/model";
 import type { HourFormat } from "@/preferences";
 import { formatWallClockTime } from "./localDateTime";
@@ -12,7 +12,7 @@ export type WallTimeHintContext = {
   shownTimeLabel: string;
   /** The row's UTC offset at the pinned instant, already presented. */
   utcOffsetLabel: string;
-  language: SupportedLanguage;
+  language: InterfaceLanguageCode;
   hourFormat: HourFormat;
   translate: TFunction;
 };

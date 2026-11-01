@@ -1,10 +1,10 @@
 import {
+  CITY_NAME_LANGUAGES,
   POPULAR_TIME_ZONE_IDS,
   REGION_DISPLAY_FALLBACK,
   REGION_DISPLAY_TYPE,
   UTC_ZONE_ID,
 } from "@/constants";
-import { SUPPORTED_LANGUAGES } from "@/i18n";
 import { canonicalizeTimeZoneId } from "@/model";
 import {
   type CityRecord,
@@ -80,7 +80,7 @@ function buildRecord(
 /** Implements FR5 of support-legacy-ios-12-safari (no texts without Intl.DisplayNames). */
 function readCountryTexts(countryCode: string): SearchableText[] {
   if (countryCode === "" || typeof Intl.DisplayNames !== "function") return [];
-  return SUPPORTED_LANGUAGES.flatMap((language) => {
+  return CITY_NAME_LANGUAGES.flatMap((language) => {
     const countryName = new Intl.DisplayNames(language, {
       type: REGION_DISPLAY_TYPE,
       fallback: REGION_DISPLAY_FALLBACK,
@@ -103,7 +103,7 @@ export function createZoneCitiesSource(
   );
   const searchableRecords = records.map((record) => ({
     record,
-    cityTexts: SUPPORTED_LANGUAGES.map((language) =>
+    cityTexts: CITY_NAME_LANGUAGES.map((language) =>
       toSearchableText(record.names[language]),
     ),
     countryTexts: readCountryTexts(record.countryCode),

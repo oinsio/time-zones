@@ -5,7 +5,6 @@ import {
   normalizeSearchText,
   splitIntoWords,
 } from "@/adapters";
-import type { SupportedLanguage } from "@/i18n";
 import { isDeviceTimeLocation, type Location } from "@/model";
 import type { CitySearch, LoadCitySearch } from "@/ports";
 import {
@@ -14,6 +13,7 @@ import {
   presentSearchResults,
 } from "@/presenter";
 import { loadCitySearchOnce, readLoadedCitySearch } from "./cityDataCache";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 
 export enum CitySearchStatus {
   LOADING = "LOADING",
@@ -31,8 +31,7 @@ export enum CitySearchStatus {
  */
 export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
   const { i18n } = useTranslation();
-  const language = (i18n.resolvedLanguage ??
-    i18n.language) as SupportedLanguage;
+  const { code: language, cityNameLanguage } = useActiveInterfaceLanguage();
   const [search, setSearch] = useState<CitySearch | undefined>(() =>
     readLoadedCitySearch(load),
   );
@@ -68,10 +67,15 @@ export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
     ): PresentedSearchResult[] => {
       if (search === undefined) return [];
       const results =
-        query.trim() === "" ? search.suggest() : search.search(query, language);
-      return presentSearchResults(results, locations, language);
+        query.trim() === ""
+          ? search.suggest()
+          : search.search(query, cityNameLanguage);
+      return presentSearchResults(results, locations, {
+        language,
+        cityNameLanguage,
+      });
     },
-    [search, language],
+    [search, language, cityNameLanguage],
   );
 
   const status =

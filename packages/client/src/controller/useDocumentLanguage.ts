@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 
 /**
  * Keeps the document title and the `<html lang>` attribute in sync with the
@@ -7,8 +8,8 @@ import { useTranslation } from "react-i18next";
  * Implements FR2 of setup-app-shell-and-pages-deploy.
  */
 export function useDocumentLanguage(): void {
-  const { t, i18n } = useTranslation();
-  const activeLanguage = i18n.resolvedLanguage ?? i18n.language;
+  const { t } = useTranslation();
+  const { code: activeLanguage } = useActiveInterfaceLanguage();
   const appTitle = t("app.title");
 
   useEffect(() => {

@@ -2,8 +2,8 @@
 
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
-import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import { getUtcOffsetMinutes, type Location } from "@/model";
 import { HourFormat } from "@/preferences";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
@@ -23,7 +23,7 @@ const present = (
   }: {
     deviceTimeZoneId: string;
     homeCity?: string;
-    language?: SupportedLanguage;
+    language?: InterfaceLanguageCode;
   },
 ) => {
   const locations = cities.map(city);

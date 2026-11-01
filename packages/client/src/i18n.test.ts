@@ -1,49 +1,49 @@
-// Verifies FR2 of setup-app-shell-and-pages-deploy: production i18next options
-// detect, resolve and remember the UI language.
+// Verifies FR7, FR9, FR10 of add-interface-language-selection: the i18next options
+// come from the locale registry; no detector decides the language.
 import i18next from "i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
-import { i18nInitOptions, LANGUAGE_STORAGE_KEY } from "@/i18n";
+import { createI18nOptions } from "@/i18n";
+import { localeRegistry, type RegisteredLocale } from "@/locales";
+import {
+  buildRegisteredLocale,
+  DIALECT_REGISTRY,
+} from "@/test/factories/localeFixtures";
 
-const createDetectedInstance = async (browserLanguages: string[]) => {
-  const [primaryBrowserLanguage] = browserLanguages;
-  vi.spyOn(navigator, "languages", "get").mockReturnValue(browserLanguages);
-  vi.spyOn(navigator, "language", "get").mockReturnValue(
-    primaryBrowserLanguage,
-  );
-  const i18nInstance = i18next.createInstance().use(LanguageDetector);
-  await i18nInstance.init(i18nInitOptions);
+const withTranslations = (
+  locale: RegisteredLocale,
+  translations: Record<string, unknown>,
+): RegisteredLocale => ({ ...locale, translations });
+
+const createInstance = async (
+  registry: readonly RegisteredLocale[],
+  language: string,
+) => {
+  const i18nInstance = i18next.createInstance();
+  await i18nInstance.init({ ...createI18nOptions(registry), lng: language });
   return i18nInstance;
 };
 
-describe("i18nInitOptions", () => {
-  beforeEach(() => {
-    localStorage.clear();
+describe("createI18nOptions", () => {
+  it("should give i18next translations without _meta", () => {
+    const { resources } = createI18nOptions(localeRegistry);
+    expect(resources?.en?.translation).not.toHaveProperty("_meta");
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  it("should support exactly the registry codes", () => {
+    expect(createI18nOptions(DIALECT_REGISTRY).supportedLngs).toEqual([
+      "en",
+      "ru",
+      "ru-KZ",
+    ]);
   });
 
-  it("should resolve a regional browser language to its base language", async () => {
-    const i18nInstance = await createDetectedInstance(["ru-RU"]);
-    expect(i18nInstance.resolvedLanguage).toBe("ru");
+  it("should keep a regional language as it is", () => {
+    expect(createI18nOptions(localeRegistry).load).toBe("currentOnly");
   });
 
-  it("should fall back to English for an unsupported browser language", async () => {
-    const i18nInstance = await createDetectedInstance(["de-DE"]);
-    expect(i18nInstance.resolvedLanguage).toBe("en");
-  });
-
-  it("should prefer the stored language over the browser language", async () => {
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, "ru");
-    const i18nInstance = await createDetectedInstance(["en-US"]);
-    expect(i18nInstance.resolvedLanguage).toBe("ru");
-  });
-
-  it("should store the chosen language under the language key", async () => {
-    const i18nInstance = await createDetectedInstance(["en-US"]);
-    await i18nInstance.changeLanguage("ru");
-    expect(localStorage.getItem("language")).toBe("ru");
+  it("should leave HTML escaping to React", () => {
+    expect(createI18nOptions(localeRegistry).interpolation?.escapeValue).toBe(
+      false,
+    );
   });
 
   it.each([
@@ -52,12 +52,37 @@ describe("i18nInitOptions", () => {
   ])(
     "should translate the app title for $language",
     async ({ language, expectedTitle }) => {
-      const i18nInstance = await createDetectedInstance([language]);
+      const i18nInstance = await createInstance(localeRegistry, language);
       expect(i18nInstance.t("app.title")).toBe(expectedTitle);
     },
   );
 
-  it("should leave HTML escaping to React", () => {
-    expect(i18nInitOptions.interpolation?.escapeValue).toBe(false);
+  it("should fall back from a dialect to its base language, then English", async () => {
+    const [english, russian, dialect] = DIALECT_REGISTRY as [
+      RegisteredLocale,
+      RegisteredLocale,
+      RegisteredLocale,
+    ];
+    const registry = [
+      withTranslations(english, { a: "en a", b: "en b", c: "en c" }),
+      withTranslations(russian, { a: "ru a", b: "ru b" }),
+      withTranslations(dialect, { a: "kz a" }),
+    ];
+    const i18nInstance = await createInstance(registry, "ru-KZ");
+    expect([
+      i18nInstance.t("a"),
+      i18nInstance.t("b"),
+      i18nInstance.t("c"),
+    ]).toEqual(["kz a", "ru b", "en c"]);
+  });
+
+  it("should fall back to English for an unlisted language", async () => {
+    const registry = [
+      withTranslations(buildRegisteredLocale("en", "English", "English"), {
+        a: "en a",
+      }),
+    ];
+    const i18nInstance = await createInstance(registry, "xx");
+    expect(i18nInstance.t("a")).toBe("en a");
   });
 });

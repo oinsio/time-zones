@@ -5,8 +5,8 @@
 
 import i18n, { type TFunction } from "i18next";
 import { describe, expect, it } from "vitest";
-import type { SupportedLanguage } from "@/i18n";
 import { fakeClock } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import { HourFormat } from "@/preferences";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
@@ -19,7 +19,7 @@ const january = fakeClock("2026-01-15T12:00:00Z").instant();
 
 const present = (
   locations: Parameters<typeof presentLocationRows>[0],
-  language: SupportedLanguage = "en",
+  language: InterfaceLanguageCode = "en",
   options: {
     instant?: typeof july;
     translate?: TFunction;

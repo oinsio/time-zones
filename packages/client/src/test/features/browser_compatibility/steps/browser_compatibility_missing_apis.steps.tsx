@@ -107,7 +107,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       When("the user searches for {string}", (_ctx, query: string) => {
         const world = { ...createSearchWorld(), citySearch: buildCitySearch() };
         runSearch(world, query);
-        presented = presentSearchResults(world.results, [], LANGUAGE);
+        presented = presentSearchResults(world.results, [], {
+          language: LANGUAGE,
+          cityNameLanguage: LANGUAGE,
+        });
       });
       Then(
         "{string} is among the presented results with an empty country name",

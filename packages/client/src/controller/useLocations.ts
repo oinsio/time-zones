@@ -1,6 +1,5 @@
 import { useContext, useMemo, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
-import type { SupportedLanguage } from "@/i18n";
 import {
   getEffectiveInstant,
   getReferenceDay,
@@ -10,6 +9,7 @@ import {
 } from "@/model";
 import { type LocationRowsContext, presentLocationRows } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
+import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 import { useExemplarCity } from "./useExemplarCity";
 import { useHourFormat } from "./useHourFormat";
 
@@ -46,9 +46,8 @@ export function useLocations() {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const { locations, deviceTimeZoneId, homeLocationId } = state;
   const hourFormat = useHourFormat();
-  const { i18n, t } = useTranslation();
-  const language = (i18n.resolvedLanguage ??
-    i18n.language) as SupportedLanguage;
+  const { t } = useTranslation();
+  const { code: language } = useActiveInterfaceLanguage();
   const deviceTimeLocation = locations.find(isDeviceTimeLocation);
   const deviceTimeCityLabel = useExemplarCity(
     deviceTimeLocation?.timeZoneId,

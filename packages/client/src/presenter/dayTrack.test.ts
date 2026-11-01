@@ -2,8 +2,8 @@
 // Verifies FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
-import type { SupportedLanguage } from "@/i18n";
 import { Temporal } from "@/lib/temporal";
+import type { InterfaceLanguageCode } from "@/locales";
 import {
   getDayPeriodStops,
   getReferenceDay,
@@ -21,7 +21,7 @@ const DAY = getReferenceDay(
 
 const present = (
   timeZoneId: string,
-  language: SupportedLanguage = "en",
+  language: InterfaceLanguageCode = "en",
   localTimeLabel = "12:30",
   localDateLabel = "Sun, Mar 8",
 ) =>
