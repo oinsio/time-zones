@@ -32,6 +32,7 @@ import {
 const { When, Then } = createBdd(test);
 
 // Verifies FR1, FR2, NFR-A1, UX1 of add-gnomish-factory-credit and FR1, UX1 of move-and-restyle-gnomish-factory-credit: the page shows the credit link.
+// Verifies FR1, NFR-A1, UX1 of keep-gnomish-factory-name-untranslated-in-credit: the Russian credit keeps the brand name.
 Then(
   "the settings page shows the link {string} to the Gnomish Factory",
   async ({ locationsWorld }, creditText: string) => {
@@ -74,6 +75,7 @@ Then("the settings page is still shown", async ({ locationsWorld }) => {
 });
 
 // Verifies FR3 of add-gnomish-factory-credit: the credit is there offline.
+// Verifies FR1 of keep-gnomish-factory-name-untranslated-in-credit.
 Then(
   "the Gnomish Factory credit is {string}",
   async ({ locationsWorld }, creditText: string) => {
@@ -171,6 +173,7 @@ When("the user presses Enter", async ({ locationsWorld }) => {
   );
 });
 
+// Verifies NFR-R1 of keep-gnomish-factory-name-untranslated-in-credit.
 // Verifies NFR-R1 of add-gnomish-factory-credit: the text is not cut off.
 Then("the credit text is shown in full", async ({ locationsWorld }) => {
   const fit = await measureCreditFit(locationsWorld.page);

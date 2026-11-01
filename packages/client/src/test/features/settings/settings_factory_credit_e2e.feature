@@ -3,7 +3,7 @@ Feature: Gnomish Factory credit on the settings page in a real browser
   As a user I see above the theme setting on the settings page that the app was built
   with the Gnomish Factory, and I can follow the link to its landing page.
 
-  @add-gnomish-factory-credit @FR1 @FR2 @NFR-A1 @UX1 @move-and-restyle-gnomish-factory-credit @FR1 @UX1
+  @add-gnomish-factory-credit @FR1 @FR2 @NFR-A1 @UX1 @move-and-restyle-gnomish-factory-credit @FR1 @UX1 @keep-gnomish-factory-name-untranslated-in-credit @FR1 @NFR-A1 @UX1
   Scenario Outline: The credit in both languages
     Given the locations interface language is <language>
     And the user opens the settings
@@ -13,7 +13,7 @@ Feature: Gnomish Factory credit on the settings page in a real browser
     Examples:
       | language | credit                             |
       | English  | Built with Gnomish Factory         |
-      | Russian  | Создано с помощью Гномской фабрики |
+      | Russian  | Создано с помощью Gnomish Factory |
 
   @add-gnomish-factory-credit @FR3 @UX3
   Scenario: Following the credit keeps the app
@@ -73,7 +73,7 @@ Feature: Gnomish Factory credit on the settings page in a real browser
     And the user presses Enter
     Then a new tab opens at the Gnomish Factory landing page
 
-  @add-gnomish-factory-credit @NFR-R1 @move-and-restyle-gnomish-factory-credit @NFR-R1
+  @add-gnomish-factory-credit @NFR-R1 @move-and-restyle-gnomish-factory-credit @NFR-R1 @keep-gnomish-factory-name-untranslated-in-credit @NFR-R1
   Scenario Outline: The full credit at <width> px in <language>
     Given the screen is <width> px wide for the locations
     And the locations interface language is <language>
