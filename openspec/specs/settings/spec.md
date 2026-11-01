@@ -210,7 +210,7 @@ A change of the preferences, the interface language included, in one tab SHALL b
 - **THEN** the second tab is in Russian without a reload
 
 ### Requirement: Settings strings are localized
-Every string of the settings button, the settings page, its options, its notes, its Reset action, its Gnomish Factory credit and its language group SHALL exist in every locale file, and Russian MUST use the glossary names: «Настройки», «Тема», «Светлая», «Тёмная», «Системная», «Формат времени», «12 часов», «24 часа», «Язык», «Создано с помощью Гномской фабрики». The language button's accessible name is "Language: <native name>" («Язык: <native name>»), the search field label "Search languages" («Поиск языка») and the empty search text "No languages found" («Языки не найдены»). Language names in the list are never translated. <!-- implements FR16 of add-settings-page-and-device-time-location; implements FR2 of add-gnomish-factory-credit; implements FR13, UX1 of add-interface-language-selection -->
+Every string of the settings button, the settings page, its options, its notes, its Reset action, its Gnomish Factory credit and its language group SHALL exist in every locale file, and Russian MUST use the glossary names: «Настройки», «Тема», «Светлая», «Тёмная», «Системная», «Формат времени», «12 часов», «24 часа», «Создано с помощью Gnomish Factory». The name of the Gnomish Factory is a brand name: in the credit of every interface language, English, Russian and any language added later, it MUST read exactly `Gnomish Factory`, in Latin letters, and MUST NOT be translated or transliterated into the interface language. The language button's accessible name is "Language: <native name>" («Язык: <native name>»), the search field label "Search languages" («Поиск языка») and the empty search text "No languages found" («Языки не найдены»). Language names in the list are never translated. <!-- implements FR16 of add-settings-page-and-device-time-location; implements FR2 of add-gnomish-factory-credit; implements FR1, FR2 of keep-gnomish-factory-name-untranslated-in-credit; implements FR13, UX1 of add-interface-language-selection -->
 
 #### Scenario: Both languages
 - **WHEN** the settings page is shown in `<language>`
@@ -220,7 +220,12 @@ Every string of the settings button, the settings page, its options, its notes, 
 | language | heading | theme | hour format | language group | credit |
 |---|---|---|---|---|---|
 | English | Settings | Theme | Hour format | Language | Built with Gnomish Factory |
-| Russian | Настройки | Тема | Формат времени | Язык | Создано с помощью Гномской фабрики |
+| Russian | Настройки | Тема | Формат времени | Язык | Создано с помощью Gnomish Factory |
+
+#### Scenario: The factory name is never translated
+- **GIVEN** the app supports the interface languages English and Russian, and any language added later
+- **WHEN** the credit is read in each supported interface language
+- **THEN** each credit contains `Gnomish Factory`, written exactly as in English
 
 ### Requirement: Settings in every view
 Opening the settings and switching the theme and the hour format are part of the view contract (ADR-0002). For every registered view, the user MUST be able to open the settings from the main page, change both preferences, and return to the view showing the changed hour format. <!-- implements FR17 of add-settings-page-and-device-time-location -->
@@ -307,7 +312,7 @@ Presenting the location rows again with unchanged preferences and an unchanged i
 - **THEN** at most one formatter per time zone and label kind in use is built
 
 ### Requirement: Gnomish Factory credit
-The settings page SHALL show the Gnomish Factory credit as the line directly above the theme group, on every width: below the page header with the back button and the "Settings" heading, below any settings note (the unreadable-settings note with its Reset action, the save-failed note), and with nothing between the credit and the theme group. The credit MUST NOT be part of the page header. The credit MUST be one link whose text is the whole credit: "Built with Gnomish Factory" in English and «Создано с помощью Гномской фабрики» in Russian, following the interface language. The link's address MUST be `https://oinsio.github.io/gnomish-factory/`. Activating it MUST open that page in a new browsing context (a new tab, or the system browser for the installed app) that gets no reference to the app's window, and the app's own tab MUST keep the settings page with its locations, reference moment and preferences unchanged. The app MUST NOT request the landing page itself, so the settings page works the same offline. Inputs: the interface language, the settings notes shown, activation of the link. Output: the credit line; a new tab at the landing page. Errors: none; offline, the new tab shows the browser's own offline page and the app tab is unaffected. <!-- implements FR1, FR2, FR3, UX1, UX3 of add-gnomish-factory-credit; implements FR1, UX1 of move-and-restyle-gnomish-factory-credit -->
+The settings page SHALL show the Gnomish Factory credit as the line directly above the theme group, on every width: below the page header with the back button and the "Settings" heading, below any settings note (the unreadable-settings note with its Reset action, the save-failed note), and with nothing between the credit and the theme group. The credit MUST NOT be part of the page header. The credit MUST be one link whose text is the whole credit: "Built with Gnomish Factory" in English and «Создано с помощью Gnomish Factory» in Russian, following the interface language; in every language the factory name stays `Gnomish Factory`, untranslated. The link's address MUST be `https://oinsio.github.io/gnomish-factory/`. Activating it MUST open that page in a new browsing context (a new tab, or the system browser for the installed app) that gets no reference to the app's window, and the app's own tab MUST keep the settings page with its locations, reference moment and preferences unchanged. The app MUST NOT request the landing page itself, so the settings page works the same offline. Inputs: the interface language, the settings notes shown, activation of the link. Output: the credit line; a new tab at the landing page. Errors: none; offline, the new tab shows the browser's own offline page and the app tab is unaffected. <!-- implements FR1, FR2, FR3, UX1, UX3 of add-gnomish-factory-credit; implements FR1, UX1 of move-and-restyle-gnomish-factory-credit; implements FR1 of keep-gnomish-factory-name-untranslated-in-credit -->
 
 The credit MUST use the app's design tokens in the light and the dark theme: the Manrope font, an underline, and at rest, on hover and on keyboard focus the same colour as the icons of the theme options (the accent colour of the active theme). Its font size MUST be 15–20 % larger than 14 px, that is between 16.1 px and 16.8 px at the default root font size of 16 px, so the credit text is larger than the group legends and smaller than the "Settings" heading. It MUST follow the active theme, also when the theme changes while the settings page is open, and MUST NOT introduce a colour the tokens do not define. <!-- implements FR4, UX2 of add-gnomish-factory-credit; implements FR2, FR3, UX1, UX2 of move-and-restyle-gnomish-factory-credit -->
 
@@ -322,7 +327,7 @@ The credit MUST be exposed as a link named exactly by its visible text. It MUST 
 | language | credit |
 |---|---|
 | English | Built with Gnomish Factory |
-| Russian | Создано с помощью Гномской фабрики |
+| Russian | Создано с помощью Gnomish Factory |
 
 #### Scenario: The credit below a settings note
 - **GIVEN** the stored preferences document is not valid JSON
