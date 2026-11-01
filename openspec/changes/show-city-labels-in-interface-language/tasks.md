@@ -46,7 +46,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
 ## 5. Unit BDD (FR1–FR5, NFR-P1, UX1, UX2)
 
-- [ ] 5.1 Create `test/features/locations/locations_city_label_language_unit.feature` ("Implements change show-city-labels-in-interface-language."). It holds the scenarios of the spec requirement "City label in the interface language" that assert visible text and storage:
+- [x] 5.1 Create `test/features/locations/locations_city_label_language_unit.feature` ("Implements change show-city-labels-in-interface-language."). It holds the scenarios of the spec requirement "City label in the interface language" that assert visible text and storage:
   - "Added in Russian, shown in English" and "Added in English, shown in Russian" (`@FR1 @FR2 @UX2`);
   - "A switch keeps the stored list" (`@FR2`);
   - "Stored label until the data is loaded" (`@FR4 @UX1`) and "Loading fails" (`@FR4`);
