@@ -122,6 +122,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             start,
             end: start.add({ minutes: dayLengthMinutes }),
             lengthMinutes: dayLengthMinutes,
+            clockChangeWindow: { start, end: start },
           },
         );
       });

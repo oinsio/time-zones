@@ -4,12 +4,14 @@ import type { InterfaceLanguageCode } from "@/locales";
 import {
   getLocalDateTime,
   getOffsetDifferenceMinutes,
+  getRowNote,
   getUtcOffsetMinutes,
   type ReferenceDay,
+  RowNoteKind,
   type WallClockNote,
-  WallClockNotePlacement,
 } from "@/model";
 import type { HourFormat } from "@/preferences";
+import { presentClockChangeNote } from "./clockChangeNote";
 import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
 import { formatLocalDate, formatLocalTime } from "./localDateTime";
 import { formatOffsetDifference } from "./offsetDifference";
@@ -52,6 +54,8 @@ export type PresentedZoneMoment = {
   wallTimeInputLabel: string;
   /** The wall-time hint of this row; `undefined` when the row has none. */
   wallTimeHint?: string;
+  /** The clock change note of this row; `undefined` when the row has none or shows a wall-time hint. */
+  clockChangeNote?: string;
 };
 
 /**
@@ -61,6 +65,8 @@ export type PresentedZoneMoment = {
  * from `presentLocationRows`.
  * Implements FR7, NFR-A2 of add-wall-time-input-with-hint (D7): the time button name, the wall-time hint
  * and the row note.
+ * Implements FR2, FR6 of show-clock-change-note-on-location-cards (D4, D5): the clock change note
+ * and the one row note.
  */
 export function presentZoneMoment(
   subject: { id: string; timeZoneId: string; cityLabel: string },
@@ -98,7 +104,13 @@ export function presentZoneMoment(
     offsetMinutes === undefined
       ? ""
       : formatUtcOffset(offsetMinutes, translate("locations.utcOffsetPrefix"));
-  const hintNote = findRowNoteOf(wallClockNote, subject.id);
+  const rowNote = getRowNote({
+    wallClockNote,
+    locationId: subject.id,
+    timeZoneId: subject.timeZoneId,
+    window: referenceDay.clockChangeWindow,
+    instant,
+  });
   return {
     utcOffsetLabel,
     offsetDifferenceLabel: difference?.label ?? "",
@@ -123,31 +135,26 @@ export function presentZoneMoment(
       time: localTimeLabel,
     }),
     wallTimeHint:
-      hintNote === undefined
-        ? undefined
-        : presentWallTimeHint({
-            status: hintNote.status,
-            requestedWallTime: hintNote.requestedWallTime,
+      rowNote.kind === RowNoteKind.WALL_TIME_HINT
+        ? presentWallTimeHint({
+            status: rowNote.wallClockNote.status,
+            requestedWallTime: rowNote.wallClockNote.requestedWallTime,
             shownTimeLabel: localTimeLabel,
             utcOffsetLabel,
             language,
             hourFormat,
             translate,
-          }),
+          })
+        : undefined,
+    clockChangeNote:
+      rowNote.kind === RowNoteKind.CLOCK_CHANGE_NOTE
+        ? presentClockChangeNote({
+            clockChange: rowNote.clockChange,
+            tense: rowNote.tense,
+            language,
+            hourFormat,
+            translate,
+          })
+        : undefined,
   };
-}
-
-type RowNote = Extract<
-  WallClockNote,
-  { placement: WallClockNotePlacement.ROW }
->;
-
-/** The note when it is a row note about this subject: a location by id. */
-function findRowNoteOf(
-  note: WallClockNote | undefined,
-  subjectId: string | undefined,
-): RowNote | undefined {
-  if (note?.placement !== WallClockNotePlacement.ROW) return undefined;
-  const isAboutSubject = subjectId === note.target.locationId;
-  return isAboutSubject ? note : undefined;
 }

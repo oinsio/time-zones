@@ -1,3 +1,4 @@
+// Verifies FR5, FR6 of show-clock-change-note-on-location-cards (D4, D5).
 // Verifies FR7, NFR-A2 of add-wall-time-input-with-hint (D4).
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
@@ -121,5 +122,53 @@ describe("the wall-time hint", () => {
   ] as const)("is absent for %s", (_name, note) => {
     const [row] = presentLocationRows([NEW_YORK], contextOf("en", note));
     expect(row?.wallTimeHint).toBeUndefined();
+  });
+});
+
+describe("the clock change note", () => {
+  it("shows on a row whose zone changes its offset in the window", () => {
+    const rows = presentLocationRows([MOSCOW, NEW_YORK], contextOf("en"));
+    expect(rows.map((row) => row.clockChangeNote)).toEqual([
+      undefined,
+      "On Mar 8 at 02:00 clocks went forward 1 h",
+    ]);
+  });
+
+  it("is replaced by the wall-time hint in the row of the hint", () => {
+    const [row] = presentLocationRows([NEW_YORK], contextOf("en", newYorkGap));
+    expect(row?.clockChangeNote).toBeUndefined();
+    expect(row?.wallTimeHint).toContain("02:30 does not exist");
+  });
+
+  it("stays in the other rows next to a hint", () => {
+    const chicago = {
+      ...NEW_YORK,
+      id: "America/Chicago|Chicago",
+      timeZoneId: "America/Chicago",
+      label: "Chicago",
+    };
+    const rows = presentLocationRows(
+      [NEW_YORK, chicago],
+      contextOf("en", newYorkGap),
+    );
+    expect(rows[0]?.clockChangeNote).toBeUndefined();
+    expect(rows[1]?.clockChangeNote).toBe(
+      "On Mar 8 at 02:00 clocks will go forward 1 h",
+    );
+    expect(rows[1]?.wallTimeHint).toBeUndefined();
+  });
+
+  it("shows on the device time location", () => {
+    const [row] = presentLocationRows(
+      [buildDeviceTimeLocation("America/New_York")],
+      {
+        ...contextOf("en"),
+        deviceTimeZoneId: "America/New_York",
+        referenceDay: buildReferenceDay(instant, "America/New_York"),
+      },
+    );
+    expect(row?.clockChangeNote).toBe(
+      "On Mar 8 at 02:00 clocks went forward 1 h",
+    );
   });
 });

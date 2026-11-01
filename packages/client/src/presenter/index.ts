@@ -11,6 +11,7 @@ export {
   presentCalendarMonth,
   resolveFirstDayOfWeek,
 } from "./calendarMonth";
+export { presentClockChangeNote } from "./clockChangeNote";
 export {
   type DateBarGap,
   type PresentedDateBar,

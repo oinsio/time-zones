@@ -1,4 +1,7 @@
-import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
+import type {
+  FeatureDescriibeCallbackParams,
+  StepTest,
+} from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { MAX_SEARCH_RESULTS, POPULAR_TIME_ZONE_IDS } from "@/constants";
@@ -19,12 +22,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Object.assign(world, createSearchWorld());
   });
 
-  const whenUserSearches = ({ When }: { When: Function }) =>
+  const whenUserSearches = ({ When }: Pick<StepTest, "When">) =>
     When("the user searches for {string}", (_ctx: unknown, query: string) =>
       runSearch(world, query),
     );
 
-  const thenSuggestionsAreShown = ({ Then }: { Then: Function }) =>
+  const thenSuggestionsAreShown = ({ Then }: Pick<StepTest, "Then">) =>
     Then("popular locations are shown as suggestions", () => {
       expect(zoneIdsOf(world)).toEqual(POPULAR_TIME_ZONE_IDS);
     });

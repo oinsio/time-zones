@@ -1,4 +1,5 @@
 import {
+  CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
   HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT,
   LOCAL_DATE_FORMAT_OPTIONS,
   LOCAL_TIME_FORMAT_OPTIONS_BY_HOUR_FORMAT,
@@ -10,6 +11,7 @@ export enum DateTimeLabelKind {
   LOCAL_TIME = "localTime",
   LOCAL_DATE = "localDate",
   HOUR = "hour",
+  DAY_AND_MONTH = "dayAndMonth",
 }
 
 const FORMAT_OPTIONS_BY_KIND_AND_HOUR_FORMAT: Record<
@@ -22,6 +24,10 @@ const FORMAT_OPTIONS_BY_KIND_AND_HOUR_FORMAT: Record<
     [HourFormat.H12]: LOCAL_DATE_FORMAT_OPTIONS,
   },
   [DateTimeLabelKind.HOUR]: HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT,
+  [DateTimeLabelKind.DAY_AND_MONTH]: {
+    [HourFormat.H24]: CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
+    [HourFormat.H12]: CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
+  },
 };
 
 // Stryker disable next-line StringLiteral: equivalent — no language, zone and kind combine to the same joined text
@@ -32,7 +38,7 @@ const formattersByKey = new Map<string, Intl.DateTimeFormat>();
 /**
  * One cached formatter per language, zone, label kind and hour format.
  * Building a formatter is the costliest step of presenting a row, so every
- * label shares them. The date label has no hour, so it ignores the hour format.
+ * label shares them. The date labels have no hour, so it ignores the hour format.
  * Implements FR1, FR2, FR5 of replace-wall-clock-row-budgets-with-deterministic-checks (D1).
  * Implements FR5, NFR-P1 of add-settings-page-and-device-time-location (D8).
  */
@@ -42,8 +48,10 @@ export function getDateTimeFormatter(
   kind: DateTimeLabelKind,
   hourFormat: HourFormat,
 ): Intl.DateTimeFormat {
-  const keyedHourFormat =
-    kind === DateTimeLabelKind.LOCAL_DATE ? HourFormat.H24 : hourFormat;
+  const isHourless =
+    kind === DateTimeLabelKind.LOCAL_DATE ||
+    kind === DateTimeLabelKind.DAY_AND_MONTH;
+  const keyedHourFormat = isHourless ? HourFormat.H24 : hourFormat;
   const cacheKey = [language, timeZoneId, kind, keyedHourFormat].join(
     CACHE_KEY_SEPARATOR,
   );

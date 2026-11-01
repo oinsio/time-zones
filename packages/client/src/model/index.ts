@@ -11,6 +11,14 @@ export {
   getCalendarWeeks,
 } from "./calendar";
 export {
+  type ClockChange,
+  ClockChangeDirection,
+  ClockChangeTense,
+  findNearestClockChange,
+  getClockChanges,
+  type NearestClockChange,
+} from "./clockChange";
+export {
   assembleDayPeriodStops,
   type DayPeriodStop,
   getDayPeriodStops,
@@ -29,6 +37,7 @@ export {
   type OffsetEdge,
 } from "./dayPeriodWindows";
 export {
+  type ClockChangeWindow,
   getInstantAfterTrackMove,
   getInstantAtTrackFraction,
   getReferenceDay,
@@ -81,6 +90,12 @@ export {
   type WallTimeTarget,
   WallTimeTargetKind,
 } from "./referenceMoment";
+export {
+  getRowNote,
+  type RowNote,
+  RowNoteKind,
+  type RowWallClockNote,
+} from "./rowNote";
 export { createStore, type ReduceResult, type Store } from "./store";
 export { canonicalizeTimeZoneId } from "./timeZoneId";
 // Implements FR2, FR6 of show-utc-offset-on-location-rows.

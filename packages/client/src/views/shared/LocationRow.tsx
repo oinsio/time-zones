@@ -12,10 +12,12 @@ import {
   LocationMarkKind,
   type LocationRow as LocationRowModel,
 } from "@/presenter";
+import { ClockChangeNote } from "./ClockChangeNote";
 import { DragHandle } from "./DragHandle";
 import { LocationMenu, type LocationMenuItem } from "./LocationMenu";
 import { getReorderTransition } from "./reorderTransition";
 import { useDropSettleAnimation } from "./useDropSettleAnimation";
+
 import { WallTimeHint } from "./WallTimeHint";
 import { ZoneRowContent } from "./ZoneRowContent";
 
@@ -60,6 +62,8 @@ type LocationRowProps = {
  * Implements FR1, FR7 of add-wall-time-input-with-hint (D6): binds the location target.
  * Implements FR1, NFR-A2, UX1 of fix-location-card-and-header-layout (D1): the
  * wall-time hint is the last child of the card.
+ * Implements FR2, NFR-A1, UX1 of show-clock-change-note-on-location-cards (D6): the
+ * clock change note takes the same place when the row has no hint.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -183,6 +187,9 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
         />
         {row.wallTimeHint !== undefined && (
           <WallTimeHint text={row.wallTimeHint} />
+        )}
+        {row.clockChangeNote !== undefined && (
+          <ClockChangeNote text={row.clockChangeNote} />
         )}
       </li>
     );

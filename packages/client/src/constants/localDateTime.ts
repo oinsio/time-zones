@@ -39,3 +39,12 @@ export const HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT: Record<
   [HourFormat.H24]: HOUR_LABEL_FORMAT_OPTIONS,
   [HourFormat.H12]: { hour: "numeric", hourCycle: "h12" },
 };
+
+/**
+ * Day and short month of the clock change note ("25 окт.", "Oct 25").
+ * Implements FR2 of show-clock-change-note-on-location-cards (D5).
+ */
+export const CLOCK_CHANGE_DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "short",
+};

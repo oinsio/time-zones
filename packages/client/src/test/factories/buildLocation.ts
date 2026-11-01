@@ -29,5 +29,9 @@ export const KNOWN_CITIES: Record<
   Tokyo: { timeZoneId: "Asia/Tokyo", countryCode: "JP" },
   Kathmandu: { timeZoneId: "Asia/Kathmandu", countryCode: "NP" },
   Apia: { timeZoneId: "Pacific/Apia", countryCode: "WS" },
+  Belgrade: { timeZoneId: "Europe/Belgrade", countryCode: "RS" },
+  "Lord Howe Island": { timeZoneId: "Australia/Lord_Howe", countryCode: "AU" },
+  "Boa Vista": { timeZoneId: "America/Boa_Vista", countryCode: "BR" },
+  Chicago: { timeZoneId: "America/Chicago", countryCode: "US" },
   UTC: { timeZoneId: "UTC", countryCode: "" },
 };

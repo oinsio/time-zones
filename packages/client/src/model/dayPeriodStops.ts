@@ -1,5 +1,9 @@
-import { MILLISECONDS_PER_MINUTE } from "@/constants";
-import type { Temporal } from "@/lib/temporal";
+import {
+  MILLISECONDS_PER_MINUTE,
+  OFFSET_CHANGE_MARGIN_HOURS,
+} from "@/constants";
+import { Temporal } from "@/lib/temporal";
+import { getClockChanges } from "./clockChange";
 import {
   DAY_PERIOD_SCHEDULE,
   type DayPeriod,
@@ -9,7 +13,6 @@ import {
   type BlendWindow,
   collectBlendWindows,
   collectOffsetEdges,
-  findOffsetTransitions,
   type OffsetEdge,
 } from "./dayPeriodWindows";
 import type { ReferenceDay } from "./dayTrack";
@@ -50,6 +53,28 @@ export function assembleDayPeriodStops(
   return stops.sort((first, second) => first.fraction - second.fraction);
 }
 
+/**
+ * The offset changes from just before the day to just after it, taken from the
+ * clock changes of the day's window, so one search serves the note and the
+ * colours.
+ * Implements FR2, NFR-P1 of show-clock-change-note-on-location-cards (D2).
+ */
+function getClockChangesAround(
+  timeZoneId: string,
+  day: ReferenceDay,
+): Temporal.Instant[] {
+  const margin = { hours: OFFSET_CHANGE_MARGIN_HOURS };
+  const from = day.start.subtract(margin);
+  const until = day.end.add(margin);
+  return getClockChanges(timeZoneId, day.clockChangeWindow)
+    .map((clockChange) => clockChange.instant)
+    .filter(
+      (instant) =>
+        Temporal.Instant.compare(instant, from) >= 0 &&
+        Temporal.Instant.compare(instant, until) < 0,
+    );
+}
+
 let cachedDayKey: string | undefined;
 let cachedStopsByZone = new Map<string, readonly DayPeriodStop[]>();
 
@@ -69,7 +94,7 @@ export function getDayPeriodStops(
     ? cachedStopsByZone.get(timeZoneId)
     : undefined;
   if (cached !== undefined) return cached;
-  const transitions = findOffsetTransitions(timeZoneId, day);
+  const transitions = getClockChangesAround(timeZoneId, day);
   const stops = assembleDayPeriodStops(
     collectBlendWindows(timeZoneId, day, schedule, transitions),
     collectOffsetEdges(timeZoneId, day, schedule, transitions),

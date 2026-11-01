@@ -1,4 +1,7 @@
-import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
+import type {
+  FeatureDescriibeCallbackParams,
+  StepTest,
+} from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { SearchMatchKind } from "@/ports";
@@ -24,7 +27,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     restoreDisplayNames = () => undefined;
   });
 
-  const givenNoCountryNames = ({ Given }: { Given: Function }) =>
+  const givenNoCountryNames = ({ Given }: Pick<StepTest, "Given">) =>
     Given("the environment has no country names", () => {
       const nativeDisplayNames = Intl.DisplayNames;
       Object.defineProperty(Intl, "DisplayNames", {
@@ -42,7 +45,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       world.citySearch = buildCitySearch();
     });
 
-  const whenUserSearches = ({ When }: { When: Function }) =>
+  const whenUserSearches = ({ When }: Pick<StepTest, "When">) =>
     When("the user searches for {string}", (_ctx: unknown, query: string) =>
       runSearch(world, query),
     );

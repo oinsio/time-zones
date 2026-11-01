@@ -61,3 +61,21 @@ export function formatWallClockTime(
     hourFormat,
   ).format(minutesSinceMidnight * MILLISECONDS_PER_MINUTE);
 }
+
+/**
+ * A plain date as day and short month in the interface language ("Oct 25").
+ * It is not an instant, so it is read as UTC midnight through the cached UTC
+ * formatter; no zone is looked up and no formatter is built per call.
+ * Implements FR2, NFR-P1 of show-clock-change-note-on-location-cards (D5).
+ */
+export function formatWallClockDate(
+  date: Temporal.PlainDate,
+  language: InterfaceLanguageCode,
+): string {
+  return getDateTimeFormatter(
+    language,
+    UTC_ZONE_ID,
+    DateTimeLabelKind.DAY_AND_MONTH,
+    HourFormat.H24,
+  ).format(date.toZonedDateTime(UTC_ZONE_ID).epochMilliseconds);
+}
