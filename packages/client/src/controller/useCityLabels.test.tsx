@@ -79,6 +79,29 @@ describe("useCityLabels", () => {
     expect(result.current?.get(moscow.id)).toBe("Москва");
   });
 
+  it("should use data a later load filled after the first load failed", async () => {
+    // FR1: the search's retry fills the cache the labels read on the next render
+    const load: LoadCitySearch = vi
+      .fn<LoadCitySearch>()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(search);
+    const { result } = renderHook(() => useCityLabels([tokyoInRussian], load));
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(1));
+    await act(async () => undefined);
+    await act(async () => {
+      await loadCitySearchOnce(load);
+    });
+
+    await act(async () => {
+      await i18n.changeLanguage("ru");
+    });
+    await act(async () => {
+      await i18n.changeLanguage("en");
+    });
+
+    expect(result.current?.get(tokyoInRussian.id)).toBe("Tokyo");
+  });
+
   it("should keep no labels and load once when the load fails, also after the list changes", async () => {
     const deferred = createDeferredLoader();
     const { result, rerender } = renderHook(

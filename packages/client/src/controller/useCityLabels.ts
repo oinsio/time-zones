@@ -31,19 +31,21 @@ export function useCityLabels(
     loadCitySearchOnce(load).then(setLoadedSearch, () => undefined);
   }, [hasCityLocation, load]);
 
+  const availableSearch = loadedSearch ?? readLoadedCitySearch(load);
+
   return useMemo(() => {
-    if (loadedSearch === undefined) return undefined;
+    if (availableSearch === undefined) return undefined;
     return new Map(
       locations
         .filter(isCityLocation)
         .map((location) => [
           location.id,
-          loadedSearch.getCityLabel(
+          availableSearch.getCityLabel(
             location.timeZoneId,
             location.label,
             cityNameLanguage,
           ),
         ]),
     );
-  }, [locations, cityNameLanguage, loadedSearch]);
+  }, [locations, cityNameLanguage, availableSearch]);
 }
