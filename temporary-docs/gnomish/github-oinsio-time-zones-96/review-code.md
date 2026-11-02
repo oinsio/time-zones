@@ -121,7 +121,8 @@ No file is below 90 %, and no survivor sits on a line this branch changed.
 - Impact: the app starts with a failed load (first launch offline before the service worker cached the file, or a network error). The user later opens the search and it loads the data. Then they switch the interface language. Every listed city keeps its stored label: Tokyo added in Russian still reads «Токио» in English. That is the reported bug, for the rest of the session, even though the data is in memory. The device time location in the same list does change language, so the screen mixes languages.
 - Fix: in `useCityLabels`, compute `const availableSearch = loadedSearch ?? readLoadedCitySearch(load);` and build the map from `availableSearch` in the `useMemo`, with deps `[locations, cityNameLanguage, availableSearch]`. This is the pattern `useExemplarCity` already uses. Add a case to `controller/useCityLabels.test.tsx`: the loader rejects once, then `loadCitySearchOnce(load)` succeeds (as the search's retry does), and after a re-render with a language switch the map holds "Tokyo" for the Russian-stored Tokyo.
 - Fix risk: low. `readLoadedCitySearch` returns the same instance on every call, so the memo stays stable on minute ticks and NFR-P1 (0 lookups on a tick) still holds. The rows pick up the data on the next re-render of `useLocations` (a list change, a language switch or a minute tick), not at the moment the search finishes loading. This matches `useExemplarCity` and is enough for the switch scenario.
-- Status: open
+- Status: fixed
+- Resolution: useCityLabels now falls back to readLoadedCitySearch(load) like useExemplarCity; covered by useCityLabels.test.tsx "should use data a later load filled after the first load failed" (red before the fix).
 
 ### R2 — WARNING — Task 3.4 is ticked but `useCityLabels` is not exported from `controller/index.ts`
 - Location: `packages/client/src/controller/index.ts:1-34`
@@ -130,7 +131,8 @@ No file is below 90 %, and no survivor sits on a line this branch changed.
 - Impact: the task record claims work that was not done, so the change cannot be archived as fully implemented. Any later consumer outside `controller/` would have to import from the module's internals, which breaks the "imports only through `index.ts`" invariant (`process-invariants.md`). Today nothing breaks at runtime.
 - Fix: add `export { useCityLabels } from "./useCityLabels";` to `packages/client/src/controller/index.ts`, in alphabetical order after the `useCalendarMonth` export.
 - Fix risk: none functionally. It adds a public export that no code outside the module uses yet. The sibling `useExemplarCity` is not exported either, so the export makes the module a little less uniform.
-- Status: open
+- Status: fixed
+- Resolution: added the useCityLabels export to controller/index.ts after useCalendarMonth, so task 3.4 is true.
 
 ### R3 — SUGGESTION — "A label the data does not know" passes before the zone cities data has loaded
 - Location: `packages/client/src/test/features/locations/locations_city_label_language_unit.feature:64-69` and `packages/client/src/test/features/locations/steps/locations_city_label_language_unit.steps.tsx:160-166`
@@ -139,7 +141,8 @@ No file is below 90 %, and no survivor sits on a line this branch changed.
 - Impact: at the row level the scenario cannot catch a regression where an unknown label is replaced after the load (for example `getCityLabel` returning `record.names[language]` without the `isCityNameOfRecord` check). Only the adapter contract case `Edo` → `Edo` catches it today, and the executable spec does not prove what it claims.
 - Fix: make the scenario follow the spec. Use `And the zone cities data has not been loaded` (`world.givenData(DataMode.HELD)`), then `When the user opens the app` and `And the zone cities data finishes loading` (`world.whenDataFinishesLoading`, already used by "Stored label until the data is loaded"), then `Then the row reads "Edo"`. Change the feature and steps file together, keeping the scenario name.
 - Fix risk: none. Both steps already exist in the same steps file and world. The steps file is already 224 lines, and this adds about 4 more.
-- Status: open
+- Status: fixed
+- Resolution: the scenario now holds the data, opens the app and finishes loading before the row check; feature and steps changed together, 59 steps tests pass.
 
 ## Verdict
 
