@@ -63,9 +63,10 @@ Feature: City label in the interface language
   @show-city-labels-in-interface-language @FR1
   Scenario: A label the data does not know
     Given the interface language is "ru"
-    And the zone cities data is loaded
+    And the zone cities data has not been loaded
     And the list is "Edo"
     When the user opens the app
+    And the zone cities data finishes loading
     Then the row reads "Edo"
 
   @show-city-labels-in-interface-language @FR1

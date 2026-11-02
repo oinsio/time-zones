@@ -159,9 +159,16 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   // @show-city-labels-in-interface-language @FR1
   f.Scenario("A label the data does not know", ({ Given, And, When, Then }) => {
     Given("the interface language is {string}", world.givenLanguage);
-    And("the zone cities data is loaded", world.givenData(DataMode.LOADED));
+    And(
+      "the zone cities data has not been loaded",
+      world.givenData(DataMode.HELD),
+    );
     And("the list is {string}", world.givenList);
     When("the user opens the app", world.openApp);
+    And(
+      "the zone cities data finishes loading",
+      world.whenDataFinishesLoading,
+    );
     Then("the row reads {string}", expectRowReads);
   });
 
