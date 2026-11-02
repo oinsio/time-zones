@@ -165,10 +165,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     And("the list is {string}", world.givenList);
     When("the user opens the app", world.openApp);
-    And(
-      "the zone cities data finishes loading",
-      world.whenDataFinishesLoading,
-    );
+    And("the zone cities data finishes loading", world.whenDataFinishesLoading);
     Then("the row reads {string}", expectRowReads);
   });
 
