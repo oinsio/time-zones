@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { listRow } from "../../locations/steps/locationsE2eHelpers";
+import { englishLocale } from "../../main_page/steps/englishTexts";
 
 export const ENGLISH_SLIDER_NAME_PREFIX = "Time in ";
 export const SLIDER_ROLE = "slider";
@@ -11,6 +12,23 @@ const TIME_TEXT_XPATH = "xpath=preceding-sibling::button";
 const PERCENT = 100;
 export const DRAG_STEPS = 10;
 export const HALF = 2;
+
+const OFFLINE_NOTICE_WAIT_MS = 1500;
+
+/**
+ * Settles the service worker and dismisses the "ready to work offline" notice,
+ * which sits over the bottom of the screen where a mouse drag would start.
+ * Implements FR4 of show-city-labels-in-interface-language: the city data request at load shifts when the notice appears.
+ */
+export async function dismissOfflineReadyNotice(page: Page) {
+  await page.evaluate(() => navigator.serviceWorker?.ready.then(() => null));
+  const dismissButton = page.getByRole("button", {
+    name: englishLocale.app.dismiss,
+  });
+  await dismissButton
+    .click({ timeout: OFFLINE_NOTICE_WAIT_MS })
+    .catch(() => undefined);
+}
 
 export type Box = { x: number; y: number; width: number; height: number };
 

@@ -110,14 +110,15 @@ export async function enterLocationsState(
       await expect(page.getByText(STORAGE_WARNING_TEXT)).toBeVisible();
       break;
     case WorldClockState.SEARCH_LOADING:
-      await storeDeviceCity(world);
+      // The data route is set first: the city labels of the stored list request the data at load (FR4 of show-city-labels-in-interface-language).
       await world.holdSearchData();
+      await storeDeviceCity(world);
       await openSearch(page);
       await expect(page.getByText(SEARCH_LOADING_TEXT)).toBeVisible();
       break;
     case WorldClockState.SEARCH_ERROR:
-      await storeDeviceCity(world);
       await world.failSearchData();
+      await storeDeviceCity(world);
       await openSearch(page);
       await expect(page.getByText(SEARCH_LOAD_ERROR_TEXT)).toBeVisible();
       break;

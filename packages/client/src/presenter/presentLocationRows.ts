@@ -42,6 +42,7 @@ export type LocationRow = PresentedZoneMoment & {
  * Implements FR5, FR6, FR7 of set-home-location-and-show-differences (D3-D5).
  * Implements FR7, NFR-A2 of add-wall-time-input-with-hint (D7): passes `cityLabel` to the zone part.
  * Implements FR8, UX3 of add-settings-page-and-device-time-location (D4).
+ * Implements FR1, FR3 of show-city-labels-in-interface-language (D4).
  */
 export function presentLocationRows(
   locations: readonly Location[],
@@ -59,7 +60,7 @@ export function presentLocationRows(
     const isDeviceTime = isDeviceTimeLocation(location);
     const cityLabel = isDeviceTime
       ? (context.deviceTimeCityLabel ?? location.timeZoneId)
-      : location.label;
+      : (context.cityLabels?.get(location.id) ?? location.label);
     const zoneMoment = presentZoneMoment({ ...location, cityLabel }, context);
     return {
       id: location.id,

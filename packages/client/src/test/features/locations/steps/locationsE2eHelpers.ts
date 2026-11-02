@@ -24,6 +24,13 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
     label: "Москва",
     countryCode: "RU",
   },
+  Алматы: { timeZoneId: "Asia/Almaty", label: "Алматы", countryCode: "KZ" },
+  Токио: { timeZoneId: "Asia/Tokyo", label: "Токио", countryCode: "JP" },
+  Калькутта: {
+    timeZoneId: "Asia/Kolkata",
+    label: "Калькутта",
+    countryCode: "IN",
+  },
   Kolkata: { timeZoneId: "Asia/Kolkata", label: "Kolkata", countryCode: "IN" },
   Kathmandu: {
     timeZoneId: "Asia/Kathmandu",
@@ -51,9 +58,9 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
     label: "Lord Howe Island",
     countryCode: "AU",
   },
-  "Остров Лорд-Хау": {
+  "Лорд-Хау": {
     timeZoneId: "Australia/Lord_Howe",
-    label: "Остров Лорд-Хау",
+    label: "Лорд-Хау",
     countryCode: "AU",
   },
   Chicago: {

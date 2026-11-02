@@ -23,10 +23,10 @@ Feature: Device time location data and outdated zone data
     Then the device time location shows the derived city "Almaty"
     And no error is shown
 
-  @add-settings-page-and-device-time-location @FR8 @NFR-P2
+  @add-settings-page-and-device-time-location @show-city-labels-in-interface-language @FR8 @FR4 @NFR-P2
   Scenario: No load without the device time location
     Given the device time zone is "Asia/Almaty"
-    And the list is "Almaty"
+    And the list is empty
     When the user opens the app and does not open the search
     Then the zone cities data is not requested
 
@@ -37,6 +37,13 @@ Feature: Device time location data and outdated zone data
     When the user opens the app, the zone cities data finishes loading, and the user opens the search
     Then the suggestions are shown
     And the zone cities data was requested exactly once
+
+  @show-city-labels-in-interface-language @FR4 @M2
+  Scenario: One request for city labels and the device time location
+    Given the device time zone is "Asia/Almaty"
+    And the list is "the device time location, Tokyo"
+    When the user opens the app, the zone cities data finishes loading, and the user opens the search
+    Then the zone cities data was requested exactly once
 
   @add-settings-page-and-device-time-location @FR8
   Scenario: Unreadable stored list

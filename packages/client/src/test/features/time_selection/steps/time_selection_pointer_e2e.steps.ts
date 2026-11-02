@@ -12,6 +12,7 @@ import {
   barOf,
   centreOfBox,
   DRAG_STEPS,
+  dismissOfflineReadyNotice,
   handleOf,
   pointOnBar,
   requireBox,
@@ -30,6 +31,7 @@ When(
   "the user drags the handle of {string} to {int} percent of its track",
   async ({ locationsWorld }, city: string, percent: number) => {
     const { page } = locationsWorld;
+    await dismissOfflineReadyNotice(page);
     const from = centreOfBox(await requireBox(handleOf(page, city)));
     const to = await pointOnBar(page, city, percent);
     await page.mouse.move(from.x, from.y);

@@ -2,6 +2,7 @@ export {
   type CityRecord,
   type CitySearch,
   type CitySearchResult,
+  isCityNameOfRecord,
   type LoadCitySearch,
   SearchMatchKind,
 } from "./citySearch";

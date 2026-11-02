@@ -4,7 +4,10 @@ import {
   LOCAL_DATE_FORMAT_OPTIONS,
   LOCAL_TIME_FORMAT_OPTIONS_BY_HOUR_FORMAT,
 } from "@/constants";
-import type { InterfaceLanguageCode } from "@/locales";
+import {
+  type InterfaceLanguageCode,
+  resolveLanguageFallbacks,
+} from "@/locales";
 import { HourFormat } from "@/preferences";
 
 export enum DateTimeLabelKind {
@@ -41,6 +44,7 @@ const formattersByKey = new Map<string, Intl.DateTimeFormat>();
  * label shares them. The date labels have no hour, so it ignores the hour format.
  * Implements FR1, FR2, FR5 of replace-wall-clock-row-budgets-with-deterministic-checks (D1).
  * Implements FR5, NFR-P1 of add-settings-page-and-device-time-location (D8).
+ * Implements FR5 of show-city-labels-in-interface-language (D5): formats along the fallback order.
  */
 export function getDateTimeFormatter(
   language: InterfaceLanguageCode,
@@ -57,10 +61,13 @@ export function getDateTimeFormatter(
   );
   const cachedFormatter = formattersByKey.get(cacheKey);
   if (cachedFormatter !== undefined) return cachedFormatter;
-  const formatter = new Intl.DateTimeFormat(language, {
-    ...FORMAT_OPTIONS_BY_KIND_AND_HOUR_FORMAT[kind][keyedHourFormat],
-    timeZone: timeZoneId,
-  });
+  const formatter = new Intl.DateTimeFormat(
+    [...resolveLanguageFallbacks(language)],
+    {
+      ...FORMAT_OPTIONS_BY_KIND_AND_HOUR_FORMAT[kind][keyedHourFormat],
+      timeZone: timeZoneId,
+    },
+  );
   formattersByKey.set(cacheKey, formatter);
   return formatter;
 }

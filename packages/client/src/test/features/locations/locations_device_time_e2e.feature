@@ -39,11 +39,12 @@ Feature: Device time location in a real browser
     And the device time location's layout matches the Moscow card's layout
 
   @add-settings-page-and-device-time-location @UX3 @NFR-P2
+  @show-city-labels-in-interface-language @FR1
   Scenario Outline: The exemplar city keeps the height at <width> px
     Given the locations interface language is Russian
     And the screen is <width> px wide for the locations
     And the search data is slow to load
-    And the stored locations are "the device time location", "Moscow"
+    And the stored locations are "the device time location", "Москва"
     When the user opens the locations app
     Then the device time location shows the city "Almaty"
     When the zone cities data finishes loading

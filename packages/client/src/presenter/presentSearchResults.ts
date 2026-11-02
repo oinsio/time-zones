@@ -1,7 +1,7 @@
 import type { CityNameLanguage } from "@/constants";
 import type { InterfaceLanguageCode } from "@/locales";
 import type { Location } from "@/model";
-import type { CitySearchResult } from "@/ports";
+import { type CitySearchResult, isCityNameOfRecord } from "@/ports";
 import { presentCountryName } from "./countryName";
 
 /**
@@ -42,7 +42,7 @@ export function presentSearchResults(
     isAdded: locations.some(
       (location) =>
         location.timeZoneId === record.timeZoneId &&
-        Object.values(record.names).includes(location.label),
+        isCityNameOfRecord(record, location.label),
     ),
   }));
 }

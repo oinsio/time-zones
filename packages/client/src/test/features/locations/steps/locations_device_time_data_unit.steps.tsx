@@ -91,7 +91,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "No load without the device time location",
     ({ Given, And, When, Then }) => {
       Given("the device time zone is {string}", world.givenDeviceZone);
-      And("the list is {string}", world.givenList);
+      And("the list is empty", world.givenEmptyList);
       When(
         "the user opens the app and does not open the search",
         world.openApp,
@@ -117,6 +117,27 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       );
       Then("the suggestions are shown", expectSuggestions);
       And("the zone cities data was requested exactly once", () =>
+        expect(world.getDataRequests()).toBe(1),
+      );
+    },
+  );
+
+  // @show-city-labels-in-interface-language @FR4 @M2
+  f.Scenario(
+    "One request for city labels and the device time location",
+    ({ Given, And, When, Then }) => {
+      Given("the device time zone is {string}", world.givenDeviceZone);
+      And("the list is {string}", world.givenList);
+      When(
+        "the user opens the app, the zone cities data finishes loading, and the user opens the search",
+        async () => {
+          world.givenData(DataMode.HELD)();
+          await world.openApp();
+          await world.whenDataFinishesLoading();
+          await world.whenOpensSearch();
+        },
+      );
+      Then("the zone cities data was requested exactly once", () =>
         expect(world.getDataRequests()).toBe(1),
       );
     },

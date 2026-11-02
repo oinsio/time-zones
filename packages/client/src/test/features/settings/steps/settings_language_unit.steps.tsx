@@ -59,10 +59,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         ).toBeInTheDocument();
       });
       And(
-        "after going back Almaty keeps its city label and shows the country «Казахстан»",
+        "after going back Almaty reads «Алматы» and shows the country «Казахстан»",
         async () => {
           await world.goBack();
-          expect(await screen.findByText("Almaty")).toBeInTheDocument();
+          expect(await screen.findByText("Алматы")).toBeInTheDocument();
           expect(await screen.findByText(/Казахстан/)).toBeInTheDocument();
           expect(document.documentElement.lang).toBe("ru");
         },

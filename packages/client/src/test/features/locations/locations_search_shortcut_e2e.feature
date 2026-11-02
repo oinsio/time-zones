@@ -17,8 +17,9 @@ Feature: Open the location search with the slash key
 
   @open-location-search-with-slash-shortcut @view-contract @NFR-P1
   @show-here-entry-for-device-time @FR8
+  @show-city-labels-in-interface-language @FR4
   Scenario: The slash key loads the search data only when it opens the search
-    Given the stored locations are "Almaty"
+    Given the stored list is empty
     Then the page has not requested the search data
     When the user presses "/" on the main page
     Then the page has requested the search data

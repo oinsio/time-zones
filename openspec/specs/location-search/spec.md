@@ -160,7 +160,7 @@ The search data SHALL be loaded when the search is first opened. While it loads,
 - **THEN** Moscow is among the results
 
 ### Requirement: Search is fast and lazy
-Computing the results of one query over the full bundled data SHALL take at most 50 ms. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: one non-empty query MUST normalize exactly one text, the query itself, and MUST build at most one collator. The search data MUST NOT be part of the initial JavaScript; it MUST be a separate file of at most 30 KB gzipped, and the initial JavaScript MUST stay at most 150 KB gzipped. While the list holds no device time location, the page MUST NOT request the search data before the search is first opened. While the list holds the device time location, the page MAY request it once in the background for the device time location's exemplar city, and the search MUST reuse that data without a second request. The service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search; FR4, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks; FR8 of show-here-entry-for-device-time; NFR-P2 of add-settings-page-and-device-time-location -->
+Computing the results of one query over the full bundled data SHALL take at most 50 ms. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: one non-empty query MUST normalize exactly one text, the query itself, and MUST build at most one collator. The search data MUST NOT be part of the initial JavaScript; it MUST be a separate file of at most 30 KB gzipped, and the initial JavaScript MUST stay at most 150 KB gzipped. While the list is empty, the page MUST NOT request the search data before the search is first opened. While the list holds at least one location of any kind, the page MAY request it once in the background for the city labels of city locations and the exemplar city of the device time location, and the search MUST reuse that data without a second request. The service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search; FR4, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks; FR8 of show-here-entry-for-device-time; NFR-P2 of add-settings-page-and-device-time-location; FR4 of show-city-labels-in-interface-language -->
 
 #### Scenario: Query timing
 - **WHEN** each of 10 sample queries is run over the full data
@@ -168,13 +168,13 @@ Computing the results of one query over the full bundled data SHALL take at most
 - **AND** each query builds at most one collator
 
 #### Scenario: Data loads only when the search opens
-- **GIVEN** the stored list holds no device time location
+- **GIVEN** the stored list is empty
 - **WHEN** the user opens the app and has not opened the search
 - **THEN** the page has not requested the search data
 - **AND** the page requests it when the user opens the search
 
 #### Scenario: The Here entry's request is the only one
-- **GIVEN** the list holds the device time location
+- **GIVEN** the list holds the device time location and Tokyo
 - **WHEN** the user opens the app, the search data finishes loading, and the user opens the search
 - **THEN** the page has requested the search data exactly once
 
@@ -223,7 +223,7 @@ The search in each of its states (suggestions, results, no matches, loading, err
 - **THEN** they match the approved screenshots
 
 ### Requirement: Open the search with the slash key
-While the main page shows the header's "Add location" button, pressing `/` SHALL open the location search exactly as that button does: the suggestions are shown, focus is in the query field and the query is empty — the `/` MUST NOT be entered into the query field and the browser's own action for `/` MUST NOT start. Closing a search opened with `/`, with Esc or by adding a location, MUST return focus to the "Add location" button. Opening with `/` MUST keep the search data lazy: while the list holds no device time location, it is requested only when the search first opens. <!-- implements FR1, FR5, NFR-P1, UX1, UX2 of open-location-search-with-slash-shortcut; FR8 of show-here-entry-for-device-time; FR2, NFR-P2 of add-settings-page-and-device-time-location -->
+While the main page shows the header's "Add location" button, pressing `/` SHALL open the location search exactly as that button does: the suggestions are shown, focus is in the query field and the query is empty — the `/` MUST NOT be entered into the query field and the browser's own action for `/` MUST NOT start. Closing a search opened with `/`, with Esc or by adding a location, MUST return focus to the "Add location" button. Opening with `/` MUST keep the search data lazy: while the list is empty, it is requested only when the search first opens. <!-- implements FR1, FR5, NFR-P1, UX1, UX2 of open-location-search-with-slash-shortcut; FR8 of show-here-entry-for-device-time; FR2, NFR-P2 of add-settings-page-and-device-time-location; FR4 of show-city-labels-in-interface-language -->
 
 The shortcut MUST be ignored — the search state does not change and the key keeps its usual effect — while focus is in a text input, a textarea or a contenteditable element, while the search is already open, when Ctrl, Meta or Alt is held, and while the "Add location" button is not on the page (the stored list is unreadable, or the settings page is shown). Shift MUST NOT be checked. <!-- implements FR2, FR3, FR4, FR6 of open-location-search-with-slash-shortcut; FR3 of add-settings-page-and-device-time-location -->
 
@@ -244,7 +244,7 @@ The "Add location" button MUST expose `/` as its keyboard shortcut to assistive 
 
 #### Scenario: Data is requested only when the search opens
 - **GIVEN** the user has not opened the search
-- **AND** the stored list holds no device time location
+- **AND** the stored list is empty
 - **WHEN** the user presses `/`
 - **THEN** the search data is requested exactly once
 - **AND** it was not requested before

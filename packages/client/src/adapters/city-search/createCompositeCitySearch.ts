@@ -3,6 +3,7 @@ import { MAX_SEARCH_RESULTS, POPULAR_TIME_ZONE_IDS } from "@/constants";
 import {
   type CitySearch,
   type CitySearchResult,
+  isCityNameOfRecord,
   SearchMatchKind,
 } from "@/ports";
 import { createAbbreviationSource } from "./abbreviationSource";
@@ -45,6 +46,7 @@ function keepFirstResultPerZone(
  * of the abbreviation table).
  * Implements FR1–FR7, NFR-P1 of add-locations-via-search (D7, ADR-0006).
  * Implements FR5 of add-interface-language-selection (D5): matches names of the active language.
+ * Implements FR1 of show-city-labels-in-interface-language (D2): getCityLabel.
  */
 export function createCompositeCitySearch(
   zoneCityRecords: readonly ZoneCityData[],
@@ -84,6 +86,12 @@ export function createCompositeCitySearch(
     getExemplarCity: (timeZoneId, language) =>
       recordsById.get(timeZoneId)?.names[language] ??
       deriveCityNameFromTimeZoneId(timeZoneId),
+    getCityLabel: (timeZoneId, storedLabel, language) => {
+      const record = recordsById.get(timeZoneId);
+      return record && isCityNameOfRecord(record, storedLabel)
+        ? record.names[language]
+        : storedLabel;
+    },
     suggest: () =>
       POPULAR_TIME_ZONE_IDS.flatMap((zoneId) => {
         const record = recordsById.get(zoneId);

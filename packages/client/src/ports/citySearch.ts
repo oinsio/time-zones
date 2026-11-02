@@ -24,6 +24,15 @@ export type CityRecord = {
   rank: number;
 };
 
+/**
+ * Whether a label is one of the names of the record, in any language.
+ * Implements FR1 of show-city-labels-in-interface-language (D2).
+ */
+export const isCityNameOfRecord = (
+  record: CityRecord,
+  label: string,
+): boolean => Object.values(record.names).includes(label);
+
 export type CitySearchResult = {
   record: CityRecord;
   matchKind: SearchMatchKind;
@@ -47,6 +56,17 @@ export interface CitySearch {
    * Implements FR8, FR12 of show-here-entry-for-device-time.
    */
   getExemplarCity(timeZoneId: string, language: CityNameLanguage): string;
+  /**
+   * The name a location is shown with: the name of the zone's record in the
+   * language when the stored label is one of that record's names, otherwise
+   * the stored label.
+   * Implements FR1 of show-city-labels-in-interface-language (D2).
+   */
+  getCityLabel(
+    timeZoneId: string,
+    storedLabel: string,
+    language: CityNameLanguage,
+  ): string;
   /** Popular locations, shown for an empty query. */
   suggest(): readonly CitySearchResult[];
 }

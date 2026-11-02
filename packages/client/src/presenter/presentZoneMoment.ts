@@ -30,6 +30,8 @@ export type LocationRowsContext = {
   referenceDay: ReferenceDay;
   /** Exemplar city of the device zone; `undefined` until known (FR8 of add-settings-page-and-device-time-location). */
   deviceTimeCityLabel?: string;
+  /** City label per location ID in the interface language; absent until the city data is loaded (FR1 of show-city-labels-in-interface-language). */
+  cityLabels?: ReadonlyMap<string, string>;
   /** The one wall-clock note of the moment; absent means none. */
   wallClockNote?: WallClockNote;
 };

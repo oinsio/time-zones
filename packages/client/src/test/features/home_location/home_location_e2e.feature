@@ -39,13 +39,14 @@ Feature: Home location in a real browser
     And the row of "Almaty" has no mark named "Home location"
 
   @set-home-location-and-show-differences @FR12
+  @show-city-labels-in-interface-language @FR1
   Scenario: Russian interface
     Given the locations interface language is Russian
-    And the list holds "Almaty", "Moscow" and home is "Almaty"
+    And the list holds "Алматы", "Москва" and home is "Алматы"
     And the user opens the locations app
-    When the user opens the location menu named "Действия: Moscow"
+    When the user opens the location menu named "Действия: Москва"
     Then the menu offers the items "Сделать домашним, Удалить"
-    And the row of "Almaty" has a mark named "Домашнее место"
+    And the row of "Алматы" has a mark named "Домашнее место"
 
   @set-home-location-and-show-differences @UX1 @FR7
   Scenario: The difference stands between the city and the caption

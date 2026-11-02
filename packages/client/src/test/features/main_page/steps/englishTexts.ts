@@ -7,6 +7,7 @@ const ENGLISH_LOCALE_FILE = join(process.cwd(), "src", "locales", "en.json");
 export const englishLocale = JSON.parse(
   readFileSync(ENGLISH_LOCALE_FILE, "utf8"),
 ) as {
+  app: Record<string, string>;
   views: { cardsEmptyState: string };
   locations: Record<string, string>;
   date: Record<string, string>;

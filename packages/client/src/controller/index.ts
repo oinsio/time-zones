@@ -8,6 +8,7 @@ export {
   useActiveInterfaceLanguage,
 } from "./useActiveInterfaceLanguage";
 export { useCalendarMonth } from "./useCalendarMonth";
+export { useCityLabels } from "./useCityLabels";
 export { CitySearchStatus, useCitySearch } from "./useCitySearch";
 export { useContainerWidth } from "./useContainerWidth";
 export { useDocumentLanguage } from "./useDocumentLanguage";

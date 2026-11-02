@@ -3,7 +3,7 @@ Feature: Device time location
   As a user I see the time on my own device as a location of the list, with
   the controls of every card.
 
-  @add-settings-page-and-device-time-location @FR8 @UX3
+  @add-settings-page-and-device-time-location @show-city-labels-in-interface-language @FR8 @FR1 @UX3
   Scenario: Device time location on the design sample
     Given the device time zone is "Asia/Almaty"
     And the interface language is "ru"
@@ -13,7 +13,7 @@ Feature: Device time location
     When the user opens the app
     Then the device time location shows "Алматы", the caption "здесь", the meta line "Время устройства · UTC+5", the time "12:30" and the date "вс, 8 мар."
     And the device time location shows no offset difference
-    And the rows show the offset differences "Moscow −2 ч, Kolkata +0:30, New York −9 ч"
+    And the rows show the offset differences "Москва −2 ч, Калькутта +0:30, Нью-Йорк −9 ч"
 
   @add-settings-page-and-device-time-location @FR1 @FR8
   Scenario: The device's city next to the device time location
