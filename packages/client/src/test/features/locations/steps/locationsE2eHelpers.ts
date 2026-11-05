@@ -68,6 +68,16 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
     label: "Chicago",
     countryCode: "US",
   },
+  Adelaide: {
+    timeZoneId: "Australia/Adelaide",
+    label: "Adelaide",
+    countryCode: "AU",
+  },
+  "St. Vincent": {
+    timeZoneId: "America/St_Vincent",
+    label: "St. Vincent",
+    countryCode: "VC",
+  },
 };
 
 /** The scenario phrase for the device time location in a stored list. */
