@@ -83,7 +83,7 @@ export const createZoneLineWorld = () => {
   const rowOf = (city: string) =>
     screen
       .getAllByRole("listitem")
-      .find((row) => row.textContent?.includes(city)) as HTMLElement;
+      .find((row) => row.textContent?.startsWith(city)) as HTMLElement;
 
   return {
     reset: async () => {
@@ -157,6 +157,12 @@ export const createZoneLineWorld = () => {
     },
     rowOf,
     zoneLineOf: (city: string) => readZoneLineElements(rowOf(city)),
-    deviceTimeRowOf: () => rowOf(i18n.t("locations.deviceTimeMeta")),
+    deviceTimeRowOf: () =>
+      screen
+        .getAllByRole("listitem")
+        .find(
+          (row) =>
+            readZoneLineElements(row)[0] === i18n.t("locations.deviceTimeMeta"),
+        ) as HTMLElement,
   };
 };
