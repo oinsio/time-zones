@@ -35,3 +35,22 @@ describe("startZoneLookupCount", () => {
     expect(count.wallClockLookupsIn("Europe/Moscow")).toBe(0);
   });
 });
+
+// Verifies NFR-P1 of show-zone-abbreviations-and-zone-label-setting (D2): adjustments per zone.
+describe("startZoneLookupCount adjustments", () => {
+  it("should count adjustments of a zoned date-time per zone and leave the lookups alone", () => {
+    const zoned = Temporal.ZonedDateTime.from(
+      "2026-03-07T07:30:00-05:00[America/New_York]",
+    );
+    const count = startZoneLookupCount();
+
+    zoned.with({ hour: 1 });
+    zoned.with({ hour: 2 });
+    count.stop();
+    zoned.with({ hour: 3 });
+
+    expect(count.adjustmentsIn("America/New_York")).toBe(2);
+    expect(count.adjustmentsIn("Europe/Moscow")).toBe(0);
+    expect(count.lookupsIn("America/New_York")).toBe(0);
+  });
+});
