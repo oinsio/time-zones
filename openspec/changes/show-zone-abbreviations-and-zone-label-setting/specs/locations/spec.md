@@ -88,10 +88,11 @@ Presenting 50 location rows again at another minute of the same day, with the zo
 - **AND** no time zone transition is looked up
 
 #### Scenario: Extra zone lookups per row
-- **GIVEN** the list contains New York, which has an abbreviation pair, and Moscow, which has one abbreviation
-- **WHEN** the rows are presented with the zone abbreviation shown and then with it hidden
-- **THEN** New York has at most 2 more zone lookups with it shown than with it hidden
-- **AND** Moscow has the same number of zone lookups both times
+- **GIVEN** the list contains New York (`America/New_York`, an abbreviation pair and a clock change), Santiago (`America/Santiago`, a clock change with numeric designations only), Moscow (`Europe/Moscow`, one abbreviation) and Almaty (`Asia/Almaty`, no abbreviation)
+- **AND** the current instant is `2026-07-15T12:00:00Z`
+- **WHEN** the rows are presented with the zone abbreviation and the UTC offset shown
+- **THEN** New York has at most 2 more zone lookups than Santiago
+- **AND** Moscow has as many zone lookups as Almaty
 
 ## MODIFIED Requirements
 
