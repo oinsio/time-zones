@@ -98,6 +98,33 @@ describe("extractZoneAbbreviations", () => {
     expect(extractOne(periods)).toBeUndefined();
   });
 
+  it.each(["A1", "1A", "A B"])(
+    "leaves out the designation %s that is not letters alone",
+    (designation) => {
+      expect(extractOne([period(designation, 60, Infinity)])).toBeUndefined();
+    },
+  );
+
+  it("ignores a period that ended exactly when 2026 began", () => {
+    const startOf2026 = Date.UTC(2026, 0, 1);
+    expect(
+      extractOne([
+        period("OLD", 60, startOf2026),
+        period("NEW", 120, Infinity),
+      ]),
+    ).toEqual(["NEW"]);
+  });
+
+  it("ignores a period that began exactly when 2027 began", () => {
+    const startOf2027 = Date.UTC(2027, 0, 1);
+    expect(
+      extractOne([
+        period("CUR", 60, startOf2027),
+        period("NEXT", 120, Infinity),
+      ]),
+    ).toEqual(["CUR"]);
+  });
+
   it("builds one entry per listed zone", () => {
     const table = extractZoneAbbreviations(["A/One", "B/Two"], (zoneId) =>
       zoneId === "A/One" ? [period("IST", 330, Infinity)] : undefined,
