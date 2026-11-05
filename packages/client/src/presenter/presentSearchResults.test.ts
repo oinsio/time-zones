@@ -1,4 +1,6 @@
 // Verifies FR5, FR8, UX3 of add-locations-via-search (D9).
+// Verifies FR10, FR12, FR13, UX3 of show-zone-abbreviations-and-zone-label-setting (D8).
+import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import {
   type CityRecord,
@@ -25,8 +27,21 @@ const resultFor = (
   matchedAbbreviation,
 });
 
-const IN_EN = { language: "en", cityNameLanguage: "en" } as const;
-const IN_RU = { language: "ru", cityNameLanguage: "ru" } as const;
+const IN_EN = {
+  language: "en",
+  cityNameLanguage: "en",
+  translate: i18n.getFixedT("en"),
+} as const;
+const IN_RU = {
+  language: "ru",
+  cityNameLanguage: "ru",
+  translate: i18n.getFixedT("ru"),
+} as const;
+const zoneRecord = (timeZoneId: string): CityRecord => ({
+  ...moscowRecord,
+  id: timeZoneId,
+  timeZoneId,
+});
 
 describe("present search results", () => {
   it("should show the city and country in the interface language", () => {
@@ -55,13 +70,62 @@ describe("present search results", () => {
     });
   });
 
-  it("should pass the matched abbreviation through", () => {
+  it.each([
+    [
+      "America/New_York",
+      "EDT",
+      [
+        { text: "EST", isMatched: false },
+        { text: "EDT", isMatched: true },
+      ],
+    ],
+    [
+      "America/New_York",
+      "EST",
+      [
+        { text: "EST", isMatched: true },
+        { text: "EDT", isMatched: false },
+      ],
+    ],
+    ["America/Panama", "EST", [{ text: "EST", isMatched: true }]],
+    [
+      "Europe/Dublin",
+      "IST",
+      [
+        { text: "GMT", isMatched: false },
+        { text: "IST", isMatched: true },
+      ],
+    ],
+  ])(
+    "should present the pair of %s for %s with the matched one marked",
+    (timeZoneId, matched, expected) => {
+      const [presented] = presentSearchResults(
+        [resultFor(zoneRecord(timeZoneId), matched)],
+        [],
+        IN_EN,
+      );
+      expect(presented?.abbreviationPair).toEqual(expected);
+    },
+  );
+
+  it("should write МСК in the Russian pair", () => {
     const [presented] = presentSearchResults(
       [resultFor(moscowRecord, "MSK")],
       [],
+      IN_RU,
+    );
+    expect(presented?.abbreviationPair).toEqual([
+      { text: "МСК", isMatched: true },
+    ]);
+  });
+
+  it("should give no pair for a result that is no abbreviation match", () => {
+    const [presented] = presentSearchResults(
+      [resultFor(moscowRecord)],
+      [],
       IN_EN,
     );
-    expect(presented?.matchedAbbreviation).toBe("MSK");
+    expect(presented?.abbreviationPair).toBeUndefined();
   });
 
   it("should give an empty country name for a zone without a country", () => {

@@ -31,7 +31,7 @@ export enum CitySearchStatus {
  * Implements FR5 of add-interface-language-selection (D5): results follow the active language.
  */
 export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { code: language, cityNameLanguage } = useActiveInterfaceLanguage();
   const [search, setSearch] = useState<CitySearch | undefined>(() =>
     readLoadedCitySearch(load),
@@ -74,9 +74,10 @@ export function useCitySearch(load: LoadCitySearch = loadCitySearch) {
       return presentSearchResults(results, locations, {
         language,
         cityNameLanguage,
+        translate: t,
       });
     },
-    [search, language, cityNameLanguage],
+    [search, language, cityNameLanguage, t],
   );
 
   const status =

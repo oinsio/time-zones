@@ -111,6 +111,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         presented = presentSearchResults(world.results, [], {
           language: LANGUAGE,
           cityNameLanguage: LANGUAGE,
+          translate: i18n.t,
         });
       });
       Then(

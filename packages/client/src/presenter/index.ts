@@ -41,6 +41,7 @@ export { parseWallTimeInput } from "./parseWallTimeInput";
 export { presentDeviceTimeOptionLabels } from "./presentDeviceTimeOptionLabels";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";
 export {
+  type PresentedAbbreviation,
   type PresentedSearchResult,
   presentSearchResults,
 } from "./presentSearchResults";

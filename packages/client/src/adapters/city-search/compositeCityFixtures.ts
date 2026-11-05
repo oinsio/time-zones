@@ -21,6 +21,9 @@ export const zoneCities: ZoneCityData[] = [
   city("Asia/Almaty", "Almaty", "Алматы", "KZ"),
   city("Asia/Qostanay", "Kostanay", "Костанай", "KZ"),
   city("Asia/Aqtobe", "Aqtobe", "Актобе", "KZ"),
+  city("Europe/London", "London", "Лондон", "GB"),
+  city("Asia/Dhaka", "Dhaka", "Дакка", "BD"),
+  city("America/Panama", "Panama", "Панама", "PA"),
   city("UTC", "UTC", "UTC"),
 ];
 export const search = createCompositeCitySearch(zoneCities);
