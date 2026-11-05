@@ -1,5 +1,5 @@
 // Verifies FR5–FR8, FR15, UX1–UX3 of add-locations-via-search.
-// Verifies FR12, FR13, NFR-A2, UX3 of show-zone-abbreviations-and-zone-label-setting (D8).
+// Verifies FR11, NFR-A2, UX3 of show-zone-abbreviations-and-zone-label-setting (D8).
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";

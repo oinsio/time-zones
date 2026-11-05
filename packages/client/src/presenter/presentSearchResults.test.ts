@@ -1,5 +1,5 @@
 // Verifies FR5, FR8, UX3 of add-locations-via-search (D9).
-// Verifies FR10, FR12, FR13, UX3 of show-zone-abbreviations-and-zone-label-setting (D8).
+// Verifies FR10, FR11, UX3 of show-zone-abbreviations-and-zone-label-setting (D8).
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import {
