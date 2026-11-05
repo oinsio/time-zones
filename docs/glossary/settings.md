@@ -2,11 +2,13 @@
 
 The user's preferences and the page that changes them. Stored by their own repository (`src/preferences/`). See [README](README.md) for the entry format.
 
-- **Settings page** — the page with the Gnomish Factory credit, the theme preference, the hour format and the interface language. *Code:* `SettingsPage`, `AppPage.SETTINGS`. *RU:* «Настройки».
+- **Settings page** — the page with the Gnomish Factory credit, the theme preference, the hour format, the zone label and the interface language. *Code:* `SettingsPage`, `AppPage.SETTINGS`. *RU:* «Настройки».
 - **Settings button** — the header button that opens the settings page. *Code:* `SettingsButton`. *RU:* «Настройки».
-- **Preferences** — the user's choices kept on the device, apart from the location list: the theme preference, the hour format and the interface language. *Code:* `Preferences`, `src/preferences/`, `PreferencesRepository`.
+- **Preferences** — the user's choices kept on the device, apart from the location list: the theme preference, the hour format, the zone label and the interface language. *Code:* `Preferences`, `src/preferences/`, `PreferencesRepository`.
 - **Theme preference** — light, dark or system. System follows the system color scheme. *Code:* `ThemePreference`. *RU:* «Тема»: «Светлая», «Тёмная», «Системная».
 - **Hour format** — how times of day are written, 12-hour or 24-hour. *Code:* `HourFormat`. *RU:* «Формат времени»: «12 часов», «24 часа».
+- **Zone label** — the preference that decides which zone parts the zone line shows, the UTC offset and the zone abbreviation, each on or off, both on by default; it does not affect the search. *RU:* «Подпись пояса»: «Смещение UTC», «Сокращение». *Code:* `Preferences.zoneLabelParts`, `ZoneLabelPart`, `SET_ZONE_LABEL_PART`, `useZoneLabelParts`, `ZoneLabelGroup`, `settings.zoneLabelLabel`.
+- **Toggle group** — a compact settings group in one row: a caption and independent toggle buttons, each on or off. *RU:* группа переключателей. *Code:* `SettingsToggleGroup`.
 - **Gnomish Factory** — the tool the app is built with; its landing page is linked from the settings page. A brand name: written `Gnomish Factory` in every interface language, never translated. *Code:* `GNOMISH_FACTORY_LANDING_URL`. *RU:* «Gnomish Factory».
 - **Gnomish Factory credit** — the line of the settings page above the theme preference, one link "Built with Gnomish Factory" to the factory's landing page, opened in a new tab. *Code:* `GnomishFactoryCredit`, `settings.gnomishFactoryCredit`. *RU:* «Создано с помощью Gnomish Factory».
 - **Interface language** — the language of every interface text, date, country name, city name of search results and city label of a city location. It is chosen in the language group of the settings page, or, when none is chosen, it follows the browser language and then falls back to English. *Code:* `Preferences.interfaceLanguage`, `SET_INTERFACE_LANGUAGE`, `resolveInterfaceLanguage`, `useInterfaceLanguage`, `useActiveInterfaceLanguage`, `InterfaceLanguageGroup`, `settings.languageLabel`. *RU:* «Язык интерфейса»; the group caption is «Язык».
