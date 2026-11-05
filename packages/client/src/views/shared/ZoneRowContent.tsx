@@ -94,7 +94,10 @@ export function ZoneRowContent({
             )}
           </span>
           {zoneLineParts.length > 0 && (
-            <span className="flex flex-wrap gap-x-2 text-sm text-muted-foreground">
+            <span
+              data-zone-line
+              className="flex flex-wrap gap-x-2 text-sm text-muted-foreground"
+            >
               {zoneLineParts.map((part) => (
                 <span
                   key={part.kind}

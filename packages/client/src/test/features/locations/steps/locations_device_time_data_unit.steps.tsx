@@ -191,13 +191,22 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       });
     });
     Then(
-      "the device time location shows {string}, the time {string} and the meta line {string}",
-      (_ctx: unknown, city: string, time: string, meta: string) => {
+      "the device time location shows {string}, the time {string} and the meta line {string}, {string} and {string}",
+      (
+        _ctx: unknown,
+        city: string,
+        time: string,
+        place: string,
+        abbreviation: string,
+        offset: string,
+      ) => {
         expect(engineResult.presented).toMatchObject({
           cityLabel: city,
           localTimeLabel: time,
-          metaLabel: meta,
         });
+        expect(
+          engineResult.presented?.zoneLineParts.map((part) => part.text),
+        ).toEqual([place, abbreviation, offset]);
       },
     );
     And(
