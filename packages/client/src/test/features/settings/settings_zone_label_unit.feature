@@ -8,7 +8,7 @@ Feature: Zone label setting
     And the interface language is "en"
     When the user opens the settings
     Then the zone label shows "the UTC offset and the zone abbreviation"
-    And the example shows "India", "IST", "UTC+5:30"
+    And the example shows "India, IST, UTC+5:30"
 
   @show-zone-abbreviations-and-zone-label-setting @FR12 @FR14 @M4
   Scenario Outline: The example follows the toggles

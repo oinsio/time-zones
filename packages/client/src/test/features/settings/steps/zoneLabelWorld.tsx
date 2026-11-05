@@ -6,10 +6,9 @@ import {
   createInMemoryLocationRepository,
   createLocalStoragePreferencesRepository,
   type LocationsSyncChannel,
-  serializePreferencesDocument,
 } from "@/adapters";
 import { SettingsPage } from "@/app/settings";
-import { STORAGE_KEYS } from "@/constants";
+import { PREFERENCES_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import {
   LocationsProvider,
   PreferencesProvider,
@@ -131,9 +130,14 @@ export const createZoneLabelWorld = () => {
     storeZoneLabel: (partsName: keyof typeof ZONE_LABEL_PART_NAMES) =>
       localStorage.setItem(
         STORAGE_KEYS.PREFERENCES,
-        serializePreferencesDocument({
-          ...DEFAULT_PREFERENCES,
-          zoneLabelParts: ZONE_LABEL_PART_NAMES[partsName],
+        JSON.stringify({
+          schemaVersion: PREFERENCES_SCHEMA_VERSION,
+          payload: {
+            theme: DEFAULT_PREFERENCES.theme,
+            hourFormat: DEFAULT_PREFERENCES.hourFormat,
+            interfaceLanguage: DEFAULT_PREFERENCES.interfaceLanguage,
+            zoneLabelParts: ZONE_LABEL_PART_NAMES[partsName],
+          },
         }),
       ),
     storeRaw: (documentText: string) =>
