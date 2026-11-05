@@ -34,22 +34,24 @@ export function ZoneLabelGroup() {
       selectedValues={zoneLabelParts}
       onToggle={setZoneLabelPart}
       description={
-        <span className="flex flex-wrap gap-x-2">
+        <>
           <span className="sr-only">{t("settings.zoneLabelExample")} </span>
-          {exampleParts.map((part) => (
-            <Fragment key={part.kind}>
-              <span
-                className={
-                  part.kind === ZoneLinePartKind.PLACE
-                    ? undefined
-                    : "whitespace-nowrap"
-                }
-              >
-                {part.text}
-              </span>{" "}
-            </Fragment>
-          ))}
-        </span>
+          <span data-zone-line className="flex flex-wrap gap-x-2">
+            {exampleParts.map((part) => (
+              <Fragment key={part.kind}>
+                <span
+                  className={
+                    part.kind === ZoneLinePartKind.PLACE
+                      ? undefined
+                      : "whitespace-nowrap"
+                  }
+                >
+                  {part.text}
+                </span>{" "}
+              </Fragment>
+            ))}
+          </span>
+        </>
       }
     />
   );
