@@ -2,6 +2,7 @@
 import { act, renderHook } from "@testing-library/react";
 import i18n from "i18next";
 import type { ReactNode } from "react";
+import { vi } from "vitest";
 import {
   createInMemoryLocationRepository,
   createInMemoryPreferencesRepository,
@@ -79,5 +80,12 @@ describe("useZoneLabelExample", () => {
       ),
     );
     expect(textsOf(result.current.example)).toEqual(["India", "UTC+5:30"]);
+  });
+
+  it("should refuse to run outside a LocationsProvider", () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(() => renderHook(() => useZoneLabelExample())).toThrow(
+      "useZoneLabelExample must be used inside a LocationsProvider",
+    );
   });
 });
