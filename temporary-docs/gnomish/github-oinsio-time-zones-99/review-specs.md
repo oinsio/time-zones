@@ -131,7 +131,7 @@ The proposal defines no `Q` id ("Open Questions: None."; D1–D3 decide the open
   The scenario "Collapsed group" ("below the hour format group a group "Language"…") can stay as it is, because it is still true.
 - Fix risk: The restatement must keep every stable scenario of that requirement, or the archive drops them. No code or test changes, because the existing E2E step only asserts "below".
 - Status: fixed
-- Resolution: specs/settings/spec.md restates "Interface language choice" under MODIFIED Requirements verbatim with all four stable scenarios, except "directly below the zone label group" and FR12 of this change appended to its trace comment.
+- Resolution: specs/settings/spec.md restates "Interface language choice" under MODIFIED Requirements verbatim with all four stable scenarios, except "directly below the zone label group" and FR12 of this change appended to its trace comment; proposal.md "Modified Capabilities" lists it.
 
 ### R3 — WARNING — Task 2.4 tells the implement stage to edit the spec scenarios
 - Location: `openspec/changes/show-zone-abbreviations-and-zone-label-setting/tasks.md:32`
@@ -174,7 +174,7 @@ The proposal defines no `Q` id ("Open Questions: None."; D1–D3 decide the open
 - Fix: In `specs/location-search/spec.md`, add `### Requirement: Search is fast and lazy` under `## MODIFIED Requirements`. Restate the stable text and its scenarios unchanged, and append `; NFR-P3 of show-zone-abbreviations-and-zone-label-setting` to its trace comment.
 - Fix risk: The restatement must copy every stable scenario of that requirement verbatim, or the archive drops them. Nothing else changes.
 - Status: fixed
-- Resolution: specs/location-search/spec.md restates "Search is fast and lazy" under MODIFIED Requirements with all stable scenarios, a sentence that an abbreviation query is no exception, NFR-P3 of this change in its trace, and a new scenario "Abbreviation query within the work bound" (IST); task 8.3 adds that scenario to location_search_performance.feature and runs its steps.
+- Resolution: specs/location-search/spec.md restates "Search is fast and lazy" under MODIFIED Requirements with all stable scenarios, a sentence that an abbreviation query is no exception, NFR-P3 of this change in its trace, and a new scenario "Abbreviation query within the work bound" (IST); task 8.3 adds that scenario to location_search_performance.feature and runs its steps; proposal.md "Modified Capabilities" lists it.
 
 ## Verdict
 
