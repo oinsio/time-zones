@@ -3,20 +3,30 @@
  * Implements FR1, FR4 of show-zone-abbreviations-and-zone-label-setting (D1).
  */
 
+import { Temporal } from "../../src/lib/temporal.ts";
+
 /** The year whose periods decide which abbreviations a zone uses. */
 export const ZONE_ABBREVIATION_RULES_YEAR = 2026;
 /** A tzdb designation counts as an abbreviation only when it is letters alone. */
 export const LETTERS_ONLY_DESIGNATION = /^[A-Za-z]+$/;
 
-const RULES_YEAR_START_EPOCH_MILLISECONDS = Date.UTC(
+const JANUARY = 1;
+const FIRST_DAY_OF_MONTH = 1;
+const UTC_TIME_ZONE = "UTC";
+
+function getYearStartEpochMilliseconds(year: number): number {
+  return Temporal.PlainDate.from({
+    year,
+    month: JANUARY,
+    day: FIRST_DAY_OF_MONTH,
+  }).toZonedDateTime(UTC_TIME_ZONE).epochMilliseconds;
+}
+
+const RULES_YEAR_START_EPOCH_MILLISECONDS = getYearStartEpochMilliseconds(
   ZONE_ABBREVIATION_RULES_YEAR,
-  0,
-  1,
 );
-const RULES_YEAR_END_EPOCH_MILLISECONDS = Date.UTC(
+const RULES_YEAR_END_EPOCH_MILLISECONDS = getYearStartEpochMilliseconds(
   ZONE_ABBREVIATION_RULES_YEAR + 1,
-  0,
-  1,
 );
 const MAX_OFFSETS_PER_ZONE = 2;
 const NO_ABBREVIATION = "";
