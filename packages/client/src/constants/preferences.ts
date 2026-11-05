@@ -1,7 +1,7 @@
 import { KeyboardKey } from "./keyboard";
 
 /** Version of the stored preferences document (ADR-0004 envelope). */
-export const PREFERENCES_SCHEMA_VERSION = 2;
+export const PREFERENCES_SCHEMA_VERSION = 3;
 
 /** Delay that collapses bursts of preference changes into one storage write. */
 export const PREFERENCES_WRITE_DEBOUNCE_MS = 300;

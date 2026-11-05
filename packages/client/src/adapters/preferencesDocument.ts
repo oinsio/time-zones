@@ -1,13 +1,19 @@
 import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { type PreferencesLoadResult, PreferencesLoadStatus } from "@/ports";
-import { type Preferences, parseStoredPreferences } from "@/preferences";
+import {
+  type Preferences,
+  parseStoredPreferences,
+  ZoneLabelPart,
+} from "@/preferences";
 import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
 
 /**
  * Version 1 had no interface language: the step adds the one the legacy
  * `language` key held (or "not chosen"), so an existing user keeps their language.
  * The stored preferences document is `{ schemaVersion, payload }` (ADR-0004).
- * Implements FR8 of add-interface-language-selection (D2).
+ * Version 2 had no zone label: the step shows both parts.
+ * Implements FR8 of add-interface-language-selection (D2);
+ * the zone label step implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4).
  */
 export const createPreferencesMigrations = (
   legacyInterfaceLanguage: string | null,
@@ -15,6 +21,10 @@ export const createPreferencesMigrations = (
   1: (payload) => ({
     ...(payload as object),
     interfaceLanguage: legacyInterfaceLanguage,
+  }),
+  2: (payload) => ({
+    ...(payload as object),
+    zoneLabelParts: Object.values(ZoneLabelPart),
   }),
 });
 
@@ -27,6 +37,7 @@ export const serializePreferencesDocument = (
       theme: preferences.theme,
       hourFormat: preferences.hourFormat,
       interfaceLanguage: preferences.interfaceLanguage,
+      zoneLabelParts: preferences.zoneLabelParts,
     },
   });
 

@@ -22,6 +22,7 @@ const storedDarkTwelveHour = {
     theme: ThemePreference.DARK,
     hourFormat: HourFormat.H12,
     interfaceLanguage: null,
+    zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
   },
 } as const;
 

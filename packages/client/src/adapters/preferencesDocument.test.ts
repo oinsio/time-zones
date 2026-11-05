@@ -1,14 +1,18 @@
 // Verifies FR8 of add-interface-language-selection (D2).
+// Verifies FR13, FR15, M6 of show-zone-abbreviations-and-zone-label-setting (D4).
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DEFAULT_PREFERENCES,
   HourFormat,
   ThemePreference,
+  ZoneLabelPart,
 } from "@/preferences";
 import {
   deserializePreferencesDocument,
   serializePreferencesDocument,
 } from "./preferencesDocument";
+
+const BOTH_PARTS = [ZoneLabelPart.UTC_OFFSET, ZoneLabelPart.ZONE_ABBREVIATION];
 
 const versionOneDocument = JSON.stringify({
   schemaVersion: 1,
@@ -23,6 +27,7 @@ describe("deserializePreferencesDocument", () => {
         theme: ThemePreference.DARK,
         hourFormat: HourFormat.H12,
         interfaceLanguage: "ru",
+        zoneLabelParts: BOTH_PARTS,
       },
     });
   });
@@ -35,7 +40,7 @@ describe("deserializePreferencesDocument", () => {
     });
   });
 
-  it("should round-trip version 2", () => {
+  it("should round-trip the current version", () => {
     const preferences = { ...DEFAULT_PREFERENCES, interfaceLanguage: "ru" };
     expect(
       deserializePreferencesDocument(
@@ -54,9 +59,9 @@ describe("deserializePreferencesDocument", () => {
 
   it.each([
     [
-      "version 3",
+      "version 4",
       JSON.stringify({
-        schemaVersion: 3,
+        schemaVersion: 4,
         payload: { ...DEFAULT_PREFERENCES },
       }),
     ],
@@ -93,11 +98,17 @@ describe("serializePreferencesDocument", () => {
           theme: ThemePreference.DARK,
           hourFormat: HourFormat.H12,
           interfaceLanguage: "ru",
+          zoneLabelParts: BOTH_PARTS,
         }),
       ),
     ).toEqual({
-      schemaVersion: 2,
-      payload: { theme: "DARK", hourFormat: "H12", interfaceLanguage: "ru" },
+      schemaVersion: 3,
+      payload: {
+        theme: "DARK",
+        hourFormat: "H12",
+        interfaceLanguage: "ru",
+        zoneLabelParts: BOTH_PARTS,
+      },
     });
   });
 });

@@ -16,7 +16,10 @@ beforeAll(async () => {
 });
 
 function abbreviationAt(instant: string): string | undefined {
-  return model.getZoneAbbreviation(ZONE, Temporal.Instant.from(instant).toZonedDateTimeISO(ZONE));
+  return model.getZoneAbbreviation(
+    ZONE,
+    Temporal.Instant.from(instant).toZonedDateTimeISO(ZONE),
+  );
 }
 
 describe("getZoneAbbreviation with an empty slot", () => {

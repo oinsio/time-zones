@@ -63,8 +63,8 @@ function readTzdbZonePeriods(
   if (!zone) return undefined;
   return zone.abbrs.map((designation, index) => ({
     designation,
-    utcOffsetMinutes: -zone.offsets[index],
-    untilEpochMilliseconds: zone.untils[index],
+    utcOffsetMinutes: -(zone.offsets[index] ?? 0),
+    untilEpochMilliseconds: zone.untils[index] ?? Infinity,
   }));
 }
 
