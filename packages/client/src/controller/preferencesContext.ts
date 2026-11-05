@@ -1,5 +1,10 @@
 import { createContext } from "react";
-import type { HourFormat, Preferences, ThemePreference } from "@/preferences";
+import type {
+  HourFormat,
+  Preferences,
+  ThemePreference,
+  ZoneLabelPart,
+} from "@/preferences";
 
 /** Whether the stored preferences could be read. */
 export enum PreferencesStatus {
@@ -15,6 +20,8 @@ export type PreferencesContextValue = {
   setHourFormat: (hourFormat: HourFormat) => void;
   /** Implements FR7 of add-interface-language-selection (D1). */
   setInterfaceLanguage: (interfaceLanguage: string) => void;
+  /** Implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4). */
+  setZoneLabelPart: (part: ZoneLabelPart, isShown: boolean) => void;
   /** Clears the stored document and returns to the defaults. */
   resetPreferences: () => void;
 };

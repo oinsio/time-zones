@@ -32,4 +32,5 @@ export {
   type WallTimeTarget,
   WallTimeTargetKind,
 } from "./useWallTimeInput";
+export { useZoneLabelParts } from "./useZoneLabelParts";
 export type { WriteScheduler } from "./writeScheduler";
