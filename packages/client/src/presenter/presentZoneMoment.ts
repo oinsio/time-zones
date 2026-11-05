@@ -6,21 +6,25 @@ import {
   getOffsetDifferenceMinutes,
   getRowNote,
   getUtcOffsetMinutes,
+  getZoneAbbreviation,
   type ReferenceDay,
   RowNoteKind,
   type WallClockNote,
 } from "@/model";
-import type { HourFormat } from "@/preferences";
+import { type HourFormat, ZoneLabelPart } from "@/preferences";
 import { presentClockChangeNote } from "./clockChangeNote";
 import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
 import { formatLocalDate, formatLocalTime } from "./localDateTime";
 import { formatOffsetDifference } from "./offsetDifference";
 import { formatUtcOffset } from "./utcOffset";
 import { presentWallTimeHint } from "./wallTimeHint";
+import { formatZoneAbbreviation } from "./zoneAbbreviation";
 
 export type LocationRowsContext = {
   language: InterfaceLanguageCode;
   hourFormat: HourFormat;
+  /** The shown zone parts of the zone label (FR13 of show-zone-abbreviations-and-zone-label-setting). */
+  zoneLabelParts: readonly ZoneLabelPart[];
   instant: Temporal.Instant;
   translate: TFunction;
   deviceTimeZoneId: string;
@@ -40,6 +44,8 @@ export type LocationRowsContext = {
 export type PresentedZoneMoment = {
   /** "UTC+3" style label; empty when the offset cannot be computed. */
   utcOffsetLabel: string;
+  /** "EDT" style label in the interface language, whatever the zone label; empty when the zone has no abbreviation. */
+  zoneAbbreviationLabel: string;
   /** "−2 h" style label; empty when there is no offset difference. */
   offsetDifferenceLabel: string;
   /** "2 hours behind" style text read in the name; empty without a difference. */
@@ -69,12 +75,14 @@ export type PresentedZoneMoment = {
  * and the row note.
  * Implements FR2, FR6 of show-clock-change-note-on-location-cards (D4, D5): the clock change note
  * and the one row note.
+ * Implements FR2, FR3, FR7 of show-zone-abbreviations-and-zone-label-setting (D5): the zone abbreviation label.
  */
 export function presentZoneMoment(
   subject: { id: string; timeZoneId: string; cityLabel: string },
   {
     language,
     hourFormat,
+    zoneLabelParts,
     instant,
     translate,
     deviceTimeZoneId,
@@ -106,6 +114,12 @@ export function presentZoneMoment(
     offsetMinutes === undefined
       ? ""
       : formatUtcOffset(offsetMinutes, translate("locations.utcOffsetPrefix"));
+  const abbreviation = localDateTime
+    ? getZoneAbbreviation(subject.timeZoneId, localDateTime)
+    : undefined;
+  const zoneAbbreviationLabel = abbreviation
+    ? formatZoneAbbreviation(abbreviation, translate)
+    : "";
   const rowNote = getRowNote({
     wallClockNote,
     locationId: subject.id,
@@ -115,6 +129,7 @@ export function presentZoneMoment(
   });
   return {
     utcOffsetLabel,
+    zoneAbbreviationLabel,
     offsetDifferenceLabel: difference?.label ?? "",
     offsetDifferenceAccessibleLabel: difference?.accessibleLabel ?? "",
     localTimeLabel,
@@ -143,6 +158,10 @@ export function presentZoneMoment(
             requestedWallTime: rowNote.wallClockNote.requestedWallTime,
             shownTimeLabel: localTimeLabel,
             utcOffsetLabel,
+            zoneAbbreviationLabel,
+            isZoneAbbreviationShown: zoneLabelParts.includes(
+              ZoneLabelPart.ZONE_ABBREVIATION,
+            ),
             language,
             hourFormat,
             translate,

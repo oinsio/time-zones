@@ -6,7 +6,7 @@ import { expect, vi } from "vitest";
 import { usePrefersReducedMotion } from "@/controller";
 import { loadLegacySupport } from "@/lib/legacy";
 import { Temporal } from "@/lib/temporal";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import type { PresentedSearchResult } from "@/presenter";
 import { presentLocationRows, presentSearchResults } from "@/presenter";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
@@ -81,6 +81,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       rows = presentLocationRows(locations, {
         language: LANGUAGE,
         hourFormat: HourFormat.H24,
+        zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
         instant,
         translate: i18n.t,
         deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,

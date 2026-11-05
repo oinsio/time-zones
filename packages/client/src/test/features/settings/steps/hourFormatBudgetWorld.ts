@@ -1,9 +1,11 @@
 // Implements NFR-P1 of add-settings-page-and-device-time-location and add-interface-language-selection: counts the formatters built when rows are presented in an hour format.
+
 import i18n from "i18next";
 import { expect } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import { getUtcOffsetMinutes, type Location } from "@/model";
 import type { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES } from "@/preferences";
 import { presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
@@ -34,6 +36,7 @@ const presentIn = (
   presentLocationRows(locations, {
     language,
     hourFormat,
+    zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(language),
     deviceTimeZoneId: BUDGET_DEVICE_ZONE,

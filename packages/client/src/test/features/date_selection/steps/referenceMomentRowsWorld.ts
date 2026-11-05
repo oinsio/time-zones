@@ -10,7 +10,7 @@ import {
   reduceLocations,
   type WorldClockState,
 } from "@/model";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
@@ -74,6 +74,7 @@ export const createRowBudgetWorld = () => {
     presentLocationRows(locations, {
       language: ENGLISH_LANGUAGE,
       hourFormat: HourFormat.H24,
+      zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
       instant,
       translate: i18n.getFixedT(ENGLISH_LANGUAGE),
       deviceTimeZoneId: state.deviceTimeZoneId,

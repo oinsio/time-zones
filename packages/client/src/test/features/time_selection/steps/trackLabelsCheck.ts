@@ -7,7 +7,7 @@ import {
 } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { type HourLabel, presentLocationRows } from "@/presenter";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
@@ -30,6 +30,7 @@ export const createTrackLabelsCheck = () => {
     return presentLocationRows(locations, {
       language,
       hourFormat: HourFormat.H24,
+      zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
       instant,
       translate: i18n.getFixedT(language),
       deviceTimeZoneId: LABEL_DEVICE_TIME_ZONE,

@@ -3,7 +3,7 @@ import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import { buildDeviceTimeLocation } from "@/model";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
@@ -24,6 +24,7 @@ const present = (
   presentLocationRows(locations, {
     language: "en",
     hourFormat: HourFormat.H24,
+    zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
     homeLocationId: null,
