@@ -1,12 +1,21 @@
 // Verifies FR3, FR4, FR5, FR7, FR16 of add-settings-page-and-device-time-location (D10).
+// Verifies FR12, FR14 of show-zone-abbreviations-and-zone-label-setting (D7).
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import { createInMemoryPreferencesRepository } from "@/adapters";
-import { PreferencesProvider } from "@/controller";
+import {
+  createInMemoryLocationRepository,
+  createInMemoryPreferencesRepository,
+} from "@/adapters";
+import { LocationsProvider, PreferencesProvider } from "@/controller";
+import { fakeClock } from "@/lib/temporal";
 import { PreferencesLoadStatus } from "@/ports";
-import { HourFormat, ThemePreference } from "@/preferences";
-import { createManualWriteScheduler } from "@/test/writeSchedulers";
+import { HourFormat, ThemePreference, ZoneLabelPart } from "@/preferences";
+import { createManualTickScheduler } from "@/test/tickSchedulers";
+import {
+  createManualWriteScheduler,
+  immediateWriteScheduler,
+} from "@/test/writeSchedulers";
 import { SettingsPage } from "./SettingsPage";
 
 const renderPage = (
@@ -19,7 +28,14 @@ const renderPage = (
       repository={repository}
       writeScheduler={writeScheduler}
     >
-      <SettingsPage notices={<p>a notice</p>} onBack={onBack} />
+      <LocationsProvider
+        repository={createInMemoryLocationRepository()}
+        writeScheduler={immediateWriteScheduler}
+        clock={fakeClock("2026-07-15T12:00:00Z")}
+        tickScheduler={createManualTickScheduler()}
+      >
+        <SettingsPage notices={<p>a notice</p>} onBack={onBack} />
+      </LocationsProvider>
     </PreferencesProvider>,
   );
   return { repository, writeScheduler, onBack };
@@ -109,6 +125,10 @@ describe("SettingsPage", () => {
         theme: ThemePreference.DARK,
         hourFormat: HourFormat.H12,
         interfaceLanguage: null,
+        zoneLabelParts: [
+          ZoneLabelPart.UTC_OFFSET,
+          ZoneLabelPart.ZONE_ABBREVIATION,
+        ],
       },
     });
   });
@@ -120,6 +140,61 @@ describe("SettingsPage", () => {
     expect(
       within(themeGroup()).getByRole("radio", { name: "Dark" }),
     ).toBeChecked();
+  });
+
+  it("should list the groups as Theme, Hour format, Zone label, Language", () => {
+    renderPage();
+    const groupNames = screen
+      .getAllByRole("radiogroup")
+      .map((group) => group.getAttribute("aria-label"));
+    expect(groupNames).toEqual(["Theme", "Hour format"]);
+    const zoneLabel = screen.getByRole("group", { name: "Zone label" });
+    expect(
+      hourGroup().compareDocumentPosition(zoneLabel) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      zoneLabel.compareDocumentPosition(
+        screen.getByRole("button", { name: /^Language:/ }),
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("should show both zone label toggles on and the example by default", () => {
+    renderPage();
+    const zoneLabel = screen.getByRole("group", { name: "Zone label" });
+    expect(
+      within(zoneLabel).getByRole("button", {
+        name: "UTC offset",
+        pressed: true,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(zoneLabel).getByRole("button", {
+        name: "Abbreviation",
+        pressed: true,
+      }),
+    ).toBeInTheDocument();
+    expect(zoneLabel).toHaveAccessibleDescription(
+      "Example: India IST UTC+5:30",
+    );
+  });
+
+  it("should change the example in the same render as the Abbreviation toggle", async () => {
+    renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Abbreviation" }));
+    expect(
+      screen.getByRole("group", { name: "Zone label" }),
+    ).toHaveAccessibleDescription("Example: India UTC+5:30");
+  });
+
+  it("should save the zone label once after the debounce", async () => {
+    const { repository, writeScheduler } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Abbreviation" }));
+    writeScheduler.runPending();
+    expect(repository.load()).toMatchObject({
+      preferences: { zoneLabelParts: [ZoneLabelPart.UTC_OFFSET] },
+    });
   });
 
   it("should show the notices in a polite status region", () => {

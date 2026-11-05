@@ -2,10 +2,18 @@
 // Verifies FR1, NFR-A1, UX1 of move-and-restyle-gnomish-factory-credit (D1).
 import { render, screen, within } from "@testing-library/react";
 import i18n from "i18next";
-import { createInMemoryPreferencesRepository } from "@/adapters";
-import { PreferencesProvider } from "@/controller";
+import {
+  createInMemoryLocationRepository,
+  createInMemoryPreferencesRepository,
+} from "@/adapters";
+import { LocationsProvider, PreferencesProvider } from "@/controller";
+import { fakeClock } from "@/lib/temporal";
 import { PreferencesLoadStatus } from "@/ports";
-import { createManualWriteScheduler } from "@/test/writeSchedulers";
+import { createManualTickScheduler } from "@/test/tickSchedulers";
+import {
+  createManualWriteScheduler,
+  immediateWriteScheduler,
+} from "@/test/writeSchedulers";
 import { SettingsPage } from "./SettingsPage";
 
 const renderPage = (repository = createInMemoryPreferencesRepository()) =>
@@ -14,7 +22,14 @@ const renderPage = (repository = createInMemoryPreferencesRepository()) =>
       repository={repository}
       writeScheduler={createManualWriteScheduler()}
     >
-      <SettingsPage notices={null} onBack={vi.fn()} />
+      <LocationsProvider
+        repository={createInMemoryLocationRepository()}
+        writeScheduler={immediateWriteScheduler}
+        clock={fakeClock("2026-07-15T12:00:00Z")}
+        tickScheduler={createManualTickScheduler()}
+      >
+        <SettingsPage notices={null} onBack={vi.fn()} />
+      </LocationsProvider>
     </PreferencesProvider>,
   );
 
