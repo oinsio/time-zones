@@ -117,7 +117,8 @@ The proposal defines no `Q` id ("Open Questions: None."; D1–D3 decide the open
     - AND Moscow has as many zone lookups as Almaty
   - In task 8.6, extend `startZoneLookupCount()` with a separate per-zone count of `Temporal.ZonedDateTime.prototype.with`, for example `adjustmentsIn(timeZoneId)`, leaving `lookupsIn` unchanged. Assert on `lookupsIn + adjustmentsIn`.
 - Fix risk: Other per-row code may call `with` or convert per zone differently for zones with and without a clock change. That is why the baseline for New York is Santiago, a zone with a clock change but no table entry, and not Almaty. If the counts still differ for reasons outside the abbreviation, the implementer has to choose the instant further from a clock change. Keeping `lookupsIn` unchanged leaves the existing budget scenarios that use it (`locations_offset_difference_budget_unit`, `time_selection_wall_time_budget`) unaffected.
-- Status: open
+- Status: fixed
+- Resolution: specs/locations/spec.md scenario "Extra zone lookups per row" now presents New York, Santiago, Moscow and Almaty at 2026-07-15T12:00:00Z with the abbreviation shown and asserts New York has at most 2 more zone lookups than Santiago and Moscow as many as Almaty; design.md D2 explains the baseline and the new counter; task 8.6 extends src/test/zoneLookupCounter.ts with a per-zone adjustmentsIn count of ZonedDateTime#with (lookupsIn unchanged, own test) and asserts on lookupsIn + adjustmentsIn.
 
 ### R2 — WARNING — "Interface language choice" still puts the language group directly below the hour format group
 - Location: `openspec/specs/settings/spec.md:403`; `openspec/changes/show-zone-abbreviations-and-zone-label-setting/specs/settings/spec.md:4`
@@ -129,7 +130,8 @@ The proposal defines no `Q` id ("Open Questions: None."; D1–D3 decide the open
   - the trace comment gets `; FR12 of show-zone-abbreviations-and-zone-label-setting` appended.
   The scenario "Collapsed group" ("below the hour format group a group "Language"…") can stay as it is, because it is still true.
 - Fix risk: The restatement must keep every stable scenario of that requirement, or the archive drops them. No code or test changes, because the existing E2E step only asserts "below".
-- Status: open
+- Status: fixed
+- Resolution: specs/settings/spec.md restates "Interface language choice" under MODIFIED Requirements verbatim with all four stable scenarios, except "directly below the zone label group" and FR12 of this change appended to its trace comment.
 
 ### R3 — WARNING — Task 2.4 tells the implement stage to edit the spec scenarios
 - Location: `openspec/changes/show-zone-abbreviations-and-zone-label-setting/tasks.md:32`
@@ -138,7 +140,8 @@ The proposal defines no `Q` id ("Open Questions: None."; D1–D3 decide the open
 - Impact: If this branch is taken, the implement stage must either break its write limits, or leave the spec and the code disagreeing on the abbreviation of a zone. In the second case the box cannot honestly be ticked, and the stage is blocked.
 - Fix: Replace that sentence with: "These are the tzdb values the spec states; if a real value differs, fix the extraction (D1) or its adapter of `moment.tz.zone`, not the expectation." All listed values agree with current tzdb (numeric `+05` for Almaty, `+04` for Dubai, `+08` for Singapore, `-03` for São Paulo, `+06` for Dhaka; letter pairs for the others), so the branch exists only to catch an extraction bug.
 - Fix risk: If the pinned `moment-timezone` data really did differ from tzdb for one of these zones, the task would stay red until a fix-specs round corrects the spec. That is the right owner for a spec change.
-- Status: open
+- Status: fixed
+- Resolution: task 2.4 in tasks.md now says these are the tzdb values the spec states and a differing value is fixed in the extraction (D1) or its moment.tz.zone adapter, not in the expectation; the instruction to edit the spec scenarios is gone.
 
 ### R4 — WARNING — The modified "Both languages" outline of "Settings strings are localized" has no task
 - Location: `openspec/changes/show-zone-abbreviations-and-zone-label-setting/specs/settings/spec.md:217`; `tasks.md:68` (8.4) and `tasks.md:76` (9.2)
@@ -150,7 +153,8 @@ The proposal defines no `Q` id ("Open Questions: None."; D1–D3 decide the open
   - "the zone label toggles are {string} and {string}", which uses `getByRole("button", { name })` inside that group.
   Keep the existing three-name step for any other caller. Verify with the task 9.2 command run on `settings_e2e.feature --grep "Both languages"`.
 - Fix risk: Accessible names belong to E2E (`.claude/rules/bdd-unit.md`, "aria-labels, focus management": unit no, E2E yes), so the placement is correct. The cost is one more E2E outline with two examples.
-- Status: open
+- Status: fixed
+- Resolution: task 9.2 in tasks.md gains a step that extends the settings_e2e.feature outline "Both languages" with the zone label, utc offset and abbreviation columns and the FR12 tags, adds the four-group-name and zone-label-toggle steps to settings_e2e.steps.ts, keeps the old step, and runs it with --grep "Both languages".
 
 ### R5 — SUGGESTION — With only the abbreviation shown, the `UTC` row's zone line is empty
 - Location: `openspec/changes/show-zone-abbreviations-and-zone-label-setting/specs/locations/spec.md:4`; `design.md:72` (D5)
@@ -159,7 +163,8 @@ The proposal defines no `Q` id ("Open Questions: None."; D1–D3 decide the open
 - Impact: In the "abbreviation only" combination, the `UTC` row shows no zone at all, although its abbreviation is known and switched on.
 - Fix: In the spec, change the sentence to "While the UTC offset is shown, a zone abbreviation that reads the same as the UTC offset text MUST NOT be shown, so the `UTC` zone reads `UTC` once". Add the row "| the zone abbreviation only | UTC |" for the `UTC` row in a scenario. In D5, move the equality check from `presentZoneMoment` into `presentZoneLine`: drop the abbreviation part only when the `UTC_OFFSET` part is shown with the same text.
 - Fix risk: `presentZoneLabelExample` and the device time meta line go through `presentZoneLine`, so both follow the new rule. The wall-time hint reads `zoneAbbreviationLabel`, which no longer has the equality applied. This is harmless because the `UTC` zone has no DST overlap and so never shows the ambiguous hint.
-- Status: open
+- Status: fixed
+- Resolution: specs/locations/spec.md "Zone line on location rows" now drops a same-text abbreviation only while the UTC offset is shown and adds scenario "UTC with the zone abbreviation only" (elements UTC); design.md D5 moves the equality check from presentZoneMoment into presentZoneLine; tasks 5.1, 5.3 and 8.2 test both UTC cases and the new scenario. The proposal FR5 wording ("not shown twice") already fits.
 
 ### R6 — SUGGESTION — NFR-P3 has no delta requirement
 - Location: `openspec/changes/show-zone-abbreviations-and-zone-label-setting/proposal.md:93`
@@ -168,7 +173,8 @@ The proposal defines no `Q` id ("Open Questions: None."; D1–D3 decide the open
 - Impact: The Coverage column for NFR-P3 has no spec entry, and after the archive the stable spec does not show that this change relies on that bound for the new abbreviation path. Only task 8.3's tag records the link.
 - Fix: In `specs/location-search/spec.md`, add `### Requirement: Search is fast and lazy` under `## MODIFIED Requirements`. Restate the stable text and its scenarios unchanged, and append `; NFR-P3 of show-zone-abbreviations-and-zone-label-setting` to its trace comment.
 - Fix risk: The restatement must copy every stable scenario of that requirement verbatim, or the archive drops them. Nothing else changes.
-- Status: open
+- Status: fixed
+- Resolution: specs/location-search/spec.md restates "Search is fast and lazy" under MODIFIED Requirements with all stable scenarios, a sentence that an abbreviation query is no exception, NFR-P3 of this change in its trace, and a new scenario "Abbreviation query within the work bound" (IST); task 8.3 adds that scenario to location_search_performance.feature and runs its steps.
 
 ## Verdict
 
