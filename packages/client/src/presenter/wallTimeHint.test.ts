@@ -1,4 +1,5 @@
 // Verifies FR7, FR11 of add-wall-time-input-with-hint (D4).
+// Verifies FR7 of show-zone-abbreviations-and-zone-label-setting (D5).
 
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
@@ -11,12 +12,18 @@ const hintFor = (
   language: "en" | "ru",
   status: WallClockStatus,
   requested: string,
+  zone: {
+    zoneAbbreviationLabel?: string;
+    isZoneAbbreviationShown?: boolean;
+  } = {},
 ) =>
   presentWallTimeHint({
     status,
     requestedWallTime: Temporal.PlainTime.from(requested),
     shownTimeLabel: "03:30",
     utcOffsetLabel: "UTC−4",
+    zoneAbbreviationLabel: zone.zoneAbbreviationLabel ?? "",
+    isZoneAbbreviationShown: zone.isZoneAbbreviationShown ?? false,
     language,
     hourFormat: HourFormat.H24,
     translate: i18n.getFixedT(language),
@@ -52,6 +59,35 @@ describe("presentWallTimeHint", () => {
     expect(hintFor(language, status, requested)).toBe(expected);
   });
 
+  it.each([
+    ["en", "01:30 occurs twice — showing the first (EDT, UTC−4)."],
+    ["ru", "01:30 бывает дважды — показано первое (EDT, UTC−4)"],
+  ] as const)(
+    "names the abbreviation before the offset in %s",
+    (language, expected) => {
+      const hint = hintFor(language, WallClockStatus.AMBIGUOUS, "01:30", {
+        zoneAbbreviationLabel: "EDT",
+        isZoneAbbreviationShown: true,
+      });
+      expect(hint).toBe(expected);
+    },
+  );
+
+  it.each([
+    [
+      "the abbreviation is hidden",
+      { zoneAbbreviationLabel: "EDT", isZoneAbbreviationShown: false },
+    ],
+    [
+      "the zone has no abbreviation",
+      { zoneAbbreviationLabel: "", isZoneAbbreviationShown: true },
+    ],
+  ])("names only the offset when %s", (_name, zone) => {
+    expect(hintFor("en", WallClockStatus.AMBIGUOUS, "01:30", zone)).toBe(
+      "01:30 occurs twice — showing the first (UTC−4).",
+    );
+  });
+
   it("writes no hint for a UNIQUE time", () => {
     expect(hintFor("en", WallClockStatus.UNIQUE, "10:40")).toBeUndefined();
   });
@@ -65,6 +101,8 @@ describe("presentWallTimeHint in the 12-hour format", () => {
       requestedWallTime: Temporal.PlainTime.from("02:30"),
       shownTimeLabel: "3:30 AM",
       utcOffsetLabel: "UTC−4",
+      zoneAbbreviationLabel: "",
+      isZoneAbbreviationShown: false,
       language: "en",
       hourFormat: HourFormat.H12,
       translate: i18n.getFixedT("en"),

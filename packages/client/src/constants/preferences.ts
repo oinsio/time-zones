@@ -3,6 +3,15 @@ import { KeyboardKey } from "./keyboard";
 /** Version of the stored preferences document (ADR-0004 envelope). */
 export const PREFERENCES_SCHEMA_VERSION = 3;
 
+/**
+ * The zone of the live example under the zone label group.
+ * Implements FR14 of show-zone-abbreviations-and-zone-label-setting (D5).
+ */
+export const ZONE_LABEL_EXAMPLE = {
+  timeZoneId: "Asia/Kolkata",
+  countryCode: "IN",
+} as const;
+
 /** Delay that collapses bursts of preference changes into one storage write. */
 export const PREFERENCES_WRITE_DEBOUNCE_MS = 300;
 
