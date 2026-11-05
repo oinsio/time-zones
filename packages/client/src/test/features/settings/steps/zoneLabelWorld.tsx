@@ -123,7 +123,9 @@ export const createZoneLabelWorld = () => {
       cleanup();
       await i18n.changeLanguage("ru");
     },
-    setLanguage: (language: string) => i18n.changeLanguage(language),
+    setLanguage: async (language: string) => {
+      await i18n.changeLanguage(language);
+    },
     setList: (...cities: string[]) => {
       cityLabels = cities;
     },

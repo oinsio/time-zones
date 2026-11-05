@@ -82,7 +82,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     whenUserSearches({ When });
     Then(
       "exactly three results match by abbreviation: {string}, {string} and {string}",
-      (_ctx, ...cities: string[]) =>
+      (_ctx: unknown, ...cities: string[]) =>
         expect(cityNamesByAbbreviation()).toEqual(cities),
     );
   });
@@ -233,7 +233,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       whenUserSearches({ When });
       Then(
         "the first three results are {string} with {string}, {string} with {string} and {string} with {string}, in that order",
-        (_ctx, ...expected: string[]) => {
+        (_ctx: unknown, ...expected: string[]) => {
           const leading = present().slice(0, LEADING_RESULTS_COUNT);
           expect(
             leading.flatMap((result) => [result.cityName, pairTextOf(result)]),

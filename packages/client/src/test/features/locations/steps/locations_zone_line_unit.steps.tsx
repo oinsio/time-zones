@@ -101,7 +101,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     ({ Given, And, When, Then }) => {
       Given(
         "the list contains {string} and {string}",
-        (_ctx, ...cities: string[]) =>
+        (_ctx: unknown, ...cities: string[]) =>
           world.setList(cities.join(ELEMENT_SEPARATOR)),
       );
       And("the current instant is {string}", givenInstant);
@@ -125,7 +125,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Given("the current instant is {string}", givenInstant);
       And(
         "the list contains {string} and {string}",
-        (_ctx, ...cities: string[]) =>
+        (_ctx: unknown, ...cities: string[]) =>
           world.setList(cities.join(ELEMENT_SEPARATOR)),
       );
       When("the user opens the app", openApp);

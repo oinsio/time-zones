@@ -102,7 +102,9 @@ export const createZoneLineWorld = () => {
       clock.moveTo(timestamp, clock.timeZoneId()),
     setDeviceZone: (zone: string) =>
       clock.moveTo(clock.instant().toString(), zone),
-    setLanguage: (language: string) => i18n.changeLanguage(language),
+    setLanguage: async (language: string) => {
+      await i18n.changeLanguage(language);
+    },
     setZoneLabel: (partsName: keyof typeof ZONE_LABEL_PART_NAMES) => {
       zoneLabelParts = ZONE_LABEL_PART_NAMES[partsName];
     },

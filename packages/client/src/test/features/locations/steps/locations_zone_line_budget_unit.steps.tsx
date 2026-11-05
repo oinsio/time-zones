@@ -49,7 +49,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("Extra zone lookups per row", ({ Given, And, When, Then }) => {
     Given(
       "the list contains {string}, {string}, {string} and {string}",
-      (_ctx, ...cities: string[]) => {
+      (_ctx: unknown, ...cities: string[]) => {
         locations = cities.map((city) => buildLocation(cityEntry(city)));
       },
     );
