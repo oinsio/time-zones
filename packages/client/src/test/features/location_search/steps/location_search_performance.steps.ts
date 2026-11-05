@@ -1,3 +1,4 @@
+// Verifies NFR-P3 of show-zone-abbreviations-and-zone-label-setting (abbreviation query work bound).
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
@@ -37,4 +38,26 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       }
     });
   });
+
+  // @show-zone-abbreviations-and-zone-label-setting @NFR-P3
+  f.Scenario(
+    "Abbreviation query within the work bound",
+    ({ When, Then, And }) => {
+      let abbreviationWork: ReturnType<typeof countSearchWork>;
+      When(
+        "the query {string} is run over the full data",
+        (_ctx, query: string) => {
+          abbreviationWork = countSearchWork(query);
+        },
+      );
+      Then("it normalizes exactly one text", () =>
+        expect(abbreviationWork.normalizations).toBe(NORMALIZATIONS_PER_QUERY),
+      );
+      And("it builds at most one collator", () =>
+        expect(abbreviationWork.collators).toBeLessThanOrEqual(
+          MAX_COLLATORS_PER_QUERY,
+        ),
+      );
+    },
+  );
 });

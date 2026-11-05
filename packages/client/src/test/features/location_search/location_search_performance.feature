@@ -6,3 +6,9 @@ Feature: Location search performance
     When each of 10 sample queries is run over the full data
     Then each query normalizes exactly one text
     And each query builds at most one collator
+
+  @show-zone-abbreviations-and-zone-label-setting @NFR-P3
+  Scenario: Abbreviation query within the work bound
+    When the query "IST" is run over the full data
+    Then it normalizes exactly one text
+    And it builds at most one collator
