@@ -1,4 +1,5 @@
 // Implements FR4, FR5, FR7 of add-settings-page-and-device-time-location: the settings page over real preferences storage.
+// Implements FR12 of show-zone-abbreviations-and-zone-label-setting: the zone label example reads the list's moment.
 import {
   act,
   cleanup,
@@ -10,17 +11,24 @@ import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { expect } from "vitest";
 import {
+  createInMemoryLocationRepository,
   createLocalStoragePreferencesRepository,
   type LocationsSyncChannel,
 } from "@/adapters";
 import { SettingsPage } from "@/app/settings";
 import { STORAGE_KEYS } from "@/constants";
-import { PreferencesProvider } from "@/controller";
+import { LocationsProvider, PreferencesProvider } from "@/controller";
+import { fakeClock } from "@/lib/temporal";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
-import { createManualWriteScheduler } from "@/test/writeSchedulers";
+import { createManualTickScheduler } from "@/test/tickSchedulers";
+import {
+  createManualWriteScheduler,
+  immediateWriteScheduler,
+} from "@/test/writeSchedulers";
 
 const NOT_JSON = "{not json";
 const NO_OP = () => undefined;
+const SETTINGS_INSTANT = "2026-07-15T12:00:00Z";
 
 type OpenedSettings = {
   unmount: () => void;
@@ -45,7 +53,14 @@ export const createSettingsWorld = () => {
         repository={repository}
         writeScheduler={writeScheduler}
       >
-        <SettingsPage notices={null} onBack={NO_OP} />
+        <LocationsProvider
+          repository={createInMemoryLocationRepository()}
+          writeScheduler={immediateWriteScheduler}
+          clock={fakeClock(SETTINGS_INSTANT)}
+          tickScheduler={createManualTickScheduler()}
+        >
+          <SettingsPage notices={null} onBack={NO_OP} />
+        </LocationsProvider>
       </PreferencesProvider>,
     );
     const opened = { unmount, writeScheduler, container };
