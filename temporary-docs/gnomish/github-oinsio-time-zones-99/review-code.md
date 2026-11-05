@@ -230,7 +230,8 @@ Every file is at or above the 90 % minimum. No survivor points to an untested re
 - Impact: The traceability rule says "If the reference is not explicit, it does not exist" and that coverage is checked with `grep`. A grep for FR12/FR13 counts these search files as implementing the settings group, and a grep for FR11 misses them. A later reader or audit following the links lands in the wrong place.
 - Fix: In both JSDoc lines, replace `FR12, FR13` with `FR11` (keep FR10, NFR-A2 and UX3).
 - Fix risk: none. This is a comment-only change. FR12 and FR13 stay covered by `ZoneLabelGroup.tsx`, `SettingsToggleGroup.tsx` and the settings features, so task 10.3's id grep still passes.
-- Status: open
+- Status: fixed
+- Resolution: replaced FR12, FR13 with FR11 in the JSDoc of presentSearchResults.ts and LocationSearchResults.tsx; comment-only, FR10/NFR-A2/UX3 kept.
 
 ### R2 — SUGGESTION — The zone line markup is rendered by two components
 - Location: `packages/client/src/app/settings/ZoneLabelGroup.tsx:39-52`
@@ -239,7 +240,8 @@ Every file is at or above the 90 % minimum. No survivor points to an untested re
 - Impact: The NFR-R1 layout rule (abbreviation and offset never break, place wraps) lives in two places. A later change to the zone line's rendering, such as a new part kind or another wrap rule, must be made twice. If it is not, the settings example stops matching the card. The settings E2E checks do not catch this, because they assert text, not wrapping.
 - Fix: Extract a `ZoneLine` component in `packages/client/src/views/shared/` (exported from its `index.ts`) that takes `parts: readonly ZoneLinePart[]` and an optional `className`. Use it in `ZoneRowContent.tsx`, with `text-sm text-muted-foreground`, and in `ZoneLabelGroup.tsx`. Code under `app/` may already import from `@/views/shared`; `app/AppShell.tsx:15` does. Keep the existing component tests passing.
 - Fix risk: `ZoneLabelGroup` adds a `{" "}` text node after each part, which `SettingsPage.test.tsx:179` relies on ("Example: India IST UTC+5:30"). The card markup has no such spaces. The shared component must keep a separator space, or the test must match the parts. Adding spaces to the card changes its `textContent`, so recheck the row tests and the screenshot steps. Extra whitespace nodes in a flex container do not render, so the screenshots should not change.
-- Status: open
+- Status: fixed
+- Resolution: extracted shared ZoneLine in views/shared/ZoneLine.tsx, used by ZoneRowContent and ZoneLabelGroup (isTextSeparated keeps the space nodes for the example description); covered by LocationRow.test.tsx and SettingsPage.test.tsx "Example: India IST UTC+5:30".
 
 ## Verdict
 

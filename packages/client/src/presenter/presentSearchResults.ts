@@ -34,7 +34,7 @@ export type PresentedSearchResult = {
 /**
  * Search results in the interface language, each marked when already added.
  * Implements FR5, FR8, UX3 of add-locations-via-search (D9).
- * Implements FR10, FR12, FR13, UX3 of show-zone-abbreviations-and-zone-label-setting (D8): the abbreviation pair.
+ * Implements FR10, FR11, UX3 of show-zone-abbreviations-and-zone-label-setting (D8): the abbreviation pair.
  */
 export function presentSearchResults(
   results: readonly CitySearchResult[],

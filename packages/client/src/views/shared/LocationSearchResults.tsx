@@ -20,7 +20,7 @@ type LocationSearchResultsProps = {
  * Implements FR5, FR8, UX3 of add-locations-via-search (D10).
  * Implements FR11 of add-settings-page-and-device-time-location (D12): the
  * Device time option comes first.
- * Implements FR10, FR12, FR13, NFR-A2, UX3 of show-zone-abbreviations-and-zone-label-setting (D8): the abbreviation pair, the matched one bold.
+ * Implements FR10, FR11, NFR-A2, UX3 of show-zone-abbreviations-and-zone-label-setting (D8): the abbreviation pair, the matched one bold.
  */
 export function LocationSearchResults({
   listboxId,

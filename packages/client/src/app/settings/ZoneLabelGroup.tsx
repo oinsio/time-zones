@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import {
   usePreferences,
@@ -6,7 +5,7 @@ import {
   useZoneLabelParts,
 } from "@/controller";
 import { ZoneLabelPart } from "@/preferences";
-import { ZoneLinePartKind } from "@/presenter";
+import { ZoneLine } from "@/views/shared";
 import { SettingsToggleGroup } from "./SettingsToggleGroup";
 
 const ZONE_LABEL_PART_LABEL_KEYS = {
@@ -36,21 +35,7 @@ export function ZoneLabelGroup() {
       description={
         <>
           <span className="sr-only">{t("settings.zoneLabelExample")} </span>
-          <span data-zone-line className="flex flex-wrap gap-x-2">
-            {exampleParts.map((part) => (
-              <Fragment key={part.kind}>
-                <span
-                  className={
-                    part.kind === ZoneLinePartKind.PLACE
-                      ? undefined
-                      : "whitespace-nowrap"
-                  }
-                >
-                  {part.text}
-                </span>{" "}
-              </Fragment>
-            ))}
-          </span>
+          <ZoneLine parts={exampleParts} isTextSeparated />
         </>
       }
     />

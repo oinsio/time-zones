@@ -1,13 +1,13 @@
 import type { TrackMove, WallTimeInputOutcome } from "@/controller";
-import {
-  type PresentedDayTrack,
-  type PresentedLocationMark,
-  type ZoneLinePart,
-  ZoneLinePartKind,
+import type {
+  PresentedDayTrack,
+  PresentedLocationMark,
+  ZoneLinePart,
 } from "@/presenter";
 import { DayTrack } from "./DayTrack";
 import { LocalDateTime } from "./LocalDateTime";
 import { LocationMarkIcon } from "./LocationMarkIcon";
+import { ZoneLine } from "./ZoneLine";
 
 type ZoneRowContentProps = {
   cityLabel: string;
@@ -94,23 +94,10 @@ export function ZoneRowContent({
             )}
           </span>
           {zoneLineParts.length > 0 && (
-            <span
-              data-zone-line
-              className="flex flex-wrap gap-x-2 text-sm text-muted-foreground"
-            >
-              {zoneLineParts.map((part) => (
-                <span
-                  key={part.kind}
-                  className={
-                    part.kind === ZoneLinePartKind.PLACE
-                      ? undefined
-                      : "whitespace-nowrap"
-                  }
-                >
-                  {part.text}
-                </span>
-              ))}
-            </span>
+            <ZoneLine
+              parts={zoneLineParts}
+              className="text-sm text-muted-foreground"
+            />
           )}
         </span>
         <LocalDateTime
