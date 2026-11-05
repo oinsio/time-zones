@@ -23,6 +23,12 @@ declare module "virtual:zone-cities" {
   export default zoneCities;
 }
 
+declare module "virtual:zone-abbreviations" {
+  /** Zone ID → its abbreviation pair (one entry for a zone with one offset, "" for a numeric half). */
+  const zoneAbbreviations: Readonly<Record<string, readonly string[]>>;
+  export default zoneAbbreviations;
+}
+
 declare module "virtual:legacy-core-js" {
   // Side-effect module: installs the core-js polyfills a legacy engine lacks.
 }

@@ -12,6 +12,10 @@ export type WallTimeHintContext = {
   shownTimeLabel: string;
   /** The row's UTC offset at the pinned instant, already presented. */
   utcOffsetLabel: string;
+  /** The row's zone abbreviation, already presented; empty when the zone has none. */
+  zoneAbbreviationLabel: string;
+  /** Whether the zone label shows the zone abbreviation. */
+  isZoneAbbreviationShown: boolean;
   language: InterfaceLanguageCode;
   hourFormat: HourFormat;
   translate: TFunction;
@@ -21,12 +25,15 @@ export type WallTimeHintContext = {
  * The wall-time hint of the row a time was typed in: what a DST gap or a DST
  * overlap did to the typed time. `undefined` for a `UNIQUE` time.
  * Implements FR7, FR11 of add-wall-time-input-with-hint (D4).
+ * Implements FR7 of show-zone-abbreviations-and-zone-label-setting (D5): the overlap hint names the zone abbreviation too.
  */
 export function presentWallTimeHint({
   status,
   requestedWallTime,
   shownTimeLabel,
   utcOffsetLabel,
+  zoneAbbreviationLabel,
+  isZoneAbbreviationShown,
   language,
   hourFormat,
   translate,
@@ -45,7 +52,13 @@ export function presentWallTimeHint({
   if (status === WallClockStatus.AMBIGUOUS) {
     return translate("locations.wallTimeHintAmbiguous", {
       requestedTime,
-      utcOffset: utcOffsetLabel,
+      zone:
+        isZoneAbbreviationShown && zoneAbbreviationLabel !== ""
+          ? translate("locations.wallTimeHintZone", {
+              zoneAbbreviation: zoneAbbreviationLabel,
+              utcOffset: utcOffsetLabel,
+            })
+          : utcOffsetLabel,
     });
   }
   return undefined;

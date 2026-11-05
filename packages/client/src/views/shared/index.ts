@@ -8,3 +8,4 @@ export { LocationsLoadError } from "./LocationsLoadError";
 // Implements FR1, FR7 of add-wall-time-input-with-hint.
 export { WallTimeHint } from "./WallTimeHint";
 export { WallTimeInput } from "./WallTimeInput";
+export { ZoneLine } from "./ZoneLine";

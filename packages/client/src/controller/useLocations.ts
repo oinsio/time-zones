@@ -13,6 +13,7 @@ import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 import { useCityLabels } from "./useCityLabels";
 import { useExemplarCity } from "./useExemplarCity";
 import { useHourFormat } from "./useHourFormat";
+import { useZoneLabelParts } from "./useZoneLabelParts";
 
 export { LocationsStatus } from "./locationsContext";
 
@@ -42,6 +43,7 @@ const MISSING_PROVIDER_MESSAGE =
  * Passes the wall-clock note: Implements FR7 of add-wall-time-input-with-hint (D2).
  * Passes the city labels in the interface language: Implements FR1, FR2, FR4,
  * NFR-P1 of show-city-labels-in-interface-language (D3).
+ * Passes the zone label: Implements FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
@@ -50,6 +52,7 @@ export function useLocations() {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const { locations, deviceTimeZoneId, homeLocationId } = state;
   const hourFormat = useHourFormat();
+  const zoneLabelParts = useZoneLabelParts();
   const { t } = useTranslation();
   const { code: language } = useActiveInterfaceLanguage();
   const deviceTimeLocation = locations.find(isDeviceTimeLocation);
@@ -65,6 +68,7 @@ export function useLocations() {
     const context: LocationRowsContext = {
       language,
       hourFormat,
+      zoneLabelParts,
       instant,
       translate: t,
       deviceTimeZoneId,
@@ -87,6 +91,7 @@ export function useLocations() {
     cityLabels,
     language,
     hourFormat,
+    zoneLabelParts,
     t,
     clock,
     minuteTick,

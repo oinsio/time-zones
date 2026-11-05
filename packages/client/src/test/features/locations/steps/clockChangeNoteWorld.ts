@@ -18,7 +18,7 @@ import {
   WallTimeTargetKind,
   type WorldClockState,
 } from "@/model";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { type LocationRow, presentLocationRows } from "@/presenter";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { type StubbedZoneRules, stubZoneRules } from "@/test/stubZoneRules";
@@ -132,6 +132,7 @@ export function createClockChangeNoteWorld() {
       return presentLocationRows(state.locations, {
         language,
         hourFormat,
+        zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
         instant,
         translate: i18n.getFixedT(language),
         deviceTimeZoneId: state.deviceTimeZoneId,

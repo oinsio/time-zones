@@ -63,6 +63,7 @@
     "cldr-dates-full": "^48.2.0",
     "core-js-compat": "^3.51.0",
     "jsdom": "^25.0.1",
+    "moment-timezone": "^0.6.6",
     "playwright-bdd": "^9.2.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",

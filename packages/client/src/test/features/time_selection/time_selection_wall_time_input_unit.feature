@@ -143,7 +143,7 @@ Feature: Type an exact time in any row
     Then "New York" shows the hint "02:30 does not exist on this day — clocks moved forward. Showing 03:30."
     And "Almaty" shows no hint
 
-  @add-wall-time-input-with-hint @FR7
+  @add-wall-time-input-with-hint @FR7 @show-zone-abbreviations-and-zone-label-setting
   Scenario: Hint for a DST overlap
     Given the device time zone is "Asia/Almaty"
     And the interface language is "ru"
@@ -151,7 +151,7 @@ Feature: Type an exact time in any row
     And the list contains "New York"
     And the app is open
     When the user types "01:30" in "New York"
-    Then "New York" shows the hint "01:30 бывает дважды — показано первое (UTC−4)"
+    Then "New York" shows the hint "01:30 бывает дважды — показано первое (EDT, UTC−4)"
 
   @add-wall-time-input-with-hint @FR7 @FR11
   Scenario: Hint texts in Russian for a DST gap
@@ -162,9 +162,19 @@ Feature: Type an exact time in any row
     When the user types "02:30" in "New York"
     Then "New York" shows the hint "02:30 не существует в этот день — часы переведены вперёд. Показано 03:30"
 
-  @add-wall-time-input-with-hint @FR7 @FR11
+  @add-wall-time-input-with-hint @FR7 @FR11 @show-zone-abbreviations-and-zone-label-setting
   Scenario: Hint texts in English for a DST overlap
     Given the interface language is "en"
+    And the current instant is "2026-11-01T07:30:00Z"
+    And the list contains "New York"
+    And the app is open
+    When the user types "01:30" in "New York"
+    Then "New York" shows the hint "01:30 occurs twice — showing the first (EDT, UTC−4)."
+
+  @show-zone-abbreviations-and-zone-label-setting @FR7
+  Scenario: Overlap hint without the abbreviation
+    Given the interface language is "en"
+    And the zone label shows neither the zone abbreviation nor the UTC offset
     And the current instant is "2026-11-01T07:30:00Z"
     And the list contains "New York"
     And the app is open

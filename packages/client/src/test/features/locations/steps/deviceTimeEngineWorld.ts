@@ -9,7 +9,7 @@ import {
   getUtcOffsetMinutes,
   type Location,
 } from "@/model";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import type { LocationRowsContext } from "@/presenter";
 import { presentLocationRows } from "@/presenter";
 import { buildReferenceDay } from "@/test/referenceDay";
@@ -55,6 +55,7 @@ export async function presentDeviceTimeOnEngine(
   const [presented] = presenter.presentLocationRows([deviceTimeLocation], {
     language: LANGUAGE,
     hourFormat: HourFormat.H24,
+    zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(LANGUAGE),
     deviceTimeZoneId: state.state.deviceTimeZoneId,
@@ -74,6 +75,7 @@ const contextAt = (timestamp: string): LocationRowsContext => {
   return {
     language: LANGUAGE,
     hourFormat: HourFormat.H24,
+    zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(LANGUAGE),
     deviceTimeZoneId: BUDGET_DEVICE_ZONE,

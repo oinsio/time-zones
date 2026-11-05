@@ -1,6 +1,9 @@
+import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import type { PresentedSearchResult } from "@/presenter";
 import { cn } from "@/shared/lib/cn";
+
+const ABBREVIATION_PAIR_SEPARATOR = " / ";
 
 type LocationSearchResultsProps = {
   listboxId: string;
@@ -17,6 +20,7 @@ type LocationSearchResultsProps = {
  * Implements FR5, FR8, UX3 of add-locations-via-search (D10).
  * Implements FR11 of add-settings-page-and-device-time-location (D12): the
  * Device time option comes first.
+ * Implements FR10, FR11, NFR-A2, UX3 of show-zone-abbreviations-and-zone-label-setting (D8): the abbreviation pair, the matched one bold.
  */
 export function LocationSearchResults({
   listboxId,
@@ -64,9 +68,23 @@ export function LocationSearchResults({
           <span className="flex flex-col">
             <span className="font-semibold">
               {result.cityName}
-              {result.matchedAbbreviation !== undefined && (
-                <span className="ml-2 font-normal text-muted-foreground">
-                  {result.matchedAbbreviation}
+              {result.abbreviationPair !== undefined && (
+                <span className="ml-2">
+                  {result.abbreviationPair.map((abbreviation, position) => (
+                    <Fragment key={abbreviation.text}>
+                      {position > 0 && ABBREVIATION_PAIR_SEPARATOR}
+                      <span
+                        data-matched={abbreviation.isMatched || undefined}
+                        className={
+                          abbreviation.isMatched
+                            ? "font-bold text-foreground"
+                            : "font-normal text-muted-foreground"
+                        }
+                      >
+                        {abbreviation.text}
+                      </span>
+                    </Fragment>
+                  ))}
                 </span>
               )}
             </span>

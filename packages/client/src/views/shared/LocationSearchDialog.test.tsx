@@ -1,4 +1,5 @@
 // Verifies FR5–FR8, FR15, UX1–UX3 of add-locations-via-search.
+// Verifies FR11, NFR-A2, UX3 of show-zone-abbreviations-and-zone-label-setting (D8).
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -6,6 +7,8 @@ import { CitySearchStatus } from "@/controller";
 import {
   addedTokyo,
   kolkata,
+  moscow,
+  newYork,
   renderDialog,
 } from "./locationSearchDialogFixtures";
 
@@ -41,6 +44,25 @@ describe("LocationSearchDialog", () => {
     expect(
       screen.getByText("Try a city, a country or an abbreviation such as IST."),
     ).toBeVisible();
+  });
+
+  it("should show the abbreviation pair with the matched one emphasised", () => {
+    renderDialog({ query: "EDT", presentedResults: [newYork] });
+    expect(screen.getByRole("option")).toHaveTextContent("EST / EDT");
+    expect(screen.getByText("EDT")).toHaveAttribute("data-matched");
+    expect(screen.getByText("EDT")).toHaveClass("font-bold");
+    expect(screen.getByText("EST")).not.toHaveAttribute("data-matched");
+    expect(screen.getByText("EST")).toHaveClass("font-normal");
+  });
+
+  it("should show a single abbreviation without a separator", () => {
+    renderDialog({ query: "IST", presentedResults: [kolkata] });
+    expect(screen.getByRole("option")).toHaveTextContent("KolkataISTIndia");
+  });
+
+  it("should show no abbreviation for a result that is no abbreviation match", () => {
+    renderDialog({ query: "Mos", presentedResults: [moscow] });
+    expect(screen.getByRole("option")).toHaveTextContent(/^MoscowRussia$/);
   });
 
   it("should show the loading placeholder while the data loads", () => {

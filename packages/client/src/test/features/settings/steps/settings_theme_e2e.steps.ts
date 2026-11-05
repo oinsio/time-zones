@@ -5,6 +5,7 @@ import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import { englishLocale } from "../../main_page/steps/englishTexts";
 import { readThemeColours } from "../../main_page/steps/themeTokens";
 import {
+  ALL_ZONE_LABEL_PARTS,
   BUTTON_ROLE,
   HOUR_FORMAT_VALUES,
   seedPreferences,
@@ -34,6 +35,7 @@ Given(
           theme: THEME_VALUES[themeName],
           hourFormat,
           interfaceLanguage: locationsWorld.seededInterfaceLanguage,
+          zoneLabelParts: ALL_ZONE_LABEL_PARTS,
         },
       }),
     );

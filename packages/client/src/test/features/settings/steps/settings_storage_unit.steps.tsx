@@ -3,7 +3,11 @@ import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import userEvent from "@testing-library/user-event";
 import { expect } from "vitest";
-import { HourFormat, ThemePreference } from "@/preferences";
+import {
+  DEFAULT_PREFERENCES,
+  HourFormat,
+  ThemePreference,
+} from "@/preferences";
 import { createSettingsWorld } from "./settingsWorld";
 
 const feature = await loadFeature("../settings_storage_unit.feature");
@@ -93,6 +97,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             theme: ThemePreference.DARK,
             hourFormat: HourFormat.H12,
             interfaceLanguage: null,
+            zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
           });
         },
       );

@@ -85,6 +85,7 @@ describe("localStorage preferences repository", () => {
         theme: ThemePreference.LIGHT,
         hourFormat: HourFormat.H24,
         interfaceLanguage: null,
+        zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
       }),
     ).toBe(SaveOutcome.FAILED);
   });
@@ -104,11 +105,17 @@ describe("localStorage preferences repository", () => {
       theme: ThemePreference.DARK,
       hourFormat: HourFormat.H12,
       interfaceLanguage: "ru",
+      zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
-        schemaVersion: 2,
-        payload: { theme: "DARK", hourFormat: "H12", interfaceLanguage: "ru" },
+        schemaVersion: 3,
+        payload: {
+          theme: "DARK",
+          hourFormat: "H12",
+          interfaceLanguage: "ru",
+          zoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        },
       },
     );
   });
@@ -173,6 +180,7 @@ describe("in-memory preferences repository", () => {
       theme: ThemePreference.DARK,
       hourFormat: HourFormat.H12,
       interfaceLanguage: null,
+      zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     });
     expect(outcome).toBe(SaveOutcome.FAILED);
     expect(repository.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });

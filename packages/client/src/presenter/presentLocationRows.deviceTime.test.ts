@@ -1,3 +1,4 @@
+// Verifies FR6 of show-zone-abbreviations-and-zone-label-setting (D5): the meta line is zone line parts.
 // Verifies FR8, UX3 of add-settings-page-and-device-time-location (D4): the device time row.
 // Verifies FR5 of add-settings-page-and-device-time-location (D8): the 12-hour rows.
 import i18n from "i18next";
@@ -5,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import { buildDeviceTimeLocation } from "@/model";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
@@ -21,6 +22,7 @@ const present = (
   presentLocationRows(locations, {
     language,
     hourFormat: HourFormat.H24,
+    zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     deviceTimeZoneId: DEVICE_ZONE,
     homeLocationId: null,
@@ -53,10 +55,14 @@ describe("the device time row", () => {
   });
 
   it.each([
-    ["en", "Device time · UTC+5"],
-    ["ru", "Время устройства · UTC+5"],
+    ["en", ["Device time", "UTC+5"]],
+    ["ru", ["Время устройства", "UTC+5"]],
   ] as const)("should have the %s meta line", (language, expected) => {
-    expect(present([deviceTime], language)[0]?.metaLabel).toBe(expected);
+    expect(
+      present([deviceTime], language)[0]?.zoneLineParts.map(
+        (part) => part.text,
+      ),
+    ).toEqual(expected);
   });
 
   it.each([
@@ -78,11 +84,10 @@ describe("the device time row", () => {
     expect(present([deviceTime])[0]?.offsetDifferenceLabel).toBe("");
   });
 
-  it("should leave a city row without a meta line or accessible name", () => {
+  it("should leave a city row without an accessible name", () => {
     const [row] = present([
       buildLocation({ ...KNOWN_CITIES.Moscow, label: "Moscow" }),
     ]);
-    expect(row?.metaLabel).toBeUndefined();
     expect(row?.accessibleName).toBeUndefined();
   });
 });

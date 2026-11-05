@@ -59,7 +59,7 @@ Feature: Device time location data and outdated zone data
     Then the storage warning is shown
     And the device time location for "Asia/Almaty" is shown
 
-  @add-settings-page-and-device-time-location @FR8 @M7
+  @add-settings-page-and-device-time-location @FR8 @M7 @show-zone-abbreviations-and-zone-label-setting @FR6
   Scenario: Renamed device time zone
     Given the engine rejects "Europe/Kyiv" and accepts "Europe/Kiev"
     And the device reports the time zone "Europe/Kiev"
@@ -67,7 +67,7 @@ Feature: Device time location data and outdated zone data
     And the current instant is "2026-03-08T07:30:00Z"
     And the list is "the device time location"
     When the user opens the app
-    Then the device time location shows "Kyiv", the time "09:30" and the meta line "Device time · UTC+2"
+    Then the device time location shows "Kyiv", the time "09:30" and the meta line "Device time", "EET" and "UTC+2"
     And the device time zone is kept as "Europe/Kyiv"
 
   @add-settings-page-and-device-time-location @NFR-P1

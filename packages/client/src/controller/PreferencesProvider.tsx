@@ -21,6 +21,7 @@ import {
   PreferencesCommandType,
   reducePreferences,
   type ThemePreference,
+  type ZoneLabelPart,
 } from "@/preferences";
 import {
   PreferencesContext,
@@ -138,6 +139,13 @@ export function PreferencesProvider({
         applyChange({
           type: PreferencesCommandType.SET_INTERFACE_LANGUAGE,
           interfaceLanguage,
+        }),
+      // Implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4).
+      setZoneLabelPart: (part: ZoneLabelPart, isShown: boolean) =>
+        applyChange({
+          type: PreferencesCommandType.SET_ZONE_LABEL_PART,
+          part,
+          isShown,
         }),
       resetPreferences: () => {
         discardPendingWrite();

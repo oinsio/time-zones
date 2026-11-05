@@ -107,3 +107,5 @@ export {
   type WallClockNote,
   WallClockNotePlacement,
 } from "./wallClockNote";
+// Implements FR1, FR2 of show-zone-abbreviations-and-zone-label-setting.
+export { getZoneAbbreviation, getZoneAbbreviations } from "./zoneAbbreviation";

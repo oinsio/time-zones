@@ -15,7 +15,18 @@ export const kolkata: PresentedSearchResult = {
   cityName: "Kolkata",
   countryCode: "IN",
   countryName: "India",
-  matchedAbbreviation: "IST",
+  abbreviationPair: [{ text: "IST", isMatched: true }],
+  isAdded: false,
+};
+export const newYork: PresentedSearchResult = {
+  timeZoneId: "America/New_York",
+  cityName: "New York",
+  countryCode: "US",
+  countryName: "United States",
+  abbreviationPair: [
+    { text: "EST", isMatched: false },
+    { text: "EDT", isMatched: true },
+  ],
   isAdded: false,
 };
 export const berlin: PresentedSearchResult = {

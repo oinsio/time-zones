@@ -66,12 +66,31 @@ Feature: Locations in a real browser
     When the user removes "Moscow"
     Then the polite announcement reads "Moscow removed"
 
-  @add-locations-via-search @NFR-A3 @FR5
+  @add-locations-via-search @NFR-A3 @FR5 @show-zone-abbreviations-and-zone-label-setting @FR11 @M2
   Scenario: Result order and content
     Given the user opens the locations app
     When the user searches for "IST"
-    Then the first results are "Kolkata", "Jerusalem", "Dublin" in that order
+    Then the first results are "Kolkata", "Dublin", "Jerusalem" in that order
     And the polite announcement reads "4 results"
+
+  @show-zone-abbreviations-and-zone-label-setting @NFR-A2 @M7
+  Scenario Outline: No violations in the IST results in the <theme> theme
+    Given the locations screen uses the <theme> theme
+    And the user opens the locations app
+    When the user searches for "IST"
+    Then the search dialog has no accessibility violations
+
+    Examples:
+      | theme |
+      | light |
+      | dark  |
+
+  @show-zone-abbreviations-and-zone-label-setting @NFR-A2
+  Scenario: The pair is in the result's name
+    Given the user opens the locations app
+    When the user searches for "EDT"
+    Then the result "New York" is named with "EST / EDT"
+    And the matched abbreviation "EDT" is bolder than "EST"
 
   @add-locations-via-search @NFR-R1
   Scenario Outline: The list of 5 locations fits a <width> px wide screen
@@ -135,6 +154,7 @@ Feature: Locations in a real browser
   @keep-now-button-visible-when-live @NFR-R2
   @fix-location-card-and-header-layout @NFR-R2
   @show-clock-change-note-on-location-cards @NFR-R2
+  @show-zone-abbreviations-and-zone-label-setting @NFR-R3
   Scenario Outline: Screenshot of the <state> state at <width> px in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme

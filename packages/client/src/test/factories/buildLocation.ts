@@ -35,5 +35,12 @@ export const KNOWN_CITIES: Record<
   "Lord Howe Island": { timeZoneId: "Australia/Lord_Howe", countryCode: "AU" },
   "Boa Vista": { timeZoneId: "America/Boa_Vista", countryCode: "BR" },
   Chicago: { timeZoneId: "America/Chicago", countryCode: "US" },
+  Dublin: { timeZoneId: "Europe/Dublin", countryCode: "IE" },
+  Adelaide: { timeZoneId: "Australia/Adelaide", countryCode: "AU" },
+  Sydney: { timeZoneId: "Australia/Sydney", countryCode: "AU" },
+  Panama: { timeZoneId: "America/Panama", countryCode: "PA" },
+  Jerusalem: { timeZoneId: "Asia/Jerusalem", countryCode: "IL" },
+  "St. Vincent": { timeZoneId: "America/St_Vincent", countryCode: "VC" },
+  Santiago: { timeZoneId: "America/Santiago", countryCode: "CL" },
   UTC: { timeZoneId: "UTC", countryCode: "" },
 };

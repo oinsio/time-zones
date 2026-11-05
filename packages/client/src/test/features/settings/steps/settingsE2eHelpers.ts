@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { STORAGE_KEYS } from "@/constants";
+import { PREFERENCES_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import { englishLocale } from "../../main_page/steps/englishTexts";
 
 export const BUTTON_ROLE = "button";
@@ -50,3 +50,49 @@ export const seedPreferences = async (page: Page, documentText: string) =>
     },
     { key: STORAGE_KEYS.PREFERENCES, text: documentText },
   );
+
+export const ZONE_LABEL_GROUP_ROLE = "group";
+export const ZONE_LABEL_PART_VALUES: Record<string, string[]> = {
+  "the UTC offset and the zone abbreviation": [
+    "UTC_OFFSET",
+    "ZONE_ABBREVIATION",
+  ],
+  "only the UTC offset": ["UTC_OFFSET"],
+  "the zone abbreviation only": ["ZONE_ABBREVIATION"],
+  nothing: [],
+};
+export const ALL_ZONE_LABEL_PARTS =
+  ZONE_LABEL_PART_VALUES["the UTC offset and the zone abbreviation"];
+export const MIN_TOGGLE_SIZE_PX = 44;
+export const ZONE_LABEL_TAB_LIMIT = 30;
+const SEEDED_THEME = "SYSTEM";
+const SEEDED_HOUR_FORMAT = "H24";
+
+/** Stores a preferences document whose zone label shows the given parts. */
+export const seedZoneLabelParts = (
+  page: Page,
+  partsName: string,
+  interfaceLanguage: string | null,
+) =>
+  seedPreferences(
+    page,
+    JSON.stringify({
+      schemaVersion: PREFERENCES_SCHEMA_VERSION,
+      payload: {
+        theme: SEEDED_THEME,
+        hourFormat: SEEDED_HOUR_FORMAT,
+        interfaceLanguage,
+        zoneLabelParts: ZONE_LABEL_PART_VALUES[partsName],
+      },
+    }),
+  );
+
+/** The zone label group in either language, unless a scenario names it. */
+export const ANY_LANGUAGE_ZONE_LABEL_GROUP_NAME =
+  /^(Zone label|Подпись пояса)$/;
+export const zoneLabelGroupOf = (
+  page: Page,
+  name: string | RegExp = ANY_LANGUAGE_ZONE_LABEL_GROUP_NAME,
+) => page.getByRole(ZONE_LABEL_GROUP_ROLE, { name });
+export const zoneLabelToggleOf = (page: Page, name: string) =>
+  zoneLabelGroupOf(page).getByRole(BUTTON_ROLE, { name, exact: true });

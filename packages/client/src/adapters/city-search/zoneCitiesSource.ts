@@ -5,7 +5,7 @@ import {
   REGION_DISPLAY_TYPE,
   UTC_ZONE_ID,
 } from "@/constants";
-import { canonicalizeTimeZoneId } from "@/model";
+import { canonicalizeTimeZoneId, getZoneAbbreviations } from "@/model";
 import {
   type CityRecord,
   type CitySearchResult,
@@ -14,7 +14,6 @@ import {
 import type { CitySource, ZoneCityData } from "./citySource";
 import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
 import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
-import { findAbbreviationsOfZone } from "./timeZoneAbbreviations";
 
 /** Zones the browser knows, or `undefined` when it cannot list them. */
 export type ListTimeZones = () => readonly string[] | undefined;
@@ -66,7 +65,7 @@ function buildRecord(
     timeZoneId,
     names: data?.names ?? { en: derivedName, ru: derivedName },
     countryCode: data?.countryCode ?? "",
-    aliases: findAbbreviationsOfZone(timeZoneId),
+    aliases: getZoneAbbreviations(timeZoneId),
     rank: calculateRank(timeZoneId),
   };
 }
@@ -88,6 +87,7 @@ function readCountryTexts(countryCode: string): SearchableText[] {
  * city names.
  * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
  * Implements FR5, FR10 of add-interface-language-selection (D5): names in the language fallback order.
+ * Implements FR8 of show-zone-abbreviations-and-zone-label-setting (D8): the aliases are the abbreviation pair.
  */
 export function createZoneCitiesSource(
   zoneCities: readonly ZoneCityData[],

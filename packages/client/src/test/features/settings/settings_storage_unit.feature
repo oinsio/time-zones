@@ -24,7 +24,7 @@ Feature: Preferences storage
     Then the hour format "12-hour" is in force
     And the settings page says changes will not be saved
 
-  @add-settings-page-and-device-time-location @FR7
+  @add-settings-page-and-device-time-location @FR7 @show-zone-abbreviations-and-zone-label-setting @FR15
   Scenario: Choices are written after the debounce
     Given no preferences are stored
     When the user chooses the theme "Dark" and the hour format "12-hour"

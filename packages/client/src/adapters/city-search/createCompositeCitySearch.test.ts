@@ -1,15 +1,16 @@
 // Verifies FR1–FR7 of add-locations-via-search (D7).
+// Verifies FR11 of show-zone-abbreviations-and-zone-label-setting (D8).
 import { describe, expect, it } from "vitest";
 import { SearchMatchKind } from "@/ports";
 import { city, idsOf, search } from "./compositeCityFixtures";
 import { createCompositeCitySearch } from "./createCompositeCitySearch";
 
 describe("composite city search ordering", () => {
-  it("should put abbreviation matches first in table order, then city prefixes", () => {
+  it("should put abbreviation matches first by popularity then name, then city prefixes", () => {
     expect(idsOf("IST")).toEqual([
       "Asia/Kolkata",
-      "Asia/Jerusalem",
       "Europe/Dublin",
+      "Asia/Jerusalem",
       "Europe/Istanbul",
     ]);
   });

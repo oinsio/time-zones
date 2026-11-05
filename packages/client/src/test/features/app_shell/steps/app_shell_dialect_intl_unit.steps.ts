@@ -95,7 +95,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
               },
             ],
             [],
-            { language, cityNameLanguage: "ru" },
+            {
+              language,
+              cityNameLanguage: "ru",
+              translate: i18n.getFixedT(language),
+            },
           );
           expect(result?.countryName).toBe(countryName);
         },

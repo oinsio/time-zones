@@ -1,4 +1,5 @@
 // Verifies FR1, FR3, FR8, FR9, FR11, FR16 of add-settings-page-and-device-time-location.
+// Verifies FR6 of show-zone-abbreviations-and-zone-label-setting.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, cleanup, screen, within } from "@testing-library/react/pure";
@@ -8,6 +9,7 @@ import { expect } from "vitest";
 import { LocationErrorCode } from "@/model";
 import { createDeviceTimeChecks } from "./deviceTimeChecks";
 import { createDeviceTimeWorld, DataMode } from "./deviceTimeWorld";
+import { readZoneLineElements } from "./zoneLineQueries";
 
 const DIFFERENCE_ENTRY_PATTERN = /^(.+?) ([+−].+)$/u;
 const LANGUAGES_TO_SWITCH = ["en", "ru"];
@@ -55,7 +57,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the list is {string}", givenList);
       When("the user opens the app", openApp);
       Then(
-        "the device time location shows {string}, the caption {string}, the meta line {string}, the time {string} and the date {string}",
+        "the device time location shows {string}, the caption {string}, the meta line {string} and {string}, the time {string} and the date {string}",
         async (_ctx: unknown, ...texts: string[]) => {
           for (const text of texts) await checks.expectDeviceTimeShows(text);
         },
@@ -101,7 +103,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         world.whenDeviceZoneBecomesAndTicks,
       );
       Then(
-        "the device time location shows {string} and the meta line {string}",
+        "the device time location shows {string} and the meta line {string}, {string} and {string}",
         async (_ctx: unknown, ...texts: string[]) => {
           for (const text of texts) await checks.expectDeviceTimeShows(text);
         },
@@ -117,9 +119,20 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the list is {string}", givenList);
     When("the user opens the app", openApp);
     Then(
-      "the device time location shows {string}, the caption {string} and the meta line {string}",
-      async (_ctx: unknown, ...texts: string[]) => {
-        for (const text of texts) await checks.expectDeviceTimeShows(text);
+      "the device time location shows {string}, the caption {string} and the meta line {string} and {string}",
+      async (
+        _ctx: unknown,
+        city: string,
+        caption: string,
+        place: string,
+        offset: string,
+      ) => {
+        await checks.expectDeviceTimeShows(caption);
+        expect(readZoneLineElements(world.deviceTimeRow())).toEqual([
+          place,
+          offset,
+        ]);
+        expect(world.deviceTimeRow()).toHaveTextContent(city);
       },
     );
   });
@@ -208,7 +221,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @add-settings-page-and-device-time-location @FR16
   f.Scenario("Both languages", ({ Given, And, When, Then }) => {
-    const metaLines: string[] = [];
+    const metaLines: string[][] = [];
     Given("the device time zone is {string}", givenDeviceZone);
     And("the list is {string}", givenList);
     When("the user opens the app", openApp);
@@ -219,16 +232,23 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           await act(async () => {
             await i18n.changeLanguage(language);
           });
-          metaLines.push(
-            within(world.deviceTimeRow()).getByText(/UTC/).textContent ?? "",
-          );
+          metaLines.push(readZoneLineElements(world.deviceTimeRow()));
         }
       },
     );
     Then(
-      "the meta line reads {string} and {string}",
-      (_ctx: unknown, english: string, russian: string) => {
-        expect(metaLines).toEqual([english, russian]);
+      "the meta line reads {string}, {string} and {string}, {string}",
+      (
+        _ctx: unknown,
+        englishPlace: string,
+        englishOffset: string,
+        russianPlace: string,
+        russianOffset: string,
+      ) => {
+        expect(metaLines).toEqual([
+          [englishPlace, englishOffset],
+          [russianPlace, russianOffset],
+        ]);
       },
     );
   });

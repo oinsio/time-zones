@@ -7,7 +7,7 @@ import i18n, { type TFunction } from "i18next";
 import { describe, expect, it } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 
@@ -29,6 +29,7 @@ const present = (
   presentLocationRows(locations, {
     language,
     hourFormat: HourFormat.H24,
+    zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant: options.instant ?? july,
     deviceTimeZoneId: options.deviceTimeZoneId ?? UNIT_TEST_DEVICE_TIME_ZONE,
     homeLocationId: null,

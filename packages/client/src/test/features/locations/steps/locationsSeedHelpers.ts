@@ -2,6 +2,7 @@
 import { expect } from "@playwright/test";
 import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import {
+  ALL_ZONE_LABEL_PARTS,
   HOUR_FORMAT_VALUES,
   seedPreferences,
   THEME_VALUES,
@@ -105,6 +106,7 @@ export async function seedTwelveHourState(world: LocationsWorld) {
         theme: THEME_VALUES.System,
         hourFormat: HOUR_FORMAT_VALUES["12-hour"],
         interfaceLanguage: world.seededInterfaceLanguage,
+        zoneLabelParts: ALL_ZONE_LABEL_PARTS,
       },
     }),
   );

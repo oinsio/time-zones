@@ -1,10 +1,10 @@
 Feature: Location search ranking and suggestions
   As a user I see the most likely place first, and suggestions before I type
 
-  @add-locations-via-search @FR5 @UX3
+  @add-locations-via-search @FR5 @UX3 @show-zone-abbreviations-and-zone-label-setting @FR11
   Scenario: Abbreviation before city prefix
     When the user searches for "IST"
-    Then "Istanbul" appears after "Kolkata", "Jerusalem" and "Dublin"
+    Then "Istanbul" appears after "Kolkata", "Dublin" and "Jerusalem"
 
   @add-locations-via-search @FR5
   Scenario: City before country

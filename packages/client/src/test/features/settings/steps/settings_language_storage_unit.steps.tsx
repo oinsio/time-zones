@@ -1,9 +1,11 @@
 // Verifies FR7, FR8, FR12 of add-interface-language-selection.
+// Verifies FR15 of show-zone-abbreviations-and-zone-label-setting.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen, waitFor } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect, vi } from "vitest";
+import { DEFAULT_PREFERENCES } from "@/preferences";
 import { createSettingsLanguageWorld } from "./settingsLanguageWorld";
 
 vi.mock(
@@ -72,6 +74,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             theme: "DARK",
             hourFormat: "H24",
             interfaceLanguage: language,
+            zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
           });
         },
       );

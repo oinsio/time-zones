@@ -7,7 +7,7 @@ Finding a city, country or zone abbreviation and adding it as a location. Decisi
 - **City record** — one searchable place in the common format: time zone ID, localized names, optional region, country code, aliases, rank. *Code:* `CityRecord`. *Not:* a location (a record becomes a location only when added).
 - **Zone cities source** — the city source with one record per IANA zone, named by its exemplar city. *Code:* `createZoneCitiesSource`.
 - **Exemplar city** — the city CLDR uses to name a time zone (`Almaty` for `Asia/Almaty`), in English and Russian. *Code:* `CitySearch.getExemplarCity`, `CitySearch.getCityLabel`, `deriveCityNameFromTimeZoneId`.
-- **Abbreviation source** — the city source that maps common zone abbreviations (`EST`, `IST`, `MSK`) to zones. An ambiguous abbreviation returns every match. *Code:* `timeZoneAbbreviations`.
+- **Abbreviation source** — the city source that maps every zone abbreviation of the zone abbreviation table to the zones whose abbreviation pair contains it; an ambiguous abbreviation returns every match. *Code:* `createAbbreviationSource`, `getZoneAbbreviations`.
 - **Search result** — one presented answer: city, country, zone and how it matched. *Code:* `PresentedSearchResult`, `SearchMatchKind`.
 - **Suggestions** — the popular locations shown before the user types, so the search never opens empty. *Code:* `SearchMatchKind.SUGGESTION`. *RU:* «Популярные места». *Never:* defaults, recent.
 - **Search shortcut** — the `/` key that opens the search from anywhere on the main page. *Code:* `useSearchShortcut`.

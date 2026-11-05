@@ -38,6 +38,8 @@ const rows: LocationRow[] = ["moscow", "tokyo", "kyiv"].map((id) => ({
   cityLabel: id,
   countryName: "",
   utcOffsetLabel: "",
+  zoneAbbreviationLabel: "",
+  zoneLineParts: [],
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",

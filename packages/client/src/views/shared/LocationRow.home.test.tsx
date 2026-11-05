@@ -18,6 +18,8 @@ const row: LocationRowModel = {
   cityLabel: "Moscow",
   countryName: "Russia",
   utcOffsetLabel: "UTC+3",
+  zoneAbbreviationLabel: "",
+  zoneLineParts: [],
   offsetDifferenceLabel: "−2 h",
   offsetDifferenceAccessibleLabel: "2 hours behind",
   localTimeLabel: "10:30",

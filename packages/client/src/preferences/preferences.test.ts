@@ -7,7 +7,10 @@ import {
   parseStoredPreferences,
   reducePreferences,
   ThemePreference,
+  ZoneLabelPart,
 } from ".";
+
+const STORED_ZONE_LABEL_PARTS = ["UTC_OFFSET", "ZONE_ABBREVIATION"];
 
 describe("DEFAULT_PREFERENCES", () => {
   it("should follow the system theme in the 24-hour format", () => {
@@ -15,6 +18,10 @@ describe("DEFAULT_PREFERENCES", () => {
       theme: ThemePreference.SYSTEM,
       hourFormat: HourFormat.H24,
       interfaceLanguage: null,
+      zoneLabelParts: [
+        ZoneLabelPart.UTC_OFFSET,
+        ZoneLabelPart.ZONE_ABBREVIATION,
+      ],
     });
   });
 });
@@ -59,6 +66,7 @@ describe("reducePreferences", () => {
 describe("parseStoredPreferences", () => {
   it.each(Object.values(ThemePreference))("should accept theme %s", (theme) => {
     const outcome = parseStoredPreferences({
+      zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       theme,
       hourFormat: "H12",
       interfaceLanguage: null,
@@ -69,6 +77,7 @@ describe("parseStoredPreferences", () => {
         theme,
         hourFormat: HourFormat.H12,
         interfaceLanguage: null,
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });
   });
@@ -78,6 +87,7 @@ describe("parseStoredPreferences", () => {
     (hourFormat) => {
       expect(
         parseStoredPreferences({
+          zoneLabelParts: STORED_ZONE_LABEL_PARTS,
           theme: "DARK",
           hourFormat,
           interfaceLanguage: null,
@@ -89,28 +99,74 @@ describe("parseStoredPreferences", () => {
   it.each([
     ["a non-object", "text"],
     ["null", null],
-    ["a missing hour format", { theme: "DARK", interfaceLanguage: null }],
-    ["a missing theme", { hourFormat: "H12", interfaceLanguage: null }],
-    ["a missing interface language", { theme: "DARK", hourFormat: "H12" }],
+    [
+      "a missing hour format",
+      {
+        theme: "DARK",
+        interfaceLanguage: null,
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
+      },
+    ],
+    [
+      "a missing theme",
+      {
+        hourFormat: "H12",
+        interfaceLanguage: null,
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
+      },
+    ],
+    [
+      "a missing interface language",
+      {
+        theme: "DARK",
+        hourFormat: "H12",
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
+      },
+    ],
     [
       "an empty interface language",
-      { theme: "DARK", hourFormat: "H12", interfaceLanguage: "" },
+      {
+        theme: "DARK",
+        hourFormat: "H12",
+        interfaceLanguage: "",
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
+      },
     ],
     [
       "a numeric interface language",
-      { theme: "DARK", hourFormat: "H12", interfaceLanguage: 42 },
+      {
+        theme: "DARK",
+        hourFormat: "H12",
+        interfaceLanguage: 42,
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
+      },
     ],
     [
       "an object interface language",
-      { theme: "DARK", hourFormat: "H12", interfaceLanguage: {} },
+      {
+        theme: "DARK",
+        hourFormat: "H12",
+        interfaceLanguage: {},
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
+      },
     ],
     [
       "an unknown theme",
-      { theme: "SEPIA", hourFormat: "H12", interfaceLanguage: null },
+      {
+        theme: "SEPIA",
+        hourFormat: "H12",
+        interfaceLanguage: null,
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
+      },
     ],
     [
       "an unknown hour format",
-      { theme: "DARK", hourFormat: "H36", interfaceLanguage: null },
+      {
+        theme: "DARK",
+        hourFormat: "H36",
+        interfaceLanguage: null,
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
+      },
     ],
   ])("should reject %s", (_name, payload) => {
     expect(parseStoredPreferences(payload)).toEqual({ ok: false });
@@ -139,6 +195,7 @@ describe("SET_INTERFACE_LANGUAGE", () => {
   it("should accept a stored language code", () => {
     expect(
       parseStoredPreferences({
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
         theme: "DARK",
         hourFormat: "H12",
         interfaceLanguage: "ru",
@@ -149,6 +206,7 @@ describe("SET_INTERFACE_LANGUAGE", () => {
         theme: ThemePreference.DARK,
         hourFormat: HourFormat.H12,
         interfaceLanguage: "ru",
+        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });
   });

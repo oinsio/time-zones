@@ -14,7 +14,7 @@ import {
   WallClockStatus,
   WallTimeTargetKind,
 } from "@/model";
-import { HourFormat } from "@/preferences";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
 import type { LocationRowsContext } from "./presentZoneMoment";
@@ -42,6 +42,7 @@ const contextOf = (
 ): LocationRowsContext => ({
   language,
   hourFormat: HourFormat.H24,
+  zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
   instant,
   translate: i18n.getFixedT(language),
   deviceTimeZoneId: "Asia/Almaty",

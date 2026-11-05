@@ -3,7 +3,11 @@ import { act, render, renderHook } from "@testing-library/react";
 import { type ReactNode, useLayoutEffect } from "react";
 import { createInMemoryPreferencesRepository } from "@/adapters";
 import { PreferencesLoadStatus } from "@/ports";
-import { HourFormat, ThemePreference } from "@/preferences";
+import {
+  DEFAULT_PREFERENCES,
+  HourFormat,
+  ThemePreference,
+} from "@/preferences";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 import { PreferencesProvider } from "./PreferencesProvider";
 import { usePreferences } from "./usePreferences";
@@ -12,7 +16,12 @@ import { useThemePreference } from "./useThemePreference";
 const storedTheme = (theme: ThemePreference) =>
   ({
     status: PreferencesLoadStatus.LOADED,
-    preferences: { theme, hourFormat: HourFormat.H24, interfaceLanguage: null },
+    preferences: {
+      theme,
+      hourFormat: HourFormat.H24,
+      interfaceLanguage: null,
+      zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+    },
   }) as const;
 
 const wrapperFor =

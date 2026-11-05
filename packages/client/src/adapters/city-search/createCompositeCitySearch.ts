@@ -42,11 +42,11 @@ function keepFirstResultPerZone(
 
 /**
  * Searches zone cities and abbreviations together, merges the results and
- * ranks them: kind, then popularity, then name (abbreviations keep the order
- * of the abbreviation table).
+ * ranks them: kind, then popularity, then name.
  * Implements FR1–FR7, NFR-P1 of add-locations-via-search (D7, ADR-0006).
  * Implements FR5 of add-interface-language-selection (D5): matches names of the active language.
  * Implements FR1 of show-city-labels-in-interface-language (D2): getCityLabel.
+ * Implements FR11, NFR-P3 of show-zone-abbreviations-and-zone-label-setting (D8): abbreviation results rank like the other kinds.
  */
 export function createCompositeCitySearch(
   zoneCityRecords: readonly ZoneCityData[],
@@ -70,9 +70,6 @@ export function createCompositeCitySearch(
         const byKind =
           kindPosition(first.matchKind) - kindPosition(second.matchKind);
         if (byKind !== 0) return byKind;
-        if (first.matchKind === SearchMatchKind.ABBREVIATION) {
-          return 0; // the sort is stable: table order is kept
-        }
         return (
           second.record.rank - first.record.rank ||
           collator.compare(

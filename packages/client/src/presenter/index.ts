@@ -41,9 +41,18 @@ export { parseWallTimeInput } from "./parseWallTimeInput";
 export { presentDeviceTimeOptionLabels } from "./presentDeviceTimeOptionLabels";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";
 export {
+  type PresentedAbbreviation,
   type PresentedSearchResult,
   presentSearchResults,
 } from "./presentSearchResults";
 export type { LocationRowsContext } from "./presentZoneMoment";
 // Implements FR3 of show-utc-offset-on-location-rows.
 export { formatUtcOffset } from "./utcOffset";
+// Implements FR3, FR5, FR13, FR14 of show-zone-abbreviations-and-zone-label-setting.
+export { formatZoneAbbreviation } from "./zoneAbbreviation";
+export {
+  presentZoneLabelExample,
+  presentZoneLine,
+  type ZoneLinePart,
+  ZoneLinePartKind,
+} from "./zoneLine";

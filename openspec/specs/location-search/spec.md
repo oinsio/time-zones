@@ -60,27 +60,83 @@ Every time zone of a country SHALL match when the country name in English or Rus
 - **THEN** Almaty is among the results
 
 ### Requirement: Search by abbreviation
-When the whole query equals an abbreviation from the app's own abbreviation table (case-insensitive), every zone that abbreviation maps to SHALL match, in the table's order. Abbreviations produced by the browser for display MUST NOT be used for matching. <!-- implements FR4 of add-locations-via-search -->
+When the whole query equals a zone abbreviation of the app's zone abbreviation table (see the `zone-abbreviations` capability), compared without regard to case, every zone whose abbreviation pair contains it SHALL match by abbreviation, whichever half of the year uses it. Only abbreviations of that table match: abbreviations outside the IANA time zone database (`ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT`, `ART`) and the Russian display form «МСК» MUST NOT match by abbreviation; an abbreviation finds only the zones whose tzdb abbreviation pair contains it, so `GMT` no longer finds the `UTC` zone (tzdb: `UTC`) and `BST` no longer finds Dhaka (tzdb: `+06`); and abbreviations produced by the browser for display MUST NOT be used for matching. A query that is only the start of an abbreviation MUST NOT match by abbreviation. The zone label preference MUST NOT change which results are found or how they are shown. Inputs: the query. Output: the zones matched by abbreviation, each with its abbreviation pair. Errors: none; no match leaves only the other match kinds. <!-- implements FR4 of add-locations-via-search; FR8, FR9, FR11, FR15 of show-zone-abbreviations-and-zone-label-setting -->
 
 #### Scenario: Ambiguous abbreviation
 - **WHEN** the user searches for "IST"
-- **THEN** the first three results are Kolkata, Jerusalem and Dublin in that order
-- **AND** each of them shows "IST"
+- **THEN** exactly three results match by abbreviation: Kolkata, Dublin and Jerusalem
 
 #### Scenario: Single-zone abbreviation
 - **WHEN** the user searches for "est"
-- **THEN** the first result is New York and it shows "EST"
+- **THEN** the first result is New York and it shows `EST / EDT`
+
+#### Scenario: Either half of the year
+- **WHEN** the user searches for "EDT"
+- **THEN** the first result is New York and it matches by abbreviation
+
+#### Scenario: Zones without a clock change
+- **WHEN** the user searches for "EST"
+- **THEN** Panama matches by abbreviation
+
+#### Scenario: Abbreviations outside tzdb no longer match
+- **WHEN** the user searches for `<query>`
+- **THEN** no result matches by abbreviation
+
+| query |
+|---|
+| ET |
+| PT |
+| ALMT |
+| ICT |
+| SGT |
+| GST |
+| BRT |
+| ART |
+
+#### Scenario: Zones that tzdb names otherwise are no longer found
+- **WHEN** the user searches for `<query>`
+- **THEN** `<kept>` matches by abbreviation
+- **AND** `<dropped>` does not match by abbreviation
+
+| query | kept | dropped |
+|---|---|---|
+| GMT | London | UTC |
+| BST | London | Dhaka |
 
 #### Scenario: Partial abbreviation does not match by abbreviation
 - **WHEN** the user searches for "IS"
 - **THEN** no result shows an abbreviation
 
+#### Scenario: The zone label does not change the search
+- **GIVEN** the zone label shows neither the zone abbreviation nor the UTC offset
+- **WHEN** the user searches for "IST"
+- **THEN** the results are the same as with both shown, and each shows its abbreviation pair
+
 ### Requirement: Result order and content
-Results SHALL be ordered by match kind — abbreviation, city name starting with the query, a later word of the city name starting with the query, country — then popular locations first, then alphabetically by city name in the interface language. Each time zone MUST appear at most once, and at most 50 results MUST be shown. Each result MUST show the city and the country in the interface language, and the abbreviation when it matched by abbreviation. The number of results MUST be announced politely. <!-- implements FR5, UX3, NFR-A3 of add-locations-via-search -->
+Results SHALL be ordered by match kind — abbreviation, city name starting with the query, a later word of the city name starting with the query, country — then popular locations first, then alphabetically by city name in the interface language; results matched by abbreviation follow the same popularity and name order. Each time zone MUST appear at most once, and at most 50 results MUST be shown. Each result MUST show the city and the country in the interface language. A result matched by abbreviation MUST also show its zone's abbreviation pair in order of increasing UTC offset, separated by " / ", in the spelling of the interface language (see the `zone-abbreviations` capability), with the matched abbreviation emphasised and the other not; a zone with one abbreviation shows it alone. The number of results MUST be announced politely. <!-- implements FR5, UX3, NFR-A3 of add-locations-via-search; FR10, FR11, UX3 of show-zone-abbreviations-and-zone-label-setting -->
 
 #### Scenario: Abbreviation before city prefix
 - **WHEN** the user searches for "IST"
-- **THEN** Istanbul appears after Kolkata, Jerusalem and Dublin
+- **THEN** Istanbul appears after Kolkata, Dublin and Jerusalem
+
+#### Scenario: Ambiguous abbreviation with its pairs
+- **GIVEN** the interface language is English
+- **WHEN** the user searches for "IST"
+- **THEN** the first three results are Kolkata with `IST`, Dublin with `GMT / IST` and Jerusalem with `IST / IDT`, in that order
+- **AND** `IST` is the emphasised abbreviation in each of them
+- **AND** 4 results are announced
+
+#### Scenario: The matched half of a pair is emphasised
+- **WHEN** the user searches for "EDT"
+- **THEN** the New York result shows `EST / EDT` with `EDT` emphasised
+- **WHEN** the user searches for "EST"
+- **THEN** the New York result shows `EST / EDT` with `EST` emphasised
+- **AND** the Panama result shows `EST` alone
+
+#### Scenario: Russian spelling in the result
+- **GIVEN** the interface language is Russian
+- **WHEN** the user searches for "MSK"
+- **THEN** the Moscow result shows «МСК» emphasised
 
 #### Scenario: City before country
 - **GIVEN** a city whose name starts with the query and a country whose name starts with the query
@@ -160,7 +216,7 @@ The search data SHALL be loaded when the search is first opened. While it loads,
 - **THEN** Moscow is among the results
 
 ### Requirement: Search is fast and lazy
-Computing the results of one query over the full bundled data SHALL take at most 50 ms. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: one non-empty query MUST normalize exactly one text, the query itself, and MUST build at most one collator. The search data MUST NOT be part of the initial JavaScript; it MUST be a separate file of at most 30 KB gzipped, and the initial JavaScript MUST stay at most 150 KB gzipped. While the list is empty, the page MUST NOT request the search data before the search is first opened. While the list holds at least one location of any kind, the page MAY request it once in the background for the city labels of city locations and the exemplar city of the device time location, and the search MUST reuse that data without a second request. The service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search; FR4, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks; FR8 of show-here-entry-for-device-time; NFR-P2 of add-settings-page-and-device-time-location; FR4 of show-city-labels-in-interface-language -->
+Computing the results of one query over the full bundled data SHALL take at most 50 ms. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: one non-empty query MUST normalize exactly one text, the query itself, and MUST build at most one collator; an abbreviation query, which this change matches against the zone abbreviation table, is no exception. The search data MUST NOT be part of the initial JavaScript; it MUST be a separate file of at most 30 KB gzipped, and the initial JavaScript MUST stay at most 150 KB gzipped. While the list is empty, the page MUST NOT request the search data before the search is first opened. While the list holds at least one location of any kind, the page MAY request it once in the background for the city labels of city locations and the exemplar city of the device time location, and the search MUST reuse that data without a second request. The service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search; FR4, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks; FR8 of show-here-entry-for-device-time; NFR-P2 of add-settings-page-and-device-time-location; FR4 of show-city-labels-in-interface-language; NFR-P3 of show-zone-abbreviations-and-zone-label-setting -->
 
 #### Scenario: Query timing
 - **WHEN** each of 10 sample queries is run over the full data
@@ -184,6 +240,11 @@ Computing the results of one query over the full bundled data SHALL take at most
 - **AND** that file is not part of the initial JavaScript
 - **AND** the initial JavaScript is at most 150 KB gzipped
 
+#### Scenario: Abbreviation query within the work bound
+- **WHEN** the query `IST` is run over the full data
+- **THEN** it normalizes exactly one text
+- **AND** it builds at most one collator
+
 ### Requirement: Keyboard-operable search
 The search SHALL be fully operable with the keyboard: it opens from the "Add location" action with Enter, the query field has focus when it opens, arrow keys move through results, Enter adds the highlighted result, and Esc closes the search. Closing, with Esc or by adding, MUST return focus to the action that opened it. <!-- implements NFR-A2 of add-locations-via-search -->
 
@@ -204,7 +265,7 @@ The search SHALL be fully operable with the keyboard: it opens from the "Add loc
 - **AND** focus is on the "Add location" action
 
 ### Requirement: Accessible and responsive search
-The search in each of its states (suggestions, results, no matches, loading, error) SHALL have no automated accessibility violations in light and dark themes and MUST NOT scroll horizontally from 320 px to 2560 px. Below 640 px it MUST fill the screen; from 640 px it MUST be a centered dialog. Its suggestions and results states MUST match the approved screenshots at 375 px and 1024 px in both themes. <!-- implements NFR-A1, NFR-R1, NFR-R2, UX5 of add-locations-via-search -->
+The search in each of its states (suggestions, results, no matches, loading, error) SHALL have no automated accessibility violations in light and dark themes and MUST NOT scroll horizontally from 320 px to 2560 px. Below 640 px it MUST fill the screen; from 640 px it MUST be a centered dialog. Its suggestions and results states MUST match the approved screenshots at 375 px and 1024 px in both themes; the results for "IST" are re-approved once with the abbreviation pairs of this change. In a pair, the matched abbreviation MUST differ from the other by font weight as well as by colour, and the accessible name of a result MUST contain its pair. <!-- implements NFR-A1, NFR-R1, NFR-R2, UX5 of add-locations-via-search; NFR-A2, NFR-R3, UX3 of show-zone-abbreviations-and-zone-label-setting -->
 
 #### Scenario: Accessibility check
 - **WHEN** each search state is checked with axe-core in light and dark theme
@@ -221,6 +282,12 @@ The search in each of its states (suggestions, results, no matches, loading, err
 #### Scenario: Screenshots
 - **WHEN** the suggestions and the results for "IST" are shown at 375 px and 1024 px in each theme
 - **THEN** they match the approved screenshots
+
+#### Scenario: The pair is in the result's name
+- **GIVEN** the interface language is English
+- **WHEN** the user searches for "EDT"
+- **THEN** the New York result's accessible name contains "EST / EDT"
+- **AND** "EDT" is set in a bolder weight than "EST"
 
 ### Requirement: Open the search with the slash key
 While the main page shows the header's "Add location" button, pressing `/` SHALL open the location search exactly as that button does: the suggestions are shown, focus is in the query field and the query is empty — the `/` MUST NOT be entered into the query field and the browser's own action for `/` MUST NOT start. Closing a search opened with `/`, with Esc or by adding a location, MUST return focus to the "Add location" button. Opening with `/` MUST keep the search data lazy: while the list is empty, it is requested only when the search first opens. <!-- implements FR1, FR5, NFR-P1, UX1, UX2 of open-location-search-with-slash-shortcut; FR8 of show-here-entry-for-device-time; FR2, NFR-P2 of add-settings-page-and-device-time-location; FR4 of show-city-labels-in-interface-language -->

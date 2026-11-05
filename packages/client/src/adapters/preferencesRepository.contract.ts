@@ -3,7 +3,12 @@ import {
   type PreferencesRepository,
   SaveOutcome,
 } from "@/ports";
-import { HourFormat, type Preferences, ThemePreference } from "@/preferences";
+import {
+  DEFAULT_PREFERENCES,
+  HourFormat,
+  type Preferences,
+  ThemePreference,
+} from "@/preferences";
 
 export interface PreferencesRepositoryScenario {
   /** Two empty repository instances that see each other's changes. */
@@ -17,6 +22,7 @@ const darkTwelveHour: Preferences = {
   theme: ThemePreference.DARK,
   hourFormat: HourFormat.H12,
   interfaceLanguage: null,
+  zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
 };
 
 /**

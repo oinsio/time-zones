@@ -3,7 +3,7 @@ Feature: Interface language storage
   The interface language is kept with the other settings: it is migrated from the
   previous document, reset, and kept in step with other tabs.
 
-  @add-interface-language-selection @FR8
+  @add-interface-language-selection @FR8 @show-zone-abbreviations-and-zone-label-setting @FR15
   Scenario: Migration of the previous document
     Given the previous version stored the theme Dark and the hour format 12-hour, and the legacy language key holds "ru"
     When the app is opened again

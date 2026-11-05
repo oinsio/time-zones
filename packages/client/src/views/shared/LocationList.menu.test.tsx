@@ -14,6 +14,8 @@ const buildRow = (cityLabel: string): LocationRow => ({
   cityLabel,
   countryName: "",
   utcOffsetLabel: "",
+  zoneAbbreviationLabel: "",
+  zoneLineParts: [],
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "10:30",
