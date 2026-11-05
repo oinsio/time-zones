@@ -4,7 +4,7 @@ No other active change touches the capabilities this change modifies: the only o
 
 ## Why
 
-A location card names its zone only by the UTC offset (`UTC+5:30`). The offset is exact, but people recognise a zone by its abbreviation: invitations and calendars say `IST`, `EST`, `MSK`. The card cannot show one today. The search finds zones by abbreviation, but from the app's own hand-written table (`adapters/city-search/timeZoneAbbreviations.ts`). That table mixes real abbreviations with invented ones (`ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT`, `ART`) that the IANA time zone database (tzdb) does not use, and it has no notion of which abbreviation is in force at a moment (`EST` in January, `EDT` in July).
+A location card names its zone only by the UTC offset (`UTC+5:30`). The offset is exact, but people recognise a zone by its abbreviation: invitations and calendars say `IST`, `EST`, `MSK`. The card cannot show one today. The search finds zones by abbreviation, but from the app's own hand-written table (`adapters/city-search/timeZoneAbbreviations.ts`). That table mixes real abbreviations with invented ones (`ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT`, `ART`) that the IANA time zone database (tzdb) does not use, maps two real abbreviations to zones that tzdb names otherwise (`GMT` to the `UTC` zone, whose tzdb abbreviation is `UTC`; `BST` to Dhaka, whose tzdb designation is the numeric `+06`), and it has no notion of which abbreviation is in force at a moment (`EST` in January, `EDT` in July).
 
 Users also differ in what they want on the card. Some want the offset, some the abbreviation, some only the country. So the card's second line becomes a choice in the settings. Every settings group today is a column of full-width radio rows (`SettingsOptionGroup`), so each new setting makes the page longer. The new setting is therefore built as a compact one-row group that later settings can reuse.
 
@@ -15,14 +15,15 @@ Audience: every user who reads cards (all of them), users who add places from an
 - ADDED `zone-abbreviations` (new capability): the zone abbreviation of a zone at a moment, taken from tzdb letter abbreviations only, from one table built into the app and available offline. It is written in Latin letters in every interface language, except `MSK`, which the Russian interface writes «МСК».
 - MODIFIED `locations`: the line under the city (the **zone line**) is made of separate elements: the country name, the zone abbreviation, the UTC offset. The zone label preference decides which of the last two are shown. A missing element leaves no gap. The device time location's meta line follows the same rule ("Device time", abbreviation, offset). The line wraps only between elements and never truncates.
 - MODIFIED `time-selection`: the wall-time hint of a DST overlap names the abbreviation before the offset when the zone label shows the abbreviation: "(EDT, UTC−4)". It always names the offset.
-- MODIFIED `location-search`: search by abbreviation uses the tzdb table instead of the app's own table. A query equal to an abbreviation finds every zone that uses it in either half of the year. A result matched by abbreviation shows the zone's abbreviation pair (`EST / EDT`), with the matched one emphasised. Abbreviation results are ordered like other results: popular locations first, then by city name. **BREAKING** for users who typed `ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT` or `ART`: those no longer match by abbreviation.
+- MODIFIED `location-search`: search by abbreviation uses the tzdb table instead of the app's own table. A query equal to an abbreviation finds every zone that uses it in either half of the year. A result matched by abbreviation shows the zone's abbreviation pair (`EST / EDT`), with the matched one emphasised. Abbreviation results are ordered like other results: popular locations first, then by city name. **BREAKING** for users who typed `ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT` or `ART`: those no longer match by abbreviation. Also **BREAKING**: `GMT` no longer finds the `UTC` zone (it still finds London, Dublin and the other zones that use `GMT`), and `BST` no longer finds Dhaka (it still finds London).
 - MODIFIED `settings`: a new **Zone label** group («Подпись пояса») with two independent toggles, "UTC offset" («Смещение UTC») and "Abbreviation" («Сокращение»), and a live example of the zone line under them. Both are on by default, also for existing users (the stored preferences document is migrated from version 2 to 3). The group is a reusable **toggle group** component.
 - REMOVED: the app's own abbreviation table `TIME_ZONE_ABBREVIATIONS` and `findAbbreviationsOfZone`.
 - Glossary (new or changed terms):
   - new **Zone abbreviation** and **Abbreviation pair** (`docs/glossary/time.md`);
   - new **Zone line** (`docs/glossary/locations.md`); **Location row** gets the zone line and the zone abbreviation;
   - new **Zone label** and **Toggle group** (`docs/glossary/settings.md`); **Settings page** and **Preferences** list the zone label;
-  - **Abbreviation source** (`docs/glossary/search.md`) changes owner: it reads the zone abbreviation table.
+  - **Abbreviation source** (`docs/glossary/search.md`) changes owner: it reads the zone abbreviation table;
+  - **Wall-time hint** (`docs/glossary/date-selection.md`) changes meaning: the overlap hint names the zone abbreviation before the UTC offset when the zone label shows it («(EDT, UTC−4)»), and its owner `presentWallTimeHint` reads the zone abbreviation and the zone label.
 - New build-time dependency: a tzdb data package read only by the Vite zone-data plugin, never shipped as code (design D1).
 
 ## Capabilities
@@ -73,7 +74,7 @@ Audience: every user who reads cards (all of them), users who add places from an
 - FR5: The zone line of a city location SHALL consist of separate elements in this order: the country name, the zone abbreviation, the UTC offset. An element that the zone label hides, or that is unknown (no country, no abbreviation, an offset that cannot be computed), MUST leave no element, gap or separator behind. A zone abbreviation that reads the same as the UTC offset text (the `UTC` zone: `UTC`) is not shown twice.
 - FR6: The meta line of the device time location SHALL follow FR5 with "Device time" («Время устройства») in place of the country name.
 - FR7: The wall-time hint of a DST overlap SHALL always name the UTC offset of the shown instant, and SHALL name the zone abbreviation before it when the zone label shows the abbreviation and the zone has one: "(EDT, UTC−4)".
-- FR8: Search by abbreviation SHALL use the zone abbreviation table of FR4 instead of the app's own table. `ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT` and `ART` MUST NOT match by abbreviation.
+- FR8: Search by abbreviation SHALL use the zone abbreviation table of FR4 instead of the app's own table. `ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT` and `ART` MUST NOT match by abbreviation. `GMT` MUST NOT find the `UTC` zone and `BST` MUST NOT find Dhaka (`Asia/Dhaka`), because tzdb does not give those zones these abbreviations.
 - FR9: A query whose whole text equals a zone abbreviation (case-insensitive) SHALL find every zone whose abbreviation pair contains it.
 - FR10: A result matched by abbreviation SHALL show the zone's abbreviation pair in order of increasing UTC offset, separated by " / " ("New York  EST / EDT"), with the matched abbreviation emphasised. A zone with one abbreviation shows it alone (Panama: `EST`).
 - FR11: An abbreviation used by several zones SHALL return each of them with its own pair (`IST`: Kolkata `IST`, Dublin `GMT / IST`, Jerusalem `IST / IDT`), ordered like every other result kind: popular locations first, then alphabetically by city name in the interface language.
@@ -93,7 +94,7 @@ Audience: every user who reads cards (all of them), users who add places from an
 
 #### Accessibility
 
-- NFR-A1: The zone label group SHALL be a group named by its caption; each toggle is a button that exposes its pressed state, is a Tab stop, toggles with Space and Enter, is at least 44 × 44 px, and shows its pressed state by an icon as well as by colour. The live example is the group's description. axe-core reports no violations on the settings page in the light and dark themes.
+- NFR-A1: The zone label group SHALL be a group named by its caption; each toggle is a button that exposes its pressed state, is a Tab stop, toggles with Space and Enter, is at least 44 × 44 px, keeps a visible focus outline, and shows its pressed state by an icon as well as by colour. The live example is the group's description. axe-core reports no violations on the settings page in the light and dark themes.
 - NFR-A2: The emphasised abbreviation of a search result SHALL differ by font weight as well as colour, and the result's accessible name contains the pair. axe-core reports no violations in the results for `IST` in both themes.
 
 #### Responsive
@@ -129,10 +130,11 @@ Audience: every user who reads cards (all of them), users who add places from an
 - `packages/client/src/test/features/zone_abbreviations/zone_abbreviations_unit.feature` — FR1–FR4.
 - `packages/client/src/test/features/locations/locations_zone_line_unit.feature` — FR5, FR6, FR13, UX1.
 - `packages/client/src/test/features/locations/locations_zone_line_budget_unit.feature` — NFR-P1.
-- `packages/client/src/test/features/locations/locations_zone_line_e2e.feature` — NFR-R1, NFR-R3.
-- `packages/client/src/test/features/location_search/location_search_by_abbreviation.feature` — FR8–FR11 (rewritten).
+- `packages/client/src/test/features/locations/locations_zone_line_e2e.feature` — NFR-R1.
+- `packages/client/src/test/features/location_search/location_search_by_abbreviation.feature` — FR8–FR11, M3 (rewritten).
 - `packages/client/src/test/features/settings/settings_zone_label_unit.feature` — FR12–FR15, UX2.
-- `packages/client/src/test/features/settings/settings_zone_label_e2e.feature` — NFR-A1, NFR-R2, NFR-R3.
+- `packages/client/src/test/features/settings/settings_zone_label_e2e.feature` — NFR-A1, NFR-R2, UX2.
+- The existing screenshot outlines (task 9.4) — NFR-R3.
 - `packages/client/src/test/features/time_selection/` wall-time hint scenarios — FR7.
 
 All scenarios carry `@show-zone-abbreviations-and-zone-label-setting`.
@@ -149,7 +151,7 @@ No changes: `docs/ia/` does not exist.
 
 - M1: 8 of 8 sample cards show exactly the expected abbreviation: New York `EST` (2026-01-15) and `EDT` (2026-07-15), Dublin `GMT` and `IST` on the same dates, Sydney `AEDT` (2026-01-15), Kolkata `IST`, Almaty none, Moscow «МСК» in Russian (unit BDD).
 - M2: The query `IST` returns exactly 3 abbreviation results, Kolkata `IST`, Dublin `GMT / IST`, Jerusalem `IST / IDT`, in that order, and 4 results in total (unit BDD and E2E).
-- M3: 8 of 8 removed abbreviations (`ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT`, `ART`) return 0 abbreviation results (unit BDD).
+- M3: 8 of 8 removed abbreviations (`ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT`, `ART`) return 0 abbreviation results, and 2 of 2 dropped matches are gone: `GMT` gives no abbreviation result for the `UTC` zone and `BST` none for Dhaka, while both still give one for London (unit BDD).
 - M4: 4 of 4 toggle combinations give the expected Kolkata zone line on the card and in the example: "India IST UTC+5:30", "India UTC+5:30", "India IST", "India" (unit BDD).
 - M5: 0 px of horizontal overflow and 0 clipped zone line elements at 5 of 5 widths (320, 375, 768, 1024, 1440 px) for the heaviest case (E2E).
 - M6: A version 2 preferences document loads with 2 of 2 toggles on and its theme, hour format and interface language unchanged (unit test).
@@ -173,4 +175,4 @@ None. The source of the table, how the half of the year is decided, and the Russ
   - `src/views/shared/` and `src/app/settings/`: the zone line, the result pair, the toggle group and the zone label group;
   - `src/locales/en.json`, `ru.json`: new keys.
 - Dependency: one new devDependency of `@time-zones/client`, `moment-timezone`, used only at build time (design D1).
-- Docs: `docs/glossary/time.md`, `locations.md`, `settings.md`, `search.md`; `docs/architecture/domain-model.md` (the preferences fields).
+- Docs: `docs/glossary/time.md`, `locations.md`, `settings.md`, `search.md`, `date-selection.md`; `docs/architecture/domain-model.md` (the preferences fields).

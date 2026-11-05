@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Search by abbreviation
-When the whole query equals a zone abbreviation of the app's zone abbreviation table (see the `zone-abbreviations` capability), compared without regard to case, every zone whose abbreviation pair contains it SHALL match by abbreviation, whichever half of the year uses it. Only abbreviations of that table match: abbreviations outside the IANA time zone database (`ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT`, `ART`) and the Russian display form «МСК» MUST NOT match by abbreviation, and abbreviations produced by the browser for display MUST NOT be used for matching. A query that is only the start of an abbreviation MUST NOT match by abbreviation. The zone label preference MUST NOT change which results are found or how they are shown. Inputs: the query. Output: the zones matched by abbreviation, each with its abbreviation pair. Errors: none; no match leaves only the other match kinds. <!-- implements FR4 of add-locations-via-search; FR8, FR9, FR11, FR15 of show-zone-abbreviations-and-zone-label-setting -->
+When the whole query equals a zone abbreviation of the app's zone abbreviation table (see the `zone-abbreviations` capability), compared without regard to case, every zone whose abbreviation pair contains it SHALL match by abbreviation, whichever half of the year uses it. Only abbreviations of that table match: abbreviations outside the IANA time zone database (`ET`, `PT`, `ALMT`, `ICT`, `SGT`, `GST`, `BRT`, `ART`) and the Russian display form «МСК» MUST NOT match by abbreviation; an abbreviation finds only the zones whose tzdb abbreviation pair contains it, so `GMT` no longer finds the `UTC` zone (tzdb: `UTC`) and `BST` no longer finds Dhaka (tzdb: `+06`); and abbreviations produced by the browser for display MUST NOT be used for matching. A query that is only the start of an abbreviation MUST NOT match by abbreviation. The zone label preference MUST NOT change which results are found or how they are shown. Inputs: the query. Output: the zones matched by abbreviation, each with its abbreviation pair. Errors: none; no match leaves only the other match kinds. <!-- implements FR4 of add-locations-via-search; FR8, FR9, FR11, FR15 of show-zone-abbreviations-and-zone-label-setting -->
 
 #### Scenario: Ambiguous abbreviation
 - **WHEN** the user searches for "IST"
@@ -33,6 +33,16 @@ When the whole query equals a zone abbreviation of the app's zone abbreviation t
 | GST |
 | BRT |
 | ART |
+
+#### Scenario: Zones that tzdb names otherwise are no longer found
+- **WHEN** the user searches for `<query>`
+- **THEN** `<kept>` matches by abbreviation
+- **AND** `<dropped>` does not match by abbreviation
+
+| query | kept | dropped |
+|---|---|---|
+| GMT | London | UTC |
+| BST | London | Dhaka |
 
 #### Scenario: Partial abbreviation does not match by abbreviation
 - **WHEN** the user searches for "IS"

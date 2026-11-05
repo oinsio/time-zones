@@ -57,6 +57,12 @@ The zone label group SHALL be a group named by its caption ("Zone label", «По
 - **WHEN** the user presses Enter
 - **THEN** "Abbreviation" is pressed again
 
+#### Scenario: Toggle size, focus and pressed icon
+- **WHEN** the settings page is shown with the "UTC offset" toggle on and the "Abbreviation" toggle off
+- **THEN** each toggle is at least 44 × 44 px
+- **AND** the focused toggle shows a focus outline
+- **AND** only the "UTC offset" toggle shows the check icon
+
 #### Scenario: No violations with the zone label group
 - **WHEN** axe-core checks the settings page in the `<theme>` theme with `<parts>`
 - **THEN** it reports no violations
@@ -67,7 +73,17 @@ The zone label group SHALL be a group named by its caption ("Zone label", «По
 | dark | both toggles off |
 
 ### Requirement: Zone label layout
-The zone label group SHALL take one row of the settings page: its caption and both toggles side by side from 640 px. Below 640 px the toggles MAY move under the caption, but they MUST stay in one row together. The example MUST be under the toggles. The settings page MUST NOT scroll horizontally at 320 px and 2560 px in English and Russian. <!-- implements NFR-R2 of show-zone-abbreviations-and-zone-label-setting -->
+The zone label group SHALL take one row of the settings page: its caption and both toggles side by side from 640 px. Below 640 px the toggles MAY move under the caption, but they MUST stay in one row together. The example MUST be under the toggles. Turning a toggle on or off MUST NOT move or resize either toggle. The settings page MUST NOT scroll horizontally at 320 px and 2560 px in English and Russian. <!-- implements NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting -->
+
+#### Scenario: Toggling does not move the toggles
+- **GIVEN** the settings page is shown `<width>` px wide with both toggles on
+- **WHEN** the user turns "Abbreviation" off
+- **THEN** both toggles keep their position and size
+
+| width |
+|---|
+| 375 |
+| 1024 |
 
 #### Scenario: One row on wide screens
 - **WHEN** the settings page is shown `<width>` px wide in `<language>`
