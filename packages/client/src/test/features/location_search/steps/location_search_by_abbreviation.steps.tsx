@@ -4,24 +4,20 @@ import type {
   StepTest,
 } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { cleanup, renderHook, waitFor } from "@testing-library/react/pure";
+import { cleanup } from "@testing-library/react/pure";
 import i18n from "i18next";
-import type { ReactNode } from "react";
 import { expect } from "vitest";
-import { createInMemoryPreferencesRepository } from "@/adapters";
 import type { CityNameLanguage } from "@/constants";
-import { PreferencesProvider, useCitySearch } from "@/controller";
-import { PreferencesLoadStatus, SearchMatchKind } from "@/ports";
+import { SearchMatchKind } from "@/ports";
 import { DEFAULT_PREFERENCES, type ZoneLabelPart } from "@/preferences";
 import { type PresentedSearchResult, presentSearchResults } from "@/presenter";
-import { createManualWriteScheduler } from "@/test/writeSchedulers";
 import {
-  buildCitySearch,
   cityNamesOf,
   createSearchWorld,
   runSearch,
   zoneIdsOf,
 } from "./searchWorld";
+import { searchWithZoneLabel } from "./zoneLabelSearchWorld";
 
 const feature = await loadFeature("../location_search_by_abbreviation.feature");
 
@@ -163,36 +159,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario(
     "The zone label does not change the search",
     ({ Given, When, Then, And }) => {
-      let queryRun = "";
-      const searchWithZoneLabel = async (parts: readonly ZoneLabelPart[]) => {
-        const { result } = renderHook(
-          () => useCitySearch(() => Promise.resolve(buildCitySearch())),
-          {
-            wrapper: ({ children }: { children: ReactNode }) => (
-              <PreferencesProvider
-                repository={createInMemoryPreferencesRepository({
-                  initialDocument: {
-                    status: PreferencesLoadStatus.LOADED,
-                    preferences: {
-                      ...DEFAULT_PREFERENCES,
-                      zoneLabelParts: parts,
-                    },
-                  },
-                })}
-                writeScheduler={createManualWriteScheduler()}
-              >
-                {children}
-              </PreferencesProvider>
-            ),
-          },
-        );
-        await waitFor(() =>
-          expect(
-            result.current.presentResults(queryRun, []).length,
-          ).toBeGreaterThan(0),
-        );
-        return result.current.presentResults(queryRun, []);
-      };
       let resultsWithoutParts: PresentedSearchResult[] = [];
       let resultsWithBoth: PresentedSearchResult[] = [];
       Given(
@@ -202,9 +168,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         },
       );
       When("the user searches for {string}", async (_ctx, query: string) => {
-        queryRun = query;
-        resultsWithoutParts = await searchWithZoneLabel(zoneLabelParts);
+        resultsWithoutParts = await searchWithZoneLabel(query, zoneLabelParts);
         resultsWithBoth = await searchWithZoneLabel(
+          query,
           DEFAULT_PREFERENCES.zoneLabelParts,
         );
       });
