@@ -61,6 +61,8 @@ export const ZONE_LABEL_PART_VALUES: Record<string, string[]> = {
   "the zone abbreviation only": ["ZONE_ABBREVIATION"],
   nothing: [],
 };
+export const ALL_ZONE_LABEL_PARTS =
+  ZONE_LABEL_PART_VALUES["the UTC offset and the zone abbreviation"];
 export const MIN_TOGGLE_SIZE_PX = 44;
 export const ZONE_LABEL_TAB_LIMIT = 30;
 const SEEDED_THEME = "SYSTEM";
