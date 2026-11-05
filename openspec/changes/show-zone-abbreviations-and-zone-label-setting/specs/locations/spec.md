@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Zone line on location rows
-The line under the city of every city location row, its zone line, SHALL consist of separate elements in this order: the country name in the interface language, the zone abbreviation at the effective instant (see the `zone-abbreviations` capability) and the UTC offset. The zone abbreviation MUST be shown only while the zone label shows the zone abbreviation, and the UTC offset only while it shows the UTC offset (see the `settings` capability). An element that is hidden or unknown — a zone without a country, a zone without a zone abbreviation, an offset that cannot be computed — MUST leave no element, no empty space and no separator character behind. A zone abbreviation that reads the same as the UTC offset text MUST NOT be shown, so the `UTC` zone reads `UTC` once. A change of the zone label MUST apply to every row in the same render, without a reload and without a loading state; it MUST NOT change the city label, the local time, the offset difference, the day track or any accessible name. Inputs: the location, the effective instant, the interface language, the zone label. Output: the zone line elements. Errors: none beyond the existing rule for an unknown zone. <!-- implements FR5, FR13, UX1, UX2 of show-zone-abbreviations-and-zone-label-setting -->
+The line under the city of every city location row, its zone line, SHALL consist of separate elements in this order: the country name in the interface language, the zone abbreviation at the effective instant (see the `zone-abbreviations` capability) and the UTC offset. The zone abbreviation MUST be shown only while the zone label shows the zone abbreviation, and the UTC offset only while it shows the UTC offset (see the `settings` capability). An element that is hidden or unknown — a zone without a country, a zone without a zone abbreviation, an offset that cannot be computed — MUST leave no element, no empty space and no separator character behind. While the UTC offset is shown, a zone abbreviation that reads the same as the UTC offset text MUST NOT be shown, so the `UTC` zone reads `UTC` once; while the UTC offset is hidden, that zone abbreviation MUST be shown, so the `UTC` zone still reads `UTC`. A change of the zone label MUST apply to every row in the same render, without a reload and without a loading state; it MUST NOT change the city label, the local time, the offset difference, the day track or any accessible name. Inputs: the location, the effective instant, the interface language, the zone label. Output: the zone line elements. Errors: none beyond the existing rule for an unknown zone. <!-- implements FR5, FR13, UX1, UX2 of show-zone-abbreviations-and-zone-label-setting -->
 
 #### Scenario: Country, abbreviation and offset
 - **GIVEN** the interface language is Russian
@@ -39,6 +39,14 @@ The line under the city of every city location row, its zone line, SHALL consist
 - **WHEN** the user opens the app
 - **THEN** the Almaty row's zone line elements are `Kazakhstan`, `UTC+5`
 - **AND** the UTC row's zone line elements are `UTC`
+
+#### Scenario: UTC with the zone abbreviation only
+- **GIVEN** the interface language is English
+- **AND** the zone label shows the zone abbreviation only
+- **AND** the current instant is `2026-07-15T12:00:00Z`
+- **AND** the list contains UTC
+- **WHEN** the user opens the app
+- **THEN** the UTC row's zone line elements are `UTC`
 
 #### Scenario: A change applies to every row at once
 - **GIVEN** the list contains Moscow, Kolkata and the device time location
