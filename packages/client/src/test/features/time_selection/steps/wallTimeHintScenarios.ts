@@ -76,6 +76,23 @@ export function registerHintScenarios(
     },
   );
 
+  // @show-zone-abbreviations-and-zone-label-setting @FR7
+  f.Scenario(
+    "Overlap hint without the abbreviation",
+    ({ Given, And, When, Then }) => {
+      Given("the interface language is {string}", givenLanguage);
+      And(
+        "the zone label shows neither the zone abbreviation nor the UTC offset",
+        () => world.setZoneLabelParts([]),
+      );
+      And("the current instant is {string}", givenInstant);
+      And("the list contains {string}", givenList);
+      And("the app is open", givenAppOpen);
+      When("the user types {string} in {string}", whenTypes);
+      Then("{string} shows the hint {string}", thenHint);
+    },
+  );
+
   // @add-wall-time-input-with-hint @FR7 @FR11
   f.Scenario(
     "Hint texts in English for a DST overlap",

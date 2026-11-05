@@ -5,9 +5,11 @@ import type { ReactNode } from "react";
 import {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
+  createInMemoryPreferencesRepository,
 } from "@/adapters";
 import {
   LocationsProvider,
+  PreferencesProvider,
   type TrackMove,
   useLocations,
   useReferenceMoment,
@@ -16,7 +18,8 @@ import {
 } from "@/controller";
 import { Temporal } from "@/lib/temporal";
 import { buildDeviceTimeLocation } from "@/model";
-import { LocationsLoadStatus } from "@/ports";
+import { LocationsLoadStatus, PreferencesLoadStatus } from "@/ports";
+import { DEFAULT_PREFERENCES, type ZoneLabelPart } from "@/preferences";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
@@ -43,6 +46,8 @@ export const createTimeSelectionWorld = () => {
   let backend = createInMemoryLocationBackend();
   let storedLocations: ReturnType<typeof buildLocation>[] = [];
   let homeLocationId: string | null = null;
+  let zoneLabelParts: readonly ZoneLabelPart[] =
+    DEFAULT_PREFERENCES.zoneLabelParts;
   let tickScheduler = createManualTickScheduler();
   let writeScheduler = createManualWriteScheduler();
   let hooks: {
@@ -112,6 +117,7 @@ export const createTimeSelectionWorld = () => {
       cleanup();
       storedLocations = [];
       homeLocationId = null;
+      zoneLabelParts = DEFAULT_PREFERENCES.zoneLabelParts;
       backend = createInMemoryLocationBackend();
       clock = createSwitchableClock(DEFAULT_INSTANT, DEFAULT_DEVICE_ZONE);
       tickScheduler = createManualTickScheduler();
@@ -136,6 +142,10 @@ export const createTimeSelectionWorld = () => {
             : buildLocation(cityEntry(city)),
         );
     },
+    /** Implements FR7 of show-zone-abbreviations-and-zone-label-setting: the zone label in force when the app opens. */
+    setZoneLabelParts: (parts: readonly ZoneLabelPart[]) => {
+      zoneLabelParts = parts;
+    },
     setHomeCity: (city: string) => {
       homeLocationId = buildLocation(cityEntry(city)).id;
     },
@@ -159,14 +169,24 @@ export const createTimeSelectionWorld = () => {
         }),
         {
           wrapper: ({ children }: { children: ReactNode }) => (
-            <LocationsProvider
-              repository={createInMemoryLocationRepository({ backend })}
-              writeScheduler={writeScheduler}
-              clock={clock}
-              tickScheduler={tickScheduler}
+            <PreferencesProvider
+              repository={createInMemoryPreferencesRepository({
+                initialDocument: {
+                  status: PreferencesLoadStatus.LOADED,
+                  preferences: { ...DEFAULT_PREFERENCES, zoneLabelParts },
+                },
+              })}
+              writeScheduler={createManualWriteScheduler()}
             >
-              {children}
-            </LocationsProvider>
+              <LocationsProvider
+                repository={createInMemoryLocationRepository({ backend })}
+                writeScheduler={writeScheduler}
+                clock={clock}
+                tickScheduler={tickScheduler}
+              >
+                {children}
+              </LocationsProvider>
+            </PreferencesProvider>
           ),
         },
       );
