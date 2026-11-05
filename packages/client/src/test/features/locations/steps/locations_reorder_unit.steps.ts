@@ -215,6 +215,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         cityLabel: label,
         countryName: "",
         utcOffsetLabel: "",
+        zoneAbbreviationLabel: "",
+        zoneLineParts: [],
         offsetDifferenceLabel: "",
         offsetDifferenceAccessibleLabel: "",
         localTimeLabel: "",

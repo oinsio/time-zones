@@ -161,10 +161,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           mark={row.mark}
           offsetDifferenceLabel={row.offsetDifferenceLabel}
           offsetDifferenceAccessibleLabel={row.offsetDifferenceAccessibleLabel}
-          secondaryTexts={(row.metaLabel === undefined
-            ? [row.countryName, row.utcOffsetLabel]
-            : [row.metaLabel]
-          ).filter((text) => text !== "")}
+          zoneLineParts={row.zoneLineParts}
           localTimeLabel={row.localTimeLabel}
           localDateLabel={row.localDateLabel}
           localIsoDate={row.localIsoDate}

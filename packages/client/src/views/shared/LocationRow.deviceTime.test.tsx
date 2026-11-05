@@ -1,4 +1,5 @@
 // Verifies FR8, UX3 of add-settings-page-and-device-time-location (D4).
+// Verifies FR6 of show-zone-abbreviations-and-zone-label-setting (D6).
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
@@ -6,6 +7,7 @@ import i18n from "i18next";
 import {
   LocationMarkKind,
   type LocationRow as LocationRowModel,
+  ZoneLinePartKind,
 } from "@/presenter";
 import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { ALMATY_TRACK } from "./dayTrackFixture";
@@ -16,6 +18,7 @@ const deviceTimeRow: LocationRowModel = {
   cityLabel: "Almaty",
   countryName: "",
   utcOffsetLabel: "UTC+5",
+  zoneAbbreviationLabel: "",
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "12:30",
@@ -28,7 +31,10 @@ const deviceTimeRow: LocationRowModel = {
     accessibleLabel: "You are here",
     caption: "here",
   },
-  metaLabel: "Device time · UTC+5",
+  zoneLineParts: [
+    { kind: ZoneLinePartKind.PLACE, text: "Device time" },
+    { kind: ZoneLinePartKind.UTC_OFFSET, text: "UTC+5" },
+  ],
   accessibleName: "Almaty, You are here, Device time",
 };
 
@@ -57,10 +63,11 @@ describe("LocationRow of the device time location", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("should show the meta line in place of the country and offset", () => {
+  it("should show the meta line as the first element of the zone line", () => {
     renderRow(deviceTimeRow);
-    expect(screen.getByText("Device time · UTC+5")).toBeInTheDocument();
-    expect(screen.queryByText("UTC+5")).not.toBeInTheDocument();
+    expect(screen.getByText("Device time")).toBeInTheDocument();
+    expect(screen.getByText("UTC+5")).toBeInTheDocument();
+    expect(screen.queryByText(/·/)).not.toBeInTheDocument();
   });
 
   it("should use the accessible name of the row for the item", () => {
@@ -88,7 +95,10 @@ describe("LocationRow of the device time location", () => {
       id: "moscow",
       cityLabel: "Moscow",
       countryName: "Russia",
-      metaLabel: undefined,
+      zoneLineParts: [
+        { kind: ZoneLinePartKind.PLACE, text: "Russia" },
+        { kind: ZoneLinePartKind.UTC_OFFSET, text: "UTC+5" },
+      ],
       accessibleName: undefined,
       mark: undefined,
     });

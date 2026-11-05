@@ -16,6 +16,8 @@ const row = {
   cityLabel: "Kolkata",
   countryName: "India",
   utcOffsetLabel: "UTC+5:30",
+  zoneAbbreviationLabel: "",
+  zoneLineParts: [],
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",

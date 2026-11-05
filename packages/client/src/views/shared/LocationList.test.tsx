@@ -4,7 +4,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import type { LocationRow } from "@/presenter";
+import { type LocationRow, ZoneLinePartKind } from "@/presenter";
 import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { removeLocationThroughMenu } from "@/test/removeLocationThroughMenu";
 import { LocationList } from "./LocationList";
@@ -14,6 +14,8 @@ const rows: LocationRow[] = [
     id: "moscow",
     cityLabel: "Moscow",
     utcOffsetLabel: "UTC+3",
+    zoneAbbreviationLabel: "",
+    zoneLineParts: [{ kind: ZoneLinePartKind.PLACE, text: "Russia" }],
     offsetDifferenceLabel: "",
     offsetDifferenceAccessibleLabel: "",
     localTimeLabel: "",
@@ -26,6 +28,8 @@ const rows: LocationRow[] = [
     id: "tokyo",
     cityLabel: "Tokyo",
     utcOffsetLabel: "UTC+9",
+    zoneAbbreviationLabel: "",
+    zoneLineParts: [{ kind: ZoneLinePartKind.PLACE, text: "Japan" }],
     offsetDifferenceLabel: "",
     offsetDifferenceAccessibleLabel: "",
     localTimeLabel: "",
@@ -38,6 +42,8 @@ const rows: LocationRow[] = [
     id: "kyiv",
     cityLabel: "Kyiv",
     utcOffsetLabel: "UTC+3",
+    zoneAbbreviationLabel: "",
+    zoneLineParts: [{ kind: ZoneLinePartKind.PLACE, text: "Ukraine" }],
     offsetDifferenceLabel: "",
     offsetDifferenceAccessibleLabel: "",
     localTimeLabel: "",

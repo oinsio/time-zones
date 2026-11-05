@@ -1,4 +1,5 @@
 // Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
+// Verifies FR5, FR6, NFR-R1, UX1 of show-zone-abbreviations-and-zone-label-setting (D6).
 // Verifies FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
 // Verifies FR2, FR6, UX1, NFR-A2 of show-local-time-and-date-on-location-cards (D5).
 // Verifies FR1 of reorder-locations-by-drag-and-drop.
@@ -16,30 +17,45 @@ describe("LocationRow", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("should show the offset after the country on the muted secondary line", () => {
+  it("should show country, abbreviation and offset as separate elements on the muted zone line", () => {
     renderRow();
-    const secondaryLine = screen.getByText("India").parentElement;
-    expect(secondaryLine).toHaveTextContent("IndiaUTC+5:30");
-    expect(secondaryLine).toHaveClass("text-muted-foreground");
-    expect(secondaryLine).toContainElement(screen.getByText("UTC+5:30"));
+    const zoneLine = screen.getByText("India").parentElement;
+    expect(zoneLine).toHaveClass("text-muted-foreground");
+    expect(
+      Array.from(zoneLine?.children ?? []).map(
+        (element) => element.textContent,
+      ),
+    ).toEqual(["India", "IST", "UTC+5:30"]);
   });
 
-  it("should still show the offset when the country name is empty", () => {
-    renderRow({ countryName: "" });
-    expect(screen.getByText("UTC+5:30")).toBeInTheDocument();
+  it("should keep the abbreviation and the offset on one line each", () => {
+    renderRow();
+    expect(screen.getByText("IST")).toHaveClass("whitespace-nowrap");
+    expect(screen.getByText("UTC+5:30")).toHaveClass("whitespace-nowrap");
   });
 
-  it("should show no offset element and keep the remove action when the offset label is empty", () => {
-    renderRow({ utcOffsetLabel: "" });
-    expect(screen.queryByText(/UTC/)).not.toBeInTheDocument();
+  it("should let the place wrap between words", () => {
+    renderRow();
+    expect(screen.getByText("India")).not.toHaveClass("whitespace-nowrap");
+  });
+
+  it("should never cut a zone line element or write a separator", () => {
+    renderRow();
+    const zoneLine = screen.getByText("India").parentElement;
+    expect(zoneLine?.innerHTML).not.toMatch(/truncate|text-ellipsis/);
+    expect(zoneLine).not.toHaveTextContent("·");
+  });
+
+  it("should show no zone line when the row has no zone line parts", () => {
+    renderRow({ zoneLineParts: [] });
+    expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata⋯$/);
+  });
+
+  it("should keep the remove action when the zone line is empty", () => {
+    renderRow({ zoneLineParts: [] });
     expect(
       screen.getByRole("button", { name: "Actions for Kolkata" }),
     ).toBeInTheDocument();
-  });
-
-  it("should show no secondary line when both country and offset are empty", () => {
-    renderRow({ countryName: "", utcOffsetLabel: "" });
-    expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata⋯$/);
   });
 
   it("should show the move handle when reorderable", () => {
@@ -61,10 +77,10 @@ describe("LocationRow", () => {
       localIsoDate: "2026-03-08",
     };
 
-    it("should read city, country and offset, time, date in that order", () => {
+    it("should read city, country, abbreviation and offset, time, date in that order", () => {
       renderRow(withTime);
       expect(screen.getByRole("listitem")).toHaveTextContent(
-        "KolkataIndiaUTC+5:3012:30Sun, Mar 8",
+        "KolkataIndiaISTUTC+5:3012:30Sun, Mar 8",
       );
     });
 

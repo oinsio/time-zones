@@ -1,5 +1,10 @@
 import type { TrackMove, WallTimeInputOutcome } from "@/controller";
-import type { PresentedDayTrack, PresentedLocationMark } from "@/presenter";
+import {
+  type PresentedDayTrack,
+  type PresentedLocationMark,
+  type ZoneLinePart,
+  ZoneLinePartKind,
+} from "@/presenter";
 import { DayTrack } from "./DayTrack";
 import { LocalDateTime } from "./LocalDateTime";
 import { LocationMarkIcon } from "./LocationMarkIcon";
@@ -11,8 +16,8 @@ type ZoneRowContentProps = {
   mark?: PresentedLocationMark;
   offsetDifferenceLabel: string;
   offsetDifferenceAccessibleLabel: string;
-  /** Texts of the line under the city: country and offset, or the meta line. */
-  secondaryTexts: readonly string[];
+  /** Elements of the zone line under the city: place, zone abbreviation, UTC offset. */
+  zoneLineParts: readonly ZoneLinePart[];
   localTimeLabel: string;
   localDateLabel: string;
   localIsoDate: string;
@@ -33,6 +38,7 @@ type ZoneRowContentProps = {
  * button before the day track.
  * Implements FR1, NFR-A2, UX1 of fix-location-card-and-header-layout (D1): the
  * hint moved to `LocationRow`, the card's last element.
+ * Implements FR5, FR6, NFR-R1, UX1 of show-zone-abbreviations-and-zone-label-setting (D6): the zone line parts.
  */
 export function ZoneRowContent({
   cityLabel,
@@ -40,7 +46,7 @@ export function ZoneRowContent({
   mark,
   offsetDifferenceLabel,
   offsetDifferenceAccessibleLabel,
-  secondaryTexts,
+  zoneLineParts,
   localTimeLabel,
   localDateLabel,
   localIsoDate,
@@ -87,10 +93,19 @@ export function ZoneRowContent({
               </span>
             )}
           </span>
-          {secondaryTexts.length > 0 && (
+          {zoneLineParts.length > 0 && (
             <span className="flex flex-wrap gap-x-2 text-sm text-muted-foreground">
-              {secondaryTexts.map((text) => (
-                <span key={text}>{text}</span>
+              {zoneLineParts.map((part) => (
+                <span
+                  key={part.kind}
+                  className={
+                    part.kind === ZoneLinePartKind.PLACE
+                      ? undefined
+                      : "whitespace-nowrap"
+                  }
+                >
+                  {part.text}
+                </span>
               ))}
             </span>
           )}

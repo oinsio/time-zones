@@ -1,10 +1,14 @@
 // UX3 of support-legacy-ios-12-safari: no empty country element in a row.
+// Verifies FR5, UX1 of show-zone-abbreviations-and-zone-label-setting (D6).
 
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
-import type { LocationRow as LocationRowModel } from "@/presenter";
+import {
+  type LocationRow as LocationRowModel,
+  ZoneLinePartKind,
+} from "@/presenter";
 import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { LocationRow } from "./LocationRow";
 
@@ -13,6 +17,8 @@ const countrylessRow: LocationRowModel = {
   cityLabel: "Kyiv",
   countryName: "",
   utcOffsetLabel: "UTC+2",
+  zoneAbbreviationLabel: "",
+  zoneLineParts: [{ kind: ZoneLinePartKind.UTC_OFFSET, text: "UTC+2" }],
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
