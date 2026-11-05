@@ -1,7 +1,7 @@
 # zone-abbreviations Specification
 
 ## Purpose
-TBD - created by archiving change show-zone-abbreviations-and-zone-label-setting. Update Purpose after archive.
+Show the IANA (tzdb) letter abbreviation of a time zone, valid for the selected moment, in zone cards and match zones by any of their abbreviations in search, from one offline reference shared by both.
 
 ## Requirements
 
