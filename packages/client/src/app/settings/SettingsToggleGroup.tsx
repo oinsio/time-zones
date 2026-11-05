@@ -56,13 +56,13 @@ export function SettingsToggleGroup<Value extends string>({
                 aria-pressed={isSelected}
                 onClick={() => onToggle(value, !isSelected)}
                 className={cn(
-                  "flex min-h-11 min-w-11 items-center gap-2 rounded-md border bg-surface px-4 py-2 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent",
+                  "flex min-h-11 min-w-11 items-center gap-1 rounded-md border bg-surface px-2 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent",
                   isSelected ? "border-accent" : "border-border",
                 )}
               >
-                <span className="flex size-6 shrink-0 items-center justify-center">
+                <span className="flex size-5 shrink-0 items-center justify-center">
                   {isSelected && (
-                    <Check aria-hidden="true" className="text-accent" />
+                    <Check aria-hidden="true" className="size-5 text-accent" />
                   )}
                 </span>
                 {label}

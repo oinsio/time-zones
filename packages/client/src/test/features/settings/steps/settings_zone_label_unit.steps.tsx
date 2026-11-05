@@ -9,7 +9,7 @@ import { expect, vi } from "vitest";
 import { SettingsToggleGroup } from "@/app/settings";
 import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { ZoneLabelPart } from "@/preferences";
-import { ZONE_LABEL_PART_NAMES } from "../../locations/steps/zoneLineWorld";
+import type { ZONE_LABEL_PART_NAMES } from "../../locations/steps/zoneLineWorld";
 import { createZoneLabelWorld } from "./zoneLabelWorld";
 
 vi.mock(

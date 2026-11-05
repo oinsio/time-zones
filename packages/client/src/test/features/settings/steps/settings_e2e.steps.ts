@@ -178,3 +178,44 @@ Given(
     await locationsWorld.seedLanguage(ENGLISH_LANGUAGE);
   },
 );
+
+// Verifies FR12 of show-zone-abbreviations-and-zone-label-setting: theme and hour format are radio groups, the zone label and language groups are plain groups.
+Then(
+  "the groups are named {string}, {string}, {string} and {string}",
+  async (
+    { locationsWorld },
+    themeName: string,
+    hourFormatName: string,
+    zoneLabelName: string,
+    languageGroupName: string,
+  ) => {
+    for (const groupName of [themeName, hourFormatName]) {
+      await expect(
+        locationsWorld.page.getByRole(RADIOGROUP_ROLE, { name: groupName }),
+      ).toBeVisible();
+    }
+    for (const groupName of [zoneLabelName, languageGroupName]) {
+      await expect(
+        locationsWorld.page.getByRole("group", { name: groupName }),
+      ).toBeVisible();
+    }
+  },
+);
+
+// Verifies FR12 of show-zone-abbreviations-and-zone-label-setting: the toggles are named in the interface language.
+Then(
+  "the zone label toggles are {string} and {string}",
+  async (
+    { locationsWorld },
+    utcOffsetName: string,
+    abbreviationName: string,
+  ) => {
+    for (const name of [utcOffsetName, abbreviationName]) {
+      await expect(
+        locationsWorld.page
+          .getByRole("group", { name: /Zone label|Подпись пояса/ })
+          .getByRole(BUTTON_ROLE, { name, exact: true }),
+      ).toBeVisible();
+    }
+  },
+);
