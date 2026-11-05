@@ -176,3 +176,31 @@ Then(
     ).toBeVisible();
   },
 );
+
+// Verifies NFR-A2 of show-zone-abbreviations-and-zone-label-setting: the pair is part of the accessible name.
+Then(
+  "the result {string} is named with {string}",
+  async ({ locationsWorld }, cityName: string, pairText: string) => {
+    await expect(
+      locationsWorld.page.getByRole("option", {
+        name: new RegExp(`${cityName}.*${pairText}`),
+      }),
+    ).toBeVisible();
+  },
+);
+
+// Verifies NFR-A2 of show-zone-abbreviations-and-zone-label-setting: the matched half is emphasised by weight, not only by colour.
+Then(
+  "the matched abbreviation {string} is bolder than {string}",
+  async ({ locationsWorld }, matched: string, other: string) => {
+    const options = locationsWorld.page.getByRole("option");
+    const weightOf = async (abbreviation: string) =>
+      Number(
+        await options
+          .getByText(abbreviation, { exact: true })
+          .first()
+          .evaluate((element) => getComputedStyle(element).fontWeight),
+      );
+    expect(await weightOf(matched)).toBeGreaterThan(await weightOf(other));
+  },
+);

@@ -89,7 +89,7 @@ describe("SettingsToggleGroup", () => {
     const slotOf = (name: string) =>
       screen.getByRole("button", { name }).firstElementChild;
     expect(slotOf("Option A")?.className).toBe(slotOf("Option B")?.className);
-    expect(slotOf("Option A")).toHaveClass("size-6");
+    expect(slotOf("Option A")).toHaveClass("size-5");
   });
 
   it("should be at least 44 px high and wide", () => {
