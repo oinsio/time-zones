@@ -13,7 +13,11 @@ const ALPHA_2026 = Date.UTC(2026, 3, 1);
 const BETA_2026 = Date.UTC(2026, 6, 1);
 const ZONE_ID = "Test/Zone";
 
-function period(designation: string, utcOffsetMinutes: number, untilEpochMilliseconds: number): ZonePeriod {
+function period(
+  designation: string,
+  utcOffsetMinutes: number,
+  untilEpochMilliseconds: number,
+): ZonePeriod {
   return { designation, utcOffsetMinutes, untilEpochMilliseconds };
 }
 
@@ -25,12 +29,20 @@ describe("extractZoneAbbreviations", () => {
   it.each([
     {
       name: "a zone with winter and summer time",
-      periods: [period("EST", -300, MARCH_2026), period("EDT", -240, NOVEMBER_2026), period("EST", -300, Infinity)],
+      periods: [
+        period("EST", -300, MARCH_2026),
+        period("EDT", -240, NOVEMBER_2026),
+        period("EST", -300, Infinity),
+      ],
       expected: ["EST", "EDT"],
     },
     {
       name: "a Dublin-like zone whose summer time is the higher offset",
-      periods: [period("GMT", 0, MARCH_2026), period("IST", 60, NOVEMBER_2026), period("GMT", 0, Infinity)],
+      periods: [
+        period("GMT", 0, MARCH_2026),
+        period("IST", 60, NOVEMBER_2026),
+        period("GMT", 0, Infinity),
+      ],
       expected: ["GMT", "IST"],
     },
     {
@@ -40,7 +52,11 @@ describe("extractZoneAbbreviations", () => {
     },
     {
       name: "a numeric lower half and a letter higher half",
-      periods: [period("-03", -180, MARCH_2026), period("XDT", -120, NOVEMBER_2026), period("-03", -180, Infinity)],
+      periods: [
+        period("-03", -180, MARCH_2026),
+        period("XDT", -120, NOVEMBER_2026),
+        period("-03", -180, Infinity),
+      ],
       expected: ["", "XDT"],
     },
     {
@@ -72,7 +88,10 @@ describe("extractZoneAbbreviations", () => {
   });
 
   it.each([
-    { name: "only numeric designations", periods: [period("+05", 300, Infinity)] },
+    {
+      name: "only numeric designations",
+      periods: [period("+05", 300, Infinity)],
+    },
     { name: "a +0530 designation", periods: [period("+0530", 330, Infinity)] },
     { name: "an unknown zone", periods: undefined },
   ])("leaves the zone out for $name", ({ periods }) => {

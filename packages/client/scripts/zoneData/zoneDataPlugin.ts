@@ -6,7 +6,10 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import type { Plugin } from "vite";
-import { extractZoneAbbreviations, type ZonePeriod } from "./extractZoneAbbreviations.ts";
+import {
+  extractZoneAbbreviations,
+  type ZonePeriod,
+} from "./extractZoneAbbreviations.ts";
 import { extractZoneData, type ZoneData } from "./extractZoneData.ts";
 
 const ALIASES_MODULE_ID = "virtual:time-zone-aliases";
@@ -50,7 +53,9 @@ function loadZoneData(): ZoneData {
 }
 
 /** Reads the tzdb periods of a zone, turning minutes west of UTC into minutes east. */
-function readTzdbZonePeriods(zoneId: string): readonly ZonePeriod[] | undefined {
+function readTzdbZonePeriods(
+  zoneId: string,
+): readonly ZonePeriod[] | undefined {
   const tzdb = nodeRequire(ZONE_ABBREVIATIONS_PACKAGE) as {
     tz: { zone(zoneId: string): TzdbZone | null };
   };
@@ -66,7 +71,10 @@ function readTzdbZonePeriods(zoneId: string): readonly ZonePeriod[] | undefined 
 function loadZoneAbbreviations(): string {
   cachedZoneAbbreviations ??= JSON.stringify(
     extractZoneAbbreviations(
-      [...loadZoneData().zoneCities.map((record) => record.timeZoneId), UTC_ZONE_ID],
+      [
+        ...loadZoneData().zoneCities.map((record) => record.timeZoneId),
+        UTC_ZONE_ID,
+      ],
       readTzdbZonePeriods,
     ),
   );

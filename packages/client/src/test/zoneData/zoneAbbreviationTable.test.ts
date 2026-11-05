@@ -4,7 +4,16 @@ import zoneAbbreviations from "virtual:zone-abbreviations";
 import { describe, expect, it } from "vitest";
 
 const MAX_GZIPPED_BYTES = 5 * 1024;
-const REMOVED_ABBREVIATIONS = ["ET", "PT", "ALMT", "ICT", "SGT", "GST", "BRT", "ART"];
+const REMOVED_ABBREVIATIONS = [
+  "ET",
+  "PT",
+  "ALMT",
+  "ICT",
+  "SGT",
+  "GST",
+  "BRT",
+  "ART",
+];
 
 describe("virtual:zone-abbreviations", () => {
   it.each([
@@ -21,26 +30,39 @@ describe("virtual:zone-abbreviations", () => {
     expect(zoneAbbreviations[zoneId]).toEqual(expected);
   });
 
-  it.each(["Asia/Almaty", "Asia/Dubai", "Asia/Singapore", "America/Sao_Paulo", "Asia/Dhaka"])(
-    "has no entry for %s, which tzdb names numerically",
-    (zoneId) => {
-      expect(zoneAbbreviations[zoneId]).toBeUndefined();
-    },
-  );
+  it.each([
+    "Asia/Almaty",
+    "Asia/Dubai",
+    "Asia/Singapore",
+    "America/Sao_Paulo",
+    "Asia/Dhaka",
+  ])("has no entry for %s, which tzdb names numerically", (zoneId) => {
+    expect(zoneAbbreviations[zoneId]).toBeUndefined();
+  });
 
   it("holds none of the abbreviations outside tzdb", () => {
     const held = Object.values(zoneAbbreviations).flat();
-    expect(held.filter((abbreviation) => REMOVED_ABBREVIATIONS.includes(abbreviation))).toEqual([]);
+    expect(
+      held.filter((abbreviation) =>
+        REMOVED_ABBREVIATIONS.includes(abbreviation),
+      ),
+    ).toEqual([]);
   });
 
   it("gives IST to exactly Kolkata, Jerusalem and Dublin", () => {
     const zonesWithIst = Object.entries(zoneAbbreviations)
       .filter(([, pair]) => pair.includes("IST"))
       .map(([zoneId]) => zoneId);
-    expect(zonesWithIst.sort()).toEqual(["Asia/Jerusalem", "Asia/Kolkata", "Europe/Dublin"]);
+    expect(zonesWithIst.sort()).toEqual([
+      "Asia/Jerusalem",
+      "Asia/Kolkata",
+      "Europe/Dublin",
+    ]);
   });
 
   it("stays within the gzipped size budget", () => {
-    expect(gzipSync(JSON.stringify(zoneAbbreviations)).length).toBeLessThanOrEqual(MAX_GZIPPED_BYTES);
+    expect(
+      gzipSync(JSON.stringify(zoneAbbreviations)).length,
+    ).toBeLessThanOrEqual(MAX_GZIPPED_BYTES);
   });
 });
