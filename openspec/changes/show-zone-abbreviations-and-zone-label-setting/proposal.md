@@ -36,8 +36,8 @@ Audience: every user who reads cards (all of them), users who add places from an
 
 - `locations`: MODIFIED "UTC offset on location rows", "Device time location", "Exemplar city of the device time location", "Device time location strings are localized"; ADDED "Zone line on location rows", "Zone line layout", "Zone line is fast".
 - `time-selection`: MODIFIED "Wall-time hint texts".
-- `location-search`: MODIFIED "Search by abbreviation", "Result order and content", "Accessible and responsive search".
-- `settings`: MODIFIED "Open the settings page", "Preferences are kept on the device", "Unreadable stored preferences", "Settings strings are localized", "Settings page layout"; ADDED "Zone label", "Toggle group", "Accessible zone label", "Zone label layout".
+- `location-search`: MODIFIED "Search by abbreviation", "Result order and content", "Accessible and responsive search", "Search is fast and lazy" (NFR-P3 trace and an abbreviation-query scenario).
+- `settings`: MODIFIED "Open the settings page", "Preferences are kept on the device", "Unreadable stored preferences", "Settings strings are localized", "Settings page layout", "Interface language choice" (the language group now sits directly below the zone label group); ADDED "Zone label", "Toggle group", "Accessible zone label", "Zone label layout".
 
 ## Goals
 
