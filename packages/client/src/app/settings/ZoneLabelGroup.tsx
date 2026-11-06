@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
+import { ZONE_LABEL_PART_ORDER } from "@/constants";
 import {
   usePreferences,
   useZoneLabelExample,
   useZoneLabelParts,
 } from "@/controller";
-import { ZONE_LABEL_PART_ORDER } from "@/constants";
 import { ZoneLabelPart } from "@/preferences";
 import { ZoneLine } from "@/views/shared";
 import { SettingsToggleGroup } from "./SettingsToggleGroup";

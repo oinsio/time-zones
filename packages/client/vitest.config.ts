@@ -1,11 +1,13 @@
 import * as path from "node:path";
 import react from "@vitejs/plugin-react";
 import { configDefaults, defineConfig } from "vitest/config";
+import { DEPLOY_INSTANT_DEFINE, TEST_DEPLOY_INSTANT } from "./app.config";
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 
 export default defineConfig({
   plugins: [react(), zoneDataPlugin(), legacyCoreJsPlugin()],
+  define: { [DEPLOY_INSTANT_DEFINE]: JSON.stringify(TEST_DEPLOY_INSTANT) },
   test: {
     globals: true,
     environment: "jsdom",

@@ -32,3 +32,6 @@ declare module "virtual:zone-abbreviations" {
 declare module "virtual:legacy-core-js" {
   // Side-effect module: installs the core-js polyfills a legacy engine lacks.
 }
+
+/** The build instant, replaced by Vite's `define` (see `app.config.ts`). */
+declare const __APP_DEPLOY_INSTANT__: string;

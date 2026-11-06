@@ -18,6 +18,7 @@ export {
   WORK_BOUNDARY_BLEND_MINUTES,
   WORK_START_WALL_TIME,
 } from "./dayPeriods";
+export { APP_DEPLOY_INSTANT } from "./deploy";
 export { DEVICE_TIME_ZONE_FALLBACK_ID } from "./deviceTimeZone";
 export {
   ADD_LOCATION_BUTTON_ID,

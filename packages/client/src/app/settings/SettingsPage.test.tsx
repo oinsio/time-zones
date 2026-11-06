@@ -175,9 +175,7 @@ describe("SettingsPage", () => {
         pressed: true,
       }),
     ).toBeInTheDocument();
-    expect(zoneLabel).toHaveAccessibleDescription(
-      "Example: Russia MSK UTC+3",
-    );
+    expect(zoneLabel).toHaveAccessibleDescription("Example: Russia MSK UTC+3");
   });
 
   it("should order the zone label toggles like the zone line", () => {

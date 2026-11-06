@@ -178,7 +178,9 @@ export const createZoneLabelWorld = () => {
       const example = readZoneLineElements(zoneLabelGroup(tab));
       const parts = [
         ...(example.includes(EXAMPLE_OFFSET) ? [ZoneLabelPart.UTC_OFFSET] : []),
-        ...(EXAMPLE_ABBREVIATIONS.some((abbreviation) => example.includes(abbreviation))
+        ...(EXAMPLE_ABBREVIATIONS.some((abbreviation) =>
+          example.includes(abbreviation),
+        )
           ? [ZoneLabelPart.ZONE_ABBREVIATION]
           : []),
       ];

@@ -213,7 +213,9 @@ Then(
     for (const name of [abbreviationName, utcOffsetName]) {
       await expect(
         locationsWorld.page
-          .getByRole("group", { name: /^(Timezone label|Обозначение часового пояса)$/ })
+          .getByRole("group", {
+            name: /^(Timezone label|Обозначение часового пояса)$/,
+          })
           .getByRole(BUTTON_ROLE, { name, exact: true }),
       ).toBeVisible();
     }

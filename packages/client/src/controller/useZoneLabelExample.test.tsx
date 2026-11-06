@@ -53,21 +53,13 @@ describe("useZoneLabelExample", () => {
   it("should give the example of Moscow with both parts by default", async () => {
     await i18n.changeLanguage("en");
     const { result } = renderExample();
-    expect(textsOf(result.current.example)).toEqual([
-      "Russia",
-      "MSK",
-      "UTC+3",
-    ]);
+    expect(textsOf(result.current.example)).toEqual(["Russia", "MSK", "UTC+3"]);
   });
 
   it("should follow the active language", async () => {
     await i18n.changeLanguage("ru");
     const { result } = renderExample();
-    expect(textsOf(result.current.example)).toEqual([
-      "Россия",
-      "МСК",
-      "UTC+3",
-    ]);
+    expect(textsOf(result.current.example)).toEqual(["Россия", "МСК", "UTC+3"]);
   });
 
   it("should change in the same render as a toggle", async () => {
