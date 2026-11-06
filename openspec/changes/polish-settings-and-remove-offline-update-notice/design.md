@@ -45,7 +45,7 @@ Alternative: `mask`. Rejected: the mask box follows the text width, which change
 
 ### D5. One order for the zone parts (FR3, UX1)
 
-`src/constants/preferences.ts` gets `ZONE_LABEL_PART_ORDER: readonly ZoneLabelPart[] = [ZONE_ABBREVIATION, UTC_OFFSET]`. `presentZoneLine` emits the zone parts in this order after the place, instead of the hand-written order. `ZoneLabelGroup` maps this constant instead of `Object.values(ZoneLabelPart)`. The enum and the stored array order stay, so no migration is needed (NG2). `ZONE_LABEL_EXAMPLE` becomes `{ timeZoneId: "Europe/Moscow", countryCode: "RU" }` (FR4). Moscow has had one offset since 2014, so `UTC+3` and `MSK` hold at any effective instant.
+`src/constants/preferences.ts` gets `ZONE_LABEL_PART_ORDER: readonly ZoneLabelPart[] = [ZONE_ABBREVIATION, UTC_OFFSET]`. `presentZoneLine` emits the zone parts in this order after the place, instead of the hand-written order. `ZoneLabelGroup` maps this constant instead of `Object.values(ZoneLabelPart)`. The enum and the stored array order stay, so no migration is needed (NG2); the enum's JSDoc then says that its declaration order is the stored order and that the display order is `ZONE_LABEL_PART_ORDER`. `ZONE_LABEL_EXAMPLE` becomes `{ timeZoneId: "Europe/Moscow", countryCode: "RU" }` (FR4). Moscow has had one offset since 2014, so `UTC+3` and `MSK` hold at any effective instant.
 
 Alternative: reorder the enum. Rejected: it changes the stored order and the tests of `SET_ZONE_LABEL_PART`, for no visible gain.
 
