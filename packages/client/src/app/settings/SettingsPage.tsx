@@ -7,6 +7,7 @@ import {
   usePreferences,
 } from "@/controller";
 import { HourFormat, ThemePreference } from "@/preferences";
+import { DeployTime } from "./DeployTime";
 import { GnomishFactoryCredit } from "./GnomishFactoryCredit";
 import { InterfaceLanguageGroup } from "./InterfaceLanguageGroup";
 import { SettingsOptionGroup } from "./SettingsOptionGroup";
@@ -36,7 +37,7 @@ const HOUR_FORMAT_LABEL_KEYS = {
 } as const;
 
 /**
- * The settings page: the theme preference, the hour format, the zone label and the interface language. It handles an
+ * The settings page: the theme preference, the hour format, the zone label, the interface language and the deploy time. It handles an
  * unreadable stored document (a note with Reset) and a failed save (a note).
  * Focus goes to its heading when it opens.
  * Implements FR3, FR4, FR5, FR7, FR16, NFR-A1, NFR-R1 of
@@ -44,6 +45,7 @@ const HOUR_FORMAT_LABEL_KEYS = {
  * Implements FR1, NFR-A1, NFR-A2, UX1 of add-gnomish-factory-credit (D1).
  * Implements FR1, NFR-A1, UX1 of move-and-restyle-gnomish-factory-credit (D1).
  * Implements FR1, FR13 of add-interface-language-selection (D6).
+ * Implements FR5 of polish-settings-and-remove-offline-update-notice (D4): the deploy time.
  * Implements FR12 of show-zone-abbreviations-and-zone-label-setting (D7): the zone label group.
  */
 export function SettingsPage({ notices, onBack }: SettingsPageProps) {
@@ -130,6 +132,7 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
           activeCode={activeLanguage.code}
           onChoose={setInterfaceLanguage}
         />
+        <DeployTime />
       </main>
       <footer className="sticky bottom-0 -mx-4">
         <div
