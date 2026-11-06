@@ -1,6 +1,6 @@
 # Polish the settings page and remove the offline update note
 
-No other active change touches the capabilities this change modifies: the only one, `add-pr-preview-deploy`, changes `app-delivery`, not `settings`, `app-shell` or `main-page`.
+No other active change touches the capabilities this change modifies: the only one, `add-pr-preview-deploy`, changes `app-delivery`, not `settings`, `app-shell`, `main-page` or `date-selection`.
 
 ## Why
 
@@ -20,7 +20,7 @@ Audience: every user of the settings page, Russian-speaking users in particular,
 - MODIFIED `settings`: the zone label group's caption becomes "Timezone label" («Обозначение часового пояса»). The abbreviation toggle becomes «Аббревиатура» in Russian ("Abbreviation" in English stays). The toggles come in the order of the zone line: "Abbreviation" first, then "UTC offset". The live example becomes Russia (`Europe/Moscow`): `Russia, MSK, UTC+3` / `Россия, МСК, UTC+3`. The approved settings screenshots are re-approved.
 - ADDED `settings` → **Deploy time**: a line directly after the language group, "Deployed <date> at <time>" («Развёрнуто <date> в <time>»), in the interface language, the hour format and the device time zone, in the accent colour that the settings page icons use, in both themes.
 - MODIFIED `app-shell`: a failed update check, offline or otherwise, shows nothing. The update check, the update recheck, the update notice and the offline-ready notice stay as they are.
-- REMOVED `app-shell` → "Update check failure note" and `main-page` → "Update check failed note"; MODIFIED `main-page` → "Main page regions" (the notices region no longer holds that note). ADDED `main-page` → "Offline without notes".
+- REMOVED `app-shell` → "Update check failure note" and `main-page` → "Update check failed note"; MODIFIED `main-page` → "Main page regions" (the notices region no longer holds that note). ADDED `main-page` → "Offline without notes". MODIFIED `date-selection` → "Date bar on every page state" (its list of notices above the date bar no longer names that note).
 - Glossary (new or changed terms):
   - **Zone label** (`docs/glossary/settings.md`) changes its interface names: *RU:* «Обозначение часового пояса»: «Аббревиатура», «Смещение UTC»; English interface "Timezone label". The term and its code names (`zoneLabelParts`, `ZoneLabelPart`, `ZoneLabelGroup`, `settings.zoneLabelLabel`) stay, so the stored preferences document does not change.
   - **Zone abbreviation** (`docs/glossary/time.md`): *RU:* аббревиатура пояса (interface: «Аббревиатура»).
@@ -38,6 +38,7 @@ None.
 - `settings`: the zone label group's names, order and example; the deploy time line; the re-approved screenshots.
 - `app-shell`: a failed update check is silent; the update check failure note is removed.
 - `main-page`: the notices region no longer holds the update check failure note; offline shows no note.
+- `date-selection`: the notices above the date bar no longer include the update check failure note.
 
 ## Goals
 
