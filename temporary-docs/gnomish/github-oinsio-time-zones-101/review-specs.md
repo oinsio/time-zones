@@ -87,7 +87,8 @@ The proposal defines no `Q` ids ("Open Questions: None.").
 - Impact: Once the change is archived, `date-selection` still requires an "update-check-failed" notice that `app-shell` and `main-page` say no longer exists. The stable specs then contradict each other. A later change that reads `date-selection` may treat the note as required and build it again.
 - Fix: Add `openspec/changes/polish-settings-and-remove-offline-update-notice/specs/date-selection/spec.md` with `## MODIFIED Requirements` → `### Requirement: Date bar on every page state`. Restate the full stable requirement (`openspec/specs/date-selection/spec.md:231-250`), with its scenarios "Bar in each state" and "Notice above the bar" unchanged. Change only the list to "The notices (offline-ready, update, storage warning)", and append `FR7 of polish-settings-and-remove-offline-update-notice` to its `implements` comment. In `proposal.md` "Modified Capabilities", add "- `date-selection`: the notices above the date bar no longer include the update check failure note."
 - Fix risk: Low. No task or test change is needed. Neither scenario of the requirement names the note, and no date-selection test uses it: `grep -rl "failUpdateChecks\|updateCheckFailed" packages/client/src/test` finds only main-page and app-shell files. The delta must copy the rest of the requirement word for word. Otherwise, archiving the change would silently alter other rules.
-- Status: open
+- Status: fixed
+- Resolution: added specs/date-selection/spec.md, which MODIFIES "Date bar on every page state". It copies the stable requirement and its scenarios "Bar in each state" and "Notice above the bar" word for word, except that the notices list reads "(offline-ready, update, storage warning)" and the implements comment adds FR7 of this change. proposal.md now lists `date-selection` under Modified Capabilities and in What Changes, and its opening line names it too.
 
 ### R2 — SUGGESTION — The E2E "Update cannot be fetched" can pass before the update check has failed
 - Location: `openspec/changes/polish-settings-and-remove-offline-update-notice/tasks.md:41`
@@ -96,7 +97,8 @@ The proposal defines no `Q` ids ("Open Questions: None.").
 - Impact: The scenario that measures M5 ("0 notes after a failed update check offline") would also pass with the old code if it asserts before the rejection is handled. The E2E run would then show no regression in the real browser. FR7 stays covered by the jsdom tests of tasks 5.1/5.3, which control the rejected promise.
 - Fix: In task 5.4, add: "`rejectServiceWorkerUpdates` counts its calls on `window` (e.g. `window.__rejectedUpdateChecks`); the step waits with `expect.poll` until the count is at least 1, and only then asserts that the notices region has no text."
 - Fix risk: Low. The helper is shared with `main_page_recovery_e2e.steps.ts`, and adding a counter does not change how the update rejects there. It is test code only.
-- Status: open
+- Status: fixed
+- Resolution: task 5.4 now has `rejectServiceWorkerUpdates` in steps/main_page_e2e.fixtures.ts count its calls on `window` under a named key, with the rejection itself unchanged. The step waits with `expect.poll` until the count is at least 1, and only then asserts that the notices region has no text.
 
 ### R3 — SUGGESTION — The deploy time layout rule has no spec scenario, but task 4.6 builds two
 - Location: `openspec/changes/polish-settings-and-remove-offline-update-notice/specs/settings/spec.md:4`
@@ -105,7 +107,8 @@ The proposal defines no `Q` ids ("Open Questions: None.").
 - Impact: After archive, the stable `settings` spec has no scenario for the deploy time layout, and the two E2E outlines can be traced only to the requirement text. A later change that edits the requirement has no scenario to keep in step with those outlines.
 - Fix: Add to the "Deploy time" requirement in the delta spec the outline "The deploy time fits the screen": WHEN the settings page is `<width>` px wide in `<language>`, THEN the deploy time takes one line (375 and 1024 px, English and Russian), plus the scenario "The deploy time at 320 px": THEN the settings page does not scroll horizontally. Use the same names in task 4.6.
 - Fix risk: none. This only edits the spec; task 4.6 already plans these tests in E2E, where layout checks belong (`bdd-e2e.md`).
-- Status: open
+- Status: fixed
+- Resolution: the "Deploy time" requirement in specs/settings/spec.md gains the outline "The deploy time fits one line" (375 and 1024 px, English 12-hour and Russian) and the scenario "The deploy time at 320 px" (no horizontal scrolling). Task 4.6 uses these two names.
 
 ### R4 — SUGGESTION — The order check sits in a scenario the spec does not have
 - Location: `openspec/changes/polish-settings-and-remove-offline-update-notice/tasks.md:19`
@@ -114,7 +117,8 @@ The proposal defines no `Q` ids ("Open Questions: None.").
 - Impact: The unit feature's "Both parts by default" step keeps checking "both on" without the order, so it no longer says what the spec scenario says. The feature also gains a scenario that the archived spec lacks.
 - Fix: In task 2.3, change the Then step of "Both parts by default" to "the "Abbreviation" and "UTC offset" toggles are both on, in this order" (the step checks DOM order) and tag it `@FR3 @UX1` as well. Drop the extra scenario "The toggles follow the zone line".
 - Fix risk: Low. Changing the step text means updating the matching step in `steps/settings_zone_label_unit.steps.tsx`. Any other scenario that uses the old step text must keep a step that matches it.
-- Status: open
+- Status: fixed
+- Resolution: in task 2.3, the Then of "Both parts by default" becomes the spec step `the "Abbreviation" and "UTC offset" toggles are both on, in this order`, which checks the pressed state and the DOM order. The scenario gains `@FR3 @UX1`. The extra scenario "The toggles follow the zone line" is dropped. "Existing users get both parts" keeps the old step text, so that step stays. The task header now names UX1.
 
 ### R5 — SUGGESTION — The enum comment "declaration order is display order" becomes false
 - Location: `openspec/changes/polish-settings-and-remove-offline-update-notice/design.md:48`
@@ -123,7 +127,8 @@ The proposal defines no `Q` ids ("Open Questions: None.").
 - Impact: Once the change ships, the comment states the opposite of the code. The next developer who trusts it may reorder the enum to change the display. That would change the stored `zoneLabelParts` order, which NG2 explicitly excludes.
 - Fix: In task 2.2, add: "update the JSDoc of `ZoneLabelPart` in `src/preferences/preferences.ts` to "declaration order is the stored order; the display order is `ZONE_LABEL_PART_ORDER`"".
 - Fix risk: none. It edits a comment only.
-- Status: open
+- Status: fixed
+- Resolution: task 2.2 now rewrites the JSDoc of `ZoneLabelPart` in src/preferences/preferences.ts to "declaration order is the stored order; the display order is `ZONE_LABEL_PART_ORDER`", and design.md D5 says the same.
 
 ## Verdict
 
