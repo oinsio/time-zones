@@ -82,11 +82,16 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     expect(world.exampleOf()).toEqual(example.split(ELEMENT_SEPARATOR));
 
   // @show-zone-abbreviations-and-zone-label-setting @FR12 @FR14
+  // @polish-settings-and-remove-offline-update-notice @FR3 @FR4 @UX1 @M1
   f.Scenario("Both parts by default", ({ Given, And, When, Then }) => {
     Given("no preferences are stored", givenNoPreferences);
     And("the interface language is {string}", givenLanguage);
     When("the user opens the settings", openSettings);
-    Then("the zone label shows {string}", expectZoneLabel);
+    Then(
+      "the {string} and {string} toggles are both on, in this order",
+      (_ctx, first: string, second: string) =>
+        expect(world.pressedToggleNames()).toEqual([first, second]),
+    );
     And("the example shows {string}", expectExample);
   });
 

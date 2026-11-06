@@ -2,15 +2,15 @@ Feature: Zone label setting
   Implements change show-zone-abbreviations-and-zone-label-setting.
   As a user I choose which parts of a zone the location rows show, and I see the effect on a live example.
 
-  @show-zone-abbreviations-and-zone-label-setting @FR12 @FR14
+  @show-zone-abbreviations-and-zone-label-setting @FR12 @FR14 @polish-settings-and-remove-offline-update-notice @FR3 @FR4 @UX1 @M1
   Scenario: Both parts by default
     Given no preferences are stored
     And the interface language is "en"
     When the user opens the settings
-    Then the zone label shows "the UTC offset and the zone abbreviation"
-    And the example shows "India, IST, UTC+5:30"
+    Then the "Abbreviation" and "UTC offset" toggles are both on, in this order
+    And the example shows "Russia, MSK, UTC+3"
 
-  @show-zone-abbreviations-and-zone-label-setting @FR12 @FR14 @M4
+  @show-zone-abbreviations-and-zone-label-setting @FR12 @FR14 @M4 @polish-settings-and-remove-offline-update-notice @FR4 @M1
   Scenario Outline: The example follows the toggles
     Given the interface language is "<language>"
     And the stored zone label is "<parts>"
@@ -19,11 +19,11 @@ Feature: Zone label setting
 
     Examples:
       | language | parts                                    | example               |
-      | en       | the UTC offset and the zone abbreviation | India, IST, UTC+5:30  |
-      | en       | the UTC offset only                      | India, UTC+5:30       |
-      | en       | the zone abbreviation only               | India, IST            |
-      | en       | nothing                                  | India                 |
-      | ru       | the UTC offset and the zone abbreviation | Индия, IST, UTC+5:30  |
+      | en       | the UTC offset and the zone abbreviation | Russia, MSK, UTC+3    |
+      | en       | the UTC offset only                      | Russia, UTC+3         |
+      | en       | the zone abbreviation only               | Russia, MSK           |
+      | en       | nothing                                  | Russia                |
+      | ru       | the UTC offset and the zone abbreviation | Россия, МСК, UTC+3    |
 
   @show-zone-abbreviations-and-zone-label-setting @FR13
   Scenario: Both off leaves the country
