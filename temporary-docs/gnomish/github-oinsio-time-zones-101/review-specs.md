@@ -4,11 +4,11 @@
 
 | Item | Value |
 |---|---|
-| Stale claims | 0 |
+| Stale claims | 1 |
 | Requirements fully covered | 27/27 |
-| Contradictions | 0 |
+| Contradictions | 1 |
 | CRITICAL | 0 |
-| WARNING | 0 |
+| WARNING | 1 |
 | SUGGESTION | 4 |
 
 ## Freshness
@@ -37,6 +37,7 @@
 - ✅ The E2E group name patterns task 2.4 changes exist — `settingsE2eHelpers.ts:91-92`, `settings_e2e.steps.ts:216`.
 - ✅ The stable requirements restated as MODIFIED/REMOVED exist under these names: `settings` "Zone label" (`openspec/specs/settings/spec.md:545`), "Accessible zone label" (586), "Settings strings are localized" (230), "Settings page layout" (287); `app-shell` "New version notice" (65) and "Update check failure note" (179); `main-page` "Main page regions" (8) and "Update check failed note" (115). No part is already implemented, and no archived change did it.
 - ✅ Glossary and architecture texts tasks 1.1 rewrites exist: `docs/glossary/settings.md:10`, `docs/glossary/time.md:21`, `docs/glossary/app-shell.md:9,11,14`, `docs/architecture/views.md:132`; no glossary term for a deploy time exists yet.
+- ❌ The proposal lists only `settings`, `app-shell` and `main-page` under "Modified Capabilities" (`proposal.md:36-40`). A fourth stable spec also names the note that the change removes: `openspec/specs/date-selection/spec.md:232`, requirement "Date bar on every page state", says "The notices (offline-ready, update, update-check-failed, storage warning) MUST stay visible above the bar and MUST NOT cover it." The change has no `specs/date-selection/` delta. Apart from that line, the only stable requirements that name the note are the ones the change already modifies or removes (`grep -rniE "update.check.failed|failure note|could not be fetched" openspec/specs`). See R1.
 - ✅ The only other active change, `add-pr-preview-deploy`, has only `specs/app-delivery`.
 
 ## Coverage
@@ -53,7 +54,7 @@
 | FR8 | ✅ | ✅ app-shell / main-page REMOVED, main-page "Offline without notes" | ✅ 5.2, 5.4 |
 | NFR-A1 | ✅ | ✅ settings "Deploy time" ("The deploy time in the icon colour") | ✅ 4.3, 4.6 |
 | NFR-A2 | ✅ | ✅ settings "Accessible zone label" ("Tab order follows the zone line") | ✅ 2.4 |
-| NFR-R1 | ✅ | ✅ settings "Deploy time" text and stable "Zone label layout"; no deploy-time layout scenario (R2) | ✅ 4.6, 6.3 |
+| NFR-R1 | ✅ | ✅ settings "Deploy time" text and stable "Zone label layout"; no deploy-time layout scenario (R3) | ✅ 4.6, 6.3 |
 | NFR-R2 | ✅ | ✅ settings "Settings page layout" | ✅ 6.1 |
 | UX1 | ✅ | ✅ settings "Zone label" | ✅ 2.3 |
 | UX2 | ✅ | ✅ settings "Deploy time" | ✅ 4.3 |
@@ -75,11 +76,20 @@ The proposal defines no `Q` ids ("Open Questions: None.").
 
 ## Consistency
 
-None.
+- The change removes the note: it REMOVES `app-shell` "Update check failure note" (`specs/app-shell/spec.md:54`) and `main-page` "Update check failed note" (`specs/main-page/spec.md:39`), and its MODIFIED `main-page` "Main page regions" no longer names it (`specs/main-page/spec.md:20`). The stable `openspec/specs/date-selection/spec.md:232` ("Date bar on every page state") still lists "update-check-failed" among the notices that must stay above the date bar, and the change does not touch it. After archive, the stable specs contradict each other (R1).
 
 ## Findings
 
-### R1 — SUGGESTION — The E2E "Update cannot be fetched" can pass before the update check has failed
+### R1 — WARNING — The date-selection spec still names the removed update-check-failed note
+- Location: `openspec/specs/date-selection/spec.md:232`; `openspec/changes/polish-settings-and-remove-offline-update-notice/proposal.md:36-40`
+- Rule: `.claude/rules/delta-specs.md`
+- Problem: The stable requirement "Date bar on every page state" in `date-selection` says "The notices (offline-ready, update, update-check-failed, storage warning) MUST stay visible above the bar and MUST NOT cover it." The change removes that note everywhere else: it REMOVES `app-shell` "Update check failure note" and `main-page` "Update check failed note", and its MODIFIED `main-page` "Main page regions" leaves the note out. It has no `specs/date-selection/spec.md` delta, and the proposal's "Modified Capabilities" lists only `settings`, `app-shell` and `main-page`.
+- Impact: Once the change is archived, `date-selection` still requires an "update-check-failed" notice that `app-shell` and `main-page` say no longer exists. The stable specs then contradict each other. A later change that reads `date-selection` may treat the note as required and build it again.
+- Fix: Add `openspec/changes/polish-settings-and-remove-offline-update-notice/specs/date-selection/spec.md` with `## MODIFIED Requirements` → `### Requirement: Date bar on every page state`. Restate the full stable requirement (`openspec/specs/date-selection/spec.md:231-250`), with its scenarios "Bar in each state" and "Notice above the bar" unchanged. Change only the list to "The notices (offline-ready, update, storage warning)", and append `FR7 of polish-settings-and-remove-offline-update-notice` to its `implements` comment. In `proposal.md` "Modified Capabilities", add "- `date-selection`: the notices above the date bar no longer include the update check failure note."
+- Fix risk: Low. No task or test change is needed. Neither scenario of the requirement names the note, and no date-selection test uses it: `grep -rl "failUpdateChecks\|updateCheckFailed" packages/client/src/test` finds only main-page and app-shell files. The delta must copy the rest of the requirement word for word. Otherwise, archiving the change would silently alter other rules.
+- Status: open
+
+### R2 — SUGGESTION — The E2E "Update cannot be fetched" can pass before the update check has failed
 - Location: `openspec/changes/polish-settings-and-remove-offline-update-notice/tasks.md:41`
 - Rule: `.claude/rules/test-planning.md`
 - Problem: Task 5.4 asks the new E2E scenario to make the check fail with `failUpdateChecksOnNextLoad`, reload offline, and then assert that the notices region has no text. `rejectServiceWorkerUpdates` (`packages/client/src/test/features/main_page/steps/main_page_e2e.fixtures.ts:7-12`) only replaces `ServiceWorkerRegistration.prototype.update` and leaves no trace that it ran. So the step cannot wait for the failed check, and an "is empty" assertion made right after the reload holds whether or not the check has run yet.
@@ -88,7 +98,7 @@ None.
 - Fix risk: Low. The helper is shared with `main_page_recovery_e2e.steps.ts`, and adding a counter does not change how the update rejects there. It is test code only.
 - Status: open
 
-### R2 — SUGGESTION — The deploy time layout rule has no spec scenario, but task 4.6 builds two
+### R3 — SUGGESTION — The deploy time layout rule has no spec scenario, but task 4.6 builds two
 - Location: `openspec/changes/polish-settings-and-remove-offline-update-notice/specs/settings/spec.md:4`
 - Rule: `.claude/rules/delta-specs.md`
 - Problem: The "Deploy time" requirement says the line "MUST fit one line from 375 px; at 320 px it MAY wrap … but MUST NOT make the page scroll horizontally" (NFR-R1). None of its four scenarios (lines 6-38) covers this. Task 4.6 still adds the E2E outlines "The deploy time fits one line at <width> px" (375, 1024) and "The deploy time at 320 px", so the feature file gets scenarios that the spec does not have.
@@ -97,7 +107,7 @@ None.
 - Fix risk: none. This only edits the spec; task 4.6 already plans these tests in E2E, where layout checks belong (`bdd-e2e.md`).
 - Status: open
 
-### R3 — SUGGESTION — The order check sits in a scenario the spec does not have
+### R4 — SUGGESTION — The order check sits in a scenario the spec does not have
 - Location: `openspec/changes/polish-settings-and-remove-offline-update-notice/tasks.md:19`
 - Rule: `.claude/rules/gherkin.md`
 - Problem: The delta spec puts the order into "Both parts by default": "THEN the "Abbreviation" and "UTC offset" toggles are both on, in this order" (`specs/settings/spec.md:49`). Task 2.3 only re-tags that scenario and swaps its example. It checks the order in a new unit scenario, "The toggles follow the zone line", which appears in no delta spec.
@@ -106,7 +116,7 @@ None.
 - Fix risk: Low. Changing the step text means updating the matching step in `steps/settings_zone_label_unit.steps.tsx`. Any other scenario that uses the old step text must keep a step that matches it.
 - Status: open
 
-### R4 — SUGGESTION — The enum comment "declaration order is display order" becomes false
+### R5 — SUGGESTION — The enum comment "declaration order is display order" becomes false
 - Location: `openspec/changes/polish-settings-and-remove-offline-update-notice/design.md:48`
 - Rule: `.claude/rules/glossary.md`
 - Problem: D5 keeps the enum order `UTC_OFFSET`, `ZONE_ABBREVIATION` and moves the display order to `ZONE_LABEL_PART_ORDER`. The JSDoc on the enum, `packages/client/src/preferences/preferences.ts:20`, still says "A part of the zone line the zone label can show; declaration order is display order." No task updates it.
@@ -117,4 +127,4 @@ None.
 
 ## Verdict
 
-Ready to implement. No finding blocks: R1–R4 are SUGGESTIONs and can be folded in by the fix-specs stage.
+Needs revision. Blocking: R1 (WARNING). Without a `date-selection` delta, the stable specs contradict each other after archive. R2–R5 are SUGGESTIONs that the fix-specs stage can fold in.
