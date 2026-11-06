@@ -35,7 +35,7 @@ type ZoneLineInput = {
  * The elements of a zone line in order, without empty or hidden ones. The
  * zone abbreviation yields to a UTC offset that reads the same (the `UTC` zone).
  * Implements FR5, FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
- * Implements FR2 of polish-settings-and-remove-offline-update-notice (D5).
+ * Implements FR3, UX1 of polish-settings-and-remove-offline-update-notice (D5).
  */
 export function presentZoneLine({
   placeText,

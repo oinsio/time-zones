@@ -7,6 +7,7 @@ export const PREFERENCES_SCHEMA_VERSION = 3;
 /**
  * The zone of the live example under the zone label group.
  * Implements FR14 of show-zone-abbreviations-and-zone-label-setting (D5).
+ * Implements FR4 of polish-settings-and-remove-offline-update-notice (D5).
  */
 export const ZONE_LABEL_EXAMPLE = {
   timeZoneId: "Europe/Moscow",
@@ -16,7 +17,7 @@ export const ZONE_LABEL_EXAMPLE = {
 /**
  * The order of the zone label parts in the zone line and in the zone label
  * group: the zone abbreviation, then the UTC offset.
- * Implements FR2 of polish-settings-and-remove-offline-update-notice (D5).
+ * Implements FR3, UX1 of polish-settings-and-remove-offline-update-notice (D5).
  */
 export const ZONE_LABEL_PART_ORDER: readonly ZoneLabelPart[] = [
   ZoneLabelPart.ZONE_ABBREVIATION,
