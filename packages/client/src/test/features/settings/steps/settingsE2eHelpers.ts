@@ -89,7 +89,7 @@ export const seedZoneLabelParts = (
 
 /** The zone label group in either language, unless a scenario names it. */
 export const ANY_LANGUAGE_ZONE_LABEL_GROUP_NAME =
-  /^(Zone label|Подпись пояса)$/;
+  /^(Timezone label|Обозначение часового пояса)$/;
 export const zoneLabelGroupOf = (
   page: Page,
   name: string | RegExp = ANY_LANGUAGE_ZONE_LABEL_GROUP_NAME,

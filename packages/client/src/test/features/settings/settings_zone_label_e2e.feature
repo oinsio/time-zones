@@ -2,22 +2,29 @@ Feature: Zone label in a real browser
   Implements change show-zone-abbreviations-and-zone-label-setting.
   As a user I switch the parts of the zone label with the mouse or the keyboard on any screen.
 
-  @show-zone-abbreviations-and-zone-label-setting @FR12
+  @show-zone-abbreviations-and-zone-label-setting @FR12 @polish-settings-and-remove-offline-update-notice @FR1 @FR2 @FR3
   Scenario: Names and pressed state
     Given the locations interface language is Russian
     When the user opens the settings
-    Then the group "Подпись пояса" holds the pressed toggle buttons "Смещение UTC" and "Сокращение"
-    And the description of the group "Подпись пояса" contains "Индия"
+    Then the group "Обозначение часового пояса" holds the pressed toggle buttons "Аббревиатура" and "Смещение UTC" in this order
+    And the description of the group "Обозначение часового пояса" contains "Россия"
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-A1
+  @show-zone-abbreviations-and-zone-label-setting @NFR-A1 @polish-settings-and-remove-offline-update-notice @FR3
   Scenario: Toggle with the keyboard
     Given the locations interface language is English
     And the user opens the settings
     When the user tabs to the toggle "Abbreviation" and presses "Space"
     Then the toggle "Abbreviation" is not pressed
-    And the example shows "India, UTC+5:30"
+    And the example shows "Russia, UTC+3"
     When the user presses the key "Enter"
     Then the toggle "Abbreviation" is pressed
+
+  @polish-settings-and-remove-offline-update-notice @NFR-A2
+  Scenario: Tab order follows the zone line
+    Given the locations interface language is English
+    And the user opens the settings
+    When the user focuses the toggle "Abbreviation" and presses "Tab"
+    Then the toggle "UTC offset" is focused
 
   @show-zone-abbreviations-and-zone-label-setting @NFR-A1
   Scenario: Toggle size, focus and pressed icon
@@ -40,7 +47,7 @@ Feature: Zone label in a real browser
       | light | the UTC offset and the zone abbreviation |
       | dark  | nothing                                  |
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-R2
+  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @polish-settings-and-remove-offline-update-notice @NFR-R1
   Scenario Outline: One row on wide screens at <width> px in <language>
     Given the screen is <width> px wide for the locations
     And the locations interface language is <language>
@@ -52,7 +59,7 @@ Feature: Zone label in a real browser
       | 640   | Russian  |
       | 1024  | English  |
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-R2
+  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @polish-settings-and-remove-offline-update-notice @NFR-R1
   Scenario Outline: Narrow screens at <width> px
     Given the screen is <width> px wide for the locations
     And the locations interface language is Russian
@@ -66,7 +73,7 @@ Feature: Zone label in a real browser
       | 375   |
       | 2560  |
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @UX2
+  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @UX2 @polish-settings-and-remove-offline-update-notice @NFR-R1
   Scenario Outline: Toggling does not move the toggles at <width> px
     Given the screen is <width> px wide for the locations
     And the user opens the settings

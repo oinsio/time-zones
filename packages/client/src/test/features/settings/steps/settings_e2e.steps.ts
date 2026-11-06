@@ -207,13 +207,13 @@ Then(
   "the zone label toggles are {string} and {string}",
   async (
     { locationsWorld },
-    utcOffsetName: string,
     abbreviationName: string,
+    utcOffsetName: string,
   ) => {
-    for (const name of [utcOffsetName, abbreviationName]) {
+    for (const name of [abbreviationName, utcOffsetName]) {
       await expect(
         locationsWorld.page
-          .getByRole("group", { name: /Zone label|Подпись пояса/ })
+          .getByRole("group", { name: /^(Timezone label|Обозначение часового пояса)$/ })
           .getByRole(BUTTON_ROLE, { name, exact: true }),
       ).toBeVisible();
     }
