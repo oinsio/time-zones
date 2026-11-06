@@ -6,7 +6,7 @@ The main page of the app: the page frame (header, content region hosting the act
 ## Requirements
 
 ### Requirement: Main page regions
-The main page SHALL consist of a header with the app title as the only page heading, the Add location button and the settings button (see "Header actions"), a content region hosting the active view, a bottom bar holding the date bar (see the `date-selection` capability) that stays at the bottom of the viewport and is the page's footer landmark, and a polite notices region, out of the document flow, that keeps the offline-ready and update notices and stacks the update-check-failed note and the storage warning with them. The notices region MUST sit above the bottom bar and MUST NOT cover it. <!-- implements FR1, UX3 of add-main-page-scaffold; FR8 of select-date-with-calendar-and-now; FR1, FR2 of add-settings-page-and-device-time-location -->
+The main page SHALL consist of a header with the app title as the only page heading, the Add location button and the settings button (see "Header actions"), a content region hosting the active view, a bottom bar holding the date bar (see the `date-selection` capability) that stays at the bottom of the viewport and is the page's footer landmark, and a polite notices region, out of the document flow, that keeps the offline-ready and update notices and stacks the storage warning with them. The notices region MUST sit above the bottom bar and MUST NOT cover it. <!-- implements FR1, UX3 of add-main-page-scaffold; FR8 of select-date-with-calendar-and-now; FR1, FR2 of add-settings-page-and-device-time-location; FR7 of polish-settings-and-remove-offline-update-notice -->
 
 #### Scenario: User opens the app
 - **WHEN** the user opens the app
@@ -20,7 +20,7 @@ The main page SHALL consist of a header with the app title as the only page head
 - **AND** the bottom bar still shows the date bar
 
 #### Scenario: Header keeps its position
-- **WHEN** the page shows the update-check-failed note or the storage warning
+- **WHEN** the page shows the storage warning
 - **THEN** the header keeps its position
 
 ### Requirement: View host resolves the active view
@@ -111,22 +111,6 @@ When the location list is empty, the Cards view SHALL show an explanation that n
 - **GIVEN** the location list is empty
 - **WHEN** the user chooses the header's Add location button
 - **THEN** the search opens with popular suggestions
-
-### Requirement: Update check failed note
-While the browser is offline, the page MUST keep working with the same content and MUST NOT show a note because of the missing network alone. When a check for a new version fails because the network is unreachable, the page SHALL show a short non-blocking note that the latest version could not be fetched, announced politely and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
-
-#### Scenario: Update cannot be fetched
-- **WHEN** the app checks for a new version while offline
-- **THEN** the note is announced politely
-- **AND** the view stays usable
-
-#### Scenario: Offline without a pending check
-- **WHEN** the browser goes offline
-- **THEN** no note is shown
-
-#### Scenario: Connection restored
-- **WHEN** the browser goes back online
-- **THEN** the update-check-failed note disappears
 
 ### Requirement: Storage unavailable warning
 When local storage cannot be used, the page SHALL show a warning that changes will not be saved, and the app MUST keep working. <!-- implements FR9, NFR-A2 of add-main-page-scaffold -->
@@ -221,3 +205,17 @@ The header SHALL hold the Add location button, which opens the location search, 
 | 1024 |
 | 1440 |
 | 2560 |
+
+### Requirement: Offline without notes
+While the browser is offline, in airplane mode included, the main page SHALL keep working with the same content and MUST NOT show any note because of the missing network or because a check for a new version failed. Going offline and coming back online MUST NOT show or remove anything in the notices region. The update notice, the offline-ready notice and the storage warning keep their own rules. Inputs: the network state, the result of the update check. Output: none. Errors: none. <!-- implements FR7, FR8, UX3 of polish-settings-and-remove-offline-update-notice -->
+
+#### Scenario: Update cannot be fetched
+- **GIVEN** the app was installed on an earlier visit
+- **WHEN** the user opens it offline and its check for a new version fails
+- **THEN** the notices region shows nothing
+- **AND** the view is shown
+
+#### Scenario: Going offline and back online
+- **GIVEN** the user has opened the app
+- **WHEN** the browser goes offline and then back online
+- **THEN** the notices region shows nothing
