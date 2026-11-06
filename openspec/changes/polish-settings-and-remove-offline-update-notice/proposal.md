@@ -85,7 +85,7 @@ None: the change adds one line to the settings page and removes a note.
 
 #### Responsive
 
-- NFR-R1: The longer Russian texts keep the zone label layout: caption and both toggles in one row from 640 px, both toggles in one row below it, and no horizontal scrolling of the settings page at 320 px and 2560 px in English and Russian. The deploy time fits one line from 320 px.
+- NFR-R1: The longer Russian texts keep the zone label layout: caption and both toggles in one row from 640 px, both toggles in one row below it, and no horizontal scrolling of the settings page at 320 px and 2560 px in English and Russian. The deploy time fits one line from 375 px; at 320 px it may wrap between words but causes no horizontal scrolling.
 - NFR-R2: The approved settings screenshots at 375 px and 1024 px in both themes are re-approved once for this change; the deploy time text is hidden in them, because it changes with every build.
 
 ## UX Acceptance Criteria
