@@ -52,11 +52,20 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         clock.instant().epochMilliseconds + minutes * MILLISECONDS_PER_MINUTE,
       ).toString(),
     );
-  const failureNote = () => i18n.t("mainPage.updateCheckFailed");
+  const getNoticesRegion = () => {
+    const region = screen
+      .getAllByRole("status")
+      .find((candidate) => candidate.closest("footer") !== null);
+    if (region === undefined) throw new Error("no notices region");
+    return region;
+  };
+  const expectNoticesRegionEmpty = () =>
+    expect(getNoticesRegion()).toBeEmptyDOMElement();
 
   f.BeforeEachScenario(async () => {
     cleanup();
     localStorage.clear();
+    fakeServiceWorker.isUpdateAvailable = false;
     clock = createSwitchableClock(START_INSTANT);
     update = vi.fn().mockResolvedValue(undefined);
     await i18n.changeLanguage("en");
@@ -127,7 +136,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
-  // @support-legacy-ios-12-safari @FR10
+  // @support-legacy-ios-12-safari @FR10 @polish-settings-and-remove-offline-update-notice @FR7
   f.Scenario(
     "A check on return fails offline",
     ({ Given, And, When, Then }) => {
@@ -140,16 +149,34 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           await openAppWithRegistration();
         },
       );
-      And("no update-check failure note is shown", () => {
-        expect(screen.queryByText(failureNote())).toBeNull();
-      });
+      And("the notices region is empty", expectNoticesRegionEmpty);
       When(
         "the user returns to the app after {number} minutes",
         whenReturnsAfter,
       );
-      Then("the update-check failure note is shown", async () => {
-        expect(await screen.findByText(failureNote())).toBeInTheDocument();
-      });
+      Then(
+        "the app has checked for a new version {number} times",
+        thenCheckedTimes,
+      );
+      And("the notices region stays empty", expectNoticesRegionEmpty);
     },
   );
+
+  // @polish-settings-and-remove-offline-update-notice @FR7
+  f.Scenario("The start-up check fails", ({ Given, Then }) => {
+    Given(
+      "the update notice is shown and the start-up check fails because the network is unreachable",
+      async () => {
+        fakeServiceWorker.isUpdateAvailable = true;
+        update.mockRejectedValue(new TypeError(NETWORK_ERROR_MESSAGE));
+        await openAppWithRegistration();
+      },
+    );
+    Then("the update notice stays alone in the notices region", () => {
+      expect(getNoticesRegion()).toHaveTextContent(
+        i18n.t("app.updateAvailable"),
+      );
+      expect(getNoticesRegion()).not.toHaveTextContent(/could not be fetched/);
+    });
+  });
 });

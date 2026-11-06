@@ -93,17 +93,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @add-main-page-scaffold @FR1 @UX3
   f.Scenario("Header keeps its position", ({ Given, When, Then, And }) => {
-    Given("the update check has failed and storage is unavailable", () => {
-      fakeServiceWorker.shouldUpdateCheckFail = true;
+    Given("storage is unavailable", () => {
       vi.spyOn(localStorage, "setItem").mockImplementation(() => {
         throw new DOMException("quota", "QuotaExceededError");
       });
     });
     When("the user opens the app", () => openApp());
     Then("the notices are out of the document flow", () => {
-      expect(getNoticeRegion()).toHaveTextContent(
-        i18n.t("mainPage.updateCheckFailed"),
-      );
       expect(getNoticeRegion()).toHaveTextContent(
         i18n.t("mainPage.storageUnavailable"),
       );
@@ -116,41 +112,28 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
-  // @add-main-page-scaffold @FR8 @NFR-A2
+  // @polish-settings-and-remove-offline-update-notice @FR7 @UX3 @M5
   f.Scenario("Update cannot be fetched", ({ Given, When, Then, And }) => {
     Given("the update check fails because the network is unreachable", () => {
       fakeServiceWorker.shouldUpdateCheckFail = true;
     });
     When("the user opens the app", () => openApp());
-    Then("the update-check-failed note is announced politely", () => {
-      expect(getNoticeRegion()).toHaveAttribute("aria-live", "polite");
-      expect(getNoticeRegion()).toHaveTextContent(
-        i18n.t("mainPage.updateCheckFailed"),
-      );
+    Then("the notices region shows nothing", () => {
+      expect(getNoticeRegion()).toBeEmptyDOMElement();
     });
     And("the view stays usable", async () => {
       expect(await screen.findByText(emptyStateText())).toBeInTheDocument();
     });
   });
 
-  // @add-main-page-scaffold @FR8
-  f.Scenario("Offline without a pending check", ({ Given, When, Then }) => {
+  // @polish-settings-and-remove-offline-update-notice @FR8 @UX3
+  f.Scenario("Going offline and back online", ({ Given, When, Then }) => {
     Given("the user has opened the app", () => openApp());
-    When("the browser goes offline", () => setBrowserConnection(false));
-    Then("no note is shown", () => {
-      expect(getNoticeRegion()).toBeEmptyDOMElement();
-    });
-  });
-
-  // @add-main-page-scaffold @FR8
-  f.Scenario("Connection restored", ({ Given, When, Then }) => {
-    Given("the update check failed and the browser is offline", async () => {
-      fakeServiceWorker.shouldUpdateCheckFail = true;
-      await openApp();
+    When("the browser goes offline and then back online", () => {
       setBrowserConnection(false);
+      setBrowserConnection(true);
     });
-    When("the browser goes back online", () => setBrowserConnection(true));
-    Then("the update-check-failed note disappears", () => {
+    Then("the notices region shows nothing", () => {
       expect(getNoticeRegion()).toBeEmptyDOMElement();
     });
   });
