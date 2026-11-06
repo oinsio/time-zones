@@ -1,3 +1,4 @@
+// Verifies FR7, FR8 of polish-settings-and-remove-offline-update-notice.
 // Verifies FR6, FR7 of setup-app-shell-and-pages-deploy: offline-ready and
 // update-available state from the service worker, reload only on request.
 
@@ -97,60 +98,40 @@ describe("usePwaUpdateStatus update check", () => {
     vi.restoreAllMocks();
   });
 
-  it("should not report a failed check before any check ran", () => {
-    mockServiceWorker();
-    const { result } = renderHook(() => usePwaUpdateStatus());
-    expect(result.current.isUpdateCheckFailed).toBe(false);
-  });
-
   it("should check for an update once when the worker registers", async () => {
     const update = vi.fn().mockResolvedValue(undefined);
     await registerAndCheck(update);
     expect(update).toHaveBeenCalledTimes(1);
   });
 
-  it("should not report a failure when the check succeeds", async () => {
-    const { result } = await registerAndCheck(
-      vi.fn().mockResolvedValue(undefined),
-    );
-    expect(result.current.isUpdateCheckFailed).toBe(false);
-  });
-
-  it("should report a failure when the check rejects", async () => {
+  it("should have no failed check flag in the status after a rejected check", async () => {
     const { result } = await registerAndCheck(
       vi.fn().mockRejectedValue(new TypeError("network unreachable")),
     );
-    expect(result.current.isUpdateCheckFailed).toBe(true);
+    expect(Object.keys(result.current).sort()).toEqual([
+      "applyUpdate",
+      "dismiss",
+      "isOfflineReady",
+      "isUpdateAvailable",
+    ]);
   });
 
-  it("should clear the failure when the connection returns", async () => {
-    const { result } = await registerAndCheck(
+  it("should cause no unhandled rejection when the check rejects", async () => {
+    const onUnhandledRejection = vi.fn();
+    process.on("unhandledRejection", onUnhandledRejection);
+    await registerAndCheck(
       vi.fn().mockRejectedValue(new TypeError("network unreachable")),
     );
-    act(() => {
-      window.dispatchEvent(new Event("offline"));
-    });
-    act(() => {
-      window.dispatchEvent(new Event("online"));
-    });
-    expect(result.current.isUpdateCheckFailed).toBe(false);
-  });
-
-  it("should keep the failure while the browser is offline", async () => {
-    const { result } = await registerAndCheck(
-      vi.fn().mockRejectedValue(new TypeError("network unreachable")),
-    );
-    act(() => {
-      window.dispatchEvent(new Event("offline"));
-    });
-    expect(result.current.isUpdateCheckFailed).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    process.off("unhandledRejection", onUnhandledRejection);
+    expect(onUnhandledRejection).not.toHaveBeenCalled();
   });
 
   it("should not fail when the worker registers without a registration", async () => {
-    const { result, onRegisteredSW } = registerWithUpdate(vi.fn());
+    const { onRegisteredSW } = registerWithUpdate(vi.fn());
     await act(async () => {
       onRegisteredSW?.("sw.js", undefined);
     });
-    expect(result.current.isUpdateCheckFailed).toBe(false);
+    expect(onRegisteredSW).toBeDefined();
   });
 });

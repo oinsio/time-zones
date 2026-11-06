@@ -1,5 +1,6 @@
 import {
   CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
+  DEPLOY_DATE_FORMAT_OPTIONS,
   HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT,
   LOCAL_DATE_FORMAT_OPTIONS,
   LOCAL_TIME_FORMAT_OPTIONS_BY_HOUR_FORMAT,
@@ -15,6 +16,7 @@ export enum DateTimeLabelKind {
   LOCAL_DATE = "localDate",
   HOUR = "hour",
   DAY_AND_MONTH = "dayAndMonth",
+  DEPLOY_DATE = "deployDate",
 }
 
 const FORMAT_OPTIONS_BY_KIND_AND_HOUR_FORMAT: Record<
@@ -31,6 +33,10 @@ const FORMAT_OPTIONS_BY_KIND_AND_HOUR_FORMAT: Record<
     [HourFormat.H24]: CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
     [HourFormat.H12]: CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
   },
+  [DateTimeLabelKind.DEPLOY_DATE]: {
+    [HourFormat.H24]: DEPLOY_DATE_FORMAT_OPTIONS,
+    [HourFormat.H12]: DEPLOY_DATE_FORMAT_OPTIONS,
+  },
 };
 
 // Stryker disable next-line StringLiteral: equivalent — no language, zone and kind combine to the same joined text
@@ -44,6 +50,7 @@ const formattersByKey = new Map<string, Intl.DateTimeFormat>();
  * label shares them. The date labels have no hour, so it ignores the hour format.
  * Implements FR1, FR2, FR5 of replace-wall-clock-row-budgets-with-deterministic-checks (D1).
  * Implements FR5, NFR-P1 of add-settings-page-and-device-time-location (D8).
+ * Implements FR5 of polish-settings-and-remove-offline-update-notice (D2): the deploy date kind.
  * Implements FR5 of show-city-labels-in-interface-language (D5): formats along the fallback order.
  */
 export function getDateTimeFormatter(
@@ -54,7 +61,8 @@ export function getDateTimeFormatter(
 ): Intl.DateTimeFormat {
   const isHourless =
     kind === DateTimeLabelKind.LOCAL_DATE ||
-    kind === DateTimeLabelKind.DAY_AND_MONTH;
+    kind === DateTimeLabelKind.DAY_AND_MONTH ||
+    kind === DateTimeLabelKind.DEPLOY_DATE;
   const keyedHourFormat = isHourless ? HourFormat.H24 : hourFormat;
   const cacheKey = [language, timeZoneId, kind, keyedHourFormat].join(
     CACHE_KEY_SEPARATOR,

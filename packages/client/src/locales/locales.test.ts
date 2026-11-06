@@ -1,3 +1,4 @@
+// Verifies FR1, FR2 of polish-settings-and-remove-offline-update-notice (see the zone label names block).
 // Verifies FR2, FR10 of setup-app-shell-and-pages-deploy: locale files describe
 // themselves and share one set of keys.
 import { SUPPORTED_LANGUAGES } from "@/locales";
@@ -69,5 +70,21 @@ describe("locale files", () => {
     for (const { localeFile } of otherLocales) {
       expect(collectKeyPaths(localeFile).sort()).toEqual(referenceKeyPaths);
     }
+  });
+});
+
+describe("zone label names", () => {
+  // Verifies FR1, FR2 of polish-settings-and-remove-offline-update-notice.
+  it.each([
+    ["en", "zoneLabelLabel", "Timezone label"],
+    ["ru", "zoneLabelLabel", "Обозначение часового пояса"],
+    ["en", "zoneLabelAbbreviation", "Abbreviation"],
+    ["ru", "zoneLabelAbbreviation", "Аббревиатура"],
+  ])("should name the %s text settings.%s as %s", (code, key, expected) => {
+    const settings = localeModules[`./${code}.json`].settings as Record<
+      string,
+      string
+    >;
+    expect(settings[key]).toBe(expected);
   });
 });

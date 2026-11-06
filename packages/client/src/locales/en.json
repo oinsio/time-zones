@@ -19,7 +19,6 @@
     "loading": "Loading…",
     "viewError": "The view could not be loaded.",
     "retry": "Retry",
-    "updateCheckFailed": "The latest version could not be fetched. The app keeps working.",
     "storageUnavailable": "Storage is unavailable, so your changes will not be saved."
   },
   "views": {
@@ -121,7 +120,8 @@
     "hourFormatLabel": "Hour format",
     "hourFormat12": "12-hour",
     "hourFormat24": "24-hour",
-    "zoneLabelLabel": "Zone label",
+    "deployTime": "Deployed {{date}} at {{time}}",
+    "zoneLabelLabel": "Timezone label",
     "zoneLabelUtcOffset": "UTC offset",
     "zoneLabelAbbreviation": "Abbreviation",
     "zoneLabelExample": "Example:",

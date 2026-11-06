@@ -1,16 +1,16 @@
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
-import { test } from "./main_page_e2e.fixtures";
+import { REJECTED_UPDATE_CHECKS_KEY, test } from "./main_page_e2e.fixtures";
 import {
   APP_ROOT_URL,
   EMPTY_STATE_TEXT,
   ERROR_TEXT,
   failStorageWrites,
   installServiceWorker,
+  NOTICES_REGION_SELECTOR,
   RETRY_LABEL,
   readHeaderBox,
   STORAGE_WARNING_TEXT,
-  UPDATE_CHECK_FAILED_TEXT,
 } from "./mainPageE2eHelpers";
 
 const { Given, When, Then } = createBdd(test);
@@ -78,17 +78,6 @@ Given(
   },
 );
 
-When(
-  "the update check fails because the network is unreachable",
-  async ({ mainPageWorld }) => {
-    await mainPageWorld.failUpdateChecksOnNextLoad();
-    await mainPageWorld.page.reload();
-    await expect(
-      mainPageWorld.page.getByText(UPDATE_CHECK_FAILED_TEXT),
-    ).toBeVisible();
-  },
-);
-
 When("storage becomes unavailable", async ({ mainPageWorld }) => {
   const { page } = mainPageWorld;
   await page.addInitScript(failStorageWrites);
@@ -99,4 +88,37 @@ When("storage becomes unavailable", async ({ mainPageWorld }) => {
 Then("the header has not moved", async ({ mainPageWorld }) => {
   const currentHeaderBox = await readHeaderBox(mainPageWorld.page);
   expect(currentHeaderBox).toEqual(mainPageWorld.recordedHeaderBox);
+});
+
+// Verifies FR7, UX3, M5 of polish-settings-and-remove-offline-update-notice.
+Given(
+  "the app was installed on an earlier visit",
+  async ({ mainPageWorld }) => {
+    await mainPageWorld.seedEmptyList();
+    await installServiceWorker(mainPageWorld);
+  },
+);
+
+When(
+  "the update check is made to fail and the app is opened offline",
+  async ({ mainPageWorld }) => {
+    const { page } = mainPageWorld;
+    await mainPageWorld.failUpdateChecksOnNextLoad();
+    await page.context().setOffline(true);
+    await page.reload();
+  },
+);
+
+Then("the notices region shows nothing", async ({ mainPageWorld }) => {
+  const { page } = mainPageWorld;
+  await expect
+    .poll(() =>
+      page.evaluate(
+        (countKey) =>
+          (window as unknown as Record<string, number>)[countKey] ?? 0,
+        REJECTED_UPDATE_CHECKS_KEY,
+      ),
+    )
+    .toBeGreaterThanOrEqual(1);
+  await expect(page.locator(NOTICES_REGION_SELECTOR)).toHaveText("");
 });

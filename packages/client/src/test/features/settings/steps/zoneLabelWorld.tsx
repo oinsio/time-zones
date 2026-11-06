@@ -33,8 +33,8 @@ import { ZONE_LABEL_PART_NAMES } from "../../locations/steps/zoneLineWorld";
 const NO_OP = () => undefined;
 const INSTANT = "2026-07-15T12:00:00Z";
 const PAGE_HIDE_EVENT = "pagehide";
-const EXAMPLE_OFFSET = "UTC+5:30";
-const EXAMPLE_ABBREVIATION = "IST";
+const EXAMPLE_OFFSET = "UTC+3";
+const EXAMPLE_ABBREVIATIONS = ["MSK", "МСК"];
 
 type Tab = {
   container: HTMLElement;
@@ -165,6 +165,11 @@ export const createZoneLabelWorld = () => {
     /** The example under the toggles, as zone line elements. */
     exampleOf: (tab = tabs[0] as Tab) =>
       readZoneLineElements(zoneLabelGroup(tab)),
+    /** The names of the pressed zone label toggles in DOM order. */
+    pressedToggleNames: (tab = tabs[0] as Tab) =>
+      within(zoneLabelGroup(tab))
+        .getAllByRole("button", { pressed: true })
+        .map((toggle) => toggle.textContent),
     /**
      * The zone label in force, read from the example it shows (never from
      * `aria-pressed`, which belongs to the E2E scenario of the accessible names).
@@ -173,7 +178,9 @@ export const createZoneLabelWorld = () => {
       const example = readZoneLineElements(zoneLabelGroup(tab));
       const parts = [
         ...(example.includes(EXAMPLE_OFFSET) ? [ZoneLabelPart.UTC_OFFSET] : []),
-        ...(example.includes(EXAMPLE_ABBREVIATION)
+        ...(EXAMPLE_ABBREVIATIONS.some((abbreviation) =>
+          example.includes(abbreviation),
+        )
           ? [ZoneLabelPart.ZONE_ABBREVIATION]
           : []),
       ];

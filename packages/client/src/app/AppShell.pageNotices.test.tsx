@@ -1,3 +1,4 @@
+// Verifies FR7, FR8 of polish-settings-and-remove-offline-update-notice.
 // Verifies FR8, FR9, NFR-A2 of add-main-page-scaffold: the page notices stack
 // next to the service worker notices in the polite region, and FR13 of
 // add-locations-via-search: a failed save shows the storage warning.
@@ -12,8 +13,6 @@ import { AppShell } from "./AppShell";
 
 vi.mock("virtual:pwa-register/react", () => ({ useRegisterSW: vi.fn() }));
 
-const UPDATE_CHECK_FAILED_TEXT =
-  "The latest version could not be fetched. The app keeps working.";
 const STORAGE_WARNING_TEXT =
   "Storage is unavailable, so your changes will not be saved.";
 
@@ -58,41 +57,26 @@ describe("AppShell page notices", () => {
     vi.restoreAllMocks();
   });
 
-  it("should show no note before an update check fails", () => {
-    render(<AppShell />);
-    expect(
-      screen.queryByText(UPDATE_CHECK_FAILED_TEXT),
-    ).not.toBeInTheDocument();
-  });
-
-  it("should announce the update-check-failed note politely", async () => {
+  it("should show nothing in the notices region after a failed check", async () => {
     render(<AppShell />);
     await failUpdateCheck();
-    expect(getNoticesRegion()).toHaveTextContent(UPDATE_CHECK_FAILED_TEXT);
+    expect(getNoticesRegion()).toBeEmptyDOMElement();
   });
 
-  it("should keep the update notice next to the failed-check note", async () => {
+  it("should keep the update notice alone after a failed check", async () => {
     mockServiceWorker(true);
     render(<AppShell />);
     await failUpdateCheck();
     expect(getNoticesRegion()).toHaveTextContent("A new version is available.");
-    expect(getNoticesRegion()).toHaveTextContent(UPDATE_CHECK_FAILED_TEXT);
+    expect(getNoticesRegion()).not.toHaveTextContent("could not be fetched");
   });
 
-  it("should show no note when the browser merely goes offline", () => {
+  it("should show nothing when the browser goes offline and back online", () => {
     render(<AppShell />);
     act(() => {
       window.dispatchEvent(new Event("offline"));
     });
     expect(getNoticesRegion()).toBeEmptyDOMElement();
-  });
-
-  it("should remove the note when the connection returns", async () => {
-    render(<AppShell />);
-    await failUpdateCheck();
-    act(() => {
-      window.dispatchEvent(new Event("offline"));
-    });
     act(() => {
       window.dispatchEvent(new Event("online"));
     });

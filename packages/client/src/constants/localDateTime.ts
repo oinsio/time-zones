@@ -41,6 +41,16 @@ export const HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT: Record<
 };
 
 /**
+ * Date of the deploy time line ("March 8, 2026").
+ * Implements FR5 of polish-settings-and-remove-offline-update-notice (D2).
+ */
+export const DEPLOY_DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+};
+
+/**
  * Day and short month of the clock change note ("25 окт.", "Oct 25").
  * Implements FR2 of show-clock-change-note-on-location-cards (D5).
  */

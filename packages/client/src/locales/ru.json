@@ -19,7 +19,6 @@
     "loading": "Загрузка…",
     "viewError": "Не удалось загрузить экран.",
     "retry": "Повторить",
-    "updateCheckFailed": "Не удалось получить последнюю версию. Приложение продолжает работать.",
     "storageUnavailable": "Хранилище недоступно, поэтому изменения не будут сохранены."
   },
   "views": {
@@ -121,9 +120,10 @@
     "hourFormatLabel": "Формат времени",
     "hourFormat12": "12 часов",
     "hourFormat24": "24 часа",
-    "zoneLabelLabel": "Подпись пояса",
+    "deployTime": "Развёрнуто {{date}} в {{time}}",
+    "zoneLabelLabel": "Обозначение часового пояса",
     "zoneLabelUtcOffset": "Смещение UTC",
-    "zoneLabelAbbreviation": "Сокращение",
+    "zoneLabelAbbreviation": "Аббревиатура",
     "zoneLabelExample": "Пример:",
     "languageLabel": "Язык",
     "languageButton": "Язык: {{language}}",

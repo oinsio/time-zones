@@ -54,7 +54,7 @@ Given(
 
 // Verifies FR12 of show-zone-abbreviations-and-zone-label-setting: names and pressed state.
 Then(
-  "the group {string} holds the pressed toggle buttons {string} and {string}",
+  "the group {string} holds the pressed toggle buttons {string} and {string} in this order",
   async (
     { locationsWorld },
     groupName: string,
@@ -67,6 +67,7 @@ Then(
         group.getByRole(BUTTON_ROLE, { name, exact: true }),
       ).toHaveAttribute(PRESSED_ATTRIBUTE, "true");
     }
+    await expect(group.getByRole(BUTTON_ROLE)).toHaveText([first, second]);
   },
 );
 
@@ -86,6 +87,23 @@ When(
     const { page } = locationsWorld;
     await tabUntilFocused(page, zoneLabelToggleOf(page, name));
     await page.keyboard.press(key);
+  },
+);
+
+// Verifies NFR-A2 of polish-settings-and-remove-offline-update-notice: Tab order follows the zone line.
+When(
+  "the user focuses the toggle {string} and presses {string}",
+  async ({ locationsWorld }, name: string, key: string) => {
+    const { page } = locationsWorld;
+    await zoneLabelToggleOf(page, name).focus();
+    await page.keyboard.press(key);
+  },
+);
+
+Then(
+  "the toggle {string} is focused",
+  async ({ locationsWorld }, name: string) => {
+    await expect(zoneLabelToggleOf(locationsWorld.page, name)).toBeFocused();
   },
 );
 

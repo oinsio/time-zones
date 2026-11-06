@@ -18,6 +18,7 @@ export {
   WORK_BOUNDARY_BLEND_MINUTES,
   WORK_START_WALL_TIME,
 } from "./dayPeriods";
+export { APP_DEPLOY_INSTANT } from "./deploy";
 export { DEVICE_TIME_ZONE_FALLBACK_ID } from "./deviceTimeZone";
 export {
   ADD_LOCATION_BUTTON_ID,
@@ -28,6 +29,7 @@ export { KeyboardKey } from "./keyboard";
 export { LEGACY_ZONE_PROBE_ID } from "./legacy";
 export {
   CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
+  DEPLOY_DATE_FORMAT_OPTIONS,
   HOUR_LABEL_FORMAT_OPTIONS,
   HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT,
   LOCAL_DATE_FORMAT_OPTIONS,
@@ -51,6 +53,7 @@ export {
   PREFERENCES_SCHEMA_VERSION,
   PREFERENCES_WRITE_DEBOUNCE_MS,
   ZONE_LABEL_EXAMPLE,
+  ZONE_LABEL_PART_ORDER,
 } from "./preferences";
 export {
   MIN_LOCATIONS_TO_REORDER,

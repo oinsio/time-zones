@@ -21,9 +21,15 @@ Feature: Check for a new version when the app returns to the screen
     When the user leaves the app and 16 minutes pass
     Then the app has checked for a new version 1 times
 
-  @support-legacy-ios-12-safari @FR10
+  @support-legacy-ios-12-safari @FR10 @polish-settings-and-remove-offline-update-notice @FR7
   Scenario: A check on return fails offline
     Given the app was opened and the next check will fail because the network is unreachable
-    And no update-check failure note is shown
+    And the notices region is empty
     When the user returns to the app after 16 minutes
-    Then the update-check failure note is shown
+    Then the app has checked for a new version 2 times
+    And the notices region stays empty
+
+  @polish-settings-and-remove-offline-update-notice @FR7
+  Scenario: The start-up check fails
+    Given the update notice is shown and the start-up check fails because the network is unreachable
+    Then the update notice stays alone in the notices region

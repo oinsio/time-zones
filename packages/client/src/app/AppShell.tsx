@@ -18,7 +18,6 @@ import { MainPage } from "./MainPage";
 import { OfflineReadyNotice } from "./OfflineReadyNotice";
 import { SettingsButton } from "./SettingsButton";
 import { StorageWarning } from "./StorageWarning";
-import { UpdateCheckFailedNote } from "./UpdateCheckFailedNote";
 import { UpdateNotice } from "./UpdateNotice";
 import { ViewSkeleton } from "./ViewSkeleton";
 
@@ -55,13 +54,8 @@ function AppShellContent({ clock }: { clock: Clock }) {
   useThemePreference();
   useInterfaceLanguage();
   const { hasSaveFailed, loadStatus } = useLocations();
-  const {
-    isOfflineReady,
-    isUpdateAvailable,
-    isUpdateCheckFailed,
-    applyUpdate,
-    dismiss,
-  } = usePwaUpdateStatus(clock);
+  const { isOfflineReady, isUpdateAvailable, applyUpdate, dismiss } =
+    usePwaUpdateStatus(clock);
   const isStorageAvailable = useStorageAvailability();
   const [page, setPage] = useState(AppPage.MAIN);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
@@ -91,7 +85,6 @@ function AppShellContent({ clock }: { clock: Clock }) {
       ) : (
         isOfflineReady && <OfflineReadyNotice onDismiss={dismiss} />
       )}
-      {isUpdateCheckFailed && <UpdateCheckFailedNote />}
       {(!isStorageAvailable || hasSaveFailed) && <StorageWarning />}
     </>
   );

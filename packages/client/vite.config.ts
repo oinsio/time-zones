@@ -11,7 +11,9 @@ import {
   APP_THEME_COLOR,
   BUILD_OUT_DIR,
   BUILD_TARGETS,
+  DEPLOY_INSTANT_DEFINE,
 } from "./app.config";
+import { resolveDeployInstant } from "./scripts/deployInstant/resolveDeployInstant";
 import { mainChunkPreloadPlugin } from "./scripts/legacyBoot/mainChunkPreloadPlugin";
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
@@ -20,6 +22,7 @@ const SHARED_VIEWS_PATH = "/src/views/shared/";
 
 export default defineConfig({
   base: APP_BASE_PATH,
+  define: { [DEPLOY_INSTANT_DEFINE]: JSON.stringify(resolveDeployInstant()) },
   build: {
     outDir: BUILD_OUT_DIR,
     target: BUILD_TARGETS,

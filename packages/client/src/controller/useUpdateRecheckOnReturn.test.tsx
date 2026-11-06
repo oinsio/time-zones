@@ -1,3 +1,4 @@
+// Verifies FR7, FR8 of polish-settings-and-remove-offline-update-notice.
 // FR10 of support-legacy-ios-12-safari: a new version is looked for when the page returns.
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -17,15 +18,14 @@ function setup() {
   const clock = createSwitchableClock(START);
   const update = vi.fn().mockResolvedValue(undefined);
   const registration = { update } as unknown as ServiceWorkerRegistration;
-  const onCheckFailed = vi.fn();
   const rendered = renderHook(() =>
-    useUpdateRecheckOnReturn(registration, clock, onCheckFailed),
+    useUpdateRecheckOnReturn(registration, clock),
   );
   const returnToPage = (instant: string) => {
     clock.moveTo(instant);
     act(() => setPageVisibility("visible"));
   };
-  return { clock, update, onCheckFailed, returnToPage, ...rendered };
+  return { clock, update, returnToPage, ...rendered };
 }
 
 describe("useUpdateRecheckOnReturn", () => {
@@ -93,23 +93,18 @@ describe("useUpdateRecheckOnReturn", () => {
     expect(update).toHaveBeenCalledTimes(1);
   });
 
-  it("should report a failed check", async () => {
-    const { update, onCheckFailed, returnToPage } = setup();
+  it("should swallow a failed check without an unhandled rejection", async () => {
+    const onUnhandledRejection = vi.fn();
+    process.on("unhandledRejection", onUnhandledRejection);
+    const { update, returnToPage } = setup();
     update.mockRejectedValueOnce(new TypeError("network unreachable"));
 
     returnToPage(MINUTES_16);
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
-    await vi.waitFor(() => expect(onCheckFailed).toHaveBeenCalledTimes(1));
-  });
-
-  it("should not report a successful check", async () => {
-    const { update, onCheckFailed, returnToPage } = setup();
-
-    returnToPage(MINUTES_16);
-    await Promise.resolve();
-
+    process.off("unhandledRejection", onUnhandledRejection);
     expect(update).toHaveBeenCalledTimes(1);
-    expect(onCheckFailed).not.toHaveBeenCalled();
+    expect(onUnhandledRejection).not.toHaveBeenCalled();
   });
 
   it("should remove its listener on unmount", () => {
@@ -123,7 +118,7 @@ describe("useUpdateRecheckOnReturn", () => {
 
   it("should do nothing before a registration exists", () => {
     const clock = createSwitchableClock(START);
-    renderHook(() => useUpdateRecheckOnReturn(undefined, clock, vi.fn()));
+    renderHook(() => useUpdateRecheckOnReturn(undefined, clock));
     clock.moveTo(MINUTES_16);
 
     const reportedErrors: ErrorEvent[] = [];
@@ -145,17 +140,15 @@ describe("useUpdateRecheckOnReturn across renders", () => {
     resetPageVisibility();
   });
 
-  it("should keep counting from the start-up check when the callback changes", () => {
+  it("should keep counting from the start-up check on a rerender", () => {
     const clock = createSwitchableClock(START);
     const update = vi.fn().mockResolvedValue(undefined);
     const registration = { update } as unknown as ServiceWorkerRegistration;
-    const { rerender } = renderHook(
-      ({ onCheckFailed }) =>
-        useUpdateRecheckOnReturn(registration, clock, onCheckFailed),
-      { initialProps: { onCheckFailed: vi.fn() as () => void } },
+    const { rerender } = renderHook(() =>
+      useUpdateRecheckOnReturn(registration, clock),
     );
     clock.moveTo(MINUTES_16);
-    rerender({ onCheckFailed: vi.fn() });
+    rerender();
 
     act(() => setPageVisibility("visible"));
 

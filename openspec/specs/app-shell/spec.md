@@ -63,7 +63,7 @@ When the app finishes preparing for offline use, the shell SHALL show a notice t
 - **THEN** no offline-ready notice is shown
 
 ### Requirement: New version notice
-When a new version of the app is available, the shell SHALL show a non-blocking notice with a reload action and a dismiss control. The reload action MUST switch the app to the new version. The app MUST NOT reload by itself. The notice MUST NOT cover the page heading. The app MUST check for a new version when it starts, and again each time the page becomes visible once at least 15 minutes have passed since the last check; no check MUST run while the page is hidden. A failed check MUST be reported as in "Update check failure note". <!-- implements FR7, UX2, NFR-A2 of setup-app-shell-and-pages-deploy; FR10 of support-legacy-ios-12-safari -->
+When a new version of the app is available, the shell SHALL show a non-blocking notice with a reload action and a dismiss control. The reload action MUST switch the app to the new version. The app MUST NOT reload by itself. The notice MUST NOT cover the page heading. The app MUST check for a new version when it starts, and again each time the page becomes visible once at least 15 minutes have passed since the last check; no check MUST run while the page is hidden. A failed check, because the network is unreachable or for any other reason, MUST show nothing: no note, no notice and no error, and the app MUST keep working as before; the next check runs by the same rule. <!-- implements FR7, UX2, NFR-A2 of setup-app-shell-and-pages-deploy; FR10 of support-legacy-ios-12-safari; FR7 of polish-settings-and-remove-offline-update-notice -->
 
 #### Scenario: New version becomes available
 - **WHEN** a new version of the app is waiting
@@ -100,10 +100,16 @@ When a new version of the app is available, the shell SHALL show a non-blocking 
 
 #### Scenario: A check on return fails offline
 - **GIVEN** the start-up check for a new version succeeded 16 minutes ago
-- **AND** no update-check failure note is shown
 - **AND** the network is now unreachable
 - **WHEN** the page becomes visible
-- **THEN** the note that the latest version could not be fetched is shown
+- **THEN** the app checks for a new version
+- **AND** the notices region stays empty
+
+#### Scenario: The start-up check fails
+- **GIVEN** the network is unreachable
+- **WHEN** the app starts and its check for a new version fails
+- **THEN** the notices region stays empty
+- **AND** a shown update or offline-ready notice stays visible
 
 ### Requirement: Recovery screen on unexpected errors
 If rendering fails unexpectedly, the shell SHALL replace the page content with a recovery screen that explains the problem in plain language and offers a reload action. The recovery screen MUST NOT show technical error details. <!-- implements FR8, UX4 of setup-app-shell-and-pages-deploy -->
@@ -175,14 +181,6 @@ The shell, the recovery screen and both notices SHALL have no automated accessib
 #### Scenario: Narrow and wide screens
 - **WHEN** the shell is opened at 320 px and at 2560 px wide
 - **THEN** the page has no horizontal scrolling
-
-### Requirement: Update check failure note
-When the check for a new version fails because the network is unreachable, the shell SHALL show a short polite note in the notices region next to the existing notices, without replacing them and without taking focus. The note MUST disappear when the connection returns. <!-- implements FR8, NFR-A2 of add-main-page-scaffold -->
-
-#### Scenario: Update check fails offline
-- **WHEN** the app checks for a new version while the network is unreachable
-- **THEN** the note that the latest version could not be fetched is announced politely
-- **AND** a shown update or offline-ready notice stays visible
 
 ### Requirement: Interface language at start
 The app SHALL start in the interface language chosen on the settings page when one is stored and its code is registered. Otherwise it SHALL use the first browser language, in the browser's order of preference, that matches a registered locale: first a locale whose code equals the browser language exactly, then a locale whose code equals its own base language and equals the browser language's primary subtag (`ru-RU` matches `ru`). A dialect MUST be picked from the browser language only by an exact code match. When no browser language matches, the app MUST use English. The language in force MUST be applied before the main page is first shown, with no flash of another language, online and offline alike. Inputs: the stored interface language, the browser languages, the locale registry. Output: the interface language in force. Errors: none; an unknown stored code is treated as no choice. <!-- implements FR7, FR8 of add-interface-language-selection -->

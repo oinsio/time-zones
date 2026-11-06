@@ -41,3 +41,12 @@ export const BUILD_TARGETS = [
   "safari12",
   "ios12",
 ];
+
+/**
+ * Name of the global that Vite's `define` replaces with the deploy instant.
+ * Implements FR6 of polish-settings-and-remove-offline-update-notice (D1).
+ */
+export const DEPLOY_INSTANT_DEFINE = "__APP_DEPLOY_INSTANT__";
+
+/** The deploy instant of every Vitest run, so that tests do not depend on the build. */
+export const TEST_DEPLOY_INSTANT = "2026-03-08T07:30:00.000Z";

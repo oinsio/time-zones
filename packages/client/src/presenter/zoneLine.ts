@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next";
-import { ZONE_LABEL_EXAMPLE } from "@/constants";
+import { ZONE_LABEL_EXAMPLE, ZONE_LABEL_PART_ORDER } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import {
@@ -35,6 +35,7 @@ type ZoneLineInput = {
  * The elements of a zone line in order, without empty or hidden ones. The
  * zone abbreviation yields to a UTC offset that reads the same (the `UTC` zone).
  * Implements FR5, FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
+ * Implements FR3, UX1 of polish-settings-and-remove-offline-update-notice (D5).
  */
 export function presentZoneLine({
   placeText,
@@ -46,16 +47,19 @@ export function presentZoneLine({
   const isAbbreviationShown =
     zoneLabelParts.includes(ZoneLabelPart.ZONE_ABBREVIATION) &&
     !(isOffsetShown && zoneAbbreviationLabel === utcOffsetLabel);
-  return [
-    { kind: ZoneLinePartKind.PLACE, text: placeText },
-    {
+  const zonePartByLabelPart = {
+    [ZoneLabelPart.ZONE_ABBREVIATION]: {
       kind: ZoneLinePartKind.ZONE_ABBREVIATION,
       text: isAbbreviationShown ? zoneAbbreviationLabel : "",
     },
-    {
+    [ZoneLabelPart.UTC_OFFSET]: {
       kind: ZoneLinePartKind.UTC_OFFSET,
       text: isOffsetShown ? utcOffsetLabel : "",
     },
+  };
+  return [
+    { kind: ZoneLinePartKind.PLACE, text: placeText },
+    ...ZONE_LABEL_PART_ORDER.map((part) => zonePartByLabelPart[part]),
   ].filter((part) => part.text !== "");
 }
 
