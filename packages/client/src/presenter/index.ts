@@ -21,6 +21,8 @@ export {
 export { type DayPeriodMarkers, getDayPeriodMarkers } from "./dayPeriodMarkers";
 // Implements FR1, FR2, FR7, FR9 of add-time-sliders-to-location-cards.
 export type { HourLabel, PresentedDayTrack } from "./dayTrack";
+// Implements FR5 of polish-settings-and-remove-offline-update-notice.
+export { formatDeployTime } from "./deployTime";
 // Implements FR1, FR2 of show-local-time-and-date-on-location-cards.
 export {
   formatLocalDate,

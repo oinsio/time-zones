@@ -121,6 +121,7 @@
     "hourFormatLabel": "Формат времени",
     "hourFormat12": "12 часов",
     "hourFormat24": "24 часа",
+    "deployTime": "Развёрнуто {{date}} в {{time}}",
     "zoneLabelLabel": "Обозначение часового пояса",
     "zoneLabelUtcOffset": "Смещение UTC",
     "zoneLabelAbbreviation": "Аббревиатура",
