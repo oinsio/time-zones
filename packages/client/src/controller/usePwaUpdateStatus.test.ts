@@ -108,7 +108,12 @@ describe("usePwaUpdateStatus update check", () => {
     const { result } = await registerAndCheck(
       vi.fn().mockRejectedValue(new TypeError("network unreachable")),
     );
-    expect(Object.keys(result.current)).not.toContain("isUpdateCheckFailed");
+    expect(Object.keys(result.current).sort()).toEqual([
+      "applyUpdate",
+      "dismiss",
+      "isOfflineReady",
+      "isUpdateAvailable",
+    ]);
   });
 
   it("should cause no unhandled rejection when the check rejects", async () => {
