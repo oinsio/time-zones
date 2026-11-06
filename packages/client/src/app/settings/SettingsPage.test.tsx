@@ -148,7 +148,7 @@ describe("SettingsPage", () => {
       .getAllByRole("radiogroup")
       .map((group) => group.getAttribute("aria-label"));
     expect(groupNames).toEqual(["Theme", "Hour format"]);
-    const zoneLabel = screen.getByRole("group", { name: "Zone label" });
+    const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     expect(
       hourGroup().compareDocumentPosition(zoneLabel) &
         Node.DOCUMENT_POSITION_FOLLOWING,
@@ -162,7 +162,7 @@ describe("SettingsPage", () => {
 
   it("should show both zone label toggles on and the example by default", () => {
     renderPage();
-    const zoneLabel = screen.getByRole("group", { name: "Zone label" });
+    const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     expect(
       within(zoneLabel).getByRole("button", {
         name: "UTC offset",
@@ -176,16 +176,25 @@ describe("SettingsPage", () => {
       }),
     ).toBeInTheDocument();
     expect(zoneLabel).toHaveAccessibleDescription(
-      "Example: India IST UTC+5:30",
+      "Example: Russia MSK UTC+3",
     );
+  });
+
+  it("should order the zone label toggles like the zone line", () => {
+    renderPage();
+    const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
+    const toggleNames = within(zoneLabel)
+      .getAllByRole("button")
+      .map((button) => button.textContent);
+    expect(toggleNames).toEqual(["Abbreviation", "UTC offset"]);
   });
 
   it("should change the example in the same render as the Abbreviation toggle", async () => {
     renderPage();
     await userEvent.click(screen.getByRole("button", { name: "Abbreviation" }));
     expect(
-      screen.getByRole("group", { name: "Zone label" }),
-    ).toHaveAccessibleDescription("Example: India UTC+5:30");
+      screen.getByRole("group", { name: "Timezone label" }),
+    ).toHaveAccessibleDescription("Example: Russia UTC+3");
   });
 
   it("should save the zone label once after the debounce", async () => {

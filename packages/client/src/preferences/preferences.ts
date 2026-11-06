@@ -17,7 +17,7 @@ export enum HourFormat {
   H24 = "H24",
 }
 
-/** A part of the zone line the zone label can show; declaration order is display order. */
+/** A part of the zone line the zone label can show; declaration order is the stored order; the display order is `ZONE_LABEL_PART_ORDER`. */
 export enum ZoneLabelPart {
   UTC_OFFSET = "UTC_OFFSET",
   ZONE_ABBREVIATION = "ZONE_ABBREVIATION",

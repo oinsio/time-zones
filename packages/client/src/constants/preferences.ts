@@ -1,3 +1,4 @@
+import { ZoneLabelPart } from "@/preferences";
 import { KeyboardKey } from "./keyboard";
 
 /** Version of the stored preferences document (ADR-0004 envelope). */
@@ -8,9 +9,19 @@ export const PREFERENCES_SCHEMA_VERSION = 3;
  * Implements FR14 of show-zone-abbreviations-and-zone-label-setting (D5).
  */
 export const ZONE_LABEL_EXAMPLE = {
-  timeZoneId: "Asia/Kolkata",
-  countryCode: "IN",
+  timeZoneId: "Europe/Moscow",
+  countryCode: "RU",
 } as const;
+
+/**
+ * The order of the zone label parts in the zone line and in the zone label
+ * group: the zone abbreviation, then the UTC offset.
+ * Implements FR2 of polish-settings-and-remove-offline-update-notice (D5).
+ */
+export const ZONE_LABEL_PART_ORDER: readonly ZoneLabelPart[] = [
+  ZoneLabelPart.ZONE_ABBREVIATION,
+  ZoneLabelPart.UTC_OFFSET,
+];
 
 /** Delay that collapses bursts of preference changes into one storage write. */
 export const PREFERENCES_WRITE_DEBOUNCE_MS = 300;

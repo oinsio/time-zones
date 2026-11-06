@@ -80,8 +80,8 @@ describe("presentZoneLine", () => {
 
 describe("presentZoneLabelExample", () => {
   it.each([
-    ["en", ["India", "IST", "UTC+5:30"]],
-    ["ru", ["Индия", "IST", "UTC+5:30"]],
+    ["en", ["Russia", "MSK", "UTC+3"]],
+    ["ru", ["Россия", "МСК", "UTC+3"]],
   ])("gives the example in %s", (language, expected) => {
     const parts = presentZoneLabelExample({
       instant: JULY_INSTANT,
@@ -99,6 +99,19 @@ describe("presentZoneLabelExample", () => {
       translate: i18n.getFixedT("en"),
       zoneLabelParts: [],
     });
-    expect(texts(parts)).toEqual(["India"]);
+    expect(texts(parts)).toEqual(["Russia"]);
+  });
+});
+
+describe("presentZoneLine order", () => {
+  it("should follow ZONE_LABEL_PART_ORDER for the zone parts", () => {
+    const kinds = line({ zoneLabelParts: [ZONE_ABBREVIATION, UTC_OFFSET] }).map(
+      (part) => part.kind,
+    );
+    expect(kinds).toEqual([
+      ZoneLinePartKind.PLACE,
+      ZoneLinePartKind.ZONE_ABBREVIATION,
+      ZoneLinePartKind.UTC_OFFSET,
+    ]);
   });
 });

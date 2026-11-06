@@ -4,6 +4,7 @@ import {
   useZoneLabelExample,
   useZoneLabelParts,
 } from "@/controller";
+import { ZONE_LABEL_PART_ORDER } from "@/constants";
 import { ZoneLabelPart } from "@/preferences";
 import { ZoneLine } from "@/views/shared";
 import { SettingsToggleGroup } from "./SettingsToggleGroup";
@@ -16,6 +17,7 @@ const ZONE_LABEL_PART_LABEL_KEYS = {
 /**
  * The zone label group: a toggle for the UTC offset and one for the zone
  * abbreviation, with a live example of the zone line under them.
+ * Implements FR1, FR2 of polish-settings-and-remove-offline-update-notice (D5).
  * Implements FR12, FR13, FR14, NFR-A1, NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting (D7).
  */
 export function ZoneLabelGroup() {
@@ -26,7 +28,7 @@ export function ZoneLabelGroup() {
   return (
     <SettingsToggleGroup
       caption={t("settings.zoneLabelLabel")}
-      options={Object.values(ZoneLabelPart).map((part) => ({
+      options={ZONE_LABEL_PART_ORDER.map((part) => ({
         value: part,
         label: t(ZONE_LABEL_PART_LABEL_KEYS[part]),
       }))}

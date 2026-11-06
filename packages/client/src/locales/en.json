@@ -121,7 +121,7 @@
     "hourFormatLabel": "Hour format",
     "hourFormat12": "12-hour",
     "hourFormat24": "24-hour",
-    "zoneLabelLabel": "Zone label",
+    "zoneLabelLabel": "Timezone label",
     "zoneLabelUtcOffset": "UTC offset",
     "zoneLabelAbbreviation": "Abbreviation",
     "zoneLabelExample": "Example:",

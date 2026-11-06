@@ -50,13 +50,13 @@ describe("useZoneLabelExample", () => {
     await i18n.changeLanguage("ru");
   });
 
-  it("should give the example of Kolkata with both parts by default", async () => {
+  it("should give the example of Moscow with both parts by default", async () => {
     await i18n.changeLanguage("en");
     const { result } = renderExample();
     expect(textsOf(result.current.example)).toEqual([
-      "India",
-      "IST",
-      "UTC+5:30",
+      "Russia",
+      "MSK",
+      "UTC+3",
     ]);
   });
 
@@ -64,9 +64,9 @@ describe("useZoneLabelExample", () => {
     await i18n.changeLanguage("ru");
     const { result } = renderExample();
     expect(textsOf(result.current.example)).toEqual([
-      "Индия",
-      "IST",
-      "UTC+5:30",
+      "Россия",
+      "МСК",
+      "UTC+3",
     ]);
   });
 
@@ -79,7 +79,7 @@ describe("useZoneLabelExample", () => {
         false,
       ),
     );
-    expect(textsOf(result.current.example)).toEqual(["India", "UTC+5:30"]);
+    expect(textsOf(result.current.example)).toEqual(["Russia", "UTC+3"]);
   });
 
   it("should refuse to run outside a LocationsProvider", () => {
