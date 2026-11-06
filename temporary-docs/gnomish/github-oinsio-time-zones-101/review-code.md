@@ -129,7 +129,9 @@ Every changed line is killed. The two files below 95 % fall short only because o
 - Impact: The instant in `settings_deploy_time_unit.feature` (`Given the build was made at "2026-03-08T07:30:00.000Z"`) is not executed. If the feature's instant is edited and the expected texts are changed to match, the Given step still passes against the old literal. The scenario then claims a build instant it never checked, and the outline's rows fail later with a misleading message instead of failing at the Given.
 - Fix: Register the helper directly so the step uses the feature's value: `Given("the build was made at {string}", givenBuildInstant);` (or `(_ctx, buildInstant: string) => givenBuildInstant(_ctx, buildInstant)`).
 - Fix risk: none — the feature's value equals `TEST_DEPLOY_INSTANT` today, so the scenario keeps passing. The change stays in the same unit BDD steps file where `bdd-unit.md` puts it.
-- Status: open
+- Status: fixed
+- Resolution: the Given step now registers `givenBuildInstant` directly, so the feature's
+  instant is compared with `APP_DEPLOY_INSTANT`; covered by settings_deploy_time_unit.steps.tsx (24 tests pass).
 
 ## Verdict
 

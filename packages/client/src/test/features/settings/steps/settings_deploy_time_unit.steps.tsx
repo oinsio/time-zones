@@ -32,9 +32,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.ScenarioOutline(
     "The deploy time in the interface language",
     ({ Given, And, When, Then }, variables) => {
-      Given("the build was made at {string}", () =>
-        givenBuildInstant(undefined, "2026-03-08T07:30:00.000Z"),
-      );
+      Given("the build was made at {string}", givenBuildInstant);
       And("the device time zone is {string}", () => {
         deviceZone = variables.zone;
       });
