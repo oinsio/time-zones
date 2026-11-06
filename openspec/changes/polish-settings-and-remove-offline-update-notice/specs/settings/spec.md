@@ -37,6 +37,21 @@ The settings page SHALL show the deploy time as the last line of its content, di
 | light |
 | dark |
 
+#### Scenario: The deploy time fits one line
+- **WHEN** the settings page is `<width>` px wide in `<language>`
+- **THEN** the deploy time takes one line
+
+| width | language |
+|---|---|
+| 375 | English, 12-hour |
+| 375 | Russian |
+| 1024 | English, 12-hour |
+| 1024 | Russian |
+
+#### Scenario: The deploy time at 320 px
+- **WHEN** the settings page is 320 px wide in English with the hour format 12-hour or in Russian
+- **THEN** the settings page does not scroll horizontally
+
 ## MODIFIED Requirements
 
 ### Requirement: Zone label
