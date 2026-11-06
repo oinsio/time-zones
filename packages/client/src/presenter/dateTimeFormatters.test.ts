@@ -174,4 +174,24 @@ describe("getDateTimeFormatter hour format", () => {
       ),
     );
   });
+
+  // Verifies FR5 of polish-settings-and-remove-offline-update-notice.
+  it.each([DateTimeLabelKind.DAY_AND_MONTH, DateTimeLabelKind.DEPLOY_DATE])(
+    "should share the %s formatter between hour formats",
+    (kind) => {
+      expect(getDateTimeFormatter("en", ZONE, kind, HourFormat.H12)).toBe(
+        getDateTimeFormatter("en", ZONE, kind, HourFormat.H24),
+      );
+    },
+  );
+
+  it("should format the deploy date with the day, the month name and the year", () => {
+    const deployDate = getDateTimeFormatter(
+      "en",
+      "UTC",
+      DateTimeLabelKind.DEPLOY_DATE,
+      HourFormat.H24,
+    ).format(Temporal.Instant.from("2026-03-08T07:30:00Z").epochMilliseconds);
+    expect(deployDate).toBe("March 8, 2026");
+  });
 });
