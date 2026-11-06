@@ -4,7 +4,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
 ## 1. Glossary and architecture docs (FR1–FR8)
 
-- [ ] 1.1 Update the glossary in the same change (`.claude/rules/glossary.md`), using the entry format of `docs/glossary/README.md`:
+- [x] 1.1 Update the glossary in the same change (`.claude/rules/glossary.md`), using the entry format of `docs/glossary/README.md`:
   - `docs/glossary/settings.md` **Zone label**: *RU:* «Обозначение часового пояса»: «Аббревиатура», «Смещение UTC»; add "English interface: "Timezone label", "Abbreviation", "UTC offset"; the toggles follow the order of the zone line (`ZONE_LABEL_PART_ORDER`)". *Code:* gets `ZONE_LABEL_PART_ORDER`. New **Deploy time**: the instant the running build of the app was made, fixed into the build, shown on the settings page after the language group in the interface language, the hour format and the device time zone; a stand-in for a version number. *RU:* «Развёрнуто …». *Code:* `APP_DEPLOY_INSTANT`, `resolveDeployInstant`, `formatDeployTime`, `useDeployTime`, `DeployTime`, `settings.deployTime`. *Not:* a version number. *Never:* build number, release date. **Settings page** lists the deploy time.
   - `docs/glossary/time.md` **Zone abbreviation**: *RU:* аббревиатура пояса (interface: «Аббревиатура»).
   - `docs/glossary/app-shell.md`: remove **Update check failure note**. **Update check** adds "a failed check is silent". **Offline** becomes "no network. The app works fully and shows no note; a failed update check is silent." and loses its *Code:* `useOnlineStatus`.

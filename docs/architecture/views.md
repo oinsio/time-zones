@@ -129,7 +129,7 @@ Every view must pass the same BDD E2E scenarios:
 | Loading | city search data is being loaded | skeleton in search results |
 | Error | stored data is corrupted or city data failed to load | message with a recovery action (reset, retry) |
 | Empty | no locations in the list | an explanation and the header "Add location" action |
-| Offline | no network | the app works fully; only a note when an update cannot be fetched |
+| Offline | no network | the app works fully; no note is shown |
 | Storage unavailable | private mode, quota | warning that changes will not be saved |
 
 On first launch the list holds the device time location; after that the stored list is the truth, also when it is empty.
