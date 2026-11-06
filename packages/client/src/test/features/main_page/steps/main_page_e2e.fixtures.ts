@@ -4,11 +4,18 @@ import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 
 const CARDS_CHUNK_URL_PATTERN = /\/CardsView-[^/]+\.js$/;
 
-const rejectServiceWorkerUpdates = () => {
-  ServiceWorkerRegistration.prototype.update = () =>
-    Promise.reject(
+/** Window property that counts the update checks rejected on the page. */
+export const REJECTED_UPDATE_CHECKS_KEY = "rejectedUpdateChecks";
+
+const rejectServiceWorkerUpdates = (countKey: string) => {
+  const countingWindow = window as unknown as Record<string, number>;
+  countingWindow[countKey] = 0;
+  ServiceWorkerRegistration.prototype.update = () => {
+    countingWindow[countKey] += 1;
+    return Promise.reject(
       new TypeError("Failed to update a ServiceWorker: network error"),
     );
+  };
 };
 
 export interface BoundingBox {
@@ -73,7 +80,10 @@ export class MainPageWorld {
    * service worker script fetch, so the rejection is injected at the API.
    */
   async failUpdateChecksOnNextLoad() {
-    await this.page.addInitScript(rejectServiceWorkerUpdates);
+    await this.page.addInitScript(
+      rejectServiceWorkerUpdates,
+      REJECTED_UPDATE_CHECKS_KEY,
+    );
   }
 
   async releaseHeldRequests() {

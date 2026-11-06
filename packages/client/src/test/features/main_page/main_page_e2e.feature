@@ -54,10 +54,15 @@ Feature: Main page in a real browser
   @add-main-page-scaffold @FR1 @UX3
   Scenario: Header keeps its position
     Given the app has been installed and its header position is recorded
-    When the update check fails because the network is unreachable
-    Then the header has not moved
     When storage becomes unavailable
     Then the header has not moved
+
+  @polish-settings-and-remove-offline-update-notice @FR7 @UX3 @M5
+  Scenario: Update cannot be fetched
+    Given the app was installed on an earlier visit
+    When the update check is made to fail and the app is opened offline
+    Then the notices region shows nothing
+    And the view is shown
 
   @select-date-with-calendar-and-now @FR8
   Scenario: Notice above the bar

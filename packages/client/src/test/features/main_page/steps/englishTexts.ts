@@ -15,7 +15,6 @@ export const englishLocale = JSON.parse(
   mainPage: {
     viewError: string;
     retry: string;
-    updateCheckFailed: string;
     storageUnavailable: string;
   };
 };

@@ -7,9 +7,11 @@ export const APP_ROOT_URL = ".";
 export const EMPTY_STATE_TEXT = englishLocale.views.cardsEmptyState;
 export const ERROR_TEXT = englishLocale.mainPage.viewError;
 export const RETRY_LABEL = englishLocale.mainPage.retry;
-export const UPDATE_CHECK_FAILED_TEXT =
-  englishLocale.mainPage.updateCheckFailed;
 export const STORAGE_WARNING_TEXT = englishLocale.mainPage.storageUnavailable;
+
+/** The polite notices region of the page (the footer's status region). */
+export const NOTICES_REGION_SELECTOR =
+  'footer [role="status"][aria-live="polite"]';
 
 export const failStorageWrites = () => {
   Storage.prototype.setItem = () => {
