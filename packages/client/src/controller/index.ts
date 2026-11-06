@@ -17,7 +17,6 @@ export { useHourFormat } from "./useHourFormat";
 export { useInterfaceLanguage } from "./useInterfaceLanguage";
 // Implements FR2, FR6, FR8 of show-here-entry-for-device-time.
 export { LocationsStatus, useLocations } from "./useLocations";
-export { useOnlineStatus } from "./useOnlineStatus";
 export { PreferencesStatus, usePreferences } from "./usePreferences";
 export { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 export type { PwaUpdateStatus } from "./usePwaUpdateStatus";

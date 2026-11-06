@@ -1,3 +1,4 @@
+// Verifies FR7, FR8 of polish-settings-and-remove-offline-update-notice.
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { act, renderHook } from "@testing-library/react";
 import { resetPageVisibility, setPageVisibility } from "@/test/pageVisibility";
@@ -42,7 +43,7 @@ describe("usePwaUpdateStatus recheck on return", () => {
     expect(update).toHaveBeenCalledTimes(2);
   });
 
-  it("should report the failure of the check on return", async () => {
+  it("a failed check on return changes nothing in the status", async () => {
     mockServiceWorker();
     const clock = createSwitchableClock("2026-03-08T07:30:00Z");
     const update = vi
@@ -56,12 +57,16 @@ describe("usePwaUpdateStatus recheck on return", () => {
         update,
       } as unknown as ServiceWorkerRegistration);
     });
+    const flagsOf = (status: typeof result.current) => ({
+      isOfflineReady: status.isOfflineReady,
+      isUpdateAvailable: status.isUpdateAvailable,
+    });
+    const flagsBefore = flagsOf(result.current);
 
     clock.moveTo("2026-03-08T07:46:00Z");
     act(() => setPageVisibility("visible"));
+    await vi.waitFor(() => expect(update).toHaveBeenCalledTimes(2));
 
-    await vi.waitFor(() =>
-      expect(result.current.isUpdateCheckFailed).toBe(true),
-    );
+    expect(flagsOf(result.current)).toEqual(flagsBefore);
   });
 });
