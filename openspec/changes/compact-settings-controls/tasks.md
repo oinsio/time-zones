@@ -4,7 +4,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
 ## 1. Glossary and architecture docs (FR1, FR2, FR4, FR6)
 
-- [ ] 1.1 Update the glossary in the same change (`.claude/rules/glossary.md`), in the entry format of `docs/glossary/README.md`:
+- [x] 1.1 Update the glossary in the same change (`.claude/rules/glossary.md`), in the entry format of `docs/glossary/README.md`:
   - `docs/glossary/settings.md`: add a new **Option group** entry after **Toggle group**: "a compact settings group in one row: a caption and mutually exclusive options, exactly one checked, joined in one control; each option is shown by an icon or a pictogram, or by its name when it has neither, and its name is its accessible name and pointer hint. *RU:* группа выбора. *Code:* `SettingsOptionGroup`, `SettingsOption`, `SETTINGS_GROUP_ROW_CLASS_NAME`."
   - **Toggle group**: add "shares its row layout with the option group (`SETTINGS_GROUP_ROW_CLASS_NAME`)".
   - **Theme preference**: add "shown as icons only, in the order System, Light, Dark (`THEME_PREFERENCE_ORDER`)".
