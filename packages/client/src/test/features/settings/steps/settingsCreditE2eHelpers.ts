@@ -75,8 +75,13 @@ export async function measureCreditFit(page: Page) {
 export const themeGroupOf = (page: Page) =>
   page.getByRole(RADIOGROUP_ROLE, { name: ANY_LANGUAGE_THEME_GROUP_NAME });
 
+// Verifies FR5, FR6 of compact-settings-controls: an unchecked option keeps the accent icon colour.
 export const themeIconOf = (page: Page) =>
-  themeGroupOf(page).locator("svg").first();
+  themeGroupOf(page).locator("label:has(input:not(:checked)) svg").first();
+
+// Verifies FR5, FR6 of compact-settings-controls: the caption is the visible name of the group.
+export const themeCaptionOf = (page: Page) =>
+  themeGroupOf(page).locator(":scope > span").first();
 
 export const readThemeIconColour = (page: Page) =>
   themeIconOf(page).evaluate((element) =>
@@ -90,16 +95,21 @@ export async function readCreditFontSizeRatio(page: Page) {
   return fontSizePx / FORMER_CREDIT_FONT_SIZE_PX;
 }
 
+// Verifies FR5, FR6 of compact-settings-controls: the theme radiogroup is the next sibling or inside it, named by its caption.
 export const isCreditDirectlyAboveThemeGroup = (page: Page) =>
   creditOf(page).evaluate(
     (element, { groupRole, themeNamePattern }) => {
       const themeNameRegExp = new RegExp(themeNamePattern);
-      const groups = element.nextElementSibling?.querySelectorAll(
-        `[role="${groupRole}"]`,
-      );
-      return Array.from(groups ?? []).some((group) =>
-        themeNameRegExp.test(group.getAttribute("aria-label") ?? ""),
-      );
+      const nextElement = element.nextElementSibling;
+      const groupSelector = `[role="${groupRole}"]`;
+      const groups = nextElement?.matches(groupSelector)
+        ? [nextElement]
+        : Array.from(nextElement?.querySelectorAll(groupSelector) ?? []);
+      return groups.some((group) => {
+        const captionId = group.getAttribute("aria-labelledby") ?? "";
+        const captionText = document.getElementById(captionId)?.textContent;
+        return themeNameRegExp.test(captionText ?? "");
+      });
     },
     {
       groupRole: RADIOGROUP_ROLE,

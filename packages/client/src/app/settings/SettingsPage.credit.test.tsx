@@ -36,12 +36,15 @@ const renderPage = (repository = createInMemoryPreferencesRepository()) =>
 const getCredit = () =>
   screen.getByRole("link", { name: "Built with Gnomish Factory" });
 
-const expectThemeGroupRightAfter = (credit: HTMLElement) =>
-  expect(
-    within(credit.nextElementSibling as HTMLElement).getByRole("radiogroup", {
-      name: "Theme",
-    }),
-  ).toBeInTheDocument();
+// Verifies FR5, FR6 of compact-settings-controls: the theme radiogroup is the credit's next element sibling or inside it.
+const expectThemeGroupRightAfter = (credit: HTMLElement) => {
+  const nextElement = credit.nextElementSibling as HTMLElement;
+  const themeGroup =
+    nextElement.getAttribute("role") === "radiogroup"
+      ? nextElement
+      : within(nextElement).getByRole("radiogroup");
+  expect(themeGroup).toBe(screen.getByRole("radiogroup", { name: "Theme" }));
+};
 
 describe("SettingsPage Gnomish Factory credit", () => {
   beforeEach(async () => {

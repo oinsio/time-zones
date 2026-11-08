@@ -99,4 +99,4 @@ Feature: Gnomish Factory credit on the settings page in a real browser
   Scenario: The larger credit text
     Given the user opens the settings
     Then the credit's font size is 15 to 20 % larger than before
-    And the credit is larger than the group legends and smaller than the settings heading
+    And the credit is larger than the group captions and smaller than the settings heading

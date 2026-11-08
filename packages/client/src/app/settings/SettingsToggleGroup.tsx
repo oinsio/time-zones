@@ -1,5 +1,9 @@
 import { Check } from "lucide-react";
 import { type ReactNode, useId } from "react";
+import {
+  SETTINGS_GROUP_CAPTION_CLASS_NAME,
+  SETTINGS_GROUP_ROW_CLASS_NAME,
+} from "@/constants";
 import { cn } from "@/shared/lib/cn";
 
 export type SettingsToggleOption<Value extends string> = {
@@ -22,6 +26,7 @@ type SettingsToggleGroupProps<Value extends string> = {
  * move under the caption together. A pressed toggle shows a check icon whose
  * slot keeps its size when the toggle is off, so toggling moves nothing.
  * Implements FR16, NFR-A1, NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting (D7).
+ * Implements FR6 of compact-settings-controls (D5).
  */
 export function SettingsToggleGroup<Value extends string>({
   caption,
@@ -39,11 +44,8 @@ export function SettingsToggleGroup<Value extends string>({
       aria-describedby={description === undefined ? undefined : descriptionId}
       className="flex flex-col gap-2"
     >
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <span
-          id={captionId}
-          className="text-sm font-semibold text-muted-foreground"
-        >
+      <div className={SETTINGS_GROUP_ROW_CLASS_NAME}>
+        <span id={captionId} className={SETTINGS_GROUP_CAPTION_CLASS_NAME}>
           {caption}
         </span>
         <div className="flex flex-nowrap gap-2">

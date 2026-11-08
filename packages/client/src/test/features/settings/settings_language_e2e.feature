@@ -117,6 +117,7 @@ Feature: Interface language choice in a real browser
 
   @add-interface-language-selection @NFR-R2 @M7
   @show-zone-abbreviations-and-zone-label-setting @NFR-R3 @polish-settings-and-remove-offline-update-notice @NFR-R2
+  @compact-settings-controls @NFR-R2
   Scenario Outline: Approved language screenshots in the <theme> theme with the list <state>
     Given the locations screen uses the <theme> theme
     And the screen is 375 px wide for the locations

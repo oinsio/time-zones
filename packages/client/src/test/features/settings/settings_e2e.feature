@@ -26,6 +26,7 @@ Feature: Settings page in a real browser
     And the date bar is shown
 
   @add-settings-page-and-device-time-location @FR3 @NFR-A1
+  @compact-settings-controls @NFR-A1
   Scenario: Arrow keys change the theme
     Given the system colour scheme is light
     And the user opens the settings
@@ -34,6 +35,7 @@ Feature: Settings page in a real browser
     And the page background is the dark token colour
 
   @add-settings-page-and-device-time-location @FR3 @FR5 @NFR-A1
+  @compact-settings-controls @NFR-A1
   Scenario: Names and checked state
     Given the user opens the settings
     Then the option "System" of the group "Theme" is checked
@@ -86,6 +88,7 @@ Feature: Settings page in a real browser
 
   @add-settings-page-and-device-time-location @NFR-R3 @M6 @add-gnomish-factory-credit @NFR-R2 @move-and-restyle-gnomish-factory-credit @NFR-R2 @add-interface-language-selection @NFR-R2
   @show-zone-abbreviations-and-zone-label-setting @NFR-R3 @polish-settings-and-remove-offline-update-notice @NFR-R2
+  @compact-settings-controls @NFR-R2
   Scenario Outline: Approved screenshots of the settings at <width> px in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the screen is <width> px wide for the locations
@@ -100,6 +103,7 @@ Feature: Settings page in a real browser
       | 1024  | dark  |
 
   @add-settings-page-and-device-time-location @FR4
+  @compact-settings-controls @M4
   Scenario: Dark on a light system
     Given the system colour scheme is light
     And the user opens the settings
@@ -107,6 +111,7 @@ Feature: Settings page in a real browser
     Then the page background is the dark token colour
 
   @add-settings-page-and-device-time-location @FR4
+  @compact-settings-controls @M4
   Scenario: Light on a dark system
     Given the system colour scheme is dark
     And the user opens the settings
@@ -114,6 +119,7 @@ Feature: Settings page in a real browser
     Then the page background is the light token colour
 
   @add-settings-page-and-device-time-location @FR4
+  @compact-settings-controls @M4
   Scenario: System follows a change of the system preference
     Given the system colour scheme is light
     And the user opens the settings
@@ -122,6 +128,7 @@ Feature: Settings page in a real browser
     Then the page background is the dark token colour
 
   @add-settings-page-and-device-time-location @FR4 @FR7
+  @compact-settings-controls @M4
   Scenario: Stored Dark on a light system
     Given the system colour scheme is light
     And the stored preferences are theme Dark and hour format 12-hour
@@ -130,6 +137,7 @@ Feature: Settings page in a real browser
     Then the dark theme was applied when the header first appeared
 
   @add-settings-page-and-device-time-location @FR5 @UX5
+  @compact-settings-controls @M4
   Scenario: Switching to 12-hour
     Given the current time is "2026-03-08T07:30:00Z"
     And the screen is 1024 px wide for the locations
@@ -141,6 +149,7 @@ Feature: Settings page in a real browser
     And the hour labels of "Almaty" are "12 AM, 6 AM, 12 PM, 6 PM, 12 AM"
 
   @add-settings-page-and-device-time-location @FR7
+  @compact-settings-controls @M4
   Scenario: Choices survive a reload
     Given the system colour scheme is light
     And the user opens the settings
