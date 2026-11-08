@@ -2,6 +2,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Sun } from "lucide-react";
+import { SETTINGS_GROUP_CAPTION_CLASS_NAME } from "@/constants";
 import { SettingsOptionGroup } from "./SettingsOptionGroup";
 
 const OPTIONS = [
@@ -88,6 +89,7 @@ describe("SettingsOptionGroup", () => {
   it("should show the name of an option without icon and pictogram", () => {
     renderGroup();
     expect(labelOf("Option C")).toHaveTextContent("Option C");
+    expect(labelOf("Option C").querySelector(".sr-only:not(input)")).toBeNull();
   });
 
   it("should fill the checked option only", () => {
@@ -109,6 +111,13 @@ describe("SettingsOptionGroup", () => {
     expect(labelOf("Option B").parentElement).toBe(track);
     expect(labelOf("Option C").parentElement).toBe(track);
     expect(track).not.toContainElement(screen.getByText("Sample"));
+  });
+
+  it("should style the caption with the shared caption class", () => {
+    renderGroup();
+    expect(screen.getByText("Sample")).toHaveClass(
+      ...SETTINGS_GROUP_CAPTION_CLASS_NAME.split(" "),
+    );
   });
 
   it("should not use a fieldset", () => {
