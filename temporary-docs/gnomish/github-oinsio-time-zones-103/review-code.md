@@ -108,7 +108,8 @@ One scoped run: `npx stryker run --mutate 'src/app/settings/SettingsOptionGroup.
 - Impact: The approved wide-screen visual reference contradicts the spec, and the 1024 px visual regression guards the wrong layout. A later regression at 1024 px that brings back stacked rows or breaks the compact group would still be within the 2.5 % of a baseline that shows stacked rows, so it would pass. Anyone reviewing the baselines would see the old design as approved.
 - Fix: From `packages/client`, run `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots of the settings at 1024" --update-snapshots`. This covers both projects. Open the four new PNGs with the Read tool and confirm the three theme icons with System filled and `12` `24` with 24 filled. Then run the same command without `--update-snapshots`: it must pass. Commit only those four files.
 - Fix risk: Low. Only the four 1024 px baselines change. Their text rendering is now Linux's, which the shared 2.5 % tolerance already absorbs for every other baseline (`playwright.bdd.config.ts:38-43`). Do not lower the global tolerance: that would affect every other screenshot and is outside this change's scope.
-- Status: open
+- Status: fixed
+- Resolution: re-approved the four 1024 px settings baselines with --update-snapshots=all (plain --update-snapshots skipped them, within tolerance); the light one shows three theme icons with System filled and 12/24 with 24 filled; the scenario passes without update.
 
 ## Verdict
 
