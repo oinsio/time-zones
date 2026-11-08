@@ -6,9 +6,9 @@
 |---|---|
 | Stale claims | 2 |
 | Requirements fully covered | 26/26 |
-| Contradictions | 1 |
+| Contradictions | 2 |
 | CRITICAL | 0 |
-| WARNING | 1 |
+| WARNING | 2 |
 | SUGGESTION | 1 |
 
 ## Freshness
@@ -20,11 +20,12 @@
 - ✅ `design.md:9` — `src/constants/preferences.ts:48` holds `LANGUAGE_BUTTON_CLASS_NAME` and `:22` `ZONE_LABEL_PART_ORDER` (display order apart from enum order), and `constants/preferences.ts` already imports from `@/preferences`, so `THEME_PREFERENCE_ORDER` / `HOUR_FORMAT_PICTOGRAMS` can live there.
 - ✅ `design.md:10` — `optionOf` is `getByRole("radio", { name, exact: true })` (`settingsE2eHelpers.ts:33-34`), choices use `check({ force: true })` (`settings_e2e.steps.ts:70`), "every settings option is at least {int} px high" measures every `label` that has a radio (`settings_e2e.steps.ts:160-172`), groups are found by `getByRole("radiogroup", { name })`.
 - ✅ `design.md:11` — `readThemeIconColour` reads the first `svg` of the theme radiogroup (`settingsCreditE2eHelpers.ts:78-84`), `isCreditDirectlyAboveThemeGroup` searches the credit's next sibling for a radiogroup by `aria-label` (`:93-108`), the credit layout step reads `page.locator("legend").first()` (`settings_factory_credit_layout_e2e.steps.ts:85`), and the language step compares the theme radiogroup's width (`settings_language_layout_e2e.steps.ts:49-59`).
-- ❌ `design.md:11` ("Some E2E helpers rely on the old markup") and `proposal.md:135` (Impact, tests) — the list is incomplete: the unit test `src/app/settings/SettingsPage.credit.test.tsx:39-44` also relies on the old nesting (`within(credit.nextElementSibling).getByRole("radiogroup", { name: "Theme" })`), which fails once the credit's next sibling is the radiogroup itself. See R2.
+- ❌ `design.md:11` ("Some E2E helpers rely on the old markup") and `proposal.md:135` (Impact, tests) — the list is incomplete: the unit test `src/app/settings/SettingsPage.credit.test.tsx:39-44` also relies on the old nesting (`within(credit.nextElementSibling).getByRole("radiogroup", { name: "Theme" })`), which fails once the credit's next sibling is the radiogroup itself. See R3.
 - ✅ `design.md:12` — `lucide-react` `^0.577.0` (`packages/client/package.json:36`); `--color-accent`, `--color-accent-foreground`, `--color-surface`, `--color-border` exist in both themes with the hex values D4 quotes (`src/styles/tokens.css:14-23, 35-44`); `readThemeColours` exists in `src/test/features/main_page/steps/themeTokens.ts:46` and has a `surface` field but no accent field, as task 6.1 states.
 - ✅ `design.md:13` — no Storybook (no `.storybook/`, no script); approved screenshots live under `src/test/features/__screenshots__/{chromium,mobile-chrome}/`, 4 settings PNGs per project.
 - ✅ `tasks.md:81` — the axe step "the locations screen has no accessibility violations" exists (`locations_view_a11y_e2e.steps.ts:34`); `createSettingsWorld` exists (`steps/settingsWorld.tsx:40`).
 - ✅ `tasks.md:12` — `docs/architecture/views.md:112` reads "theme (Light, Dark, System)".
+- ✅ `design.md:52`, `:77` — today the checked theme option is marked by `border-accent` and a `Check` icon (`SettingsOptionGroup.tsx:50`, `:63-65`), the same mark the language list draws for the active row (`InterfaceLanguageList.tsx:61`, `:69`); the stable **Interface language choice** (`openspec/specs/settings/spec.md:422`) ties the two together with "like the checked option of the theme group". See R2.
 - ✅ `proposal.md:126` (M4) — the 6 named scenarios exist in `settings_e2e.feature` (lines 103, 110, 117, 125, 133, 144) and `settings_view_contract_e2e.feature` has exactly 2 scenarios (lines 10, 17).
 - ✅ `proposal.md:18`, `:28` — locale texts are "12-hour"/"24-hour" and «12 часов»/«24 часа» (`en.json:121-122`, `ru.json:121-122`); only `en` and `ru` locale files exist, so the pictograms are contained in every accessible name (NFR-A3).
 - ✅ MODIFIED requirements restated — **Theme preference** (`openspec/specs/settings/spec.md:33`), **Hour format** (`:56`), **Accessible settings** (`:264`), **Settings page layout** (`:287`) and **Toggle group** (`:577`) exist; every stable scenario of each is kept in the delta, and the requirement bodies keep all stable clauses except the ones the change replaces (check icon, radio layout of the toggle-group note).
@@ -58,13 +59,14 @@
 | G3 | ✅ | n/a — met by FR3, FR4, M4 | n/a — met by FR3, M4 |
 | NG1 | ✅ | n/a — nothing adds a setting, value or default | n/a |
 | NG2 | ✅ | n/a — enum, document and declaration order untouched (D3) | n/a |
-| NG3 | ✅ | n/a — zone label, language, credit, deploy time behaviour untouched; only test helpers adapt (6.3) | n/a |
+| NG3 | ✅ | n/a — zone label, language, credit, deploy time behaviour untouched; only test helpers adapt (6.3); R1 and R2 ask for wording-only spec edits | n/a |
 | NG4 | ✅ | n/a — no locale key added (D2) | n/a |
 | NG5 | ✅ | n/a — icons from installed `lucide-react` | n/a |
 
 ## Consistency
 
 - The delta's **Accessible settings** (`openspec/changes/compact-settings-controls/specs/settings/spec.md:112`: "The checked option MUST be marked by a fill in the accent colour with its icon or pictogram in the accent foreground colour") makes the checked theme icon accent-foreground, while the unmodified stable **Gnomish Factory credit** requirement (`openspec/specs/settings/spec.md:336`) still says the credit has "the same colour as the icons of the theme options (the accent colour of the active theme)" and is "larger than the group legends", and its scenarios say "the colour of the theme option icons" (`:376-391`) and "larger than the group legends" (`:396`). Design D1 (`design.md:50`) and task 6.3 (`tasks.md:83-87`) redefine the helpers to read an unchecked icon and the caption instead of a legend, but no delta updates the requirement. See R1.
+- Design D1 (`design.md:52`: "`Check` is no longer imported by the option group") and D4 (`design.md:77`: checked label `bg-accent text-accent-foreground`, "This replaces the check icon for the option group") remove the check icon and the accent border mark from the checked theme option, and the delta's **Accessible settings** (`openspec/changes/compact-settings-controls/specs/settings/spec.md:112`) marks it by a fill; the unmodified stable **Interface language choice** (`openspec/specs/settings/spec.md:422`) still says "The row of the active interface language MUST be marked by the accent border and a check icon at its end, like the checked option of the theme group". See R2.
 
 ## Findings
 
@@ -77,7 +79,16 @@
 - Fix risk: The restated requirement is long (≈9 scenarios); copying it must not drop or alter any other scenario, or archiving would remove or change it. Renaming the step touches one feature file and one step file under `packages/`, inside the implement stage's limits; the feature line and the step definition must be renamed together, or `bddgen` fails with a missing step definition. NG3 still holds because the credit's behaviour and colour do not change.
 - Status: open
 
-### R2 — SUGGESTION — The credit unit test that relies on the old nesting is not named in any task
+### R2 — WARNING — Stable Interface language choice compares the language row with a theme mark the change removes
+- Location: `openspec/specs/settings/spec.md:422` (Interface language choice, not in the delta) against `openspec/changes/compact-settings-controls/design.md:52`, `:77` and `openspec/changes/compact-settings-controls/specs/settings/spec.md:112`
+- Rule: `.claude/rules/delta-specs.md` (a requirement whose meaning the change alters is restated under MODIFIED)
+- Problem: The stable **Interface language choice** requirement says "The row of the active interface language MUST be marked by the accent border and a check icon at its end, like the checked option of the theme group." The change removes that mark from the theme group: D1 (`design.md:52`) says "`Check` is no longer imported by the option group", D4 (`design.md:77`) makes the checked option `bg-accent text-accent-foreground` and says "This replaces the check icon for the option group", and the delta's **Accessible settings** (`specs/settings/spec.md:112`) defines the checked mark as an accent fill. NG3 (`proposal.md:50`) keeps the language group unchanged, and the language list keeps its own `border-accent` and `Check` (`InterfaceLanguageList.tsx:61`, `:69`). The delta has no MODIFIED **Interface language choice**, and `proposal.md` What Changes does not mention it.
+- Impact: After archiving, the stable spec ties the active language row to "the checked option of the theme group", which then has neither an accent border mark nor a check icon. The requirement contradicts **Accessible settings** in the same spec: a reader can take it to mean the language row should follow the theme group's new accent fill (breaking NG3), or that the theme group should still show a check icon (breaking D4). It is the same stale cross-reference as R1.
+- Fix: Add `### Requirement: Interface language choice` under `## MODIFIED Requirements` of the delta, restated in full from `openspec/specs/settings/spec.md:421-452` (the body and its four scenarios "Collapsed group", "Expand and collapse", "Names are not translated", "Choosing Russian applies at once") with one wording edit only: "marked by the accent border and a check icon at its end, like the checked option of the theme group." → "marked by the accent border and a check icon at its end." Append `FR6 of compact-settings-controls` to its `implements` comment. In `proposal.md` What Changes, add one bullet: "MODIFIED `settings` → **Interface language choice**: wording only — the active row's mark (accent border and check icon) is no longer compared with the theme group, whose checked option now has an accent fill; behaviour unchanged."
+- Fix risk: The restated requirement must copy every other sentence and all four scenarios verbatim, or archiving would change them. The language list's code and tests stay as they are, so NG3 still holds; no task or test changes, since no feature step asserts the comparison (the language feature files only compare the group widths).
+- Status: open
+
+### R3 — SUGGESTION — The credit unit test that relies on the old nesting is not named in any task
 - Location: `openspec/changes/compact-settings-controls/design.md:11`, `openspec/changes/compact-settings-controls/tasks.md:83`
 - Rule: `.claude/rules/test-planning.md`
 - Problem: `packages/client/src/app/settings/SettingsPage.credit.test.tsx:39-44` asserts `within(credit.nextElementSibling).getByRole("radiogroup", { name: "Theme" })`. Testing Library's `within` searches descendants only; with D1 the credit's next sibling is the radiogroup itself, so the query finds nothing and the test fails. Design lists only the E2E helpers that rely on the old markup, and no task names this unit test; task 4.2 runs only `SettingsPage.test.tsx` and `AppShell.settings.test.tsx`.
@@ -88,4 +99,4 @@
 
 ## Verdict
 
-Needs revision. Blocking: R1 (WARNING — the stable credit requirement contradicts the new checked fill and the removed legends). R2 is a non-blocking SUGGESTION. Everything else is ready to implement: every requirement has a scenario and an automated test task, the handoff has no human item, and no task leaves the implement stage's limits.
+Needs revision. Blocking: R1 (WARNING — the stable credit requirement contradicts the new checked fill and the removed legends) and R2 (WARNING — the stable Interface language choice compares the active language row with the theme group's check icon and accent border, which the change removes). R3 is a non-blocking SUGGESTION. Everything else is ready to implement: every requirement has a scenario and an automated test task, the handoff has no human item, and no task leaves the implement stage's limits.
