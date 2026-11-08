@@ -9,6 +9,7 @@ import {
   MAX_CREDIT_FONT_SIZE_RATIO,
   MIN_CREDIT_FONT_SIZE_RATIO,
   readCreditFontSizeRatio,
+  themeCaptionOf,
   themeGroupOf,
 } from "./settingsCreditE2eHelpers";
 import { settingsHeading } from "./settingsE2eHelpers";
@@ -76,15 +77,16 @@ Then(
   },
 );
 
-// Verifies FR3, UX1 of move-and-restyle-gnomish-factory-credit: between the legends and the heading.
+// Verifies FR3, UX1 of move-and-restyle-gnomish-factory-credit: between the group captions and the heading.
+// Verifies FR5, FR6 of compact-settings-controls: the caption replaces the legend.
 Then(
-  "the credit is larger than the group legends and smaller than the settings heading",
+  "the credit is larger than the group captions and smaller than the settings heading",
   async ({ locationsWorld }) => {
     const { page } = locationsWorld;
     const creditSize = await readFontSizePx(creditOf(page));
-    const legendSize = await readFontSizePx(page.locator("legend").first());
+    const captionSize = await readFontSizePx(themeCaptionOf(page));
     const headingSize = await readFontSizePx(settingsHeading(page));
-    expect(creditSize).toBeGreaterThan(legendSize);
+    expect(creditSize).toBeGreaterThan(captionSize);
     expect(creditSize).toBeLessThan(headingSize);
   },
 );
