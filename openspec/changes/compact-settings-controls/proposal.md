@@ -20,6 +20,7 @@ Audience: every user of the settings page, on phones in particular, where five t
 - MODIFIED `settings` → **Toggle group**: it no longer says that the theme and the hour format keep a radio layout. It shares its row layout with the option group.
 - MODIFIED `settings` → **Accessible settings**: both groups stay radio groups with one Tab stop. The arrow keys follow the new visual order. The checked option is marked by an accent fill instead of a check icon. Every option is at least 44 × 44 px.
 - MODIFIED `settings` → **Settings page layout**: the theme and the hour format groups each take one row at every width from 320 px. The approved settings screenshots are re-approved once.
+- MODIFIED `settings` → **Gnomish Factory credit**: wording only — its colour is named as the accent colour of the unchecked theme option icons, and its size is compared with the group captions, since the group legends are gone. Behaviour unchanged.
 - Glossary (`docs/glossary/settings.md`):
   - new term **Option group** (*Code:* `SettingsOptionGroup`, `SettingsOption`);
   - **Theme preference** gets its display order (`THEME_PREFERENCE_ORDER`);
