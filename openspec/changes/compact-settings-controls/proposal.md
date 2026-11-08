@@ -21,6 +21,7 @@ Audience: every user of the settings page, on phones in particular, where five t
 - MODIFIED `settings` → **Accessible settings**: both groups stay radio groups with one Tab stop. The arrow keys follow the new visual order. The checked option is marked by an accent fill instead of a check icon. Every option is at least 44 × 44 px.
 - MODIFIED `settings` → **Settings page layout**: the theme and the hour format groups each take one row at every width from 320 px. The approved settings screenshots are re-approved once.
 - MODIFIED `settings` → **Gnomish Factory credit**: wording only — its colour is named as the accent colour of the unchecked theme option icons, and its size is compared with the group captions, since the group legends are gone. Behaviour unchanged.
+- MODIFIED `settings` → **Interface language choice**: wording only — the active row's mark (accent border and check icon) is no longer compared with the theme group, whose checked option now has an accent fill. Behaviour unchanged.
 - Glossary (`docs/glossary/settings.md`):
   - new term **Option group** (*Code:* `SettingsOptionGroup`, `SettingsOption`);
   - **Theme preference** gets its display order (`THEME_PREFERENCE_ORDER`);
@@ -48,7 +49,7 @@ None.
 
 - NG1: No new setting, no new value of the theme preference or the hour format, no change of the default.
 - NG2: No change of the stored preferences document, `ThemePreference`, `HourFormat` or their declaration order. The display order is a separate constant.
-- NG3: No change of the zone label group's look or behaviour, the language group, the Gnomish Factory credit, the deploy time or the unreadable and save-failed notes.
+- NG3: No change of the zone label group's look or behaviour, the language group, the Gnomish Factory credit, the deploy time or the unreadable and save-failed notes. The **Gnomish Factory credit** and **Interface language choice** requirements are restated in wording only, because they named the theme group's old look.
 - NG4: No new locale keys and no renamed texts. The existing labels stay the accessible names.
 - NG5: No new icon dependency: the icons come from the installed `lucide-react`.
 
