@@ -1,46 +1,13 @@
 // Verifies FR3, FR4, FR5, FR7, FR16 of add-settings-page-and-device-time-location (D10).
 // Verifies FR12, FR14 of show-zone-abbreviations-and-zone-label-setting (D7).
 // Verifies FR1, FR2, FR3, FR4 of compact-settings-controls.
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import {
-  createInMemoryLocationRepository,
-  createInMemoryPreferencesRepository,
-} from "@/adapters";
-import { LocationsProvider, PreferencesProvider } from "@/controller";
-import { fakeClock } from "@/lib/temporal";
+import { createInMemoryPreferencesRepository } from "@/adapters";
 import { PreferencesLoadStatus } from "@/ports";
 import { HourFormat, ThemePreference, ZoneLabelPart } from "@/preferences";
-import { createManualTickScheduler } from "@/test/tickSchedulers";
-import {
-  createManualWriteScheduler,
-  immediateWriteScheduler,
-} from "@/test/writeSchedulers";
-import { SettingsPage } from "./SettingsPage";
-
-const renderPage = (
-  repository = createInMemoryPreferencesRepository(),
-  onBack = vi.fn(),
-) => {
-  const writeScheduler = createManualWriteScheduler();
-  render(
-    <PreferencesProvider
-      repository={repository}
-      writeScheduler={writeScheduler}
-    >
-      <LocationsProvider
-        repository={createInMemoryLocationRepository()}
-        writeScheduler={immediateWriteScheduler}
-        clock={fakeClock("2026-07-15T12:00:00Z")}
-        tickScheduler={createManualTickScheduler()}
-      >
-        <SettingsPage notices={<p>a notice</p>} onBack={onBack} />
-      </LocationsProvider>
-    </PreferencesProvider>,
-  );
-  return { repository, writeScheduler, onBack };
-};
+import { renderSettingsPage } from "./renderSettingsPage";
 
 const themeGroup = () => screen.getByRole("radiogroup", { name: "Theme" });
 const hourGroup = () => screen.getByRole("radiogroup", { name: "Hour format" });
@@ -54,14 +21,14 @@ describe("SettingsPage", () => {
   });
 
   it("should have the heading Settings, focused when it opens", () => {
-    renderPage();
+    renderSettingsPage();
     expect(
       screen.getByRole("heading", { name: "Settings", level: 1 }),
     ).toHaveFocus();
   });
 
   it("should keep the heading focusable by script only", () => {
-    renderPage();
+    renderSettingsPage();
     expect(screen.getByRole("heading", { name: "Settings" })).toHaveAttribute(
       "tabindex",
       "-1",
@@ -69,7 +36,7 @@ describe("SettingsPage", () => {
   });
 
   it("should have a Back button", async () => {
-    const { onBack } = renderPage();
+    const { onBack } = renderSettingsPage();
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(onBack).toHaveBeenCalledTimes(1);
   });
@@ -79,7 +46,7 @@ describe("SettingsPage", () => {
     ["Dark", "moon"],
     ["System", "monitor"],
   ])("should draw the %s theme option with the %s icon", (name, icon) => {
-    renderPage();
+    renderSettingsPage();
     const label = within(themeGroup())
       .getByRole("radio", { name })
       .closest("label");
@@ -92,7 +59,7 @@ describe("SettingsPage", () => {
   });
 
   it("should order the theme options System, Light, Dark", () => {
-    renderPage();
+    renderSettingsPage();
     expect(
       within(themeGroup())
         .getAllByRole("radio")
@@ -105,7 +72,7 @@ describe("SettingsPage", () => {
   });
 
   it("should show the hour formats as 12 and 24, named 12-hour and 24-hour", () => {
-    renderPage();
+    renderSettingsPage();
     const labels = within(hourGroup())
       .getAllByRole("radio")
       .map((radio) => radio.closest("label"));
@@ -120,7 +87,7 @@ describe("SettingsPage", () => {
   });
 
   it("should check System and 24-hour by default", () => {
-    renderPage();
+    renderSettingsPage();
     expect(
       within(themeGroup()).getByRole("radio", { name: "System" }),
     ).toBeChecked();
@@ -130,7 +97,7 @@ describe("SettingsPage", () => {
   });
 
   it("should fill the checked option only", () => {
-    renderPage();
+    renderSettingsPage();
     const checkedLabel = within(themeGroup())
       .getByRole("radio", { name: "System" })
       .closest("label");
@@ -142,7 +109,7 @@ describe("SettingsPage", () => {
   });
 
   it("should apply the chosen theme and hour format and save them", async () => {
-    const { repository, writeScheduler } = renderPage();
+    const { repository, writeScheduler } = renderSettingsPage();
     await userEvent.click(
       within(themeGroup()).getByRole("radio", { name: "Dark" }),
     );
@@ -168,7 +135,7 @@ describe("SettingsPage", () => {
   });
 
   it("should move the theme choice with the arrow keys", async () => {
-    renderPage();
+    renderSettingsPage();
     within(themeGroup()).getByRole("radio", { name: "System" }).focus();
     await userEvent.keyboard("{ArrowUp}");
     expect(
@@ -177,7 +144,7 @@ describe("SettingsPage", () => {
   });
 
   it("should list the groups as Theme, Hour format, Zone label, Language", () => {
-    renderPage();
+    renderSettingsPage();
     const groupNames = screen.getAllByRole("radiogroup").map((group) => {
       const captionId = group.getAttribute("aria-labelledby") ?? "";
       return document.getElementById(captionId)?.textContent;
@@ -196,7 +163,7 @@ describe("SettingsPage", () => {
   });
 
   it("should show both zone label toggles on and the example by default", () => {
-    renderPage();
+    renderSettingsPage();
     const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     expect(
       within(zoneLabel).getByRole("button", {
@@ -214,7 +181,7 @@ describe("SettingsPage", () => {
   });
 
   it("should order the zone label toggles like the zone line", () => {
-    renderPage();
+    renderSettingsPage();
     const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     const toggleNames = within(zoneLabel)
       .getAllByRole("button")
@@ -223,7 +190,7 @@ describe("SettingsPage", () => {
   });
 
   it("should change the example in the same render as the Abbreviation toggle", async () => {
-    renderPage();
+    renderSettingsPage();
     await userEvent.click(screen.getByRole("button", { name: "Abbreviation" }));
     expect(
       screen.getByRole("group", { name: "Timezone label" }),
@@ -231,7 +198,7 @@ describe("SettingsPage", () => {
   });
 
   it("should save the zone label once after the debounce", async () => {
-    const { repository, writeScheduler } = renderPage();
+    const { repository, writeScheduler } = renderSettingsPage();
     await userEvent.click(screen.getByRole("button", { name: "Abbreviation" }));
     writeScheduler.runPending();
     expect(repository.load()).toMatchObject({
@@ -240,7 +207,7 @@ describe("SettingsPage", () => {
   });
 
   it("should show the notices in a polite status region", () => {
-    renderPage();
+    renderSettingsPage();
     expect(screen.getByRole("status")).toHaveTextContent("a notice");
   });
 
@@ -248,7 +215,7 @@ describe("SettingsPage", () => {
     const repository = createInMemoryPreferencesRepository({
       initialDocument: { status: PreferencesLoadStatus.UNREADABLE },
     });
-    renderPage(repository);
+    renderSettingsPage(repository);
     expect(screen.getByRole("alert")).toHaveTextContent("could not be read");
     await userEvent.click(
       screen.getByRole("button", { name: "Reset settings" }),
@@ -258,12 +225,12 @@ describe("SettingsPage", () => {
   });
 
   it("should show no unreadable note for readable settings", () => {
-    renderPage();
+    renderSettingsPage();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("should warn that the settings will not be saved after a failed save", async () => {
-    const { writeScheduler } = renderPage(
+    const { writeScheduler } = renderSettingsPage(
       createInMemoryPreferencesRepository({ isWritable: false }),
     );
     await userEvent.click(
@@ -276,27 +243,5 @@ describe("SettingsPage", () => {
     expect(
       within(themeGroup()).getByRole("radio", { name: "Light" }),
     ).toBeChecked();
-  });
-
-  it("should write the texts in Russian", async () => {
-    await i18n.changeLanguage("ru");
-    renderPage();
-    expect(
-      screen.getByRole("heading", { name: "Настройки" }),
-    ).toBeInTheDocument();
-    const russianTheme = screen.getByRole("radiogroup", { name: "Тема" });
-    expect(
-      within(russianTheme)
-        .getAllByRole("radio")
-        .map((radio) => radio.closest("label")?.getAttribute("title")),
-    ).toEqual(["Системная", "Светлая", "Тёмная"]);
-    const russianHours = screen.getByRole("radiogroup", {
-      name: "Формат времени",
-    });
-    expect(
-      within(russianHours)
-        .getAllByRole("radio")
-        .map((radio) => radio.closest("label")?.getAttribute("title")),
-    ).toEqual(["12 часов", "24 часа"]);
   });
 });
