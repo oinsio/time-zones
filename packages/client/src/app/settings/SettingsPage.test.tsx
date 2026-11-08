@@ -1,5 +1,6 @@
 // Verifies FR3, FR4, FR5, FR7, FR16 of add-settings-page-and-device-time-location (D10).
 // Verifies FR12, FR14 of show-zone-abbreviations-and-zone-label-setting (D7).
+// Verifies FR1, FR2, FR3, FR4 of compact-settings-controls.
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -79,10 +80,43 @@ describe("SettingsPage", () => {
     ["System", "monitor"],
   ])("should draw the %s theme option with the %s icon", (name, icon) => {
     renderPage();
-    const option = within(themeGroup()).getByRole("radio", { name });
+    const label = within(themeGroup())
+      .getByRole("radio", { name })
+      .closest("label");
+    expect(label?.querySelector(`svg.lucide-${icon}`)).not.toBeNull();
+    expect(label).toHaveAttribute("title", name);
+    expect(label?.querySelector("span.sr-only")?.textContent).toBe(name);
+    expect(label?.querySelectorAll(":scope > span:not(.sr-only)")).toHaveLength(
+      0,
+    );
+  });
+
+  it("should order the theme options System, Light, Dark", () => {
+    renderPage();
     expect(
-      option.closest("label")?.querySelector(`svg.lucide-${icon}`),
-    ).not.toBeNull();
+      within(themeGroup())
+        .getAllByRole("radio")
+        .map((radio) => radio.getAttribute("value")),
+    ).toEqual([
+      ThemePreference.SYSTEM,
+      ThemePreference.LIGHT,
+      ThemePreference.DARK,
+    ]);
+  });
+
+  it("should show the hour formats as 12 and 24, named 12-hour and 24-hour", () => {
+    renderPage();
+    const labels = within(hourGroup())
+      .getAllByRole("radio")
+      .map((radio) => radio.closest("label"));
+    expect(
+      labels.map((label) => label?.querySelector("[aria-hidden]")?.textContent),
+    ).toEqual(["12", "24"]);
+    expect(
+      within(hourGroup())
+        .getAllByRole("radio")
+        .map((radio) => radio.closest("label")?.getAttribute("title")),
+    ).toEqual(["12-hour", "24-hour"]);
   });
 
   it("should check System and 24-hour by default", () => {
@@ -95,7 +129,7 @@ describe("SettingsPage", () => {
     ).toBeChecked();
   });
 
-  it("should draw a check icon on the checked option only", () => {
+  it("should fill the checked option only", () => {
     renderPage();
     const checkedLabel = within(themeGroup())
       .getByRole("radio", { name: "System" })
@@ -103,8 +137,8 @@ describe("SettingsPage", () => {
     const otherLabel = within(themeGroup())
       .getByRole("radio", { name: "Dark" })
       .closest("label");
-    expect(checkedLabel?.querySelector("svg.lucide-check")).not.toBeNull();
-    expect(otherLabel?.querySelector("svg.lucide-check")).toBeNull();
+    expect(checkedLabel).toHaveClass("bg-accent");
+    expect(otherLabel).not.toHaveClass("bg-accent");
   });
 
   it("should apply the chosen theme and hour format and save them", async () => {
@@ -144,9 +178,10 @@ describe("SettingsPage", () => {
 
   it("should list the groups as Theme, Hour format, Zone label, Language", () => {
     renderPage();
-    const groupNames = screen
-      .getAllByRole("radiogroup")
-      .map((group) => group.getAttribute("aria-label"));
+    const groupNames = screen.getAllByRole("radiogroup").map((group) => {
+      const captionId = group.getAttribute("aria-labelledby") ?? "";
+      return document.getElementById(captionId)?.textContent;
+    });
     expect(groupNames).toEqual(["Theme", "Hour format"]);
     const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     expect(
@@ -250,18 +285,18 @@ describe("SettingsPage", () => {
       screen.getByRole("heading", { name: "Настройки" }),
     ).toBeInTheDocument();
     const russianTheme = screen.getByRole("radiogroup", { name: "Тема" });
-    for (const name of ["Светлая", "Тёмная", "Системная"]) {
-      expect(
-        within(russianTheme).getByRole("radio", { name }),
-      ).toBeInTheDocument();
-    }
+    expect(
+      within(russianTheme)
+        .getAllByRole("radio")
+        .map((radio) => radio.closest("label")?.getAttribute("title")),
+    ).toEqual(["Системная", "Светлая", "Тёмная"]);
     const russianHours = screen.getByRole("radiogroup", {
       name: "Формат времени",
     });
-    for (const name of ["12 часов", "24 часа"]) {
-      expect(
-        within(russianHours).getByRole("radio", { name }),
-      ).toBeInTheDocument();
-    }
+    expect(
+      within(russianHours)
+        .getAllByRole("radio")
+        .map((radio) => radio.closest("label")?.getAttribute("title")),
+    ).toEqual(["12 часов", "24 часа"]);
   });
 });

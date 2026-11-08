@@ -1,6 +1,7 @@
 import { ChevronLeft, Monitor, Moon, Sun } from "lucide-react";
 import { type ReactNode, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { HOUR_FORMAT_PICTOGRAMS, THEME_PREFERENCE_ORDER } from "@/constants";
 import {
   PreferencesStatus,
   useActiveInterfaceLanguage,
@@ -47,6 +48,7 @@ const HOUR_FORMAT_LABEL_KEYS = {
  * Implements FR1, FR13 of add-interface-language-selection (D6).
  * Implements FR5 of polish-settings-and-remove-offline-update-notice (D4): the deploy time.
  * Implements FR12 of show-zone-abbreviations-and-zone-label-setting (D7): the zone label group.
+ * Implements FR1, FR2, FR3, FR4 of compact-settings-controls (D1-D3).
  */
 export function SettingsPage({ notices, onBack }: SettingsPageProps) {
   const { t } = useTranslation();
@@ -109,8 +111,8 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
         )}
         <GnomishFactoryCredit />
         <SettingsOptionGroup
-          legend={t("settings.themeLabel")}
-          options={Object.values(ThemePreference).map((theme) => ({
+          caption={t("settings.themeLabel")}
+          options={THEME_PREFERENCE_ORDER.map((theme) => ({
             value: theme,
             label: t(THEME_OPTION_LABEL_KEYS[theme]),
             Icon: THEME_OPTION_ICONS[theme],
@@ -119,10 +121,11 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
           onSelect={setTheme}
         />
         <SettingsOptionGroup
-          legend={t("settings.hourFormatLabel")}
+          caption={t("settings.hourFormatLabel")}
           options={Object.values(HourFormat).map((hourFormat) => ({
             value: hourFormat,
             label: t(HOUR_FORMAT_LABEL_KEYS[hourFormat]),
+            pictogram: HOUR_FORMAT_PICTOGRAMS[hourFormat],
           }))}
           selectedValue={preferences.hourFormat}
           onSelect={setHourFormat}
