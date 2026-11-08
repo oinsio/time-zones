@@ -7,6 +7,7 @@ Feature: Settings in every registered view
     Given the view under contract is shown
 
   @add-settings-page-and-device-time-location @view-contract @FR17
+  @compact-settings-controls @M4
   Scenario: Switch the hour format from the view
     Given the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Almaty"
@@ -14,6 +15,7 @@ Feature: Settings in every registered view
     Then the time of "Almaty" reads "12:30 PM"
 
   @add-settings-page-and-device-time-location @view-contract @FR17
+  @compact-settings-controls @M4
   Scenario: Switch the theme from the view
     Given the system colour scheme is light
     When the user opens the settings
