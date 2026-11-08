@@ -56,20 +56,22 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
   Run `npx vitest run src/app/settings/SettingsPage.test.tsx` and see the new expectations fail.
 - [ ] 4.2 GREEN: in `src/app/settings/SettingsPage.tsx`, map `THEME_PREFERENCE_ORDER` for the theme options. Pass the hour format options with `pictogram: HOUR_FORMAT_PICTOGRAMS[hourFormat]`. Pass `caption` instead of `legend`. Add `Implements FR1, FR2, FR3, FR4 of compact-settings-controls (D1–D3).` to its JSDoc. Re-run `npx vitest run src/app/settings/SettingsPage.test.tsx`, then `npx vitest run src/app/AppShell.settings.test.tsx`: both pass.
 
-## 5. Unit BDD (FR3, FR4, FR6, M2)
+## 5. Unit BDD (FR3, FR6)
 
 - [ ] 5.1 Create `src/test/features/settings/settings_option_group_unit.feature` (paired with the E2E file of task 6.1), with these scenarios of the spec delta:
   - "A group with three options" (`@FR6`);
   - "An option without an icon or a pictogram shows its name" (`@FR6`);
-  - "The stored theme is unchanged" (`@FR3`): choose Dark, flush the write scheduler, then the `STORAGE_KEYS.PREFERENCES` document's payload has `theme: "DARK"` and `hourFormat: "H24"`;
-  - the outline "Pictograms in every language" (`@FR4 @M2`, English and Russian): the pictograms `12`, `24` and the names.
+  - "The stored theme is unchanged" (`@FR3`): choose Dark, flush the write scheduler, then the `STORAGE_KEYS.PREFERENCES` document's payload has `theme: "DARK"` and `hourFormat: "H24"`.
+
+  Scenarios that assert accessible names live in the E2E file (task 6.1).
 
   Put the steps in `src/test/features/settings/steps/settings_option_group_unit.steps.tsx`. Render with `createSettingsWorld` from `steps/settingsWorld.tsx` where the page is needed, and render `SettingsOptionGroup` directly for the generic scenarios. Verify `npx vitest run src/test/features/settings/steps/settings_option_group_unit.steps.tsx`.
 
-## 6. E2E (FR1, FR2, FR5, NFR-A1, NFR-A2, NFR-R1, UX2, M1, M2, M3)
+## 6. E2E (FR1, FR2, FR4, FR5, NFR-A3, NFR-A1, NFR-A2, NFR-R1, UX2, M1, M2, M3)
 
 - [ ] 6.1 Create `src/test/features/settings/settings_option_group_e2e.feature` with the spec delta scenarios, each tagged `@compact-settings-controls` and its ids:
   - "Icons only, in the order System, Light, Dark" (`@FR1 @FR2 @M2`, English and Russian: accessible names in DOM order, an `svg` and an empty `innerText` per label);
+  - the outline "Pictograms in every language" (`@FR4 @NFR-A3 @M2`, English and Russian): each hour format label's `innerText` is `12` or `24`, in this order, and its radio's accessible name is the name of the spec table, which contains that pictogram;
   - "Arrow keys follow the visual order" (`@FR2 @NFR-A1`);
   - "Size, focus and checked fill" (`@NFR-A1 @NFR-A2 @UX2 @M3`, light and dark). Every theme and hour format label is ≥ 44 × 44 px. The checked label's computed `background-color` equals the computed `color` of the back button's chevron `svg`, which is `text-accent`. `readThemeColours` (`themeTokens.ts`) has no accent field. The unchecked labels' `background-color` equals `readThemeColours(theme).surface`. A label focused with Tab shows a non-`none` `outline-style`;
   - "Caption and options in one row" (`@FR5 @NFR-R1 @UX1`, 320 Russian, 375 English, 1024 Russian, 2560 English): the caption's and the track's bounding boxes overlap vertically for both groups, the caption's left edge is left of the track's, and the page does not scroll horizontally;

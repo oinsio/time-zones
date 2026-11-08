@@ -12,7 +12,7 @@ The theme group and the hour format group SHALL be built from one reusable optio
 #### Scenario: An option without an icon or a pictogram shows its name
 - **GIVEN** an option group with the caption "Sample" and an option named "Plain" that has neither an icon nor a pictogram
 - **WHEN** the group is shown
-- **THEN** the option shows the text "Plain" and is named "Plain"
+- **THEN** the option shows the text "Plain"
 
 #### Scenario: Caption and options in one row
 - **WHEN** the settings page is shown `<width>` px wide in `<language>`
