@@ -15,13 +15,13 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
 ## 2. Constants (FR2, FR4, FR5; design D2, D3, D5)
 
-- [ ] 2.1 RED: in `src/constants/preferences.test.ts` (create it if it does not exist; `// Verifies FR2, FR4, FR5 of compact-settings-controls.`) assert:
+- [x] 2.1 RED: in `src/constants/preferences.test.ts` (create it if it does not exist; `// Verifies FR2, FR4, FR5 of compact-settings-controls.`) assert:
   - `THEME_PREFERENCE_ORDER` equals `[ThemePreference.SYSTEM, ThemePreference.LIGHT, ThemePreference.DARK]` and holds every `ThemePreference` value once;
   - `HOUR_FORMAT_PICTOGRAMS` equals `{ H12: "12", H24: "24" }`;
   - `SETTINGS_GROUP_ROW_CLASS_NAME` contains `flex-wrap` and `justify-between`.
 
   All three are imported from `@/constants`. Run `npx vitest run src/constants/preferences.test.ts` and see it fail.
-- [ ] 2.2 GREEN: add `THEME_PREFERENCE_ORDER`, `HOUR_FORMAT_PICTOGRAMS`, `SETTINGS_GROUP_ROW_CLASS_NAME` and `SETTINGS_GROUP_CAPTION_CLASS_NAME` (design D2, D3, D5) to `src/constants/preferences.ts` and export them from `src/constants/index.ts`. Re-run `npx vitest run src/constants/preferences.test.ts`: it passes.
+- [x] 2.2 GREEN: add `THEME_PREFERENCE_ORDER`, `HOUR_FORMAT_PICTOGRAMS`, `SETTINGS_GROUP_ROW_CLASS_NAME` and `SETTINGS_GROUP_CAPTION_CLASS_NAME` (design D2, D3, D5) to `src/constants/preferences.ts` and export them from `src/constants/index.ts`. Re-run `npx vitest run src/constants/preferences.test.ts`: it passes.
 
 ## 3. Option group component (FR5, FR6, NFR-A1, NFR-A2, NFR-A3, UX2, UX3; design D1, D4, D5, D6)
 
