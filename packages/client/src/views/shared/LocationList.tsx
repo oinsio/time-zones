@@ -28,6 +28,10 @@ import {
 import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import type { LocationRow as LocationRowModel } from "@/presenter";
 import { LocationRow } from "./LocationRow";
+import {
+  LOCATION_ROW_VARIANT_CLASS_NAMES,
+  LocationRowVariant,
+} from "./locationRowVariant";
 import { restrictToVerticalAxis } from "./reorderModifiers";
 import { getMoveTargetIndex } from "./reorderTarget";
 import { useReorderAnnouncements } from "./useReorderAnnouncements";
@@ -58,6 +62,8 @@ type LocationListProps = {
     text: string,
     date: string,
   ) => WallTimeInputOutcome;
+  /** Cards when omitted. */
+  rowVariant?: LocationRowVariant;
 };
 
 /**
@@ -74,6 +80,8 @@ type LocationListProps = {
  * Implements FR11 of set-home-location-and-show-differences (D7, D8): the
  * focus after a removal goes to a location menu button.
  * Implements FR1, FR3 of add-wall-time-input-with-hint (D6): `onConfirmWallTime` per row.
+ * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): cards, or
+ * the rows of one panel with dividers.
  */
 export function LocationList({
   rows,
@@ -83,6 +91,7 @@ export function LocationList({
   onSelectTrackFraction,
   onMoveTrack,
   onConfirmWallTime,
+  rowVariant = LocationRowVariant.CARD,
 }: LocationListProps) {
   const menuButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const focusIndexAfterRemoval = useRef<number | null>(null);
@@ -125,7 +134,10 @@ export function LocationList({
       }}
     >
       <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
-        <ul className="flex flex-col gap-2">
+        <ul
+          data-row-variant={rowVariant}
+          className={LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant].list}
+        >
           {rows.map((row, rowIndex) => (
             <LocationRow
               key={row.id}
@@ -140,6 +152,7 @@ export function LocationList({
               onSetHome={onSetHome}
               isReorderable={rows.length >= MIN_LOCATIONS_TO_REORDER}
               prefersReducedMotion={prefersReducedMotion}
+              rowVariant={rowVariant}
             />
           ))}
         </ul>

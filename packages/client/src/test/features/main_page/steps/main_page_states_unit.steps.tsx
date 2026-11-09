@@ -124,7 +124,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
-  const explanationText = () => i18n.t("views.cardsEmptyState");
+  const explanationText = () => i18n.t("views.emptyState");
   const getAddLocationButtons = () =>
     screen.getAllByRole("button", { name: i18n.t("locations.addLocation") });
 

@@ -1,4 +1,5 @@
 // Verifies FR1, FR2 of compact-settings-controls.
+// Verifies FR1 of add-view-mode-setting-and-grid-skeleton: the view group names in Russian.
 import { screen, within } from "@testing-library/react";
 import i18n from "i18next";
 import { renderSettingsPage } from "./renderSettingsPage";
@@ -28,5 +29,11 @@ describe("SettingsPage in Russian", () => {
         .getAllByRole("radio")
         .map((radio) => radio.closest("label")?.getAttribute("title")),
     ).toEqual(["12 часов", "24 часа"]);
+    const russianView = screen.getByRole("radiogroup", { name: "Вид" });
+    expect(
+      within(russianView)
+        .getAllByRole("radio")
+        .map((radio) => radio.closest("label")?.getAttribute("title")),
+    ).toEqual(["Карточки", "Сетка"]);
   });
 });

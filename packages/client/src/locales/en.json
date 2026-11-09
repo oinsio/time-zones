@@ -24,7 +24,7 @@
   "views": {
     "cardsTitle": "Cards",
     "gridTitle": "Grid",
-    "cardsEmptyState": "No locations added yet."
+    "emptyState": "No locations added yet."
   },
   "locations": {
     "utcOffsetPrefix": "UTC",
@@ -119,6 +119,7 @@
     "themeDark": "Dark",
     "themeSystem": "System",
     "hourFormatLabel": "Hour format",
+    "viewModeLabel": "View",
     "hourFormat12": "12-hour",
     "hourFormat24": "24-hour",
     "deployTime": "Deployed {{date}} at {{time}}",

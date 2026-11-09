@@ -70,7 +70,7 @@ export const expectListContains = (city: string) =>
   expect(listedCityLabels()).toContainEqual(expect.stringContaining(city));
 
 export const expectEmptyState = () => {
-  expect(screen.getByText(i18n.t("views.cardsEmptyState"))).toBeVisible();
+  expect(screen.getByText(i18n.t("views.emptyState"))).toBeVisible();
   expect(
     screen.getByRole("button", { name: i18n.t("locations.addLocation") }),
   ).toBeVisible();

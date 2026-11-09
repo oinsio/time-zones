@@ -1,94 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { ADD_LOCATION_BUTTON_ID } from "@/constants";
-import {
-  LocationsStatus,
-  useLocations,
-  useTimeSelection,
-  useWallTimeInput,
-} from "@/controller";
-import { LocationList, LocationsLoadError } from "@/views/shared";
+import { LocationRowVariant, ViewLocationList } from "@/views/shared";
 
 /**
- * Cards view: the location list (or its empty state or load error).
- * Implements FR7, UX1 of add-main-page-scaffold and FR10, FR12, FR17, NFR-A2,
- * NFR-A3 of add-locations-via-search (D10).
- * Implements FR3, FR4 of add-time-sliders-to-location-cards (D8): hands the
- * track selection and move commands to the list.
- * Implements FR3, FR11, NFR-A2 of set-home-location-and-show-differences (D8):
- * announces a home change politely.
- * Implements FR9, FR13, UX3 of add-settings-page-and-device-time-location (D4,
- * D11): the device time location is a row of the list; the search lives in the
- * header, and focus returns to its button after the last removal.
- * Implements FR1, FR3 of add-wall-time-input-with-hint (D6): wires `useWallTimeInput().confirmWallTime`.
+ * Cards view: the location list with a card for every location.
+ * Implements FR7, UX1 of add-main-page-scaffold and the requirements of the
+ * shared list (`ViewLocationList`).
+ * Implements FR7 of add-view-mode-setting-and-grid-skeleton (D4).
  */
 export default function CardsView() {
-  const { t } = useTranslation();
-  const {
-    rows,
-    loadStatus,
-    removeLocation,
-    moveLocation,
-    setHomeLocation,
-    resetLocations,
-  } = useLocations();
-  const { selectTrackFraction, moveTrack } = useTimeSelection();
-  const { confirmWallTime } = useWallTimeInput();
-  const hasRemovedLastLocation = useRef(false);
-  const [announcement, setAnnouncement] = useState("");
-
-  useEffect(() => {
-    if (!hasRemovedLastLocation.current || rows.length > 0) return;
-    hasRemovedLastLocation.current = false;
-    document.getElementById(ADD_LOCATION_BUTTON_ID)?.focus();
-  }, [rows]);
-
-  if (loadStatus === LocationsStatus.UNREADABLE) {
-    return <LocationsLoadError onReset={resetLocations} />;
-  }
-
-  const handleRemove = (id: string) => {
-    const removedRow = rows.find((row) => row.id === id);
-    hasRemovedLastLocation.current = rows.length === 1;
-    removeLocation(id);
-    if (removedRow) {
-      setAnnouncement(
-        t("locations.removedAnnouncement", { city: removedRow.cityLabel }),
-      );
-    }
-  };
-
-  const handleSetHome = (id: string | null) => {
-    const outcome = setHomeLocation(id);
-    if (!outcome.ok) return;
-    const homeRow = rows.find((row) => row.id === id);
-    setAnnouncement(
-      homeRow
-        ? t("locations.homeSetAnnouncement", { city: homeRow.cityLabel })
-        : t("locations.homeClearedAnnouncement"),
-    );
-  };
-
-  return (
-    <div className="flex flex-col gap-4">
-      {rows.length === 0 ? (
-        <p className="py-8 text-center text-muted-foreground">
-          {t("views.cardsEmptyState")}
-        </p>
-      ) : (
-        <LocationList
-          rows={rows}
-          onRemove={handleRemove}
-          onSetHome={handleSetHome}
-          onMove={moveLocation}
-          onSelectTrackFraction={selectTrackFraction}
-          onMoveTrack={moveTrack}
-          onConfirmWallTime={confirmWallTime}
-        />
-      )}
-      <p aria-live="polite" aria-atomic="true" className="sr-only">
-        {announcement}
-      </p>
-    </div>
-  );
+  return <ViewLocationList rowVariant={LocationRowVariant.CARD} />;
 }

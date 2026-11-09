@@ -7,6 +7,10 @@ import type {
 import { DayTrack } from "./DayTrack";
 import { LocalDateTime } from "./LocalDateTime";
 import { LocationMarkIcon } from "./LocationMarkIcon";
+import {
+  LOCATION_ROW_VARIANT_CLASS_NAMES,
+  LocationRowVariant,
+} from "./locationRowVariant";
 import { ZoneLine } from "./ZoneLine";
 
 type ZoneRowContentProps = {
@@ -27,6 +31,8 @@ type ZoneRowContentProps = {
   dayTrack?: PresentedDayTrack;
   onSelectTrackFraction: (fraction: number) => void;
   onMoveTrack: (move: TrackMove) => void;
+  /** Cards when omitted. */
+  rowVariant?: LocationRowVariant;
 };
 
 /**
@@ -39,6 +45,7 @@ type ZoneRowContentProps = {
  * Implements FR1, NFR-A2, UX1 of fix-location-card-and-header-layout (D1): the
  * hint moved to `LocationRow`, the card's last element.
  * Implements FR5, FR6, NFR-R1, UX1 of show-zone-abbreviations-and-zone-label-setting (D6): the zone line parts.
+ * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): the zone line on the city's line in a grid row.
  */
 export function ZoneRowContent({
   cityLabel,
@@ -55,12 +62,18 @@ export function ZoneRowContent({
   dayTrack,
   onSelectTrackFraction,
   onMoveTrack,
+  rowVariant = LocationRowVariant.CARD,
 }: ZoneRowContentProps) {
+  const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
   const hasDifference = offsetDifferenceLabel !== "";
   return (
     <>
-      <span className="flex min-w-0 flex-1 items-start gap-3 md:flex-none">
-        <span className="flex min-w-0 flex-1 flex-col break-words md:w-64 md:flex-none">
+      <span
+        className={`flex min-w-0 flex-1 items-start gap-3 ${variantClassNames.placeAndTime}`}
+      >
+        <span
+          className={`flex min-w-0 flex-1 flex-col break-words ${variantClassNames.place}`}
+        >
           <span className="flex flex-wrap items-center gap-x-2">
             {mark && <LocationMarkIcon mark={mark} id={ids.mark} />}
             <span id={ids.city} className="font-semibold">
@@ -106,9 +119,10 @@ export function ZoneRowContent({
           localIsoDate={localIsoDate}
           wallTimeInputLabel={wallTimeInputLabel}
           onConfirmWallTime={onConfirmWallTime}
+          rowVariant={rowVariant}
         />
       </span>
-      {dayTrack && (
+      {dayTrack && variantClassNames.hasDayTrack && (
         <DayTrack
           track={dayTrack}
           city={cityLabel}

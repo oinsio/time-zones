@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { WallTimeInputOutcome } from "@/controller";
 import type { LocationRow } from "@/presenter";
+import {
+  LOCATION_ROW_VARIANT_CLASS_NAMES,
+  LocationRowVariant,
+} from "./locationRowVariant";
 import { WallTimeInput } from "./WallTimeInput";
 
 type LocalDateTimeProps = Pick<
@@ -9,6 +13,8 @@ type LocalDateTimeProps = Pick<
 > & {
   /** `date` is the local ISO date the row showed when the field opened. */
   onConfirmWallTime: (text: string, date: string) => WallTimeInputOutcome;
+  /** Cards when omitted. */
+  rowVariant?: LocationRowVariant;
 };
 
 /**
@@ -21,6 +27,8 @@ type LocalDateTimeProps = Pick<
  * Implements FR1, FR5, FR13, NFR-A2, UX1 of add-wall-time-input-with-hint (D6).
  * Implements FR5, UX3 of fix-location-card-and-header-layout (D4): a fixed
  * column width from 768 px, so every track is equally long.
+ * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): in a
+ * grid row the date comes first and the date and time sit in one line from 768 px.
  */
 export function LocalDateTime({
   localTimeLabel,
@@ -28,7 +36,9 @@ export function LocalDateTime({
   localIsoDate,
   wallTimeInputLabel,
   onConfirmWallTime,
+  rowVariant = LocationRowVariant.CARD,
 }: LocalDateTimeProps) {
+  const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const isFocusReturnDue = useRef(false);
   const [openedDate, setOpenedDate] = useState<string | undefined>();
@@ -43,8 +53,16 @@ export function LocalDateTime({
     isFocusReturnDue.current = shouldRestoreFocus;
     setOpenedDate(undefined);
   };
+  const dateElement = (
+    <time dateTime={localIsoDate} className="text-sm text-muted-foreground">
+      {localDateLabel}
+    </time>
+  );
   return (
-    <span className="flex shrink-0 flex-col items-end md:w-44 md:items-start">
+    <span
+      className={`flex shrink-0 flex-col items-end ${variantClassNames.dateTime}`}
+    >
+      {variantClassNames.isDateBeforeTime && dateElement}
       {openedDate === undefined ? (
         <button
           ref={buttonRef}
@@ -63,9 +81,7 @@ export function LocalDateTime({
           onClose={closeField}
         />
       )}
-      <time dateTime={localIsoDate} className="text-sm text-muted-foreground">
-        {localDateLabel}
-      </time>
+      {!variantClassNames.isDateBeforeTime && dateElement}
     </span>
   );
 }

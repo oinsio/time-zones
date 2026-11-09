@@ -161,7 +161,7 @@ When("the user reloads the app", async ({ locationsWorld }) => {
 
 Then("the empty-state explanation is shown", async ({ locationsWorld }) => {
   await expect(
-    locationsWorld.page.getByText(englishLocale.views.cardsEmptyState),
+    locationsWorld.page.getByText(englishLocale.views.emptyState),
   ).toBeVisible();
 });
 

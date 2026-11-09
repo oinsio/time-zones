@@ -37,7 +37,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     act(() => {
       window.dispatchEvent(new Event(isOnline ? "online" : "offline"));
     });
-  const emptyStateText = () => i18n.t("views.cardsEmptyState");
+  const emptyStateText = () => i18n.t("views.emptyState");
 
   f.BeforeEachScenario(async () => {
     cleanup();

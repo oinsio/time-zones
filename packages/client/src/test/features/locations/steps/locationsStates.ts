@@ -96,7 +96,7 @@ export async function enterLocationsState(
       await world.seedList([]);
       await world.reloadIfOpen();
       await expect(
-        page.getByText(englishLocale.views.cardsEmptyState),
+        page.getByText(englishLocale.views.emptyState),
       ).toBeVisible();
       break;
     case WorldClockState.UNREADABLE:

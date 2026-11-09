@@ -1,22 +1,23 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { forwardRef, useId, useRef } from "react";
-import { useTranslation } from "react-i18next";
 import {
   type TrackMove,
   type WallTimeInputOutcome,
   type WallTimeTarget,
   WallTimeTargetKind,
 } from "@/controller";
-import {
-  LocationMarkKind,
-  type LocationRow as LocationRowModel,
-} from "@/presenter";
+import type { LocationRow as LocationRowModel } from "@/presenter";
 import { ClockChangeNote } from "./ClockChangeNote";
 import { DragHandle } from "./DragHandle";
-import { LocationMenu, type LocationMenuItem } from "./LocationMenu";
+import { LocationMenu } from "./LocationMenu";
+import {
+  LOCATION_ROW_VARIANT_CLASS_NAMES,
+  LocationRowVariant,
+} from "./locationRowVariant";
 import { getReorderTransition } from "./reorderTransition";
 import { useDropSettleAnimation } from "./useDropSettleAnimation";
+import { useLocationMenuItems } from "./useLocationMenuItems";
 
 import { WallTimeHint } from "./WallTimeHint";
 import { ZoneRowContent } from "./ZoneRowContent";
@@ -35,6 +36,8 @@ type LocationRowProps = {
   ) => WallTimeInputOutcome;
   isReorderable: boolean;
   prefersReducedMotion: boolean;
+  /** Cards when omitted. */
+  rowVariant?: LocationRowVariant;
 };
 
 /**
@@ -64,6 +67,8 @@ type LocationRowProps = {
  * wall-time hint is the last child of the card.
  * Implements FR2, NFR-A1, UX1 of show-clock-change-note-on-location-cards (D6): the
  * clock change note takes the same place when the row has no hint.
+ * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): a card or
+ * a row of the grid panel, the same row header.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -76,10 +81,10 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       onConfirmWallTime,
       isReorderable,
       prefersReducedMotion,
+      rowVariant = LocationRowVariant.CARD,
     },
     menuButtonRef,
   ) {
-    const { t } = useTranslation();
     const {
       attributes,
       listeners,
@@ -104,24 +109,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       prefersReducedMotion,
     );
     const hasDifference = row.offsetDifferenceLabel !== "";
-    const isHome = row.mark?.kind === LocationMarkKind.HOME;
-    const menuItems: LocationMenuItem[] = [];
-    // A row without a day track has an unknown zone and cannot be home.
-    if (isHome) {
-      menuItems.push({
-        label: t("locations.clearHome"),
-        onSelect: () => onSetHome(null),
-      });
-    } else if (row.dayTrack) {
-      menuItems.push({
-        label: t("locations.makeHome"),
-        onSelect: () => onSetHome(row.id),
-      });
-    }
-    menuItems.push({
-      label: t("locations.remove"),
-      onSelect: () => onRemove(row.id),
-    });
+    const menuItems = useLocationMenuItems(row, onSetHome, onRemove);
     const labelIds = [
       cityId,
       row.mark && markId,
@@ -145,7 +133,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             ? labelIds.filter(Boolean).join(" ")
             : undefined
         }
-        className={`flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-border bg-surface px-4 py-3${draggingClassName}`}
+        className={`flex flex-wrap items-center gap-x-3 gap-y-2 bg-surface px-4 py-3 ${LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant].row}${draggingClassName}`}
       >
         {isReorderable && (
           <DragHandle
@@ -176,6 +164,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           dayTrack={row.dayTrack}
           onSelectTrackFraction={onSelectTrackFraction}
           onMoveTrack={onMoveTrack}
+          rowVariant={rowVariant}
         />
         <LocationMenu
           ref={menuButtonRef}

@@ -74,7 +74,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then("the first-launch list is shown without an explanation", () => {
       expect(listedCityLabels()).toHaveLength(1);
       expect(
-        screen.queryByText(i18n.t("views.cardsEmptyState")),
+        screen.queryByText(i18n.t("views.emptyState")),
       ).not.toBeInTheDocument();
     });
     And("no list document is stored", () => {

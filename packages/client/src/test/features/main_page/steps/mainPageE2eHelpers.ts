@@ -4,7 +4,7 @@ import type { BoundingBox } from "./main_page_e2e.fixtures";
 
 export const APP_ROOT_URL = ".";
 
-export const EMPTY_STATE_TEXT = englishLocale.views.cardsEmptyState;
+export const EMPTY_STATE_TEXT = englishLocale.views.emptyState;
 export const ERROR_TEXT = englishLocale.mainPage.viewError;
 export const RETRY_LABEL = englishLocale.mainPage.retry;
 export const STORAGE_WARNING_TEXT = englishLocale.mainPage.storageUnavailable;

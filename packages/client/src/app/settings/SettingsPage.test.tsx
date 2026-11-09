@@ -1,6 +1,7 @@
 // Verifies FR3, FR4, FR5, FR7, FR16 of add-settings-page-and-device-time-location (D10).
 // Verifies FR12, FR14 of show-zone-abbreviations-and-zone-label-setting (D7).
 // Verifies FR1, FR2, FR3, FR4 of compact-settings-controls.
+// Verifies FR1, FR2 of add-view-mode-setting-and-grid-skeleton (D2): the view group after the hour format.
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -144,13 +145,13 @@ describe("SettingsPage", () => {
     ).toBeChecked();
   });
 
-  it("should list the groups as Theme, Hour format, Zone label, Language", () => {
+  it("should list the groups as Theme, Hour format, View, Zone label, Language", () => {
     renderSettingsPage();
     const groupNames = screen.getAllByRole("radiogroup").map((group) => {
       const captionId = group.getAttribute("aria-labelledby") ?? "";
       return document.getElementById(captionId)?.textContent;
     });
-    expect(groupNames).toEqual(["Theme", "Hour format"]);
+    expect(groupNames).toEqual(["Theme", "Hour format", "View"]);
     const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     expect(
       hourGroup().compareDocumentPosition(zoneLabel) &
