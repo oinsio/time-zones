@@ -133,7 +133,8 @@ All files are above the 90 % minimum; no finding.
 - Impact: breaks the explicit project limit for a file this branch created; the next change (meeting range) will add to the grid unit steps and push it towards the 300-line hard cap.
 - Fix: split `grid_view_hour_cells_unit.feature` into two features by aspect, e.g. `grid_view_hour_cells_unit.feature` (FR1, FR2, FR4 scenarios) and `grid_view_hour_cell_labels_unit.feature` (FR3, FR5, FR6 scenarios, keeping the `_unit` suffix only if a paired `_e2e` exists per `bdd-unit.md`, otherwise `grid_view_hour_cell_labels.feature`), each with its own steps file under `steps/`, and move the shared setup (sample locations, presenting helper) into the existing `steps/hourCellsWorld.ts`. Keep the scenario names, tags and `// @add-grid-hour-cells-and-hour-frame @FRx` comments unchanged.
 - Fix risk: low — pure test reorganisation; the scenario names must stay byte-identical to the feature files (`bdd-unit.md`), and the task 5.1 run command in `tasks.md` names the old steps path, so the new path must be run instead.
-- Status: open
+- Status: fixed
+- Resolution: split into grid_view_hour_cells_unit.feature (FR1, FR2, FR4; 83-line steps) and grid_view_hour_cell_labels.feature (FR3, FR5, FR6; 180-line steps); shared setup moved to createHourCellsSteps in steps/hourCellsWorld.ts. Scenario names and tags unchanged; both files pass in the unit suite.
 
 ### R2 — SUGGESTION — FR10 header-text hit test can pass without checking anything
 - Location: `packages/client/src/test/features/grid_view/steps/grid_view_hour_frame_e2e.steps.ts:107-120`
@@ -142,7 +143,8 @@ All files are above the 90 % minimum; no finding.
 - Impact: if a layout change (cell width, scroll target, header wrap) moves the frame clear of every Almaty header text, the FR10 header half of "Notes and header texts cover the frame" turns green without testing that header texts cover the frame.
 - Fix: count the checked crossings in the loop and add `expect(checkedCrossings).toBeGreaterThan(0)` after it.
 - Fix risk: none — the current baseline layout already produces a crossing with the zone line, so the scenario stays green.
-- Status: open
+- Status: fixed
+- Resolution: the crossing loop in grid_view_hour_frame_e2e.steps.ts now counts checked crossings and asserts the count is above zero; the scenario passes in the BDD E2E run.
 
 ## Verdict
 
