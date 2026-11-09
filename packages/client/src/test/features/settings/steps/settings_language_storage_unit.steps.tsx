@@ -75,6 +75,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             hourFormat: "H24",
             interfaceLanguage: language,
             zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+            viewMode: null,
           });
         },
       );

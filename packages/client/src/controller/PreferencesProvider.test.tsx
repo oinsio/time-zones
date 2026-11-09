@@ -23,6 +23,7 @@ const storedDarkTwelveHour = {
     hourFormat: HourFormat.H12,
     interfaceLanguage: null,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+    viewMode: null,
   },
 } as const;
 

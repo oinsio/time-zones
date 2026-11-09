@@ -11,7 +11,8 @@ const HALF = 2;
 const ALIGNMENT_TOLERANCE_PX = 1;
 const PLACE_COLUMN_XPATH =
   "xpath=ancestor::span[contains(@class,'flex-col')][1]";
-const TIME_TEXT_XPATH = "xpath=preceding-sibling::button";
+const TIME_TEXT_XPATH =
+  "xpath=preceding-sibling::button | following-sibling::button";
 const LIVE_REGION_XPATH = "xpath=ancestor-or-self::*[@aria-live]";
 const DATE_ELEMENT = "time";
 const MENU_BUTTON = "button";

@@ -107,6 +107,7 @@ export async function seedTwelveHourState(world: LocationsWorld) {
         hourFormat: HOUR_FORMAT_VALUES["12-hour"],
         interfaceLanguage: world.seededInterfaceLanguage,
         zoneLabelParts: ALL_ZONE_LABEL_PARTS,
+        viewMode: null,
       },
     }),
   );

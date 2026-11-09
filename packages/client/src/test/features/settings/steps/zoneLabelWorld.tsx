@@ -139,6 +139,7 @@ export const createZoneLabelWorld = () => {
             hourFormat: DEFAULT_PREFERENCES.hourFormat,
             interfaceLanguage: DEFAULT_PREFERENCES.interfaceLanguage,
             zoneLabelParts: ZONE_LABEL_PART_NAMES[partsName],
+            viewMode: null,
           },
         }),
       ),

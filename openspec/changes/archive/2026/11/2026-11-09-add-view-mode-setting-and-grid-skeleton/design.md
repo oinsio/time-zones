@@ -1,0 +1,149 @@
+# Design: Add the view mode setting and the Grid view skeleton
+
+Paths are relative to `packages/client/` unless they start with `docs/`. Glossary owners touched: **View mode**, **View registry**, **Grid view**, **Cards view**, **Shared block** (`docs/glossary/views.md`), **Preferences**, **Option group** (`docs/glossary/settings.md`), **Location row** (`docs/glossary/locations.md`). Each is extended in place; no second owner is introduced.
+
+The global decision — the view is always the user's choice, there is no `AUTO` — is an ADR, not a local decision: ADR-0012, written as handoff H1 because `docs/adr/` is outside the implement stage's limits. The decisions below are local to this change and follow ADR-0002 (layers), ADR-0004 (persistence) and ADR-0005 (registry, minus its `AUTO` rules and, per ADR-0012, its consequence that a new view cannot skip a contract scenario: D5 excludes one pending scenario for Grid).
+
+## D1. The view mode is a stored view id or "none chosen"
+
+### Context
+FR3, FR4, FR6. `Preferences` lives in `src/preferences/`, a pure model that must not import the views (`.claude/rules/architecture.md`: "never import React, the DOM, i18next, the presenter or adapters"; ADR-0002 dependency rule). The view ids (`ViewId`) and the registry live in `src/views/`. ADR-0004 requires that a stored reference that no longer resolves does not make the document unreadable, while a value of the wrong type does.
+
+### Decision
+- `Preferences.viewMode: string | null` — the id of the chosen view, `null` when none is chosen. `DEFAULT_PREFERENCES.viewMode` is `null`. This mirrors the existing owner pattern of `Preferences.interfaceLanguage` (`string | null`, resolved against the locale registry by `resolveInterfaceLanguage`).
+- Command `PreferencesCommandType.SET_VIEW_MODE` with `{ viewMode: string }`; the reducer returns the same object when the value is unchanged, as every other preferences command does.
+- `parseStoredPreferences` accepts `viewMode` that is `null` or a non-empty string, and rejects anything else (the document is unreadable). It does not check the registry.
+- Resolution against the registry happens in `src/views/` only: `resolveActiveView(registry, viewMode)` returns the registered view whose `id === viewMode`, otherwise the view with `DEFAULT_VIEW_ID` (`ViewId.CARDS`, a new constant in `views/viewDefinition.ts`, exported from `@/views`), otherwise `registry[0]`, otherwise `undefined` (empty registry, as the `app-shell` spec requires). The `containerWidth` parameter is removed.
+- Storage: `PREFERENCES_SCHEMA_VERSION` goes from 3 to 4. `createPreferencesMigrations` gets step `3: payload => ({ ...payload, viewMode: null })`; `serializePreferencesDocument` writes `viewMode`. Version 1 and 2 documents migrate through all steps.
+- Controller: `PreferencesContextValue.setViewMode(viewMode: string)` in `preferencesContext.ts` and `PreferencesProvider.tsx`; a hook `useViewMode(): string | null` in `src/controller/useViewMode.ts` that, like `useHourFormat`, returns `DEFAULT_PREFERENCES.viewMode` outside a provider. Cross-tab sync and the debounced write are the provider's existing paths; nothing new is needed for them.
+
+### Consequences
+Positive:
+- The model stays free of views; a new view needs no preferences change (G2).
+- An unregistered stored id (a view removed in a later version) shows Cards without an unreadable note: in effect it is cleared to "none chosen", which is ADR-0004's load normalization ("a reference that no longer resolves … is cleared silently instead of making the document unreadable"). The clearing happens in `resolveActiveView`, not by a write, because nothing is written until the user changes a setting (`settings` → Preferences are kept on the device); the next write of any setting stores the id as it was, and choosing a view replaces it.
+
+Negative:
+- The model accepts any non-empty string, so a typo in a stored id is caught only at resolution, silently. This is the same trade-off as the interface language.
+
+### Alternatives Considered
+**Move `ViewId` into `src/preferences/` and validate against it**: the model would have to change for every new view, against ADR-0005's "Nothing else changes: the model, …".
+**Store `"cards"` as the default instead of `null`**: needs the model to know a view id; and an existing user's document would claim a choice the user never made.
+
+## D2. The view group lists the registry by name
+
+### Context
+FR1, FR2, NG6, NFR-A1, UX1. The option group (`SettingsOptionGroup`, `src/app/settings/SettingsOptionGroup.tsx`) already shows an option by its name when it has neither `Icon` nor `pictogram`.
+
+### Decision
+- New `src/app/settings/ViewModeGroup.tsx`: reads `viewRegistry` from `@/views`, `useViewMode()` and `usePreferences().setViewMode`. It passes to `SettingsOptionGroup` the caption `t("settings.viewModeLabel")`, one option per registry entry in registry order `{ value: view.id, label: t(view.titleKey) }` without `Icon` or `pictogram`, `selectedValue = resolveActiveView(viewRegistry, viewMode)?.id`, and `onSelect = setViewMode`. With an empty registry it renders nothing.
+- `SettingsPage.tsx` renders `<ViewModeGroup />` right after the hour format group.
+- New locale keys in `src/locales/en.json` and `src/locales/ru.json`: `settings.viewModeLabel` ("View" / «Вид»), `views.gridTitle` ("Grid" / «Сетка»). `views.cardsTitle` exists ("Cards" / «Карточки»).
+- The settings test can swap the registry through the existing `src/test/registryOverride.ts` (`withRegistryOverride`) to prove M1 (a test view adds an option with no settings change).
+
+### Consequences
+Positive: the names are unambiguous in both languages and fit one row at 320 px; no new component.
+Negative: `ViewDefinition.icon` stays unused by the settings for now.
+
+### Alternatives Considered
+**Icons only, like the theme**: no established icon distinguishes "cards" from "grid" reliably, and the task names the options by word.
+
+## D3. The view host follows the view mode only
+
+### Context
+FR4, FR5, FR6.
+
+### Decision
+- `src/app/ViewHost.tsx` drops `containerRef`, `useContainerWidth` and the `mode` prop. It reads `useViewMode()` and calls `resolveActiveView(registry, viewMode)`. It keeps the `registry` prop for tests, the retry and error boundary, the `Suspense` fallback `ViewSkeleton`, and the `data-view-id` attribute.
+- Removed: `AutoViewMode` and the `ViewMode` type (`views/viewDefinition.ts`), `ViewDefinition.autoMinWidth`, `CARDS_AUTO_MIN_WIDTH` (`views/index.ts`), `src/controller/useContainerWidth.ts` and its test and export, `src/test/viewContractViewport.ts` and its test. `buildTestView` / `buildTextView` in `src/test/viewFixtures.tsx` lose their `autoMinWidth` parameter.
+- The `ResizeObserver` polyfill of the legacy chunk (`src/lib/legacy/`) stays (NG5); only the wording of its requirement changes.
+
+### Consequences
+Positive: the host has no measurement effect and no re-render on resize.
+Negative: the view-host BDD scenarios of add-main-page-scaffold are rewritten, not kept.
+
+### Alternatives Considered
+**Keep `AUTO` as a hidden default**: contradicts FR5 and the owner's decision that the view is always the user's choice.
+
+## D4. Grid is a registry entry over a shared view location list
+
+### Context
+FR7, UX3, NFR-P1. Everything `CardsView` does around the list (unreadable list → `LocationsLoadError`, empty state, remove and home announcements, focus to "Add location" after the last removal, wiring of `useLocations`, `useTimeSelection`, `useWallTimeInput`) is view-independent and part of the view contract. Copying it into Grid would make it a second owner (`.claude/rules/glossary.md`).
+
+### Decision
+- `ViewId.GRID = "grid"`. Registry entry `gridView` after `cardsView` in `views/index.ts`: `titleKey: "views.gridTitle"`, `icon: Grid3x3` from `lucide-react`, `component: createRetryableLazyView(() => import("./grid/GridView"))`.
+- New shared enum `LocationRowVariant { CARD = "card", GRID_ROW = "grid-row" }` in `views/shared/locationRowVariant.ts`, exported from `views/shared/index.ts`.
+- New shared block `views/shared/ViewLocationList.tsx` with the prop `rowVariant: LocationRowVariant`: the body of today's `CardsView` moved unchanged, passing `rowVariant` to `LocationList`. `CardsView` becomes `<ViewLocationList rowVariant={LocationRowVariant.CARD} />`; new `views/grid/GridView.tsx` (default export) is `<ViewLocationList rowVariant={LocationRowVariant.GRID_ROW} />`.
+- `LocationList` takes `rowVariant` and passes it to each `LocationRow`. For `GRID_ROW` its `<ul>` is one panel: `rounded-md border border-border divide-y divide-border`, no gap; for `CARD` it stays `flex flex-col gap-2`. The `<ul>` carries `data-row-variant={rowVariant}` so tests can tell the layouts apart.
+- `LocationRow` with `GRID_ROW` keeps `bg-surface` on its `<li>` and drops only its own border and rounding (the panel draws the outer border and the dividers); the first and the last row round their outer corners (`first:rounded-t-md last:rounded-b-md`) so the surface stays inside the panel's rounded border. Keeping the surface on the row matters for the view contract: the accessibility outline of `locations_view_contract_e2e.feature` ends with "the list and the search use the <theme> theme token colours", whose step (`src/test/features/locations/steps/locations_view_a11y_e2e.steps.ts:73-79`) expects `page.getByRole("listitem").first()` to have the `--color-surface` background. With the surface on the row, Grid passes that step unchanged in every state and theme, and the step stays as it is. The row also passes `dayTrack={undefined}` to `ZoneRowContent`, which already renders no `DayTrack` without one. Everything else — drag handle, marks, offset difference, zone line, `LocalDateTime` with the wall-time input, location menu, wall-time hint, clock change note — is the same component, so the row header is shared, not copied. The "Make home" item still depends on `row.dayTrack` from the presenter, unchanged.
+- The row header follows the Grid design (`docs/architecture/views.md` → Grid → Row header, `docs/design/screens/grid-desktop-light.png`): from 768 px (`md`) it is one line — drag handle, mark, city, offset difference and zone line on the left, then the date, the time and the location menu on the right; below 768 px it takes two lines, city and zone line on the left, time and date on the right, as the card does today. `ZoneRowContent` and `LocalDateTime` take an optional `rowVariant` (default `CARD`, so every Cards caller is unchanged). For `GRID_ROW`, `ZoneRowContent` puts the zone line on the city's line from `md` (`md:flex-row md:items-baseline md:gap-x-2` on the name block, `md:flex-1` instead of `md:w-64`), and `LocalDateTime` renders the `<time>` before the time button in the DOM and lays them out in a row from `md` (`md:flex-row md:items-baseline md:gap-x-3`, no `md:w-44`), so the reading order and the focus order match what is seen. The variant classes live in one map `LOCATION_ROW_VARIANT_CLASS_NAMES: Record<LocationRowVariant, …>` in `views/shared/locationRowVariant.ts`, so `LocationRow`, `ZoneRowContent` and `LocalDateTime` look classes up instead of branching, and `LocationRow.tsx` stays under 200 lines. The day shift mark next to the date is out of scope (NG2).
+- The empty-state key `views.cardsEmptyState` is renamed `views.emptyState` in both locale files and every reference (`englishTexts.ts`, `mainPageE2eHelpers.ts`, `locationsStates.ts`, `locationsUiWorld.tsx`, `locations_storage_ui_unit.steps.tsx`, `locations_device_time_e2e.steps.ts`, `main_page_states_unit.steps.tsx`, `src/test/features/main_page/steps/main_page_unit.steps.ts:40`), because both views show it.
+- The date bar is rendered by `AppShell` in the main page's bottom bar, outside the view, so Grid gets it with no change.
+
+### Consequences
+Positive: the hour cells change adds its strip inside `LocationRow` / `views/grid/` for `GRID_ROW` only, on top of a row header that is already shared.
+Negative: `LocationRow`, `ZoneRowContent` and `LocalDateTime` gain a `rowVariant` prop; `LocationRow.tsx` is 194 lines today, so its class names come from the variant map rather than inline branches, and the implementer splits it if it would pass 200.
+
+### Alternatives Considered
+**A separate `GridRow` component composing the shared pieces**: duplicates the sortable wiring, the accessible name and the menu items of `LocationRow`.
+**Keep the card's row header in Grid unchanged**: smaller change, but Grid would not match its design (zone line under the city, time above the date), and the hour cells change would have to reshape the row header later.
+**Background on the panel, none on the rows**: the contract's theme-colour step reads the first list item's background and would see a transparent row in Grid; changing the step to read the panel would weaken it for Cards too.
+
+## D5. The view contract picks its view through the stored view mode
+
+### Context
+FR8, NFR-A2. Today `playwright.bdd.config.ts` makes one `view-contract-<id>` project per registry entry and makes `AUTO` pick the view by viewport width (`getContractViewportWidth`). Without `AUTO` that cannot select Grid.
+
+### Decision
+- The contract option becomes `contractView: { id: string; preferencesStorageKey: string; preferencesDocument: string }` in `src/test/features/view_contract/steps/view_contract_e2e.fixtures.ts`. The fixture file keeps importing nothing through `@/`.
+- `playwright.bdd.config.ts` loads, at run time like the registry, `./src/constants/index.ts` (`STORAGE_KEYS`, `PREFERENCES_SCHEMA_VERSION`) and `./src/preferences/index.ts` (`DEFAULT_PREFERENCES`), and per view builds `JSON.stringify({ schemaVersion: PREFERENCES_SCHEMA_VERSION, payload: { ...DEFAULT_PREFERENCES, viewMode: view.id } })`.
+- `showContractView()` registers an init script that writes that document under `STORAGE_KEYS.PREFERENCES` only when the key is missing (as `seedPreferences` does), sets the viewport to a fixed `1280 × 800`, opens the app and still fails unless `[data-view-id]` equals the view's id. No contract scenario seeds its own preferences document today; one that does later must include the view mode.
+- Exclusion marker: the tag `@grid-pending-hour-cells` on "Select a time" in `src/test/features/time_selection/time_selection_view_contract_e2e.feature`, with the comment line `# Grid: excluded until the hour cells change; remove @grid-pending-hour-cells there.` above the tags. The config holds `VIEW_CONTRACT_PENDING_TAGS: Partial<Record<string, RegExp>> = { grid: /@grid-pending-hour-cells/ }` and sets it as the `grepInvert` of that view's project; Cards has none. Only "Select a time" needs it: it moves the time through the day track slider (`sliderOf`), which Grid does not have. "Type an exact time" passes, because the Grid row header keeps the wall-time input. The other contract steps read the shared row header (time text, `<time datetime>`, location menu, marks, drag handle) or, in the accessibility outline, the first row's surface background, which D4 keeps on Grid rows; none needs a day track.
+
+### Consequences
+Positive: a contract run selects its view the way a user does, independent of width; the marker is one tag to delete.
+Negative: the config imports two more source modules at run time.
+
+### Alternatives Considered
+**Switch the view through the settings page in the fixture**: adds a settings round-trip to every contract scenario and depends on the settings UI.
+**Skip Grid in the contract until it is complete**: hides regressions of everything Grid already does.
+
+## D6. Width and orientation checks in a real browser
+
+### Context
+FR5, M3.
+
+### Decision
+`settings_view_mode_e2e.feature` chooses Grid at 1280 px, then sets the viewport to 375 px and 2560 px and asserts `[data-view-id="grid"]` each time. Orientation is emulated by swapping the viewport of a phone in portrait (390 × 844) to landscape (844 × 390), the layout change a turn causes; Playwright has no rotation API.
+
+### Consequences
+Positive: the checks run in a real layout engine.
+Negative: a real device rotation is not exercised; the viewport swap is its layout equivalent.
+
+### Alternatives Considered
+**jsdom resize in unit tests**: jsdom has no layout, so it cannot show that nothing reacts to the size.
+
+## D7. Tests that depend on the preferences schema version
+
+### Context
+D1 raises `PREFERENCES_SCHEMA_VERSION` from 3 to 4 and makes `viewMode` required in a current document and in the `Preferences` type. Tests break in three ways: a literal `4` that meant "newer than current" becomes current; an expected serialized document still says `3`; a seed or typed literal of the current version lacks `viewMode`.
+
+### Decision
+Version-dependent tests, each fixed as named:
+- `src/adapters/preferencesDocument.test.ts:60-67`: the `"version 4"` case of "should load %s as unreadable" (`{ schemaVersion: 4, payload: { ...DEFAULT_PREFERENCES } }`) would load once 4 is current. It becomes `"a newer version"` with `schemaVersion: PREFERENCES_SCHEMA_VERSION + 1` (5).
+- `src/adapters/preferencesDocument.test.ts:93-114`: the serialization test expects `schemaVersion: 3`; it expects `4`, and the input `Preferences` and the expected payload gain `viewMode: null`.
+- `src/adapters/preferencesDocument.zoneLabel.test.ts:59-64` "should read version 4 as unreadable" becomes "should read a newer version as unreadable" with `schemaVersion: PREFERENCES_SCHEMA_VERSION + 1`.
+- `src/adapters/preferencesDocument.zoneLabel.test.ts:44-57` "should round-trip a version 3 document with the offset only": the `Preferences` literal gains `viewMode: null`, and the title says "a current document".
+- `src/adapters/preferencesRepository.test.ts:56-63` "a newer schema version" uses `schemaVersion: 3`, which is not newer; it uses `PREFERENCES_SCHEMA_VERSION + 1`.
+- `src/adapters/preferencesRepository.test.ts:106-122` "should store the schema version with the payload" expects `schemaVersion: 3`; it expects `4` and `viewMode: null` in the payload. The `Preferences` literals passed to `save` in this file gain `viewMode: null`.
+- `src/test/features/settings/steps/settings_zone_label_unit.steps.tsx:25` defines `LEGACY_SCHEMA_VERSION = PREFERENCES_SCHEMA_VERSION - 1`, which would become 3; "Existing users get both parts" (lines 175-186) would then write a version 3 document without `zoneLabelParts`, which is unreadable. The constant is pinned to the version before the zone label existed — `const SCHEMA_VERSION_BEFORE_ZONE_LABEL = 2` — and the then unused `PREFERENCES_SCHEMA_VERSION` import is dropped. The document gets no `viewMode`.
+
+Current-version seeds whose payload is written field by field add `viewMode: null`: `src/test/features/settings/steps/zoneLabelWorld.tsx:136`, `settings_theme_e2e.steps.ts:33`, `settingsE2eHelpers.ts:80`, `src/test/features/locations/steps/locationsSeedHelpers.ts:104`. `settings_deploy_time_world.tsx:46` spreads `DEFAULT_PREFERENCES` and needs no change.
+
+Every other typed `Preferences` literal in tests (controller tests, step worlds, `src/adapters/preferencesRepository.contract.ts`) gains `viewMode: null` or spreads `DEFAULT_PREFERENCES`; `pnpm typecheck` (`tsc -b --noEmit`) reports each one that lacks it. Documents of versions 1 and 2 in tests (`src/i18n.test.ts:115`, `src/app/AppShell.settings.test.tsx:133`, `settingsLanguageWorld.tsx:99`, `settings_language_storage_unit.steps.tsx:42`) stay as they are and now also run the new step.
+
+### Consequences
+Positive: the seeds keep exercising a valid current document, and the "newer version" fixtures stay newer at every later bump.
+Negative: several test files change only for the new field.
+
+### Alternatives Considered
+**Let `parseStoredPreferences` default a missing `viewMode`**: breaks the rule that a current document missing a value is unreadable, which every other preference follows.

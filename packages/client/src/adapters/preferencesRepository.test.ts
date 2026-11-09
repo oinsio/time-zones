@@ -1,5 +1,9 @@
 // Verifies FR7 of add-settings-page-and-device-time-location: one contract, every adapter.
-import { LEGACY_STORAGE_KEYS, STORAGE_KEYS } from "@/constants";
+import {
+  LEGACY_STORAGE_KEYS,
+  PREFERENCES_SCHEMA_VERSION,
+  STORAGE_KEYS,
+} from "@/constants";
 import { PreferencesLoadStatus, SaveOutcome } from "@/ports";
 import {
   DEFAULT_PREFERENCES,
@@ -57,7 +61,7 @@ describe("localStorage preferences repository", () => {
     [
       "a newer schema version",
       JSON.stringify({
-        schemaVersion: 3,
+        schemaVersion: PREFERENCES_SCHEMA_VERSION + 1,
         payload: { theme: "DARK", hourFormat: "H12", interfaceLanguage: null },
       }),
     ],
@@ -86,6 +90,7 @@ describe("localStorage preferences repository", () => {
         hourFormat: HourFormat.H24,
         interfaceLanguage: null,
         zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+        viewMode: null,
       }),
     ).toBe(SaveOutcome.FAILED);
   });
@@ -106,15 +111,17 @@ describe("localStorage preferences repository", () => {
       hourFormat: HourFormat.H12,
       interfaceLanguage: "ru",
       zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+      viewMode: null,
     });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
-        schemaVersion: 3,
+        schemaVersion: 4,
         payload: {
           theme: "DARK",
           hourFormat: "H12",
           interfaceLanguage: "ru",
           zoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+          viewMode: null,
         },
       },
     );
@@ -181,6 +188,7 @@ describe("in-memory preferences repository", () => {
       hourFormat: HourFormat.H12,
       interfaceLanguage: null,
       zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+      viewMode: null,
     });
     expect(outcome).toBe(SaveOutcome.FAILED);
     expect(repository.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });

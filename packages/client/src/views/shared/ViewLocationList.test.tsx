@@ -1,7 +1,9 @@
 // Verifies FR7, UX1 of add-main-page-scaffold: the empty state of Cards, and
 // FR10, FR12, FR17, NFR-A2, NFR-A3 of add-locations-via-search, and FR1 of
 // reorder-locations-by-drag-and-drop.
-import { render, screen } from "@testing-library/react";
+// Verifies FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): the shared
+// view location list serves the Cards view and the Grid view.
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createInMemoryLocationRepository } from "@/adapters";
@@ -12,11 +14,15 @@ import { buildLocation } from "@/test/factories/buildLocation";
 import { removeLocationThroughMenu } from "@/test/removeLocationThroughMenu";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
-import CardsView from "./CardsView";
+import { LocationRowVariant } from "./locationRowVariant";
+import { ViewLocationList } from "./ViewLocationList";
 
 type RepositoryOptions = Parameters<typeof createInMemoryLocationRepository>[0];
 
-const renderCards = (options: RepositoryOptions = {}) =>
+const renderCards = (
+  options: RepositoryOptions = {},
+  rowVariant = LocationRowVariant.CARD,
+) =>
   render(
     <LocationsProvider
       repository={createInMemoryLocationRepository(options)}
@@ -25,7 +31,7 @@ const renderCards = (options: RepositoryOptions = {}) =>
       <button type="button" id={ADD_LOCATION_BUTTON_ID}>
         Add location
       </button>
-      <CardsView />
+      <ViewLocationList rowVariant={rowVariant} />
     </LocationsProvider>,
   );
 
@@ -39,7 +45,7 @@ const savedLocations = (...labels: string[]) => ({
   },
 });
 
-describe("CardsView", () => {
+describe("ViewLocationList with card rows", () => {
   beforeEach(async () => {
     await i18n.changeLanguage("en");
     stubZoneCitiesFetch();
@@ -115,5 +121,114 @@ describe("CardsView", () => {
     expect(
       screen.getByRole("button", { name: "Move Almaty" }),
     ).toBeInTheDocument();
+  });
+});
+
+const ALMATY_ZONE_ID = "Asia/Almaty";
+const savedAlmatyAndMoscow = () => ({
+  initialDocument: {
+    status: LocationsLoadStatus.LOADED as const,
+    locations: [
+      buildLocation({
+        label: "Almaty",
+        timeZoneId: ALMATY_ZONE_ID,
+        countryCode: "KZ",
+      }),
+      buildLocation({
+        label: "Moscow",
+        timeZoneId: "Europe/Moscow",
+        countryCode: "RU",
+      }),
+    ],
+    homeLocationId: null,
+  },
+});
+
+describe("ViewLocationList with grid rows", () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
+    stubZoneCitiesFetch();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should mark the list as grid rows", () => {
+    renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
+    expect(screen.getByRole("list")).toHaveAttribute(
+      "data-row-variant",
+      "grid-row",
+    );
+  });
+
+  it("should mark the list as cards for card rows", () => {
+    renderCards(savedAlmatyAndMoscow());
+    expect(screen.getByRole("list")).toHaveAttribute(
+      "data-row-variant",
+      "card",
+    );
+  });
+
+  it("should draw the rows in one panel with dividers", () => {
+    renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
+    expect(screen.getByRole("list")).toHaveClass(
+      "border",
+      "border-border",
+      "divide-y",
+      "divide-border",
+    );
+  });
+
+  it("should keep the surface on every row and give it no border of its own", () => {
+    renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
+    for (const row of screen.getAllByRole("listitem")) {
+      expect(row).toHaveClass("bg-surface");
+      expect(row).not.toHaveClass("border");
+      expect(row).toHaveClass("first:rounded-t-md", "last:rounded-b-md");
+    }
+  });
+
+  it("should show no day track slider", () => {
+    renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
+    expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+  });
+
+  it("should keep the location menu and the wall-time button on every row", () => {
+    renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
+    for (const city of ["Almaty", "Moscow"]) {
+      expect(
+        screen.getByRole("button", { name: `Actions for ${city}` }),
+      ).toBeInTheDocument();
+    }
+    expect(screen.getAllByRole("button", { name: /^Enter time/ })).toHaveLength(
+      2,
+    );
+  });
+
+  it("should read the date before the time button in every row", () => {
+    renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
+    for (const row of screen.getAllByRole("listitem")) {
+      const dateElement = row.querySelector("time") as HTMLElement;
+      const timeButton = within(row).getByRole("button", {
+        name: /^Enter time/,
+      });
+      expect(
+        dateElement.compareDocumentPosition(timeButton) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    }
+  });
+
+  it("should show the empty state", () => {
+    renderCards(savedLocations(), LocationRowVariant.GRID_ROW);
+    expect(screen.getByText("No locations added yet.")).toBeInTheDocument();
+  });
+
+  it("should show the load error for an unreadable list", () => {
+    renderCards(
+      { initialDocument: { status: LocationsLoadStatus.UNREADABLE } },
+      LocationRowVariant.GRID_ROW,
+    );
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 });

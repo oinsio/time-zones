@@ -44,14 +44,13 @@ const LONG_LABEL = "long";
 const BAR_STATES: Record<string, () => Promise<void> | void> = {
   "view loading": () => {
     registryOverride.views = [
-      buildTestView("pending", 0, () => new Promise(() => {})),
+      buildTestView("pending", () => new Promise(() => {})),
     ];
   },
   "view error": () => {
     registryOverride.views = [
       buildTestView(
         "failing",
-        0,
         failingThenLoading(() => null, 1),
       ),
     ];

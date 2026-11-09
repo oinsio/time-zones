@@ -22,6 +22,8 @@ export type PreferencesContextValue = {
   setInterfaceLanguage: (interfaceLanguage: string) => void;
   /** Implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4). */
   setZoneLabelPart: (part: ZoneLabelPart, isShown: boolean) => void;
+  /** Implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1). */
+  setViewMode: (viewMode: string) => void;
   /** Clears the stored document and returns to the defaults. */
   resetPreferences: () => void;
 };

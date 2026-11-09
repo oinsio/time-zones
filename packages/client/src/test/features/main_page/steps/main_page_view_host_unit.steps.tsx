@@ -1,53 +1,97 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
-import { cleanup, render, screen } from "@testing-library/react/pure";
+import { act, cleanup, render, screen } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
-import { createInMemoryLocationRepository } from "@/adapters";
+import {
+  createInMemoryLocationRepository,
+  createInMemoryPreferencesBackend,
+  createInMemoryPreferencesRepository,
+} from "@/adapters";
 import { ViewHost } from "@/app";
-import { LocationsProvider } from "@/controller";
+import { LocationsProvider, PreferencesProvider } from "@/controller";
+import { PreferencesLoadStatus } from "@/ports";
+import { DEFAULT_PREFERENCES } from "@/preferences";
 import { installResizeObserverFake } from "@/test/resizeObserverFake";
-import { buildTextView } from "@/test/viewFixtures";
-import { AutoViewMode, type ViewDefinition, viewRegistry } from "@/views";
+import { buildTestView, buildTextView } from "@/test/viewFixtures";
+import { createManualWriteScheduler } from "@/test/writeSchedulers";
+import { type ViewDefinition, ViewId, viewRegistry } from "@/views";
 
-const NARROW_MIN_WIDTH = 0;
-const WIDE_MIN_WIDTH = 768;
-const NARROW_TEXT = "narrow view";
-const WIDE_TEXT = "wide view";
+const CARDS_TEXT = "cards view";
+const GRID_TEXT = "grid view";
+const TEST_VIEW_ID = "test";
 const TEST_VIEW_TEXT = "test view";
-const TEST_VIEW_MIN_WIDTH = 100;
-const UNREGISTERED_VIEW_ID = "unregistered" as never;
-const WIDE_WIDTH = 1024;
+const UNREGISTERED_VIEW_ID = "timeline";
 const NARROW_WIDTH = 320;
+const WIDE_WIDTH = 2560;
+const VIEW_ID_ATTRIBUTE = "data-view-id";
 
 const feature = await loadFeature("../main_page_view_host_unit.feature");
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let resizeObserver: ReturnType<typeof installResizeObserverFake>;
   let hostRegistry: readonly ViewDefinition[] = [];
+  let backend = createInMemoryPreferencesBackend();
+  let gridLoader = vi.fn();
 
-  const twoViews = () => [
-    buildTextView("narrow", NARROW_MIN_WIDTH, NARROW_TEXT),
-    buildTextView("wide", WIDE_MIN_WIDTH, WIDE_TEXT),
+  const buildRegistry = () => [
+    buildTextView(ViewId.CARDS, CARDS_TEXT),
+    buildTestView(ViewId.GRID, async () => {
+      gridLoader();
+      return () => <p>{GRID_TEXT}</p>;
+    }),
   ];
 
-  const renderHost = (containerWidth: number, mode = AutoViewMode.AUTO) => {
+  const renderHost = (viewMode: string | null) => {
+    backend = createInMemoryPreferencesBackend({
+      status: PreferencesLoadStatus.LOADED,
+      preferences: { ...DEFAULT_PREFERENCES, viewMode },
+    });
     render(
       createElement(
-        LocationsProvider,
-        { repository: createInMemoryLocationRepository() },
-        createElement(ViewHost, { registry: hostRegistry, mode }),
+        PreferencesProvider,
+        {
+          repository: createInMemoryPreferencesRepository({
+            backend,
+          }),
+          writeScheduler: createManualWriteScheduler(),
+        },
+        createElement(
+          LocationsProvider,
+          { repository: createInMemoryLocationRepository() },
+          createElement(ViewHost, { registry: hostRegistry }),
+        ),
       ),
     );
-    resizeObserver.reportWidth(containerWidth);
+  };
+
+  const shownViewId = () =>
+    document
+      .querySelector(`[${VIEW_ID_ATTRIBUTE}]`)
+      ?.getAttribute(VIEW_ID_ATTRIBUTE);
+
+  const expectViewShown = async (viewId: ViewId, text: string) => {
+    expect(await screen.findByText(text)).toBeInTheDocument();
+    expect(shownViewId()).toBe(viewId);
+  };
+
+  const chooseViewInAnotherTab = (viewMode: string) => {
+    act(() => {
+      createInMemoryPreferencesRepository({ backend }).save({
+        ...DEFAULT_PREFERENCES,
+        viewMode,
+      });
+    });
   };
 
   f.BeforeEachScenario(async () => {
     cleanup();
     resizeObserver = installResizeObserverFake();
     hostRegistry = [];
+    backend = createInMemoryPreferencesBackend();
+    gridLoader = vi.fn();
     await i18n.changeLanguage("en");
   });
 
@@ -59,108 +103,117 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     cleanup();
   });
 
-  // @add-main-page-scaffold @FR2
-  f.Scenario("Wide container picks the wider view", ({ Given, When, Then }) => {
-    Given("two registered views with minimum widths 0 px and 768 px", () => {
-      hostRegistry = twoViews();
+  // @add-view-mode-setting-and-grid-skeleton @FR3
+  f.Scenario("Chosen view is shown", ({ Given, When, Then }) => {
+    Given("Cards and Grid are registered", () => {
+      hostRegistry = buildRegistry();
     });
-    When("the container is 1024 px wide in AUTO mode", () =>
-      renderHost(WIDE_WIDTH),
+    When("the view mode is Grid", () => renderHost(ViewId.GRID));
+    Then("the Grid view is shown", () =>
+      expectViewShown(ViewId.GRID, GRID_TEXT),
     );
-    Then("the view with the 768 px minimum is shown", async () => {
-      expect(await screen.findByText(WIDE_TEXT)).toBeInTheDocument();
-    });
   });
 
-  // @add-main-page-scaffold @FR2
-  f.Scenario(
-    "Narrow container picks the narrower view",
-    ({ Given, When, Then }) => {
-      Given("two registered views with minimum widths 0 px and 768 px", () => {
-        hostRegistry = twoViews();
-      });
-      When("the container is 320 px wide in AUTO mode", () =>
-        renderHost(NARROW_WIDTH),
-      );
-      Then("the view with the 0 px minimum is shown", async () => {
-        expect(await screen.findByText(NARROW_TEXT)).toBeInTheDocument();
-      });
-    },
-  );
-
-  // @add-main-page-scaffold @FR2
-  f.Scenario("Only one view registered", ({ Given, When, Then }) => {
-    Given("only Cards is registered", () => {
-      hostRegistry = viewRegistry;
+  // @add-view-mode-setting-and-grid-skeleton @FR3
+  f.Scenario("No view chosen", ({ Given, When, Then }) => {
+    Given("Cards and Grid are registered", () => {
+      hostRegistry = buildRegistry();
     });
-    When("the container is 320 px wide in AUTO mode", () =>
-      renderHost(NARROW_WIDTH),
+    When("no view is chosen", () => renderHost(null));
+    Then("the Cards view is shown", () =>
+      expectViewShown(ViewId.CARDS, CARDS_TEXT),
     );
-    Then("the Cards view is shown", async () => {
-      expect(await screen.findByRole("list")).toBeInTheDocument();
-    });
   });
 
-  // @add-main-page-scaffold @FR2
+  // @add-view-mode-setting-and-grid-skeleton @FR3 @FR4
   f.Scenario("Unknown view id", ({ Given, When, Then }) => {
-    Given("two registered views with minimum widths 0 px and 768 px", () => {
-      hostRegistry = twoViews();
+    Given("Cards and Grid are registered", () => {
+      hostRegistry = buildRegistry();
     });
-    When(
-      "the mode is a view id that is not registered and the container is 1024 px wide",
-      () => renderHost(WIDE_WIDTH, UNREGISTERED_VIEW_ID),
+    When("the view mode is a view id that is not registered", () =>
+      renderHost(UNREGISTERED_VIEW_ID),
     );
-    Then("the view with the 768 px minimum is shown", async () => {
-      expect(await screen.findByText(WIDE_TEXT)).toBeInTheDocument();
-    });
+    Then("the Cards view is shown", () =>
+      expectViewShown(ViewId.CARDS, CARDS_TEXT),
+    );
   });
 
-  // @add-main-page-scaffold @FR4
-  f.Scenario("Container is resized", ({ Given, And, When, Then }) => {
-    Given("two registered views with minimum widths 0 px and 768 px", () => {
-      hostRegistry = twoViews();
+  // @add-view-mode-setting-and-grid-skeleton @FR5
+  f.Scenario("Width does not choose the view", ({ Given, When, Then }) => {
+    Given("Cards and Grid are registered and the view mode is Grid", () => {
+      hostRegistry = buildRegistry();
+      renderHost(ViewId.GRID);
     });
-    And("the container is 320 px wide in AUTO mode", async () => {
-      renderHost(NARROW_WIDTH);
-      await screen.findByText(NARROW_TEXT);
-    });
-    When("the container becomes 1024 px wide", () => {
+    When("the container is 320 px wide and then 2560 px wide", async () => {
+      resizeObserver.reportWidth(NARROW_WIDTH);
+      await expectViewShown(ViewId.GRID, GRID_TEXT);
       resizeObserver.reportWidth(WIDE_WIDTH);
     });
-    Then("the view with the 768 px minimum is shown", async () => {
-      expect(await screen.findByText(WIDE_TEXT)).toBeInTheDocument();
-    });
+    Then("the Grid view is shown both times", () =>
+      expectViewShown(ViewId.GRID, GRID_TEXT),
+    );
   });
 
-  // @add-main-page-scaffold @FR3
+  // @add-view-mode-setting-and-grid-skeleton @FR4
+  f.Scenario("View mode changes", ({ Given, When, Then }) => {
+    Given("the Cards view is shown", async () => {
+      hostRegistry = buildRegistry();
+      renderHost(null);
+      await expectViewShown(ViewId.CARDS, CARDS_TEXT);
+    });
+    When("the view mode becomes Grid", () =>
+      chooseViewInAnotherTab(ViewId.GRID),
+    );
+    Then("the host shows the Grid view without reloading the page", () =>
+      expectViewShown(ViewId.GRID, GRID_TEXT),
+    );
+  });
+
+  // @add-view-mode-setting-and-grid-skeleton @FR3
   f.Scenario("Registry content", ({ When, Then }) => {
     let registeredViews: readonly ViewDefinition[] = [];
     When("the registry is read", () => {
       registeredViews = viewRegistry;
     });
-    Then("it contains exactly one view, Cards", () => {
-      expect(registeredViews.map((view) => view.titleKey)).toEqual([
-        "views.cardsTitle",
+    Then("it contains exactly two views, Cards and Grid, in this order", () => {
+      expect(registeredViews.map((view) => view.id)).toEqual([
+        ViewId.CARDS,
+        ViewId.GRID,
       ]);
     });
   });
 
-  // @add-main-page-scaffold @FR2 @M4
-  f.Scenario("Second view needs no page change", ({ Given, When, Then }) => {
-    Given("a test view is added to the registry", () => {
-      hostRegistry = [
-        ...viewRegistry,
-        buildTextView("test", TEST_VIEW_MIN_WIDTH, TEST_VIEW_TEXT),
-      ];
-    });
-    When("the container is 320 px wide in AUTO mode", () =>
-      renderHost(NARROW_WIDTH),
-    );
-    Then(
-      "the host resolves to the test view without any change to the main page",
-      async () => {
-        expect(await screen.findByText(TEST_VIEW_TEXT)).toBeInTheDocument();
+  // @add-view-mode-setting-and-grid-skeleton @FR3
+  f.Scenario("Second view needs no page change", ({ When, Then }) => {
+    When(
+      "a test view is added to the registry and chosen as the view mode",
+      () => {
+        hostRegistry = [
+          ...viewRegistry,
+          buildTextView(TEST_VIEW_ID, TEST_VIEW_TEXT),
+        ];
+        renderHost(TEST_VIEW_ID);
       },
     );
+    Then("the host shows it without any change to the main page", async () => {
+      expect(await screen.findByText(TEST_VIEW_TEXT)).toBeInTheDocument();
+    });
   });
+
+  // @add-view-mode-setting-and-grid-skeleton @NFR-P1
+  f.Scenario(
+    "Grid is not loaded while Cards is shown",
+    ({ Given, When, Then }) => {
+      Given("no view is chosen", () => {
+        hostRegistry = buildRegistry();
+      });
+      When("the main page is shown", async () => {
+        renderHost(null);
+        await expectViewShown(ViewId.CARDS, CARDS_TEXT);
+      });
+      Then("the Grid component has not been requested", () => {
+        expect(gridLoader).not.toHaveBeenCalled();
+      });
+    },
+  );
 });

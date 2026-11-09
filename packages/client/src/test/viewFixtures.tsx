@@ -8,7 +8,6 @@ import {
 /** Builds a registry entry whose component loads through `loadComponent`. */
 export const buildTestView = (
   id: string,
-  autoMinWidth: number,
   loadComponent: () => Promise<ComponentType>,
   reloadPage: () => void = () => undefined,
 ): ViewDefinition => ({
@@ -19,12 +18,11 @@ export const buildTestView = (
     async () => ({ default: await loadComponent() }),
     reloadPage,
   ),
-  autoMinWidth,
 });
 
 /** A view that renders `text` once loaded. */
-export const buildTextView = (id: string, autoMinWidth: number, text: string) =>
-  buildTestView(id, autoMinWidth, async () => () => <p>{text}</p>);
+export const buildTextView = (id: string, text: string) =>
+  buildTestView(id, async () => () => <p>{text}</p>);
 
 /** A loader that rejects on its first `failureCount` calls, then resolves. */
 export const failingThenLoading = (

@@ -147,6 +147,9 @@ export function PreferencesProvider({
           part,
           isShown,
         }),
+      // Implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
+      setViewMode: (viewMode: string) =>
+        applyChange({ type: PreferencesCommandType.SET_VIEW_MODE, viewMode }),
       resetPreferences: () => {
         discardPendingWrite();
         latestPreferences.current = DEFAULT_PREFERENCES;

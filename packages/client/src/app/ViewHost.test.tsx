@@ -1,32 +1,25 @@
 // Verifies FR2, FR4, FR5, FR6, NFR-A2, M4 of add-main-page-scaffold and
-// D12 of add-locations-via-search.
+// D12 of add-locations-via-search; FR3, FR4, FR5 of add-view-mode-setting-and-grid-skeleton.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import { installResizeObserverFake } from "@/test/resizeObserverFake";
 import {
   buildTestView,
   buildTextView,
   failingThenLoading,
 } from "@/test/viewFixtures";
-import { AutoViewMode } from "@/views";
 import { ViewHost } from "./ViewHost";
 
-const WIDE_CONTAINER_WIDTH = 1024;
-const NARROW_CONTAINER_WIDTH = 320;
-const WIDE_MIN_WIDTH = 768;
 const NARROW_TEXT = "narrow view";
-const WIDE_TEXT = "wide view";
 const PLACEHOLDER_ROW_COUNT = 3;
 const RESOLVED_TEXT = "resolved view";
 const RESOLVED_VIEW = () => <p>{RESOLVED_TEXT}</p>;
 
-const narrowView = buildTextView("narrow", 0, NARROW_TEXT);
-const wideView = buildTextView("wide", WIDE_MIN_WIDTH, WIDE_TEXT);
+const narrowView = buildTextView("narrow", NARROW_TEXT);
 const buildNeverLoadingView = () =>
-  buildTestView("pending", 0, () => new Promise(() => {}));
+  buildTestView("pending", () => new Promise(() => {}));
 const buildFlakyView = (failureCount: number) =>
-  buildTestView("flaky", 0, failingThenLoading(RESOLVED_VIEW, failureCount));
+  buildTestView("flaky", failingThenLoading(RESOLVED_VIEW, failureCount));
 
 describe("ViewHost", () => {
   beforeEach(async () => {
@@ -43,53 +36,18 @@ describe("ViewHost", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("should show the narrowest view before any width is measured", async () => {
-    render(<ViewHost registry={[wideView, narrowView]} />);
-    expect(await screen.findByText(NARROW_TEXT)).toBeInTheDocument();
-  });
-
-  it("should show the wide view when the container is wide", async () => {
-    const resizeObserver = installResizeObserverFake();
-    render(<ViewHost registry={[narrowView, wideView]} />);
-    resizeObserver.reportWidth(WIDE_CONTAINER_WIDTH);
-    expect(await screen.findByText(WIDE_TEXT)).toBeInTheDocument();
-  });
-
-  it("should switch views when the container is resized", async () => {
-    const resizeObserver = installResizeObserverFake();
-    render(<ViewHost registry={[narrowView, wideView]} />);
-    resizeObserver.reportWidth(WIDE_CONTAINER_WIDTH);
-    await screen.findByText(WIDE_TEXT);
-    resizeObserver.reportWidth(NARROW_CONTAINER_WIDTH);
-    expect(await screen.findByText(NARROW_TEXT)).toBeInTheDocument();
-  });
-
   it("should resolve a second registered view without a page edit", async () => {
-    render(<ViewHost registry={[buildTextView("extra", 0, RESOLVED_TEXT)]} />);
+    render(<ViewHost registry={[buildTextView("extra", RESOLVED_TEXT)]} />);
     expect(await screen.findByText(RESOLVED_TEXT)).toBeInTheDocument();
   });
 
   it("should mark the content container with the active view id", async () => {
-    const { container } = render(
-      <ViewHost registry={[narrowView, wideView]} />,
-    );
+    const { container } = render(<ViewHost registry={[narrowView]} />);
     await screen.findByText(NARROW_TEXT);
     expect(container.querySelector("[data-view-id]")).toHaveAttribute(
       "data-view-id",
       narrowView.id,
     );
-  });
-
-  it("should honour a requested view id", async () => {
-    render(<ViewHost registry={[narrowView, wideView]} mode={wideView.id} />);
-    expect(await screen.findByText(WIDE_TEXT)).toBeInTheDocument();
-  });
-
-  it("should resolve by width in AUTO mode", async () => {
-    render(
-      <ViewHost registry={[narrowView, wideView]} mode={AutoViewMode.AUTO} />,
-    );
-    expect(await screen.findByText(NARROW_TEXT)).toBeInTheDocument();
   });
 
   it("should show a busy skeleton while the view loads", () => {

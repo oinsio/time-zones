@@ -3,15 +3,14 @@ import type { ComponentType, LazyExoticComponent } from "react";
 /** Identifiers of registered views; a member is added with each new view. */
 export enum ViewId {
   CARDS = "cards",
+  GRID = "grid",
 }
 
-/** The mode in which the host picks the view by container width (ADR-0005). */
-export enum AutoViewMode {
-  AUTO = "auto",
-}
-
-/** What the user chose: let the app decide, or one specific view. */
-export type ViewMode = AutoViewMode | ViewId;
+/**
+ * The view shown when the user has chosen none, or the chosen one is not registered.
+ * Implements FR3 of add-view-mode-setting-and-grid-skeleton (D1).
+ */
+export const DEFAULT_VIEW_ID = ViewId.CARDS;
 
 /**
  * Describes one swappable view (ADR-0005).
@@ -23,6 +22,4 @@ export interface ViewDefinition {
   titleKey: string;
   icon: ComponentType;
   component: LazyExoticComponent<ComponentType>;
-  /** Minimum container width in px at which AUTO may pick this view. */
-  autoMinWidth: number;
 }

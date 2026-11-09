@@ -102,7 +102,7 @@ On an engine without `Intl.DisplayNames`, presenting a country SHALL yield an em
 - **THEN** Almaty is among the results with an empty country name
 
 ### Requirement: Width measurement on legacy engines
-On an engine without `ResizeObserver`, container widths SHALL be measured by a polyfill, so the view that fits the width is selected as on modern engines. <!-- implements FR6 of support-legacy-ios-12-safari -->
+On an engine without `ResizeObserver`, a polyfill SHALL make a `ResizeObserver` available to the app before any application module runs, and the app MUST start on the chosen view as on modern engines. The view is never chosen by width. <!-- implements FR6 of support-legacy-ios-12-safari; FR6 of add-view-mode-setting-and-grid-skeleton -->
 
 #### Scenario: View selection without ResizeObserver
 - **GIVEN** the environment has no native `ResizeObserver`

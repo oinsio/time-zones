@@ -1,32 +1,37 @@
-// Verifies FR3 of add-main-page-scaffold: the registry holds the lazy Cards view.
+// Verifies FR3, FR6, NFR-P1 of add-view-mode-setting-and-grid-skeleton: the registry holds the lazy Cards and Grid views.
 
 import i18n from "i18next";
 import { SUPPORTED_LANGUAGES } from "@/locales";
-import { ViewId, viewRegistry } from ".";
+import { DEFAULT_VIEW_ID, ViewId, viewRegistry } from ".";
 
 describe("viewRegistry", () => {
-  it("should contain exactly one view", () => {
-    expect(viewRegistry).toHaveLength(1);
+  it("should register Cards, then Grid", () => {
+    expect(viewRegistry.map((view) => view.id)).toEqual([
+      ViewId.CARDS,
+      ViewId.GRID,
+    ]);
   });
 
-  it("should register the Cards view", () => {
-    expect(viewRegistry[0].id).toBe(ViewId.CARDS);
+  it("should make Cards the default view", () => {
+    expect(DEFAULT_VIEW_ID).toBe(ViewId.CARDS);
   });
 
-  it("should let AUTO pick Cards at any width", () => {
-    expect(viewRegistry[0].autoMinWidth).toBe(0);
+  it.each(viewRegistry)("should load $id lazily", (view) => {
+    expect(view.component).toHaveProperty("_payload");
   });
 
-  it("should load the component lazily", () => {
-    expect(viewRegistry[0].component).toHaveProperty("_payload");
+  it.each(viewRegistry)("should carry no choice by width for $id", (view) => {
+    expect(Object.keys(view).sort()).toEqual([
+      "component",
+      "icon",
+      "id",
+      "titleKey",
+    ]);
   });
 
-  it.each(SUPPORTED_LANGUAGES)(
-    "should have the title key in the %s locale",
-    (languageCode) => {
-      expect(i18n.exists(viewRegistry[0].titleKey, { lng: languageCode })).toBe(
-        true,
-      );
-    },
-  );
+  describe.each(SUPPORTED_LANGUAGES)("in the %s locale", (languageCode) => {
+    it.each(viewRegistry)("should have the title key of $id", (view) => {
+      expect(i18n.exists(view.titleKey, { lng: languageCode })).toBe(true);
+    });
+  });
 });

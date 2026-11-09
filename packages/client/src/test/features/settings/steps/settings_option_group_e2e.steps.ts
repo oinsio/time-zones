@@ -14,9 +14,11 @@ const { Given, When, Then } = createBdd(test);
 
 const THEME_GROUP_NAME = /^(Theme|Тема)$/;
 const HOUR_FORMAT_GROUP_NAME = /^(Hour format|Формат времени)$/;
+const VIEW_GROUP_NAME = /^(View|Вид)$/;
 const GROUP_NAMES = {
   theme: THEME_GROUP_NAME,
   "hour format": HOUR_FORMAT_GROUP_NAME,
+  view: VIEW_GROUP_NAME,
 } as const;
 type GroupKind = keyof typeof GROUP_NAMES;
 const THEME_ICON_CLASSES = ["lucide-monitor", "lucide-sun", "lucide-moon"];
@@ -45,8 +47,11 @@ const readVisibleText = (label: Locator) =>
 const readNames = async (group: Locator) => {
   const names: string[] = [];
   for (const label of await labelsOf(group).all()) {
+    const screenReaderName = label.locator("span.sr-only");
     names.push(
-      (await label.locator("span.sr-only").textContent())?.trim() ?? "",
+      (await screenReaderName.count()) === 0
+        ? await readVisibleText(label)
+        : ((await screenReaderName.textContent())?.trim() ?? ""),
     );
   }
   return names;
@@ -111,7 +116,7 @@ Then(
 );
 
 Then(
-  "every theme and hour format option is at least {int} by {int} px",
+  "every theme, hour format and view option is at least {int} by {int} px",
   async ({ locationsWorld }, minWidth: number, minHeight: number) => {
     for (const kind of Object.keys(GROUP_NAMES) as GroupKind[]) {
       for (const label of await labelsOf(
@@ -175,7 +180,7 @@ Then("the focused option shows a focus outline", async ({ locationsWorld }) => {
 });
 
 Then(
-  /^the caption and the options of the (theme|hour format) group share one row$/,
+  /^the caption and the options of the (theme|hour format|view) group share one row$/,
   async ({ locationsWorld }, kind: GroupKind) => {
     const group = groupOf(locationsWorld.page, kind);
     const captionBox = await group.locator(":scope > span").boundingBox();
@@ -188,7 +193,7 @@ Then(
 );
 
 Then(
-  "the theme group and the hour format group are at most {int} px high",
+  "the theme group, the hour format group and the view group are at most {int} px high",
   async ({ locationsWorld }, maxHeight: number) => {
     for (const kind of Object.keys(GROUP_NAMES) as GroupKind[]) {
       const box = await groupOf(locationsWorld.page, kind).boundingBox();

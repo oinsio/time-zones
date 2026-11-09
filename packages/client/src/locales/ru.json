@@ -23,7 +23,8 @@
   },
   "views": {
     "cardsTitle": "Карточки",
-    "cardsEmptyState": "Места пока не добавлены."
+    "gridTitle": "Сетка",
+    "emptyState": "Места пока не добавлены."
   },
   "locations": {
     "utcOffsetPrefix": "UTC",
@@ -118,6 +119,7 @@
     "themeDark": "Тёмная",
     "themeSystem": "Системная",
     "hourFormatLabel": "Формат времени",
+    "viewModeLabel": "Вид",
     "hourFormat12": "12 часов",
     "hourFormat24": "24 часа",
     "deployTime": "Развёрнуто {{date}} в {{time}}",

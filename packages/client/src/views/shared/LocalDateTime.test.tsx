@@ -4,6 +4,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WallTimeInputOutcome } from "@/controller";
 import { LocalDateTime } from "./LocalDateTime";
+import { LocationRowVariant } from "./locationRowVariant";
 
 const NAME = "Ввести время — Алматы, 12:30";
 
@@ -73,5 +74,58 @@ describe("LocalDateTime", () => {
     await userEvent.click(screen.getByRole("button", { name: NAME }));
     await userEvent.keyboard("{Escape}");
     expect(screen.getByRole("button", { name: NAME })).toHaveFocus();
+  });
+});
+
+// Verifies FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4).
+describe("LocalDateTime row variants", () => {
+  it("should put the time button before the date without a row variant", () => {
+    renderDateTime();
+    expect(
+      screen
+        .getByRole("button", { name: NAME })
+        .compareDocumentPosition(screen.getByText("Sun, Mar 8")) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("should keep the fixed column width without a row variant", () => {
+    renderDateTime();
+    expect(screen.getByText("Sun, Mar 8").parentElement).toHaveClass("md:w-44");
+  });
+
+  it("should put the date before the time button for a grid row", () => {
+    render(
+      <LocalDateTime
+        localTimeLabel="12:30"
+        localDateLabel="Sun, Mar 8"
+        localIsoDate="2026-03-08"
+        wallTimeInputLabel={NAME}
+        onConfirmWallTime={() => WallTimeInputOutcome.CLOSED}
+        rowVariant={LocationRowVariant.GRID_ROW}
+      />,
+    );
+    expect(
+      screen
+        .getByText("Sun, Mar 8")
+        .compareDocumentPosition(screen.getByRole("button", { name: NAME })) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("should lay the date and the time in one row from 768 px for a grid row", () => {
+    render(
+      <LocalDateTime
+        localTimeLabel="12:30"
+        localDateLabel="Sun, Mar 8"
+        localIsoDate="2026-03-08"
+        wallTimeInputLabel={NAME}
+        onConfirmWallTime={() => WallTimeInputOutcome.CLOSED}
+        rowVariant={LocationRowVariant.GRID_ROW}
+      />,
+    );
+    expect(screen.getByText("Sun, Mar 8").parentElement).toHaveClass(
+      "md:flex-row",
+    );
   });
 });

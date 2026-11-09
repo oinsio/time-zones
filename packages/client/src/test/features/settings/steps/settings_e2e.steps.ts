@@ -181,15 +181,16 @@ Given(
 
 // Verifies FR12 of show-zone-abbreviations-and-zone-label-setting: theme and hour format are radio groups, the zone label and language groups are plain groups.
 Then(
-  "the groups are named {string}, {string}, {string} and {string}",
+  "the groups are named {string}, {string}, {string}, {string} and {string}",
   async (
     { locationsWorld },
     themeName: string,
     hourFormatName: string,
+    viewName: string,
     zoneLabelName: string,
     languageGroupName: string,
   ) => {
-    for (const groupName of [themeName, hourFormatName]) {
+    for (const groupName of [themeName, hourFormatName, viewName]) {
       await expect(
         locationsWorld.page.getByRole(RADIOGROUP_ROLE, { name: groupName }),
       ).toBeVisible();

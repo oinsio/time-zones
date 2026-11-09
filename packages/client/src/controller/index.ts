@@ -10,7 +10,6 @@ export {
 export { useCalendarMonth } from "./useCalendarMonth";
 export { useCityLabels } from "./useCityLabels";
 export { CitySearchStatus, useCitySearch } from "./useCitySearch";
-export { useContainerWidth } from "./useContainerWidth";
 export { useDeployTime } from "./useDeployTime";
 export { useDocumentLanguage } from "./useDocumentLanguage";
 export { useHourFormat } from "./useHourFormat";
@@ -25,6 +24,7 @@ export { useReferenceMoment } from "./useReferenceMoment";
 export { useStorageAvailability } from "./useStorageAvailability";
 export { useThemePreference } from "./useThemePreference";
 export { useTimeSelection } from "./useTimeSelection";
+export { useViewMode } from "./useViewMode";
 // Implements FR3, FR6 of add-wall-time-input-with-hint.
 export {
   useWallTimeInput,
