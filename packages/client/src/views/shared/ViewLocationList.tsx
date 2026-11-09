@@ -7,12 +7,15 @@ import {
   useTimeSelection,
   useWallTimeInput,
 } from "@/controller";
+import type { HourGridSlots } from "./hourGridSlots";
 import { LocationList } from "./LocationList";
 import { LocationsLoadError } from "./LocationsLoadError";
 import type { LocationRowVariant } from "./locationRowVariant";
 
 type ViewLocationListProps = {
   rowVariant: LocationRowVariant;
+  /** The Grid view's hour strips and frame; Cards passes none. */
+  hourGrid?: HourGridSlots;
 };
 
 /**
@@ -30,8 +33,12 @@ type ViewLocationListProps = {
  * D11): the device time location is a row of the list; the search lives in the
  * header, and focus returns to its button after the last removal.
  * Implements FR1, FR3 of add-wall-time-input-with-hint (D6): wires `useWallTimeInput().confirmWallTime`.
+ * Implements FR1, FR8 of add-grid-hour-cells-and-hour-frame (D5): hands the hour grid slots to the list.
  */
-export function ViewLocationList({ rowVariant }: ViewLocationListProps) {
+export function ViewLocationList({
+  rowVariant,
+  hourGrid,
+}: ViewLocationListProps) {
   const { t } = useTranslation();
   const {
     rows,
@@ -94,6 +101,7 @@ export function ViewLocationList({ rowVariant }: ViewLocationListProps) {
           onMoveTrack={moveTrack}
           onConfirmWallTime={confirmWallTime}
           rowVariant={rowVariant}
+          hourGrid={hourGrid}
         />
       )}
       <p aria-live="polite" aria-atomic="true" className="sr-only">

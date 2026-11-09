@@ -4,6 +4,7 @@
  * Implements FR9, NFR-A3, UX1 of setup-app-shell-and-pages-deploy.
  * Implements FR4, NFR-A3 of keep-now-button-visible-when-live (D3).
  * Implements FR4, NFR-A3 of add-settings-page-and-device-time-location (D7).
+ * Implements FR4, FR5, UX1 of add-grid-hour-cells-and-hour-frame (D6): midnight shade and hour cell digits.
  */
 :root {
   color-scheme: light;
@@ -19,6 +20,8 @@
   --color-day-morning: #f8cbbe;
   --color-day-working: #f8e6a6;
   --color-day-evening: #d4c6ee;
+  --color-midnight-shade: rgba(24, 24, 27, 0.1);
+  --color-hour-cell-foreground: #18181b;
   --color-surface: #ffffff;
   --color-border: #8a8a93;
   --color-overlay: #18181b;
@@ -40,6 +43,8 @@
   --color-day-morning: #e0b1a4;
   --color-day-working: #eedba3;
   --color-day-evening: #b9aadb;
+  --color-midnight-shade: rgba(15, 23, 41, 0.22);
+  --color-hour-cell-foreground: #0f1729;
   --color-surface: #16213a;
   --color-border: #6b7a99;
   --color-overlay: #000000;
@@ -61,6 +66,8 @@
     --color-day-morning: #e0b1a4;
     --color-day-working: #eedba3;
     --color-day-evening: #b9aadb;
+    --color-midnight-shade: rgba(15, 23, 41, 0.22);
+    --color-hour-cell-foreground: #0f1729;
     --color-surface: #16213a;
     --color-border: #6b7a99;
     --color-overlay: #000000;

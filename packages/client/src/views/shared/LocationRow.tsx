@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { forwardRef, useId, useRef } from "react";
+import { forwardRef, type ReactNode, useId, useRef } from "react";
 import {
   type TrackMove,
   type WallTimeInputOutcome,
@@ -15,10 +15,10 @@ import {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
   LocationRowVariant,
 } from "./locationRowVariant";
+import { OptionalBox } from "./OptionalBox";
 import { getReorderTransition } from "./reorderTransition";
 import { useDropSettleAnimation } from "./useDropSettleAnimation";
 import { useLocationMenuItems } from "./useLocationMenuItems";
-
 import { WallTimeHint } from "./WallTimeHint";
 import { ZoneRowContent } from "./ZoneRowContent";
 
@@ -38,6 +38,8 @@ type LocationRowProps = {
   prefersReducedMotion: boolean;
   /** Cards when omitted. */
   rowVariant?: LocationRowVariant;
+  /** The hour strip of a grid row, shown after the row header and before the row notes. */
+  hourStrip?: ReactNode;
 };
 
 /**
@@ -69,6 +71,7 @@ type LocationRowProps = {
  * clock change note takes the same place when the row has no hint.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): a card or
  * a row of the grid panel, the same row header.
+ * Implements FR1, FR7, FR10 of add-grid-hour-cells-and-hour-frame (D5): hour strip, then notes, in sticky boxes.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -82,6 +85,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       isReorderable,
       prefersReducedMotion,
       rowVariant = LocationRowVariant.CARD,
+      hourStrip,
     },
     menuButtonRef,
   ) {
@@ -115,6 +119,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       row.mark && markId,
       hasDifference && differenceId,
     ];
+    const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
     const draggingClassName = isDragging ? " relative z-10 shadow-lg" : "";
     return (
       <li
@@ -133,49 +138,60 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             ? labelIds.filter(Boolean).join(" ")
             : undefined
         }
-        className={`flex flex-wrap items-center gap-x-3 gap-y-2 bg-surface px-4 py-3 ${LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant].row}${draggingClassName}`}
+        className={`bg-surface py-3 ${variantClassNames.row}${draggingClassName}`}
       >
-        {isReorderable && (
-          <DragHandle
-            ref={setActivatorNodeRef}
-            city={row.cityLabel}
-            attributes={attributes}
-            listeners={listeners}
+        <OptionalBox className={variantClassNames.headerBox}>
+          {isReorderable && (
+            <DragHandle
+              ref={setActivatorNodeRef}
+              city={row.cityLabel}
+              attributes={attributes}
+              listeners={listeners}
+            />
+          )}
+          <ZoneRowContent
+            cityLabel={row.cityLabel}
+            ids={{ city: cityId, mark: markId, difference: differenceId }}
+            mark={row.mark}
+            offsetDifferenceLabel={row.offsetDifferenceLabel}
+            offsetDifferenceAccessibleLabel={
+              row.offsetDifferenceAccessibleLabel
+            }
+            zoneLineParts={row.zoneLineParts}
+            localTimeLabel={row.localTimeLabel}
+            localDateLabel={row.localDateLabel}
+            localIsoDate={row.localIsoDate}
+            wallTimeInputLabel={row.wallTimeInputLabel}
+            onConfirmWallTime={(text, date) =>
+              onConfirmWallTime(
+                { kind: WallTimeTargetKind.LOCATION, locationId: row.id },
+                text,
+                date,
+              )
+            }
+            dayTrack={row.dayTrack}
+            onSelectTrackFraction={onSelectTrackFraction}
+            onMoveTrack={onMoveTrack}
+            rowVariant={rowVariant}
           />
-        )}
-        <ZoneRowContent
-          cityLabel={row.cityLabel}
-          ids={{ city: cityId, mark: markId, difference: differenceId }}
-          mark={row.mark}
-          offsetDifferenceLabel={row.offsetDifferenceLabel}
-          offsetDifferenceAccessibleLabel={row.offsetDifferenceAccessibleLabel}
-          zoneLineParts={row.zoneLineParts}
-          localTimeLabel={row.localTimeLabel}
-          localDateLabel={row.localDateLabel}
-          localIsoDate={row.localIsoDate}
-          wallTimeInputLabel={row.wallTimeInputLabel}
-          onConfirmWallTime={(text, date) =>
-            onConfirmWallTime(
-              { kind: WallTimeTargetKind.LOCATION, locationId: row.id },
-              text,
-              date,
-            )
-          }
-          dayTrack={row.dayTrack}
-          onSelectTrackFraction={onSelectTrackFraction}
-          onMoveTrack={onMoveTrack}
-          rowVariant={rowVariant}
-        />
-        <LocationMenu
-          ref={menuButtonRef}
-          city={row.cityLabel}
-          items={menuItems}
-        />
-        {row.wallTimeHint !== undefined && (
-          <WallTimeHint text={row.wallTimeHint} />
-        )}
-        {row.clockChangeNote !== undefined && (
-          <ClockChangeNote text={row.clockChangeNote} />
+          <LocationMenu
+            ref={menuButtonRef}
+            city={row.cityLabel}
+            items={menuItems}
+            isMenuFixedToViewport={variantClassNames.isMenuFixedToViewport}
+          />
+        </OptionalBox>
+        {hourStrip}
+        {(row.wallTimeHint !== undefined ||
+          row.clockChangeNote !== undefined) && (
+          <OptionalBox className={variantClassNames.notesBox}>
+            {row.wallTimeHint !== undefined && (
+              <WallTimeHint text={row.wallTimeHint} />
+            )}
+            {row.clockChangeNote !== undefined && (
+              <ClockChangeNote text={row.clockChangeNote} />
+            )}
+          </OptionalBox>
         )}
       </li>
     );

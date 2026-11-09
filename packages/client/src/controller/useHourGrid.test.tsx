@@ -156,11 +156,8 @@ describe("useHourGrid", () => {
 
     moveClockTo("2026-03-08T07:31:00Z");
 
-    expect([...result.current.grid.strips.values()]).toEqual(stripsBefore);
-    result.current.grid.strips.forEach((strip, id) =>
-      expect(strip).toBe(
-        stripsBefore[[...result.current.grid.strips.keys()].indexOf(id)],
-      ),
-    );
+    [...result.current.grid.strips.values()].forEach((strip, index) => {
+      expect(strip).toBe(stripsBefore[index]);
+    });
   });
 });

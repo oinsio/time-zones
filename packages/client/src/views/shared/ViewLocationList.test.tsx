@@ -1,6 +1,7 @@
 // Verifies FR7, UX1 of add-main-page-scaffold: the empty state of Cards, and
 // FR10, FR12, FR17, NFR-A2, NFR-A3 of add-locations-via-search, and FR1 of
 // reorder-locations-by-drag-and-drop.
+// Verifies FR1, FR7, FR8, FR10 of add-grid-hour-cells-and-hour-frame (D5).
 // Verifies FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): the shared
 // view location list serves the Cards view and the Grid view.
 import { render, screen, within } from "@testing-library/react";
@@ -171,12 +172,12 @@ describe("ViewLocationList with grid rows", () => {
 
   it("should draw the rows in one panel with dividers", () => {
     renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
-    expect(screen.getByRole("list")).toHaveClass(
-      "border",
-      "border-border",
-      "divide-y",
-      "divide-border",
-    );
+    const panel = screen.getByRole("list");
+    expect(panel).toHaveClass("border", "border-border");
+    expect(panel).not.toHaveClass("divide-y");
+    for (const row of screen.getAllByRole("listitem")) {
+      expect(row).toHaveClass("border-t", "border-border", "first:border-t-0");
+    }
   });
 
   it("should keep the surface on every row and give it no border of its own", () => {
@@ -188,9 +189,17 @@ describe("ViewLocationList with grid rows", () => {
     }
   });
 
-  it("should show no day track slider", () => {
+  it("should show no day track", () => {
     renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
-    expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+    expect(document.querySelector("[data-day-track]")).toBeNull();
+  });
+
+  it("should keep the header above the frame while a menu holds focus", () => {
+    renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
+    const headerBox = screen
+      .getByRole("button", { name: "Actions for Almaty" })
+      .closest("div.sticky");
+    expect(headerBox).toHaveClass("z-[2]", "focus-within:z-[3]");
   });
 
   it("should keep the location menu and the wall-time button on every row", () => {
@@ -217,6 +226,42 @@ describe("ViewLocationList with grid rows", () => {
           Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy();
     }
+  });
+
+  it("should render each strip after the location menu and the frame last", () => {
+    render(
+      <LocationsProvider
+        repository={createInMemoryLocationRepository(savedAlmatyAndMoscow())}
+        writeScheduler={immediateWriteScheduler}
+      >
+        <ViewLocationList
+          rowVariant={LocationRowVariant.GRID_ROW}
+          hourGrid={{
+            renderHourStrip: (row) => <p data-strip={row.cityLabel} />,
+            frame: <li data-frame />,
+            panelRef: () => undefined,
+            panelStyle: {},
+          }}
+        />
+      </LocationsProvider>,
+    );
+    const rows = screen
+      .getAllByRole("listitem")
+      .filter((row) => !row.hasAttribute("data-frame"));
+    expect(rows).toHaveLength(2);
+    for (const row of rows) {
+      const menuButton = within(row).getByRole("button", {
+        name: /^Actions for/,
+      });
+      const strip = row.querySelector("[data-strip]") as HTMLElement;
+      expect(
+        menuButton.compareDocumentPosition(strip) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    }
+    expect(screen.getByRole("list").lastElementChild).toHaveAttribute(
+      "data-frame",
+    );
   });
 
   it("should show the empty state", () => {

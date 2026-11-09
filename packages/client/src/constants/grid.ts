@@ -15,3 +15,20 @@ export const HOUR_CELL_MINUTE_SEPARATOR = ":";
 export const HOUR_CELL_MINUTE_DIGITS = 2;
 /** The full stop some languages write after a short month name. */
 export const SHORT_MONTH_TRAILING_STOP = /\.$/u;
+// Implements FR1 of add-grid-hour-cells-and-hour-frame (D5): the location menu of a grid row.
+/** The gap between a location menu button and its open menu. */
+export const LOCATION_MENU_OFFSET_PX = 4;
+// Implements FR1, NFR-R2 of add-grid-hour-cells-and-hour-frame (D5): the hour grid layout variables.
+/** The horizontal padding of a grid row; the hour strip fills the panel minus twice this. */
+export const GRID_ROW_PADDING_PX = 16;
+export enum HourGridCssVariable {
+  PANEL_WIDTH = "--grid-panel-width",
+  ROW_PADDING = "--grid-row-padding",
+  CELL_PITCH = "--hour-cell-pitch",
+  CELL_COUNT = "--hour-cell-count",
+  CELL_GAP = "--hour-cell-gap",
+}
+// Implements FR5, FR6 of add-grid-hour-cells-and-hour-frame (D6): the shadows of an hour cell.
+/** A spread wider than any cell, so the midnight shade fills it. */
+export const MIDNIGHT_SHADE_SPREAD_PX = 999;
+export const OFFSET_EDGE_WIDTH_PX = 3;

@@ -1,6 +1,10 @@
 export { AddLocationButton } from "./AddLocationButton";
 export { DateBar } from "./DateBar";
 // Implements FR2 of show-here-entry-for-device-time.
+// Implements FR1, FR4, FR12 of add-grid-hour-cells-and-hour-frame (D4, D5).
+export { DAY_PERIOD_COLOR_VARIABLES } from "./dayTrackGradient";
+export { getTrackMoveForKey } from "./dayTrackKeys";
+export type { HourGridSlots } from "./hourGridSlots";
 export { LocationList } from "./LocationList";
 export { LocationMarkIcon } from "./LocationMarkIcon";
 export { LocationSearch } from "./LocationSearch";

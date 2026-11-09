@@ -46,6 +46,7 @@ type ZoneRowContentProps = {
  * hint moved to `LocationRow`, the card's last element.
  * Implements FR5, FR6, NFR-R1, UX1 of show-zone-abbreviations-and-zone-label-setting (D6): the zone line parts.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): the zone line on the city's line in a grid row.
+ * Implements FR10 of add-grid-hour-cells-and-hour-frame (D5): the texts keep the surface background, so the hour frame breaks behind them.
  */
 export function ZoneRowContent({
   cityLabel,
@@ -76,7 +77,7 @@ export function ZoneRowContent({
         >
           <span className="flex flex-wrap items-center gap-x-2">
             {mark && <LocationMarkIcon mark={mark} id={ids.mark} />}
-            <span id={ids.city} className="font-semibold">
+            <span id={ids.city} className="bg-surface font-semibold">
               {cityLabel}
             </span>
             {hasDifference && (
@@ -84,7 +85,7 @@ export function ZoneRowContent({
                 <span
                   aria-hidden="true"
                   data-offset-difference
-                  className="text-sm font-semibold text-muted-foreground"
+                  className="bg-surface text-sm font-semibold text-muted-foreground"
                 >
                   {offsetDifferenceLabel}
                 </span>
@@ -100,7 +101,7 @@ export function ZoneRowContent({
             {mark?.caption && (
               <span
                 aria-hidden="true"
-                className="text-xs font-bold text-accent"
+                className="bg-surface text-xs font-bold text-accent"
               >
                 {mark.caption}
               </span>
@@ -109,7 +110,7 @@ export function ZoneRowContent({
           {zoneLineParts.length > 0 && (
             <ZoneLine
               parts={zoneLineParts}
-              className="text-sm text-muted-foreground"
+              className="bg-surface text-sm text-muted-foreground"
             />
           )}
         </span>
