@@ -1,0 +1,2840 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Сетка — компьютер, встреча</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #d9d9d4;
+        font-family: "Manrope", system-ui, sans-serif;
+        display: flex;
+        justify-content: center;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        background: none;
+        border: 0;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      style="
+        width: 1440px;
+        height: 700px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        padding: 0px 16px;
+        background: #f7f7f5;
+        color: #18181b;
+        font-family: Manrope, system-ui, sans-serif;
+      "
+    >
+      <header
+        style="
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+          gap: 8px;
+          margin: 0px -16px;
+          padding: 24px 16px 16px;
+          background: #e0f5e0;
+          border-bottom: 1px solid #00aa00;
+        "
+      >
+        <span></span>
+        <h1 style="margin: 0px; font-size: 24px; font-weight: 600">Встреча · 2 ч</h1>
+        <div style="justify-self: end; display: flex; gap: 4px">
+          <button
+            aria-label="Поделиться встречей"
+            style="
+              width: 44px;
+              height: 44px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #00aa00;
+            "
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style="
+                fill: none;
+                stroke: currentcolor;
+                stroke-width: 2;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+              "
+            >
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"></path>
+            </svg>
+          </button>
+          <button
+            aria-label="Сбросить выбор встречи"
+            style="
+              width: 44px;
+              height: 44px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #00aa00;
+            "
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style="
+                fill: none;
+                stroke: currentcolor;
+                stroke-width: 2.5;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+              "
+            >
+              <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+      <main style="flex-grow: 1; padding-top: 8px">
+        <ul
+          style="
+            position: relative;
+            margin: 0px;
+            padding: 0px;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #8a8a93;
+            border-radius: 6px;
+            background: #ffffff;
+          "
+        >
+          <li
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              padding: 12px;
+              border-top-width: medium;
+              border-top-style: none;
+              border-top-color: currentcolor;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px; height: 32px">
+              <button
+                aria-label="Переместить Алматы"
+                style="
+                  width: 44px;
+                  height: 44px;
+                  margin: -6px -6px -6px -10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #5b5b63;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: currentcolor"
+                >
+                  <circle cx="9" cy="6" r="1.6"></circle>
+                  <circle cx="15" cy="6" r="1.6"></circle>
+                  <circle cx="9" cy="12" r="1.6"></circle>
+                  <circle cx="15" cy="12" r="1.6"></circle>
+                  <circle cx="9" cy="18" r="1.6"></circle>
+                  <circle cx="15" cy="18" r="1.6"></circle>
+                </svg>
+              </button>
+              <div
+                style="
+                  flex: 1 1 0px;
+                  min-width: 0px;
+                  display: flex;
+                  align-items: baseline;
+                  gap: 8px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                "
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  aria-label="Домашняя локация"
+                  style="
+                    flex-shrink: 0;
+                    align-self: center;
+                    fill: none;
+                    stroke: #2f5bd3;
+                    stroke-width: 2;
+                    stroke-linejoin: round;
+                  "
+                >
+                  <path d="M4 11l8-7 8 7v9H4z"></path>
+                </svg>
+                <span
+                  style="
+                    position: relative;
+                    z-index: 2;
+                    background: #ffffff;
+                    font-size: 18px;
+                    font-weight: 600;
+                  "
+                >
+                  Алматы
+                </span>
+                <span style="display: flex; gap: 6px; font-size: 14px; color: #5b5b63">
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    Казахстан
+                  </span>
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    UTC+5
+                  </span>
+                </span>
+              </div>
+              <span
+                style="
+                  display: flex;
+                  gap: 6px;
+                  font-size: 14px;
+                  color: #5b5b63;
+                  white-space: nowrap;
+                "
+              >
+                <span style="position: relative; z-index: 2; background: #ffffff">
+                  Вс, 8 мар
+                </span>
+              </span>
+              <button
+                aria-label="Ввести время"
+                style="
+                  position: relative;
+                  z-index: 2;
+                  background: #ffffff;
+                  padding: 0px 0px 0px 4px;
+                  font-size: 26px;
+                  font-weight: 700;
+                  line-height: 1;
+                  font-variant-numeric: tabular-nums;
+                  color: #008800;
+                "
+              >
+                09:00–11:00
+              </button>
+              <button
+                aria-label="Меню: Алматы"
+                style="
+                  width: 44px;
+                  height: 44px;
+                  margin: -6px -10px -6px -6px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: currentcolor"
+                >
+                  <circle cx="5" cy="12" r="2"></circle>
+                  <circle cx="12" cy="12" r="2"></circle>
+                  <circle cx="19" cy="12" r="2"></circle>
+                </svg>
+              </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px">
+              <button
+                aria-label="Алматы, 00:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">0</span>
+              </button>
+              <button
+                aria-label="Алматы, 01:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">1</span>
+              </button>
+              <button
+                aria-label="Алматы, 02:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">2</span>
+              </button>
+              <button
+                aria-label="Алматы, 03:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">3</span>
+              </button>
+              <button
+                aria-label="Алматы, 04:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">4</span>
+              </button>
+              <button
+                aria-label="Алматы, 05:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">5</span>
+              </button>
+              <button
+                aria-label="Алматы, 06:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">6</span>
+              </button>
+              <button
+                aria-label="Алматы, 07:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8cbbe;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">7</span>
+              </button>
+              <button
+                aria-label="Алматы, 08:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8cbbe;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">8</span>
+              </button>
+              <button
+                aria-label="Алматы, 09:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 700; line-height: 1.1">9</span>
+              </button>
+              <button
+                aria-label="Алматы, 10:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 700; line-height: 1.1">10</span>
+              </button>
+              <button
+                aria-label="Алматы, 11:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">11</span>
+              </button>
+              <button
+                aria-label="Алматы, 12:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">12</span>
+              </button>
+              <button
+                aria-label="Алматы, 13:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">13</span>
+              </button>
+              <button
+                aria-label="Алматы, 14:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">14</span>
+              </button>
+              <button
+                aria-label="Алматы, 15:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">15</span>
+              </button>
+              <button
+                aria-label="Алматы, 16:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">16</span>
+              </button>
+              <button
+                aria-label="Алматы, 17:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">17</span>
+              </button>
+              <button
+                aria-label="Алматы, 18:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">18</span>
+              </button>
+              <button
+                aria-label="Алматы, 19:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">19</span>
+              </button>
+              <button
+                aria-label="Алматы, 20:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">20</span>
+              </button>
+              <button
+                aria-label="Алматы, 21:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">21</span>
+              </button>
+              <button
+                aria-label="Алматы, 22:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">22</span>
+              </button>
+              <button
+                aria-label="Алматы, 23:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">23</span>
+              </button>
+            </div>
+          </li>
+          <li
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              padding: 12px;
+              border-top: 1px solid #e4e4e7;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px; height: 32px">
+              <button
+                aria-label="Переместить Москва"
+                style="
+                  width: 44px;
+                  height: 44px;
+                  margin: -6px -6px -6px -10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #5b5b63;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: currentcolor"
+                >
+                  <circle cx="9" cy="6" r="1.6"></circle>
+                  <circle cx="15" cy="6" r="1.6"></circle>
+                  <circle cx="9" cy="12" r="1.6"></circle>
+                  <circle cx="15" cy="12" r="1.6"></circle>
+                  <circle cx="9" cy="18" r="1.6"></circle>
+                  <circle cx="15" cy="18" r="1.6"></circle>
+                </svg>
+              </button>
+              <div
+                style="
+                  flex: 1 1 0px;
+                  min-width: 0px;
+                  display: flex;
+                  align-items: baseline;
+                  gap: 8px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                "
+              >
+                <span
+                  style="
+                    position: relative;
+                    z-index: 2;
+                    background: #ffffff;
+                    font-size: 18px;
+                    font-weight: 600;
+                  "
+                >
+                  Москва
+                </span>
+                <span
+                  style="
+                    position: relative;
+                    z-index: 2;
+                    background: #ffffff;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #5b5b63;
+                  "
+                >
+                  −2 ч
+                </span>
+                <span style="display: flex; gap: 6px; font-size: 14px; color: #5b5b63">
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    Россия
+                  </span>
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    МСК
+                  </span>
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    UTC+3
+                  </span>
+                </span>
+              </div>
+              <span
+                style="
+                  display: flex;
+                  gap: 6px;
+                  font-size: 14px;
+                  color: #5b5b63;
+                  white-space: nowrap;
+                "
+              >
+                <span style="position: relative; z-index: 2; background: #ffffff">
+                  Вс, 8 мар
+                </span>
+              </span>
+              <button
+                aria-label="Ввести время"
+                style="
+                  position: relative;
+                  z-index: 2;
+                  background: #ffffff;
+                  padding: 0px 0px 0px 4px;
+                  font-size: 26px;
+                  font-weight: 700;
+                  line-height: 1;
+                  font-variant-numeric: tabular-nums;
+                  color: #008800;
+                "
+              >
+                07:00–09:00
+              </button>
+              <button
+                aria-label="Меню: Москва"
+                style="
+                  width: 44px;
+                  height: 44px;
+                  margin: -6px -10px -6px -6px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: currentcolor"
+                >
+                  <circle cx="5" cy="12" r="2"></circle>
+                  <circle cx="12" cy="12" r="2"></circle>
+                  <circle cx="19" cy="12" r="2"></circle>
+                </svg>
+              </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px">
+              <button
+                aria-label="Москва, 22:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">22</span>
+              </button>
+              <button
+                aria-label="Москва, 23:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">23</span>
+              </button>
+              <button
+                aria-label="Москва, 00:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: rgba(24, 24, 27, 0.1) 0px 0px 0px 999px inset;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 9px; font-weight: 700; line-height: 1">МАР</span>
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">8</span>
+              </button>
+              <button
+                aria-label="Москва, 01:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">1</span>
+              </button>
+              <button
+                aria-label="Москва, 02:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">2</span>
+              </button>
+              <button
+                aria-label="Москва, 03:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">3</span>
+              </button>
+              <button
+                aria-label="Москва, 04:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">4</span>
+              </button>
+              <button
+                aria-label="Москва, 05:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">5</span>
+              </button>
+              <button
+                aria-label="Москва, 06:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">6</span>
+              </button>
+              <button
+                aria-label="Москва, 07:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8cbbe;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 700; line-height: 1.1">7</span>
+              </button>
+              <button
+                aria-label="Москва, 08:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8cbbe;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 700; line-height: 1.1">8</span>
+              </button>
+              <button
+                aria-label="Москва, 09:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">9</span>
+              </button>
+              <button
+                aria-label="Москва, 10:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">10</span>
+              </button>
+              <button
+                aria-label="Москва, 11:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">11</span>
+              </button>
+              <button
+                aria-label="Москва, 12:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">12</span>
+              </button>
+              <button
+                aria-label="Москва, 13:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">13</span>
+              </button>
+              <button
+                aria-label="Москва, 14:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">14</span>
+              </button>
+              <button
+                aria-label="Москва, 15:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">15</span>
+              </button>
+              <button
+                aria-label="Москва, 16:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">16</span>
+              </button>
+              <button
+                aria-label="Москва, 17:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">17</span>
+              </button>
+              <button
+                aria-label="Москва, 18:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">18</span>
+              </button>
+              <button
+                aria-label="Москва, 19:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">19</span>
+              </button>
+              <button
+                aria-label="Москва, 20:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">20</span>
+              </button>
+              <button
+                aria-label="Москва, 21:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">21</span>
+              </button>
+            </div>
+          </li>
+          <li
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              padding: 12px;
+              border-top: 1px solid #e4e4e7;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px; height: 32px">
+              <button
+                aria-label="Переместить Калькутта"
+                style="
+                  width: 44px;
+                  height: 44px;
+                  margin: -6px -6px -6px -10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #5b5b63;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: currentcolor"
+                >
+                  <circle cx="9" cy="6" r="1.6"></circle>
+                  <circle cx="15" cy="6" r="1.6"></circle>
+                  <circle cx="9" cy="12" r="1.6"></circle>
+                  <circle cx="15" cy="12" r="1.6"></circle>
+                  <circle cx="9" cy="18" r="1.6"></circle>
+                  <circle cx="15" cy="18" r="1.6"></circle>
+                </svg>
+              </button>
+              <div
+                style="
+                  flex: 1 1 0px;
+                  min-width: 0px;
+                  display: flex;
+                  align-items: baseline;
+                  gap: 8px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                "
+              >
+                <span
+                  style="
+                    position: relative;
+                    z-index: 2;
+                    background: #ffffff;
+                    font-size: 18px;
+                    font-weight: 600;
+                  "
+                >
+                  Калькутта
+                </span>
+                <span
+                  style="
+                    position: relative;
+                    z-index: 2;
+                    background: #ffffff;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #5b5b63;
+                  "
+                >
+                  +0:30
+                </span>
+                <span style="display: flex; gap: 6px; font-size: 14px; color: #5b5b63">
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    Индия
+                  </span>
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    IST
+                  </span>
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    UTC+5:30
+                  </span>
+                </span>
+              </div>
+              <span
+                style="
+                  display: flex;
+                  gap: 6px;
+                  font-size: 14px;
+                  color: #5b5b63;
+                  white-space: nowrap;
+                "
+              >
+                <span style="position: relative; z-index: 2; background: #ffffff">
+                  Вс, 8 мар
+                </span>
+              </span>
+              <button
+                aria-label="Ввести время"
+                style="
+                  position: relative;
+                  z-index: 2;
+                  background: #ffffff;
+                  padding: 0px 0px 0px 4px;
+                  font-size: 26px;
+                  font-weight: 700;
+                  line-height: 1;
+                  font-variant-numeric: tabular-nums;
+                  color: #008800;
+                "
+              >
+                09:30–11:30
+              </button>
+              <button
+                aria-label="Меню: Калькутта"
+                style="
+                  width: 44px;
+                  height: 44px;
+                  margin: -6px -10px -6px -6px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: currentcolor"
+                >
+                  <circle cx="5" cy="12" r="2"></circle>
+                  <circle cx="12" cy="12" r="2"></circle>
+                  <circle cx="19" cy="12" r="2"></circle>
+                </svg>
+              </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px">
+              <button
+                aria-label="Калькутта, 00:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: rgba(24, 24, 27, 0.1) 0px 0px 0px 999px inset;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 9px; font-weight: 700; line-height: 1">МАР</span>
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">8</span>
+              </button>
+              <button
+                aria-label="Калькутта, 01:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">1</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 02:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">2</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 03:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">3</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 04:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">4</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 05:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">5</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 06:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">6</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 07:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8cbbe;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">7</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 08:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8cbbe;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">8</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 09:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 700; line-height: 1.1">9</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 10:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 700; line-height: 1.1">10</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 11:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">11</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 12:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">12</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 13:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">13</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 14:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">14</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 15:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">15</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 16:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">16</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 17:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">17</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 18:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">18</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 19:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">19</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 20:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">20</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 21:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">21</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 22:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">22</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+              <button
+                aria-label="Калькутта, 23:30"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">23</span>
+                <span style="font-size: 10px; font-weight: 600; line-height: 1">:30</span>
+              </button>
+            </div>
+          </li>
+          <li
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              padding: 12px;
+              border-top: 1px solid #e4e4e7;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px; height: 32px">
+              <button
+                aria-label="Переместить Нью-Йорк"
+                style="
+                  width: 44px;
+                  height: 44px;
+                  margin: -6px -6px -6px -10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #5b5b63;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: currentcolor"
+                >
+                  <circle cx="9" cy="6" r="1.6"></circle>
+                  <circle cx="15" cy="6" r="1.6"></circle>
+                  <circle cx="9" cy="12" r="1.6"></circle>
+                  <circle cx="15" cy="12" r="1.6"></circle>
+                  <circle cx="9" cy="18" r="1.6"></circle>
+                  <circle cx="15" cy="18" r="1.6"></circle>
+                </svg>
+              </button>
+              <div
+                style="
+                  flex: 1 1 0px;
+                  min-width: 0px;
+                  display: flex;
+                  align-items: baseline;
+                  gap: 8px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                "
+              >
+                <span
+                  style="
+                    position: relative;
+                    z-index: 2;
+                    background: #ffffff;
+                    font-size: 18px;
+                    font-weight: 600;
+                  "
+                >
+                  Нью-Йорк
+                </span>
+                <span
+                  style="
+                    position: relative;
+                    z-index: 2;
+                    background: #ffffff;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #5b5b63;
+                  "
+                >
+                  −10 ч
+                </span>
+                <span style="display: flex; gap: 6px; font-size: 14px; color: #5b5b63">
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    США
+                  </span>
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    EST
+                  </span>
+                  <span style="position: relative; z-index: 2; background: #ffffff">
+                    UTC−5
+                  </span>
+                </span>
+              </div>
+              <span
+                style="
+                  display: flex;
+                  gap: 6px;
+                  font-size: 14px;
+                  color: #5b5b63;
+                  white-space: nowrap;
+                "
+              >
+                <span
+                  style="
+                    position: relative;
+                    z-index: 2;
+                    background: #ffffff;
+                    font-weight: 700;
+                    color: #b42318;
+                  "
+                >
+                  днём раньше
+                </span>
+                <span style="position: relative; z-index: 2; background: #ffffff">
+                  Сб, 7 мар
+                </span>
+              </span>
+              <button
+                aria-label="Ввести время"
+                style="
+                  position: relative;
+                  z-index: 2;
+                  background: #ffffff;
+                  padding: 0px 0px 0px 4px;
+                  font-size: 26px;
+                  font-weight: 700;
+                  line-height: 1;
+                  font-variant-numeric: tabular-nums;
+                  color: #008800;
+                "
+              >
+                23:00–01:00
+              </button>
+              <button
+                aria-label="Меню: Нью-Йорк"
+                style="
+                  width: 44px;
+                  height: 44px;
+                  margin: -6px -10px -6px -6px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  style="fill: currentcolor"
+                >
+                  <circle cx="5" cy="12" r="2"></circle>
+                  <circle cx="12" cy="12" r="2"></circle>
+                  <circle cx="19" cy="12" r="2"></circle>
+                </svg>
+              </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px">
+              <button
+                aria-label="Нью-Йорк, 14:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">14</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 15:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">15</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 16:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">16</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 17:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">17</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 18:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">18</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 19:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">19</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 20:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">20</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 21:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #d4c6ee;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">21</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 22:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">22</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 23:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 700; line-height: 1.1">23</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 00:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: rgba(24, 24, 27, 0.1) 0px 0px 0px 999px inset;
+                  opacity: 1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 9px; font-weight: 700; line-height: 1">МАР</span>
+                <span style="font-size: 16px; font-weight: 700; line-height: 1.1">8</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 01:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">1</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 03:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: #18181b 3px 0px 0px inset;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">3</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 04:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">4</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 05:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">5</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 06:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #a3afd3;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">6</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 07:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8cbbe;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">7</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 08:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8cbbe;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">8</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 09:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">9</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 10:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">10</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 11:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">11</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 12:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">12</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 13:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">13</span>
+              </button>
+              <button
+                aria-label="Нью-Йорк, 14:00"
+                style="
+                  height: 52px;
+                  padding: 0px;
+                  border-radius: 4px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 1px;
+                  background: #f8e6a6;
+                  color: #18181b;
+                  box-shadow: none;
+                  opacity: 0.4;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                <span style="font-size: 16px; font-weight: 500; line-height: 1.1">14</span>
+              </button>
+            </div>
+            <p
+              style="
+                position: relative;
+                z-index: 2;
+                margin: 0px;
+                display: flex;
+                gap: 6px;
+                align-items: flex-start;
+                padding: 5px 10px;
+                border-radius: 6px;
+                background: #fff4d6;
+                color: #5c4300;
+                font-size: 12px;
+                line-height: 1.35;
+              "
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                style="
+                  flex-shrink: 0;
+                  margin-top: 1px;
+                  fill: none;
+                  stroke: currentcolor;
+                  stroke-width: 2;
+                  stroke-linecap: round;
+                "
+              >
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 11v5M12 8h.01"></path>
+              </svg>
+              <span>8 мар в 02:00 часы переведены на 1 ч вперёд</span>
+            </p>
+          </li>
+          <li
+            aria-hidden="true"
+            style="
+              position: absolute;
+              top: 4px;
+              bottom: 4px;
+              left: 528px;
+              width: 119.3px;
+              box-sizing: border-box;
+              border: 3px solid #00aa00;
+              border-radius: 6px;
+              pointer-events: none;
+              z-index: 1;
+            "
+          ></li>
+          <li style="position: absolute; z-index: 3; top: 288px; left: 517.5px">
+            <button
+              aria-label="Начало встречи: 09:00"
+              style="
+                width: 24px;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: ew-resize;
+              "
+            >
+              <span
+                style="width: 12px; height: 36px; border-radius: 4px; background: #00aa00"
+              ></span>
+            </button>
+          </li>
+          <li style="position: absolute; z-index: 3; top: 171px; left: 633.8px">
+            <button
+              aria-label="Конец встречи: 11:00"
+              style="
+                width: 24px;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: ew-resize;
+              "
+            >
+              <span
+                style="width: 12px; height: 36px; border-radius: 4px; background: #00aa00"
+              ></span>
+            </button>
+          </li>
+        </ul>
+      </main>
+      <footer
+        style="
+          margin: 0px -16px;
+          padding: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          background: #ffffff;
+          border-top: 1px solid #8a8a93;
+        "
+      >
+        <div style="display: flex; align-items: center">
+          <button
+            aria-label="Предыдущий день"
+            style="
+              width: 44px;
+              height: 44px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style="
+                fill: none;
+                stroke: currentcolor;
+                stroke-width: 2;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+              "
+            >
+              <path d="M15 6l-6 6 6 6"></path>
+            </svg>
+          </button>
+          <button
+            style="
+              height: 44px;
+              min-width: 200px;
+              padding: 0px 8px;
+              font-size: 16px;
+              font-weight: 600;
+            "
+          >
+            Воскресенье, 8 марта
+          </button>
+          <button
+            aria-label="Следующий день"
+            style="
+              width: 44px;
+              height: 44px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              style="
+                fill: none;
+                stroke: currentcolor;
+                stroke-width: 2;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+              "
+            >
+              <path d="M9 6l6 6-6 6"></path>
+            </svg>
+          </button>
+        </div>
+        <button
+          style="
+            height: 44px;
+            padding: 0px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 22px;
+            background: #2f5bd3;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+          "
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            style="fill: none; stroke: currentcolor; stroke-width: 2; stroke-linecap: round"
+          >
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v5l3 2"></path>
+          </svg>
+          Сейчас
+        </button>
+      </footer>
+    </div>
+  </body>
+</html>
