@@ -32,7 +32,7 @@ Audience: every user (the setting, Cards stays the default) and the developers o
   - **Grid view** no longer planned: *Code:* `GridView`, `views.gridTitle`;
   - new **Grid row** and **Row header**; **Shared block** gains the view location list (`ViewLocationList`);
   - **Preferences** and **Settings page** list the view mode.
-- ADR (handoff H1, `docs/adr/` is outside the factory's limits): new ADR-0012 "The user chooses the view; no automatic choice by width". It supersedes the `AUTO` parts of ADR-0005 and of ADR-0002 (its "Swappable views" section); both get a status line, and `CLAUDE.md` lists ADR-0012.
+- ADR (handoff H1, `docs/adr/` is outside the factory's limits): new ADR-0012 "The user chooses the view; no automatic choice by width". It also allows a pending, per-view exclusion of a view-contract scenario that names the change bringing it back (FR8). It supersedes the `AUTO` parts of ADR-0005 and its consequence "A new view cannot skip the contract scenarios", and the `AUTO` parts of ADR-0002 (its "Swappable views" section); both get a status line, and `CLAUDE.md` lists ADR-0012.
 
 ## Capabilities
 

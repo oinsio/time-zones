@@ -2,7 +2,7 @@
 
 Paths are relative to `packages/client/` unless they start with `docs/`. Glossary owners touched: **View mode**, **View registry**, **Grid view**, **Cards view**, **Shared block** (`docs/glossary/views.md`), **Preferences**, **Option group** (`docs/glossary/settings.md`), **Location row** (`docs/glossary/locations.md`). Each is extended in place; no second owner is introduced.
 
-The global decision — the view is always the user's choice, there is no `AUTO` — is an ADR, not a local decision: ADR-0012, written as handoff H1 because `docs/adr/` is outside the implement stage's limits. The decisions below are local to this change and follow ADR-0002 (layers), ADR-0004 (persistence) and ADR-0005 (registry, minus its `AUTO` rules).
+The global decision — the view is always the user's choice, there is no `AUTO` — is an ADR, not a local decision: ADR-0012, written as handoff H1 because `docs/adr/` is outside the implement stage's limits. The decisions below are local to this change and follow ADR-0002 (layers), ADR-0004 (persistence) and ADR-0005 (registry, minus its `AUTO` rules and, per ADR-0012, its consequence that a new view cannot skip a contract scenario: D5 excludes one pending scenario for Grid).
 
 ## D1. The view mode is a stored view id or "none chosen"
 
