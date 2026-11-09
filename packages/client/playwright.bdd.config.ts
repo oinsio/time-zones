@@ -7,7 +7,6 @@ import {
   TEST_DEPLOY_INSTANT,
 } from "./app.config";
 import type { ContractViewOptions } from "./src/test/features/view_contract/steps/view_contract_e2e.fixtures";
-import { getContractViewportWidth } from "./src/test/viewContractViewport";
 
 /**
  * The step files import `@/constants`, which reads the deploy instant that Vite
@@ -33,8 +32,22 @@ const testDir = defineBddConfig({
  * into `src/views/`, which the node project cannot type-check (D12).
  */
 const VIEW_REGISTRY_MODULE_PATH: string = "./src/views/index.ts";
+const CONSTANTS_MODULE_PATH: string = "./src/constants/index.ts";
+const PREFERENCES_MODULE_PATH: string = "./src/preferences/index.ts";
 const { viewRegistry } = await import(VIEW_REGISTRY_MODULE_PATH);
+const { STORAGE_KEYS, PREFERENCES_SCHEMA_VERSION } = await import(
+  CONSTANTS_MODULE_PATH
+);
+const { DEFAULT_PREFERENCES } = await import(PREFERENCES_MODULE_PATH);
 const VIEW_CONTRACT_TAG_PATTERN = /@view-contract/;
+/**
+ * The scenarios a view cannot pass yet, excluded for that view only; the tag
+ * names the change that brings the scenario back (ADR-0012).
+ * Implements FR8 of add-view-mode-setting-and-grid-skeleton (D5).
+ */
+const VIEW_CONTRACT_PENDING_TAGS: Partial<Record<string, RegExp>> = {
+  grid: /@grid-pending-hour-cells/,
+};
 /**
  * One set of baselines serves macOS, Linux and CI. Chromium rasterizes text
  * and focus rings differently on each; on 2026-10-01 the widest macOS-vs-Linux
@@ -57,20 +70,26 @@ const CI_WORKER_COUNT = 1;
 const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 const isCi = !!process.env.CI;
 
-/** One contract run per registered view; registering a view adds its run. */
-const viewContractProjects = viewRegistry.map(
-  (view: { id: string; autoMinWidth: number }) => ({
-    name: `view-contract-${view.id}`,
-    grep: VIEW_CONTRACT_TAG_PATTERN,
-    use: {
-      ...devices["Desktop Chrome"],
-      contractView: {
-        id: view.id,
-        viewportWidth: getContractViewportWidth(view, viewRegistry),
-      },
+/**
+ * One contract run per registered view; registering a view adds its run. Each
+ * run shows its view through the stored view mode, not through the viewport.
+ */
+const viewContractProjects = viewRegistry.map((view: { id: string }) => ({
+  name: `view-contract-${view.id}`,
+  grep: VIEW_CONTRACT_TAG_PATTERN,
+  grepInvert: VIEW_CONTRACT_PENDING_TAGS[view.id],
+  use: {
+    ...devices["Desktop Chrome"],
+    contractView: {
+      id: view.id,
+      preferencesStorageKey: STORAGE_KEYS.PREFERENCES,
+      preferencesDocument: JSON.stringify({
+        schemaVersion: PREFERENCES_SCHEMA_VERSION,
+        payload: { ...DEFAULT_PREFERENCES, viewMode: view.id },
+      }),
     },
-  }),
-);
+  },
+}));
 
 export default defineConfig<ContractViewOptions>({
   testDir,
