@@ -1,13 +1,24 @@
 ## ADDED Requirements
 
 ### Requirement: Grid view skeleton
-The Grid view SHALL show the location rows in list order, all inside one panel separated by dividers. Each row MUST be the shared row header — drag handle when the list can be reordered, home or Here mark, city, offset difference, zone line, local time and date, location menu — followed by its row note when it has one, and MUST NOT contain a day track or hour cells. The date bar MUST stay under the view. In Grid the user MUST be able to add and remove a location, set and clear home, reorder the list, type an exact time into a row's time, change the date with the date bar and return to now. Grid MUST show the same empty state, location load error, loading state and view error as Cards, and MUST work offline without a note. Grid MUST NOT scroll horizontally at 320 px and at 2560 px. Inputs: the presented location rows. Output: one grid row per location. Errors: an unreadable stored list shows the load error with Reset. <!-- implements FR7, NFR-R1, UX3 of add-view-mode-setting-and-grid-skeleton -->
+The Grid view SHALL show the location rows in list order, all inside one panel separated by dividers. Each row MUST have the surface token background of the active theme, and the panel's border the border token colour. Each row MUST be the shared row header — drag handle when the list can be reordered, home or Here mark, city, offset difference, zone line, local time and date, location menu — followed by its row note when it has one, and MUST NOT contain a day track or hour cells. The date bar MUST stay under the view. In Grid the user MUST be able to add and remove a location, set and clear home, reorder the list, type an exact time into a row's time, change the date with the date bar and return to now. Grid MUST show the same empty state, location load error, loading state and view error as Cards, and MUST work offline without a note. Grid MUST NOT scroll horizontally at 320 px and at 2560 px. Inputs: the presented location rows. Output: one grid row per location. Errors: an unreadable stored list shows the load error with Reset. <!-- implements FR7, NFR-R1, UX3 of add-view-mode-setting-and-grid-skeleton -->
 
 #### Scenario: Rows in one panel without hour cells
 - **GIVEN** the view mode is Grid and the stored locations are Almaty and Moscow
 - **WHEN** the main page is shown
 - **THEN** the Grid view shows the rows of Almaty and Moscow, in this order, inside one panel
 - **AND** no row has a day track
+
+#### Scenario: Grid rows use the theme token colours
+- **GIVEN** the view mode is Grid, the stored locations are Almaty and Moscow, and the `<theme>` theme is active
+- **WHEN** the main page is shown
+- **THEN** each row's background is the `<theme>` surface token colour
+- **AND** the panel's border is the `<theme>` border token colour
+
+| theme |
+|---|
+| light |
+| dark |
 
 #### Scenario: Typing a time in Grid
 - **GIVEN** the view mode is Grid, the current time is `2026-03-08T07:30:00Z` and the stored locations are Almaty and Moscow

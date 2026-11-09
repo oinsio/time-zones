@@ -101,7 +101,7 @@ None.
 
 - UX1: The view group reads like the theme and the hour format groups: caption at the start of the row, joined options at the end, the checked option filled with the accent colour.
 - UX2: Switching the view keeps everything the user set: the location list, home, the chosen date and time. Only the presentation changes.
-- UX3: A Grid row reads as the row header of the Grid design (`docs/design/README.md` → Grid) without its hour strip: the rows sit in one panel separated by dividers, not as separate cards.
+- UX3: A Grid row reads as the row header of the Grid design (`docs/design/README.md` → Grid) without its hour strip: the rows sit in one panel separated by dividers, not as separate cards; each row keeps the surface token background, and the panel border and the dividers use the border token colour.
 
 ## UI States Matrix
 
