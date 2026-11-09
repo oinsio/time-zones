@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Grid view rows
-The Grid view SHALL show the location rows in list order, all inside one panel separated by dividers. Each row MUST have the surface token background of the active theme, and the panel's border the border token colour. Each row MUST be the shared row header — drag handle when the list can be reordered, home or Here mark, city, offset difference, zone line, local time and date, location menu — followed by its hour strip (`grid-view` → Hour cells of the reference day) and then by its row note when it has one; it MUST NOT contain a day track. From 768 px wide the row header MUST be one line: the city, the offset difference and the zone line on the left, then the date, the time and the location menu on the right. Below 768 px the row header MUST take two lines: the city and the offset difference on the left and the time on the right on the first line, the zone line on the left and the date on the right on the second. The date bar MUST stay under the view. In Grid the user MUST be able to add and remove a location, set and clear home, reorder the list, type an exact time into a row's time, select a time on an hour strip, change the date with the date bar and return to now. Grid MUST show the same empty state, location load error, loading state and view error as Cards, and MUST work offline without a note. The page MUST NOT scroll horizontally at 320 px and at 2560 px; only the hour strips may. Inputs: the presented location rows and their hour strips. Output: one grid row per location. Errors: an unreadable stored list shows the load error with Reset. <!-- implements FR7, NFR-R1, UX3 of add-view-mode-setting-and-grid-skeleton; FR1, FR7, NFR-R2, NFR-R3, NFR-R4, UX1 of add-grid-hour-cells-and-hour-frame -->
+The Grid view SHALL show the location rows in list order, all inside one panel separated by dividers. Each row MUST have the surface token background of the active theme, and the panel's border the border token colour. Each row MUST be the shared row header — drag handle when the list can be reordered, home or Here mark, city, offset difference, zone line, local time and date, location menu — followed by its hour strip (`grid-view` → Hour cells of the reference day) and then by its row note when it has one; it MUST NOT contain a day track. From 768 px wide the row header MUST be one line: the city, the offset difference and the zone line on the left, then the date, the time and the location menu on the right. Below 768 px the row header MUST take two lines: the city and the offset difference on the left and the time on the right on the first line, the zone line on the left and the date on the right on the second. The date bar MUST stay under the view. In Grid the user MUST be able to add and remove a location, set and clear home, reorder the list, type an exact time into a row's time, select a time on an hour strip, change the date with the date bar and return to now. An open location menu of any grid row MUST be shown whole and above the other rows: the panel's horizontal scrolling MUST NOT clip it, and the next row's header MUST NOT cover it. Grid MUST show the same empty state, location load error, loading state and view error as Cards, and MUST work offline without a note. The page MUST NOT scroll horizontally at 320 px and at 2560 px; only the hour strips may. Inputs: the presented location rows and their hour strips. Output: one grid row per location. Errors: an unreadable stored list shows the load error with Reset. <!-- implements FR7, NFR-R1, UX3 of add-view-mode-setting-and-grid-skeleton; FR1, FR7, NFR-R2, NFR-R3, NFR-R4, UX1 of add-grid-hour-cells-and-hour-frame -->
 
 #### Scenario: Rows in one panel with hour strips
 - **GIVEN** the view mode is Grid and the stored locations are Almaty and Moscow
@@ -13,6 +13,19 @@ The Grid view SHALL show the location rows in list order, all inside one panel s
 - **GIVEN** the view mode is Grid, the current time is `2026-03-08T07:30:00Z` and the stored location is New York
 - **WHEN** the main page is shown
 - **THEN** New York's clock change note comes after its hour strip, in the document and on the screen
+
+#### Scenario: The location menu of a grid row is fully visible
+- **GIVEN** the view mode is Grid and the stored locations are Almaty, Moscow, Kolkata and New York
+- **AND** the main page is `<width>` by `<height>` px
+- **WHEN** the user opens the location menu of `<city>`
+- **THEN** the whole menu lies inside the viewport
+- **AND** at the centre of every menu item the topmost element is that item
+
+| width | height | city |
+|---|---|---|
+| 1440 | 900 | Almaty |
+| 1440 | 900 | New York |
+| 390 | 844 | New York |
 
 #### Scenario: Grid row header in one line
 - **GIVEN** the view mode is Grid and the stored locations are Almaty and Moscow
