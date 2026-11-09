@@ -12,9 +12,12 @@ import { createElement } from "react";
 import { vi } from "vitest";
 import { AppShell } from "@/app";
 import { PREFERENCES_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
-import { fakeClock } from "@/lib/temporal";
 import { DEFAULT_PREFERENCES } from "@/preferences";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
+import {
+  createSwitchableClock,
+  type SwitchableClock,
+} from "@/test/switchableClock";
 import { getCardOf } from "../../locations/steps/deviceTimeQueries";
 import {
   NOT_JSON,
@@ -23,10 +26,13 @@ import {
 
 const DEFAULT_INSTANT = "2026-03-08T07:30:00Z";
 const PAGE_HIDE_EVENT_NAME = "pagehide";
+const DEFAULT_DEVICE_ZONE = "UTC";
 
 /** Per-scenario state of the Grid view features. */
 export const createGridViewWorld = () => {
   let instant = DEFAULT_INSTANT;
+  let deviceZone = DEFAULT_DEVICE_ZONE;
+  let clock: SwitchableClock | undefined;
 
   const wallTimeButtonOf = (city: string) =>
     within(getCardOf(city)).getByRole("button", { name: /^Enter time/ });
@@ -39,6 +45,8 @@ export const createGridViewWorld = () => {
       vi.unstubAllGlobals();
       localStorage.clear();
       instant = DEFAULT_INSTANT;
+      deviceZone = DEFAULT_DEVICE_ZONE;
+      clock = undefined;
       stubZoneCitiesFetch();
       await i18n.changeLanguage("en");
     },
@@ -48,6 +56,15 @@ export const createGridViewWorld = () => {
     },
     setInstant: (isoInstant: string) => {
       instant = isoInstant;
+    },
+    /** Implements FR8, FR9 of add-grid-hour-cells-and-hour-frame: the reference zone of the open app. */
+    setDeviceZone: (zoneId: string) => {
+      deviceZone = zoneId;
+    },
+    /** Moves the clock of the open app and lets the live tick notice it. */
+    moveClockTo: (isoInstant: string) => {
+      clock?.moveTo(isoInstant);
+      act(() => void document.dispatchEvent(new Event("visibilitychange")));
     },
     storeViewMode: (viewMode: string | null) =>
       localStorage.setItem(
@@ -62,7 +79,8 @@ export const createGridViewWorld = () => {
     storeUnreadableList: () =>
       localStorage.setItem(STORAGE_KEYS.LOCATIONS, NOT_JSON),
     openApp: async () => {
-      render(createElement(AppShell, { clock: fakeClock(instant) }));
+      clock = createSwitchableClock(instant, deviceZone);
+      render(createElement(AppShell, { clock }));
       await screen.findByRole("main");
     },
     typeTime: async (city: string, text: string) => {
@@ -72,6 +90,8 @@ export const createGridViewWorld = () => {
         `{Control>}a{/Control}${text}{Enter}`,
       );
     },
+    timesOfRows: () =>
+      ["Almaty", "Moscow"].map((city) => wallTimeButtonOf(city).textContent),
     timeOf: (city: string) => wallTimeButtonOf(city).textContent,
     isoDateOf: (city: string) =>
       getCardOf(city).querySelector("time")?.getAttribute("datetime"),

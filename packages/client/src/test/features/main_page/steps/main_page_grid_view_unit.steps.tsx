@@ -28,8 +28,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.AfterAllScenarios(world.finish);
 
   // @add-view-mode-setting-and-grid-skeleton @FR7 @UX3
+  // @add-grid-hour-cells-and-hour-frame @FR1
   f.Scenario(
-    "Rows in one panel without hour cells",
+    "Rows in one panel with hour strips",
     ({ Given, When, Then, And }) => {
       Given(
         "the view mode is Grid and the stored locations are Almaty and Moscow",
@@ -50,9 +51,24 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           ]);
         },
       );
-      And("no row has a day track", () => {
-        expect(screen.queryByRole("slider")).not.toBeInTheDocument();
-      });
+      And(
+        "every row has an hour strip after its row header and no day track",
+        () => {
+          expect(document.querySelector("[data-day-track]")).toBeNull();
+          for (const city of ["Almaty", "Moscow"]) {
+            const strip = screen.getByRole("slider", {
+              name: i18n.t("locations.timeSliderLabel", { city }),
+            });
+            const menuButton = screen.getByRole("button", {
+              name: i18n.t("locations.locationMenu", { city }),
+            });
+            expect(
+              menuButton.compareDocumentPosition(strip) &
+                Node.DOCUMENT_POSITION_FOLLOWING,
+            ).toBeTruthy();
+          }
+        },
+      );
     },
   );
 
@@ -95,6 +111,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(
         screen.getByRole("button", { name: i18n.t("locations.addLocation") }),
       ).toBeVisible();
+    });
+    And("no hour strip and no hour frame are shown", () => {
+      expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+      expect(document.querySelector("[data-hour-frame-index]")).toBeNull();
     });
   });
 
