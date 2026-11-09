@@ -58,10 +58,10 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `temp
 
 ## 7. Verification (all)
 
-- [ ] 7.1 Scoped Stryker, at most 5 files per run, one run at a time, target ≥ 95 % (minimum 90 %): `cd packages/client && npx stryker run --mutate 'src/preferences/preferencesCommands.ts,src/preferences/parseStoredPreferences.ts,src/adapters/preferencesDocument.ts,src/views/resolveActiveView.ts,src/controller/useViewMode.ts'`, then `npx stryker run --mutate 'src/app/settings/ViewModeGroup.tsx,src/views/shared/ViewLocationList.tsx,src/app/ViewHost.tsx'`. Kill survivors with tests; read `reports/mutation/mutation-report.json`.
+- [x] 7.1 Scoped Stryker, at most 5 files per run, one run at a time, target ≥ 95 % (minimum 90 %): `cd packages/client && npx stryker run --mutate 'src/preferences/preferencesCommands.ts,src/preferences/parseStoredPreferences.ts,src/adapters/preferencesDocument.ts,src/views/resolveActiveView.ts,src/controller/useViewMode.ts'`, then `npx stryker run --mutate 'src/app/settings/ViewModeGroup.tsx,src/views/shared/ViewLocationList.tsx,src/app/ViewHost.tsx'`. Kill survivors with tests; read `reports/mutation/mutation-report.json`.
 - [x] 7.2 NFR-P1: in `scripts/check-bundle-size.mjs` replace the single `CARDS_VIEW_CHUNK_PREFIX` check by a list of view chunk prefixes (`"CardsView-"`, `"GridView-"`), each of which must exist as a separate chunk in `assets/`, the failure message naming the missing view's prefix. Then `pnpm run build`, then `pnpm check:bundle-size`, then `pnpm check:legacy-build`, then `pnpm lint`, then `pnpm test` — one at a time, all pass (NFR-P1: the Grid chunk is not in the initial JavaScript).
-- [ ] 7.3 FR6 / M4: `grep -rnE "AutoViewMode|autoMinWidth|useContainerWidth|getContractViewportWidth|AUTO mode" src playwright.bdd.config.ts` prints nothing.
-- [ ] 7.4 Traceability: `grep -rn "add-view-mode-setting-and-grid-skeleton" src | grep -oE "@?(FR|NFR-[APR]|UX)[0-9]+" | sort -u` lists FR1–FR8, NFR-P1, NFR-A1, NFR-A2, NFR-R1, NFR-R2, UX1–UX3.
+- [x] 7.3 FR6 / M4: `grep -rnE "AutoViewMode|autoMinWidth|useContainerWidth|getContractViewportWidth|AUTO mode" src playwright.bdd.config.ts` prints nothing.
+- [x] 7.4 Traceability: `grep -rn "add-view-mode-setting-and-grid-skeleton" src | grep -oE "@?(FR|NFR-[APR]|UX)[0-9]+" | sort -u` lists FR1–FR8, NFR-P1, NFR-A1, NFR-A2, NFR-R1, NFR-R2, UX1–UX3.
 
 ## 8. Handoff
 

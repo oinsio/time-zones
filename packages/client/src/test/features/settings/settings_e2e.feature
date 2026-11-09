@@ -90,7 +90,7 @@ Feature: Settings page in a real browser
 
   @add-settings-page-and-device-time-location @NFR-R3 @M6 @add-gnomish-factory-credit @NFR-R2 @move-and-restyle-gnomish-factory-credit @NFR-R2 @add-interface-language-selection @NFR-R2
   @show-zone-abbreviations-and-zone-label-setting @NFR-R3 @polish-settings-and-remove-offline-update-notice @NFR-R2
-  @compact-settings-controls @NFR-R2
+  @compact-settings-controls @NFR-R2 @add-view-mode-setting-and-grid-skeleton @NFR-R2
   Scenario Outline: Approved screenshots of the settings at <width> px in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the screen is <width> px wide for the locations
