@@ -1,4 +1,9 @@
-import { type CSSProperties, type RefObject, useEffect, useState } from "react";
+import {
+  type CSSProperties,
+  type RefObject,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { LOCATION_MENU_OFFSET_PX } from "@/constants";
 
 const SCROLL_EVENT = "scroll";
@@ -16,7 +21,7 @@ export function useFixedMenuPosition(
   isActive: boolean,
 ): CSSProperties | undefined {
   const [position, setPosition] = useState<CSSProperties | undefined>();
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isActive) {
       setPosition(undefined);
       return;

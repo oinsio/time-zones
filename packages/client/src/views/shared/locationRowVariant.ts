@@ -20,6 +20,8 @@ type LocationRowVariantClassNames = {
   placeAndTime: string;
   /** The place column: the city line and the zone line. */
   place: string;
+  /** The city line: as tall as the time button on a phone, so the zone line stands level with the date. */
+  cityLine: string;
   /** The local time and date column. */
   dateTime: string;
   /** Whether the date comes before the time button in the reading order. */
@@ -52,6 +54,7 @@ export const LOCATION_ROW_VARIANT_CLASS_NAMES: Record<
     row: `${HEADER_LINE_CLASS_NAMES} px-4 rounded-md border border-border`,
     placeAndTime: "md:flex-none",
     place: "md:w-64 md:flex-none",
+    cityLine: "",
     dateTime: "flex-col md:items-start md:w-44",
     isDateBeforeTime: false,
     hasDayTrack: true,
@@ -64,6 +67,7 @@ export const LOCATION_ROW_VARIANT_CLASS_NAMES: Record<
     notesBox: `${STICKY_BOX_CLASS_NAMES} order-last`,
     placeAndTime: "md:flex-1",
     place: "md:flex-1 md:flex-row md:items-baseline md:gap-x-2",
+    cityLine: "min-h-11 md:min-h-0",
     dateTime: "flex-col-reverse md:flex-row md:items-baseline md:gap-x-3",
     isDateBeforeTime: true,
     hasDayTrack: false,

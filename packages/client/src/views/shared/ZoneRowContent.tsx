@@ -75,7 +75,9 @@ export function ZoneRowContent({
         <span
           className={`flex min-w-0 flex-1 flex-col break-words ${variantClassNames.place}`}
         >
-          <span className="flex flex-wrap items-center gap-x-2">
+          <span
+            className={`flex flex-wrap items-center gap-x-2 ${variantClassNames.cityLine}`}
+          >
             {mark && <LocationMarkIcon mark={mark} id={ids.mark} />}
             <span id={ids.city} className="bg-surface font-semibold">
               {cityLabel}
