@@ -18,7 +18,7 @@ Audience: every user (the setting, Cards stays the default) and the developers o
 - MODIFIED `settings` → **Settings strings are localized**: the Russian names «Вид», «Карточки», «Сетка».
 - MODIFIED `settings` → **Option group**: the view group is built from the same option group, and shows each option by its name.
 - MODIFIED `settings` → **Settings page layout**: the view group takes one row at every width; the approved settings screenshots are re-approved once.
-- MODIFIED `main-page` → **View host resolves the active view**: the host shows the view of the view mode, Cards when none is chosen or the chosen one is not registered; `AUTO`, the container width and re-resolving on resize are removed.
+- REMOVED `main-page` → **View host resolves the active view** (`AUTO`, the container width and re-resolving on resize), replaced by ADDED `main-page` → **View host shows the chosen view**: the host shows the view of the view mode, Cards when none is chosen or the chosen one is not registered.
 - MODIFIED `main-page` → **Cards view is registered and lazy**: the registry holds Cards and Grid, in this order, both lazy.
 - ADDED `main-page` → **Grid view skeleton**: Grid shows the location rows with the shared row headers in one panel, without hour cells, plus the date bar and every state of the main page.
 - ADDED `main-page` → **View contract runs for every registered view**: the view contract runs against Grid too; the scenarios that need hour cells are excluded for Grid by a visible marker until the hour cells change.
