@@ -105,7 +105,7 @@ When the location's UTC offset changes inside the reference day, the first cell 
 - **AND** no other cell of New York, Almaty, Moscow or Kolkata has one
 
 ### Requirement: Hour frame
-An hour frame in the accent colour of the active theme SHALL surround, across all rows of the panel, the column of the hour cell that contains the effective instant; the texts of the framed cells MUST be bold. While the reference moment is live, the frame MUST move to the next column when the clock reaches the next cell. While it is pinned, the frame MUST stay on the pinned instant's column. Now MUST return it to the column of the current time. With no rows, no frame is shown. <!-- implements FR8, FR9 of add-grid-hour-cells-and-hour-frame -->
+An hour frame in the accent colour of the active theme SHALL surround, across all rows of the panel, the column of the hour cell that contains the effective instant; the texts of the framed cells MUST be bold. While the reference moment is live, the frame MUST move to the next column when the clock reaches the next cell. While it is pinned, the frame MUST stay on the pinned instant's column. Now MUST return it to the column of the current time. With no rows, no frame is shown. <!-- implements FR8, FR9, UX2 of add-grid-hour-cells-and-hour-frame -->
 
 #### Scenario: Frame on the current hour
 - **GIVEN** the view mode is Grid, the reference zone is `Asia/Almaty`, the current time is `2026-03-08T07:30:00Z` and the stored locations are Almaty and Moscow
