@@ -91,7 +91,8 @@
 - Impact: After archive, `openspec/specs/` says every registered view, Grid included, MUST support a time selection, while the code and the main-page spec say Grid is excluded; the hour-cells change and any reviewer read two contradictory stable specs, and the archived change breaks a stable requirement undeclared.
 - Fix: Add `openspec/changes/add-view-mode-setting-and-grid-skeleton/specs/time-selection/spec.md` with `## MODIFIED Requirements` → `### Requirement: Select a time in every view`, copying the full stable text and its scenario "Select a time", and appending: "A view that has no time selection control yet MAY be excluded from this scenario by the marker of `main-page` → View contract runs for every registered view; Grid is excluded until the hour cells change." with `FR8 of add-view-mode-setting-and-grid-skeleton` added to the implements comment. Add `time-selection` to "Modified Capabilities" and a MODIFIED bullet to "What Changes" in `proposal.md`.
 - Fix risk: none for code or tests (wording only); the copied requirement must keep the stable scenario unchanged, or the archive drops it.
-- Status: open
+- Status: fixed
+- Resolution: added `specs/time-selection/spec.md` (MODIFIED "Select a time in every view", stable text and scenario kept, plus the sentence allowing the pending Grid exclusion, FR8 in its implements comment); `proposal.md` lists `time-selection` in What Changes and Modified Capabilities; task 5.1 points at the delta.
 
 ### R2 — WARNING — ADR-0012 (H1) does not record the per-view contract exclusion that ADR-0005 forbids
 - Location: `openspec/changes/add-view-mode-setting-and-grid-skeleton/tasks.md:68`, `tasks.md:72`; `design.md:100`
@@ -100,7 +101,8 @@
 - Impact: Once merged, an Accepted ADR still forbids what the code does; the next view or the hour-cells change has no ADR that allows or bounds pending exclusions, and the mechanism can spread silently (any view can tag scenarios away) with no recorded rule that it must name the change that brings the scenario back.
 - Fix: In task 8.1 add to the ADR-0012 Decision: "A view-contract scenario that a view cannot pass yet because a part of its design is not built may be excluded for that view only, by a pending tag that names the view and the change that re-enables it; every other view still runs it." Extend the ADR-0005 status line H1 writes to "Partly superseded by ADR-0012: `AUTO`, `autoMinWidth`, the settings entry `Auto`, and the consequence that a new view cannot skip contract scenarios (pending exclusions are allowed)." Mention the exclusion in the `## Human follow-up` H1 bullet.
 - Fix risk: none for the checkbox tasks — it only grows the H1 patch content; `.claude/rules/architecture.md` stays as it is (a view still passes every scenario it is not pending for).
-- Status: open
+- Status: fixed
+- Resolution: task 8.1 now has ADR-0012 record the pending per-view contract exclusion (tag naming the view and the re-enabling change, every other view still runs it) and the ADR-0005 status line supersede its "cannot skip the contract scenarios" consequence; the H1 Human follow-up bullet, the ADR bullet of `proposal.md` What Changes and `design.md` line 5 say the same.
 
 ### R3 — WARNING — The settings-page language screenshots will change but no task re-approves them
 - Location: `openspec/changes/add-view-mode-setting-and-grid-skeleton/tasks.md:57`
@@ -109,7 +111,8 @@
 - Impact: The implement stage finishes green while 8 language screenshot scenarios (chromium and mobile-chrome) fail in CI on the pull request.
 - Fix: In task 6.5 use `--grep "Approved screenshots of the settings|Approved language screenshots"` for both `--project chromium` and `--project mobile-chrome` with `--update-snapshots`, then the same command without it passes; name the updated `Approved-language-screenshots-*` PNGs in the commit message.
 - Fix risk: 8 more PNGs are regenerated, on the same machine type as the other baselines (the existing `SCREENSHOT_MAX_DIFF_PIXEL_RATIO` tolerance applies); no spec change is needed, since "Language choice layout" only requires the approved screenshots to match.
-- Status: open
+- Status: fixed
+- Resolution: task 6.5 now runs `--grep "Approved screenshots of the settings|Approved language screenshots"` per project (chromium, then mobile-chrome) with `--update-snapshots`, then without it, and names the `Approved-language-screenshots-*` PNGs in the commit message.
 
 ### R4 — SUGGESTION — Task 7.2 claims a bundle check for the Grid chunk that the script does not make
 - Location: `openspec/changes/add-view-mode-setting-and-grid-skeleton/tasks.md:62`
@@ -118,7 +121,8 @@
 - Impact: NFR-P1's traceability points to a check that cannot fail for Grid; a static import of `views/grid/GridView` from shared code would pass 7.2 (only the unit `_payload` check in task 3.1 would remain).
 - Fix: In task 7.2 add a step: extend `scripts/check-bundle-size.mjs` to require a separate chunk for every view component, `["CardsView-", "GridView-"]` instead of the single `CARDS_VIEW_CHUNK_PREFIX`, with its failure message naming the view; then run `pnpm run build && pnpm check:bundle-size`.
 - Fix risk: the chunk name follows the file name `GridView.tsx`, as `CardsView-` follows `CardsView.tsx`; renaming the file later would need the prefix updated.
-- Status: open
+- Status: fixed
+- Resolution: task 7.2 first extends `scripts/check-bundle-size.mjs` to require a separate chunk for each view prefix (`CardsView-`, `GridView-`), naming the missing one on failure, then runs the build and `pnpm check:bundle-size`.
 
 ## Verdict
 
