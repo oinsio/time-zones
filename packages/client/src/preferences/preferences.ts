@@ -2,6 +2,7 @@
  * Preferences: the user's settings, a pure model (ADR-0002).
  * Implements FR4, FR5, FR7 of add-settings-page-and-device-time-location (D5).
  * The zone label implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4).
+ * The view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
  */
 
 /** Which colour theme the app uses; SYSTEM follows the system preference. */
@@ -30,6 +31,8 @@ export type Preferences = {
   interfaceLanguage: string | null;
   /** Shown zone parts, in enum order without duplicates; empty leaves only the country. */
   zoneLabelParts: readonly ZoneLabelPart[];
+  /** Id of the chosen registered view; `null` = none chosen, Cards. Resolved against the view registry by `resolveActiveView`. */
+  viewMode: string | null;
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -37,4 +40,5 @@ export const DEFAULT_PREFERENCES: Preferences = {
   hourFormat: HourFormat.H24,
   interfaceLanguage: null,
   zoneLabelParts: Object.values(ZoneLabelPart),
+  viewMode: null,
 };

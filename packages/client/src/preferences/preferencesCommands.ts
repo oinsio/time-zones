@@ -9,13 +9,15 @@ import {
  * Commands of the preferences: plain JSON (ADR-0002).
  * Implements FR4, FR5 of add-settings-page-and-device-time-location (D5);
  * SET_INTERFACE_LANGUAGE implements FR7 of add-interface-language-selection (D1);
- * SET_ZONE_LABEL_PART implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4).
+ * SET_ZONE_LABEL_PART implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4);
+ * SET_VIEW_MODE implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
  */
 export enum PreferencesCommandType {
   SET_THEME = "SET_THEME",
   SET_HOUR_FORMAT = "SET_HOUR_FORMAT",
   SET_INTERFACE_LANGUAGE = "SET_INTERFACE_LANGUAGE",
   SET_ZONE_LABEL_PART = "SET_ZONE_LABEL_PART",
+  SET_VIEW_MODE = "SET_VIEW_MODE",
 }
 
 export type PreferencesCommand =
@@ -29,7 +31,8 @@ export type PreferencesCommand =
       type: PreferencesCommandType.SET_ZONE_LABEL_PART;
       part: ZoneLabelPart;
       isShown: boolean;
-    };
+    }
+  | { type: PreferencesCommandType.SET_VIEW_MODE; viewMode: string };
 
 const ZONE_LABEL_PARTS_IN_ORDER: readonly ZoneLabelPart[] =
   Object.values(ZoneLabelPart);
@@ -70,5 +73,9 @@ export function reducePreferences(
         : { ...preferences, interfaceLanguage: command.interfaceLanguage };
     case PreferencesCommandType.SET_ZONE_LABEL_PART:
       return reduceZoneLabelPart(preferences, command.part, command.isShown);
+    case PreferencesCommandType.SET_VIEW_MODE:
+      return preferences.viewMode === command.viewMode
+        ? preferences
+        : { ...preferences, viewMode: command.viewMode };
   }
 }

@@ -25,6 +25,7 @@ export { useReferenceMoment } from "./useReferenceMoment";
 export { useStorageAvailability } from "./useStorageAvailability";
 export { useThemePreference } from "./useThemePreference";
 export { useTimeSelection } from "./useTimeSelection";
+export { useViewMode } from "./useViewMode";
 // Implements FR3, FR6 of add-wall-time-input-with-hint.
 export {
   useWallTimeInput,

@@ -1,5 +1,6 @@
 // Verifies FR8 of add-interface-language-selection (D2).
 // Verifies FR13, FR15, M6 of show-zone-abbreviations-and-zone-label-setting (D4).
+import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DEFAULT_PREFERENCES,
@@ -28,6 +29,7 @@ describe("deserializePreferencesDocument", () => {
         hourFormat: HourFormat.H12,
         interfaceLanguage: "ru",
         zoneLabelParts: BOTH_PARTS,
+        viewMode: null,
       },
     });
   });
@@ -59,9 +61,9 @@ describe("deserializePreferencesDocument", () => {
 
   it.each([
     [
-      "version 4",
+      "a newer version",
       JSON.stringify({
-        schemaVersion: 4,
+        schemaVersion: PREFERENCES_SCHEMA_VERSION + 1,
         payload: { ...DEFAULT_PREFERENCES },
       }),
     ],
@@ -99,15 +101,17 @@ describe("serializePreferencesDocument", () => {
           hourFormat: HourFormat.H12,
           interfaceLanguage: "ru",
           zoneLabelParts: BOTH_PARTS,
+          viewMode: null,
         }),
       ),
     ).toEqual({
-      schemaVersion: 3,
+      schemaVersion: 4,
       payload: {
         theme: "DARK",
         hourFormat: "H12",
         interfaceLanguage: "ru",
         zoneLabelParts: BOTH_PARTS,
+        viewMode: null,
       },
     });
   });

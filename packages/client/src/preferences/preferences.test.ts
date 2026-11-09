@@ -18,6 +18,7 @@ describe("DEFAULT_PREFERENCES", () => {
       theme: ThemePreference.SYSTEM,
       hourFormat: HourFormat.H24,
       interfaceLanguage: null,
+      viewMode: null,
       zoneLabelParts: [
         ZoneLabelPart.UTC_OFFSET,
         ZoneLabelPart.ZONE_ABBREVIATION,
@@ -70,6 +71,7 @@ describe("parseStoredPreferences", () => {
       theme,
       hourFormat: "H12",
       interfaceLanguage: null,
+      viewMode: null,
     });
     expect(outcome).toEqual({
       ok: true,
@@ -77,6 +79,7 @@ describe("parseStoredPreferences", () => {
         theme,
         hourFormat: HourFormat.H12,
         interfaceLanguage: null,
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });
@@ -91,6 +94,7 @@ describe("parseStoredPreferences", () => {
           theme: "DARK",
           hourFormat,
           interfaceLanguage: null,
+          viewMode: null,
         }).ok,
       ).toBe(true);
     },
@@ -104,6 +108,7 @@ describe("parseStoredPreferences", () => {
       {
         theme: "DARK",
         interfaceLanguage: null,
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -112,6 +117,7 @@ describe("parseStoredPreferences", () => {
       {
         hourFormat: "H12",
         interfaceLanguage: null,
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -129,6 +135,7 @@ describe("parseStoredPreferences", () => {
         theme: "DARK",
         hourFormat: "H12",
         interfaceLanguage: "",
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -138,6 +145,7 @@ describe("parseStoredPreferences", () => {
         theme: "DARK",
         hourFormat: "H12",
         interfaceLanguage: 42,
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -147,6 +155,7 @@ describe("parseStoredPreferences", () => {
         theme: "DARK",
         hourFormat: "H12",
         interfaceLanguage: {},
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -156,6 +165,7 @@ describe("parseStoredPreferences", () => {
         theme: "SEPIA",
         hourFormat: "H12",
         interfaceLanguage: null,
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -165,6 +175,7 @@ describe("parseStoredPreferences", () => {
         theme: "DARK",
         hourFormat: "H36",
         interfaceLanguage: null,
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -199,6 +210,7 @@ describe("SET_INTERFACE_LANGUAGE", () => {
         theme: "DARK",
         hourFormat: "H12",
         interfaceLanguage: "ru",
+        viewMode: null,
       }),
     ).toEqual({
       ok: true,
@@ -206,6 +218,7 @@ describe("SET_INTERFACE_LANGUAGE", () => {
         theme: ThemePreference.DARK,
         hourFormat: HourFormat.H12,
         interfaceLanguage: "ru",
+        viewMode: null,
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });

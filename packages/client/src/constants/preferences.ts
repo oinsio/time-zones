@@ -2,7 +2,7 @@ import { HourFormat, ThemePreference, ZoneLabelPart } from "@/preferences";
 import { KeyboardKey } from "./keyboard";
 
 /** Version of the stored preferences document (ADR-0004 envelope). */
-export const PREFERENCES_SCHEMA_VERSION = 3;
+export const PREFERENCES_SCHEMA_VERSION = 4;
 
 /**
  * The zone of the live example under the zone label group.

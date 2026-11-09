@@ -21,6 +21,7 @@ const storedTheme = (theme: ThemePreference) =>
       hourFormat: HourFormat.H24,
       interfaceLanguage: null,
       zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+      viewMode: null,
     },
   }) as const;
 

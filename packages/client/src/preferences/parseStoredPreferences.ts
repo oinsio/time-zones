@@ -19,7 +19,7 @@ const isZoneLabelParts = (value: unknown): value is ZoneLabelPart[] =>
   value.every((part) => ZONE_LABEL_PART_VALUES.includes(part)) &&
   new Set(value).size === value.length;
 
-const isInterfaceLanguage = (value: unknown): value is string | null =>
+const isNullOrNonEmptyString = (value: unknown): value is string | null =>
   value === null || (typeof value === "string" && value !== "");
 
 /**
@@ -27,19 +27,21 @@ const isInterfaceLanguage = (value: unknown): value is string | null =>
  * unknown value rejects it as a whole.
  * Implements FR7 of add-settings-page-and-device-time-location (D5);
  * the interface language implements FR7 of add-interface-language-selection (D1);
- * the zone label implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4).
+ * the zone label implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4);
+ * the view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
  */
 export function parseStoredPreferences(
   payload: unknown,
 ): ParseStoredPreferencesResult {
   if (typeof payload !== "object" || payload === null) return { ok: false };
-  const { theme, hourFormat, interfaceLanguage, zoneLabelParts } =
+  const { theme, hourFormat, interfaceLanguage, zoneLabelParts, viewMode } =
     payload as Record<string, unknown>;
   if (
     !THEME_VALUES.includes(theme) ||
     !HOUR_FORMAT_VALUES.includes(hourFormat) ||
-    !isInterfaceLanguage(interfaceLanguage) ||
-    !isZoneLabelParts(zoneLabelParts)
+    !isNullOrNonEmptyString(interfaceLanguage) ||
+    !isZoneLabelParts(zoneLabelParts) ||
+    !isNullOrNonEmptyString(viewMode)
   ) {
     return { ok: false };
   }
@@ -49,6 +51,7 @@ export function parseStoredPreferences(
       theme: theme as ThemePreference,
       hourFormat: hourFormat as HourFormat,
       interfaceLanguage,
+      viewMode,
       zoneLabelParts: Object.values(ZoneLabelPart).filter((part) =>
         zoneLabelParts.includes(part),
       ),

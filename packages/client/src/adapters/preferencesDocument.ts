@@ -14,6 +14,8 @@ import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
  * Version 2 had no zone label: the step shows both parts.
  * Implements FR8 of add-interface-language-selection (D2);
  * the zone label step implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4).
+ * Version 3 had no view mode: the step leaves none chosen (Cards).
+ * Implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
  */
 export const createPreferencesMigrations = (
   legacyInterfaceLanguage: string | null,
@@ -26,6 +28,7 @@ export const createPreferencesMigrations = (
     ...(payload as object),
     zoneLabelParts: Object.values(ZoneLabelPart),
   }),
+  3: (payload) => ({ ...(payload as object), viewMode: null }),
 });
 
 export const serializePreferencesDocument = (
@@ -38,6 +41,7 @@ export const serializePreferencesDocument = (
       hourFormat: preferences.hourFormat,
       interfaceLanguage: preferences.interfaceLanguage,
       zoneLabelParts: preferences.zoneLabelParts,
+      viewMode: preferences.viewMode,
     },
   });
 

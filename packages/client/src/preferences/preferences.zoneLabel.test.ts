@@ -26,6 +26,7 @@ function parseParts(zoneLabelParts: unknown) {
     theme: "DARK",
     hourFormat: "H12",
     interfaceLanguage: null,
+    viewMode: null,
     zoneLabelParts,
   });
 }

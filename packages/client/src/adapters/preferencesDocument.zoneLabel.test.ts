@@ -1,5 +1,6 @@
 // Verifies FR13, FR15, M6 of show-zone-abbreviations-and-zone-label-setting (D4).
 import { describe, expect, it } from "vitest";
+import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   HourFormat,
@@ -27,6 +28,7 @@ describe("the zone label in the preferences document", () => {
         hourFormat: HourFormat.H12,
         interfaceLanguage: "ru",
         zoneLabelParts: BOTH_PARTS,
+        viewMode: null,
       },
     });
   });
@@ -41,12 +43,13 @@ describe("the zone label in the preferences document", () => {
     });
   });
 
-  it("should round-trip a version 3 document with the offset only", () => {
+  it("should round-trip a current document with the offset only", () => {
     const preferences: Preferences = {
       theme: ThemePreference.SYSTEM,
       hourFormat: HourFormat.H24,
       interfaceLanguage: null,
       zoneLabelParts: [ZoneLabelPart.UTC_OFFSET],
+      viewMode: null,
     };
     expect(
       deserializePreferencesDocument(
@@ -56,8 +59,11 @@ describe("the zone label in the preferences document", () => {
     ).toEqual({ status: PreferencesLoadStatus.LOADED, preferences });
   });
 
-  it("should read version 4 as unreadable", () => {
-    const rawDocument = JSON.stringify({ schemaVersion: 4, payload: {} });
+  it("should read a newer version as unreadable", () => {
+    const rawDocument = JSON.stringify({
+      schemaVersion: PREFERENCES_SCHEMA_VERSION + 1,
+      payload: {},
+    });
     expect(deserializePreferencesDocument(rawDocument, null)).toEqual({
       status: PreferencesLoadStatus.UNREADABLE,
     });

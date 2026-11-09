@@ -83,6 +83,7 @@ export const seedZoneLabelParts = (
         hourFormat: SEEDED_HOUR_FORMAT,
         interfaceLanguage,
         zoneLabelParts: ZONE_LABEL_PART_VALUES[partsName],
+        viewMode: null,
       },
     }),
   );

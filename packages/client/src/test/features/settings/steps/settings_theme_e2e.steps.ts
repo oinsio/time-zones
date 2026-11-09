@@ -36,6 +36,7 @@ Given(
           hourFormat,
           interfaceLanguage: locationsWorld.seededInterfaceLanguage,
           zoneLabelParts: ALL_ZONE_LABEL_PARTS,
+          viewMode: null,
         },
       }),
     );

@@ -7,7 +7,6 @@ import i18n from "i18next";
 import { useState } from "react";
 import { expect, vi } from "vitest";
 import { SettingsToggleGroup } from "@/app/settings";
-import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { ZoneLabelPart } from "@/preferences";
 import type { ZONE_LABEL_PART_NAMES } from "../../locations/steps/zoneLineWorld";
 import { createZoneLabelWorld } from "./zoneLabelWorld";
@@ -22,7 +21,8 @@ const feature = await loadFeature("../settings_zone_label_unit.feature");
 const ELEMENT_SEPARATOR = ", ";
 const UTC_OFFSET_TOGGLE = "UTC offset";
 const ABBREVIATION_TOGGLE = "Abbreviation";
-const LEGACY_SCHEMA_VERSION = PREFERENCES_SCHEMA_VERSION - 1;
+/** The schema version before the zone label existed. */
+const SCHEMA_VERSION_BEFORE_ZONE_LABEL = 2;
 const THEME_STORED_VALUES: Record<string, string> = { Dark: "DARK" };
 const HOUR_FORMAT_STORED_VALUES: Record<string, string> = {
   "12-hour": "H12",
@@ -176,7 +176,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       "the stored preferences document was written before the zone label existed, with the theme {string}, the hour format {string} and the language {string}",
       (_ctx, theme: string, hourFormat: string, language: string) => {
         legacyDocumentText = JSON.stringify({
-          schemaVersion: LEGACY_SCHEMA_VERSION,
+          schemaVersion: SCHEMA_VERSION_BEFORE_ZONE_LABEL,
           payload: {
             theme: THEME_STORED_VALUES[theme],
             hourFormat: HOUR_FORMAT_STORED_VALUES[hourFormat],
