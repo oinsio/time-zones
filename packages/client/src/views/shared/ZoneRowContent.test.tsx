@@ -37,8 +37,8 @@ describe("ZoneRowContent without a row variant", () => {
 
   it("should keep the card place and time block from growing", () => {
     renderContent();
-    const placeAndTime = screen.getByText("Almaty").parentElement?.parentElement
-      ?.parentElement;
+    const placeAndTime =
+      screen.getByText("Almaty").parentElement?.parentElement?.parentElement;
     expect(placeAndTime).toHaveClass("md:flex-none");
   });
 
@@ -60,8 +60,8 @@ describe("ZoneRowContent for a grid row", () => {
 
   it("should let the place and time block grow", () => {
     renderContent(LocationRowVariant.GRID_ROW);
-    const placeAndTime = screen.getByText("Almaty").parentElement?.parentElement
-      ?.parentElement;
+    const placeAndTime =
+      screen.getByText("Almaty").parentElement?.parentElement?.parentElement;
     expect(placeAndTime).toHaveClass("md:flex-1");
     expect(placeAndTime).not.toHaveClass("md:flex-none");
   });
