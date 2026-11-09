@@ -42,6 +42,14 @@ The Grid view SHALL show the location rows in list order, all inside one panel s
 - **WHEN** the main page is shown
 - **THEN** it shows the load error with a Reset action
 
+#### Scenario: Grid works offline
+- **GIVEN** the view mode is Grid, the current time is `2026-03-08T07:30:00Z`, the stored locations are Almaty and Moscow, and the app was installed for offline use on an earlier visit
+- **WHEN** the user reopens the app without network
+- **THEN** the Grid view shows the rows of Almaty and Moscow, and Almaty shows `12:30`
+- **AND** no note or alert about the network is shown
+- **WHEN** the user removes Moscow
+- **THEN** the Grid view shows only the row of Almaty
+
 #### Scenario: Grid fits narrow and wide screens
 - **GIVEN** the view mode is Grid and the stored locations are Almaty, Moscow, Kolkata and New York
 - **WHEN** the main page is `<width>` px wide
