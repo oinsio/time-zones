@@ -47,8 +47,11 @@ const readVisibleText = (label: Locator) =>
 const readNames = async (group: Locator) => {
   const names: string[] = [];
   for (const label of await labelsOf(group).all()) {
+    const screenReaderName = label.locator("span.sr-only");
     names.push(
-      (await label.locator("span.sr-only").textContent())?.trim() ?? "",
+      (await screenReaderName.count()) === 0
+        ? await readVisibleText(label)
+        : ((await screenReaderName.textContent())?.trim() ?? ""),
     );
   }
   return names;
