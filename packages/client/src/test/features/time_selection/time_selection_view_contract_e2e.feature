@@ -8,8 +8,7 @@ Feature: Time selection in every registered view
     And the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Almaty", "Moscow"
 
-  # Grid: excluded until the hour cells change; remove @grid-pending-hour-cells there.
-  @add-time-sliders-to-location-cards @add-view-mode-setting-and-grid-skeleton @view-contract @grid-pending-hour-cells @FR3 @FR5 @FR8
+  @add-time-sliders-to-location-cards @add-view-mode-setting-and-grid-skeleton @add-grid-hour-cells-and-hour-frame @view-contract @FR3 @FR5 @FR8 @FR13
   Scenario: Select a time
     When the user moves the time of "Moscow" one hour forward
     Then the card of "Almaty" shows the time "13:30"

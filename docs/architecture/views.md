@@ -9,7 +9,7 @@ Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002
 | View | Best for | Screens | Status |
 |---|---|---|---|
 | **Cards** | converting: large exact time per location | phone in portrait, any | first release |
-| **Grid** | planning a meeting: see where working hours overlap and pick a meeting range ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)) | any; all 24 hours fit from about 830 px | skeleton: grid rows and date bar; hour cells, hour frame and meeting follow |
+| **Grid** | planning a meeting: see where working hours overlap and pick a meeting range ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)) | any; all 24 hours fit from about 830 px | hour cells and hour frame; meeting follows |
 
 Future views reuse the same model, e.g. a compact world-clock list.
 
@@ -31,7 +31,7 @@ All rows sit in one panel with dividers, so a frame can cross every row. Each ro
 ```
 
 - **Row header:** drag handle, home or here icon, city, difference, zone line; on the right the date with the day shift mark, the time and the location menu. On a narrow screen it takes two lines (city and zone line on the left, time and date on the right).
-- **Hour cells:** one absolute hour of the reference day each, labelled with the location's local start hour (`9`, `9:30`), coloured by its day period. Where a location's local midnight falls the cell shows the date (`MAR` over `8`) instead of `0` and is shaded; the row of the reference zone shows a plain `0`, since its day always starts there. A DST offset edge is a dark line on the cell's left side.
+- **Hour cells:** the hour strip is the Grid view's slider for the keyboard; a tap does nothing until the meeting range. One absolute hour of the reference day each, labelled with the location's local start hour (`9`, `9:30`), coloured by its day period. Where a location's local midnight falls the cell shows the date (`MAR` over `8`) instead of `0` and is shaded; the row of the reference zone shows a plain `0`, since its day always starts there. A DST offset edge is a dark line on the cell's left side.
 - **Width:** all 24 cells when each is at least 32 px wide (desktop about 58 px, tablet 46 px, phone in landscape 33 px). Otherwise about 9 cells of 36–40 px (phone in portrait) and the strips of all rows scroll horizontally together.
 - **Cell colouring:** by day period. A later setting may offer working hours only or no colouring.
 
@@ -134,7 +134,7 @@ Every view must pass the same BDD E2E scenarios:
 - show loading, error, empty and offline states;
 - pass axe-core and be operable with Tab, Enter, Esc and arrows.
 
-A scenario a view cannot pass yet because a part of its design is not built is excluded for that view only, by a pending tag that names the view and the change that brings it back ([ADR-0012](../adr/0012-user-chosen-view.md)): today `@grid-pending-hour-cells` on "Select a time".
+A scenario a view cannot pass yet because a part of its design is not built is excluded for that view only, by a pending tag that names the view and the change that brings it back ([ADR-0012](../adr/0012-user-chosen-view.md)): no scenario is excluded today.
 
 Grid also passes the meeting scenarios: set, resize, share and clear a meeting range.
 
