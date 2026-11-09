@@ -6,9 +6,9 @@
 |---|---|
 | Stale claims | 0 |
 | Requirements fully covered | 40/41 |
-| Contradictions | 1 |
+| Contradictions | 2 |
 | CRITICAL | 0 |
-| WARNING | 2 |
+| WARNING | 3 |
 | SUGGESTION | 1 |
 
 ## Freshness
@@ -57,7 +57,7 @@
 | NFR-R3 | ✅ | ✅ Grid view rows, "Grid row header in two lines on a phone" | ✅ 6.3, 7.4 |
 | NFR-R4 | ✅ | ✅ Grid view rows, "Approved Grid screenshots" (8 examples) | ✅ 7.4 (+ H1 comparison with the design) |
 | UX1 | ✅ | ✅ Grid view rows (implements UX1, screenshots) | ✅ 7.1, 7.4 (+ H1) |
-| UX2 | ✅ | ❌ substance in "Frame crosses every row in the accent colour", but no spec requirement links UX2 (R3) | ✅ 7.1, 7.2 tagged `@UX2` |
+| UX2 | ✅ | ❌ substance in "Frame crosses every row in the accent colour", but no spec requirement links UX2 (R4) | ✅ 7.1, 7.2 tagged `@UX2` |
 | UX3 | ✅ | ✅ Hour strip width (implements UX3) | ✅ 7.3 |
 | M1 | ✅ | n/a | ✅ 2.1, 5.1 |
 | M2 | ✅ | n/a | ✅ 2.1, 5.1 |
@@ -81,6 +81,7 @@
 ## Consistency
 
 - `design.md:131,134` (D5) wraps the row header and the notes of a grid row in a `sticky left-0` box and gives only the texts inside it `relative z-[2]`, with the frame `<li>` at `z-[1]`; a `position: sticky` box establishes its own stacking context, so the texts' `z-[2]` only orders them inside that box, and the box itself paints below the frame's `z-[1]`. That contradicts `proposal.md:79` FR10 / `specs/grid-view/spec.md:149` ("the frame … never covers them"). See R1.
+- `design.md:134` (D5 Frame) makes the frame the last `<li>` child of the `<ul>` with `rounded-lg border-2 border-accent`, while `design.md:131` (D5 Panel) keeps the `<ul>`'s "border and dividers unchanged", i.e. `divide-y divide-border` (`packages/client/src/views/shared/locationRowVariant.ts:47`); Tailwind's divide selectors restyle that `<li>` to a 1 px top border in the border colour, against `proposal.md:77` FR8 ("An hour frame in the accent colour"), `proposal.md:104` UX1 and `specs/grid-view/spec.md:108`. See R2.
 
 ## Findings
 
@@ -89,11 +90,20 @@
 - Rule: `—`
 - Problem: D5 makes the row header block and the notes of every grid row a `sticky left-0` box (`design.md:131`) and gives the city, difference, zone line, date, time button and notes `relative z-[2]` inside it, while the frame is an `absolute … z-[1]` `<li>` child of the `<ul>` (`design.md:134`). A `position: sticky` element always forms a stacking context, so the `z-[2]` of the texts is local to their sticky box; the sticky box itself has `z-index: auto` and is painted at level 0 of the `<ul>`'s parent context, below the frame at `z-[1]`. The frame therefore draws over the header texts and the clock change note, the opposite of FR10 (`proposal.md:79`: "the frame is interrupted behind them and never covers them") and of `docs/architecture/views.md` → Layers ("hour cells, then the frame, then the row header texts and row notes").
 - Impact: implemented as written, the "Notes and header texts cover the frame" E2E (task 7.2, `elementFromPoint`) fails and the frame visibly crosses the New York note and header texts in every screenshot baseline; the implementer has to rediscover the layering rule during 7.2, and baselines written before that (7.4) would bake the wrong layering in.
-- Fix: in D5 "Frame", state that the z-order is set on the sticky boxes themselves: the sticky header box and the sticky notes box of a `GRID_ROW` get `relative z-[2]` (sticky already positions them) with a transparent background, and the texts inside keep their `bg-surface` / `bg-notice` so the frame shows only between them; the frame stays `z-[1]`. Mirror it in task 6.3 ("`z-[2]` on the sticky header and notes wrappers for `GRID_ROW` via `LOCATION_ROW_VARIANT_CLASS_NAMES`" instead of "`z-[2]` texts").
-- Fix risk: every row's wrapper is then a `z-[2]` context, so a dropdown inside one row's wrapper can still be covered by the next row's wrapper (later in DOM, same level) — that is the separate problem R2 addresses; no other artifact or test depends on the texts' own z-index.
+- Fix: in D5 "Frame", state that the z-order is set on the sticky boxes themselves: the sticky header box and the sticky notes box of a `GRID_ROW` get `z-[2]` only — no `relative`, which would replace their `sticky` position, and none is needed because a sticky box is already positioned, so `z-index` applies — with a transparent background, and the texts inside keep their `bg-surface` / `bg-notice` so the frame shows only between them; the frame stays `z-[1]`. Mirror it in task 6.3 ("`z-[2]` on the sticky header and notes wrappers for `GRID_ROW` via `LOCATION_ROW_VARIANT_CLASS_NAMES`" instead of "`z-[2]` texts").
+- Fix risk: every row's wrapper is then a `z-[2]` context, so a dropdown inside one row's wrapper can still be covered by the next row's wrapper (later in DOM, same level) — that is the separate problem R3 addresses; no other artifact or test depends on the texts' own z-index.
 - Status: open
 
-### R2 — WARNING — The scrolling Grid panel clips the location menu
+### R2 — WARNING — The list's dividers restyle the hour frame's border
+- Location: `openspec/changes/add-grid-hour-cells-and-hour-frame/design.md:134` and `:131`
+- Rule: `—`
+- Problem: D5 "Frame" (`design.md:134`) makes `HourFrame` "the last child of the `<ul>`, an `<li aria-hidden="true">` with … `rounded-lg border-2 border-accent`", while D5 "Panel" (`design.md:131`) keeps the `<ul>`'s "border and dividers unchanged". For `GRID_ROW` that `<ul>` carries `rounded-md border border-border divide-y divide-border` (`packages/client/src/views/shared/locationRowVariant.ts:47`). On Tailwind `^3.4.17` (`packages/client/package.json:69`), `divide-y` compiles to `.divide-y > :not([hidden]) ~ :not([hidden]) { border-top-width: 1px; border-bottom-width: 0 }` and `divide-border` sets `border-color` through the same selector. That selector (specificity 0,3,0) beats `.border-2` and `.border-accent` (0,1,0 each), and the frame `<li>` follows the rows, so it matches: the frame gets a 1 px top border, no bottom border and 2 px sides, all in the `--color-border` colour.
+- Impact: implemented as written, the frame is not an accent-coloured box but a grey outline open at the bottom. That contradicts FR8 (`proposal.md:77`: "An hour frame in the accent colour") and UX1 (`proposal.md:104`). The task 7.2 E2E "Frame crosses every row in the accent colour" (`border-color` equals `--color-accent`) fails, and the implementer has to rediscover the cause; baselines written in 7.4 would bake the wrong frame in if 7.2 is worked around.
+- Fix: in D5 "Panel", replace "border and dividers unchanged" with this rule: for `GRID_ROW` the dividers move from the `<ul>` to the row `<li>`s. `LOCATION_ROW_VARIANT_CLASS_NAMES[GRID_ROW].list` becomes `rounded-md border border-border` (no `divide-y divide-border`), and `.row` adds `border-t border-border first:border-t-0`, so the frame `<li>`, which is not a row, gets no divider style. Mirror it in task 6.3 ("dividers on the row `<li>`s instead of `divide-y` on the `<ul>` for `GRID_ROW`") and update `src/views/shared/ViewLocationList.test.tsx:172-179` ("should draw the rows in one panel with dividers") to assert `border border-border` on the list and `border-t border-border first:border-t-0` on every row.
+- Fix risk: the existing unit test at `ViewLocationList.test.tsx:172-179` asserts `divide-y` / `divide-border` on the list and must change in the same task. The test at `:182-189` (`not.toHaveClass("border")` on each row) still passes, since `border-t` is a different class. With the frame as the last child, the last row no longer matches `last:rounded-b-md` (`locationRowVariant.ts:48`), but the `<ul>`'s `overflow-x-auto` already clips its children to its rounded corners, so nothing visible changes. The divider pixels stay the same, and Cards (`CARD` variant) is untouched.
+- Status: open
+
+### R3 — WARNING — The scrolling Grid panel clips the location menu
 - Location: `openspec/changes/add-grid-hour-cells-and-hour-frame/design.md:131`
 - Rule: `—`
 - Problem: D5 makes the grid `<ul>` `relative overflow-x-auto overscroll-x-contain` and moves the location menu into a per-row sticky box. The location menu's dropdown is an `absolute right-0 top-full z-20` element inside a `relative inline-flex` wrapper in the row (`packages/client/src/views/shared/LocationMenu.tsx:123,152`), not a portal. With `overflow-x: auto`, the `<ul>`'s `overflow-y` computes to `auto` as well, so the dropdown of the last row (which opens below the panel's bottom edge) is clipped and only reachable through an inner vertical scrollbar of the panel, on every screen width, not only on phones. In addition each row's sticky box is its own stacking context, so a dropdown opened in row N is painted under row N+1's sticky header. Neither D5 nor any task mentions the menu.
@@ -102,7 +112,7 @@
 - Fix risk: touches a shared block used by Cards; gating it on the row variant keeps Cards unchanged, but `LocationMenu.test.tsx` / `LocationMenu.legacy.test.tsx` need a grid-variant case, and fixed positioning must be checked on the legacy Safari 12 build (`check:legacy-build`); `:has()` does not exist on iOS Safari 12 (ADR-0009), so there the raised z-index should come from a `data-menu-open` attribute on the row rather than `has-[…]`. `LocationMenu.tsx` must stay under 200 lines.
 - Status: open
 
-### R3 — SUGGESTION — UX2 is not linked from any delta-spec requirement
+### R4 — SUGGESTION — UX2 is not linked from any delta-spec requirement
 - Location: `openspec/changes/add-grid-hour-cells-and-hour-frame/specs/grid-view/spec.md:108`
 - Rule: `.claude/rules/traceability.md`
 - Problem: UX2 ("the frame reads as one column … not drawn per row, runs through the dividers") is tested by the scenario "Frame crosses every row in the accent colour" (`spec.md:137-146`) and tagged `@UX2` in tasks 7.1/7.2, but the "Hour frame" requirement's comment reads `implements FR8, FR9` only, and no other requirement names UX2.
@@ -113,4 +123,4 @@
 
 ## Verdict
 
-Needs revision — no CRITICAL finding; WARNINGs R1 and R2 should be fixed before implementation because both come from D5's layout decision and would otherwise be found only in E2E (R1) or not at all (R2). R3 is optional polish.
+Needs revision — no CRITICAL finding; WARNINGs R1, R2 and R3 block: all three come from D5's layout decision, R1 and R2 would otherwise surface only as failing E2E in 7.2 (frame layering, frame colour), and R3 not at all. R4 is optional polish.
