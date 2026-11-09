@@ -75,7 +75,7 @@ FR7, UX3, NFR-P1. Everything `CardsView` does around the list (unreadable list �
 - New shared block `views/shared/ViewLocationList.tsx` with the prop `rowLayout: LocationRowLayout`: the body of today's `CardsView` moved unchanged, passing `rowLayout` to `LocationList`. `CardsView` becomes `<ViewLocationList rowLayout={LocationRowLayout.CARD} />`; new `views/grid/GridView.tsx` (default export) is `<ViewLocationList rowLayout={LocationRowLayout.GRID_ROW} />`.
 - `LocationList` takes `rowLayout` and passes it to each `LocationRow`. For `GRID_ROW` its `<ul>` is one panel: `rounded-md border border-border bg-surface divide-y divide-border`, no gap; for `CARD` it stays `flex flex-col gap-2`. The `<ul>` carries `data-row-layout={rowLayout}` so tests can tell the layouts apart.
 - `LocationRow` with `GRID_ROW` drops its own border, rounding and background (the panel draws them) and passes `dayTrack={undefined}` to `ZoneRowContent`, which already renders no `DayTrack` without one. Everything else — drag handle, marks, offset difference, zone line, `LocalDateTime` with the wall-time input, location menu, wall-time hint, clock change note — is the same component, so the row header is shared, not copied. The "Make home" item still depends on `row.dayTrack` from the presenter, unchanged.
-- The empty-state key `views.cardsEmptyState` is renamed `views.emptyState` in both locale files and every reference (`englishTexts.ts`, `mainPageE2eHelpers.ts`, `locationsStates.ts`, `locationsUiWorld.tsx`, `locations_storage_ui_unit.steps.tsx`, `locations_device_time_e2e.steps.ts`, `main_page_states_unit.steps.tsx`), because both views show it.
+- The empty-state key `views.cardsEmptyState` is renamed `views.emptyState` in both locale files and every reference (`englishTexts.ts`, `mainPageE2eHelpers.ts`, `locationsStates.ts`, `locationsUiWorld.tsx`, `locations_storage_ui_unit.steps.tsx`, `locations_device_time_e2e.steps.ts`, `main_page_states_unit.steps.tsx`, `src/test/features/main_page/steps/main_page_unit.steps.ts:40`), because both views show it.
 - The date bar is rendered by `AppShell` in the main page's bottom bar, outside the view, so Grid gets it with no change.
 
 ### Consequences
@@ -119,16 +119,27 @@ Negative: a real device rotation is not exercised; the viewport swap is its layo
 ### Alternatives Considered
 **jsdom resize in unit tests**: jsdom has no layout, so it cannot show that nothing reacts to the size.
 
-## D7. Test seeds of the current preferences document
+## D7. Tests that depend on the preferences schema version
 
 ### Context
-D1 raises the schema to 4 and makes `viewMode` required in a current document.
+D1 raises `PREFERENCES_SCHEMA_VERSION` from 3 to 4 and makes `viewMode` required in a current document and in the `Preferences` type. Tests break in three ways: a literal `4` that meant "newer than current" becomes current; an expected serialized document still says `3`; a seed or typed literal of the current version lacks `viewMode`.
 
 ### Decision
-Every test that writes a current-version preferences document adds `viewMode: null` to its payload: `src/test/features/settings/steps/zoneLabelWorld.tsx`, `settings_deploy_time_world.tsx`, `settings_theme_e2e.steps.ts`, `settings_zone_label_unit.steps.tsx`, `settingsE2eHelpers.ts`, `src/test/features/locations/steps/locationsSeedHelpers.ts`, `locations_device_time_storage_unit.steps.ts`, and the adapter tests that write `PREFERENCES_SCHEMA_VERSION` documents (`src/adapters/preferencesDocument.test.ts`, `preferencesRepository.test.ts`). A literal version 3 document in a test stays version 3 and now exercises the new migration step.
+Version-dependent tests, each fixed as named:
+- `src/adapters/preferencesDocument.test.ts:60-67`: the `"version 4"` case of "should load %s as unreadable" (`{ schemaVersion: 4, payload: { ...DEFAULT_PREFERENCES } }`) would load once 4 is current. It becomes `"a newer version"` with `schemaVersion: PREFERENCES_SCHEMA_VERSION + 1` (5).
+- `src/adapters/preferencesDocument.test.ts:93-114`: the serialization test expects `schemaVersion: 3`; it expects `4`, and the input `Preferences` and the expected payload gain `viewMode: null`.
+- `src/adapters/preferencesDocument.zoneLabel.test.ts:59-64` "should read version 4 as unreadable" becomes "should read a newer version as unreadable" with `schemaVersion: PREFERENCES_SCHEMA_VERSION + 1`.
+- `src/adapters/preferencesDocument.zoneLabel.test.ts:44-57` "should round-trip a version 3 document with the offset only": the `Preferences` literal gains `viewMode: null`, and the title says "a current document".
+- `src/adapters/preferencesRepository.test.ts:56-63` "a newer schema version" uses `schemaVersion: 3`, which is not newer; it uses `PREFERENCES_SCHEMA_VERSION + 1`.
+- `src/adapters/preferencesRepository.test.ts:106-122` "should store the schema version with the payload" expects `schemaVersion: 3`; it expects `4` and `viewMode: null` in the payload. The `Preferences` literals passed to `save` in this file gain `viewMode: null`.
+- `src/test/features/settings/steps/settings_zone_label_unit.steps.tsx:25` defines `LEGACY_SCHEMA_VERSION = PREFERENCES_SCHEMA_VERSION - 1`, which would become 3; "Existing users get both parts" (lines 175-186) would then write a version 3 document without `zoneLabelParts`, which is unreadable. The constant is pinned to the version before the zone label existed — `const SCHEMA_VERSION_BEFORE_ZONE_LABEL = 2` — and the then unused `PREFERENCES_SCHEMA_VERSION` import is dropped. The document gets no `viewMode`.
+
+Current-version seeds whose payload is written field by field add `viewMode: null`: `src/test/features/settings/steps/zoneLabelWorld.tsx:136`, `settings_theme_e2e.steps.ts:33`, `settingsE2eHelpers.ts:80`, `src/test/features/locations/steps/locationsSeedHelpers.ts:104`. `settings_deploy_time_world.tsx:46` spreads `DEFAULT_PREFERENCES` and needs no change.
+
+Every other typed `Preferences` literal in tests (controller tests, step worlds, `src/adapters/preferencesRepository.contract.ts`) gains `viewMode: null` or spreads `DEFAULT_PREFERENCES`; `pnpm typecheck` (`tsc -b --noEmit`) reports each one that lacks it. Documents of versions 1 and 2 in tests (`src/i18n.test.ts:115`, `src/app/AppShell.settings.test.tsx:133`, `settingsLanguageWorld.tsx:99`, `settings_language_storage_unit.steps.tsx:42`) stay as they are and now also run the new step.
 
 ### Consequences
-Positive: the seeds keep exercising a valid current document.
+Positive: the seeds keep exercising a valid current document, and the "newer version" fixtures stay newer at every later bump.
 Negative: several test files change only for the new field.
 
 ### Alternatives Considered
