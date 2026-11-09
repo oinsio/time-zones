@@ -22,6 +22,7 @@ Audience: every user (the setting, Cards stays the default) and the developers o
 - MODIFIED `main-page` → **Cards view is registered and lazy**: the registry holds Cards and Grid, in this order, both lazy.
 - ADDED `main-page` → **Grid view skeleton**: Grid shows the location rows with the shared row headers, arranged as in the Grid design, in one panel, without hour cells, plus the date bar and every state of the main page.
 - ADDED `main-page` → **View contract runs for every registered view**: the view contract runs against Grid too; the scenarios that need hour cells are excluded for Grid by a visible marker until the hour cells change.
+- MODIFIED `time-selection` → **Select a time in every view**: a view without a time selection control yet may be excluded from "Select a time" by that marker; Grid is excluded until the hour cells change, every other view still passes it.
 - MODIFIED `browser-compatibility` → **Width measurement on legacy engines**: wording only — the `ResizeObserver` polyfill no longer serves view selection by width; it still makes a `ResizeObserver` available and the app still starts on the chosen view.
 - REMOVED: `AutoViewMode`, the `ViewMode` type of `views/`, `ViewDefinition.autoMinWidth`, `useContainerWidth`, `src/test/viewContractViewport.ts`. Every view-contract run picks its view through the stored view mode, not through the viewport width.
 - Docs: `docs/architecture/views.md` (intro, Catalog without Auto, Grid status, Overlays → Settings), `docs/architecture/domain-model.md` (`viewMode`), `docs/architecture/overview.md` (ADR table).
@@ -43,6 +44,7 @@ None.
 
 - `settings`: the view mode preference and its option group, its storage and migration, its strings, layout and screenshots.
 - `main-page`: the view host without `AUTO`, the registry with Grid, the Grid view skeleton and the view contract for every registered view.
+- `time-selection`: "Select a time in every view" allows the pending Grid exclusion of FR8.
 - `browser-compatibility`: the legacy `ResizeObserver` requirement no longer mentions view selection by width.
 
 ## Goals
