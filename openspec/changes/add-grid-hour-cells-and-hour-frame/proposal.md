@@ -123,7 +123,7 @@ Grid adds no data loading; the cells are computed from the location list and the
 
 ## Behavior
 
-- New `packages/client/src/test/features/grid_view/` with `grid_view_hour_cells.feature`, `grid_view_hour_frame_unit.feature`, `grid_view_hour_strip_budget.feature` (unit BDD) and `grid_view_hour_cells_e2e.feature`, `grid_view_hour_frame_e2e.feature`, `grid_view_width_e2e.feature`, `grid_view_screenshots_e2e.feature` (playwright-bdd), tagged `@add-grid-hour-cells-and-hour-frame`.
+- New `packages/client/src/test/features/grid_view/` with `grid_view_hour_cells_unit.feature`, `grid_view_hour_frame_unit.feature`, `grid_view_hour_strip_budget.feature` (unit BDD) and `grid_view_hour_cells_e2e.feature`, `grid_view_hour_frame_e2e.feature`, `grid_view_width_e2e.feature`, `grid_view_screenshots_e2e.feature` (playwright-bdd), tagged `@add-grid-hour-cells-and-hour-frame`.
 - Changed `main_page_grid_view_unit.feature` and `main_page_grid_view_e2e.feature` (the skeleton's "no hour cells" and 1024 px screenshot scenarios), `time_selection_view_contract_e2e.feature` (the pending tag removed).
 
 ## Visual Reference
