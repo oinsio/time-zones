@@ -1,13 +1,19 @@
 ## ADDED Requirements
 
 ### Requirement: Grid view skeleton
-The Grid view SHALL show the location rows in list order, all inside one panel separated by dividers. Each row MUST have the surface token background of the active theme, and the panel's border the border token colour. Each row MUST be the shared row header — drag handle when the list can be reordered, home or Here mark, city, offset difference, zone line, local time and date, location menu — followed by its row note when it has one, and MUST NOT contain a day track or hour cells. The date bar MUST stay under the view. In Grid the user MUST be able to add and remove a location, set and clear home, reorder the list, type an exact time into a row's time, change the date with the date bar and return to now. Grid MUST show the same empty state, location load error, loading state and view error as Cards, and MUST work offline without a note. Grid MUST NOT scroll horizontally at 320 px and at 2560 px. Inputs: the presented location rows. Output: one grid row per location. Errors: an unreadable stored list shows the load error with Reset. <!-- implements FR7, NFR-R1, UX3 of add-view-mode-setting-and-grid-skeleton -->
+The Grid view SHALL show the location rows in list order, all inside one panel separated by dividers. Each row MUST have the surface token background of the active theme, and the panel's border the border token colour. Each row MUST be the shared row header — drag handle when the list can be reordered, home or Here mark, city, offset difference, zone line, local time and date, location menu — followed by its row note when it has one, and MUST NOT contain a day track or hour cells. From 768 px wide the row header MUST be one line: the city, the offset difference and the zone line on the left, then the date, the time and the location menu on the right; below 768 px the city and the zone line MAY take two lines. The date bar MUST stay under the view. In Grid the user MUST be able to add and remove a location, set and clear home, reorder the list, type an exact time into a row's time, change the date with the date bar and return to now. Grid MUST show the same empty state, location load error, loading state and view error as Cards, and MUST work offline without a note. Grid MUST NOT scroll horizontally at 320 px and at 2560 px. Inputs: the presented location rows. Output: one grid row per location. Errors: an unreadable stored list shows the load error with Reset. <!-- implements FR7, NFR-R1, UX3 of add-view-mode-setting-and-grid-skeleton -->
 
 #### Scenario: Rows in one panel without hour cells
 - **GIVEN** the view mode is Grid and the stored locations are Almaty and Moscow
 - **WHEN** the main page is shown
 - **THEN** the Grid view shows the rows of Almaty and Moscow, in this order, inside one panel
 - **AND** no row has a day track
+
+#### Scenario: Grid row header in one line
+- **GIVEN** the view mode is Grid and the stored locations are Almaty and Moscow
+- **WHEN** the main page is 1024 px wide
+- **THEN** the zone line of Almaty is on the same line as its city
+- **AND** the date of Almaty is on the same line as its time and before it
 
 #### Scenario: Grid rows use the theme token colours
 - **GIVEN** the view mode is Grid, the stored locations are Almaty and Moscow, and the `<theme>` theme is active

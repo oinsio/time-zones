@@ -20,7 +20,7 @@ Audience: every user (the setting, Cards stays the default) and the developers o
 - MODIFIED `settings` → **Settings page layout**: the view group takes one row at every width; the approved settings screenshots are re-approved once.
 - REMOVED `main-page` → **View host resolves the active view** (`AUTO`, the container width and re-resolving on resize), replaced by ADDED `main-page` → **View host shows the chosen view**: the host shows the view of the view mode, Cards when none is chosen or the chosen one is not registered.
 - MODIFIED `main-page` → **Cards view is registered and lazy**: the registry holds Cards and Grid, in this order, both lazy.
-- ADDED `main-page` → **Grid view skeleton**: Grid shows the location rows with the shared row headers in one panel, without hour cells, plus the date bar and every state of the main page.
+- ADDED `main-page` → **Grid view skeleton**: Grid shows the location rows with the shared row headers, arranged as in the Grid design, in one panel, without hour cells, plus the date bar and every state of the main page.
 - ADDED `main-page` → **View contract runs for every registered view**: the view contract runs against Grid too; the scenarios that need hour cells are excluded for Grid by a visible marker until the hour cells change.
 - MODIFIED `browser-compatibility` → **Width measurement on legacy engines**: wording only — the `ResizeObserver` polyfill no longer serves view selection by width; it still makes a `ResizeObserver` available and the app still starts on the chosen view.
 - REMOVED: `AutoViewMode`, the `ViewMode` type of `views/`, `ViewDefinition.autoMinWidth`, `useContainerWidth`, `src/test/viewContractViewport.ts`. Every view-contract run picks its view through the stored view mode, not through the viewport width.
@@ -31,7 +31,7 @@ Audience: every user (the setting, Cards stays the default) and the developers o
   - **Grid view** no longer planned: *Code:* `GridView`, `views.gridTitle`;
   - new **Grid row** and **Row header**; **Shared block** gains the view location list (`ViewLocationList`);
   - **Preferences** and **Settings page** list the view mode.
-- ADR (handoff H1, `docs/adr/` is outside the factory's limits): new ADR-0012 "The user chooses the view; no automatic choice by width". It supersedes the `AUTO` parts of ADR-0005 and refines ADR-0002; both get a status line, and `CLAUDE.md` lists ADR-0012.
+- ADR (handoff H1, `docs/adr/` is outside the factory's limits): new ADR-0012 "The user chooses the view; no automatic choice by width". It supersedes the `AUTO` parts of ADR-0005 and of ADR-0002 (its "Swappable views" section); both get a status line, and `CLAUDE.md` lists ADR-0012.
 
 ## Capabilities
 
@@ -78,7 +78,7 @@ None.
 - FR4: Choosing a view applies it to the main page at once, with no reload. The choice is stored on the device with the other preferences, is in force from the first render after a reload, and is applied in every other open tab without a reload. A stored view that is not registered shows Cards and the view group checks «Карточки». Nothing is written until the user changes a setting.
 - FR5: The shown view never changes by itself: not when the window is resized, not when the screen is turned.
 - FR6: `AUTO` and the choice of a view by container width are removed from the code (no `AUTO` mode, no minimum width per view, no width measurement of the view host) and from the documents that describe them: ADR-0005 and ADR-0002 (by ADR-0012, handoff H1), `docs/architecture/views.md`, `docs/architecture/domain-model.md` and the glossary (View mode, View registry).
-- FR7: Grid is registered in the view registry after Cards. It shows the location rows in list order, each with the shared row header (drag handle, mark, city, offset difference, zone line, local time and date, location menu, row note), all rows in one panel separated by dividers, and no hour cells. The date bar stays under it. Everything that does not need hour cells works in Grid: adding and removing a location, setting and clearing home, reordering, typing an exact time, the date bar, the Now button, and the loading, error, empty, offline and storage-unavailable states.
+- FR7: Grid is registered in the view registry after Cards. It shows the location rows in list order, each with the shared row header (drag handle, mark, city, offset difference, zone line, local time and date, location menu, row note), all rows in one panel separated by dividers, and no hour cells. From 768 px the row header is one line, as in the Grid design: city, offset difference and zone line on the left, date, time and location menu on the right. The date bar stays under it. Everything that does not need hour cells works in Grid: adding and removing a location, setting and clearing home, reordering, typing an exact time, the date bar, the Now button, and the loading, error, empty, offline and storage-unavailable states.
 - FR8: The view contract runs against Grid. Each contract scenario that cannot pass without hour cells is excluded for Grid only, by a marker on the scenario that names the change that brings it back (the hour cells change). Today this is one scenario: "Select a time".
 
 ### Non-Functional
@@ -101,7 +101,7 @@ None.
 
 - UX1: The view group reads like the theme and the hour format groups: caption at the start of the row, joined options at the end, the checked option filled with the accent colour.
 - UX2: Switching the view keeps everything the user set: the location list, home, the chosen date and time. Only the presentation changes.
-- UX3: A Grid row reads as the row header of the Grid design (`docs/design/README.md` → Grid) without its hour strip: the rows sit in one panel separated by dividers, not as separate cards; each row keeps the surface token background, and the panel border and the dividers use the border token colour.
+- UX3: A Grid row reads as the row header of the Grid design (`docs/design/README.md` → Grid, `docs/architecture/views.md` → Grid → Row header) without its hour strip and without the day shift mark (NG2): one line from 768 px with the date before the time; the rows sit in one panel separated by dividers, not as separate cards; each row keeps the surface token background, and the panel border and the dividers use the border token colour.
 
 ## UI States Matrix
 
@@ -149,7 +149,7 @@ None. Showing the view options by name rather than by icon, and the stored form 
 
 ## Impact
 
-- `packages/client/src/preferences/` (`viewMode`, `SET_VIEW_MODE`, parsing), `src/adapters/preferencesDocument.ts` (schema version 4 and its migration), `src/constants/preferences.ts`, `src/controller/` (`setViewMode`, `useViewMode`; `useContainerWidth` removed), `src/views/` (registry with Grid, `resolveActiveView`, `viewDefinition.ts`, new `grid/GridView.tsx`, new shared `ViewLocationList.tsx`, `LocationRowLayout`), `src/app/ViewHost.tsx`, `src/app/settings/` (`ViewModeGroup.tsx`, `SettingsPage.tsx`), `src/locales/en.json`, `src/locales/ru.json`.
+- `packages/client/src/preferences/` (`viewMode`, `SET_VIEW_MODE`, parsing), `src/adapters/preferencesDocument.ts` (schema version 4 and its migration), `src/constants/preferences.ts`, `src/controller/` (`setViewMode`, `useViewMode`; `useContainerWidth` removed), `src/views/` (registry with Grid, `resolveActiveView`, `viewDefinition.ts`, new `grid/GridView.tsx`, new shared `ViewLocationList.tsx`, `LocationRowVariant`, `rowVariant` in `LocationList`, `LocationRow`, `ZoneRowContent`, `LocalDateTime`), `src/app/ViewHost.tsx`, `src/app/settings/` (`ViewModeGroup.tsx`, `SettingsPage.tsx`), `src/locales/en.json`, `src/locales/ru.json`.
 - Tests: the view host, registry, preferences, settings, Grid unit and E2E features, the view-contract fixture and `playwright.bdd.config.ts`, every test seed of a current-version preferences document, the approved settings screenshots.
 - `docs/architecture/views.md`, `docs/architecture/domain-model.md`, `docs/architecture/overview.md`, `docs/glossary/views.md`, `docs/glossary/settings.md`; ADR-0012 and the status lines of ADR-0002 and ADR-0005 and `CLAUDE.md` by handoff H1.
 - No new dependency.
