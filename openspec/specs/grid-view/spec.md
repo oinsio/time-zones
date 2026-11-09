@@ -1,7 +1,7 @@
 # grid-view Specification
 
 ## Purpose
-TBD - created by archiving change add-grid-hour-cells-and-hour-frame. Update Purpose after archive.
+Shows the Grid view: all locations in one panel, each row with a header and a strip of hour cells of the reference day aligned across rows, coloured by each location's day periods, with an hour frame around the hour of the shown moment.
 
 ## Requirements
 
