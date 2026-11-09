@@ -104,6 +104,7 @@ Then(
       row.locator("time"),
       row.getByRole("button", { name: /^Enter time/ }),
     ];
+    let checkedCrossings = 0;
     for (const headerText of headerTexts) {
       const textBox = await requireBox(headerText);
       for (const borderX of [
@@ -114,8 +115,10 @@ Then(
           continue;
         const point = { x: borderX, y: textBox.y + textBox.height / HALF };
         expect(await isTopmostAt(headerText, point)).toBe(true);
+        checkedCrossings += 1;
       }
     }
+    expect(checkedCrossings).toBeGreaterThan(0);
   },
 );
 
