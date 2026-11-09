@@ -92,7 +92,8 @@
 - Impact: implemented as written, the "Notes and header texts cover the frame" E2E (task 7.2, `elementFromPoint`) fails and the frame visibly crosses the New York note and header texts in every screenshot baseline; the implementer has to rediscover the layering rule during 7.2, and baselines written before that (7.4) would bake the wrong layering in.
 - Fix: in D5 "Frame", state that the z-order is set on the sticky boxes themselves: the sticky header box and the sticky notes box of a `GRID_ROW` get `z-[2]` only — no `relative`, which would replace their `sticky` position, and none is needed because a sticky box is already positioned, so `z-index` applies — with a transparent background, and the texts inside keep their `bg-surface` / `bg-notice` so the frame shows only between them; the frame stays `z-[1]`. Mirror it in task 6.3 ("`z-[2]` on the sticky header and notes wrappers for `GRID_ROW` via `LOCATION_ROW_VARIANT_CLASS_NAMES`" instead of "`z-[2]` texts").
 - Fix risk: every row's wrapper is then a `z-[2]` context, so a dropdown inside one row's wrapper can still be covered by the next row's wrapper (later in DOM, same level) — that is the separate problem R3 addresses; no other artifact or test depends on the texts' own z-index.
-- Status: open
+- Status: fixed
+- Resolution: design.md D5 "Frame" now sets the z-order on the transparent sticky header and notes boxes themselves (`z-[2]`, no `relative`), with the texts keeping `bg-surface` / `bg-notice`, and explains why (a sticky box forms its own stacking context); task 6.3 names `z-[2]` on the sticky wrappers instead of on the texts.
 
 ### R2 — WARNING — The list's dividers restyle the hour frame's border
 - Location: `openspec/changes/add-grid-hour-cells-and-hour-frame/design.md:134` and `:131`
@@ -101,7 +102,8 @@
 - Impact: implemented as written, the frame is not an accent-coloured box but a grey outline open at the bottom. That contradicts FR8 (`proposal.md:77`: "An hour frame in the accent colour") and UX1 (`proposal.md:104`). The task 7.2 E2E "Frame crosses every row in the accent colour" (`border-color` equals `--color-accent`) fails, and the implementer has to rediscover the cause; baselines written in 7.4 would bake the wrong frame in if 7.2 is worked around.
 - Fix: in D5 "Panel", replace "border and dividers unchanged" with this rule: for `GRID_ROW` the dividers move from the `<ul>` to the row `<li>`s. `LOCATION_ROW_VARIANT_CLASS_NAMES[GRID_ROW].list` becomes `rounded-md border border-border` (no `divide-y divide-border`), and `.row` adds `border-t border-border first:border-t-0`, so the frame `<li>`, which is not a row, gets no divider style. Mirror it in task 6.3 ("dividers on the row `<li>`s instead of `divide-y` on the `<ul>` for `GRID_ROW`") and update `src/views/shared/ViewLocationList.test.tsx:172-179` ("should draw the rows in one panel with dividers") to assert `border border-border` on the list and `border-t border-border first:border-t-0` on every row.
 - Fix risk: the existing unit test at `ViewLocationList.test.tsx:172-179` asserts `divide-y` / `divide-border` on the list and must change in the same task. The test at `:182-189` (`not.toHaveClass("border")` on each row) still passes, since `border-t` is a different class. With the frame as the last child, the last row no longer matches `last:rounded-b-md` (`locationRowVariant.ts:48`), but the `<ul>`'s `overflow-x-auto` already clips its children to its rounded corners, so nothing visible changes. The divider pixels stay the same, and Cards (`CARD` variant) is untouched.
-- Status: open
+- Status: fixed
+- Resolution: design.md D5 "Panel" moves the GRID_ROW dividers from the `<ul>` (`rounded-md border border-border`, no `divide-y divide-border`) to the rows (`border-t border-border first:border-t-0`) so the frame `<li>` keeps `border-2 border-accent`; tasks 6.2 (update "should draw the rows in one panel with dividers" in ViewLocationList.test.tsx) and 6.3 (variant classes) mirror it.
 
 ### R3 — WARNING — The scrolling Grid panel clips the location menu
 - Location: `openspec/changes/add-grid-hour-cells-and-hour-frame/design.md:131`
@@ -110,7 +112,8 @@
 - Impact: Grid's existing ability to remove a location and set/clear home through the row menu (`openspec/specs/main-page/spec.md:204`, kept in the ADDED "Grid view rows") degrades undeclared: the menu of the bottom rows is cut off and the menu of other rows is partly hidden by the next row's header. Playwright auto-scrolls inside the panel before clicking, so the existing view-contract "remove a location" scenarios are likely to stay green and the regression ships.
 - Fix: add to D5 how the open menu escapes the panel, and test it: for `GRID_ROW`, `LocationMenu` positions its open dropdown with `position: fixed` from the button's `getBoundingClientRect()` (closing it on panel scroll), and the row's sticky header box gets a higher z-index while its menu is open (e.g. `has-[[aria-expanded=true]]:z-[3]` through `LOCATION_ROW_VARIANT_CLASS_NAMES`). Add to task 6.3 the change in `LocationMenu.tsx` and a unit test of the variant class, and to task 7.4 an E2E scenario in `main_page_grid_view_e2e.feature` "The location menu of the last grid row is fully visible" (1440 × 900, four locations: the open menu's box lies inside the viewport and `document.elementFromPoint` at its last item's centre returns that item), tagged `@add-grid-hour-cells-and-hour-frame @FR1`.
 - Fix risk: touches a shared block used by Cards; gating it on the row variant keeps Cards unchanged, but `LocationMenu.test.tsx` / `LocationMenu.legacy.test.tsx` need a grid-variant case, and fixed positioning must be checked on the legacy Safari 12 build (`check:legacy-build`); `:has()` does not exist on iOS Safari 12 (ADR-0009), so there the raised z-index should come from a `data-menu-open` attribute on the row rather than `has-[…]`. `LocationMenu.tsx` must stay under 200 lines.
-- Status: open
+- Status: fixed
+- Resolution: confirmed (`LocationMenu.tsx:152` absolute dropdown; the main-page "Grid view rows" requirement keeps remove/set home in Grid). Closed my own way: specs/main-page/spec.md "Grid view rows" now requires an open grid-row menu to be whole and above other rows, with scenario outline "The location menu of a grid row is fully visible" (Almaty and New York at 1440x900, New York at 390x844); design.md D5 "Location menu over the panel" uses `position: fixed` from the trigger rect via `views/shared/useFixedMenuPosition.ts` behind an `isMenuFixedToViewport` variant flag (Cards unchanged) and `focus-within:z-[3]` on the sticky header (not `:has()`, which iOS Safari 12 lacks, ADR-0009); tasks 6.2/6.3 (LocationMenu.test.tsx and ViewLocationList.test.tsx cases, hook), 7.4 (E2E, `@FR1`) and 9.1 (Stryker on the hook and LocationMenu.tsx).
 
 ### R4 — SUGGESTION — UX2 is not linked from any delta-spec requirement
 - Location: `openspec/changes/add-grid-hour-cells-and-hour-frame/specs/grid-view/spec.md:108`
@@ -119,7 +122,8 @@
 - Impact: the proposal → spec link for UX2 is missing, so a traceability grep over the specs finds no implementing requirement for UX2 after archive.
 - Fix: change the comment on `specs/grid-view/spec.md:108` to `<!-- implements FR8, FR9, UX2 of add-grid-hour-cells-and-hour-frame -->`.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: specs/grid-view/spec.md "Hour frame" requirement comment now reads `implements FR8, FR9, UX2 of add-grid-hour-cells-and-hour-frame`.
 
 ## Verdict
 
