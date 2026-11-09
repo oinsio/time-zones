@@ -55,6 +55,13 @@ export {
   withDeviceTimeZone,
 } from "./deviceTimeLocation";
 export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
+// Implements FR1, FR2, FR5, FR6, FR8 of add-grid-hour-cells-and-hour-frame.
+export {
+  getHourCellCount,
+  getHourCells,
+  getHourFrameIndex,
+  type HourCell,
+} from "./hourCells";
 // Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards.
 export { getLocalDateTime } from "./localDateTime";
 export { LocationKind } from "./locationKind";
