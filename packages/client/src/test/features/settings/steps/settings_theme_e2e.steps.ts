@@ -138,7 +138,9 @@ Then(
       .getByRole("listitem")
       .filter({ hasText: city });
     await expect(
-      row.locator("time").locator("xpath=preceding-sibling::button"),
+      row
+        .locator("time")
+        .locator("xpath=preceding-sibling::button | following-sibling::button"),
     ).toHaveText(time);
   },
 );
