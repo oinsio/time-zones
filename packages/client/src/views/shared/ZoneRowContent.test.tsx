@@ -2,11 +2,13 @@
 import { render, screen } from "@testing-library/react";
 import { WallTimeInputOutcome } from "@/controller";
 import { ZoneLinePartKind } from "@/presenter";
+import { LocationRowVariant } from "./locationRowVariant";
 import { ZoneRowContent } from "./ZoneRowContent";
 
-const renderContent = () =>
+const renderContent = (rowVariant?: LocationRowVariant) =>
   render(
     <ZoneRowContent
+      rowVariant={rowVariant}
       cityLabel="Almaty"
       ids={{ city: "city", mark: "mark", difference: "difference" }}
       offsetDifferenceLabel=""
@@ -33,10 +35,34 @@ describe("ZoneRowContent without a row variant", () => {
     ).toBeTruthy();
   });
 
+  it("should keep the card place and time block from growing", () => {
+    renderContent();
+    const placeAndTime = screen.getByText("Almaty").parentElement?.parentElement
+      ?.parentElement;
+    expect(placeAndTime).toHaveClass("md:flex-none");
+  });
+
   it("should keep the card's fixed width for the place column", () => {
     renderContent();
     expect(screen.getByText("Almaty").parentElement?.parentElement).toHaveClass(
       "md:w-64",
     );
+  });
+});
+
+describe("ZoneRowContent for a grid row", () => {
+  it("should let the place column share the line with the city", () => {
+    renderContent(LocationRowVariant.GRID_ROW);
+    const placeColumn = screen.getByText("Almaty").parentElement?.parentElement;
+    expect(placeColumn).toHaveClass("md:flex-row");
+    expect(placeColumn).not.toHaveClass("md:w-64");
+  });
+
+  it("should let the place and time block grow", () => {
+    renderContent(LocationRowVariant.GRID_ROW);
+    const placeAndTime = screen.getByText("Almaty").parentElement?.parentElement
+      ?.parentElement;
+    expect(placeAndTime).toHaveClass("md:flex-1");
+    expect(placeAndTime).not.toHaveClass("md:flex-none");
   });
 });

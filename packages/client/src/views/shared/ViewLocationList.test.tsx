@@ -184,6 +184,7 @@ describe("ViewLocationList with grid rows", () => {
     for (const row of screen.getAllByRole("listitem")) {
       expect(row).toHaveClass("bg-surface");
       expect(row).not.toHaveClass("border");
+      expect(row).toHaveClass("first:rounded-t-md", "last:rounded-b-md");
     }
   });
 
