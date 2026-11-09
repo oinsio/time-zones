@@ -126,6 +126,7 @@ describe("SettingsPage", () => {
         theme: ThemePreference.DARK,
         hourFormat: HourFormat.H12,
         interfaceLanguage: null,
+        viewMode: null,
         zoneLabelParts: [
           ZoneLabelPart.UTC_OFFSET,
           ZoneLabelPart.ZONE_ABBREVIATION,

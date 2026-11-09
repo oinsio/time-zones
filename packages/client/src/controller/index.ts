@@ -10,7 +10,6 @@ export {
 export { useCalendarMonth } from "./useCalendarMonth";
 export { useCityLabels } from "./useCityLabels";
 export { CitySearchStatus, useCitySearch } from "./useCitySearch";
-export { useContainerWidth } from "./useContainerWidth";
 export { useDeployTime } from "./useDeployTime";
 export { useDocumentLanguage } from "./useDocumentLanguage";
 export { useHourFormat } from "./useHourFormat";

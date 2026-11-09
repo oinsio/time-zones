@@ -61,7 +61,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("View is loading", ({ Given, When, Then, And }) => {
     Given("the active view has not finished loading", () => {
       registryOverride.views = [
-        buildTestView("pending", 0, () => new Promise(() => {})),
+        buildTestView("pending", () => new Promise(() => {})),
       ];
     });
     When("the user opens the app", () => openApp());
@@ -81,7 +81,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       registryOverride.views = [
         buildTestView(
           "failing",
-          0,
           failingThenLoading(() => null, 1),
         ),
       ];
@@ -108,7 +107,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         registryOverride.views = [
           buildTestView(
             "flaky",
-            0,
             failingThenLoading(() => <p>{RESOLVED_TEXT}</p>, 1),
           ),
         ];

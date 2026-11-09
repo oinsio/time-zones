@@ -23,6 +23,7 @@
   },
   "views": {
     "cardsTitle": "Cards",
+    "gridTitle": "Grid",
     "cardsEmptyState": "No locations added yet."
   },
   "locations": {

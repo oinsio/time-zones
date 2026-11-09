@@ -23,6 +23,7 @@
   },
   "views": {
     "cardsTitle": "Карточки",
+    "gridTitle": "Сетка",
     "cardsEmptyState": "Места пока не добавлены."
   },
   "locations": {

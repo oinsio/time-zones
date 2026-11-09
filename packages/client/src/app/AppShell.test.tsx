@@ -24,7 +24,6 @@ const buildViewDefinition = (viewText: string) =>
     titleKey: "app.title",
     icon: () => null,
     component: lazy(async () => ({ default: () => <p>{viewText}</p> })),
-    autoMinWidth: 0,
   }) as unknown as ViewDefinition;
 
 describe("AppShell", () => {

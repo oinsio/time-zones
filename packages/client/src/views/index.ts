@@ -1,4 +1,4 @@
-import { LayoutGrid } from "lucide-react";
+import { Grid3x3, LayoutGrid } from "lucide-react";
 import { createRetryableLazyView } from "./createRetryableLazyView";
 import { type ViewDefinition, ViewId } from "./viewDefinition";
 
@@ -7,22 +7,26 @@ export {
   resetLazyView,
 } from "./createRetryableLazyView";
 export { resolveActiveView } from "./resolveActiveView";
-export type { ViewDefinition, ViewMode } from "./viewDefinition";
-export { AutoViewMode, ViewId } from "./viewDefinition";
-
-const CARDS_AUTO_MIN_WIDTH = 0;
+export type { ViewDefinition } from "./viewDefinition";
+export { DEFAULT_VIEW_ID, ViewId } from "./viewDefinition";
 
 const cardsView: ViewDefinition = {
   id: ViewId.CARDS,
   titleKey: "views.cardsTitle",
   icon: LayoutGrid,
   component: createRetryableLazyView(() => import("./cards/CardsView")),
-  autoMinWidth: CARDS_AUTO_MIN_WIDTH,
+};
+
+const gridView: ViewDefinition = {
+  id: ViewId.GRID,
+  titleKey: "views.gridTitle",
+  icon: Grid3x3,
+  component: createRetryableLazyView(() => import("./grid/GridView")),
 };
 
 /**
- * Every view the app can show (ADR-0005). A new view is one entry here plus
- * its folder.
- * Implements FR3 of add-main-page-scaffold.
+ * Every view the app can show, in display order (ADR-0005). A new view is one
+ * entry here plus its folder; the settings list it by itself.
+ * Implements FR3 of add-main-page-scaffold; FR2, FR7 of add-view-mode-setting-and-grid-skeleton.
  */
-export const viewRegistry: readonly ViewDefinition[] = [cardsView];
+export const viewRegistry: readonly ViewDefinition[] = [cardsView, gridView];
