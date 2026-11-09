@@ -1,7 +1,0 @@
-## H1: Compare the Grid screenshots with the design
-
-- **Serves:** NFR-R4, UX1
-- **Files:** none
-- **Verify:** compare the 8 new baselines `packages/client/src/test/features/__screenshots__/chromium/Approved-screenshots-of-Grid-at-*` with the "Now" design screens before merging: 1440 × 900 with `docs/design/screens/grid-desktop-light.png` / `grid-desktop-dark.png`, 1180 × 820 with `grid-tablet-light.png`, 844 × 390 with `grid-phone-landscape-light.png`, 390 × 844 with `grid-phone-portrait-light.png` (the dark variants differ only by token values). Check cell colours and labels, the `МАР` / `8` cells, New York's offset edge, the frame crossing all rows behind texts and the clock change note, and the two-line header on the phone. If a baseline is wrong, say so in the pull request; the fix is a code change and a new baseline.
-- **Why manual:** deciding that a rendered page looks like a design picture is a visual judgement only a human can make; the implement stage writes the baselines from its own render, so a pixel comparison with the design PNGs (another renderer, other fonts) cannot pass or fail meaningfully.
-- **Automated part:** the E2E scenarios of tasks 7.1–7.4 assert the design's structure (cell counts and columns, token colours, midnight shade, offset edge, frame colour, extent and layering, cell widths, two-line header), and the baselines are compared on every run of both Playwright projects.
