@@ -1,7 +1,7 @@
 // Verifies FR8, FR9 of add-grid-hour-cells-and-hour-frame (D3).
 import { act, renderHook } from "@testing-library/react";
 import { type ReactNode, useContext } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createInMemoryLocationRepository } from "@/adapters";
 import { LocationsProvider } from "@/controller";
 import { LocationCommandType, TrackMove, WallTimeTargetKind } from "@/model";
@@ -159,5 +159,22 @@ describe("useHourGrid", () => {
     [...result.current.grid.strips.values()].forEach((strip, index) => {
       expect(strip).toBe(stripsBefore[index]);
     });
+  });
+
+  it("should name the missing provider", () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(() => renderHook(() => useHourGrid())).toThrow(
+      "useHourGrid must be used inside a LocationsProvider",
+    );
+  });
+
+  it("should not hide an error that is not a rejected zone", () => {
+    const malformedRow = buildLocation({
+      label: "Broken",
+      timeZoneId: 42 as unknown as string,
+    });
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    expect(() => setup([cityRow("Almaty"), malformedRow])).toThrow(TypeError);
   });
 });

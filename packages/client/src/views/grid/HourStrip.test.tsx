@@ -113,6 +113,29 @@ describe("HourStrip", () => {
     expect(cellOf(3).style.boxShadow).toBe("");
   });
 
+  it("should combine the shade and the offset edge on one cell", () => {
+    render(
+      <HourStrip
+        city="Almaty"
+        track={ALMATY_TRACK}
+        strip={{
+          cells: [
+            {
+              ...cells[2],
+              hasOffsetEdge: true,
+            },
+          ],
+        }}
+        hourFrameIndex={0}
+        onMoveTrack={vi.fn()}
+      />,
+    );
+
+    expect(cellOf(0).style.boxShadow).toBe(
+      "inset 0 0 0 999px var(--color-midnight-shade), inset 3px 0 0 var(--color-foreground)",
+    );
+  });
+
   it("should draw the offset edge on the left of its cell", () => {
     renderStrip();
 

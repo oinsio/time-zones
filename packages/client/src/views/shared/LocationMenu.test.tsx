@@ -183,6 +183,8 @@ describe("LocationMenu fixed to the viewport", () => {
     await userEvent.click(trigger);
     const menu = screen.getByRole("menu");
 
+    expect(menu).toHaveClass("fixed");
+    expect(menu).not.toHaveClass("absolute");
     expect(menu.style.position).toBe("fixed");
     expect(menu.style.top).toBe("104px");
     expect(menu.style.right).toBe(`${viewportWidth - 300}px`);
