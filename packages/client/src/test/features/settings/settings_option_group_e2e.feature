@@ -40,7 +40,7 @@ Feature: Compact theme and hour format in a real browser
   Scenario Outline: Size, focus and checked fill in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the user opens the settings
-    Then every theme and hour format option is at least 44 by 44 px
+    Then every theme, hour format and view option is at least 44 by 44 px
     And the checked options are filled with the accent colour and the unchecked options with the <theme> surface colour
     When the user tabs to the theme group
     Then the focused option shows a focus outline
@@ -51,13 +51,14 @@ Feature: Compact theme and hour format in a real browser
       | light |
       | dark  |
 
-  @compact-settings-controls @FR5 @NFR-R1 @UX1
+  @compact-settings-controls @FR5 @NFR-R1 @UX1 @add-view-mode-setting-and-grid-skeleton @NFR-R1
   Scenario Outline: Caption and options in one row at <width> px in <language>
     Given the screen is <width> px wide for the locations
     And the locations interface language is <language>
     And the user opens the settings
     Then the caption and the options of the theme group share one row
     And the caption and the options of the hour format group share one row
+    And the caption and the options of the view group share one row
     And the settings page needs no horizontal scrolling
 
     Examples:
@@ -67,12 +68,12 @@ Feature: Compact theme and hour format in a real browser
       | 1024  | Russian  |
       | 2560  | English  |
 
-  @compact-settings-controls @NFR-R1 @M1
+  @compact-settings-controls @NFR-R1 @M1 @add-view-mode-setting-and-grid-skeleton @NFR-R1
   Scenario Outline: Compact groups at 375 px in <language>
     Given the screen is 375 px wide for the locations
     And the locations interface language is <language>
     And the user opens the settings
-    Then the theme group and the hour format group are at most 56 px high
+    Then the theme group, the hour format group and the view group are at most 56 px high
 
     Examples:
       | language |
