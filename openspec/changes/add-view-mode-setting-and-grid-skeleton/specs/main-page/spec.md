@@ -35,6 +35,16 @@ The Grid view SHALL show the location rows in list order, all inside one panel s
 | 320 |
 | 2560 |
 
+#### Scenario: Approved Grid screenshots
+- **GIVEN** the view mode is Grid, the current time is `2026-03-08T07:30:00Z` and the stored locations are Almaty, Moscow, Kolkata and New York
+- **WHEN** the main page is rendered at 1024 px in the `<theme>` theme
+- **THEN** it matches the approved screenshot
+
+| theme |
+|---|
+| light |
+| dark |
+
 ### Requirement: View contract runs for every registered view
 The view-contract scenarios SHALL run once for every view of the registry, each run showing its view through the stored view mode, independent of the viewport width. A contract scenario that a view cannot pass yet because a part of its design is not built MAY be excluded for that view only, by a marker on the scenario that names the view and the change that brings the scenario back; the run of every other view MUST still include it. For Grid, exactly the scenario "Select a time" is excluded, until the hour cells change. <!-- implements FR8, NFR-A2 of add-view-mode-setting-and-grid-skeleton -->
 
