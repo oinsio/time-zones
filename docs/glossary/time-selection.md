@@ -1,6 +1,6 @@
 # Glossary: Time selection
 
-Choosing a time of day, and showing each location's day around the reference moment. Decisions: ADR-0003 (absolute hours), ADR-0007 (the day of the reference zone); detail in `docs/architecture/domain-model.md` ("Day periods") and `views.md` ("Cards"). See [README](README.md) for the entry format.
+Choosing a time of day, and showing each location's day around the reference moment. Decisions: ADR-0003 (absolute hours), ADR-0007 (the day of the reference zone), ADR-0011 (the meeting range); detail in `docs/architecture/domain-model.md` ("Day periods") and `views.md` ("Cards"). See [README](README.md) for the entry format.
 
 - **Reference day** — the span of absolute time from local midnight of the reference zone on the effective instant's date to the next local midnight. It is 23, 24 or 25 hours long. Every day track and hour cell spans it. *Code:* `ReferenceDay`, `getReferenceDay`. *Not:* a calendar date, and not the location's own local day. *Never:* current day, today (unless it is today).
 - **Day track** — the horizontal bar on a card that spans the reference day, coloured by the location's day periods, with a handle at the reference moment. All handles stand at the same position, except a handle that is being dragged. *Code:* `DayTrack`, `presentDayTrack`. Its accessibility role is `slider`, and only in that sense is "slider" correct (`locations.timeSliderLabel` «Время — {city}»). *Never:* time slider, timeline, scrubber.
@@ -17,7 +17,13 @@ Choosing a time of day, and showing each location's day around the reference mom
 - **Offset edge** — a hard colour edge on a day track where a UTC offset change inside the reference day moves the local time into another day period. *Code:* `OffsetEdge`, `collectOffsetEdges`.
 - **Colour stop** — one position and day period of a day track's gradient. *Code:* `DayPeriodStop`, `getDayPeriodStops`.
 - **Hour label** — a location's local time printed under its day track on wide screens, at the start, every 6 hours and at the end of the reference day (`22 · 04 · 10 · 16 · 22`). *Code:* `HourLabel`, `formatHourLabel`.
-- **Hour cell** *(planned, Grid view)* — one absolute hour of the reference day in a grid row.
-- **Midnight marker** *(planned)* — a mark with the new date where a location's local midnight falls on its track or row.
+- **Hour cell** *(planned, Grid view)* — one absolute hour of the reference day in a grid row, labelled with the location's local start hour and coloured by its day period. Tapping it sets a one-hour meeting range. *Code:* `getHourCells`.
+- **Hour frame** *(planned, Grid view)* — the accent frame across all grid rows around the hour cell of the effective instant; while live it follows the current hour. *Not:* the meeting frame. *Never:* cursor, selection frame, now line.
+- **Meeting range** *(planned)* — the optional span from a start instant to an end instant inside the reference day, on the track step, chosen in the Grid view; the reference moment is pinned to its start. Not stored. *RU:* «Встреча». *Code:* `MeetingRange`, `SET_MEETING_RANGE`, `CLEAR_MEETING_RANGE`. *Never:* slot, event, appointment, interval.
+- **Meeting frame** *(planned, Grid view)* — the green frame across all grid rows around the meeting range; cells outside it are dimmed. *Not:* the hour frame.
+- **Meeting handle** *(planned, Grid view)* — a grip on the left or right side of the meeting frame that moves the start or the end by the track step; a slider for assistive technology. *RU:* «Начало встречи» / «Конец встречи». *Not:* the day track's handle, the drag handle. *Never:* thumb, knob.
+- **Meeting bar** *(planned, Grid view)* — the header while a meeting range is set: the duration, Share meeting and Clear meeting. *RU:* «Встреча · 2 ч», «Поделиться встречей», «Сбросить выбор встречи».
+- **Share meeting** *(planned)* — passing the meeting range on to other people; what it sends is open question Q8. *RU:* «Поделиться встречей».
+- **Midnight marker** *(planned)* — a mark with the new date where a location's local midnight falls on its track or row. In the Grid view the hour cell shows the month over the day (`МАР` / `8`) instead of `0` and is shaded; the reference zone's row shows a plain `0`.
 - **Wall-time input** — typing an exact wall-clock time in a location card. *RU:* «Ввести время». *Not:* a time selection, which is a choice on a day track in track steps. *Never:* time picker, time edit. *Code:* `SET_WALL_TIME`, `parseWallTimeInput`, `useWallTimeInput`, `WallTimeInput`.
 - **Wall-time target** — the row a wall-time input was typed in: a location. It decides where the wall-time hint is shown. *Code:* `WallTimeTarget`.

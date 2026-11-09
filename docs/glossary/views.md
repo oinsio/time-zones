@@ -6,7 +6,8 @@ Interchangeable interfaces over the same model. Decisions: ADR-0002 (model, pres
 - **View registry** — the list of registered views with the minimum container width each needs. *Code:* `views/index.ts`, `resolveActiveView`.
 - **View mode** — the user's choice of view: auto or a registered view. Auto picks the widest-fitting registered view for the container width. *Code:* `ViewMode` *(planned in preferences)*.
 - **Cards view** — the view with one card per location, the exact time in large digits and a day track. *Code:* `CardsView`. *RU:* «Карточки».
-- **Grid view** *(planned)* — the view with hour cells aligned across all locations, for planning.
+- **Grid view** *(planned)* — the view with hour cells aligned across all locations, for planning a meeting range. *RU:* «Сетка».
+- **Cell colouring** *(planned)* — how the Grid view colours hour cells: by day period (the only option now); working hours only or none may follow as a setting. *RU:* раскраска ячеек.
 - **Card** — how the Cards view shows one location row. *Not:* a location.
 - **Shared block** — a building block every view reuses, implemented once in `views/shared/`: the date bar, the day track, the Here mark icon, the home mark icon, the location menu, the search. *Never:* common component (for these blocks).
 - **View contract** — the BDD E2E scenarios every registered view must pass: select a time, select a date, return to now, add and remove a location, the Here mark, and all UI states. *Code:* `@view-contract` features.
