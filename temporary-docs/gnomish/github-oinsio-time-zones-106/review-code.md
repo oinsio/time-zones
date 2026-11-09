@@ -152,7 +152,8 @@ Not measured: `LocationRow.tsx`, `LocationList.tsx`, `ZoneRowContent.tsx`, `useL
 - Impact: a regression where a drop in Grid is announced but leaves the list order unchanged (for example the grid variant's sortable `<li>` losing its sortable id or transform, so the row falls back to its old place) passes CI, because the only Grid reorder removes the moved row before checking the order. The outcome of FR7's "reorder the list" in Grid stays unverified.
 - Fix: add to `main_page_grid_view_e2e.feature` a scenario tagged `@add-view-mode-setting-and-grid-skeleton @FR7 @NFR-A2` that reuses the existing steps of "Move a card down with the keyboard" (`locations_reorder_e2e.feature:68-76`, steps in `locations/steps/locations_reorder_drag_e2e.steps.ts` and `locations_reorder_checks_e2e.steps.ts`, same `locations_ui_e2e.fixtures` as the Grid steps): `Given the view mode is Grid`, `And the stored locations are "Moscow", "Almaty", "New York"`, `And the user opens the locations app`, pick up "Moscow" with the keyboard, move it down 2 times, drop it, `Then the locations list order is "Almaty", "New York", "Moscow"` and focus is on the move handle "Move Moscow". The contract scenario already proves the pick-up and its announcement in Grid; this scenario adds the outcome. It belongs in an `_e2e.feature` (`.claude/rules/bdd-e2e.md`) because dnd-kit keyboard sorting needs real layout.
 - Fix risk: low — one more E2E scenario on both browser projects; if the "picked-up card" step wording reads oddly for a grid row, keep the existing step text rather than adding a synonym step.
-- Status: open
+- Status: fixed
+- Resolution: added E2E scenario "Move a Grid row down with the keyboard" to main_page_grid_view_e2e.feature, asserting the list order and move-handle focus after the drop in Grid; test:bdd passes (1113).
 
 ### R2 — WARNING — Mutation score of locationRowVariant.ts is 88.24 %, below the 90 % minimum
 - Location: `packages/client/src/views/shared/locationRowVariant.ts:49`
@@ -161,7 +162,8 @@ Not measured: `LocationRow.tsx`, `LocationList.tsx`, `ZoneRowContent.tsx`, `useL
 - Impact: the file is below the project's minimum score, and a change that drops the grid place-column classes is caught only by the E2E "Grid row header in one line", not by the unit suite that Stryker and TDD rely on.
 - Fix: in `src/views/shared/ZoneRowContent.test.tsx`, add a `describe("ZoneRowContent for a grid row")` that renders with `rowVariant={LocationRowVariant.GRID_ROW}` and asserts, the same way the existing card test does (`screen.getByText("Almaty").parentElement?.parentElement`), that the place column has `md:flex-row` and not `md:w-64`, and that its parent (the place-and-time block) has `md:flex-1` and not `md:flex-none`. Re-run `npx stryker run --mutate 'src/views/shared/locationRowVariant.ts'` and confirm ≥ 90 % (target 95 %).
 - Fix risk: low — the tests assert Tailwind class names, which the file already does for the card variant; a later layout tweak of the grid row header must update them.
-- Status: open
+- Status: fixed
+- Resolution: added grid-row and card place-and-time class tests in ZoneRowContent.test.tsx and ViewLocationList.test.tsx; locationRowVariant.ts mutation score 94.1% (16/17, was 88.2%).
 
 ## Verdict
 
