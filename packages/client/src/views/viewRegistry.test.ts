@@ -20,8 +20,13 @@ describe("viewRegistry", () => {
     expect(view.component).toHaveProperty("_payload");
   });
 
-  it.each(viewRegistry)("should not carry a minimum width for $id", (view) => {
-    expect(view).not.toHaveProperty("autoMinWidth");
+  it.each(viewRegistry)("should carry no choice by width for $id", (view) => {
+    expect(Object.keys(view).sort()).toEqual([
+      "component",
+      "icon",
+      "id",
+      "titleKey",
+    ]);
   });
 
   describe.each(SUPPORTED_LANGUAGES)("in the %s locale", (languageCode) => {

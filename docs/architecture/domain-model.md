@@ -33,7 +33,7 @@ classDiagram
         HourFormat hourFormat  "H12 | H24"
         string? interfaceLanguage "registered locale code; null = follow the browser"
         ZoneLabelPart[] zoneLabelParts "UTC_OFFSET | ZONE_ABBREVIATION, each optional"
-        ViewMode viewMode      "planned: AUTO | registered ViewId"
+        string? viewMode       "registered ViewId; null = Cards"
     }
     WorldClockState "1" o-- "*" Location
     WorldClockState "1" *-- "1" ReferenceMoment
@@ -45,8 +45,8 @@ classDiagram
 - `homeLocationId` is optional; the app never assigns it.
 - `deviceTimeZoneId` is environment state: the controller reads it from the `Clock` port and sends `SET_DEVICE_TIME_ZONE`; it is not persisted.
 - `Preferences` is a separate model with its own repository.
-- Commands: `ADD_DEVICE_TIME_LOCATION` (locations), `SET_THEME`, `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE`, `SET_ZONE_LABEL_PART` (preferences). `getRows` derives no extra entry.
-- `viewMode` (planned) holds `AUTO` or an id from the view registry ([ADR-0005](../adr/0005-view-registry.md)); an unknown id falls back to `AUTO` on load.
+- Commands: `ADD_DEVICE_TIME_LOCATION` (locations), `SET_THEME`, `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE`, `SET_ZONE_LABEL_PART`, `SET_VIEW_MODE` (preferences). `getRows` derives no extra entry.
+- `viewMode` is `string | null`: a registered view id or none chosen (Cards); an unregistered id shows Cards ([ADR-0012](../adr/0012-user-chosen-view.md)). `SET_VIEW_MODE` sets it.
 
 ## Invariants
 

@@ -1,6 +1,6 @@
 # Views
 
-Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002-model-presenter-swappable-views.md)). The user picks one in settings or leaves `AUTO`. Views are plugged in through the view registry ([ADR-0005](../adr/0005-view-registry.md)).
+Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002-model-presenter-swappable-views.md)). The user picks one in settings; Cards is the default, and the view never changes by itself ([ADR-0012](../adr/0012-user-chosen-view.md)). Views are plugged in through the view registry ([ADR-0005](../adr/0005-view-registry.md)).
 
 **Rollout:** Cards is the first view; Grid comes next. Everything else stays view-independent so that adding Grid is a registry entry plus its folder.
 
@@ -9,8 +9,7 @@ Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002
 | View | Best for | Screens | Status |
 |---|---|---|---|
 | **Cards** | converting: large exact time per location | phone in portrait, any | first release |
-| **Grid** | planning a meeting: see where working hours overlap and pick a meeting range ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)) | any; all 24 hours fit from about 830 px | next |
-| **Auto** (default) | picks the registered view that fits the container width | any | first release (resolves to Cards) |
+| **Grid** | planning a meeting: see where working hours overlap and pick a meeting range ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)) | any; all 24 hours fit from about 830 px | skeleton: grid rows and date bar; hour cells, hour frame and meeting follow |
 
 Future views reuse the same model, e.g. a compact world-clock list.
 
@@ -122,7 +121,7 @@ Screens: [docs/design](../design/README.md). Values become design tokens.
 | Overlay | Content |
 |---|---|
 | Search | full screen on phones, dialog on wide screens; input plus results as "City, Region, Country" (region once a richer source is added, [ADR-0006](../adr/0006-city-data-sources.md)); suggestions are shown before typing (never an empty screen) |
-| Settings | the Gnomish Factory credit above the theme; theme (System, Light, Dark; icons only) and hour format (12 / 24); interface language (collapsible list of the locale registry); view mode later |
+| Settings | the Gnomish Factory credit above the theme; theme (System, Light, Dark; icons only) and hour format (12 / 24); view (Cards, Grid; names); interface language (collapsible list of the locale registry) |
 
 ## View contract
 
@@ -134,6 +133,8 @@ Every view must pass the same BDD E2E scenarios:
 - open settings and switch the theme and the hour format;
 - show loading, error, empty and offline states;
 - pass axe-core and be operable with Tab, Enter, Esc and arrows.
+
+A scenario a view cannot pass yet because a part of its design is not built is excluded for that view only, by a pending tag that names the view and the change that brings it back ([ADR-0012](../adr/0012-user-chosen-view.md)): today `@grid-pending-hour-cells` on "Select a time".
 
 Grid also passes the meeting scenarios: set, resize, share and clear a meeting range.
 

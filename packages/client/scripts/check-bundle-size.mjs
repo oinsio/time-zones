@@ -3,12 +3,13 @@
  * (NFR-P1 of support-legacy-ios-12-safari: the budget holds with the boot step).
  * Initial JavaScript = the entry script of dist/index.html plus its
  * modulepreload links; lazily imported chunks are not counted.
- * Also fails when the Cards view is not a separate chunk, because that chunk
- * is what keeps views out of the initial JavaScript.
+ * Also fails when a registered view (Cards, Grid) is not a separate chunk,
+ * because that chunk is what keeps views out of the initial JavaScript.
  * The search data file must exist as a separate JSON asset within its own
  * gzipped budget and must not be referenced by index.html (no preload).
  * Implements NFR-P1, M5 of setup-app-shell-and-pages-deploy (D11) and NFR-P1,
  * M5 of add-main-page-scaffold; NFR-P2, M7 of add-locations-via-search (D8).
+ * Implements NFR-P1 of add-view-mode-setting-and-grid-skeleton: one chunk per view.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -21,7 +22,7 @@ const SIZE_FRACTION_DIGITS = 1;
 const EXIT_CODE_CHECK_FAILED = 1;
 const ENTRY_HTML_FILE = "index.html";
 const ASSETS_DIRECTORY = "assets";
-const CARDS_VIEW_CHUNK_PREFIX = "CardsView-";
+const VIEW_CHUNK_PREFIXES = ["CardsView-", "GridView-"];
 const CITY_SEARCH_DATA_PREFIX = "city-search-";
 const CITY_SEARCH_DATA_EXTENSION = ".json";
 const CITY_SEARCH_DATA_BUDGET_KB = 30;
@@ -55,10 +56,11 @@ function formatKilobytes(sizeInBytes) {
   return (sizeInBytes / BYTES_PER_KB).toFixed(SIZE_FRACTION_DIGITS);
 }
 
-function hasSeparateCardsViewChunk() {
+function findMissingViewChunkPrefix() {
   const assetFileNames = readdirSync(join(buildDirectory, ASSETS_DIRECTORY));
-  return assetFileNames.some((fileName) =>
-    fileName.startsWith(CARDS_VIEW_CHUNK_PREFIX),
+  return VIEW_CHUNK_PREFIXES.find(
+    (chunkPrefix) =>
+      !assetFileNames.some((fileName) => fileName.startsWith(chunkPrefix)),
   );
 }
 
@@ -89,9 +91,10 @@ if (initialScriptUrls.length === 0) {
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
-if (!hasSeparateCardsViewChunk()) {
+const missingViewChunkPrefix = findMissingViewChunkPrefix();
+if (missingViewChunkPrefix !== undefined) {
   console.error(
-    `No separate ${CARDS_VIEW_CHUNK_PREFIX}* chunk in ${ASSETS_DIRECTORY}/ — the Cards view must be lazy-loaded`,
+    `No separate ${missingViewChunkPrefix}* chunk in ${ASSETS_DIRECTORY}/ — every view must be lazy-loaded`,
   );
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
