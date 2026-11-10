@@ -152,7 +152,8 @@ Not measured: `src/views/shared/hourGridSlots.ts` (types only, no mutants) and `
 - Impact: At the model+store level, nothing proves that a range set from wall-clock times is never persisted (ADR-0011). A regression that writes `meeting` through this new command would pass the feature. Only the hook-level `save` spy in `useMeetingRange.input.test.tsx:101` would catch it.
 - Fix: Add a step "And the stored document has no meeting range" to "Wall-clock times of any location set the range" in `meeting_range_wall_times.feature`. In the steps, run that scenario on `createStoredListApp` from `steps/meetingRangeStoredApp.ts`, dispatching through `useMeetingRange().confirmMeetingRangeInput` or the store. Assert as `meeting_range_commands.steps.ts:72-76` does: `Object.keys(backend.document)` does not contain `"meeting"`.
 - Fix risk: The stored app goes through the controller, so the "When" step must dispatch in `act` and use the immediate write scheduler the helper already wires. The outline's other assertions keep using the store world.
-- Status: open
+- Status: fixed
+- Resolution: added scenario "A range typed in wall-clock times is never stored" to meeting_range_wall_times.feature, run on createStoredListApp through confirmMeetingRangeInput; it asserts the in-memory backend document has no meeting key.
 
 ### R2 — WARNING — English range error text differs from the spec
 - Location: `packages/client/src/locales/en.json:126`
@@ -161,7 +162,8 @@ Not measured: `src/views/shared/hourGridSlots.ts` (types only, no mutants) and `
 - Impact: An English-language user who types an invalid range sees a text that is not the one the spec defines, and nothing would catch a further drift.
 - Fix: Set `meeting.rangeInputError` in `en.json` to "The meeting must lie within the day, in 15-minute steps". Optionally add an English case to `MeetingRangeInput.test.tsx` that asserts the text.
 - Fix risk: none. No test or baseline uses the English string: grep for "fit inside" in `packages/client/src` finds only the locale.
-- Status: open
+- Status: fixed
+- Resolution: en.json meeting.rangeInputError now reads "The meeting must lie within the day, in 15-minute steps"; MeetingRangeInput.test.tsx got an English case asserting the text.
 
 ### R3 — WARNING — `useSortableLocationRow.ts` mutation score below 90%
 - Location: `packages/client/src/views/shared/useSortableLocationRow.ts:49`
@@ -170,7 +172,8 @@ Not measured: `src/views/shared/hourGridSlots.ts` (types only, no mutants) and `
 - Impact: If the `<li>` stops being registered, the row is no longer a sortable node and the drop settle animation has no element. Reordering then breaks (or skips its settle animation) with green unit tests. The hook is the point of the D1 extraction, and the lock now depends on it.
 - Fix: Add a test in `src/views/shared/LocationRow.dragging.test.tsx` (or a new `useSortableLocationRow.test.tsx`) that fails when the `<li>` is not registered. For example, spy on the row `<li>`'s `getBoundingClientRect` and assert dnd-kit measures it when the keyboard picks the row up (Space on the drag handle). Then re-run `npx stryker run --mutate 'src/views/shared/useSortableLocationRow.ts'`.
 - Fix risk: Test-only. jsdom rects are all zero, so the assertion must check that the element was measured or registered, not where it moved; it must not depend on timing.
-- Status: open
+- Status: fixed
+- Resolution: new useSortableLocationRow.test.tsx asserts setNodeRef receives the list item; Stryker on the file now kills 9 of 9 (100%).
 
 ### R4 — SUGGESTION — Traceability line inserted inside an existing JSDoc sentence
 - Location: `packages/client/src/views/grid/MeetingHandle.tsx:42-44`
@@ -179,7 +182,8 @@ Not measured: `src/views/shared/hourGridSlots.ts` (types only, no mutants) and `
 - Impact: The JSDoc now reads as if the old requirements belong to this change, and the next line has no requirement ids. The link of `add-grid-meeting-range-and-share` to this component is garbled for anyone tracing those ids.
 - Fix: Move the new line after `add-grid-meeting-range-and-share (D6).`.
 - Fix risk: none (comment only).
-- Status: open
+- Status: fixed
+- Resolution: moved the new Implements line after the add-grid-meeting-range-and-share (D6) sentence in MeetingHandle.tsx.
 
 ### R5 — SUGGESTION — Blur after changing only the end field is untested
 - Location: `packages/client/src/views/shared/MeetingRangeInput.tsx:74`
@@ -188,7 +192,8 @@ Not measured: `src/views/shared/hourGridSlots.ts` (types only, no mutants) and `
 - Impact: If someone drops the end-text comparison, typing a new end time and tapping elsewhere would close the input without setting the range, and no test would fail.
 - Fix: Add an `it` in `MeetingRangeInput.test.tsx` that types a new end text only, tabs out of the wrapper, and expects `onConfirm` to be called with the unchanged start and the new end.
 - Fix risk: none (test-only).
-- Status: open
+- Status: fixed
+- Resolution: added MeetingRangeInput.test.tsx case changing only the end text and leaving focus; Stryker on the file kills 72 of 72 (100%).
 
 ## Verdict
 
