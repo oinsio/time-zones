@@ -129,7 +129,7 @@ Share meeting SHALL send only text, without a link: the first line names the ref
 #### Scenario: English text of the sample meeting
 - **GIVEN** the interface language is English, the hour format is 24-hour, the home location is Almaty and the list is Almaty, Moscow, Kolkata, New York
 - **AND** the meeting range is 09:00–11:00 in Almaty on 2026-03-08
-- **WHEN** the meeting text is built
+- **WHEN** the meeting share text is built
 - **THEN** it is exactly these lines:
 
 | line |
@@ -142,7 +142,7 @@ Share meeting SHALL send only text, without a link: the first line names the ref
 
 #### Scenario: The text follows the hour format
 - **GIVEN** the sample meeting and the hour format is 12-hour
-- **WHEN** the meeting text is built
+- **WHEN** the meeting share text is built
 - **THEN** every span is written in the 12-hour format, as the rows show their times
 
 ### Requirement: Share meeting outcome
@@ -158,6 +158,6 @@ Where the browser can share text, Share meeting SHALL hand the text to the syste
 |---|---|---|
 | shares the text | shared | nothing |
 | reports that the user closed the sheet | cancelled | nothing |
-| has no system share | copied | the meeting text |
-| fails to share for another reason | copied | the meeting text |
+| has no system share | copied | the meeting share text |
+| fails to share for another reason | copied | the meeting share text |
 | has neither share nor clipboard | failed | nothing |

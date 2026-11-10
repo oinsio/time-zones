@@ -171,12 +171,12 @@ While a meeting range is set and the Grid view shows at least one row, the page 
 - **THEN** the title and both buttons of the meeting bar are on one line and the page does not scroll horizontally
 
 ### Requirement: Share meeting from the meeting bar
-«Поделиться встречей» SHALL share the meeting text as `meeting-range` → "Share meeting text" and "Share meeting outcome" say. The outcome "copied" MUST show the copied notice «Текст встречи скопирован» ("Meeting text copied") and the outcome "failed" the share failed notice «Не удалось поделиться встречей» ("Could not share the meeting") in the notices region, announced politely and never taking the focus; the outcomes "shared" and "cancelled" show nothing. A notice MUST disappear on its Dismiss button, on Esc, on the next share, on a change of the meeting range and when the range is cleared. <!-- implements FR15, NFR-A2 of add-grid-meeting-range-and-share -->
+«Поделиться встречей» SHALL share the meeting share text as `meeting-range` → "Share meeting text" and "Share meeting outcome" say. The outcome "copied" MUST show the copied notice «Текст встречи скопирован» ("Meeting text copied") and the outcome "failed" the share failed notice «Не удалось поделиться встречей» ("Could not share the meeting") in the notices region, announced politely and never taking the focus; the outcomes "shared" and "cancelled" show nothing. A notice MUST disappear on its Dismiss button, on Esc, on the next share, on a change of the meeting range and when the range is cleared. <!-- implements FR15, NFR-A2 of add-grid-meeting-range-and-share -->
 
 #### Scenario: Share where the browser can share
 - **GIVEN** a browser with a system share and the Grid view with the sample meeting
 - **WHEN** the user chooses «Поделиться встречей»
-- **THEN** the system share receives the meeting text and no notice is shown
+- **THEN** the system share receives the meeting share text and no notice is shown
 
 #### Scenario: Closing the share sheet
 - **GIVEN** a browser whose system share reports that the user closed the sheet
@@ -186,7 +186,7 @@ While a meeting range is set and the Grid view shows at least one row, the page 
 #### Scenario: Copy where the browser cannot share
 - **GIVEN** a browser without a system share and the Grid view with the sample meeting
 - **WHEN** the user chooses «Поделиться встречей»
-- **THEN** the clipboard holds the meeting text
+- **THEN** the clipboard holds the meeting share text
 - **AND** the notice «Текст встречи скопирован» is shown and the focus stays on «Поделиться встречей»
 
 #### Scenario: Neither share nor clipboard
