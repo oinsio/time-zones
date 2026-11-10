@@ -7,6 +7,7 @@ import { Temporal } from "@/lib/temporal";
 import type { LocationCommand, LocationCommandType } from "./locationCommands";
 import { LocationErrorCode } from "./locationCommands";
 import type { LocationsReduceResult, WorldClockState } from "./locations";
+import { withoutMeetingRange } from "./reduceMeetingRange";
 import { ReferenceMode } from "./referenceMoment";
 import { resolveWallClock } from "./wallClock";
 
@@ -43,6 +44,7 @@ function isCanonicalTime(time: string): boolean {
  * wall-clock time is resolved by `resolveWallClock` (`compatible`); the
  * instant, status and target already pinned return the same state object.
  * Implements FR3, FR4, FR10, FR13 of add-wall-time-input-with-hint (D1).
+ * Implements FR3 of add-grid-meeting-range-and-share (D1): the meeting range ends.
  */
 export function reduceWallTime(
   state: WorldClockState,
@@ -68,6 +70,7 @@ export function reduceWallTime(
     );
     const { reference } = state;
     if (
+      state.meeting === undefined &&
       reference.mode === ReferenceMode.PINNED &&
       reference.instant.equals(instant) &&
       reference.wallClockStatus === status &&
@@ -79,7 +82,7 @@ export function reduceWallTime(
     return {
       ok: true,
       state: {
-        ...state,
+        ...withoutMeetingRange(state),
         reference: {
           mode: ReferenceMode.PINNED,
           instant,

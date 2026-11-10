@@ -7,6 +7,7 @@ import type { WallTimeTarget } from "./referenceMoment";
  * reorder-locations-by-drag-and-drop.
  * Implements FR3, FR8 of add-time-sliders-to-location-cards (D1): SELECT_INSTANT.
  * Implements FR1, FR2, FR3, FR10 of set-home-location-and-show-differences (D1).
+ * Implements FR2 of add-grid-meeting-range-and-share (D1): the meeting range commands.
  */
 
 export enum LocationCommandType {
@@ -22,6 +23,8 @@ export enum LocationCommandType {
   SELECT_INSTANT = "SELECT_INSTANT",
   SET_HOME_LOCATION = "SET_HOME_LOCATION",
   SET_WALL_TIME = "SET_WALL_TIME",
+  SET_MEETING_RANGE = "SET_MEETING_RANGE",
+  CLEAR_MEETING_RANGE = "CLEAR_MEETING_RANGE",
 }
 
 export enum LocationErrorCode {
@@ -33,6 +36,7 @@ export enum LocationErrorCode {
   DATE_OUT_OF_RANGE = "DATE_OUT_OF_RANGE",
   INVALID_INSTANT = "INVALID_INSTANT",
   INVALID_TIME = "INVALID_TIME",
+  INVALID_MEETING_RANGE = "INVALID_MEETING_RANGE",
 }
 
 export type LocationCommand =
@@ -71,4 +75,7 @@ export type LocationCommand =
       time: string;
       /** ISO date: the row's local date when the field opened. */
       date: string;
-    };
+    }
+  /** `start` and `end` are ISO 8601 timestamps with `Z`. */
+  | { type: LocationCommandType.SET_MEETING_RANGE; start: string; end: string }
+  | { type: LocationCommandType.CLEAR_MEETING_RANGE };

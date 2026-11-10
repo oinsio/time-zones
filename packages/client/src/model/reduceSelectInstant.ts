@@ -6,6 +6,7 @@ import {
   type LocationsReduceResult,
   type WorldClockState,
 } from "./locations";
+import { withoutMeetingRange } from "./reduceMeetingRange";
 import { getReferenceZone, ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
@@ -21,6 +22,7 @@ type SelectInstantCommand = Extract<
  * The status is always `UNIQUE`, which ends a gap note. Selecting the
  * instant that is already pinned returns the same state object.
  * Implements FR3, FR5, FR8 of add-time-sliders-to-location-cards (D1).
+ * Implements FR3 of add-grid-meeting-range-and-share (D1): the meeting range ends.
  */
 export function reduceSelectInstant(
   state: WorldClockState,
@@ -40,6 +42,7 @@ export function reduceSelectInstant(
   }
   const { reference } = state;
   if (
+    state.meeting === undefined &&
     reference.mode === ReferenceMode.PINNED &&
     reference.instant.equals(instant)
   ) {
@@ -51,7 +54,7 @@ export function reduceSelectInstant(
   return {
     ok: true,
     state: {
-      ...state,
+      ...withoutMeetingRange(state),
       reference: {
         mode: ReferenceMode.PINNED,
         instant,
