@@ -124,7 +124,8 @@
 - Impact: after archive, the stable `grid-view` spec carries no work bound for the scroll path. A later change can measure on every scroll event and still meet every spec scenario. `test-planning.md` asks for work bounds as blocking unit BDD, and no Gherkin covers this one.
 - Fix: add to "Meeting handles on the frame" the sentence "Re-placing the handles on scroll MUST measure the strips at most once per animation frame and MUST re-render a handle only when its row changes." Add the scenario "Scrolling re-places the handles cheaply": GIVEN the Grid view with 12 locations and a meeting range, WHEN three scroll events arrive before the next animation frame, THEN the strips are measured once AND a scroll that leaves the candidate rows unchanged re-renders no handle. Implement it in task 4.5's unit feature `grid_view_meeting_handle_reach_unit.feature` (`@NFR-P1`), with a stubbed `requestAnimationFrame` counter as in task 4.3.
 - Fix risk: none. It is a work bound in jsdom, with no timing assertion, as ADR-0008 and `test-planning.md` require. Task 4.3 already builds the same stubs.
-- Status: open
+- Status: fixed
+- Resolution: specs/grid-view/spec.md "Meeting handles on the frame" now says re-placing MUST measure the strips at most once per animation frame and re-render a handle only when its row changes, with the new scenario "Scrolling re-places the handles cheaply"; tasks.md 4.5 implements it in `grid_view_meeting_handle_reach_unit.feature` (`@NFR-P1`, stubbed `requestAnimationFrame` and render counter, no timing); proposal.md Behavior and design.md D10 list it.
 
 ### R5 — SUGGESTION — "The target of each move lies on the track step" is false for hour moves and limited moves
 - Location: `openspec/changes/refine-meeting-range-entry-and-handles/specs/meeting-range/spec.md:82`; `proposal.md:83` (FR4)

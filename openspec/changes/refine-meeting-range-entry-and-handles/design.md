@@ -130,7 +130,7 @@ The number is 0013, not 0012. `docs/architecture/overview.md` and `views.md` alr
 | D1, D2 | Vitest `model/dayTrack.test.ts` (`getMinutesAfterTrackStep`), `model/meetingRange.test.ts`, `model/reduceMeetingRangeWallTimes.test.ts`, `model/referenceMoment.test.ts` (date change of an off-step range); new unit BDD `meeting_range/meeting_range_any_minute.feature` | pure model |
 | D3 | Vitest `controller/useMeetingRange.input.test.tsx`, `views/shared/MeetingRangeInput.test.tsx`; unit BDD `grid_view_meeting_range_input_unit.feature` | jsdom renders text and `aria-*` values |
 | D4 | Vitest `presenter/formatTypedWallTimeText.test.ts`, `views/shared/typedTimeFieldText.test.ts`, `WallTimeInput.test.tsx`; unit BDD `time_selection/time_selection_time_separator_unit.feature` (user-event typing); E2E `time_selection_time_separator_e2e.feature` (real keyboard, caret) | caret and real key input need a browser |
-| D5 | Vitest `meetingHandleRow.test.ts`, `useVisibleStripRows.test.tsx` (stubbed rects and `requestAnimationFrame`); E2E `grid_view_meeting_handle_reach_e2e.feature` | real layout and scrolling |
+| D5 | Vitest `meetingHandleRow.test.ts`, `useVisibleStripRows.test.tsx` (stubbed rects and `requestAnimationFrame`); unit BDD `grid_view_meeting_handle_reach_unit.feature` (the NFR-P1 work bound, "Scrolling re-places the handles cheaply"); E2E `grid_view_meeting_handle_reach_e2e.feature` | real layout and scrolling |
 | D6–D8 | Vitest `useMeetingHandleDrag.test.tsx`, `MeetingHandle.test.tsx`; E2E `grid_view_meeting_handle_reach_e2e.feature`, and the auto-scroll scenarios of `grid_view_meeting_handles_e2e.feature` (grab offset while the strips scroll) | real hit testing and scrolling |
 
 ## Consequences

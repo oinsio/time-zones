@@ -133,6 +133,7 @@ Files stay under 200 lines where possible, 300 at most.
   Implement in `MeetingHandle.tsx` and `useMeetingHandleDrag.ts`, with `MEETING_HANDLE_RELEASE_CLICK_WINDOW_MS` in `src/constants/meeting.ts`. Run the three files one at a time, then `npx vitest run src/views/grid/HourStrip.selection.test.tsx`: pass.
 - [ ] 4.5 Unit BDD of the handles: `src/test/features/grid_view/grid_view_meeting_handle_reach_unit.feature` with `steps/grid_view_meeting_handle_reach_unit.steps.tsx`, through the Grid world of `steps/meetingGridSession.ts` in jsdom. Scenarios:
   - "Handle rows among the visible rows" (`@FR7`);
+  - "Scrolling re-places the handles cheaply" (`@NFR-P1`): stubbed strip rects and a stubbed `requestAnimationFrame` that counts frames and rect reads, as in 4.3, and a render counter on the handles; three `scroll` events before one frame give one measurement, and a scroll with the same candidate rows gives no handle re-render. A work bound, no timing (ADR-0008);
   - "A click after a handle drag is not a tap": a pointer drag of the end handle by one cell, then a `click` on Almaty's column 14 cell; expect 09:00–12:00 (`@FR8`);
   - "Finger drag without Pointer Events": the touch fallback; expect 09:00–11:00 and the `touchend` default prevented (`@FR8`).
 

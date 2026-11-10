@@ -19,7 +19,7 @@ While a meeting range is set and the list has rows, the Grid view SHALL show two
 
 The handles MUST stand on the rows the user can see. The candidate rows are those on which a meeting handle, centred on the row's hour strip, lies fully inside the viewport and above the date bar; the handle is taller than a strip, so the handle's box decides, not the strip's. When no row is a candidate, every row of the list is a candidate. With `k` candidate rows, counted from 1 in list order, the end handle stands on candidate row `⌈k / 2⌉` and the start handle on the candidate row after it. With one candidate row, both handles stand on it.
 
-When the page scrolls or resizes, the handles MUST move to the rows of the new candidates. While a meeting handle is being dragged, neither handle changes its row.
+When the page scrolls or resizes, the handles MUST move to the rows of the new candidates. Re-placing the handles MUST measure the strips at most once per animation frame and MUST re-render a handle only when its row changes. While a meeting handle is being dragged, neither handle changes its row.
 
 The handles MUST lie above everything in the panel, the row header texts and row notes included, and below an open location menu. <!-- implements FR9, NFR-R1, UX1 of add-grid-meeting-range-and-share; FR7, NFR-P1, NFR-R1 of refine-meeting-range-entry-and-handles -->
 
@@ -55,6 +55,12 @@ The handles MUST lie above everything in the panel, the row header texts and row
 | 7 | 12 | 9 | 10 |
 | 5 | 5 | 5 | 5 |
 | 3 | 4 | 3 | 4 |
+
+#### Scenario: Scrolling re-places the handles cheaply
+- **GIVEN** the Grid view with 12 locations and the meeting range 09:00–11:00 in Almaty
+- **WHEN** three scroll events arrive before the next animation frame
+- **THEN** the hour strips are measured once
+- **AND** a scroll that leaves the candidate rows unchanged re-renders no meeting handle
 
 ### Requirement: Drag a meeting handle
 A press anywhere within a meeting handle's hit area SHALL drag that handle and MUST NOT select hour cells. While the pointer moves, the handle's end goes to the position of the handle at the press, plus the pointer's horizontal travel along the strips since the press (the strips' scroll included), rounded to the nearest track step and limited as "Meeting handle moves" of `meeting-range` says. A press and release without movement changes nothing. While the end moves, the meeting frame, the dimming, every row's span and day shift mark and the duration in the meeting bar MUST follow at each step. Releasing the handle MUST NOT count as a tap or click on an hour cell, wherever the pointer or finger is released: on any row's hour cell, on a row header or outside the panel. A drag MUST work by mouse, pen and finger, and by finger also on an engine without Pointer Events; there the end of a finger drag MUST NOT produce a click. <!-- implements FR10, UX2 of add-grid-meeting-range-and-share; FR8 of refine-meeting-range-entry-and-handles -->

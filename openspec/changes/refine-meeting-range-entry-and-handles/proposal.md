@@ -136,7 +136,7 @@ All paths below are under `packages/client/src/test/features/`, and every scenar
 - Unit BDD (vitest-cucumber), new:
   - `meeting_range/meeting_range_any_minute.feature` (FR1, FR4, FR5);
   - `time_selection/time_selection_time_separator_unit.feature` (FR6);
-  - `grid_view/grid_view_meeting_handle_reach_unit.feature` (FR7, FR8).
+  - `grid_view/grid_view_meeting_handle_reach_unit.feature` (FR7, FR8, NFR-P1).
 - Unit BDD, updated:
   - `meeting_range/meeting_range_commands.feature` and `meeting_range_wall_times.feature` (FR1, FR2);
   - `grid_view/grid_view_meeting_range_input_unit.feature` (FR2, FR3).
