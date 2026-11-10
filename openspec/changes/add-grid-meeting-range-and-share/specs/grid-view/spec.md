@@ -106,13 +106,26 @@ Dragging a meeting handle SHALL move its end of the range to the nearest track s
 - **THEN** the meeting range is 09:00–11:00
 
 ### Requirement: Handle drag scrolls the strips
-When the strips scroll horizontally and a dragged meeting handle comes within 32 px of the left or right edge of the strips' visible part, the strips SHALL keep scrolling in that direction while the handle stays in that zone, until they reach their end or the drag ends; the handle's end of the range follows the scrolled position. <!-- implements FR11, NFR-R1 of add-grid-meeting-range-and-share -->
+When the strips scroll horizontally and a dragged meeting handle comes within 32 px of the left or right edge of the strips' visible part, the strips SHALL keep scrolling in that direction while the handle stays in that zone, until they reach their end or the drag ends; the handle's end of the range follows the scrolled position and stays the track step under the pointer, never jumping by more than one track step per pointer move or scroll frame. While a meeting range is set, the strips MUST NOT scroll on their own to follow the hour frame (the pinned start); once the range is cleared, they scroll the hour frame into view if it is hidden. <!-- implements FR10, FR11, NFR-R1, UX2 of add-grid-meeting-range-and-share -->
 
 #### Scenario: Dragging the end handle to the right edge on a phone
 - **GIVEN** the Grid view at 390 by 844 px with the meeting range 09:00–11:00 in Almaty and the strips scrolled so that the frame is visible
 - **WHEN** the user drags the end handle to the right edge of the visible strips and holds it there
 - **THEN** the strips scroll to the right
 - **AND** the meeting range ends later than 11:00 when the drag ends
+- **AND** the end handle stays within one track step of the finger
+
+#### Scenario: Dragging the start handle to the left edge on a phone
+- **GIVEN** the Grid view at 390 by 844 px with the meeting range 09:00–11:00 in Almaty and the strips scrolled so that the frame is visible
+- **WHEN** the user drags the start handle to the left edge of the visible strips and holds it there
+- **THEN** the strips scroll to the left
+- **AND** the meeting range starts earlier than 09:00 when the drag ends
+- **AND** the start changes by at most one track step per move and the start handle stays within one track step of the finger
+
+#### Scenario: The hour frame comes back into view after Clear
+- **GIVEN** the Grid view at 390 by 844 px with a meeting range whose start column is scrolled out of view
+- **WHEN** the user chooses «Сбросить выбор встречи»
+- **THEN** the hour frame is shown on the former start column, fully visible
 
 ### Requirement: Meeting handles are sliders
 Each meeting handle SHALL be a slider for assistive technology and the keyboard, named «Начало встречи» / «Конец встречи» ("Meeting start" / "Meeting end"). Its value MUST be the minutes from the start of the reference day to its end of the range, its minimum and maximum the limits of "Meeting handle moves" of `meeting-range`, and its value text the local time of that end in the reference zone in the hour format setting. Arrow Right / Arrow Up and Arrow Left / Arrow Down MUST move it by one track step, Page Up / Page Down by one hour, Home / End to the start / end of the reference day, each limited by those rules. Each handle MUST be one Tab stop, the start handle before the end handle, both after the last row's controls, with a visible focus ring in the accent colour and a hit area of at least 24 × 44 px. <!-- implements FR12, NFR-A1, NFR-A2 of add-grid-meeting-range-and-share -->
