@@ -68,6 +68,7 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
     label: "Chicago",
     countryCode: "US",
   },
+  London: { timeZoneId: "Europe/London", label: "London", countryCode: "GB" },
   Adelaide: {
     timeZoneId: "Australia/Adelaide",
     label: "Adelaide",
