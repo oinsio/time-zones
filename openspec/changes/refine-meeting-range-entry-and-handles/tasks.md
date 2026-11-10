@@ -22,8 +22,10 @@ Files stay under 200 lines where possible, 300 at most.
   - **Meeting handle**: "moves the start or the end by the track step" becomes "moves the start or the end onto the track step; stands on the grid rows visible on screen"; *Code:* gains `getMeetingHandleRow`, `useVisibleStripRows`.
   - **Wall-time input**: gains "While digits are typed, it inserts the `:` separator after the hour"; *Code:* gains `formatTypedWallTimeText`.
   - **Meeting range input**: gains "its fields insert the separator as the wall-time input does".
+  - In `docs/glossary/date-selection.md`, **Date bar**: *Code:* gains `DATE_BAR_SELECTOR` (its locator on the main page).
 
   Verify from the repository root:
+  - `grep -n "DATE_BAR_SELECTOR" docs/glossary/date-selection.md` prints a line;
   - `grep -n "at any whole minute" docs/glossary/time-selection.md`, `grep -n "formatTypedWallTimeText" docs/glossary/time-selection.md` and `grep -n "useVisibleStripRows" docs/glossary/time-selection.md` each print a line;
   - `grep -c "on the track step, chosen" docs/glossary/time-selection.md` prints 0;
   - `wc -l docs/glossary/time-selection.md` stays under 200.
@@ -68,7 +70,7 @@ Files stay under 200 lines where possible, 300 at most.
 
   The unchanged rows of "Keyboard moves of the handles" in `meeting_range_handles.feature` keep passing. Run `npx vitest run src/test/features/meeting_range/steps/meeting_range_any_minute.steps.ts`, then `npx vitest run src/test/features/meeting_range/steps/meeting_range_handles.steps.ts`: pass.
 
-## 3. Presenter and controller (FR3, FR6, M3; D3, D4)
+## 3. Presenter, controller and refusal messages (FR2, FR3, FR6, M2, M3, NFR-A1, UX3; D3, D4)
 
 - [ ] 3.1 RED then GREEN: `src/presenter/formatTypedWallTimeText.test.ts` (`it.each`):
   - `1`→`1`, `10`→`10`, `103`→`10:3`, `1030`→`10:30`;
@@ -77,16 +79,17 @@ Files stay under 200 lines where possible, 300 at most.
   - `9:3`, `09.30`, `9 am`, `abc` and the empty text unchanged.
 
   Implement `src/presenter/formatTypedWallTimeText.ts` with `WALL_TIME_SEPARATOR` and the digit limits as constants in `src/constants/timeSelection.ts`, exported through `src/constants/index.ts` and `src/presenter/index.ts`. Run `npx vitest run src/presenter/formatTypedWallTimeText.test.ts`: passes.
-- [ ] 3.2 RED then GREEN: `src/controller/useMeetingRange.input.test.tsx`:
-  - the `9:10`/`11` row now gives `CLOSED` with the range 09:10–11:00;
-  - `10`/`10` → `SAME_START_AND_END`;
-  - `12`/`10` and `22`/`2` → `END_BEFORE_START`;
-  - New York `13`/`14` on `2026-03-07` → `OUTSIDE_REFERENCE_DAY`;
-  - in each refusal the range stays 09:00–11:00.
+- [ ] 3.2 RED then GREEN, the outcomes and their messages (D3). Removing `MeetingRangeInputOutcome.INVALID_RANGE` touches the controller, the view that reads it and three test files, so they change together in this one task:
+  - `src/controller/useMeetingRange.input.test.tsx`: the `9:10`/`11` row (`INVALID_RANGE` today) now gives `CLOSED` with the range 09:10–11:00; `10`/`10` → `SAME_START_AND_END`; `12`/`10` and `22`/`2` → `END_BEFORE_START`; New York `13`/`14` on `2026-03-07` → `OUTSIDE_REFERENCE_DAY`; in each refusal the range stays 09:00–11:00.
+  - `src/views/shared/MeetingRangeInput.test.tsx`: the `INVALID_RANGE` cases (lines 150–195 today) are replaced by one case per new outcome, checking the Russian and the English text of D3, with both fields `aria-invalid` and `aria-describedby` on the message.
+  - `src/views/shared/LocalDateTime.meetingInput.test.tsx`: the case at lines 80–92 (`INVALID_RANGE`, «…с шагом 15 минут») uses `OUTSIDE_REFERENCE_DAY` and «Встреча должна быть внутри дня».
 
-  Implement D3 in `src/controller/useMeetingRange.ts` (`INVALID_RANGE` removed). Run `npx vitest run src/controller/useMeetingRange.input.test.tsx`, then `npx vitest run src/controller/useMeetingRange.test.tsx`: pass. Then, test files included, `grep -rn "INVALID_RANGE" src` prints nothing.
+  Run the three files one at a time: they fail. Implement D3 in `src/controller/useMeetingRange.ts` (`INVALID_RANGE` removed), the outcome-to-key `Record` in `src/views/shared/MeetingRangeInput.tsx` (lines 81–87 today read `INVALID_RANGE`), and the 3 keys of D3 in `src/locales/ru.json` and `src/locales/en.json` (`rangeInputError` renamed). Run `npx vitest run src/controller/useMeetingRange.input.test.tsx`, then `npx vitest run src/controller/useMeetingRange.test.tsx`, then `npx vitest run src/views/shared/MeetingRangeInput.test.tsx`, then `npx vitest run src/views/shared/LocalDateTime.meetingInput.test.tsx`, then `pnpm typecheck`: all pass. Then, test files included:
+  - `grep -rn "INVALID_RANGE" src` prints nothing;
+  - `grep -rn "шагом 15 минут\|15-minute steps" src` prints nothing;
+  - `grep -c "rangeInputSameTimesError\|rangeInputEndBeforeStartError\|rangeInputOutsideDayError" src/locales/ru.json` prints 3.
 
-## 4. Views (FR3, FR6–FR8, NFR-A1, NFR-A2, NFR-P1, UX1–UX3; D3–D8)
+## 4. Views (FR3, FR6–FR8, NFR-A2, NFR-P1, UX1, UX2; D4–D8)
 
 - [ ] 4.1 RED then GREEN, the separator (D4):
   - `src/views/shared/typedTimeFieldText.test.ts` (new): an `insertText` change at the end with `103` gives `10:3`; a `deleteContentBackward` change gives the raw text; a change with `selectionEnd` before the end gives the raw text; without `inputType`, a shorter prefix gives the raw text.
@@ -94,32 +97,25 @@ Files stay under 200 lines where possible, 300 at most.
   - `src/views/shared/MeetingRangeInput.test.tsx` adds: typing `905` in the start field shows `9:05`, and `1130` in the end field shows `11:30`.
 
   Implement `src/views/shared/typedTimeFieldText.ts` and use it in `WallTimeInput.tsx` and `MeetingRangeInput.tsx`. Run the three files one at a time: pass.
-- [ ] 4.2 RED then GREEN, the messages (D3). `src/views/shared/MeetingRangeInput.test.tsx`:
-  - the `INVALID_RANGE` cases (lines 150–195 today) are replaced by one case per new outcome, checking the Russian and the English text of D3;
-  - both fields are `aria-invalid` with `aria-describedby` on the message.
-
-  In `src/views/shared/LocalDateTime.meetingInput.test.tsx`, the case at lines 80–92 (`INVALID_RANGE`, «…с шагом 15 минут») uses `OUTSIDE_REFERENCE_DAY` and «Встреча должна быть внутри дня».
-
-  Implement the outcome-to-key `Record` in `MeetingRangeInput.tsx` and the 3 keys of D3 in `src/locales/ru.json` and `src/locales/en.json` (`rangeInputError` renamed). Run both files one at a time: pass. Then `grep -rn "шагом 15 минут\|15-minute steps" src` prints nothing, and `grep -c "rangeInputSameTimesError\|rangeInputEndBeforeStartError\|rangeInputOutsideDayError" src/locales/ru.json` prints 3.
-- [ ] 4.3 Unit BDD of the input (needs 3.2, 4.1, 4.2):
+- [ ] 4.2 Unit BDD of the input (needs 3.2, 4.1):
   - `src/test/features/grid_view/grid_view_meeting_range_input_unit.feature`: the "Wrong input keeps the input open" table becomes the 5 rows of the delta and is tagged `@FR3 @UX3`; add "A meeting at any minute" (5 examples, `@FR2 @FR3`).
   - New `src/test/features/time_selection/time_selection_time_separator_unit.feature` with `steps/time_selection_time_separator_unit.steps.tsx` (user-event typing in the app world of the existing wall-time unit steps): "Digits typed one by one" (7 examples), "Texts left as typed" (5), "Backspace removes the separator", "A pasted time gets its separator" and "Rejected texts stay rejected" (3) (`@FR6 @UX1`). The unit copy of "Digits typed one by one" omits the step "the caret is after the last character": the caret is asserted only in the browser (5.2).
 
   Run `npx vitest run src/test/features/grid_view/steps/grid_view_meeting_range_input_unit.steps.tsx`, then `npx vitest run src/test/features/time_selection/steps/time_selection_time_separator_unit.steps.tsx`, then `npx vitest run src/test/features/time_selection/steps/time_selection_wall_time_input_unit.steps.tsx`: pass.
-- [ ] 4.4 RED then GREEN, handle rows (D5):
+- [ ] 4.3 RED then GREEN, handle rows (D5):
   - `src/views/grid/meetingHandleRow.test.ts`: the existing cases call the new `getMeetingHandleRow(handle, { firstRow: 1, lastRow: n })`; add the 4 rows of `grid-view` → "Handle rows among the visible rows".
-  - `src/views/grid/useVisibleStripRows.test.tsx` (new). It uses stubbed `getBoundingClientRect` of 12 strips and a `[data-page-bar]` element, and a stubbed `requestAnimationFrame` that counts frames. Cases:
+  - `src/views/grid/useVisibleStripRows.test.tsx` (new). It uses stubbed `getBoundingClientRect` of 12 strips and a `[data-date-bar]` element, and a stubbed `requestAnimationFrame` that counts frames. Cases:
     - at scroll top it returns rows 1–6;
     - after a scroll event it returns the new run;
     - three scroll events before one frame measure once (NFR-P1);
     - an unchanged run causes no re-render (a render counter);
     - with no strip fully visible it returns `{ 1, 12 }`;
     - with `isFrozen` it keeps the last value;
-    - without `[data-page-bar]` it uses `window.innerHeight`.
-  - `src/app/MainPage.test.tsx` asserts `data-page-bar` on the `<footer>`.
+    - without `[data-date-bar]` it uses `window.innerHeight`.
+  - `src/app/MainPage.test.tsx` asserts `data-date-bar` on the bottom element that holds the date bar.
 
-  Implement `meetingHandleRow.ts`, `useVisibleStripRows.ts`, `PAGE_BAR_SELECTOR` in `src/constants/meeting.ts`, the attribute in `src/app/MainPage.tsx`, and the wiring in `GridView.tsx` and `MeetingHandle.tsx` (`onDragActiveChange`). Run the three test files one at a time, then `npx vitest run src/views/grid/MeetingHandle.test.tsx`: pass.
-- [ ] 4.5 RED then GREEN, hit area, grab offset and release (D6–D8):
+  Implement `meetingHandleRow.ts`, `useVisibleStripRows.ts`, `DATE_BAR_SELECTOR` in `src/constants/date.ts` (beside `DATE_BAR_SHORT_FORMAT_OPTIONS`, exported through `src/constants/index.ts`), the attribute in `src/app/MainPage.tsx`, and the wiring in `GridView.tsx` and `MeetingHandle.tsx` (`onDragActiveChange`). Run the three test files one at a time, then `npx vitest run src/views/grid/MeetingHandle.test.tsx`: pass.
+- [ ] 4.4 RED then GREEN, hit area, grab offset and release (D6–D8):
   - `src/views/grid/MeetingHandle.test.tsx`: the `<li>` carries `w-11` and `h-12`, and the grip keeps `h-9 w-3` (UX2).
   - `src/views/grid/useMeetingHandleDrag.test.tsx` and `useMeetingHandleDrag.edges.test.tsx`: the assertions that expect the pointer's absolute minutes are updated to press-relative minutes. The fixture's `valueMinutes` 660 plus the travel: the touch drag from x 100 to 256 at the fixture pitch expects `660 + (256 - 100) / pitch * 60`.
   - New cases:
@@ -130,7 +126,7 @@ Files stay under 200 lines where possible, 300 at most.
     - `onDragActiveChange` is called with `true` on press and `false` on release.
 
   Implement in `MeetingHandle.tsx` and `useMeetingHandleDrag.ts`, with `MEETING_HANDLE_RELEASE_CLICK_WINDOW_MS` in `src/constants/meeting.ts`. Run the three files one at a time, then `npx vitest run src/views/grid/HourStrip.selection.test.tsx`: pass.
-- [ ] 4.6 Unit BDD of the handles: `src/test/features/grid_view/grid_view_meeting_handle_reach_unit.feature` with `steps/grid_view_meeting_handle_reach_unit.steps.tsx`, through the Grid world of `steps/meetingGridSession.ts` in jsdom. Scenarios:
+- [ ] 4.5 Unit BDD of the handles: `src/test/features/grid_view/grid_view_meeting_handle_reach_unit.feature` with `steps/grid_view_meeting_handle_reach_unit.steps.tsx`, through the Grid world of `steps/meetingGridSession.ts` in jsdom. Scenarios:
   - "Handle rows among the visible rows" (`@FR7`);
   - "A click after a handle drag is not a tap": a pointer drag of the end handle by one cell, then a `click` on Almaty's column 14 cell; expect 09:00–12:00 (`@FR8`);
   - "Finger drag without Pointer Events": the touch fallback; expect 09:00–11:00 and the `touchend` default prevented (`@FR8`).
@@ -145,14 +141,20 @@ Files stay under 200 lines where possible, 300 at most.
   - "the screen is {int} by {int} px for the locations".
 
   Scenarios:
-  - "Handles stay on screen in a long list" (6 examples; the date bar is located by `[data-page-bar]`, `@FR7 @NFR-R1`);
+  - "Handles stay on screen in a long list" (6 examples; the date bar is located by `DATE_BAR_SELECTOR` from `@/constants`, `@FR7 @NFR-R1`);
   - "A press beside the grip drags the handle" (mouse down 16 px right of the end handle's centre, move one cell pitch right, release over the Kolkata row's hour cell; expect 09:00–12:00 and «Meeting · 3 h», `@FR8`);
   - "Press and release without movement" (`@FR8`);
   - "The hit area is at least 44 by 44 px" (2 examples, `@NFR-A2`);
   - "Slider values off the track step" (typed 09:05–09:28 through the meeting range input, `@FR4 @NFR-A2`);
   - "Arrow keys bring an off-step end onto the track step" (`@FR4`).
 
-  Run `pnpm test:bdd:gen && npx playwright test -c playwright.bdd.config.ts --project chromium --grep "@refine-meeting-range-entry-and-handles" --grep-invert "@FR6|@FR3"`: passes.
+  In `steps/grid_view_layers_e2e.steps.ts`, the local `const DATE_BAR_SELECTOR = "footer"` is replaced by the import of `DATE_BAR_SELECTOR` from `@/constants`, so the date bar has one locator.
+
+  The auto-scroll scenarios of `grid_view_meeting_handles_e2e.feature` follow the modified "Handle drag scrolls the strips" (grab offset):
+  - "Dragging the end handle to the right edge on a phone" and "Dragging the start handle to the left edge on a phone" gain the tags `@refine-meeting-range-entry-and-handles @FR8`, and their last step becomes "the end handle keeps its distance from the finger at the press" / "the start handle keeps its distance from the finger at the press";
+  - in `steps/grid_view_meeting_handles_e2e.steps.ts`, the finger drag presses `FINGER_PRESS_OFFSET_PX` (16 px, a new constant of the step file) right of the handle's centre and records that offset in `FingerDrag`; the step "the (end|start) handle is within a quarter of a cell of the finger" becomes "the (end|start) handle keeps its distance from the finger at the press" and asserts `|handleCentre.x - (lastX - pressOffsetPx)| ≤ pitch / CELLS_PITCH_FRACTION + EDGE_INSET_PX`.
+
+  Run `pnpm test:bdd:gen && npx playwright test -c playwright.bdd.config.ts --project chromium --grep "@refine-meeting-range-entry-and-handles" --grep-invert "@FR6|@FR3"`: passes. It includes the two auto-scroll scenarios through their new tag. Then run `npx playwright test -c playwright.bdd.config.ts --project chromium grid_view_layers_e2e` (the generated spec of the layers feature): passes.
 
   Then confirm that the scenarios guard the fix:
   - change `getMeetingHandleRow`'s call in `GridView.tsx` back to `{ firstRow: 1, lastRow: rowCount }`, rerun "Handles stay on screen in a long list" and confirm it fails;

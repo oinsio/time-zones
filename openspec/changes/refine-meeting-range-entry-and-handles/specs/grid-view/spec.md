@@ -57,7 +57,7 @@ The handles MUST lie above everything in the panel, the row header texts and row
 | 3 | 4 | 3 | 4 |
 
 ### Requirement: Drag a meeting handle
-A press anywhere within a meeting handle's hit area SHALL drag that handle and MUST NOT select hour cells. While the pointer moves, the handle's end goes to the position of the handle at the press, plus the pointer's horizontal travel since the press, rounded to the nearest track step and limited as "Meeting handle moves" of `meeting-range` says. A press and release without movement changes nothing. While the end moves, the meeting frame, the dimming, every row's span and day shift mark and the duration in the meeting bar MUST follow at each step. Releasing the handle MUST NOT count as a tap or click on an hour cell, wherever the pointer or finger is released: on any row's hour cell, on a row header or outside the panel. A drag MUST work by mouse, pen and finger, and by finger also on an engine without Pointer Events; there the end of a finger drag MUST NOT produce a click. <!-- implements FR10, UX2 of add-grid-meeting-range-and-share; FR8 of refine-meeting-range-entry-and-handles -->
+A press anywhere within a meeting handle's hit area SHALL drag that handle and MUST NOT select hour cells. While the pointer moves, the handle's end goes to the position of the handle at the press, plus the pointer's horizontal travel along the strips since the press (the strips' scroll included), rounded to the nearest track step and limited as "Meeting handle moves" of `meeting-range` says. A press and release without movement changes nothing. While the end moves, the meeting frame, the dimming, every row's span and day shift mark and the duration in the meeting bar MUST follow at each step. Releasing the handle MUST NOT count as a tap or click on an hour cell, wherever the pointer or finger is released: on any row's hour cell, on a row header or outside the panel. A drag MUST work by mouse, pen and finger, and by finger also on an engine without Pointer Events; there the end of a finger drag MUST NOT produce a click. <!-- implements FR10, UX2 of add-grid-meeting-range-and-share; FR8 of refine-meeting-range-entry-and-handles -->
 
 #### Scenario: Drag the end handle one hour right
 - **GIVEN** the Grid view at 1440 by 900 px and the meeting range 09:00–10:00 in Almaty on 2026-03-08
@@ -89,6 +89,28 @@ A press anywhere within a meeting handle's hit area SHALL drag that handle and M
 - **GIVEN** the Grid view with the meeting range 09:00–11:00 in Almaty
 - **WHEN** the user drags the end handle one cell to the right and the browser then sends the click of that gesture to an hour cell of column 14
 - **THEN** the meeting range is 09:00–12:00
+
+### Requirement: Handle drag scrolls the strips
+When the strips scroll horizontally and a dragged meeting handle comes within 32 px of the left or right edge of the strips' visible part, the strips SHALL keep scrolling in that direction while the handle stays in that zone, until they reach their end or the drag ends. The handle's end of the range follows the scrolled position by the rule of "Drag a meeting handle": the position of the handle at the press, plus the pointer's horizontal travel along the strips since the press (the strips' scroll included), rounded to the nearest track step. The handle therefore keeps the horizontal distance from the pointer it had at the press, within one track step, and its end never jumps by more than one track step per pointer move or scroll frame. While a meeting range is set, the strips MUST NOT scroll on their own to follow the hour frame (the pinned start); once the range is cleared, they scroll the hour frame into view if it is hidden. <!-- implements FR10, FR11, NFR-R1, UX2 of add-grid-meeting-range-and-share; FR8 of refine-meeting-range-entry-and-handles -->
+
+#### Scenario: Dragging the end handle to the right edge on a phone
+- **GIVEN** the Grid view at 390 by 844 px with the meeting range 09:00–11:00 in Almaty and the strips scrolled so that the frame is visible
+- **WHEN** the user drags the end handle to the right edge of the visible strips and holds it there
+- **THEN** the strips scroll to the right
+- **AND** the meeting range ends later than 11:00 when the drag ends
+- **AND** the end handle keeps the horizontal distance from the finger it had at the press, within one track step
+
+#### Scenario: Dragging the start handle to the left edge on a phone
+- **GIVEN** the Grid view at 390 by 844 px with the meeting range 09:00–11:00 in Almaty and the strips scrolled so that the frame is visible
+- **WHEN** the user drags the start handle to the left edge of the visible strips and holds it there
+- **THEN** the strips scroll to the left
+- **AND** the meeting range starts earlier than 09:00 when the drag ends
+- **AND** the start changes by at most one track step per move and the start handle keeps the horizontal distance from the finger it had at the press, within one track step
+
+#### Scenario: The hour frame comes back into view after Clear
+- **GIVEN** the Grid view at 390 by 844 px with a meeting range whose start column is scrolled out of view
+- **WHEN** the user chooses «Сбросить выбор встречи»
+- **THEN** the hour frame is shown on the former start column, fully visible
 
 ### Requirement: Meeting handles are sliders
 Each meeting handle SHALL be a slider for assistive technology and the keyboard, named «Начало встречи» / «Конец встречи» ("Meeting start" / "Meeting end"). Its value MUST be the minutes from the start of the reference day to its end of the range, which may be off the track step. Its minimum and maximum MUST be the limits of "Meeting handle moves" of `meeting-range`, and its value text the local time of that end in the reference zone in the hour format setting. Each key MUST move the handle as those rules say, each limited by them:

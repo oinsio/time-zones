@@ -88,7 +88,7 @@ An insert-only, digits-only mask keeps every accepted and rejected text of `time
 ### D5. Handles stand on the visible rows (FR7, NFR-P1, NFR-R1)
 
 - **The row rule.** `getMeetingHandleRow(handle, candidateRows)` in `views/grid/meetingHandleRow.ts` takes `{ firstRow, lastRow }` (1-based, inclusive) instead of a row count. The end handle stands on `firstRow + ⌈k / 2⌉ - 1` and the start handle on `min(end + 1, lastRow)`, where `k = lastRow - firstRow + 1`. With `{ 1, n }` this is today's rule.
-- **The measurement.** New `views/grid/useVisibleStripRows.ts` takes the panel ref, the row count and `isFrozen`, and returns the candidate rows. It reads every `[data-hour-strip]` rect and the date bar's top. The date bar is found through the new `data-page-bar` attribute on the `<footer>` of `app/MainPage.tsx`, by the constant `PAGE_BAR_SELECTOR` in `constants/meeting.ts`; without a date bar, `window.innerHeight` is used. The candidates are the contiguous run of strips with `top >= 0` and `bottom <= barTop`; with none, they are `{ 1, rowCount }`.
+- **The measurement.** New `views/grid/useVisibleStripRows.ts` takes the panel ref, the row count and `isFrozen`, and returns the candidate rows. It reads every `[data-hour-strip]` rect and the date bar's top. The date bar is found through the new `data-date-bar` attribute on the sticky bottom element of `app/MainPage.tsx` that holds it, by the constant `DATE_BAR_SELECTOR` (`"[data-date-bar]"`) in `constants/date.ts`, beside the other date bar constants; without a date bar, `window.innerHeight` is used. The E2E steps locate the date bar by the same constant, and the local `DATE_BAR_SELECTOR = "footer"` of `grid_view_layers_e2e.steps.ts` gives way to it. The candidates are the contiguous run of strips with `top >= 0` and `bottom <= barTop`; with none, they are `{ 1, rowCount }`.
 - **When it measures.** On mount, on `window` `scroll` (passive) and `resize`, and through a `ResizeObserver` on the panel, as `MeetingHandle.tsx` already uses. At most one `requestAnimationFrame` is pending at a time. It calls `setState` only when `firstRow` or `lastRow` changed (NFR-P1). While `isFrozen`, it keeps the last value.
 - **Wiring.** `GridView.tsx` calls the hook once and passes the candidates to both `MeetingHandleSlider`s in place of `rowCount`. A slider reports a drag's start and end through a new `onDragActiveChange`, and `GridView` keeps that boolean as view state and passes it as `isFrozen`.
 
@@ -100,7 +100,7 @@ The handle `<li>` in `MeetingHandle.tsx` grows from `h-12 w-6` to `h-12 w-11` (4
 
 ### D7. The drag keeps the grab offset (FR8)
 
-`useMeetingHandleDrag` gains the option `valueMinutes`: the handle's current minutes, passed by `MeetingHandleSlider` from `presented.valueMinutes`. On press it records `pressMinutes = valueMinutes` and `pressOffsetPx = clientX - strip.left`. `applyPointer` then sends `pressMinutes + (clientX - strip.left - pressOffsetPx) / cellPitchPx * MINUTES_PER_HOUR`. The strip rect carries the scroll, so auto-scroll still moves the end (the "Handle drag scrolls the strips" scenarios). The press itself sends nothing, so a press and release changes nothing.
+`useMeetingHandleDrag` gains the option `valueMinutes`: the handle's current minutes, passed by `MeetingHandleSlider` from `presented.valueMinutes`. On press it records `pressMinutes = valueMinutes` and `pressOffsetPx = clientX - strip.left`. `applyPointer` then sends `pressMinutes + (clientX - strip.left - pressOffsetPx) / cellPitchPx * MINUTES_PER_HOUR`. The strip rect carries the scroll, so auto-scroll still moves the end, and the handle keeps its press offset from the pointer while the strips scroll. That is why the `grid-view` delta also modifies "Handle drag scrolls the strips": its old wording ("stays the track step under the pointer") would contradict the grab offset of a press up to 22 px from the grip's centre. The press itself sends nothing, so a press and release changes nothing.
 
 ### D8. A handle release is never a tap (FR8)
 
@@ -130,7 +130,7 @@ The number is 0013, not 0012. `docs/architecture/overview.md` and `views.md` alr
 | D3 | Vitest `controller/useMeetingRange.input.test.tsx`, `views/shared/MeetingRangeInput.test.tsx`; unit BDD `grid_view_meeting_range_input_unit.feature` | jsdom renders text and `aria-*` values |
 | D4 | Vitest `presenter/formatTypedWallTimeText.test.ts`, `views/shared/typedTimeFieldText.test.ts`, `WallTimeInput.test.tsx`; unit BDD `time_selection/time_selection_time_separator_unit.feature` (user-event typing); E2E `time_selection_time_separator_e2e.feature` (real keyboard, caret) | caret and real key input need a browser |
 | D5 | Vitest `meetingHandleRow.test.ts`, `useVisibleStripRows.test.tsx` (stubbed rects and `requestAnimationFrame`); E2E `grid_view_meeting_handle_reach_e2e.feature` | real layout and scrolling |
-| D6–D8 | Vitest `useMeetingHandleDrag.test.tsx`, `MeetingHandle.test.tsx`; E2E `grid_view_meeting_handle_reach_e2e.feature` | real hit testing |
+| D6–D8 | Vitest `useMeetingHandleDrag.test.tsx`, `MeetingHandle.test.tsx`; E2E `grid_view_meeting_handle_reach_e2e.feature`, and the auto-scroll scenarios of `grid_view_meeting_handles_e2e.feature` (grab offset while the strips scroll) | real hit testing and scrolling |
 
 ## Consequences
 

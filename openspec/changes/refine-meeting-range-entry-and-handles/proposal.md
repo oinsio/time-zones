@@ -19,10 +19,10 @@ Audience: everyone who plans a meeting in Grid, phone users above all (narrow ha
 - MODIFIED `meeting-range` → **Meeting handle moves**: a handle lands on the track step. A move never shortens the range below one track step, or below its current length if it is already shorter.
 - MODIFIED `meeting-range` → **Set a meeting range from wall-clock times**: any minute is accepted. Equal start and end times are refused with the new error `MEETING_START_EQUALS_END`. An end time not later than the start that cannot cross midnight inside the reference day is refused with the new error `MEETING_END_BEFORE_START`. A range outside the reference day is still refused with `INVALID_MEETING_RANGE`. "The whole reference day" scenario is replaced.
 - MODIFIED `grid-view` → **Meeting range input**: the refusal messages name the actual problem. «…с шагом 15 минут» is removed.
-- MODIFIED `grid-view` → **Meeting handles on the frame**, **Drag a meeting handle**, **Meeting handles are sliders**: the handles stand on the rows visible on screen, the hit area is at least 44 × 44 px, the handle keeps its offset from the pointer, and a release never counts as a tap on an hour cell.
+- MODIFIED `grid-view` → **Meeting handles on the frame**, **Drag a meeting handle**, **Handle drag scrolls the strips**, **Meeting handles are sliders**: the handles stand on the rows visible on screen, the hit area is at least 44 × 44 px, the handle keeps its offset from the pointer (also while the strips auto-scroll), and a release never counts as a tap on an hour cell.
 - MODIFIED `grid-view` → **Tap or Enter sets a one-hour meeting range**: a click that ends a meeting handle gesture is not a tap.
 - ADDED `time-selection` → **Time separator while typing**: the wall-time input and both fields of the meeting range input insert `:` between hours and minutes as digits are typed.
-- Glossary (`docs/glossary/time-selection.md`), changed terms: **Meeting range** (any minute, no longer "on the track step"), **Meeting handle** (lands on the track step, stands on the visible rows), **Wall-time input** (the separator; new owner `formatTypedWallTimeText`). No new term.
+- Glossary (`docs/glossary/time-selection.md`), changed terms: **Meeting range** (any minute, no longer "on the track step"), **Meeting handle** (lands on the track step, stands on the visible rows), **Wall-time input** (the separator; new owner `formatTypedWallTimeText`). In `docs/glossary/date-selection.md`, **Date bar** gains the owner `DATE_BAR_SELECTOR`. No new term.
 - Docs: `docs/architecture/domain-model.md` (invariant 5, the errors of `SET_MEETING_RANGE_WALL_TIMES`), `docs/architecture/views.md` (Meeting handles).
 - ADR: ADR-0011 decides "Both ends lie on the 15-minute track step". A new ADR-0013 refines it: the ends lie on any minute, and the handles move on the track step. The factory may not write `docs/adr/`, so this goes through handoff H1.
 
@@ -35,7 +35,7 @@ None.
 ### Modified Capabilities
 
 - `meeting-range`: the invariants (any minute), the invalid-range examples, a date change of an off-step range, handle moves landing on the track step, and the wall-clock refusals (`MEETING_START_EQUALS_END`, `MEETING_END_BEFORE_START`).
-- `grid-view`: the meeting range input's messages; the handles' rows, hit area, grab offset and release; tap versus handle release.
+- `grid-view`: the meeting range input's messages; the handles' rows, hit area, grab offset (also during auto-scroll) and release; tap versus handle release.
 - `time-selection`: the separator inserted while typing in a wall-time input and in the fields of the meeting range input.
 
 ## Goals
@@ -90,7 +90,7 @@ None.
 - FR5: A date change keeps a meeting range whose start is off the track step at its exact wall-clock start in the reference zone and its duration, clamped to the new reference day.
 - FR6: While the user types into a wall-time input or a field of the meeting range input, a field text made only of digits shows the separator `:` after the hour as soon as a minute digit follows. The hour is one digit when the first digit is 3–9, or when it is 2 followed by 4–9; otherwise the hour is two digits. This applies when the typed or pasted characters end at the end of the text. Deleting, editing inside the text, and texts with a separator, a space or a letter are left as typed.
 - FR7: While a meeting range is set and the grid has rows, the two meeting handles stand on the rows whose hour strips are fully visible: in the viewport, above the date bar. The ⌈k / 2⌉ rule applies to those k rows: the end handle on visible row ⌈k / 2⌉, the start handle on the next one, or both on the one visible row. With no fully visible strip, the rule applies to all rows as before. While a handle is dragged, neither handle changes its row.
-- FR8: A press anywhere within a meeting handle's hit area, at least 44 × 44 px centred on the frame's edge, drags that handle and never selects hour cells. During the drag the handle's end follows the pointer's horizontal travel since the press, rounded to the nearest track step, so a press and release without movement changes nothing. Releasing a handle, wherever the pointer or finger is, never counts as a tap or click on an hour cell: no one-hour range is set.
+- FR8: A press anywhere within a meeting handle's hit area, at least 44 × 44 px centred on the frame's edge, drags that handle and never selects hour cells. During the drag the handle's end follows the pointer's horizontal travel along the strips since the press (the strips' scroll included, also while they auto-scroll), rounded to the nearest track step, so a press and release without movement changes nothing. Releasing a handle, wherever the pointer or finger is, never counts as a tap or click on an hour cell: no one-hour range is set.
 
 ### Non-Functional
 
@@ -140,6 +140,7 @@ All paths below are under `packages/client/src/test/features/`, and every scenar
 - Unit BDD, updated:
   - `meeting_range/meeting_range_commands.feature` and `meeting_range_wall_times.feature` (FR1, FR2);
   - `grid_view/grid_view_meeting_range_input_unit.feature` (FR2, FR3).
+- playwright-bdd, updated: the two auto-scroll scenarios of `grid_view/grid_view_meeting_handles_e2e.feature` (FR8, grab offset while the strips scroll).
 - playwright-bdd, new:
   - `grid_view/grid_view_meeting_handle_reach_e2e.feature` (FR4, FR7, FR8, NFR-A2, NFR-R1);
   - `time_selection/time_selection_time_separator_e2e.feature` (FR6 with a real keyboard, FR2, FR3);
@@ -199,9 +200,9 @@ None. Where the separator is computed, how the visible rows are measured, and ho
   - `useMeetingHandleDrag.ts`;
   - `useHourCellSelection.ts`;
   - new `useVisibleStripRows.ts`.
-- `src/app/MainPage.tsx` (a data attribute on the date bar).
-- `src/constants/meeting.ts`.
+- `src/app/MainPage.tsx` (a `data-date-bar` attribute on the element that holds the date bar).
+- `src/constants/meeting.ts`, `src/constants/date.ts` (`DATE_BAR_SELECTOR`).
 - `src/locales/ru.json` and `en.json`.
 - Tests: the features above, plus updates of existing tests that assert the 15-minute refusal.
-- Docs: `docs/glossary/time-selection.md`, `docs/architecture/domain-model.md`, `views.md`. ADR-0013 comes by handoff H1.
+- Docs: `docs/glossary/time-selection.md`, `docs/glossary/date-selection.md`, `docs/architecture/domain-model.md`, `views.md`. ADR-0013 comes by handoff H1.
 - No new dependency, no stored data change.
