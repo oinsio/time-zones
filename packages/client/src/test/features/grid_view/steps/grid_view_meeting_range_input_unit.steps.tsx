@@ -1,4 +1,5 @@
 // Verifies FR3, FR4 of fix-grid-meeting-range-lock-and-layering.
+// Verifies FR2, FR3, UX3 of refine-meeting-range-entry-and-handles.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen, within } from "@testing-library/react/pure";
@@ -7,7 +8,7 @@ import userEvent from "@testing-library/user-event";
 import { expect } from "vitest";
 import { HourFormat } from "@/preferences";
 import { getCardOf } from "../../locations/steps/deviceTimeQueries";
-import { setSampleMeeting } from "./meetingGridQueries";
+import { meetingTitle, setSampleMeeting } from "./meetingGridQueries";
 import { ALL_CITIES, createMeetingGridSession } from "./meetingGridSession";
 import {
   endFieldOf,
@@ -86,6 +87,37 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @refine-meeting-range-entry-and-handles @FR2 @FR3
+  f.ScenarioOutline(
+    "A meeting at any minute",
+    ({ Given, When, Then }, variables) => {
+      Given(
+        "the Grid view with Almaty, Moscow, Kolkata and New York, Russian interface, 24-hour format and the meeting range 09:00–11:00 in Almaty on 2026-03-08",
+        async () => {
+          await openRussianGrid();
+          setSampleMeeting();
+        },
+      );
+      When(
+        'the user opens the meeting range input of "<city>" and enters "<start>" and "<end>"',
+        () =>
+          enterMeetingRange(
+            labelOf(variables.city),
+            variables.start,
+            variables.end,
+          ),
+      );
+      Then(
+        'the meeting range is "<range>" in Almaty, the title is "<title>" and the input is closed',
+        () => {
+          expectFirstRowSpan(variables.range);
+          expect(meetingTitle()).toHaveTextContent(variables.title);
+          expect(screen.queryByRole("textbox")).toBeNull();
+        },
+      );
+    },
+  );
+
   // @fix-grid-meeting-range-lock-and-layering @FR4
   f.Scenario("Twelve-hour texts", ({ Given, When, Then }) => {
     Given(
@@ -108,7 +140,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
-  // @fix-grid-meeting-range-lock-and-layering @FR4
+  // @fix-grid-meeting-range-lock-and-layering @FR4 @refine-meeting-range-entry-and-handles @FR3 @UX3
   f.ScenarioOutline(
     "Wrong input keeps the input open",
     ({ Given, When, Then, And }, variables) => {

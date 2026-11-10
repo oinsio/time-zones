@@ -167,7 +167,7 @@ describe("getInstantAfterTrackMove", () => {
 });
 
 describe("getMinutesAfterTrackStep", () => {
-  it.each([
+  it.each<[number, TrackMove.NEXT_STEP | TrackMove.PREVIOUS_STEP, number]>([
     [545, TrackMove.NEXT_STEP, 555],
     [545, TrackMove.PREVIOUS_STEP, 540],
     [540, TrackMove.NEXT_STEP, 555],

@@ -76,7 +76,7 @@ Files stay under 200 lines where possible, 300 at most.
 
 ## 3. Presenter, controller and refusal messages (FR2, FR3, FR6, M2, M3, NFR-A1, UX3; D3, D4)
 
-- [ ] 3.1 RED then GREEN: `src/presenter/formatTypedWallTimeText.test.ts` (`it.each`):
+- [x] 3.1 RED then GREEN: `src/presenter/formatTypedWallTimeText.test.ts` (`it.each`):
   - `1`→`1`, `10`→`10`, `103`→`10:3`, `1030`→`10:30`;
   - `9`→`9`, `93`→`9:3`, `930`→`9:30`, `0930`→`09:30`;
   - `24`→`2:4`, `2359`→`23:59`, `12345`→`12:345`;
@@ -84,7 +84,7 @@ Files stay under 200 lines where possible, 300 at most.
   - `9:3`, `09.30`, `9 am`, `abc` and the empty text unchanged.
 
   Implement `src/presenter/formatTypedWallTimeText.ts` with `WALL_TIME_SEPARATOR` and the digit limits as constants in `src/constants/timeSelection.ts`, exported through `src/constants/index.ts` and `src/presenter/index.ts`. Run `npx vitest run src/presenter/formatTypedWallTimeText.test.ts`: passes.
-- [ ] 3.2 RED then GREEN, the outcomes and their messages (D3). Removing `MeetingRangeInputOutcome.INVALID_RANGE` touches the controller, the view that reads it and three test files, so they change together in this one task:
+- [x] 3.2 RED then GREEN, the outcomes and their messages (D3). Removing `MeetingRangeInputOutcome.INVALID_RANGE` touches the controller, the view that reads it and three test files, so they change together in this one task:
   - `src/controller/useMeetingRange.input.test.tsx`: the `9:10`/`11` row (`INVALID_RANGE` today) now gives `CLOSED` with the range 09:10–11:00; `10`/`10` → `SAME_START_AND_END`; `12`/`10` and `22`/`2` → `END_BEFORE_START`; New York `13`/`14` on `2026-03-07` → `OUTSIDE_REFERENCE_DAY`; in each refusal the range stays 09:00–11:00.
   - `src/views/shared/MeetingRangeInput.test.tsx`: the `INVALID_RANGE` cases (lines 150–195 today) are replaced by one case per new outcome, checking the Russian and the English text of D3, with both fields `aria-invalid` and `aria-describedby` on the message.
   - `src/views/shared/LocalDateTime.meetingInput.test.tsx`: the case at lines 80–92 (`INVALID_RANGE`, «…с шагом 15 минут») uses `OUTSIDE_REFERENCE_DAY` and «Встреча должна быть внутри дня».

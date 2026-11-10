@@ -15,13 +15,27 @@ Feature: The meeting range input in the Grid view
       | Kolkata  | 9:30  | 11:30 | 09:00–11:00 |
       | New York | 23    | 1     | 09:00–11:00 |
 
+  @refine-meeting-range-entry-and-handles @FR2 @FR3
+  Scenario Outline: A meeting at any minute
+    Given the Grid view with Almaty, Moscow, Kolkata and New York, Russian interface, 24-hour format and the meeting range 09:00–11:00 in Almaty on 2026-03-08
+    When the user opens the meeting range input of "<city>" and enters "<start>" and "<end>"
+    Then the meeting range is "<range>" in Almaty, the title is "<title>" and the input is closed
+
+    Examples:
+      | city     | start | end  | range       | title                  |
+      | Almaty   | 9:05  | 9:10 | 09:05–09:10 | Встреча · 5 мин        |
+      | Almaty   | 9     | 9:23 | 09:00–09:23 | Встреча · 23 мин       |
+      | Moscow   | 7:05  | 9:28 | 09:05–11:28 | Встреча · 2 ч 23 мин   |
+      | Kolkata  | 9:37  | 10   | 09:07–09:30 | Встреча · 23 мин       |
+      | New York | 23:10 | 0:40 | 09:10–10:40 | Встреча · 1 ч 30 мин   |
+
   @fix-grid-meeting-range-lock-and-layering @FR4
   Scenario: Twelve-hour texts
     Given the sample meeting, English interface and 12-hour format
     When the user opens the meeting range input of "Almaty" and enters "10 am" and "12:30 pm"
     Then the meeting range is "10:00 AM–12:30 PM" in Almaty and the input is closed
 
-  @fix-grid-meeting-range-lock-and-layering @FR4
+  @fix-grid-meeting-range-lock-and-layering @FR4 @refine-meeting-range-entry-and-handles @FR3 @UX3
   Scenario Outline: Wrong input keeps the input open
     Given the sample meeting in the Grid view, Russian interface
     When the user opens the meeting range input of "<city>" and enters "<start>" and "<end>"
@@ -29,11 +43,12 @@ Feature: The meeting range input in the Grid view
     And the meeting range is still 09:00–11:00
 
     Examples:
-      | city     | start | end | error                                            |
-      | Almaty   | abc   | 11  | Введите время в формате ЧЧ:ММ                    |
-      | Almaty   | 9:10  | 11  | Встреча должна быть внутри дня, с шагом 15 минут |
-      | Almaty   | 22    | 2   | Встреча должна быть внутри дня, с шагом 15 минут |
-      | New York | 13    | 14  | Встреча должна быть внутри дня, с шагом 15 минут |
+      | city     | start | end | error                                  |
+      | Almaty   | abc   | 11  | Введите время в формате ЧЧ:ММ          |
+      | Almaty   | 10    | 10  | Начало и окончание встречи совпадают   |
+      | Almaty   | 12    | 10  | Окончание встречи должно быть позже начала |
+      | Almaty   | 22    | 2   | Окончание встречи должно быть позже начала |
+      | New York | 13    | 14  | Встреча должна быть внутри дня         |
 
   @fix-grid-meeting-range-lock-and-layering @FR4
   Scenario: Esc closes the input without a change

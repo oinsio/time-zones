@@ -56,3 +56,16 @@ export const MAX_TWELVE_HOUR = 12;
 export const TWELVE_HOUR_WRAP = 12;
 /** The day-period markers every language accepts next to its own. */
 export const UNIVERSAL_DAY_PERIOD_MARKERS = { am: "am", pm: "pm" } as const;
+
+// Implements FR6 of refine-meeting-range-entry-and-handles (D4).
+/** The separator between the hour and the minutes of a typed wall time. */
+export const WALL_TIME_SEPARATOR = ":";
+/** A typed text that holds digits only. */
+export const DIGITS_ONLY_PATTERN = /^\d+$/;
+/** A first digit from this one on can only be a whole hour: `3` to `9`. */
+export const SINGLE_DIGIT_HOUR_MIN_FIRST_DIGIT = 3;
+/** A first digit of 2 followed by a digit from this one on is an hour alone: `24` to `29`. */
+export const TWENTY_HOUR_PREFIX_DIGIT = 2;
+export const SINGLE_DIGIT_HOUR_MIN_SECOND_DIGIT_AFTER_TWENTY = 4;
+export const SINGLE_DIGIT_HOUR_LENGTH = 1;
+export const DOUBLE_DIGIT_HOUR_LENGTH = 2;

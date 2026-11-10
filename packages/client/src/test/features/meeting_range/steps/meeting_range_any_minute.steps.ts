@@ -67,9 +67,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         'the reference zone is "Asia/Almaty" and the current time is "2026-03-08T07:30:00Z", live',
         () => world.open(),
       );
-      When('the meeting range is set from "<start>" to "<end>"', () =>
-        world.setRange(variables.start, variables.end),
-      );
+      When('the meeting range is set from "<start>" to "<end>"', () => {
+        world.setRange(variables.start, variables.end);
+      });
       Then(
         'the meeting range is "<range>" in Almaty, <minutes> minutes long',
         () => {
