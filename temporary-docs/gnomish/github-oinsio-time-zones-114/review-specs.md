@@ -154,7 +154,8 @@
 - Impact: the architecture doc contradicts itself after the change.
 - Fix: add to task 1.2: `domain-model.md:28` becomes `"a whole minute of the reference day"`, verified by `grep -c "on the track step of the reference day" docs/architecture/domain-model.md` printing 0.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 1.2 now also rewrites the `MeetingRange` class of `docs/architecture/domain-model.md` (`start "a whole minute of the reference day"`) and verifies it with `grep -c "on the track step of the reference day" docs/architecture/domain-model.md` printing 0.
 
 ## Verdict
 

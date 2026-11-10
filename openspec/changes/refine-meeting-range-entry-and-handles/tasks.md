@@ -31,13 +31,14 @@ Files stay under 200 lines where possible, 300 at most.
   - `grep -c "on the track step, chosen" docs/glossary/time-selection.md` prints 0;
   - `wc -l docs/glossary/time-selection.md` stays under 200.
 - [ ] 1.2 Architecture docs:
-  - `docs/architecture/domain-model.md`, invariant 5: "both ends lie on the track step inside the reference day" becomes "both ends lie on whole minutes inside the reference day". The errors cell of `SET_MEETING_RANGE_WALL_TIMES` gains `MEETING_START_EQUALS_END`, `MEETING_END_BEFORE_START`.
+  - `docs/architecture/domain-model.md`, invariant 5: "both ends lie on the track step inside the reference day" becomes "both ends lie on whole minutes inside the reference day". The errors cell of `SET_MEETING_RANGE_WALL_TIMES` gains `MEETING_START_EQUALS_END`, `MEETING_END_BEFORE_START`. In the `MeetingRange` class of the class diagram, `start "on the track step of the reference day"` becomes `start "a whole minute of the reference day"`.
   - `docs/architecture/views.md` → Grid → **Meeting handles**: "move the start and the end by the 15-minute track step" becomes "move the start and the end onto the 15-minute track step, while a typed meeting may start and end at any minute (ADR-0013)". Add "they stand on the rows visible on screen and have a 44 × 44 px hit area".
   - `docs/architecture/overview.md`: add an ADR table row for ADR-0013.
 
   Verify:
   - `grep -n "MEETING_END_BEFORE_START" docs/architecture/domain-model.md` prints a line;
   - `grep -n "whole minutes inside the reference day" docs/architecture/domain-model.md` prints a line;
+  - `grep -c "on the track step of the reference day" docs/architecture/domain-model.md` prints 0;
   - `grep -n "ADR-0013" docs/architecture/views.md docs/architecture/overview.md` prints 2 lines.
 
 ## 2. Model (FR1, FR2, FR4, FR5, M1, M2, M6; D1, D2)
