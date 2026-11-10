@@ -69,6 +69,11 @@ describe("MainPage", () => {
     expect(getNoticesRegion()).toBeEmptyDOMElement();
   });
 
+  it("should set the header apart from the page with a bottom border", () => {
+    renderMainPage(null);
+    expect(screen.getByRole("banner")).toHaveClass("grid", "border-b");
+  });
+
   it("should render the bottom bar in a footer after the main landmark", () => {
     renderMainPage(null);
     const footer = screen.getByRole("contentinfo");
