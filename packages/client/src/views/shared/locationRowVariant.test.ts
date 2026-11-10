@@ -4,7 +4,8 @@ import {
   LocationRowVariant,
 } from "./locationRowVariant";
 
-const cardClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[LocationRowVariant.CARD];
+const cardClassNames =
+  LOCATION_ROW_VARIANT_CLASS_NAMES[LocationRowVariant.CARD];
 const gridClassNames =
   LOCATION_ROW_VARIANT_CLASS_NAMES[LocationRowVariant.GRID_ROW];
 
@@ -44,7 +45,9 @@ describe("LOCATION_ROW_VARIANT_CLASS_NAMES", () => {
   });
 
   it("should raise a focused header box and one with an open menu on different layers", () => {
-    expect(gridClassNames.headerBoxLayer).toBe("focus-within:z-grid-box-focused");
+    expect(gridClassNames.headerBoxLayer).toBe(
+      "focus-within:z-grid-box-focused",
+    );
     expect(gridClassNames.headerBoxLayerWithOpenMenu).toBe("z-location-menu");
   });
 

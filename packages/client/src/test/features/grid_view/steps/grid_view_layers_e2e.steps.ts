@@ -183,7 +183,8 @@ const measureShownFrame = async (page: Page) => {
     .locator(`${HOUR_FRAME_SELECTOR}, ${MEETING_FRAME_SELECTOR}`)
     .first()
     .waitFor();
-  const hasMeetingFrame = (await page.locator(MEETING_FRAME_SELECTOR).count()) > 0;
+  const hasMeetingFrame =
+    (await page.locator(MEETING_FRAME_SELECTOR).count()) > 0;
   return measureBorderCoverage(
     page,
     hasMeetingFrame ? MEETING_FRAME_SELECTOR : HOUR_FRAME_SELECTOR,

@@ -36,7 +36,10 @@ export function measureBorderCoverage(
       inputSelector,
       transparent,
     }) => {
-      const frameBox = document.querySelector(frame)!.getBoundingClientRect();
+      const frameElement = document.querySelector(frame);
+      if (frameElement === null)
+        throw new Error(`No frame ${frame} on the page`);
+      const frameBox = frameElement.getBoundingClientRect();
       const borderXs = [frameBox.left + inset, frameBox.right - inset];
       /** The point lies in the glyph's column and in the element's own line box (the leading above and below the glyphs is part of it). */
       const holdsGlyphAt = (element: Element, x: number, y: number) => {
