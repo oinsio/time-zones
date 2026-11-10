@@ -3,7 +3,6 @@ import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import {
-  listRow,
   menuButton,
   parseCityNames,
 } from "../../locations/steps/locationsE2eHelpers";
@@ -56,13 +55,16 @@ async function tabUntil(
   return visited;
 }
 
-const spanButtonOf = (page: Page, city: string) =>
-  listRow(page, RUSSIAN_CITY_NAMES[city] ?? city).getByRole("button", {
-    name: SPAN_BUTTON_PATTERN,
+/** The row of a city under its English or its Russian name, whichever language the screen uses. */
+const rowOfCity = (page: Page, city: string) =>
+  page.getByRole("listitem").filter({
+    hasText: new RegExp(`${city}|${RUSSIAN_CITY_NAMES[city] ?? city}`),
   });
+const spanButtonOf = (page: Page, city: string) =>
+  rowOfCity(page, city).getByRole("button", { name: SPAN_BUTTON_PATTERN });
 const fieldsOf = (page: Page, city: string) => [
-  listRow(page, city).getByRole("textbox", { name: START_FIELD_PATTERN }),
-  listRow(page, city).getByRole("textbox", { name: END_FIELD_PATTERN }),
+  rowOfCity(page, city).getByRole("textbox", { name: START_FIELD_PATTERN }),
+  rowOfCity(page, city).getByRole("textbox", { name: END_FIELD_PATTERN }),
 ];
 
 // Implements FR1, FR2, FR3 of fix-grid-meeting-range-lock-and-layering: the meeting range 09:00–11:00 in a row that is not first.
@@ -114,7 +116,7 @@ When(
 );
 
 Then("the focus visited, in this order:", async ({ locationsWorld }, table) => {
-  const expectedNames = (table.rows() as string[][]).map(([name]) => name);
+  const expectedNames = (table.raw() as string[][]).map(([name]) => name);
   expect(visitedByPage.get(locationsWorld.page)).toEqual(expectedNames);
 });
 
@@ -221,7 +223,9 @@ Then(
   "the meeting range input of {string} shows an error",
   async ({ locationsWorld }, city: string) => {
     await expect(
-      listRow(locationsWorld.page, city).locator("input[aria-invalid='true']"),
+      rowOfCity(locationsWorld.page, city).locator(
+        "input[aria-invalid='true']",
+      ),
     ).not.toHaveCount(0);
   },
 );
