@@ -2,6 +2,7 @@ import { type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { KeyboardKey } from "@/constants";
 import { WallTimeInputOutcome } from "@/controller";
+import { isKeyKeptInField } from "./wallTimeFieldKeys";
 
 type WallTimeInputProps = {
   /** Accessible name: "Enter time — city, time". */
@@ -11,16 +12,6 @@ type WallTimeInputProps = {
   /** `shouldRestoreFocus` is false when the user already moved the focus away. */
   onClose: (shouldRestoreFocus: boolean) => void;
 };
-
-const KEYS_KEPT_IN_FIELD = new Set<string>([
-  KeyboardKey.SPACE,
-  KeyboardKey.ENTER,
-  KeyboardKey.ESCAPE,
-  KeyboardKey.ARROW_UP,
-  KeyboardKey.ARROW_DOWN,
-  KeyboardKey.ARROW_LEFT,
-  KeyboardKey.ARROW_RIGHT,
-]);
 
 /**
  * The field that replaces a row's time while a wall-time is typed: a text field
@@ -57,7 +48,7 @@ export function WallTimeInput({
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (KEYS_KEPT_IN_FIELD.has(event.key)) event.stopPropagation();
+    if (isKeyKeptInField(event.key)) event.stopPropagation();
     if (event.key === KeyboardKey.ENTER) {
       event.preventDefault();
       confirm(true);

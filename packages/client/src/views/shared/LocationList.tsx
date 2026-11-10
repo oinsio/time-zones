@@ -89,6 +89,7 @@ type LocationListProps = {
  * strip of each row and the hour frame as the last child of the panel.
  * Implements FR8 of add-grid-meeting-range-and-share (D8): the meeting range of each row.
  * Implements FR1, FR2 of fix-grid-meeting-range-lock-and-layering (D1): passes the lock to each row.
+ * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D4): passes the meeting range input to each row.
  */
 export function LocationList({
   rows,
@@ -166,6 +167,7 @@ export function LocationList({
               hourStrip={hourGrid?.renderHourStrip(row)}
               meetingRange={hourGrid?.meetingRangeOf?.(row)}
               areRowControlsLocked={hourGrid?.areRowControlsLocked ?? false}
+              onConfirmMeetingRange={hourGrid?.onConfirmMeetingRange}
             />
           ))}
           {hourGrid?.frame}

@@ -9,6 +9,7 @@ import { LocalDateTime } from "./LocalDateTime";
 import { LocationRowVariant } from "./locationRowVariant";
 
 const NAME = "Ввести время — Алматы, 12:30";
+const MEETING_NAME = "Ввести время встречи — Moscow, 23:00–01:00";
 
 const renderDateTime = (
   localTimeLabel = "12:30",
@@ -147,6 +148,7 @@ describe("LocalDateTime row variants", () => {
           wallTimeInputLabel={NAME}
           onConfirmWallTime={() => WallTimeInputOutcome.CLOSED}
           rowVariant={LocationRowVariant.GRID_ROW}
+          cityLabel="Moscow"
           meetingRange={{
             startTimeLabel: "23:00",
             endTimeLabel: "01:00",
@@ -158,10 +160,10 @@ describe("LocalDateTime row variants", () => {
 
     it("should show the span in the time button in the meeting time colour", () => {
       renderMeeting();
-      expect(screen.getByRole("button", { name: NAME })).toHaveTextContent(
-        "23:00–01:00",
-      );
-      expect(screen.getByRole("button", { name: NAME })).toHaveClass(
+      expect(
+        screen.getByRole("button", { name: MEETING_NAME }),
+      ).toHaveTextContent("23:00–01:00");
+      expect(screen.getByRole("button", { name: MEETING_NAME })).toHaveClass(
         "text-meeting-text",
       );
     });
@@ -179,12 +181,6 @@ describe("LocalDateTime row variants", () => {
     it("should show no mark without a day shift", () => {
       renderMeeting();
       expect(screen.queryByText("днём раньше")).toBeNull();
-    });
-
-    it("should open the wall-time input with the local time", async () => {
-      renderMeeting();
-      await userEvent.click(screen.getByRole("button", { name: NAME }));
-      expect(screen.getByRole("textbox", { name: NAME })).toHaveValue("12:30");
     });
   });
 });
@@ -206,6 +202,7 @@ describe("LocalDateTime glyph backgrounds", () => {
         wallTimeInputLabel={NAME}
         onConfirmWallTime={() => WallTimeInputOutcome.CLOSED}
         rowVariant={LocationRowVariant.GRID_ROW}
+        cityLabel="Moscow"
         meetingRange={{
           startTimeLabel: "23:00",
           endTimeLabel: "01:00",
@@ -213,7 +210,7 @@ describe("LocalDateTime glyph backgrounds", () => {
         }}
       />,
     );
-    expect(screen.getByRole("button", { name: NAME })).not.toHaveClass(
+    expect(screen.getByRole("button", { name: MEETING_NAME })).not.toHaveClass(
       "bg-surface",
     );
     expect(screen.getByText("23:00–01:00")).toHaveClass("bg-surface");

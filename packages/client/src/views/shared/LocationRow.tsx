@@ -10,6 +10,7 @@ import type {
   PresentedLocationMeetingRange,
 } from "@/presenter";
 import { DragHandle } from "./DragHandle";
+import type { ConfirmMeetingRange } from "./hourGridSlots";
 import { LocationMenu } from "./LocationMenu";
 import {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
@@ -40,6 +41,8 @@ type LocationRowProps = {
   /** The hour strip of a grid row, shown after the row header and before the row notes. */
   hourStrip?: ReactNode;
   meetingRange?: PresentedLocationMeetingRange;
+  /** Confirms the meeting range typed in this row; `locationId` is the row. */
+  onConfirmMeetingRange?: ConfirmMeetingRange;
   /** Locks the drag handle and the location menu; `false` when omitted. */
   areRowControlsLocked?: boolean;
 };
@@ -75,8 +78,7 @@ type LocationRowProps = {
  * a row of the grid panel, the same row header.
  * Implements FR1, FR7, FR10 of add-grid-hour-cells-and-hour-frame (D5): hour strip, then notes, in sticky boxes.
  * Implements FR8 of add-grid-meeting-range-and-share (D8): the meeting span in the row header; the notes live in `RowNotes`.
- * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
- * Implements FR1, FR2, UX1 of fix-grid-meeting-range-lock-and-layering (D1): the lock reaches the drag handle and the menu.
+ * Implements FR1-FR4, FR6, FR7, UX1 of fix-grid-meeting-range-lock-and-layering (D1, D4, D5): the lock, the meeting range input and the menu layer.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -92,6 +94,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       rowVariant = LocationRowVariant.CARD,
       hourStrip,
       meetingRange,
+      onConfirmMeetingRange,
       areRowControlsLocked = false,
     },
     menuButtonRef,
@@ -168,6 +171,11 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             onMoveTrack={onMoveTrack}
             rowVariant={rowVariant}
             meetingRange={meetingRange}
+            onConfirmMeetingRange={
+              onConfirmMeetingRange &&
+              ((startText, endText, date) =>
+                onConfirmMeetingRange(row.id, startText, endText, date))
+            }
           />
           <LocationMenu
             ref={menuButtonRef}

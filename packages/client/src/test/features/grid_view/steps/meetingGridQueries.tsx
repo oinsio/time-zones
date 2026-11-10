@@ -63,7 +63,7 @@ export const setMeetingOfMinutes = (minutes: number) => {
 
 export const spanOf = (city: string) => {
   const text = within(getCardOf(city)).getByRole("button", {
-    name: /^Enter time|^Ввести время/,
+    name: /^Enter meeting time|^Ввести время встречи/,
   }).textContent;
   expect(text).toContain(SPAN_SEPARATOR);
   return text;
