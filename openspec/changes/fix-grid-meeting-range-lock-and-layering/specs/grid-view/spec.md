@@ -80,6 +80,12 @@ Everything of the grid panel — the row header texts, the hour strips, the row 
 - **THEN** the topmost element at the centre of the calendar button and of the Now button is that button
 - **AND** no point of the date bar has a grid element on top
 
+#### Scenario: An open location menu lies above the date bar
+- **GIVEN** the Grid view at 390 by 844 px with 12 locations and no meeting range
+- **AND** the page is scrolled so that a row's location menu button lies just above the date bar
+- **WHEN** the user opens that row's location menu
+- **THEN** at the centre of every menu item that lies over the date bar, the topmost element is that menu item
+
 ### Requirement: Frame lines are visible beside texts
 The hour frame and the meeting frame SHALL be hidden only behind the glyphs of the row header texts — the city, the offset difference, the Here caption, each zone line part, the date, the day shift mark and the time or span — behind the row notes and behind an open wall-time input or meeting range input. Every other point of a frame's border inside a row header MUST be drawn: between and beside zone line parts, inside a time button around its digits, and beside the drag handle and the location menu button. <!-- implements FR8, UX3 of fix-grid-meeting-range-lock-and-layering -->
 

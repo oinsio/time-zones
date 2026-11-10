@@ -9,7 +9,7 @@ Driven by FR1, FR2, UX1 from proposal. The meeting range reaches Grid through `u
 
 ### Decision
 - `HourGridSlots` gains `areRowControlsLocked: boolean`; `GridView` sets it to `meeting !== undefined`. `LocationList` passes it to every `LocationRow`.
-- `LocationRow.tsx` is 199 lines and this change adds props and wiring to it (the lock here, `onConfirmMeetingRange` in D4), so first its drag wiring moves, unchanged in behaviour, to new `views/shared/useSortableLocationRow.ts`: `useSortable`, the `cardRef`, `useDropSettleAnimation`, the `<li>` ref callback, its `style`, `onTransitionEnd` and the dragging class name. The hook takes `(id, prefersReducedMotion, isDisabled)` and returns those plus `attributes`, `listeners` and `setActivatorNodeRef` for `DragHandle`. This takes about 30 lines out of `LocationRow`, which must end under 200 lines after D1 and D4.
+- `LocationRow.tsx` is 199 lines and this change adds props and wiring to it (the lock here, `onConfirmMeetingRange` in D4, `isMenuOpen` in D5), so first its drag wiring moves, unchanged in behaviour, to new `views/shared/useSortableLocationRow.ts`: `useSortable`, the `cardRef`, `useDropSettleAnimation`, the `<li>` ref callback, its `style`, `onTransitionEnd` and the dragging class name. The hook takes `(id, prefersReducedMotion, isDisabled)` and returns those plus `attributes`, `listeners` and `setActivatorNodeRef` for `DragHandle`. This takes about 30 lines out of `LocationRow`, which must end under 200 lines after D1, D4 and D5.
 - `useSortableLocationRow` calls `useSortable({ id, transition, disabled: areRowControlsLocked })`, so no sensor starts a reorder; `LocationRow` passes `isDisabled` to `DragHandle` and `LocationMenu`. Both render `disabled` on their buttons with `disabled:opacity-40 disabled:cursor-default` and no hover style. `LocationMenu` closes an open menu when `isDisabled` becomes true.
 - `LocalDateTime` shows the meeting range input (D4), never `WallTimeInput`, while `meetingRange` is set. An open `WallTimeInput` is unmounted when `meetingRange` appears, without calling `onConfirm` (its opened date is reset by an effect on `meetingRange === undefined`).
 
@@ -94,7 +94,7 @@ Negative:
 ## D5. One layer scale for the page
 
 ### Context
-Driven by FR6, FR7. `HourFrame` and `MeetingFrame` are `absolute z-[1]`, the sticky boxes `z-[2]` (`focus-within:z-[4]`, `views/shared/locationRowVariant.ts`), the handles `z-[3]`, a dragged row `relative z-10`, an open location menu `fixed z-20`. The grid panel `<ul>` has no z-index, so these compete in the root stacking context, where `DialogPrimitive.Overlay` / `Content` (`components/ui/dialog.tsx`, `fixed`) and the date bar `<footer>` (`app/MainPage.tsx`, `sticky bottom-0`) have `z-index: auto` and paint below every positive z-index.
+Driven by FR6, FR7. `HourFrame` and `MeetingFrame` are `absolute z-[1]`, the sticky boxes `z-[2]` (`focus-within:z-[4]`, `views/shared/locationRowVariant.ts`), the handles `z-[3]`, a dragged row `relative z-10`, an open location menu `fixed z-20`. The grid panel `<ul>` has no z-index, so the frames, the boxes and the handles compete in the root stacking context, where `DialogPrimitive.Overlay` / `Content` (`components/ui/dialog.tsx`, `fixed`) and the date bar `<footer>` (`app/MainPage.tsx`, `sticky bottom-0`) have `z-index: auto` and paint below every positive z-index.
 
 ### Decision
 `tailwind.config.ts` gets `theme.extend.zIndex`, lowest first:
@@ -107,20 +107,28 @@ Driven by FR6, FR7. `HourFrame` and `MeetingFrame` are `absolute z-[1]`, the sti
 | `grid-box-focused` | 4 | header box `focus-within:` |
 | `page-bar` | 10 | the date bar `<footer>` with its notices region |
 | `dragged-row` | 15 | a dragged `LocationRow` |
-| `location-menu` | 20 | an open location menu |
+| `location-menu` | 20 | an open location menu, and the Grid header box that holds it |
 | `dialog` | 30 | dialog overlay and content |
 
-Every `z-[n]`, `z-10` and `z-20` named above is replaced by its token.
+Every `z-[n]`, `z-10` and `z-20` named above is replaced by its token, in the production files and in the tests that assert them.
+
+In Grid the location menu renders inside the row's header box. That box is `sticky` with a z-index, so it forms its own stacking context: the menu's z-index ranks only among the box's children, and on the page the menu lies where its box lies (2, or 4 while focused). A menu token alone cannot lift it above the date bar, so the header box that holds an open menu is raised:
+- `LocationMenu` gains an optional `onOpenChange(isOpen: boolean)` prop, called whenever its open state changes.
+- `LocationRow` keeps `isMenuOpen` from it and gives the header box either `focus-within:z-grid-box-focused` (menu closed) or `z-location-menu` (menu open). `LocationRowVariantClassNames` gets the two strings as `headerBoxLayer` and `headerBoxLayerWithOpenMenu`, and `headerBox` loses its `focus-within:` z class. Only one of the two is ever applied: Tailwind emits a `focus-within:` utility after the plain one, so with both the focused value (4) would win while the focus sits on a menu item.
+- Cards has no header box: its menu is `absolute z-location-menu` inside a `<li>` without a z-index, so it already ranks in the root context.
 
 ### Consequences
 Positive:
-- The page's layer order is read in one place; an open menu and a dragged row stay above the date bar (FR7).
+- The page's layer order is read in one place; an open menu (with its header box) and a dragged row lie above the date bar, and every dialog above all of them (FR6, FR7).
 
 Negative:
+- While a menu is open its whole header box, not only the menu, lies above the date bar; that shows only when the row has scrolled under the bar, and a press outside closes the menu.
 - A future positioned layer must take a token, or it falls back to the root order.
 
 ### Alternatives Considered
-**`isolation: isolate` on the grid panel**: the `fixed` location menu inside the panel would be trapped below the date bar.
+**`isolation: isolate` on the grid panel**: the open menu would rank inside the panel, below the date bar.
+**Portal the menu to `document.body`**: `LocationMenu` closes on a press or a focus outside its root (`rootRef.current?.contains`); a portal moves the items out of that root, so both checks would have to be rewritten.
+**`:has([role=menu])` on the header box**: iOS Safari 12.5 is a supported engine (ADR-0009) and has no `:has()`.
 
 ## D6. Surface background only behind glyphs
 

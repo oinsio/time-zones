@@ -125,7 +125,7 @@ No changes.
 - M2: Typed in the meeting range input, 5 of 5 valid pairs set the expected range in Almaty: Almaty `10`–`12:30` → 10:00–12:30; Moscow `8`–`10:30` → 10:00–12:30; Kolkata `9:30`–`11:30` → 09:00–11:00; New York `23`–`1` → 09:00–11:00; Almaty `9 am`–`11 am` (English) → 09:00–11:00.
 - M3: 4 of 4 invalid inputs are refused with the state unchanged: Almaty `abc`–`11` (text error), Almaty `9:10`–`11` (off the track step), Almaty `22`–`2` (past the day's end), New York `13`–`14` (before the day's start).
 - M4: At 390 × 844, in 3 of 3 cases (the search over the hour frame, the calendar over the hour frame, the calendar over the sample meeting) 0 of the sampled centres of row header texts, hour cells and meeting handles inside the dialog's backdrop show a grid element on top.
-- M5: With 12 locations at 390 × 844 scrolled so that rows pass under the date bar, the topmost element at the centre of the calendar button and of the Now button is that button, and at 0 sampled points of the date bar a grid element is on top.
+- M5: With 12 locations at 390 × 844 scrolled so that rows pass under the date bar, the topmost element at the centre of the calendar button and of the Now button is that button, and at 0 sampled points of the date bar a grid element is on top; with no meeting range and a location menu opened just above the date bar, the topmost element is the menu item at the centre of each of its items over the date bar, with at least 1 item over the date bar.
 - M6: At 390 × 844 and 1440 × 900, 0 sampled points of the frame borders across the 4 sample rows are covered by a non-transparent background outside the glyph boxes of texts and the row notes, for the hour frame and the meeting frame.
 
 ## Open Questions
