@@ -114,7 +114,8 @@
 - Impact: two model functions would own the meaning of "next / previous track step" for an off-step value. A later change to one, for example stepping from the track end, silently leaves the other behind. This is the duplication the glossary rule exists to stop.
 - Fix: in D1 and task 2.2, extract the step part of `getInstantAfterTrackMove` into one exported pure model function in `model/dayTrack.ts`, for example `getTrackStepMinutes(minutes, move)` returning the next or previous step position. Make `getInstantAfterTrackMove` and `getMeetingRangeAfterHandleMove` both call it, and drop the two private helpers. Add `model/dayTrack.ts` to proposal Impact. Add `npx vitest run src/model/dayTrack.test.ts` to task 2.2's runs and `src/model/dayTrack.ts` to Stryker run 1 of task 6.1, which then holds 5 files, the limit. Add the function to the *Code:* part of **Track move** in task 1.1.
 - Fix risk: low. The refactor touches the day track's keyboard moves. Their tests in `dayTrack.test.ts:142` (`getInstantAfterTrackMove`) must stay green, and Stryker run 1 reaches the 5-file cap.
-- Status: open
+- Status: fixed
+- Resolution: design.md D1 drops the private helpers and extracts the step rule of `getInstantAfterTrackMove` into the exported `getMinutesAfterTrackStep(minutes, move)` in `model/dayTrack.ts`, called by both owners (Context lists **Track move**; D10 adds `dayTrack.test.ts`); proposal.md What Changes (glossary) and Impact add `dayTrack.ts`; tasks.md 1.1 adds the function to **Track move** with a grep, 2.1 adds its `dayTrack.test.ts` cases, 2.2 runs `dayTrack.test.ts`, and Stryker run 1 of 6.1 holds `src/model/dayTrack.ts` (5 files).
 
 ### R4 — WARNING — NFR-P1 has no spec statement or scenario
 - Location: `openspec/changes/refine-meeting-range-entry-and-handles/specs/grid-view/spec.md:20-24`; `proposal.md:99`

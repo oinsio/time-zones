@@ -22,11 +22,12 @@ Files stay under 200 lines where possible, 300 at most.
   - **Meeting handle**: "moves the start or the end by the track step" becomes "moves the start or the end onto the track step; stands on the grid rows visible on screen"; *Code:* gains `getMeetingHandleRow`, `useVisibleStripRows`.
   - **Wall-time input**: gains "While digits are typed, it inserts the `:` separator after the hour"; *Code:* gains `formatTypedWallTimeText`.
   - **Meeting range input**: gains "its fields insert the separator as the wall-time input does".
+  - **Track move**: *Code:* gains `getMinutesAfterTrackStep` (the next or previous track step position, shared by the day track and the meeting handles).
   - In `docs/glossary/date-selection.md`, **Date bar**: *Code:* gains `DATE_BAR_SELECTOR` (its locator on the main page).
 
   Verify from the repository root:
   - `grep -n "DATE_BAR_SELECTOR" docs/glossary/date-selection.md` prints a line;
-  - `grep -n "at any whole minute" docs/glossary/time-selection.md`, `grep -n "formatTypedWallTimeText" docs/glossary/time-selection.md` and `grep -n "useVisibleStripRows" docs/glossary/time-selection.md` each print a line;
+  - `grep -n "at any whole minute" docs/glossary/time-selection.md`, `grep -n "formatTypedWallTimeText" docs/glossary/time-selection.md` and `grep -n "useVisibleStripRows" docs/glossary/time-selection.md` and `grep -n "getMinutesAfterTrackStep" docs/glossary/time-selection.md` each print a line;
   - `grep -c "on the track step, chosen" docs/glossary/time-selection.md` prints 0;
   - `wc -l docs/glossary/time-selection.md` stays under 200.
 - [ ] 1.2 Architecture docs:
@@ -49,8 +50,10 @@ Files stay under 200 lines where possible, 300 at most.
   - `getMeetingRangeAtHandleMinutes` of 09:05–11:00, start at 551 minutes, gives 09:15–11:00;
   - `moveMeetingRangeToDay` keeps a 09:05–09:28 range at 09:05–09:28 on 2026-03-09.
 
-  Run `npx vitest run src/model/meetingRange.test.ts`: fails.
-- [ ] 2.2 GREEN: implement D1 in `src/model/meetingRange.ts`. Run `npx vitest run src/model/meetingRange.test.ts`, then `npx vitest run src/model/reduceMeetingRange.test.ts`, then `npx vitest run src/model/referenceMoment.test.ts`: all pass.
+  In `src/model/dayTrack.test.ts` (`it.each`), new cases for `getMinutesAfterTrackStep`: `545` next → `555`, previous → `540`; `540` next → `555`, previous → `525`.
+
+  Run `npx vitest run src/model/meetingRange.test.ts`, then `npx vitest run src/model/dayTrack.test.ts`: both fail.
+- [ ] 2.2 GREEN: implement D1. In `src/model/dayTrack.ts`, extract the step part of `getInstantAfterTrackMove` into the exported `getMinutesAfterTrackStep(minutes, move)` and call it from `getInstantAfterTrackMove`; in `src/model/meetingRange.ts`, `getMeetingRangeAfterHandleMove` calls it, with no private step helper. Run `npx vitest run src/model/dayTrack.test.ts`, then `npx vitest run src/model/meetingRange.test.ts`, then `npx vitest run src/model/reduceMeetingRange.test.ts`, then `npx vitest run src/model/referenceMoment.test.ts`: all pass.
 - [ ] 2.3 RED then GREEN, wall-clock refusals. In `src/model/reduceMeetingRangeWallTimes.test.ts` (`it.each`):
   - the 9 rows of `meeting-range` → "Wall-clock times of any location set the range";
   - the 8 rows of "Times that break the invariants are refused";
@@ -181,7 +184,7 @@ Files stay under 200 lines where possible, 300 at most.
 ## 6. Verification (all)
 
 - [ ] 6.1 Scoped Stryker, at most 5 files per run, one run at a time, target ≥ 95 % (minimum 90 %, M7). From `packages/client`, run in this order:
-  1. `npx stryker run --mutate 'src/model/meetingRange.ts,src/model/reduceMeetingRangeWallTimes.ts,src/presenter/formatTypedWallTimeText.ts,src/controller/useMeetingRange.ts'`;
+  1. `npx stryker run --mutate 'src/model/meetingRange.ts,src/model/dayTrack.ts,src/model/reduceMeetingRangeWallTimes.ts,src/presenter/formatTypedWallTimeText.ts,src/controller/useMeetingRange.ts'` (5 files, the limit);
   2. `npx stryker run --mutate 'src/views/shared/typedTimeFieldText.ts,src/views/shared/WallTimeInput.tsx,src/views/shared/MeetingRangeInput.tsx,src/views/grid/meetingHandleRow.ts,src/views/grid/useVisibleStripRows.ts'`;
   3. `npx stryker run --mutate 'src/views/grid/useMeetingHandleDrag.ts,src/views/grid/MeetingHandle.tsx,src/views/grid/GridView.tsx,src/app/MainPage.tsx'`.
 

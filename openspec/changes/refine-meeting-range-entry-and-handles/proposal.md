@@ -22,7 +22,7 @@ Audience: everyone who plans a meeting in Grid, phone users above all (narrow ha
 - MODIFIED `grid-view` → **Meeting handles on the frame**, **Drag a meeting handle**, **Handle drag scrolls the strips**, **Meeting handles are sliders**: the handles stand on the rows visible on screen, the hit area is at least 44 × 44 px, the handle keeps its offset from the pointer (also while the strips auto-scroll), and a release never counts as a tap on an hour cell.
 - MODIFIED `grid-view` → **Tap or Enter sets a one-hour meeting range**: a click that ends a meeting handle gesture is not a tap.
 - ADDED `time-selection` → **Time separator while typing**: the wall-time input and both fields of the meeting range input insert `:` between hours and minutes as digits are typed.
-- Glossary (`docs/glossary/time-selection.md`), changed terms: **Meeting range** (any minute, no longer "on the track step"), **Meeting handle** (lands on the track step, stands on the visible rows), **Wall-time input** (the separator; new owner `formatTypedWallTimeText`). In `docs/glossary/date-selection.md`, **Date bar** gains the owner `DATE_BAR_SELECTOR`. No new term.
+- Glossary (`docs/glossary/time-selection.md`), changed terms: **Meeting range** (any minute, no longer "on the track step"), **Meeting handle** (lands on the track step, stands on the visible rows), **Wall-time input** (the separator; new owner `formatTypedWallTimeText`), **Track move** (its next / previous step rule gets the shared owner `getMinutesAfterTrackStep`). In `docs/glossary/date-selection.md`, **Date bar** gains the owner `DATE_BAR_SELECTOR`. No new term.
 - Docs: `docs/architecture/domain-model.md` (invariant 5, the errors of `SET_MEETING_RANGE_WALL_TIMES`), `docs/architecture/views.md` (Meeting handles).
 - ADR: ADR-0011 decides "Both ends lie on the 15-minute track step". A new ADR-0013 refines it: the ends lie on any minute, and the handles move on the track step. The factory may not write `docs/adr/`, so this goes through handoff H1.
 
@@ -185,6 +185,7 @@ None. Where the separator is computed, how the visible rows are measured, and ho
 
 - `packages/client/src/model/`:
   - `meetingRange.ts`;
+  - `dayTrack.ts` (the next / previous track step rule, extracted to be shared);
   - `reduceMeetingRangeWallTimes.ts`;
   - `locationCommands.ts` (2 error codes).
 - `src/controller/useMeetingRange.ts` (outcomes).

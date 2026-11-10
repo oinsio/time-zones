@@ -21,6 +21,7 @@ Owners of the concepts this change touches, from `docs/glossary/time-selection.m
 - **Meeting range input**: `confirmMeetingRangeInput`, `MeetingRangeInput`.
 - **Wall-time input**: `parseWallTimeInput` in `presenter/parseWallTimeInput.ts`, `WallTimeInput`.
 - **Hour cell** tap: `useHourCellSelection`.
+- **Track move**: `TrackMove`, and the step rule of `getInstantAfterTrackMove` in `model/dayTrack.ts` (D1 extracts it as `getMinutesAfterTrackStep`).
 
 Every decision below extends one of these owners. None adds a second owner.
 
@@ -38,7 +39,7 @@ Changes in `model/meetingRange.ts`:
 
 - `isValidMeetingRange`: `isOnTrackStep` becomes `isOnWholeMinute`, the minutes from the day's start being an integer (`MILLISECONDS_PER_MINUTE` from `@/constants`). The other conditions stay. `reduceSetMeetingRange` keeps calling it, so every path (tap, drag, handles, typed times, date change) keeps one rule.
 - `getMeetingHandleLimits`: the minimum length is `Math.min(TRACK_STEP_MINUTES, endMinutes - startMinutes)` instead of `TRACK_STEP_MINUTES`. A range that is already shorter than one step keeps valid limits (`min ≤ value ≤ max`), and a handle can only lengthen it.
-- `getMeetingRangeAfterHandleMove`: `NEXT_STEP` becomes `(Math.floor(current / step) + 1) * step` and `PREVIOUS_STEP` becomes `(Math.ceil(current / step) - 1) * step`. These are new private helpers `getNextTrackStep` and `getPreviousTrackStep` in the same file. On-step values move by exactly one step, as before. Hour moves stay `± TRACK_HOUR_MOVE_MINUTES`, and the day start and end are unchanged.
+- `getMeetingRangeAfterHandleMove`: `NEXT_STEP` and `PREVIOUS_STEP` go to the next or previous track step position: `(Math.floor(current / step) + 1) * step` and `(Math.ceil(current / step) - 1) * step`. The **Track move** owner, `getInstantAfterTrackMove` in `model/dayTrack.ts`, already applies this rule to off-step values (`floorStep + TRACK_STEP_MINUTES`, `ceilStep - TRACK_STEP_MINUTES`). So that rule is extracted from it into one exported pure function in `model/dayTrack.ts`, `getMinutesAfterTrackStep(minutes, move)` for `TrackMove.NEXT_STEP` and `TrackMove.PREVIOUS_STEP`. Both `getInstantAfterTrackMove` and `getMeetingRangeAfterHandleMove` call it, and no second helper exists. `meetingRange.ts` imports it from `./dayTrack`, inside the model module. On-step values move by exactly one step, as before. Hour moves stay `± TRACK_HOUR_MOVE_MINUTES`, and the day start and end are unchanged.
 - `getMeetingRangeAtHandleMinutes`: unchanged; it already rounds to the nearest step.
 - `moveMeetingRangeToDay`: the floor to the step is removed, and the start is the instant it is given. That instant is the reference moment `reduceReferenceMoment.ts` resolves from the start's wall-clock time, so the date-change rule already in the spec ("keeps its wall-clock time") holds for off-step starts.
 
@@ -126,7 +127,7 @@ The number is 0013, not 0012. `docs/architecture/overview.md` and `views.md` alr
 
 | What | Test | Why there |
 |---|---|---|
-| D1, D2 | Vitest `model/meetingRange.test.ts`, `model/reduceMeetingRangeWallTimes.test.ts`, `model/referenceMoment.test.ts` (date change of an off-step range); new unit BDD `meeting_range/meeting_range_any_minute.feature` | pure model |
+| D1, D2 | Vitest `model/dayTrack.test.ts` (`getMinutesAfterTrackStep`), `model/meetingRange.test.ts`, `model/reduceMeetingRangeWallTimes.test.ts`, `model/referenceMoment.test.ts` (date change of an off-step range); new unit BDD `meeting_range/meeting_range_any_minute.feature` | pure model |
 | D3 | Vitest `controller/useMeetingRange.input.test.tsx`, `views/shared/MeetingRangeInput.test.tsx`; unit BDD `grid_view_meeting_range_input_unit.feature` | jsdom renders text and `aria-*` values |
 | D4 | Vitest `presenter/formatTypedWallTimeText.test.ts`, `views/shared/typedTimeFieldText.test.ts`, `WallTimeInput.test.tsx`; unit BDD `time_selection/time_selection_time_separator_unit.feature` (user-event typing); E2E `time_selection_time_separator_e2e.feature` (real keyboard, caret) | caret and real key input need a browser |
 | D5 | Vitest `meetingHandleRow.test.ts`, `useVisibleStripRows.test.tsx` (stubbed rects and `requestAnimationFrame`); E2E `grid_view_meeting_handle_reach_e2e.feature` | real layout and scrolling |
