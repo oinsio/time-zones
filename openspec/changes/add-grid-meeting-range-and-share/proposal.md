@@ -122,9 +122,9 @@ Audience: people who plan meetings across zones on a desktop, tablet or phone, i
 
 ## Behavior
 
-- New unit BDD under `packages/client/src/test/features/meeting_range/` (model commands, handle moves, day shift, share text and outcomes) and under `src/test/features/grid_view/` (tap and Enter, meeting frame column and dimming, row spans, meeting bar, work bounds), tagged `@add-grid-meeting-range-and-share`.
-- New playwright-bdd features under `src/test/features/grid_view/` (`grid_view_meeting_e2e.feature`, `grid_view_meeting_handles_e2e.feature`, `grid_view_meeting_share_e2e.feature`, `grid_view_meeting_screenshots_e2e.feature`) with the meeting scenarios of the view contract.
-- Changed `main_page_header_e2e.feature` (the meeting bar replaces the header) and the grid features that asserted "a tap changes nothing".
+- New unit BDD, tagged `@add-grid-meeting-range-and-share`: `packages/client/src/test/features/meeting_range/` (`meeting_range_commands.feature`, `meeting_range_handles.feature`, `meeting_range_day_shift.feature`, `meeting_range_share.feature`) and `src/test/features/grid_view/` (`grid_view_meeting_unit.feature`: tap, frame columns, dimming, spans, meeting bar, notices; `grid_view_meeting_budget.feature`: work bounds).
+- New playwright-bdd features under `src/test/features/grid_view/`: `grid_view_meeting_e2e.feature`, `grid_view_meeting_handles_e2e.feature`, `grid_view_meeting_share_e2e.feature`, `grid_view_meeting_contract_e2e.feature` (the meeting scenarios of the view contract: set, resize, share, clear), `grid_view_meeting_screenshots_e2e.feature`.
+- Changed `grid_view_hour_frame_unit.feature` ("A tap on a cell changes nothing" becomes "A tap on a cell sets a one-hour meeting range") and `main_page_header_e2e.feature` (the meeting bar replaces the header).
 
 ## Visual Reference
 
