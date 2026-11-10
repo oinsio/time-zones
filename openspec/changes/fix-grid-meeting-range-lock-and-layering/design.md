@@ -61,7 +61,7 @@ Positive:
 - The view only shows errors; parsing has one owner.
 
 Negative:
-- `useMeetingRange` grows by about 30 lines (now 140).
+- `useMeetingRange` grows by about 30 lines (now 144).
 
 ### Alternatives Considered
 **A separate `useMeetingRangeInput` hook**: a second subscriber to the same store for one action; rejected for one more file with no new state.
