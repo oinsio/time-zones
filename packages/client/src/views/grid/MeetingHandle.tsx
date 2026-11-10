@@ -40,8 +40,8 @@ function measureStripCentre(
  * edge over the hour strip of its row. Dragged by pointer or finger, moved by
  * the slider keys. Lies above everything in the panel (`z-meeting-handle`).
  * Implements FR9, FR10, FR12, NFR-A1, NFR-A2, NFR-R1, UX1, UX2 of
- * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  * add-grid-meeting-range-and-share (D6).
+ * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  */
 export function MeetingHandleSlider({
   presented,

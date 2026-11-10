@@ -1,14 +1,20 @@
 // Verifies FR5 of fix-grid-meeting-range-lock-and-layering.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
+import { act, cleanup } from "@testing-library/react/pure";
 import { expect } from "vitest";
 import { LocationCommandType, WallTimeTargetKind } from "@/model";
+import { LocationsLoadStatus } from "@/ports";
+import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
+import { createStoredListApp } from "./meetingRangeStoredApp";
 import { createMeetingWorld, idOf, SAMPLE_START } from "./meetingRangeWorld";
 
 const feature = await loadFeature("../meeting_range_wall_times.feature");
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createMeetingWorld();
+
+  f.AfterEachScenario(() => cleanup());
   const setFromWallTimes = (
     city: string,
     date: string,
@@ -105,4 +111,52 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
   });
+
+  // @fix-grid-meeting-range-lock-and-layering @FR5
+  f.Scenario(
+    "A range typed in wall-clock times is never stored",
+    ({ Given, When, Then }) => {
+      const { backend, renderApp } = createStoredListApp();
+      let app: ReturnType<typeof renderApp>;
+      Given(
+        'the reference zone is "Asia/Almaty" and the list holds Almaty and Moscow in storage',
+        () => {
+          backend.document = {
+            status: LocationsLoadStatus.LOADED,
+            locations: ["Almaty", "Moscow"].map((label) =>
+              buildLocation({ label, ...KNOWN_CITIES[label] }),
+            ),
+            homeLocationId: idOf("Almaty"),
+          };
+          app = renderApp();
+        },
+      );
+      When(
+        'the meeting range is typed from "08:00" to "10:30" in "Moscow" on "2026-03-08" and the list is written to storage',
+        () => {
+          act(() => {
+            app.result.current.meeting.confirmMeetingRangeInput(
+              idOf("Moscow"),
+              "08:00",
+              "10:30",
+              "2026-03-08",
+            );
+          });
+          expect(app.result.current.meeting.meeting).toBeDefined();
+          act(() => {
+            app.result.current.locations.addLocation({
+              timeZoneId: "Asia/Kolkata",
+              label: "Kolkata",
+              countryCode: "IN",
+            });
+          });
+        },
+      );
+      Then("the stored document has no meeting range", () => {
+        expect(backend.document.status).toBe(LocationsLoadStatus.LOADED);
+        expect(Object.keys(backend.document)).not.toContain("meeting");
+        expect(JSON.stringify(backend.document)).not.toContain("meeting");
+      });
+    },
+  );
 });

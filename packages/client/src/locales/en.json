@@ -123,7 +123,7 @@
     "rangeInputLabel": "Enter meeting time — {{city}}, {{span}}",
     "rangeInputStartLabel": "Start time — {{city}}",
     "rangeInputEndLabel": "End time — {{city}}",
-    "rangeInputError": "The meeting must fit inside the day, in 15-minute steps",
+    "rangeInputError": "The meeting must lie within the day, in 15-minute steps",
     "hourStripHint": "Enter — select a meeting at this hour",
     "shareHeading": "Meeting on {{date}}, {{duration}}",
     "shareLine": "{{city}}: {{span}}",

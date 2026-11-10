@@ -37,3 +37,9 @@ Feature: Meeting range from wall-clock times
     Given the reference zone is "Asia/Almaty" and the current time is "2026-03-08T07:30:00Z"
     When the meeting range is set from "00:00" to "00:00" in "Almaty" on "2026-03-08"
     Then the meeting range is the whole reference day, from "2026-03-07T19:00:00Z" to "2026-03-08T19:00:00Z"
+
+  @fix-grid-meeting-range-lock-and-layering @FR5
+  Scenario: A range typed in wall-clock times is never stored
+    Given the reference zone is "Asia/Almaty" and the list holds Almaty and Moscow in storage
+    When the meeting range is typed from "08:00" to "10:30" in "Moscow" on "2026-03-08" and the list is written to storage
+    Then the stored document has no meeting range

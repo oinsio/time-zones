@@ -2,6 +2,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MeetingRangeInputOutcome } from "@/controller";
+import i18n from "i18next";
 import { MeetingRangeInput } from "./MeetingRangeInput";
 
 const START_NAME = "Время начала — Moscow";
@@ -102,6 +103,15 @@ describe("MeetingRangeInput", () => {
     expect(onClose).toHaveBeenCalledWith(false);
   });
 
+  // FR4: leaving both fields after only the end text changed confirms.
+  it("should confirm when only the end text changed and the focus leaves", async () => {
+    const { onConfirm, endField } = renderInput();
+    await userEvent.clear(endField);
+    await userEvent.type(endField, "10:00");
+    await userEvent.click(screen.getByRole("button", { name: "Outside" }));
+    expect(onConfirm).toHaveBeenCalledWith("07:00", "10:00");
+  });
+
   it("should close without confirming when the focus leaves unchanged", async () => {
     const { onConfirm, onClose } = renderInput();
     await userEvent.click(screen.getByRole("button", { name: "Outside" }));
@@ -159,5 +169,29 @@ describe("MeetingRangeInput", () => {
     const { startField } = renderInput();
     expect(startField).toHaveAttribute("aria-invalid", "false");
     expect(startField).not.toHaveAttribute("aria-describedby");
+  });
+});
+
+describe("MeetingRangeInput in English", () => {
+  beforeEach(() => i18n.changeLanguage("en"));
+  afterEach(() => i18n.changeLanguage("ru"));
+
+  // FR4: the English text of the range error.
+  it("should explain a refused range in English", async () => {
+    render(
+      <MeetingRangeInput
+        city="Moscow"
+        initialStartText="07:00"
+        initialEndText="09:00"
+        onConfirm={() => MeetingRangeInputOutcome.INVALID_RANGE}
+        onClose={vi.fn()}
+      />,
+    );
+    await userEvent.type(screen.getAllByRole("textbox")[0], "{Enter}");
+    expect(
+      screen.getByText(
+        "The meeting must lie within the day, in 15-minute steps",
+      ),
+    ).toBeInTheDocument();
   });
 });
