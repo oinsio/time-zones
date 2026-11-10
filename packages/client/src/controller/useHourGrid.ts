@@ -20,6 +20,7 @@ const MISSING_PROVIDER_MESSAGE =
  * the reference moment; a strip is the same object while the day, language
  * and hour format stay.
  * Implements FR8, FR9, NFR-P1 of add-grid-hour-cells-and-hour-frame (D3).
+ * Implements FR7 of add-grid-meeting-range-and-share (D5): `hasMeetingRange` ends the hour frame.
  */
 export function useHourGrid() {
   const context = useContext(LocationsContext);
@@ -53,6 +54,7 @@ export function useHourGrid() {
       strips,
       hourFrameIndex: getHourFrameIndex(day, getEffectiveInstant(state, now)),
       cellCount: getHourCellCount(day),
+      hasMeetingRange: state.meeting !== undefined,
     };
   }, [state, language, hourFormat, clock, minuteTick]);
 }
