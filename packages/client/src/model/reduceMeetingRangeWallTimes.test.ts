@@ -113,7 +113,7 @@ describe("SET_MEETING_RANGE_WALL_TIMES", () => {
       "New York",
       "2026-03-07",
       "13:00",
-      "15:00",
+      "14:00",
       LocationErrorCode.INVALID_MEETING_RANGE,
     ],
     ["Almaty", "2026-03-08", "25:00", "11:00", LocationErrorCode.INVALID_TIME],
@@ -184,5 +184,18 @@ describe("SET_MEETING_RANGE_WALL_TIMES", () => {
       "11:00",
     );
     expect(outcome).toEqual({ ok: true, state: sampleState });
+  });
+});
+
+describe("SET_MEETING_RANGE_WALL_TIMES while live", () => {
+  it("should accept a range of the day before, as the shown day is unknown", () => {
+    const outcome = setFromWallTimes(
+      baseState,
+      "New York",
+      "2026-03-07",
+      "13:00",
+      "14:00",
+    );
+    expect(outcome.ok).toBe(true);
   });
 });

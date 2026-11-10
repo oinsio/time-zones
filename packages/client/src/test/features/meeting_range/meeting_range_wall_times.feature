@@ -27,7 +27,7 @@ Feature: Meeting range from wall-clock times
       | city     | date       | start | end   | error                 |
       | Almaty   | 2026-03-08 | 09:10 | 11:00 | INVALID_MEETING_RANGE |
       | Almaty   | 2026-03-08 | 22:00 | 02:00 | INVALID_MEETING_RANGE |
-      | New York | 2026-03-07 | 13:00 | 15:00 | INVALID_MEETING_RANGE |
+      | New York | 2026-03-07 | 13:00 | 14:00 | INVALID_MEETING_RANGE |
       | Almaty   | 2026-03-08 | 25:00 | 11:00 | INVALID_TIME          |
       | Almaty   | 2026-13-08 | 09:00 | 11:00 | INVALID_DATE          |
       | Tokyo    | 2026-03-08 | 09:00 | 11:00 | LOCATION_NOT_FOUND    |

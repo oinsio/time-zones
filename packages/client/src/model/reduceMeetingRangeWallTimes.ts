@@ -1,4 +1,5 @@
 import { Temporal } from "@/lib/temporal";
+import { getReferenceDay } from "./dayTrack";
 import {
   type LocationCommand,
   LocationCommandType,
@@ -7,6 +8,7 @@ import {
   type WorldClockState,
 } from "./locations";
 import { reduceSetMeetingRange } from "./reduceMeetingRange";
+import { ReferenceMode } from "./referenceMoment";
 import { isCanonicalWallTime, resolveWallClock } from "./wallClock";
 
 type SetMeetingRangeWallTimesCommand = Extract<
@@ -20,9 +22,27 @@ const fail = (error: LocationErrorCode): LocationsReduceResult => ({
 });
 
 /**
+ * Whether the range lies in the reference day the grid shows. While the
+ * moment is live the model does not know that day (it has no clock), so only
+ * `reduceSetMeetingRange` checks the range then.
+ */
+function isInShownDay(
+  state: WorldClockState,
+  start: Temporal.Instant,
+  end: Temporal.Instant,
+): boolean {
+  if (state.reference.mode !== ReferenceMode.PINNED) return true;
+  const day = getReferenceDay(state, state.reference.instant);
+  return (
+    Temporal.Instant.compare(day.start, start) <= 0 &&
+    Temporal.Instant.compare(end, day.end) <= 0
+  );
+}
+
+/**
  * Sets the meeting range from wall-clock times in a row's zone: the start on
  * the given date, the end on the first following moment with its wall time.
- * The instants are then set by `reduceSetMeetingRange`, which owns the
+ * The range must lie in the reference day the grid shows. The instants are then set by `reduceSetMeetingRange`, which owns the
  * invariants and the pin.
  * Implements FR5 of fix-grid-meeting-range-lock-and-layering (D2).
  */
@@ -59,6 +79,9 @@ export function reduceMeetingRangeWallTimes(
         zone,
         date.add({ days: 1 }).toPlainDateTime(endTime),
       ).instant;
+    }
+    if (!isInShownDay(state, start, end)) {
+      return fail(LocationErrorCode.INVALID_MEETING_RANGE);
     }
     return reduceSetMeetingRange(state, {
       type: LocationCommandType.SET_MEETING_RANGE,
