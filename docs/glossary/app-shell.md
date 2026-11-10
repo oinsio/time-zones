@@ -11,3 +11,5 @@ The frame around every view: title, notices, recovery and the states of storage 
 - **Recovery screen** — the screen the error boundary shows after an unexpected error, with Reload. *Code:* `RecoveryScreen`, `AppErrorBoundary`. *RU:* «Что-то пошло не так».
 - **Storage unavailable** — the state where the location list cannot be saved (private mode, quota). The app keeps working and warns that changes will not be saved. *Code:* `StorageAvailability`. *RU:* «Хранилище недоступно».
 - **Offline** — no network. The app works fully and shows no note; a failed update check is silent. *RU:* «без сети». *Never:* disconnected mode.
+- **Meeting copied notice** — the notice that Share meeting copied the text where the browser cannot share. *RU:* «Текст встречи скопирован». *Code:* `MeetingShareNotice.COPIED`.
+- **Share failed notice** — the notice that Share meeting could neither share nor copy. *RU:* «Не удалось поделиться встречей». *Code:* `MeetingShareNotice.FAILED`.

@@ -4,7 +4,6 @@ Architecture decisions that are not made yet. When one is resolved, record the d
 
 | # | Question | Options | Current leaning |
 |---|---|---|---|
-| Q8 | What Share meeting sends | Text with the meeting range in every location; a link that opens the same range; both | Text first: it works in any messenger without a server |
 
 ## Resolved
 
@@ -17,3 +16,4 @@ Architecture decisions that are not made yet. When one is resolved, record the d
 | Q5 | Where the date bar lives | Bottom bar with previous / next day, a date button opening a calendar, and the Now button — a shared block in `views/shared/`, used by Cards and Grid alike; no day strip |
 | Q6 | What the time in the row header shows | The reference moment: equals the current time in `LIVE`, the selected moment in `PINNED`; the Now button is always shown and is active only when the moment is pinned |
 | Q7 | How to show `GAP` / `AMBIGUOUS` results of wall-clock input | Inline hint in the affected card until the next change; no toast and no "show the other instant" action in the MVP — see the wall-time hint in [views](views.md) |
+| Q8 | What Share meeting sends | Text only: the date, the duration and every location's local span; no link — [views](views.md#meeting-bar) |

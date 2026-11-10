@@ -79,7 +79,7 @@ Commands are serializable objects with a `type` enum. The reducer returns either
 
 Preferences commands: `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE`, `SET_VIEW_MODE`.
 
-`SELECT_INSTANT`, `SET_WALL_TIME` and `SHIFT_TIME` remove a meeting range: the user picked one moment instead of a span.
+`SELECT_INSTANT`, `SET_WALL_TIME` and `SHIFT_TIME` remove a meeting range: the user picked one moment instead of a span. A change of the reference zone or an empty location list removes it too; the moment stays pinned at its former start.
 
 `SET_WALL_TIME` and `SET_DATE` resolve wall-clock time with `disambiguation: "compatible"` and report `UNIQUE | GAP | AMBIGUOUS`, so a view can explain why the time moved.
 
@@ -105,8 +105,9 @@ Selectors take the state and the current instant from the `Clock` and return vie
 | `getLocationSnapshot(row)` | `ZonedDateTime`, UTC offset, offset difference and day shift (`-1 / 0 / +1`) from the reference zone, day period, is-home and is-here flags | all views |
 | `getHourCells(timeZoneId, referenceDay, referenceZoneId)` | cells of the reference day: start instant, local start time, day period, offset edge, midnight date (never set in the reference zone's row) | grid |
 | `getHourFrameIndex(referenceDay, instant)` | the hour frame's column: the cell that contains the instant | grid |
-| `getMeetingSpan(state)` | start and end of the meeting range as fractions of the reference day, or none | grid |
-| `getLocationMeetingRange(row)` | local start and end `ZonedDateTime` of the meeting range and the day shift of the start | grid |
+| `getMeetingSpan(referenceDay, meeting)` | the range's minutes from the day's start and the first and last hour-cell column it overlaps | grid |
+| `getLocationMeetingRange(timeZoneId, meeting, referenceZoneId)` | local start and end `ZonedDateTime` of the meeting range and the day shift of the start | grid |
+| `getDayShift(timeZoneId, instant, referenceZoneId)` | `EARLIER / SAME / LATER`: the location's local date against the reference zone's at the instant | grid |
 | `getDayTrack(row)` | position of the reference moment within the reference day (0..1, equal for all rows) and the row's day-period segments over that day, including offset jumps | cards |
 | `getDayPeriod(zonedDateTime)` | `NIGHT / MORNING / WORK / EVENING` | colors in all views |
 

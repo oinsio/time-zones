@@ -9,7 +9,8 @@ Layers, the data flow between them, and the test stand-ins. Decisions: ADR-0002 
 - **Store** — the holder of the world clock state that runs the reducer and notifies subscribers only when the state object changes. *Code:* `createStore`.
 - **Presenter** — the layer that turns model values into display data: formatting, localized strings, accessible names. *Code:* `src/presenter/`, `present*` functions. *Never:* view model, formatter (for the layer).
 - **Controller** — React hooks and providers that connect the store, the ports and the views, and run side effects (ticks, writes, sync). *Code:* `src/controller/`.
-- **Port** — an interface the model or controller needs from the outside world. *Code:* `src/ports/` (`CitySearch`, `LocationRepository`, `StorageAvailability`), and `Clock` in `@/lib/temporal`. *Never:* service, gateway.
+- **Port** — an interface the model or controller needs from the outside world. *Code:* `src/ports/` (`CitySearch`, `LocationRepository`, `StorageAvailability`, `TextSharing`), and `Clock` in `@/lib/temporal`. *Never:* service, gateway.
+- **Text sharing** — the port that hands a text to the system share or copies it, answering shared, cancelled, copied or failed. *Code:* `TextSharing`, `ShareOutcome`, `browserTextSharing`, `createInMemoryTextSharing`.
 - **Adapter** — an implementation of a port for one technology. *Code:* `src/adapters/`.
 - **Repository** — the adapter that owns reading and writing one stored model (ADR-0004). Only repositories write to storage. *Code:* `LocationRepository`, `localStorageLocationRepository`; the preferences have `PreferencesRepository`, and both share `createStorageDocumentSync` (tab sync).
 - **Tab sync** — passing a changed location list to the other open tabs, through `BroadcastChannel` or `storage` events. *Never:* replication.
