@@ -12,7 +12,9 @@ import { createElement } from "react";
 import { vi } from "vitest";
 import { AppShell } from "@/app";
 import { PREFERENCES_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
-import { DEFAULT_PREFERENCES } from "@/preferences";
+import type { InterfaceLanguageCode } from "@/locales";
+import type { TextSharing } from "@/ports";
+import { DEFAULT_PREFERENCES, type Preferences } from "@/preferences";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import {
   createSwitchableClock,
@@ -27,6 +29,15 @@ import {
 const DEFAULT_INSTANT = "2026-03-08T07:30:00Z";
 const PAGE_HIDE_EVENT_NAME = "pagehide";
 const DEFAULT_DEVICE_ZONE = "UTC";
+
+const storePreferences = (overrides: Partial<Preferences>) =>
+  localStorage.setItem(
+    STORAGE_KEYS.PREFERENCES,
+    JSON.stringify({
+      schemaVersion: PREFERENCES_SCHEMA_VERSION,
+      payload: { ...DEFAULT_PREFERENCES, ...overrides },
+    }),
+  );
 
 /** Per-scenario state of the Grid view features. */
 export const createGridViewWorld = () => {
@@ -66,21 +77,20 @@ export const createGridViewWorld = () => {
       clock?.moveTo(isoInstant);
       act(() => void document.dispatchEvent(new Event("visibilitychange")));
     },
-    storeViewMode: (viewMode: string | null) =>
-      localStorage.setItem(
-        STORAGE_KEYS.PREFERENCES,
-        JSON.stringify({
-          schemaVersion: PREFERENCES_SCHEMA_VERSION,
-          payload: { ...DEFAULT_PREFERENCES, viewMode },
-        }),
-      ),
+    storeViewMode: (viewMode: string | null) => storePreferences({ viewMode }),
+    /** Implements FR13 of add-grid-meeting-range-and-share: the stored interface language of the open app. */
+    storeViewModeAndLanguage: (
+      viewMode: string | null,
+      interfaceLanguage: InterfaceLanguageCode,
+    ) => storePreferences({ viewMode, interfaceLanguage }),
     storeLocations: (cities: string[]) => seedStoredList(cities),
     storeEmptyList: () => seedStoredList([]),
     storeUnreadableList: () =>
       localStorage.setItem(STORAGE_KEYS.LOCATIONS, NOT_JSON),
-    openApp: async () => {
+    /** `textSharing` replaces the browser's sharing (FR15 of add-grid-meeting-range-and-share). */
+    openApp: async (textSharing?: TextSharing) => {
       clock = createSwitchableClock(instant, deviceZone);
-      render(createElement(AppShell, { clock }));
+      render(createElement(AppShell, { clock, textSharing }));
       await screen.findByRole("main");
     },
     typeTime: async (city: string, text: string) => {
