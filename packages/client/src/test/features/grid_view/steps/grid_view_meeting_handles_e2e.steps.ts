@@ -51,7 +51,7 @@ type FingerDrag = {
 };
 const fingerDrags = new WeakMap<Page, FingerDrag>();
 
-const valueOf = async (handle: Locator) =>
+const readHandleValue = async (handle: Locator) =>
   Number(await handle.getAttribute("aria-valuenow"));
 
 // Verifies FR9 of add-grid-meeting-range-and-share.
@@ -122,7 +122,10 @@ When(
     }
     await endHandleOf(page).press("PageDown");
     await endHandleOf(page).press("PageDown");
-    await expect(startHandleOf(page)).toHaveAttribute("aria-valuetext", "09:00");
+    await expect(startHandleOf(page)).toHaveAttribute(
+      "aria-valuetext",
+      "09:00",
+    );
     await expect(endHandleOf(page)).toHaveAttribute("aria-valuetext", "11:00");
     const frameBox = await requireBox(meetingFrameOf(page));
     const panelBox = await requireBox(panelOf(page));
@@ -139,7 +142,9 @@ async function dragHandleWithFinger(
   edgeX: number,
 ) {
   const from = centreOf(await requireBox(handle));
-  const scrollBefore = await panelOf(page).evaluate((panel) => panel.scrollLeft);
+  const scrollBefore = await panelOf(page).evaluate(
+    (panel) => panel.scrollLeft,
+  );
   const finger = await startTouch(page);
   const pitch = (await requireBox(cellOf(page, SAMPLE_CITY, 1))).width;
   const moveStepPx = pitch / MOVE_STEP_PITCH_DIVISOR;
@@ -152,7 +157,11 @@ async function dragHandleWithFinger(
   }, READINGS_KEY);
   await dispatchTouch(finger, "touchStart", from);
   const direction = Math.sign(edgeX - from.x);
-  for (let x = from.x; direction * (edgeX - x) > 0; x += direction * moveStepPx) {
+  for (
+    let x = from.x;
+    direction * (edgeX - x) > 0;
+    x += direction * moveStepPx
+  ) {
     await dispatchTouch(finger, "touchMove", { x, y: from.y });
   }
   for (let reading = 0; reading < HOLD_MOVE_COUNT; reading += 1) {
@@ -198,27 +207,27 @@ Then(
   async ({ locationsWorld }, direction: string) => {
     const { page } = locationsWorld;
     const scrollBefore = fingerDrags.get(page)?.scrollBefore ?? 0;
-    const scrollAfter = await panelOf(page).evaluate((panel) => panel.scrollLeft);
-    if (direction === "right") expect(scrollAfter).toBeGreaterThan(scrollBefore);
+    const scrollAfter = await panelOf(page).evaluate(
+      (panel) => panel.scrollLeft,
+    );
+    if (direction === "right")
+      expect(scrollAfter).toBeGreaterThan(scrollBefore);
     else expect(scrollAfter).toBeLessThan(scrollBefore);
   },
 );
 
-Then(
-  "the meeting range ends later than 11:00",
-  async ({ locationsWorld }) => {
-    expect(await valueOf(endHandleOf(locationsWorld.page))).toBeGreaterThan(
-      ELEVEN_OCLOCK_MINUTES,
-    );
-  },
-);
+Then("the meeting range ends later than 11:00", async ({ locationsWorld }) => {
+  expect(
+    await readHandleValue(endHandleOf(locationsWorld.page)),
+  ).toBeGreaterThan(ELEVEN_OCLOCK_MINUTES);
+});
 
 Then(
   "the meeting range starts earlier than 09:00",
   async ({ locationsWorld }) => {
-    expect(await valueOf(startHandleOf(locationsWorld.page))).toBeLessThan(
-      NINE_OCLOCK_MINUTES,
-    );
+    expect(
+      await readHandleValue(startHandleOf(locationsWorld.page)),
+    ).toBeLessThan(NINE_OCLOCK_MINUTES);
   },
 );
 
@@ -251,11 +260,14 @@ Then(
   },
 );
 
-When("the user scrolls the strips back to the start", async ({ locationsWorld }) => {
-  await panelOf(locationsWorld.page).evaluate((panel) => {
-    panel.scrollLeft = 0;
-  });
-});
+When(
+  "the user scrolls the strips back to the start",
+  async ({ locationsWorld }) => {
+    await panelOf(locationsWorld.page).evaluate((panel) => {
+      panel.scrollLeft = 0;
+    });
+  },
+);
 
 Then(
   "the hour frame lies inside the strips' visible part",

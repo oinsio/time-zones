@@ -71,11 +71,7 @@ export async function dragAcrossCells(
 }
 
 /** The left edge of a cell, where a handle snaps to the cell's start. */
-export async function leftEdgeOfCell(
-  page: Page,
-  city: string,
-  column: number,
-) {
+export async function leftEdgeOfCell(page: Page, city: string, column: number) {
   return (await requireBox(cellOf(page, city, column))).x;
 }
 

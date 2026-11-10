@@ -187,7 +187,8 @@ Then(
         frameBox.x + BORDER_INSET_PX,
         frameBox.x + frameBox.width - BORDER_INSET_PX,
       ]) {
-        if (borderX < textBox.x || borderX > textBox.x + textBox.width) continue;
+        if (borderX < textBox.x || borderX > textBox.x + textBox.width)
+          continue;
         const point = { x: borderX, y: textBox.y + textBox.height / HALF };
         expect(await isTopmostAt(headerText, point)).toBe(true);
         checkedCrossings += 1;
@@ -286,9 +287,7 @@ Then("no meeting range is set", async ({ locationsWorld }) => {
 Then(
   "the page header shows the app title again",
   async ({ locationsWorld }) => {
-    await expect(meetingTitleOf(locationsWorld.page)).toHaveText(
-      "Time Zones",
-    );
+    await expect(meetingTitleOf(locationsWorld.page)).toHaveText("Time Zones");
   },
 );
 
@@ -321,7 +320,9 @@ Then(
     const [title, share, clear] = boxes;
     expect(share.y).toBeLessThan(title.y + title.height);
     expect(clear.y).toBeLessThan(title.y + title.height);
-    expect(share.x).toBeGreaterThanOrEqual(title.x + title.width - BORDER_INSET_PX);
+    expect(share.x).toBeGreaterThanOrEqual(
+      title.x + title.width - BORDER_INSET_PX,
+    );
     for (const button of [share, clear]) {
       expect(button.width).toBeGreaterThanOrEqual(MIN_BUTTON_SIZE_PX);
       expect(button.height).toBeGreaterThanOrEqual(MIN_BUTTON_SIZE_PX);

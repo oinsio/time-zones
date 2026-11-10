@@ -48,7 +48,10 @@ const readShared = (page: Page) =>
 
 // Verifies FR15 of add-grid-meeting-range-and-share: browser stubs of D10.
 Given("a browser with a system share", async ({ locationsWorld }) => {
-  await stubBrowser(locationsWorld.page, { share: "works", hasClipboard: true });
+  await stubBrowser(locationsWorld.page, {
+    share: "works",
+    hasClipboard: true,
+  });
 });
 
 Given(
@@ -63,9 +66,7 @@ Given(
 
 Given("a browser without a system share", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
-  await page
-    .context()
-    .grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   await stubBrowser(page, { share: "missing", hasClipboard: true });
 });
 
@@ -88,7 +89,9 @@ Then(
   async ({ locationsWorld }, table) => {
     const expectedLines = (table.rows() as string[][]).map(([line]) => line);
     await expect
-      .poll(async () => Object.keys((await readShared(locationsWorld.page)) ?? {}))
+      .poll(async () =>
+        Object.keys((await readShared(locationsWorld.page)) ?? {}),
+      )
       .toEqual(["text"]);
     const shared = await readShared(locationsWorld.page);
     expect(String(shared?.text).split("\n")).toEqual(expectedLines);
@@ -146,7 +149,9 @@ Then(
             "",
         ),
       );
-      if (await endHandleOf(page).evaluate((el) => el === document.activeElement))
+      if (
+        await endHandleOf(page).evaluate((el) => el === document.activeElement)
+      )
         break;
       await page.keyboard.press("Tab");
     }
