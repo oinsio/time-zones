@@ -100,3 +100,85 @@ describe("useMeetingHandleDrag edge zone", () => {
     expect(getScrollLeft()).toBe(100);
   });
 });
+
+describe("useMeetingHandleDrag frame cancelling", () => {
+  beforeEach(() => {
+    frameQueue.length = 0;
+    vi.stubGlobal("requestAnimationFrame", (frame: FrameRequestCallback) => {
+      frameQueue.push(frame);
+      return 7;
+    });
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("should cancel the pending frame when the drag ends", () => {
+    const cancelAnimationFrame = vi.fn();
+    vi.stubGlobal("cancelAnimationFrame", cancelAnimationFrame);
+    const { slider } = setup();
+    fireEvent.pointerDown(slider, pointer(200));
+    fireEvent.pointerMove(slider, pointer(380));
+
+    fireEvent.pointerUp(slider, pointer(380));
+    fireEvent.pointerUp(slider, pointer(380));
+
+    expect(cancelAnimationFrame).toHaveBeenCalledExactlyOnceWith(7);
+  });
+
+  it("should cancel no frame when none is pending", () => {
+    const cancelAnimationFrame = vi.fn();
+    vi.stubGlobal("cancelAnimationFrame", cancelAnimationFrame);
+    const { slider } = setup();
+    fireEvent.pointerDown(slider, pointer(200));
+    fireEvent.pointerMove(slider, pointer(210));
+
+    fireEvent.pointerUp(slider, pointer(210));
+
+    expect(cancelAnimationFrame).not.toHaveBeenCalled();
+  });
+});
+
+describe("useMeetingHandleDrag touch details", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  async function setupTouch() {
+    vi.stubGlobal("PointerEvent", undefined);
+    vi.resetModules();
+    const fixture = await import("./meetingHandleFixture");
+    const geometry = fixture.installPanelGeometry();
+    const rendered = fixture.renderHandle();
+    geometry.bindScrollLeft(rendered.panel);
+    return { ...rendered, slider: screen.getByRole("slider") };
+  }
+  const touch = (clientX: number) => ({
+    changedTouches: [{ identifier: 1, clientX, clientY: 0 }],
+  });
+
+  it("should leave a move the browser cannot cancel alone", async () => {
+    const { slider } = await setupTouch();
+    fireEvent.touchStart(slider, touch(100));
+
+    const isNotPrevented = fireEvent.touchMove(slider, {
+      ...touch(256),
+      cancelable: false,
+    });
+
+    expect(isNotPrevented).toBe(true);
+  });
+
+  it("should stop when the touch is cancelled", async () => {
+    const { slider, onDragHandleTo } = await setupTouch();
+    fireEvent.touchStart(slider, touch(100));
+    fireEvent.touchCancel(slider, touch(100));
+
+    fireEvent.touchMove(slider, touch(256));
+
+    expect(onDragHandleTo).not.toHaveBeenCalled();
+  });
+});
