@@ -15,8 +15,8 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `temp
 
 ## 3. Presenter and controller (FR3, FR4; D3, D4)
 
-- [ ] 3.1 RED then GREEN: `src/presenter/locationMeetingRange.test.ts` adds `startTimeLabel` / `endTimeLabel` for the 4 sample rows (New York `23:00` / `01:00`) and checks `spanLabel` equals them joined by `–`; implement in `src/presenter/locationMeetingRange.ts`. Run that test file: passes.
-- [ ] 3.2 RED then GREEN: `src/controller/useMeetingRange.test.tsx` (inside `LocationsProvider` with `createSwitchableClock` from `src/test/switchableClock.ts`) adds `confirmMeetingRangeInput`: Moscow `8` / `10:30` on `2026-03-08` → `CLOSED` and 10:00–12:30; `abc` / `11` → `INVALID_START_TEXT`; `9` / `xyz` → `INVALID_END_TEXT`; Almaty `9:10` / `11` → `INVALID_RANGE` with the range unchanged; English `10 am` / `12:30 pm` → 10:00–12:30; an unknown location id → `CLOSED` with nothing changed; the repository records no save. Implement in `src/controller/useMeetingRange.ts`, export `MeetingRangeInputOutcome` from `src/controller/index.ts`. Run that test file: passes.
+- [x] 3.1 RED then GREEN: `src/presenter/locationMeetingRange.test.ts` adds `startTimeLabel` / `endTimeLabel` for the 4 sample rows (New York `23:00` / `01:00`) and checks `spanLabel` equals them joined by `–`; implement in `src/presenter/locationMeetingRange.ts`. Run that test file: passes.
+- [x] 3.2 RED then GREEN: `src/controller/useMeetingRange.test.tsx` (inside `LocationsProvider` with `createSwitchableClock` from `src/test/switchableClock.ts`) adds `confirmMeetingRangeInput`: Moscow `8` / `10:30` on `2026-03-08` → `CLOSED` and 10:00–12:30; `abc` / `11` → `INVALID_START_TEXT`; `9` / `xyz` → `INVALID_END_TEXT`; Almaty `9:10` / `11` → `INVALID_RANGE` with the range unchanged; English `10 am` / `12:30 pm` → 10:00–12:30; an unknown location id → `CLOSED` with nothing changed; the repository records no save. Implement in `src/controller/useMeetingRange.ts`, export `MeetingRangeInputOutcome` from `src/controller/index.ts`. Run that test file: passes.
 
 ## 4. Views (FR1–FR4, FR6–FR8, NFR-A1, NFR-A2, NFR-R1, UX1–UX3; D1, D4–D6)
 

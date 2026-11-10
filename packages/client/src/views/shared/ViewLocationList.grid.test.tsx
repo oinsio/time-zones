@@ -168,6 +168,8 @@ describe("ViewLocationList with grid rows", () => {
             renderHourStrip: () => null,
             frame: null,
             meetingRangeOf: (row) => ({
+              startTimeLabel: "start",
+              endTimeLabel: "end",
               spanLabel: `span of ${row.cityLabel}`,
             }),
             panelRef: () => undefined,

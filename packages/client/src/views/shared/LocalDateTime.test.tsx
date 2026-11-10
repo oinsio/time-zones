@@ -140,7 +140,12 @@ describe("LocalDateTime row variants", () => {
           wallTimeInputLabel={NAME}
           onConfirmWallTime={() => WallTimeInputOutcome.CLOSED}
           rowVariant={LocationRowVariant.GRID_ROW}
-          meetingRange={{ spanLabel: "23:00–01:00", dayShiftLabel }}
+          meetingRange={{
+            startTimeLabel: "23:00",
+            endTimeLabel: "01:00",
+            spanLabel: "23:00–01:00",
+            dayShiftLabel,
+          }}
         />,
       );
 

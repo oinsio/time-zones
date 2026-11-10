@@ -10,15 +10,19 @@ import {
   getReferenceDay,
   getReferenceZone,
   LocationCommandType,
+  LocationErrorCode,
   type MeetingHandle,
   type MeetingRange,
   type MeetingSpan,
   type TrackMove,
+  WallTimeTargetKind,
 } from "@/model";
 import {
+  getDayPeriodMarkers,
   type PresentedLocationMeetingRange,
   type PresentedMeetingBar,
   type PresentedMeetingHandles,
+  parseWallTimeInput,
   presentLocationMeetingRange,
   presentMeetingBar,
   presentMeetingHandles,
@@ -29,6 +33,18 @@ import { useHourFormat } from "./useHourFormat";
 
 const MISSING_PROVIDER_MESSAGE =
   "useMeetingRange must be used inside a LocationsProvider";
+
+/** What the view does with the meeting range input after a confirmation. */
+export enum MeetingRangeInputOutcome {
+  /** The start text is not a time: the input stays open with its error. */
+  INVALID_START_TEXT = "INVALID_START_TEXT",
+  /** The end text is not a time: the input stays open with its error. */
+  INVALID_END_TEXT = "INVALID_END_TEXT",
+  /** The times break the meeting range invariants: the input stays open. */
+  INVALID_RANGE = "INVALID_RANGE",
+  /** The store answered, with a change or another refusal: the input closes. */
+  CLOSED = "CLOSED",
+}
 
 export type PresentedMeeting = {
   range: MeetingRange;
@@ -45,6 +61,7 @@ export type PresentedMeeting = {
  * or the framed hour, move or drag a handle, clear. Actions dispatch straight
  * to the store, never through the write scheduler, so the range is never stored.
  * Implements FR2, FR5, FR6, FR10, FR12, FR13 of add-grid-meeting-range-and-share (D5).
+ * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D3): `confirmMeetingRangeInput`.
  */
 export function useMeetingRange() {
   const context = useContext(LocationsContext);
@@ -134,11 +151,36 @@ export function useMeetingRange() {
         }
         setRange(next);
       },
+      confirmMeetingRangeInput: (
+        locationId: string,
+        startText: string,
+        endText: string,
+        date: string,
+      ): MeetingRangeInputOutcome => {
+        const markers = getDayPeriodMarkers(language);
+        const start = parseWallTimeInput(startText, markers);
+        if (start === undefined) {
+          return MeetingRangeInputOutcome.INVALID_START_TEXT;
+        }
+        const end = parseWallTimeInput(endText, markers);
+        if (end === undefined) return MeetingRangeInputOutcome.INVALID_END_TEXT;
+        const outcome = store.dispatch({
+          type: LocationCommandType.SET_MEETING_RANGE_WALL_TIMES,
+          target: { kind: WallTimeTargetKind.LOCATION, locationId },
+          date,
+          start,
+          end,
+        });
+        return !outcome.ok &&
+          outcome.error === LocationErrorCode.INVALID_MEETING_RANGE
+          ? MeetingRangeInputOutcome.INVALID_RANGE
+          : MeetingRangeInputOutcome.CLOSED;
+      },
       clearMeetingRange: () => {
         store.dispatch({ type: LocationCommandType.CLEAR_MEETING_RANGE });
       },
     };
-  }, [store, clock, setRange]);
+  }, [store, clock, setRange, language]);
 
   return { meeting, ...actions };
 }
