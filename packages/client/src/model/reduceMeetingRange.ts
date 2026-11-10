@@ -1,4 +1,4 @@
-import { Temporal } from "@/lib/temporal";
+import { parseCommandInstant } from "./commandInstant";
 import { getReferenceDay } from "./dayTrack";
 import {
   type LocationCommand,
@@ -11,22 +11,10 @@ import { isValidMeetingRange } from "./meetingRange";
 import { getReferenceZone, ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
-const UTC_DESIGNATOR = "Z";
-
 type SetMeetingRangeCommand = Extract<
   LocationCommand,
   { type: LocationCommandType.SET_MEETING_RANGE }
 >;
-
-function parseInstant(text: string): Temporal.Instant | undefined {
-  if (!text.endsWith(UTC_DESIGNATOR)) return undefined;
-  try {
-    return Temporal.Instant.from(text);
-  } catch (e) {
-    if (e instanceof RangeError) return undefined;
-    throw e;
-  }
-}
 
 /** The state without a meeting range; the same object when none is set. */
 export function withoutMeetingRange(state: WorldClockState): WorldClockState {
@@ -45,8 +33,8 @@ export function reduceSetMeetingRange(
   state: WorldClockState,
   command: SetMeetingRangeCommand,
 ): LocationsReduceResult {
-  const start = parseInstant(command.start);
-  const end = parseInstant(command.end);
+  const start = parseCommandInstant(command.start);
+  const end = parseCommandInstant(command.end);
   if (start === undefined || end === undefined) {
     return { ok: false, error: LocationErrorCode.INVALID_MEETING_RANGE };
   }

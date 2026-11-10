@@ -1,4 +1,4 @@
-import { Temporal } from "@/lib/temporal";
+import { parseCommandInstant } from "./commandInstant";
 import {
   type LocationCommand,
   type LocationCommandType,
@@ -9,8 +9,6 @@ import {
 import { withoutMeetingRange } from "./reduceMeetingRange";
 import { getReferenceZone, ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
-
-const UTC_DESIGNATOR = "Z";
 
 type SelectInstantCommand = Extract<
   LocationCommand,
@@ -28,17 +26,9 @@ export function reduceSelectInstant(
   state: WorldClockState,
   command: SelectInstantCommand,
 ): LocationsReduceResult {
-  let instant: Temporal.Instant;
-  try {
-    if (!command.instant.endsWith(UTC_DESIGNATOR)) {
-      throw new RangeError(command.instant);
-    }
-    instant = Temporal.Instant.from(command.instant);
-  } catch (e) {
-    if (e instanceof RangeError) {
-      return { ok: false, error: LocationErrorCode.INVALID_INSTANT };
-    }
-    throw e;
+  const instant = parseCommandInstant(command.instant);
+  if (instant === undefined) {
+    return { ok: false, error: LocationErrorCode.INVALID_INSTANT };
   }
   const { reference } = state;
   if (
