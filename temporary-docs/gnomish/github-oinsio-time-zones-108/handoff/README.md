@@ -23,3 +23,11 @@
 **Verify:** `git apply --check temporary-docs/gnomish/github-oinsio-time-zones-108/handoff/H3-adr-0012-capability-scoped-contract.patch`, then once applied `grep -n "Refines \[ADR-0005\]" docs/adr/0012-capability-scoped-view-contract-scenarios.md` and `grep -n "Refined by \[ADR-0012\]" docs/adr/0005-view-registry.md`.
 **Why manual:** the factory may not write `docs/adr/`.
 **Automated part:** the `--list` counts of task 8.4 (Grid lists "Set, resize, share and clear", Cards does not) and `main-page` → "Meeting scenarios run only for views that show the meeting range".
+
+## H4: Record the colour-contrast exception for dimmed hour cells
+
+**Serves:** NFR-A1, M8
+**Files:** `openspec/changes/add-grid-meeting-range-and-share/specs/grid-view/spec.md`, `openspec/changes/add-grid-meeting-range-and-share/proposal.md`
+**Verify:** `git apply --check temporary-docs/gnomish/github-oinsio-time-zones-108/handoff/H4-dimmed-cell-contrast-exception.patch`, then once applied `grep -n "color-contrast" openspec/changes/add-grid-meeting-range-and-share/specs/grid-view/spec.md openspec/changes/add-grid-meeting-range-and-share/proposal.md`.
+**Why manual:** the factory may not edit `openspec/`.
+**Automated part:** the E2E step "the meeting state has no accessibility violations" scans the page without dimmed cells under all rules and the dimmed cells under every rule except `color-contrast`.

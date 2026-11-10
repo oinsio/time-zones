@@ -15,6 +15,7 @@ const { Given, When, Then } = createBdd(test);
 const SHARED_TEXT_KEY = "sharedMeetingData";
 const MAX_TAB_STOPS = 80;
 const NOTICE_SELECTOR = "[role='status']";
+const COLOR_CONTRAST_RULE = "color-contrast";
 const DIMMED_CELL_SELECTOR = "[data-hour-cell].opacity-40";
 
 /** Replaces `navigator.share` and `navigator.clipboard` before the app starts. */
@@ -168,20 +169,23 @@ Then(
 );
 
 // Verifies NFR-A1 of add-grid-meeting-range-and-share: a short report of the violations, not their whole nodes.
-// The digits of dimmed cells are left out: the spec fixes their opacity at 0.4 (FR7, UX1), which no digit colour can lift to 4.5:1.
+// Dimmed cells have a recorded colour-contrast exception: the spec fixes their opacity at 0.4 (FR7, UX1), which no digit colour can lift to 4.5:1.
+// Only that one rule is off for them; every other rule runs on them, and every rule runs on the rest of the page.
 Then(
   "the meeting state has no accessibility violations",
   async ({ locationsWorld }) => {
-    const accessibilityScan = await new AxeBuilder({
-      page: locationsWorld.page,
-    })
-      .exclude(DIMMED_CELL_SELECTOR)
-      .analyze();
-    expect(
-      accessibilityScan.violations.map((violation) => ({
+    const summarize = (scan: Awaited<ReturnType<AxeBuilder["analyze"]>>) =>
+      scan.violations.map((violation) => ({
         id: violation.id,
         targets: violation.nodes.slice(0, 3).map((node) => node.target),
-      })),
-    ).toEqual([]);
+      }));
+    const pageScan = await new AxeBuilder({ page: locationsWorld.page })
+      .exclude(DIMMED_CELL_SELECTOR)
+      .analyze();
+    const dimmedCellScan = await new AxeBuilder({ page: locationsWorld.page })
+      .include(DIMMED_CELL_SELECTOR)
+      .disableRules(COLOR_CONTRAST_RULE)
+      .analyze();
+    expect([...summarize(pageScan), ...summarize(dimmedCellScan)]).toEqual([]);
   },
 );
