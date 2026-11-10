@@ -1,5 +1,31 @@
 ## MODIFIED Requirements
 
+### Requirement: Main page regions
+The main page SHALL consist of a header with the app title as the only page heading (while the meeting bar is shown — `grid-view` → Meeting bar — its title is the only page heading in place of the app title), the Add location button and the settings button (see "Header actions"), a content region hosting the active view, a bottom bar holding the date bar (see the `date-selection` capability) that stays at the bottom of the viewport and is the page's footer landmark, and a polite notices region, out of the document flow, that keeps the offline-ready and update notices and stacks the storage warning with them. The notices region MUST sit above the bottom bar and MUST NOT cover it. <!-- implements FR1, UX3 of add-main-page-scaffold; FR8 of select-date-with-calendar-and-now; FR1, FR2 of add-settings-page-and-device-time-location; FR7 of polish-settings-and-remove-offline-update-notice; FR13 of add-grid-meeting-range-and-share -->
+
+#### Scenario: User opens the app
+- **WHEN** the user opens the app
+- **THEN** the header shows the app title as the only heading, the Add location button and the settings button
+- **AND** the content region shows the active view
+- **AND** the bottom bar shows the date bar
+
+#### Scenario: Notices stay available
+- **WHEN** a new version becomes available while a view is shown
+- **THEN** the update notice is announced politely in the notices region
+- **AND** the bottom bar still shows the date bar
+
+#### Scenario: Header keeps its position
+- **WHEN** the page shows the storage warning
+- **THEN** the header keeps its position
+
+#### Scenario: The meeting bar title is the only heading
+- **GIVEN** the interface language is Russian and the Grid view shows Almaty and Moscow
+- **WHEN** the user sets a meeting range from 09:00 to 11:00
+- **THEN** the page has exactly one heading, «Встреча · 2 ч»
+- **WHEN** the user clears the meeting range
+- **THEN** the page has exactly one heading, «Часовые пояса»
+
+
 ### Requirement: Header actions
 The header SHALL hold the Add location button, which opens the location search, and the settings button, which opens the settings page (see the `settings` capability). On every width the header MUST show, from left to right, the Add location button, the app title and the settings button. The Add location button MUST be an icon-only "+" in the accent colour on every width, with no visible text, and MUST be the leftmost control of the header. The centre of the app title MUST be the centre of the page width, within 1 px, on every width. The settings button MUST be the rightmost control of the header on every width. It shows the settings (sliders) icon in the accent colour and has the accessible name "Settings" («Настройки»). The Add location button's accessible name MUST be "Add location" («Добавить место») on every width. While the stored location list is unreadable, the Add location button MUST NOT be shown; the settings button MUST stay at the right and the title MUST stay centred. The slash shortcut MUST keep opening the search, and the content region MUST NOT show a second Add location button. Both buttons MUST be at least 44 × 44 px, and Tab MUST reach them in their visual order. The page MUST NOT scroll horizontally at 320 px and 2560 px. axe-core MUST report no violations with the header in the light and the dark theme at 375 px and 1024 px. The approved screenshots of the main page states MUST show this header. While the meeting bar is shown (`grid-view` → Meeting bar: a meeting range is set and the Grid view shows at least one row), it MUST take the place of the title and both buttons: the Add location button, the settings button and the title are not shown, and the slash shortcut opens nothing; once the meeting range is cleared or the view without the meeting bar is shown, this header comes back unchanged. <!-- implements FR1, FR2, NFR-A1, NFR-A2, NFR-A3, NFR-R1, NFR-R3, UX1 of add-settings-page-and-device-time-location; FR3, FR4, NFR-A1, NFR-R2, UX2 of fix-location-card-and-header-layout; FR13 of add-grid-meeting-range-and-share -->
 

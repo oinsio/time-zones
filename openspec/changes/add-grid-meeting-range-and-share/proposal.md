@@ -21,6 +21,7 @@ Audience: people who plan meetings across zones on a desktop, tablet or phone, i
 - ADDED to `grid-view`: tap and Enter set a one-hour meeting range, a drag across cells sets a longer one; the **meeting frame** with the dimmed cells outside it; every row's local span and day shift mark; the meeting handles (pointer, touch, keyboard, auto-scroll on a phone in portrait); the **meeting bar** (duration, Share meeting, Clear meeting); the copied and failure notices; work bounds; screenshots of the meeting state.
 - MODIFIED `grid-view` → **Hour frame**: no hour frame while a meeting range is set.
 - REMOVED `grid-view` → **Hour cells take no pointer selection yet**: a tap now sets a meeting range.
+- MODIFIED `main-page` → **Main page regions** and `app-shell` → **Shell shows the app title in the active language**: while the meeting bar is shown, its title is the only page heading in place of the app title; the document title stays the app title.
 - MODIFIED `main-page` → **Header actions**: while the meeting bar is shown it takes the header's place; Add location and Settings come back after Clear.
 - MODIFIED `main-page` → **View contract runs every scenario for every registered view**: a contract scenario tagged `@meeting-range` is a capability scenario, run for every view whose registry entry shows the meeting range and for no other view; it is not a pending exclusion. This refines ADR-0005's "run for every registered view"; the ADR note is handoff H3 (the factory may not write `docs/adr/`).
 - Glossary: **Meeting range**, **Meeting frame**, **Meeting handle**, **Meeting bar**, **Share meeting** (`time-selection.md`) and **Day shift** (`time.md`) lose *(planned)* and get *Code:* owners; **Hour cell** says a tap sets a one-hour meeting range; new **Meeting share text** (`time-selection.md`), **Text sharing** port (`architecture.md`), **Meeting copied notice** and **Share failed notice** (`app-shell.md`).
@@ -35,7 +36,8 @@ Audience: people who plan meetings across zones on a desktop, tablet or phone, i
 ### Modified Capabilities
 
 - `grid-view`: pointer, touch and keyboard selection of a meeting range on hour cells, the meeting frame and dimming, local spans and the day shift mark in rows, meeting handles, the meeting bar, share notices, work bounds and screenshots; "Hour frame" changes; "Hour cells take no pointer selection yet" is removed.
-- `main-page`: "Header actions" — the meeting bar replaces the header content while it is shown; "View contract runs every scenario for every registered view" — `@meeting-range` contract scenarios run only for views that show the meeting range.
+- `app-shell`: "Shell shows the app title in the active language" — the meeting bar title is the only page heading while the bar is shown.
+- `main-page`: "Main page regions" — the same heading exception; "Header actions" — the meeting bar replaces the header content while it is shown; "View contract runs every scenario for every registered view" — `@meeting-range` contract scenarios run only for views that show the meeting range.
 
 ## Goals
 
