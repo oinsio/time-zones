@@ -80,3 +80,22 @@ The header SHALL hold the Add location button, which opens the location search, 
 - **GIVEN** a meeting range was set in the Grid view
 - **WHEN** the view mode becomes Cards (chosen in another tab)
 - **THEN** the header shows the "+" button, the title «Часовые пояса» and the settings button
+
+### Requirement: View contract runs every scenario for every registered view
+The view-contract scenarios SHALL run once for every view of the registry, each run showing its view through the stored view mode, independent of the viewport width. A contract scenario that a view cannot pass yet because a part of its design is not built MAY be excluded for that view only, by a marker on the scenario that names the view and the change that brings the scenario back; the run of every other view MUST still include it. No scenario is excluded for any registered view by a pending marker: Grid runs every `@view-contract` scenario, "Select a time" included. A contract scenario tagged `@meeting-range` belongs to the meeting range capability (ADR-0011) and is not a pending exclusion: it MUST run for every view whose registry entry shows the meeting range (`showsMeetingRange`) and for no other view, and a view without that flag MUST still run every other contract scenario. <!-- implements FR8, NFR-A2 of add-view-mode-setting-and-grid-skeleton; FR13 of add-grid-hour-cells-and-hour-frame; FR17 of add-grid-meeting-range-and-share -->
+
+#### Scenario: One contract run per registered view
+- **WHEN** the end-to-end projects are listed
+- **THEN** there is one view-contract project for Cards and one for Grid
+- **AND** the Grid project opens the app with the view mode Grid and fails unless Grid is shown
+
+#### Scenario: Grid runs every contract scenario
+- **WHEN** the view contract runs for Grid
+- **THEN** every `@view-contract` scenario runs, "Select a time" included
+- **AND** no `@view-contract` scenario carries a pending exclusion marker
+
+#### Scenario: Meeting scenarios run only for views that show the meeting range
+- **GIVEN** the Grid registry entry shows the meeting range and the Cards entry does not
+- **WHEN** the end-to-end projects are listed
+- **THEN** the Grid view-contract project lists the `@meeting-range` scenario "Set, resize, share and clear"
+- **AND** the Cards view-contract project does not list it and lists every other `@view-contract` scenario
