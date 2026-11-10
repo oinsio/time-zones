@@ -86,7 +86,7 @@ describe("LocationRow", () => {
 
     it("should show the time bolder than the semibold city", () => {
       renderRow(withTime);
-      expect(screen.getByText("12:30")).toHaveClass("font-bold");
+      expect(screen.getByText("12:30").closest("button")).toHaveClass("font-bold");
       expect(screen.getByText("Kolkata")).toHaveClass("font-semibold");
     });
 

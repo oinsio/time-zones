@@ -1,6 +1,4 @@
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { forwardRef, type ReactNode, useId, useRef } from "react";
+import { forwardRef, type ReactNode, useId } from "react";
 import {
   type TrackMove,
   type WallTimeInputOutcome,
@@ -19,9 +17,8 @@ import {
 } from "./locationRowVariant";
 import { OptionalBox } from "./OptionalBox";
 import { RowNotes } from "./RowNotes";
-import { getReorderTransition } from "./reorderTransition";
-import { useDropSettleAnimation } from "./useDropSettleAnimation";
 import { useLocationMenuItems } from "./useLocationMenuItems";
+import { useSortableLocationRow } from "./useSortableLocationRow";
 import { ZoneRowContent } from "./ZoneRowContent";
 
 type LocationRowProps = {
@@ -95,29 +92,14 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
     },
     menuButtonRef,
   ) {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      setActivatorNodeRef,
-      transform,
-      transition,
-      isDragging,
-      isSorting,
-    } = useSortable({
-      id: row.id,
-      transition: getReorderTransition(prefersReducedMotion),
-    });
+    const sortable = useSortableLocationRow(
+      row.id,
+      prefersReducedMotion,
+      false,
+    );
     const cityId = useId();
     const markId = useId();
     const differenceId = useId();
-    const cardRef = useRef<HTMLLIElement | null>(null);
-    const dropSettle = useDropSettleAnimation(
-      cardRef,
-      isDragging,
-      isSorting,
-      prefersReducedMotion,
-    );
     const hasDifference = row.offsetDifferenceLabel !== "";
     const menuItems = useLocationMenuItems(row, onSetHome, onRemove);
     const labelIds = [
@@ -126,35 +108,26 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       hasDifference && differenceId,
     ];
     const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
-    const draggingClassName = isDragging
-      ? " relative z-dragged-row shadow-lg"
-      : "";
     return (
       <li
-        ref={(element) => {
-          cardRef.current = element;
-          setNodeRef(element);
-        }}
-        style={{
-          transform: dropSettle.transform ?? CSS.Transform.toString(transform),
-          transition: dropSettle.transition ?? transition,
-        }}
-        onTransitionEnd={dropSettle.onTransitionEnd}
+        ref={sortable.setItemRef}
+        style={sortable.style}
+        onTransitionEnd={sortable.onTransitionEnd}
         aria-label={row.accessibleName}
         aria-labelledby={
           row.accessibleName === undefined
             ? labelIds.filter(Boolean).join(" ")
             : undefined
         }
-        className={`bg-surface py-3 ${variantClassNames.row}${draggingClassName}`}
+        className={`bg-surface py-3 ${variantClassNames.row}${sortable.draggingClassName}`}
       >
         <OptionalBox className={variantClassNames.headerBox}>
           {isReorderable && (
             <DragHandle
-              ref={setActivatorNodeRef}
+              ref={sortable.setActivatorNodeRef}
               city={row.cityLabel}
-              attributes={attributes}
-              listeners={listeners}
+              attributes={sortable.attributes}
+              listeners={sortable.listeners}
             />
           )}
           <ZoneRowContent
