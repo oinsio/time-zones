@@ -128,30 +128,30 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then("the hour frame is on column {int}", expectFrameOn);
   });
 
-  // @add-grid-hour-cells-and-hour-frame @FR11
+  // @add-grid-meeting-range-and-share @FR5
   f.Scenario(
-    "A tap on a cell changes nothing",
+    "A tap on a cell sets a one-hour meeting range",
     ({ Given, When, Then, And }) => {
-      let rowsBeforeTap: unknown;
       Given("the Grid view at {string}, live", (_ctx, instant: string) =>
         openGridAt(instant),
       );
       When("the user taps column 3 of Moscow", () => {
-        rowsBeforeTap = world.timesOfRows();
-        fireEvent.pointerDown(cellBoxOf("Moscow", 3));
         fireEvent.click(cellBoxOf("Moscow", 3));
       });
-      Then("the store receives no command", () => {
-        expect(world.timesOfRows()).toEqual(rowsBeforeTap);
+      Then("the meeting frame encloses column 3", () => {
         expect(
-          screen.queryByRole("button", { name: i18n.t("date.now") }),
-        ).toBeDisabled();
+          document
+            .querySelector("[data-meeting-frame-columns]")
+            ?.getAttribute("data-meeting-frame-columns"),
+        ).toBe("3-3");
       });
       And(
-        "Almaty still shows {string} and the frame is still on column 12",
-        (_ctx, time: string) => {
-          expect(world.timeOf("Almaty")).toBe(time);
-          expect(frameColumn()).toBe(12);
+        "no hour frame is shown and the title is {string}",
+        (_ctx, title: string) => {
+          expect(document.querySelector("[data-hour-frame-index]")).toBeNull();
+          expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+            title,
+          );
         },
       );
     },
