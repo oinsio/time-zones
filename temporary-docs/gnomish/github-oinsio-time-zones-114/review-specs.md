@@ -144,7 +144,8 @@
 - Impact: low. A reviewer of the pull request may expect a change to the hour-cell selection that never comes, and miss the new view helper.
 - Fix: in Impact, drop `useHourCellSelection.ts`; add `GridView.tsx` under `src/views/grid/`, `typedTimeFieldText.ts` (new) under `src/views/shared/`, and `src/constants/timeSelection.ts`.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md Impact drops `useHourCellSelection.ts` (D8 leaves it unchanged) and adds `GridView.tsx` under `src/views/grid/`, new `typedTimeFieldText.ts` under `src/views/shared/`, and `src/constants/timeSelection.ts` (`WALL_TIME_SEPARATOR`); `dayTrack.ts` was added there under R3.
 
 ### R7 — SUGGESTION — The class diagram of `domain-model.md` keeps "on the track step"
 - Location: `openspec/changes/refine-meeting-range-entry-and-handles/tasks.md:32` (task 1.2)

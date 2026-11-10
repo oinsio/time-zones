@@ -194,15 +194,16 @@ None. Where the separator is computed, how the visible rows are measured, and ho
   - `index.ts`.
 - `src/views/shared/`:
   - `WallTimeInput.tsx`;
-  - `MeetingRangeInput.tsx`.
+  - `MeetingRangeInput.tsx`;
+  - new `typedTimeFieldText.ts`.
 - `src/views/grid/`:
+  - `GridView.tsx` (candidate rows and the drag state);
   - `MeetingHandle.tsx`;
   - `meetingHandleRow.ts`;
   - `useMeetingHandleDrag.ts`;
-  - `useHourCellSelection.ts`;
   - new `useVisibleStripRows.ts`.
 - `src/app/MainPage.tsx` (a `data-date-bar` attribute on the element that holds the date bar).
-- `src/constants/meeting.ts`, `src/constants/date.ts` (`DATE_BAR_SELECTOR`).
+- `src/constants/meeting.ts`, `src/constants/date.ts` (`DATE_BAR_SELECTOR`), `src/constants/timeSelection.ts` (`WALL_TIME_SEPARATOR`).
 - `src/locales/ru.json` and `en.json`.
 - Tests: the features above, plus updates of existing tests that assert the 15-minute refusal.
 - Docs: `docs/glossary/time-selection.md`, `docs/glossary/date-selection.md`, `docs/architecture/domain-model.md`, `views.md`. ADR-0013 comes by handoff H1.
