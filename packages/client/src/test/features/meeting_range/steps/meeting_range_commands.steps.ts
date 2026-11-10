@@ -1,4 +1,5 @@
 // Verifies FR1, FR2, FR3, FR4 of add-grid-meeting-range-and-share.
+// Verifies FR1 of refine-meeting-range-entry-and-handles.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, cleanup } from "@testing-library/react/pure";
@@ -100,7 +101,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
-  // @add-grid-meeting-range-and-share @FR2
+  // @add-grid-meeting-range-and-share @FR2 @refine-meeting-range-entry-and-handles @FR1
   f.ScenarioOutline(
     "Invalid ranges are refused",
     ({ Given, When, Then, And }, variables) => {

@@ -1,9 +1,14 @@
 // Verifies FR5 of fix-grid-meeting-range-lock-and-layering.
+// Verifies FR1, FR2 of refine-meeting-range-entry-and-handles.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, cleanup } from "@testing-library/react/pure";
 import { expect } from "vitest";
-import { LocationCommandType, WallTimeTargetKind } from "@/model";
+import {
+  LocationCommandType,
+  LocationErrorCode,
+  WallTimeTargetKind,
+} from "@/model";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { createStoredListApp } from "./meetingRangeStoredApp";
@@ -34,7 +39,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   };
 
-  // @fix-grid-meeting-range-lock-and-layering @FR5
+  // @fix-grid-meeting-range-lock-and-layering @FR5 @refine-meeting-range-entry-and-handles @FR1
   f.ScenarioOutline(
     "Wall-clock times of any location set the range",
     ({ Given, When, Then, And }, variables) => {
@@ -61,7 +66,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @fix-grid-meeting-range-lock-and-layering @FR5
+  // @fix-grid-meeting-range-lock-and-layering @FR5 @refine-meeting-range-entry-and-handles @FR2
   f.ScenarioOutline(
     "Times that break the invariants are refused",
     ({ Given, When, Then, And }, variables) => {
@@ -89,8 +94,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @fix-grid-meeting-range-lock-and-layering @FR5
-  f.Scenario("The whole reference day", ({ Given, When, Then }) => {
+  // @fix-grid-meeting-range-lock-and-layering @FR5 @refine-meeting-range-entry-and-handles @FR2
+  f.Scenario("The whole reference day", ({ Given, When, Then, And }) => {
     Given(
       'the reference zone is "Asia/Almaty" and the current time is "2026-03-08T07:30:00Z"',
       () => world.open(),
@@ -100,16 +105,15 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       () => setFromWallTimes("Almaty", "2026-03-08", "00:00", "00:00"),
     );
     Then(
-      'the meeting range is the whole reference day, from "2026-03-07T19:00:00Z" to "2026-03-08T19:00:00Z"',
+      'the command fails with "MEETING_START_EQUALS_END" and no meeting range is set',
       () => {
-        expect(world.state().meeting?.start.toString()).toBe(
-          "2026-03-07T19:00:00Z",
+        expect(world.lastError()).toBe(
+          LocationErrorCode.MEETING_START_EQUALS_END,
         );
-        expect(world.state().meeting?.end.toString()).toBe(
-          "2026-03-08T19:00:00Z",
-        );
+        expect(world.state().meeting).toBeUndefined();
       },
     );
+    And("the state is unchanged", () => world.expectStateUnchanged());
   });
 
   // @fix-grid-meeting-range-lock-and-layering @FR5

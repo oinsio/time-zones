@@ -1,3 +1,4 @@
+// Verifies FR1, FR4, FR5 of refine-meeting-range-entry-and-handles.
 // Verifies FR1, FR3, FR5, FR8, FR10, FR12 of add-grid-meeting-range-and-share.
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
@@ -20,7 +21,10 @@ const day = buildReferenceDay(
   Temporal.Instant.from("2026-03-08T07:30:00Z"),
   ALMATY,
 );
-const at = (time: string) => Temporal.Instant.from(`2026-03-08T${time}:00Z`);
+const at = (time: string) =>
+  Temporal.Instant.from(
+    `2026-03-08T${time.length === "HH:MM".length ? `${time}:00` : time}Z`,
+  );
 const SAMPLE: MeetingRange = { start: at("04:00"), end: at("06:00") };
 const show = (range: MeetingRange) =>
   `${range.start.toString()}/${range.end.toString()}`;
@@ -30,6 +34,13 @@ describe("isValidMeetingRange", () => {
     expect(isValidMeetingRange(day, SAMPLE.start, SAMPLE.end)).toBe(true);
   });
 
+  it.each([
+    ["five minutes", "04:05", "04:10"],
+    ["one minute", "04:00", "04:01"],
+  ])("should accept a range of %s", (_name, start, end) => {
+    expect(isValidMeetingRange(day, at(start), at(end))).toBe(true);
+  });
+
   it("should accept the whole reference day", () => {
     expect(isValidMeetingRange(day, day.start, day.end)).toBe(true);
   });
@@ -37,8 +48,8 @@ describe("isValidMeetingRange", () => {
   it.each([
     ["end before start", "06:00", "04:00"],
     ["equal ends", "04:00", "04:00"],
-    ["start off the step", "04:10", "06:00"],
-    ["end off the step", "04:00", "06:10"],
+    ["start off a whole minute", "04:10:30", "06:00"],
+    ["end off a whole minute", "04:00", "06:10:30"],
     ["end after the day's end", "17:00", "19:15"],
     ["start before the day", "18:45", "20:00"],
   ])("should refuse %s", (_name, start, end) => {
@@ -93,8 +104,92 @@ describe("getMeetingRangeAfterHandleMove", () => {
   });
 });
 
+describe("getMeetingRangeAfterHandleMove from an end off the track step", () => {
+  it.each([
+    [
+      "09:05",
+      "11:00",
+      MeetingHandle.START,
+      TrackMove.NEXT_STEP,
+      "09:15",
+      "11:00",
+    ],
+    [
+      "09:05",
+      "11:00",
+      MeetingHandle.START,
+      TrackMove.PREVIOUS_STEP,
+      "09:00",
+      "11:00",
+    ],
+    [
+      "09:05",
+      "11:00",
+      MeetingHandle.START,
+      TrackMove.HOUR_BACK,
+      "08:05",
+      "11:00",
+    ],
+    [
+      "09:00",
+      "10:50",
+      MeetingHandle.END,
+      TrackMove.PREVIOUS_STEP,
+      "09:00",
+      "10:45",
+    ],
+    [
+      "09:00",
+      "09:05",
+      MeetingHandle.END,
+      TrackMove.DAY_START,
+      "09:00",
+      "09:05",
+    ],
+    [
+      "09:00",
+      "09:05",
+      MeetingHandle.START,
+      TrackMove.NEXT_STEP,
+      "09:00",
+      "09:05",
+    ],
+    [
+      "09:00",
+      "09:05",
+      MeetingHandle.END,
+      TrackMove.NEXT_STEP,
+      "09:00",
+      "09:15",
+    ],
+    [
+      "09:05",
+      "09:28",
+      MeetingHandle.START,
+      TrackMove.NEXT_STEP,
+      "09:13",
+      "09:28",
+    ],
+  ])(
+    "should move %s-%s %s by %s to %s-%s",
+    (rangeStart, rangeEnd, handle, move, start, end) => {
+      const almatyAt = (time: string) => at(time).subtract({ hours: 5 });
+      const range = getMeetingRangeAfterHandleMove(
+        day,
+        { start: almatyAt(rangeStart), end: almatyAt(rangeEnd) },
+        handle,
+        move,
+      );
+      expect(show(range)).toBe(
+        show({ start: almatyAt(start), end: almatyAt(end) }),
+      );
+    },
+  );
+});
+
 describe("getMeetingRangeAtHandleMinutes", () => {
   it.each([
+    [MeetingHandle.START, 551, "04:15", "06:00"],
     [MeetingHandle.END, 460, "04:00", "04:15"],
     [MeetingHandle.START, 780, "05:45", "06:00"],
     [MeetingHandle.START, 547, "04:00", "06:00"],
@@ -118,6 +213,22 @@ describe("getMeetingHandleLimits", () => {
       minMinutes: 555,
       maxMinutes: 1440,
     });
+  });
+});
+
+describe("getMeetingHandleLimits of a range shorter than one step", () => {
+  const SHORT: MeetingRange = { start: at("04:00"), end: at("04:05") };
+
+  it("should keep the start handle limit at the start", () => {
+    expect(
+      getMeetingHandleLimits(day, SHORT, MeetingHandle.START).maxMinutes,
+    ).toBe(540);
+  });
+
+  it("should keep the end handle limit at the end", () => {
+    expect(
+      getMeetingHandleLimits(day, SHORT, MeetingHandle.END).minMinutes,
+    ).toBe(545);
   });
 });
 
@@ -149,6 +260,21 @@ describe("moveMeetingRangeToDay", () => {
       nextDay,
     );
     expect(range.end.since(range.start).total({ unit: "hour" })).toBe(2);
+  });
+
+  it("should keep an off-step start on the next day", () => {
+    const nextDay = buildReferenceDay(at("04:00").add({ hours: 24 }), ALMATY);
+    const range = moveMeetingRangeToDay(
+      { start: at("04:05"), end: at("04:28") },
+      at("04:05").add({ hours: 24 }),
+      nextDay,
+    );
+    expect(show(range)).toBe(
+      show({
+        start: at("04:05").add({ hours: 24 }),
+        end: at("04:28").add({ hours: 24 }),
+      }),
+    );
   });
 
   it("should clamp the end to a 23-hour day", () => {

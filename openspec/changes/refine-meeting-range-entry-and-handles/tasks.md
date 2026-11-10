@@ -17,7 +17,7 @@ Files stay under 200 lines where possible, 300 at most.
 
 ## 1. Glossary and architecture docs (FR1, FR2, FR4, FR6, FR7)
 
-- [ ] 1.1 Glossary, in `docs/glossary/time-selection.md`:
+- [x] 1.1 Glossary, in `docs/glossary/time-selection.md`:
   - **Meeting range**: "inside the reference day, on the track step" becomes "inside the reference day, at any whole minute; its meeting handles move its ends on the track step"; *Code:* gains `MEETING_START_EQUALS_END`, `MEETING_END_BEFORE_START`.
   - **Meeting handle**: "moves the start or the end by the track step" becomes "moves the start or the end onto the track step; stands on the grid rows visible on screen"; *Code:* gains `getMeetingHandleRow`, `useVisibleStripRows`.
   - **Wall-time input**: gains "While digits are typed, it inserts the `:` separator after the hour"; *Code:* gains `formatTypedWallTimeText`.
@@ -30,7 +30,7 @@ Files stay under 200 lines where possible, 300 at most.
   - `grep -n "at any whole minute" docs/glossary/time-selection.md`, `grep -n "formatTypedWallTimeText" docs/glossary/time-selection.md` and `grep -n "useVisibleStripRows" docs/glossary/time-selection.md` and `grep -n "getMinutesAfterTrackStep" docs/glossary/time-selection.md` each print a line;
   - `grep -c "on the track step, chosen" docs/glossary/time-selection.md` prints 0;
   - `wc -l docs/glossary/time-selection.md` stays under 200.
-- [ ] 1.2 Architecture docs:
+- [x] 1.2 Architecture docs:
   - `docs/architecture/domain-model.md`, invariant 5: "both ends lie on the track step inside the reference day" becomes "both ends lie on whole minutes inside the reference day". The errors cell of `SET_MEETING_RANGE_WALL_TIMES` gains `MEETING_START_EQUALS_END`, `MEETING_END_BEFORE_START`. In the `MeetingRange` class of the class diagram, `start "on the track step of the reference day"` becomes `start "a whole minute of the reference day"`.
   - `docs/architecture/views.md` → Grid → **Meeting handles**: "move the start and the end by the 15-minute track step" becomes "move the start and the end onto the 15-minute track step, while a typed meeting may start and end at any minute (ADR-0013)". Add "they stand on the rows visible on screen and have a 44 × 44 px hit area".
   - `docs/architecture/overview.md`: add an ADR table row for ADR-0013.
@@ -43,7 +43,7 @@ Files stay under 200 lines where possible, 300 at most.
 
 ## 2. Model (FR1, FR2, FR4, FR5, M1, M2, M6; D1, D2)
 
-- [ ] 2.1 RED, invariants and handle moves. In `src/model/meetingRange.test.ts`:
+- [x] 2.1 RED, invariants and handle moves. In `src/model/meetingRange.test.ts`:
   - the case "start off the step" (`04:10`) becomes "start off a whole minute" (`04:10:30`);
   - new cases: `isValidMeetingRange` accepts `04:05`–`04:10` and `04:00`–`04:01`;
   - `getMeetingHandleLimits` of 09:00–09:05 gives start max 540 and end min 545;
@@ -54,20 +54,20 @@ Files stay under 200 lines where possible, 300 at most.
   In `src/model/dayTrack.test.ts` (`it.each`), new cases for `getMinutesAfterTrackStep`: `545` next → `555`, previous → `540`; `540` next → `555`, previous → `525`.
 
   Run `npx vitest run src/model/meetingRange.test.ts`, then `npx vitest run src/model/dayTrack.test.ts`: both fail.
-- [ ] 2.2 GREEN: implement D1. In `src/model/dayTrack.ts`, extract the step part of `getInstantAfterTrackMove` into the exported `getMinutesAfterTrackStep(minutes, move)` and call it from `getInstantAfterTrackMove`; in `src/model/meetingRange.ts`, `getMeetingRangeAfterHandleMove` calls it, with no private step helper. Run `npx vitest run src/model/dayTrack.test.ts`, then `npx vitest run src/model/meetingRange.test.ts`, then `npx vitest run src/model/reduceMeetingRange.test.ts`, then `npx vitest run src/model/referenceMoment.test.ts`: all pass.
-- [ ] 2.3 RED then GREEN, wall-clock refusals. In `src/model/reduceMeetingRangeWallTimes.test.ts` (`it.each`):
+- [x] 2.2 GREEN: implement D1. In `src/model/dayTrack.ts`, extract the step part of `getInstantAfterTrackMove` into the exported `getMinutesAfterTrackStep(minutes, move)` and call it from `getInstantAfterTrackMove`; in `src/model/meetingRange.ts`, `getMeetingRangeAfterHandleMove` calls it, with no private step helper. Run `npx vitest run src/model/dayTrack.test.ts`, then `npx vitest run src/model/meetingRange.test.ts`, then `npx vitest run src/model/reduceMeetingRange.test.ts`, then `npx vitest run src/model/referenceMoment.test.ts`: all pass.
+- [x] 2.3 RED then GREEN, wall-clock refusals. In `src/model/reduceMeetingRangeWallTimes.test.ts` (`it.each`):
   - the 9 rows of `meeting-range` → "Wall-clock times of any location set the range";
   - the 8 rows of "Times that break the invariants are refused";
   - "The whole reference day" (00:00–00:00) → `MEETING_START_EQUALS_END`, same state object;
   - the existing `09:10` refusal becomes an accepted range.
 
   Implement D2: the two codes in `src/model/locationCommands.ts`, and the checks in `src/model/reduceMeetingRangeWallTimes.ts`. Run `npx vitest run src/model/reduceMeetingRangeWallTimes.test.ts`: passes.
-- [ ] 2.4 Update the existing unit BDD to the modified requirements, keeping the old tags and adding `@refine-meeting-range-entry-and-handles @FR1` / `@FR2`:
+- [x] 2.4 Update the existing unit BDD to the modified requirements, keeping the old tags and adding `@refine-meeting-range-entry-and-handles @FR1` / `@FR2`:
   - `src/test/features/meeting_range/meeting_range_commands.feature`: the "Invalid ranges are refused" row `2026-03-08T04:10:00Z` becomes `2026-03-08T04:10:30Z`;
   - `src/test/features/meeting_range/meeting_range_wall_times.feature`: the tables of "Wall-clock times of any location set the range" and "Times that break the invariants are refused" become those of the delta, and "The whole reference day" expects `MEETING_START_EQUALS_END`. Extend the step definitions in `steps/meeting_range_wall_times.steps.ts` if a step text changed.
 
   Run `npx vitest run src/test/features/meeting_range/steps/meeting_range_commands.steps.ts`, then `npx vitest run src/test/features/meeting_range/steps/meeting_range_wall_times.steps.ts`: pass.
-- [ ] 2.5 New unit BDD `src/test/features/meeting_range/meeting_range_any_minute.feature` with `steps/meeting_range_any_minute.steps.ts`. It reuses the store world of `steps/meetingRangeWorld.ts` and the real reducer. Scenarios:
+- [x] 2.5 New unit BDD `src/test/features/meeting_range/meeting_range_any_minute.feature` with `steps/meeting_range_any_minute.steps.ts`. It reuses the store world of `steps/meetingRangeWorld.ts` and the real reducer. Scenarios:
   - "A meeting at any minute" (`@FR1`);
   - "Next day keeps a meeting off the track step" (`@FR5`);
   - "Moves from an end off the track step" and "A drag lands an off-step end on the track step" (`@FR4`).

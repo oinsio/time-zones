@@ -16,7 +16,7 @@ Feature: Meeting range commands
     Then the meeting range is 09:00–11:00 in Almaty
     And the reference moment is pinned at "2026-03-08T04:00:00Z"
 
-  @add-grid-meeting-range-and-share @FR2
+  @add-grid-meeting-range-and-share @FR2 @refine-meeting-range-entry-and-handles @FR1
   Scenario Outline: Invalid ranges are refused
     Given the reference zone is "Asia/Almaty", the current time is "2026-03-08T07:30:00Z" and no meeting range is set
     When the meeting range is set from "<start>" to "<end>"
@@ -27,7 +27,7 @@ Feature: Meeting range commands
       | start                | end                  |
       | 2026-03-08T06:00:00Z | 2026-03-08T04:00:00Z |
       | 2026-03-08T04:00:00Z | 2026-03-08T04:00:00Z |
-      | 2026-03-08T04:10:00Z | 2026-03-08T06:00:00Z |
+      | 2026-03-08T04:10:30Z | 2026-03-08T06:00:00Z |
       | 2026-03-08T17:00:00Z | 2026-03-08T19:15:00Z |
       | 2026-03-08 04:00     | 2026-03-08T06:00:00Z |
 

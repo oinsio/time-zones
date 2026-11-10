@@ -1,3 +1,4 @@
+// Verifies FR4 of refine-meeting-range-entry-and-handles (D1).
 // Verifies FR1, FR2, FR3 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR1, FR2, FR3, FR4 of add-time-sliders-to-location-cards (D2).
 // Verifies FR4 of set-home-location-and-show-differences (M3): the day of home.
@@ -6,6 +7,7 @@ import { Temporal } from "@/lib/temporal";
 import {
   getInstantAfterTrackMove,
   getInstantAtTrackFraction,
+  getMinutesAfterTrackStep,
   getReferenceDay,
   getTrackEndMinutes,
   getTrackFraction,
@@ -161,6 +163,17 @@ describe("getInstantAfterTrackMove", () => {
     expect(
       getInstantAfterTrackMove(ALMATY_DAY, instantOf(from), move).toString(),
     ).toBe(expected);
+  });
+});
+
+describe("getMinutesAfterTrackStep", () => {
+  it.each([
+    [545, TrackMove.NEXT_STEP, 555],
+    [545, TrackMove.PREVIOUS_STEP, 540],
+    [540, TrackMove.NEXT_STEP, 555],
+    [540, TrackMove.PREVIOUS_STEP, 525],
+  ])("should move %i minutes by %s to %i", (minutes, move, expected) => {
+    expect(getMinutesAfterTrackStep(minutes, move)).toBe(expected);
   });
 });
 
