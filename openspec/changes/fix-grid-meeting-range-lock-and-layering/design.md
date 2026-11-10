@@ -154,14 +154,14 @@ Negative:
 Driven by `.claude/rules/bdd-unit.md` and `bdd-e2e.md`: keyboard, focus, layout and real-browser behaviour need a browser.
 
 ### Decision
-jsdom (Vitest and unit BDD): the model command (M2, M3), the controller outcomes, `disabled` attributes and the disabled sortable, the input's confirm, cancel and errors, the layer token classes. Real browser (`*_e2e.feature`): Tab order and keyboard entry (NFR-A2), layout at 320 and 390 px (NFR-R1), axe-core (NFR-A1), topmost elements under dialogs and the date bar (FR6, FR7), the frame-border coverage check (FR8: for points along each frame border, every element from `document.elementsFromPoint` inside a grid row with a non-transparent `background-color` must hold the point in the client rect of one of its text nodes, or be a row note or an `input`), and the screenshots (NFR-R2).
+jsdom (Vitest and unit BDD): the model command (M2, M3), the controller outcomes, `disabled` attributes and the disabled sortable, the input's confirm, cancel and errors, the layer token classes. Real browser (`*_e2e.feature`): Tab order and keyboard entry (NFR-A2), layout at 320 and 390 px (NFR-R1), axe-core (NFR-A1), topmost elements under dialogs and the date bar (FR6, FR7), the frame-border coverage check (FR8, M6: sample only the points of each frame border that lie inside a row's sticky header box or notes box — the `headerBox` / `notesBox` of `locationRowVariant.ts`, the only parts of a row painted above the frame by D5 (`z-grid-box`); at each point, of the elements `document.elementsFromPoint` returns, check only the descendants of that box: every such element with a non-transparent `background-color` must hold the point in the client rect of one of its text nodes, or be a row note or an `input`. The hour cells and the row `<li>` are painted below the frame and are never inspected, so their backgrounds do not count as covering it), and the screenshots (NFR-R2).
 
 ### Consequences
 Positive:
 - Each test proves what its runner can see.
 
 Negative:
-- `elementsFromPoint` skips `pointer-events: none` elements, so the check reasons about what covers the frame, never about the frame itself.
+- `elementsFromPoint` skips `pointer-events: none` elements, so the check reasons about what covers the frame, never about the frame itself; and it returns elements below the frame too, which is why the check looks only inside the sticky boxes that D5 places above it.
 
 ### Alternatives Considered
 **Pixel sampling of a screenshot**: no PNG decoder is installed, and colours depend on anti-aliasing.
