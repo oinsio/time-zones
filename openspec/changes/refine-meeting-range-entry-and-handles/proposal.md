@@ -131,13 +131,19 @@ None.
 
 ## Behavior
 
-- Unit BDD (vitest-cucumber), tagged `@refine-meeting-range-entry-and-handles`:
-  - `packages/client/src/test/features/meeting_range/meeting_range_any_minute.feature` (FR1, FR2, FR4, FR5);
-  - `src/test/features/grid_view/grid_view_meeting_range_input_unit.feature` (changed examples, FR3);
-  - `src/test/features/time_selection/time_selection_time_separator_unit.feature` (FR6).
-- playwright-bdd:
-  - `src/test/features/grid_view/grid_view_meeting_handle_reach_e2e.feature` (FR7, FR8, NFR-A2, NFR-R1);
-  - `src/test/features/time_selection/time_selection_time_separator_e2e.feature` (FR6 with a real keyboard, FR3, NFR-A1).
+All paths below are under `packages/client/src/test/features/`, and every scenario is tagged `@refine-meeting-range-entry-and-handles`.
+
+- Unit BDD (vitest-cucumber), new:
+  - `meeting_range/meeting_range_any_minute.feature` (FR1, FR4, FR5);
+  - `time_selection/time_selection_time_separator_unit.feature` (FR6);
+  - `grid_view/grid_view_meeting_handle_reach_unit.feature` (FR7, FR8).
+- Unit BDD, updated:
+  - `meeting_range/meeting_range_commands.feature` and `meeting_range_wall_times.feature` (FR1, FR2);
+  - `grid_view/grid_view_meeting_range_input_unit.feature` (FR2, FR3).
+- playwright-bdd, new:
+  - `grid_view/grid_view_meeting_handle_reach_e2e.feature` (FR4, FR7, FR8, NFR-A2, NFR-R1);
+  - `time_selection/time_selection_time_separator_e2e.feature` (FR6 with a real keyboard, FR2, FR3);
+  - `grid_view/grid_view_meeting_range_messages_e2e.feature` (NFR-A1).
 
 ## Visual Reference
 
