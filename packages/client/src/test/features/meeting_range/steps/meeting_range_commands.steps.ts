@@ -1,14 +1,8 @@
 // Verifies FR1, FR2, FR3, FR4 of add-grid-meeting-range-and-share.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { act, cleanup, renderHook } from "@testing-library/react/pure";
-import { createElement, type ReactNode } from "react";
+import { act, cleanup } from "@testing-library/react/pure";
 import { expect } from "vitest";
-import {
-  createInMemoryLocationBackend,
-  createInMemoryLocationRepository,
-} from "@/adapters";
-import { LocationsProvider, useLocations, useMeetingRange } from "@/controller";
 import { Temporal } from "@/lib/temporal";
 import {
   LocationCommandType,
@@ -18,9 +12,7 @@ import {
 } from "@/model";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { createSwitchableClock } from "@/test/switchableClock";
-import { createManualTickScheduler } from "@/test/tickSchedulers";
-import { immediateWriteScheduler } from "@/test/writeSchedulers";
+import { createStoredListApp } from "./meetingRangeStoredApp";
 import {
   ALMATY_ZONE,
   createMeetingWorld,
@@ -46,24 +38,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario(
     "A stored list never carries a meeting range",
     ({ Given, When, Then, And }) => {
-      const backend = createInMemoryLocationBackend();
-      const renderApp = () =>
-        renderHook(
-          () => ({ meeting: useMeetingRange(), locations: useLocations() }),
-          {
-            wrapper: ({ children }: { children?: ReactNode }) =>
-              createElement(
-                LocationsProvider,
-                {
-                  repository: createInMemoryLocationRepository({ backend }),
-                  writeScheduler: immediateWriteScheduler,
-                  clock: createSwitchableClock(SAMPLE_NOW, ALMATY_ZONE),
-                  tickScheduler: createManualTickScheduler(),
-                },
-                children,
-              ),
-          },
-        );
+      const { backend, renderApp } = createStoredListApp();
       let app: ReturnType<typeof renderApp>;
       Given(
         "the reference zone is {string} and the meeting range is 09:00–11:00 on 2026-03-08",

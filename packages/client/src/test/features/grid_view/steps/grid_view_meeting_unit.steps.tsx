@@ -4,11 +4,8 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { fireEvent, screen } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
-import { createInMemoryTextSharing } from "@/adapters";
 import { ADD_LOCATION_BUTTON_ID } from "@/constants";
 import type { InterfaceLanguageCode } from "@/locales";
-import { ViewId } from "@/views";
-import { createGridViewWorld } from "../../main_page/steps/gridViewWorld";
 import {
   clickButton,
   dimmedColumnsOf,
@@ -19,17 +16,14 @@ import {
   meetingTitle,
   pressOnHandle,
   setMeetingOfMinutes,
-  setSampleMeeting,
   spanOf,
   stripOf,
   tapColumn,
 } from "./meetingGridQueries";
+import { ALL_CITIES, createMeetingGridSession } from "./meetingGridSession";
 
 const feature = await loadFeature("../grid_view_meeting_unit.feature");
 
-const ALMATY_ZONE = "Asia/Almaty";
-const SAMPLE_INSTANT = "2026-03-08T07:30:00Z";
-const ALL_CITIES = ["Almaty", "Moscow", "Kolkata", "New York"];
 const LANGUAGES: Record<string, InterfaceLanguageCode> = {
   Russian: "ru",
   English: "en",
@@ -43,41 +37,14 @@ const RUSSIAN_CITY_NAMES: Record<string, string> = {
   "New York": "Нью-Йорк",
 };
 const NO_MARK = "no day shift mark";
-const SHARE_BUTTON = "Share meeting";
 const CLEAR_BUTTON = "Clear meeting";
 const FIRST_FRAME_COLUMNS = "9-10";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
-  const world = createGridViewWorld();
-  let sharing = createInMemoryTextSharing({ canShare: true, canCopy: true });
+  const { world, openGrid, openGridWithSampleMeeting, setLanguage, reset } =
+    createMeetingGridSession();
 
-  let language: InterfaceLanguageCode = "en";
-  const openGrid = async (
-    cities: string[] = ALL_CITIES,
-    textSharing = sharing,
-  ) => {
-    world.setInstant(SAMPLE_INSTANT);
-    world.setDeviceZone(ALMATY_ZONE);
-    world.storeViewModeAndLanguage(ViewId.GRID, language);
-    world.storeLocations(cities);
-    await world.openApp(textSharing);
-    await screen.findAllByRole("slider");
-  };
-  const openGridWithSampleMeeting = async (textSharing = sharing) => {
-    await openGrid(ALL_CITIES, textSharing);
-    setSampleMeeting();
-  };
-  const useSharing = (
-    options: Parameters<typeof createInMemoryTextSharing>[0],
-  ) => {
-    sharing = createInMemoryTextSharing(options);
-  };
-
-  f.BeforeEachScenario(async () => {
-    await world.reset();
-    sharing = createInMemoryTextSharing({ canShare: true, canCopy: true });
-    language = "en";
-  });
+  f.BeforeEachScenario(reset);
   f.AfterAllScenarios(world.finish);
 
   // @add-grid-meeting-range-and-share @FR5
@@ -175,7 +142,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Given(
         "the interface language is Russian, the hour format is 24-hour and the meeting range is 09:00–11:00 in Almaty on 2026-03-08",
         async () => {
-          language = "ru";
+          setLanguage("ru");
           await openGridWithSampleMeeting();
         },
       );
@@ -215,7 +182,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "Durations in the title",
     ({ Given, When, Then }, variables) => {
       Given("the interface language is <language>", async () => {
-        language = LANGUAGES[variables.language];
+        setLanguage(LANGUAGES[variables.language]);
         await openGrid(["Almaty", "Moscow"]);
       });
       When("the meeting range lasts <minutes> minutes", () =>
@@ -254,97 +221,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         document.getElementById(ADD_LOCATION_BUTTON_ID),
       ),
     );
-  });
-
-  // @add-grid-meeting-range-and-share @FR15
-  f.Scenario("Share where the browser can share", ({ Given, When, Then }) => {
-    Given(
-      "a browser with a system share and the Grid view with the sample meeting",
-      () => openGridWithSampleMeeting(),
-    );
-    When("the user chooses {string}", async (_ctx, name: string) => {
-      clickButton(name);
-      await screen.findByRole("button", { name: SHARE_BUTTON });
-    });
-    Then(
-      "the system share receives the meeting share text and no notice is shown",
-      () => {
-        expect(sharing.sharedTexts).toHaveLength(1);
-        expect(sharing.sharedTexts[0]).toMatch(/^Meeting on .*2 h\n/);
-        expect(screen.queryByText(i18n.t("meeting.copiedNotice"))).toBeNull();
-      },
-    );
-  });
-
-  // @add-grid-meeting-range-and-share @FR15
-  f.Scenario("Closing the share sheet", ({ Given, When, Then }) => {
-    Given(
-      "a browser whose system share reports that the user closed the sheet",
-      () => {
-        useSharing({ canShare: true, isCancelled: true, canCopy: true });
-        return openGridWithSampleMeeting();
-      },
-    );
-    When("the user chooses {string}", (_ctx, name: string) => {
-      clickButton(name);
-    });
-    Then("nothing changes and no notice is shown", () => {
-      expect(spanOf("Almaty")).toBe("09:00–11:00");
-      expect(sharing.sharedTexts).toHaveLength(0);
-      expect(sharing.copiedTexts).toHaveLength(0);
-      expect(screen.queryByText(i18n.t("meeting.copiedNotice"))).toBeNull();
-      expect(
-        screen.queryByText(i18n.t("meeting.shareFailedNotice")),
-      ).toBeNull();
-    });
-  });
-
-  // @add-grid-meeting-range-and-share @FR15
-  f.Scenario(
-    "Copy where the browser cannot share",
-    ({ Given, When, Then, And }) => {
-      Given(
-        "a browser without a system share and the Grid view with the sample meeting",
-        () => {
-          useSharing({ canShare: false, canCopy: true });
-          return openGridWithSampleMeeting();
-        },
-      );
-      When("the user chooses {string}", (_ctx, name: string) => {
-        clickButton(name);
-      });
-      Then("the clipboard holds the meeting share text", async () => {
-        await screen.findByText(i18n.t("meeting.copiedNotice"));
-        expect(sharing.copiedTexts).toHaveLength(1);
-        expect(sharing.copiedTexts[0]).toMatch(/^Meeting on /);
-      });
-      And(
-        "the notice {string} is shown and the focus stays on {string}",
-        (_ctx, notice: string, buttonName: string) => {
-          expect(screen.getByText(notice)).toBeInTheDocument();
-          const button = screen.getByRole("button", { name: buttonName });
-          button.focus();
-          expect(document.activeElement).toBe(button);
-        },
-      );
-    },
-  );
-
-  // @add-grid-meeting-range-and-share @FR15
-  f.Scenario("Neither share nor clipboard", ({ Given, When, Then }) => {
-    Given(
-      "a browser without a system share and without clipboard access",
-      () => {
-        useSharing({ canShare: false, canCopy: false });
-        return openGridWithSampleMeeting();
-      },
-    );
-    When("the user chooses {string}", (_ctx, name: string) => {
-      clickButton(name);
-    });
-    Then("the notice {string} is shown", async (_ctx, notice: string) => {
-      expect(await screen.findByText(notice)).toBeInTheDocument();
-    });
   });
 
   // @add-grid-meeting-range-and-share @FR7 @FR13

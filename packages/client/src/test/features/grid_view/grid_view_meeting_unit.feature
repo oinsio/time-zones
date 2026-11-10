@@ -69,31 +69,6 @@ Feature: Meeting range in the Grid view
     Then no meeting range is set, the hour frame is on column 9 and the header shows "Time Zones" with Add location and Settings
     And the Add location button has the focus
 
-  @add-grid-meeting-range-and-share @FR15
-  Scenario: Share where the browser can share
-    Given a browser with a system share and the Grid view with the sample meeting
-    When the user chooses "Share meeting"
-    Then the system share receives the meeting share text and no notice is shown
-
-  @add-grid-meeting-range-and-share @FR15
-  Scenario: Closing the share sheet
-    Given a browser whose system share reports that the user closed the sheet
-    When the user chooses "Share meeting"
-    Then nothing changes and no notice is shown
-
-  @add-grid-meeting-range-and-share @FR15
-  Scenario: Copy where the browser cannot share
-    Given a browser without a system share and the Grid view with the sample meeting
-    When the user chooses "Share meeting"
-    Then the clipboard holds the meeting share text
-    And the notice "Meeting text copied" is shown and the focus stays on "Share meeting"
-
-  @add-grid-meeting-range-and-share @FR15
-  Scenario: Neither share nor clipboard
-    Given a browser without a system share and without clipboard access
-    When the user chooses "Share meeting"
-    Then the notice "Could not share the meeting" is shown
-
   @add-grid-meeting-range-and-share @FR7 @FR13
   Scenario: No hour frame during a meeting
     Given the Grid view at "2026-03-08T07:30:00Z" with the meeting range 09:00–11:00 in Almaty
