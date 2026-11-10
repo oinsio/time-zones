@@ -17,12 +17,17 @@ const cityRow = (label: string) =>
   buildLocation({ label, ...KNOWN_CITIES[label] });
 const almaty = cityRow("Almaty");
 
-function setup() {
+function setup(extraLocations: ReturnType<typeof cityRow>[] = []) {
   const clock = createSwitchableClock("2026-03-08T07:30:00Z", "Asia/Almaty");
   const repository = createInMemoryLocationRepository({
     initialDocument: {
       status: LocationsLoadStatus.LOADED,
-      locations: [almaty, cityRow("Moscow"), cityRow("New York")],
+      locations: [
+        almaty,
+        cityRow("Moscow"),
+        cityRow("New York"),
+        ...extraLocations,
+      ],
       homeLocationId: almaty.id,
     },
   });
@@ -160,5 +165,29 @@ describe("useMeetingRange", () => {
     act(() => result.current.clearMeetingRange());
 
     expect(save).not.toHaveBeenCalled();
+  });
+});
+
+describe("useMeetingRange edge cases", () => {
+  it("should refuse to run outside a LocationsProvider", () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(() => renderHook(() => useMeetingRange())).toThrow(
+      "useMeetingRange must be used inside a LocationsProvider",
+    );
+    vi.restoreAllMocks();
+  });
+
+  it("should leave out the span of a location with an unknown zone", () => {
+    const unknown = buildLocation({
+      label: "Nowhere",
+      timeZoneId: "Mars/Base",
+      countryCode: "XX",
+    });
+    const { result } = setup([unknown]);
+    act(() => result.current.selectCells(9, 10));
+
+    const rowRanges = result.current.meeting?.rowRanges;
+    expect(rowRanges?.has(unknown.id)).toBe(false);
+    expect(rowRanges?.has(almaty.id)).toBe(true);
   });
 });
