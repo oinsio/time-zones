@@ -96,13 +96,13 @@ Files stay under 200 lines where possible, 300 at most.
 
 ## 4. Views (FR3, FR6–FR8, NFR-A2, NFR-P1, UX1, UX2; D4–D8)
 
-- [ ] 4.1 RED then GREEN, the separator (D4):
+- [x] 4.1 RED then GREEN, the separator (D4):
   - `src/views/shared/typedTimeFieldText.test.ts` (new): an `insertText` change at the end with `103` gives `10:3`; a `deleteContentBackward` change gives the raw text; a change with `selectionEnd` before the end gives the raw text; without `inputType`, a shorter prefix gives the raw text.
   - `src/views/shared/WallTimeInput.test.tsx` adds, with `@testing-library/user-event`: typing `1030` over the selected text shows `10:30` with `selectionStart` 5; Backspace twice after `103` shows `10`.
   - `src/views/shared/MeetingRangeInput.test.tsx` adds: typing `905` in the start field shows `9:05`, and `1130` in the end field shows `11:30`.
 
   Implement `src/views/shared/typedTimeFieldText.ts` and use it in `WallTimeInput.tsx` and `MeetingRangeInput.tsx`. Run the three files one at a time: pass.
-- [ ] 4.2 Unit BDD of the input (needs 3.2, 4.1):
+- [x] 4.2 Unit BDD of the input (needs 3.2, 4.1):
   - `src/test/features/grid_view/grid_view_meeting_range_input_unit.feature`: the "Wrong input keeps the input open" table becomes the 5 rows of the delta and is tagged `@FR3 @UX3`; add "A meeting at any minute" (5 examples, `@FR2 @FR3`).
   - New `src/test/features/time_selection/time_selection_time_separator_unit.feature` with `steps/time_selection_time_separator_unit.steps.tsx` (user-event typing in the app world of the existing wall-time unit steps): "Digits typed one by one" (8 examples, `130` → `13:0` included), "Texts left as typed" (5), "Backspace removes the separator", "A pasted time gets its separator" and "Rejected texts stay rejected" (4, `130` included) (`@FR6 @UX1`). The unit copy of "Digits typed one by one" omits the step "the caret is after the last character": the caret is asserted only in the browser (5.2).
 

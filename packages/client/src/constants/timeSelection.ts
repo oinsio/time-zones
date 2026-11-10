@@ -69,3 +69,5 @@ export const TWENTY_HOUR_PREFIX_DIGIT = 2;
 export const SINGLE_DIGIT_HOUR_MIN_SECOND_DIGIT_AFTER_TWENTY = 4;
 export const SINGLE_DIGIT_HOUR_LENGTH = 1;
 export const DOUBLE_DIGIT_HOUR_LENGTH = 2;
+/** An `inputType` that starts with this is the user inserting text (`insertText`, `insertFromPaste`). */
+export const INSERT_INPUT_TYPE_PREFIX = "insert";

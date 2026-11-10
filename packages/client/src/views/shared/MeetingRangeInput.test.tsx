@@ -178,6 +178,20 @@ describe("MeetingRangeInput", () => {
     },
   );
 
+  it.each([
+    ["start", START_NAME, "905", "9:05"],
+    ["end", END_NAME, "1130", "11:30"],
+  ])(
+    "should show the separator while digits are typed in the %s field",
+    async (_field, name, digits, shown) => {
+      renderInput();
+      const field = screen.getByRole("textbox", { name });
+      await userEvent.clear(field);
+      await userEvent.type(field, digits);
+      expect(field).toHaveValue(shown);
+    },
+  );
+
   it("should show no error before a confirmation", () => {
     const { startField } = renderInput();
     expect(startField).toHaveAttribute("aria-invalid", "false");

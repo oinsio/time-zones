@@ -9,6 +9,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { KeyboardKey, MEETING_SPAN_SEPARATOR } from "@/constants";
 import { MeetingRangeInputOutcome } from "@/controller";
+import { getTypedTimeFieldText } from "./typedTimeFieldText";
 import { isKeyKeptInField } from "./wallTimeFieldKeys";
 
 type MeetingRangeInputProps = {
@@ -114,7 +115,9 @@ export function MeetingRangeInput({
           ref={startFieldRef}
           aria-label={t("meeting.rangeInputStartLabel", { city })}
           value={startText}
-          onChange={(event) => setStartText(event.target.value)}
+          onChange={(event) =>
+            setStartText(getTypedTimeFieldText(event, startText))
+          }
           {...fieldProps(isStartInvalid)}
         />
         <span aria-hidden="true" className="font-bold">
@@ -123,7 +126,9 @@ export function MeetingRangeInput({
         <input
           aria-label={t("meeting.rangeInputEndLabel", { city })}
           value={endText}
-          onChange={(event) => setEndText(event.target.value)}
+          onChange={(event) =>
+            setEndText(getTypedTimeFieldText(event, endText))
+          }
           {...fieldProps(isEndInvalid)}
         />
       </span>

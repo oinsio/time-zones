@@ -2,6 +2,7 @@ import { type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { KeyboardKey } from "@/constants";
 import { WallTimeInputOutcome } from "@/controller";
+import { getTypedTimeFieldText } from "./typedTimeFieldText";
 import { isKeyKeptInField } from "./wallTimeFieldKeys";
 
 type WallTimeInputProps = {
@@ -19,6 +20,7 @@ type WallTimeInputProps = {
  * text and the error; the controller parses and the model resolves (ADR-0002).
  * Implements FR1, FR3, FR5, FR6, FR10, NFR-A2, NFR-A4, UX2 of
  * add-wall-time-input-with-hint (D6).
+ * Implements FR6, UX1 of refine-meeting-range-entry-and-handles (D4): the `:` separator.
  */
 export function WallTimeInput({
   label,
@@ -73,7 +75,7 @@ export function WallTimeInput({
         aria-invalid={hasError}
         aria-describedby={hasError ? errorId : undefined}
         value={text}
-        onChange={(event) => setText(event.target.value)}
+        onChange={(event) => setText(getTypedTimeFieldText(event, text))}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         className="min-h-11 w-24 rounded-md border border-accent bg-surface text-2xl font-bold leading-none tabular-nums md:w-36 md:text-4xl"

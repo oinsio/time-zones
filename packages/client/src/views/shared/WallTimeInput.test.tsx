@@ -1,3 +1,4 @@
+// Verifies FR6, UX1 of refine-meeting-range-entry-and-handles.
 // Verifies FR1, FR3, FR5, FR6, FR10, NFR-A2, NFR-A4, UX1, UX2 of add-wall-time-input-with-hint (D6).
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -44,7 +45,7 @@ describe("WallTimeInput", () => {
     const { field, onConfirm, onClose } = renderField();
     await userEvent.clear(field);
     await userEvent.type(field, "1040{Enter}");
-    expect(onConfirm).toHaveBeenCalledWith("1040");
+    expect(onConfirm).toHaveBeenCalledWith("10:40");
     expect(onClose).toHaveBeenCalledWith(true);
   });
 
@@ -72,7 +73,7 @@ describe("WallTimeInput", () => {
     await userEvent.clear(field);
     await userEvent.type(field, "1040");
     fireEvent.blur(field);
-    expect(onConfirm).toHaveBeenCalledWith("1040");
+    expect(onConfirm).toHaveBeenCalledWith("10:40");
     expect(onClose).toHaveBeenCalledWith(false);
   });
 
@@ -123,6 +124,22 @@ describe("WallTimeInput", () => {
     const { field, onParentKeyDown } = renderField();
     await userEvent.type(field, "{Tab}");
     expect(onParentKeyDown).toHaveBeenCalled();
+  });
+
+  it("shows the separator while digits are typed and keeps the caret at the end", async () => {
+    const { field } = renderField();
+    await userEvent.clear(field);
+    await userEvent.type(field, "1030");
+    expect(field).toHaveValue("10:30");
+    expect((field as HTMLInputElement).selectionStart).toBe(5);
+  });
+
+  it("removes the separator with Backspace", async () => {
+    const { field } = renderField();
+    await userEvent.clear(field);
+    await userEvent.type(field, "103");
+    await userEvent.type(field, "{Backspace}{Backspace}");
+    expect(field).toHaveValue("10");
   });
 
   it("starts without an error", () => {

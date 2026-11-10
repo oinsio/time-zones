@@ -68,3 +68,9 @@ export const enterMeetingRange = async (
   await typeInField(startFieldOf(city), startText);
   await typeInField(endFieldOf(city), `${endText}{Enter}`);
 };
+
+export const wallTimeFieldOf = (city: string) =>
+  within(getCardOf(city)).getByRole("textbox", { name: TIME_BUTTON_NAME });
+
+export const openWallTimeInput = (city: string) =>
+  userEvent.click(timeButtonOf(city));
