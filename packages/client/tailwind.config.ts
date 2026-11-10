@@ -19,6 +19,17 @@ const config: Config = {
   theme: {
     extend: {
       fontSize: { credit: [CREDIT_FONT_SIZE, CREDIT_LINE_HEIGHT] },
+      /** Page layers, lowest first. Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5). */
+      zIndex: {
+        "grid-frame": "1",
+        "grid-box": "2",
+        "meeting-handle": "3",
+        "grid-box-focused": "4",
+        "page-bar": "10",
+        "dragged-row": "15",
+        "location-menu": "20",
+        dialog: "30",
+      },
       colors: {
         background: "var(--color-background)",
         foreground: "var(--color-foreground)",

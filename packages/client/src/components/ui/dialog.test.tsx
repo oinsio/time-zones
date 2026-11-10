@@ -1,3 +1,4 @@
+// Verifies FR6 of fix-grid-meeting-range-lock-and-layering (D5): the dialog layer.
 // Verifies D10, NFR-R1, UX5 of add-locations-via-search.
 import { render, screen } from "@testing-library/react";
 import {
@@ -36,6 +37,12 @@ describe("Dialog", () => {
   it("should fill the screen below the sm breakpoint and center from it", () => {
     renderOpenDialog();
     expect(screen.getByRole("dialog")).toHaveClass("inset-0", "sm:max-w-lg");
+  });
+
+  it("should lay the overlay and the content on the dialog layer", () => {
+    renderOpenDialog();
+    expect(document.querySelector(".bg-overlay")).toHaveClass("z-dialog");
+    expect(screen.getByRole("dialog")).toHaveClass("z-dialog");
   });
 
   it("should draw the backdrop with the overlay token", () => {

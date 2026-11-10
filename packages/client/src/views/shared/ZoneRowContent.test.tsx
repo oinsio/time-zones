@@ -1,3 +1,4 @@
+// Verifies FR8, UX3 of fix-grid-meeting-range-lock-and-layering (D6): the surface background lies behind the glyphs only.
 // Verifies FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): without a row variant the content is the card's.
 import { render, screen } from "@testing-library/react";
 import { WallTimeInputOutcome } from "@/controller";
@@ -64,5 +65,19 @@ describe("ZoneRowContent for a grid row", () => {
       screen.getByText("Almaty").parentElement?.parentElement?.parentElement;
     expect(placeAndTime).toHaveClass("md:flex-1");
     expect(placeAndTime).not.toHaveClass("md:flex-none");
+  });
+});
+
+describe("ZoneRowContent glyph backgrounds", () => {
+  it("should not paint the zone line container with the surface", () => {
+    const { container } = renderContent(LocationRowVariant.GRID_ROW);
+    expect(container.querySelector("[data-zone-line]")).not.toHaveClass(
+      "bg-surface",
+    );
+  });
+
+  it("should paint each zone line part with the surface", () => {
+    renderContent(LocationRowVariant.GRID_ROW);
+    expect(screen.getByText("Kazakhstan")).toHaveClass("bg-surface");
   });
 });

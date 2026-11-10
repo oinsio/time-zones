@@ -1,3 +1,4 @@
+// Verifies FR8, UX3 of fix-grid-meeting-range-lock-and-layering (D6): the surface background lies behind the glyphs only.
 // Verifies FR8, UX1 of add-grid-meeting-range-and-share.
 // Verifies FR2, FR6, UX1, UX2, NFR-A2 of show-local-time-and-date-on-location-cards (D5).
 // Verifies FR1, FR5, NFR-A2, UX1 of add-wall-time-input-with-hint (D6).
@@ -8,6 +9,7 @@ import { LocalDateTime } from "./LocalDateTime";
 import { LocationRowVariant } from "./locationRowVariant";
 
 const NAME = "Ввести время — Алматы, 12:30";
+const MEETING_NAME = "Ввести время встречи — Moscow, 23:00–01:00";
 
 const renderDateTime = (
   localTimeLabel = "12:30",
@@ -26,12 +28,18 @@ const renderDateTime = (
 describe("LocalDateTime", () => {
   it("should show the time bold with tabular figures", () => {
     renderDateTime();
-    expect(screen.getByText("12:30")).toHaveClass("font-bold", "tabular-nums");
+    expect(screen.getByRole("button", { name: NAME })).toHaveClass(
+      "font-bold",
+      "tabular-nums",
+    );
   });
 
   it("should show the time larger than the city text", () => {
     renderDateTime();
-    expect(screen.getByText("12:30")).toHaveClass("text-2xl", "md:text-4xl");
+    expect(screen.getByRole("button", { name: NAME })).toHaveClass(
+      "text-2xl",
+      "md:text-4xl",
+    );
   });
 
   it("should show the date as muted text in a time element with the ISO date", () => {
@@ -140,16 +148,24 @@ describe("LocalDateTime row variants", () => {
           wallTimeInputLabel={NAME}
           onConfirmWallTime={() => WallTimeInputOutcome.CLOSED}
           rowVariant={LocationRowVariant.GRID_ROW}
-          meetingRange={{ spanLabel: "23:00–01:00", dayShiftLabel }}
+          cityLabel="Moscow"
+          meetingRange={{
+            startTimeLabel: "23:00",
+            endTimeLabel: "01:00",
+            spanLabel: "23:00–01:00",
+            dayShiftLabel,
+          }}
         />,
       );
 
     it("should show the span in the time button in the meeting time colour", () => {
       renderMeeting();
-      expect(screen.getByRole("button", { name: NAME })).toHaveTextContent(
-        "23:00–01:00",
+      expect(
+        screen.getByRole("button", { name: MEETING_NAME }),
+      ).toHaveTextContent("23:00–01:00");
+      expect(screen.getByRole("button", { name: MEETING_NAME })).toHaveClass(
+        "text-meeting-text",
       );
-      expect(screen.getByText("23:00–01:00")).toHaveClass("text-meeting-text");
     });
 
     it("should show the day shift mark bold in the danger colour before the date", () => {
@@ -166,11 +182,37 @@ describe("LocalDateTime row variants", () => {
       renderMeeting();
       expect(screen.queryByText("днём раньше")).toBeNull();
     });
+  });
+});
 
-    it("should open the wall-time input with the local time", async () => {
-      renderMeeting();
-      await userEvent.click(screen.getByRole("button", { name: NAME }));
-      expect(screen.getByRole("textbox", { name: NAME })).toHaveValue("12:30");
-    });
+describe("LocalDateTime glyph backgrounds", () => {
+  it("should paint only the time label with the surface, not the button box", () => {
+    renderDateTime();
+    const timeButton = screen.getByRole("button", { name: NAME });
+    expect(timeButton).not.toHaveClass("bg-surface");
+    expect(screen.getByText("12:30")).toHaveClass("bg-surface");
+  });
+
+  it("should paint only the span label with the surface while a meeting range is set", () => {
+    render(
+      <LocalDateTime
+        localTimeLabel="12:30"
+        localDateLabel="Sun, Mar 8"
+        localIsoDate="2026-03-08"
+        wallTimeInputLabel={NAME}
+        onConfirmWallTime={() => WallTimeInputOutcome.CLOSED}
+        rowVariant={LocationRowVariant.GRID_ROW}
+        cityLabel="Moscow"
+        meetingRange={{
+          startTimeLabel: "23:00",
+          endTimeLabel: "01:00",
+          spanLabel: "23:00–01:00",
+        }}
+      />,
+    );
+    expect(screen.getByRole("button", { name: MEETING_NAME })).not.toHaveClass(
+      "bg-surface",
+    );
+    expect(screen.getByText("23:00–01:00")).toHaveClass("bg-surface");
   });
 });

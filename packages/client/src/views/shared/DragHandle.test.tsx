@@ -28,6 +28,12 @@ describe("DragHandle", () => {
     await i18n.changeLanguage("en");
   });
 
+  // Verifies FR1 of fix-grid-meeting-range-lock-and-layering: unlocked unless told otherwise.
+  it("should be enabled when no lock is given", () => {
+    renderHandle();
+    expect(screen.getByRole("button", { name: "Move Moscow" })).toBeEnabled();
+  });
+
   it("should be a button named after the city", () => {
     renderHandle();
     expect(

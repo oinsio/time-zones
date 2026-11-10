@@ -19,12 +19,20 @@ import { useHourStripScroll } from "./useHourStripScroll";
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4).
  * Implements FR1, FR8, FR9, FR11, FR12, NFR-R1, NFR-R2 of add-grid-hour-cells-and-hour-frame (D3, D4, D5).
  * Implements FR5-FR12, NFR-R1, UX1, UX2 of add-grid-meeting-range-and-share (D6, D8).
+ * Implements FR1, FR2, UX1 of fix-grid-meeting-range-lock-and-layering (D1): the rows lock while a meeting range is set.
+ * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D4): binds the meeting range input.
  */
 export default function GridView() {
   const { strips, hourFrameIndex, cellCount, hasMeetingRange } = useHourGrid();
   const { moveTrack } = useTimeSelection();
-  const { meeting, selectCells, selectFramedHour, moveHandle, dragHandleTo } =
-    useMeetingRange();
+  const {
+    meeting,
+    selectCells,
+    selectFramedHour,
+    moveHandle,
+    dragHandleTo,
+    confirmMeetingRangeInput,
+  } = useMeetingRange();
   const { panelRef, panelStyle, layout } = useHourStripScroll(
     hourFrameIndex,
     cellCount,
@@ -74,6 +82,8 @@ export default function GridView() {
     meetingRangeOf: (row) => meeting?.rowRanges.get(row.id),
     panelRef,
     panelStyle,
+    areRowControlsLocked: meeting !== undefined,
+    onConfirmMeetingRange: confirmMeetingRangeInput,
   };
   return (
     <ViewLocationList

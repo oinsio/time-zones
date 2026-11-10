@@ -72,6 +72,7 @@ Commands are serializable objects with a `type` enum. The reducer returns either
 | `SET_WALL_TIME(target, time, date)` | pins the moment for a wall-clock time in a location (`target`) on the local date the row showed | `LOCATION_NOT_FOUND`, `INVALID_TIME`, `INVALID_DATE`, `DATE_OUT_OF_RANGE` |
 | `SHIFT_TIME(duration)` | moves the moment by a duration (keyboard: ±1 h, ±15 min) | — |
 | `SET_MEETING_RANGE(start, end)` | sets or replaces the meeting range (grid cell tap or drag, meeting handles) and pins the moment to `start` | `INVALID_MEETING_RANGE` |
+| `SET_MEETING_RANGE_WALL_TIMES(target, date, start, end)` | sets the meeting range from wall-clock times in a location (`target`) on a local date and pins the moment to the start | `INVALID_TIME`, `INVALID_DATE`, `LOCATION_NOT_FOUND`, `INVALID_MEETING_RANGE` |
 | `CLEAR_MEETING_RANGE()` | removes the meeting range; the moment stays pinned | — |
 | `SET_DATE(date)` | changes the date, keeping the wall-clock time of the reference zone; moves a meeting range with it | — |
 | `SHIFT_DATE(days)` | previous / next day; moves a meeting range with it | — |
@@ -88,7 +89,7 @@ Preferences commands: `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE`, `SET_VIEW_MOD
 ```mermaid
 stateDiagram-v2
     [*] --> LIVE
-    LIVE --> PINNED: SELECT_INSTANT, SET_WALL_TIME, SHIFT_TIME, SET_DATE, SHIFT_DATE, SET_MEETING_RANGE
+    LIVE --> PINNED: SELECT_INSTANT, SET_WALL_TIME, SHIFT_TIME, SET_DATE, SHIFT_DATE, SET_MEETING_RANGE, SET_MEETING_RANGE_WALL_TIMES
     PINNED --> PINNED: same commands
     PINNED --> LIVE: RESET_TO_NOW
 ```

@@ -1,4 +1,8 @@
-import type { TrackMove, WallTimeInputOutcome } from "@/controller";
+import type {
+  MeetingRangeInputOutcome,
+  TrackMove,
+  WallTimeInputOutcome,
+} from "@/controller";
 import type {
   PresentedDayTrack,
   PresentedLocationMark,
@@ -34,6 +38,12 @@ type ZoneRowContentProps = {
   onMoveTrack: (move: TrackMove) => void;
   /** Cards when omitted. */
   rowVariant?: LocationRowVariant;
+  /** Confirms the typed meeting range; `date` is the local ISO date the row showed when the input opened. */
+  onConfirmMeetingRange?: (
+    startText: string,
+    endText: string,
+    date: string,
+  ) => MeetingRangeInputOutcome;
   /** The meeting range's local span and day shift mark. */
   meetingRange?: PresentedLocationMeetingRange;
 };
@@ -51,6 +61,8 @@ type ZoneRowContentProps = {
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): the zone line on the city's line in a grid row.
  * Implements FR10 of add-grid-hour-cells-and-hour-frame (D5): the texts keep the surface background, so the hour frame breaks behind them.
  * Implements FR8 of add-grid-meeting-range-and-share (D8): passes the meeting range to the time.
+ * Implements FR8, UX3 of fix-grid-meeting-range-lock-and-layering (D6): the zone line container has no surface, only its parts.
+ * Implements FR3, FR4 of fix-grid-meeting-range-lock-and-layering (D4): passes the meeting range input to the time.
  */
 export function ZoneRowContent({
   cityLabel,
@@ -69,6 +81,7 @@ export function ZoneRowContent({
   onMoveTrack,
   rowVariant = LocationRowVariant.CARD,
   meetingRange,
+  onConfirmMeetingRange,
 }: ZoneRowContentProps) {
   const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
   const hasDifference = offsetDifferenceLabel !== "";
@@ -117,7 +130,7 @@ export function ZoneRowContent({
           {zoneLineParts.length > 0 && (
             <ZoneLine
               parts={zoneLineParts}
-              className="bg-surface text-sm text-muted-foreground"
+              className="text-sm text-muted-foreground"
             />
           )}
         </span>
@@ -128,6 +141,8 @@ export function ZoneRowContent({
           wallTimeInputLabel={wallTimeInputLabel}
           onConfirmWallTime={onConfirmWallTime}
           rowVariant={rowVariant}
+          cityLabel={cityLabel}
+          onConfirmMeetingRange={onConfirmMeetingRange}
           meetingRange={meetingRange}
         />
       </span>

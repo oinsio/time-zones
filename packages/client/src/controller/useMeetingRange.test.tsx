@@ -1,62 +1,12 @@
 // Verifies FR2, FR5, FR6, FR10, FR12, FR13 of add-grid-meeting-range-and-share.
 import { act, renderHook } from "@testing-library/react";
 import i18n from "i18next";
-import { type ReactNode, useContext } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createInMemoryLocationRepository } from "@/adapters";
-import { LocationsProvider, TrackMove } from "@/controller";
+import { TrackMove } from "@/controller";
 import { MeetingHandle } from "@/model";
-import { LocationsLoadStatus } from "@/ports";
-import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { createSwitchableClock } from "@/test/switchableClock";
-import { createManualTickScheduler } from "@/test/tickSchedulers";
-import { createManualWriteScheduler } from "@/test/writeSchedulers";
-import { LocationsContext } from "./locationsContext";
+import { buildLocation } from "@/test/factories/buildLocation";
 import { useMeetingRange } from "./useMeetingRange";
-
-const cityRow = (label: string) =>
-  buildLocation({ label, ...KNOWN_CITIES[label] });
-const almaty = cityRow("Almaty");
-
-function setup(extraLocations: ReturnType<typeof cityRow>[] = []) {
-  const clock = createSwitchableClock("2026-03-08T07:30:00Z", "Asia/Almaty");
-  const repository = createInMemoryLocationRepository({
-    initialDocument: {
-      status: LocationsLoadStatus.LOADED,
-      locations: [
-        almaty,
-        cityRow("Moscow"),
-        cityRow("New York"),
-        ...extraLocations,
-      ],
-      homeLocationId: almaty.id,
-    },
-  });
-  const save = vi.spyOn(repository, "save");
-  const rendered = renderHook(
-    () => ({
-      ...useMeetingRange(),
-      store: useContext(LocationsContext)?.store,
-    }),
-    {
-      wrapper: ({ children }: { children: ReactNode }) => (
-        <LocationsProvider
-          repository={repository}
-          writeScheduler={createManualWriteScheduler()}
-          clock={clock}
-          tickScheduler={createManualTickScheduler()}
-        >
-          {children}
-        </LocationsProvider>
-      ),
-    },
-  );
-  const span = () => {
-    const { meeting } = rendered.result.current;
-    return meeting && [meeting.span.startMinutes, meeting.span.endMinutes];
-  };
-  return { ...rendered, save, span };
-}
+import { almaty, cityRow, setup } from "./useMeetingRangeSetup";
 
 describe("useMeetingRange", () => {
   beforeEach(() => i18n.changeLanguage("en"));

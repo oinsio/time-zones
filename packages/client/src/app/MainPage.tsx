@@ -32,6 +32,7 @@ const MEETING_HEADER_CLASS_NAMES =
  * Implements FR3, FR4, UX2 of fix-location-card-and-header-layout (D3): one
  * header layout on every width, the title centred on the page.
  * Implements FR13, NFR-R1, UX1 of add-grid-meeting-range-and-share (D7): the meeting bar takes the header's place.
+ * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  */
 export function MainPage({
   notices,
@@ -61,7 +62,7 @@ export function MainPage({
       <main className="flex-1">
         <ViewHost />
       </main>
-      <footer className="sticky bottom-0 -mx-4 border-t border-border bg-surface">
+      <footer className="sticky bottom-0 z-page-bar -mx-4 border-t border-border bg-surface">
         <div
           role="status"
           aria-live="polite"

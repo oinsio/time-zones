@@ -12,6 +12,10 @@ export type MeetingPresentationContext = {
 };
 
 export type PresentedLocationMeetingRange = {
+  /** "09:00": the local start in the hour format. */
+  startTimeLabel: string;
+  /** "11:00": the local end in the hour format. */
+  endTimeLabel: string;
   /** "09:00–11:00": the local start and end in the hour format. */
   spanLabel: string;
   /** "a day earlier" / "a day later"; absent when the local date is the reference zone's. */
@@ -27,6 +31,7 @@ const DAY_SHIFT_KEYS: Record<Exclude<DayShift, DayShift.SAME>, string> = {
  * The local span of the meeting range in a location's zone and its day shift
  * mark. Formatters come from the cached `formatLocalTime`.
  * Implements FR8, NFR-P1 of add-grid-meeting-range-and-share (D3).
+ * Implements FR3 of fix-grid-meeting-range-lock-and-layering (D4): the two ends.
  */
 export function presentLocationMeetingRange(
   timeZoneId: string,
@@ -39,11 +44,11 @@ export function presentLocationMeetingRange(
     meeting,
     referenceZoneId,
   );
-  const spanLabel =
-    formatLocalTime(localStart, language, hourFormat) +
-    MEETING_SPAN_SEPARATOR +
-    formatLocalTime(localEnd, language, hourFormat);
+  const startTimeLabel = formatLocalTime(localStart, language, hourFormat);
+  const endTimeLabel = formatLocalTime(localEnd, language, hourFormat);
+  const spanLabel = startTimeLabel + MEETING_SPAN_SEPARATOR + endTimeLabel;
+  const presented = { startTimeLabel, endTimeLabel, spanLabel };
   return dayShift === DayShift.SAME
-    ? { spanLabel }
-    : { spanLabel, dayShiftLabel: translate(DAY_SHIFT_KEYS[dayShift]) };
+    ? presented
+    : { ...presented, dayShiftLabel: translate(DAY_SHIFT_KEYS[dayShift]) };
 }

@@ -2,6 +2,7 @@
 import { screen } from "@testing-library/react/pure";
 import { createInMemoryTextSharing } from "@/adapters";
 import type { InterfaceLanguageCode } from "@/locales";
+import { HourFormat } from "@/preferences";
 import { ViewId } from "@/views";
 import { createGridViewWorld } from "../../main_page/steps/gridViewWorld";
 import { setSampleMeeting } from "./meetingGridQueries";
@@ -18,6 +19,7 @@ export const createMeetingGridSession = () => {
   const world = createGridViewWorld();
   let sharing = openSharing();
   let language: InterfaceLanguageCode = "en";
+  let hourFormat: HourFormat = HourFormat.H24;
 
   const openGrid = async (
     cities: string[] = ALL_CITIES,
@@ -25,7 +27,7 @@ export const createMeetingGridSession = () => {
   ) => {
     world.setInstant(SAMPLE_INSTANT);
     world.setDeviceZone(ALMATY_ZONE);
-    world.storeViewModeAndLanguage(ViewId.GRID, language);
+    world.storeViewModeAndLanguage(ViewId.GRID, language, hourFormat);
     world.storeLocations(cities);
     await world.openApp(textSharing);
     await screen.findAllByRole("slider");
@@ -43,6 +45,9 @@ export const createMeetingGridSession = () => {
     useSharing: (options: Parameters<typeof createInMemoryTextSharing>[0]) => {
       sharing = createInMemoryTextSharing(options);
     },
+    setHourFormat: (format: HourFormat) => {
+      hourFormat = format;
+    },
     setLanguage: (code: InterfaceLanguageCode) => {
       language = code;
     },
@@ -50,6 +55,7 @@ export const createMeetingGridSession = () => {
       await world.reset();
       sharing = openSharing();
       language = "en";
+      hourFormat = HourFormat.H24;
     },
   };
 };

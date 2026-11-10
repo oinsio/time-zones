@@ -172,7 +172,7 @@ Then(
       row.getByText(city, { exact: true }),
       row.locator("[data-zone-line]"),
       row.locator("time"),
-      row.getByRole("button", { name: /^Enter time/ }),
+      row.getByRole("button", { name: /^Enter meeting time/ }),
     ];
     let checkedCrossings = 0;
     for (const headerText of headerTexts) {

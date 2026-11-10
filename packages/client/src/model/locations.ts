@@ -19,6 +19,7 @@ import {
   reduceClearMeetingRange,
   reduceSetMeetingRange,
 } from "./reduceMeetingRange";
+import { reduceMeetingRangeWallTimes } from "./reduceMeetingRangeWallTimes";
 import { reduceReferenceMoment } from "./reduceReferenceMoment";
 import { reduceSelectInstant } from "./reduceSelectInstant";
 import { reduceWallTime } from "./reduceWallTime";
@@ -190,6 +191,8 @@ function reduceCommand(
       return reduceSelectInstant(state, command);
     case LocationCommandType.SET_MEETING_RANGE:
       return reduceSetMeetingRange(state, command);
+    case LocationCommandType.SET_MEETING_RANGE_WALL_TIMES:
+      return reduceMeetingRangeWallTimes(state, command);
     case LocationCommandType.CLEAR_MEETING_RANGE:
       return reduceClearMeetingRange(state);
   }

@@ -38,9 +38,10 @@ function measureStripCentre(
 /**
  * A meeting handle: a slider standing on the meeting frame's left or right
  * edge over the hour strip of its row. Dragged by pointer or finger, moved by
- * the slider keys. Lies above everything in the panel (`z-[3]`).
+ * the slider keys. Lies above everything in the panel (`z-meeting-handle`).
  * Implements FR9, FR10, FR12, NFR-A1, NFR-A2, NFR-R1, UX1, UX2 of
  * add-grid-meeting-range-and-share (D6).
+ * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  */
 export function MeetingHandleSlider({
   presented,
@@ -87,7 +88,7 @@ export function MeetingHandleSlider({
     <li
       ref={itemElement}
       data-meeting-handle={handle}
-      className="absolute z-[3] h-12 w-6 -translate-x-1/2 -translate-y-1/2"
+      className="absolute z-meeting-handle h-12 w-6 -translate-x-1/2 -translate-y-1/2"
       style={{
         left: `calc(var(${HourGridCssVariable.ROW_PADDING}) + ${presented.valueMinutes} / ${MINUTES_PER_HOUR} * var(${HourGridCssVariable.CELL_PITCH}))`,
         top: centreTopPx,

@@ -1,6 +1,7 @@
 /**
  * How a view shows one location row: a card of its own, or a row of the grid panel.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4).
+ * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  */
 export enum LocationRowVariant {
   CARD = "card",
@@ -14,6 +15,10 @@ type LocationRowVariantClassNames = {
   row: string;
   /** The box around the row header; none where the row header needs none. */
   headerBox?: string;
+  /** The layer of the header box at rest; with the box only. */
+  headerBoxLayer?: string;
+  /** The layer of the header box while its location menu is open; with the box only. */
+  headerBoxLayerWithOpenMenu?: string;
   /** The box around the row notes; none where the notes need none. */
   notesBox?: string;
   /** The block holding the place column and the local time. */
@@ -34,7 +39,7 @@ type LocationRowVariantClassNames = {
 
 const HEADER_LINE_CLASS_NAMES = "flex flex-wrap items-center gap-x-3 gap-y-2";
 const STICKY_BOX_CLASS_NAMES =
-  "sticky left-[var(--grid-row-padding)] z-[2] w-[calc(var(--grid-panel-width)-2*var(--grid-row-padding))]";
+  "sticky left-[var(--grid-row-padding)] z-grid-box w-[calc(var(--grid-panel-width)-2*var(--grid-row-padding))]";
 
 /**
  * The classes that differ between the variants, in one place so the shared
@@ -64,7 +69,9 @@ export const LOCATION_ROW_VARIANT_CLASS_NAMES: Record<
   [LocationRowVariant.GRID_ROW]: {
     list: "relative overflow-x-auto overscroll-x-contain rounded-md border border-border",
     row: "flex flex-col gap-y-2 px-[var(--grid-row-padding)] min-w-full w-max border-t border-border first:border-t-0 first:rounded-t-md last:rounded-b-md",
-    headerBox: `${HEADER_LINE_CLASS_NAMES} ${STICKY_BOX_CLASS_NAMES} focus-within:z-[4]`,
+    headerBox: `${HEADER_LINE_CLASS_NAMES} ${STICKY_BOX_CLASS_NAMES}`,
+    headerBoxLayer: "focus-within:z-grid-box-focused",
+    headerBoxLayerWithOpenMenu: "z-location-menu",
     notesBox: `${STICKY_BOX_CLASS_NAMES} order-last`,
     placeAndTime: "md:flex-1",
     place: "md:flex-1 md:flex-row md:items-baseline md:gap-x-2",

@@ -600,7 +600,7 @@ Selecting a time is part of the view contract (ADR-0002). For every registered v
 - **THEN** Almaty shows `12:30` and Moscow shows `10:30`
 
 ### Requirement: Wall-time input on every row
-The time of every location card whose time zone is known, the device time location included, SHALL be a wall-time input. Activating it by tap, click, Enter or Space MUST open a field that holds the row's current time as shown in the hour format, fully selected. A row whose zone the browser does not know shows no time and MUST have no wall-time input. The input needs no network. <!-- implements FR1 of add-wall-time-input-with-hint; FR5, FR9 of add-settings-page-and-device-time-location -->
+The time of every location card whose time zone is known, the device time location included, SHALL be a wall-time input. Activating it by tap, click, Enter or Space MUST open a field that holds the row's current time as shown in the hour format, fully selected. A row whose zone the browser does not know shows no time and MUST have no wall-time input. The input needs no network. In the Grid view, while a meeting range is set, no row MUST offer the wall-time input: activating the span opens the meeting range input of `grid-view` instead, and a wall-time input open when the range is set MUST close without a change; once the meeting range is removed every row's time MUST be a wall-time input again. The Cards view keeps it in every state. <!-- implements FR1 of add-wall-time-input-with-hint; FR5, FR9 of add-settings-page-and-device-time-location; FR1, FR2 of fix-grid-meeting-range-lock-and-layering -->
 
 #### Scenario: Open the field
 - **GIVEN** the device time zone is `Asia/Almaty`
@@ -622,6 +622,13 @@ The time of every location card whose time zone is known, the device time locati
 - **WHEN** the list is presented
 - **THEN** Moscow has a wall-time input
 - **AND** the other location has none
+
+#### Scenario: No wall-time input in Grid while a meeting range is set
+- **GIVEN** the Grid view with Almaty and Moscow and the meeting range 09:00–11:00 in Almaty on 2026-03-08
+- **WHEN** the user activates Moscow's span
+- **THEN** the meeting range input of Moscow opens and no wall-time input opens
+- **WHEN** the user clears the meeting range and activates Moscow's time
+- **THEN** the wall-time input of Moscow opens
 
 ### Requirement: Closing the wall-time input
 Escape, or leaving the field without changing its text, SHALL close the field and change nothing. After Enter or Escape, focus MUST return to the row's time. <!-- implements FR5 of add-wall-time-input-with-hint -->

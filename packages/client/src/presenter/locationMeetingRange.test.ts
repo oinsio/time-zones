@@ -1,4 +1,5 @@
 // Verifies FR8 of add-grid-meeting-range-and-share.
+// Verifies FR3 of fix-grid-meeting-range-lock-and-layering.
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
@@ -30,6 +31,21 @@ describe("presentLocationMeetingRange", () => {
   ])("should write the span of %s as %s", (timeZoneId, span) => {
     expect(present(timeZoneId).spanLabel).toBe(span);
   });
+
+  it.each([
+    ["Asia/Almaty", "09:00", "11:00"],
+    ["Europe/Moscow", "07:00", "09:00"],
+    ["Asia/Kolkata", "09:30", "11:30"],
+    ["America/New_York", "23:00", "01:00"],
+  ])(
+    "should give the start and end labels of %s as %s and %s",
+    (timeZoneId, startTimeLabel, endTimeLabel) => {
+      const presented = present(timeZoneId);
+      expect(presented.startTimeLabel).toBe(startTimeLabel);
+      expect(presented.endTimeLabel).toBe(endTimeLabel);
+      expect(presented.spanLabel).toBe(`${startTimeLabel}–${endTimeLabel}`);
+    },
+  );
 
   it("should label New York a day earlier", () => {
     expect(present("America/New_York").dayShiftLabel).toBe("днём раньше");

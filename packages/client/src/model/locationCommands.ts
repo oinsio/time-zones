@@ -24,6 +24,7 @@ export enum LocationCommandType {
   SET_HOME_LOCATION = "SET_HOME_LOCATION",
   SET_WALL_TIME = "SET_WALL_TIME",
   SET_MEETING_RANGE = "SET_MEETING_RANGE",
+  SET_MEETING_RANGE_WALL_TIMES = "SET_MEETING_RANGE_WALL_TIMES",
   CLEAR_MEETING_RANGE = "CLEAR_MEETING_RANGE",
 }
 
@@ -78,4 +79,15 @@ export type LocationCommand =
     }
   /** `start` and `end` are ISO 8601 timestamps with `Z`. */
   | { type: LocationCommandType.SET_MEETING_RANGE; start: string; end: string }
+  /** Implements FR5 of fix-grid-meeting-range-lock-and-layering (D2). */
+  | {
+      type: LocationCommandType.SET_MEETING_RANGE_WALL_TIMES;
+      target: WallTimeTarget;
+      /** ISO date: the local date of the start in the target row. */
+      date: string;
+      /** "HH:MM", 24-hour. */
+      start: string;
+      /** "HH:MM", 24-hour. */
+      end: string;
+    }
   | { type: LocationCommandType.CLEAR_MEETING_RANGE };

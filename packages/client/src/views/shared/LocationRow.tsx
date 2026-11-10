@@ -1,6 +1,4 @@
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { forwardRef, type ReactNode, useId, useRef } from "react";
+import { forwardRef, type ReactNode, useId, useState } from "react";
 import {
   type TrackMove,
   type WallTimeInputOutcome,
@@ -12,6 +10,7 @@ import type {
   PresentedLocationMeetingRange,
 } from "@/presenter";
 import { DragHandle } from "./DragHandle";
+import type { ConfirmMeetingRange } from "./hourGridSlots";
 import { LocationMenu } from "./LocationMenu";
 import {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
@@ -19,9 +18,8 @@ import {
 } from "./locationRowVariant";
 import { OptionalBox } from "./OptionalBox";
 import { RowNotes } from "./RowNotes";
-import { getReorderTransition } from "./reorderTransition";
-import { useDropSettleAnimation } from "./useDropSettleAnimation";
 import { useLocationMenuItems } from "./useLocationMenuItems";
+import { useSortableLocationRow } from "./useSortableLocationRow";
 import { ZoneRowContent } from "./ZoneRowContent";
 
 type LocationRowProps = {
@@ -43,6 +41,10 @@ type LocationRowProps = {
   /** The hour strip of a grid row, shown after the row header and before the row notes. */
   hourStrip?: ReactNode;
   meetingRange?: PresentedLocationMeetingRange;
+  /** Confirms the meeting range typed in this row; `locationId` is the row. */
+  onConfirmMeetingRange?: ConfirmMeetingRange;
+  /** Locks the drag handle and the location menu; `false` when omitted. */
+  areRowControlsLocked?: boolean;
 };
 
 /**
@@ -76,6 +78,7 @@ type LocationRowProps = {
  * a row of the grid panel, the same row header.
  * Implements FR1, FR7, FR10 of add-grid-hour-cells-and-hour-frame (D5): hour strip, then notes, in sticky boxes.
  * Implements FR8 of add-grid-meeting-range-and-share (D8): the meeting span in the row header; the notes live in `RowNotes`.
+ * Implements FR1-FR4, FR6, FR7, UX1 of fix-grid-meeting-range-lock-and-layering (D1, D4, D5): the lock, the meeting range input and the menu layer.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -91,32 +94,20 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       rowVariant = LocationRowVariant.CARD,
       hourStrip,
       meetingRange,
+      onConfirmMeetingRange,
+      areRowControlsLocked = false,
     },
     menuButtonRef,
   ) {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      setActivatorNodeRef,
-      transform,
-      transition,
-      isDragging,
-      isSorting,
-    } = useSortable({
-      id: row.id,
-      transition: getReorderTransition(prefersReducedMotion),
-    });
+    const sortable = useSortableLocationRow(
+      row.id,
+      prefersReducedMotion,
+      areRowControlsLocked,
+    );
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const cityId = useId();
     const markId = useId();
     const differenceId = useId();
-    const cardRef = useRef<HTMLLIElement | null>(null);
-    const dropSettle = useDropSettleAnimation(
-      cardRef,
-      isDragging,
-      isSorting,
-      prefersReducedMotion,
-    );
     const hasDifference = row.offsetDifferenceLabel !== "";
     const menuItems = useLocationMenuItems(row, onSetHome, onRemove);
     const labelIds = [
@@ -125,33 +116,34 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       hasDifference && differenceId,
     ];
     const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
-    const draggingClassName = isDragging ? " relative z-10 shadow-lg" : "";
+    const headerBoxLayer = isMenuOpen
+      ? variantClassNames.headerBoxLayerWithOpenMenu
+      : variantClassNames.headerBoxLayer;
+    const headerBoxClassName =
+      variantClassNames.headerBox === undefined
+        ? undefined
+        : `${variantClassNames.headerBox} ${headerBoxLayer}`;
     return (
       <li
-        ref={(element) => {
-          cardRef.current = element;
-          setNodeRef(element);
-        }}
-        style={{
-          transform: dropSettle.transform ?? CSS.Transform.toString(transform),
-          transition: dropSettle.transition ?? transition,
-        }}
-        onTransitionEnd={dropSettle.onTransitionEnd}
+        ref={sortable.setItemRef}
+        style={sortable.style}
+        onTransitionEnd={sortable.onTransitionEnd}
         aria-label={row.accessibleName}
         aria-labelledby={
           row.accessibleName === undefined
             ? labelIds.filter(Boolean).join(" ")
             : undefined
         }
-        className={`bg-surface py-3 ${variantClassNames.row}${draggingClassName}`}
+        className={`bg-surface py-3 ${variantClassNames.row}${sortable.draggingClassName}`}
       >
-        <OptionalBox className={variantClassNames.headerBox}>
+        <OptionalBox className={headerBoxClassName}>
           {isReorderable && (
             <DragHandle
-              ref={setActivatorNodeRef}
+              ref={sortable.setActivatorNodeRef}
               city={row.cityLabel}
-              attributes={attributes}
-              listeners={listeners}
+              attributes={sortable.attributes}
+              listeners={sortable.listeners}
+              isDisabled={areRowControlsLocked}
             />
           )}
           <ZoneRowContent
@@ -179,12 +171,19 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             onMoveTrack={onMoveTrack}
             rowVariant={rowVariant}
             meetingRange={meetingRange}
+            onConfirmMeetingRange={
+              onConfirmMeetingRange &&
+              ((startText, endText, date) =>
+                onConfirmMeetingRange(row.id, startText, endText, date))
+            }
           />
           <LocationMenu
             ref={menuButtonRef}
             city={row.cityLabel}
             items={menuItems}
             isMenuFixedToViewport={variantClassNames.isMenuFixedToViewport}
+            isDisabled={areRowControlsLocked}
+            onOpenChange={setIsMenuOpen}
           />
         </OptionalBox>
         {hourStrip}
