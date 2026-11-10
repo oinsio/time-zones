@@ -104,7 +104,8 @@
 - Impact: Implemented as written, the archived specs keep a requirement the config then violates (Cards' run omits `@view-contract` scenarios with no pending marker), and a future view that simply omits the flag silently skips the meeting scenarios — the exact failure ADR-0005 forbids. A later change that checks the config against `main-page` finds two contradicting rules.
 - Fix: (1) Add to `specs/main-page/spec.md` a `## MODIFIED Requirements` entry "View contract runs every scenario for every registered view", restating `openspec/specs/main-page/spec.md:332-345` in full and adding: "A scenario tagged `@meeting-range` belongs to the meeting range capability (ADR-0011): it runs for every view whose registry entry shows the meeting range (`showsMeetingRange`) and for no other view; this is not a pending exclusion." plus a scenario "Meeting scenarios run only for views that show the meeting range" (the Grid contract project lists "Set, resize, share and clear", the Cards project does not — the `--list` checks 8.4 already runs), and `FR17 of add-grid-meeting-range-and-share` in its implements comment; list `main-page` → this requirement in `proposal.md` "What Changes" / "Modified Capabilities". (2) Because the rule binds every future view, add handoff item H3 with a checkbox task "write `H3-adr-0005-capability-scoped-contract.patch` and its README section" that appends to ADR-0005's Consequences a "Refined by ADR-0011" note ("contract scenarios of a capability a view does not show, flagged in its registry entry, run only for the views that show it"), `git apply --check` in its verification; under `## Human follow-up`: "Why manual: the factory may not write `docs/adr/`. Automated part: the `--list` counts of task 8.4." Change D11's "no new global decision" sentence accordingly.
 - Fix risk: Adds one handoff item and one modified requirement; no checkbox task depends on H3 (8.4 runs without it). The restated requirement must keep "Grid runs every contract scenario" true, which it does since Grid sets the flag.
-- Status: open
+- Status: fixed
+- Resolution: added to `specs/main-page/spec.md` a MODIFIED "View contract runs every scenario for every registered view", restated from `openspec/specs/main-page/spec.md` with the rule that a `@meeting-range` scenario is a capability scenario (runs for every view with `showsMeetingRange`, for no other, not a pending exclusion; FR17 in its implements comment) and the scenario "Meeting scenarios run only for views that show the meeting range"; listed it in `proposal.md` What Changes / Modified Capabilities / Impact; rewrote D11's last bullet and the design intro (a global rule refining ADR-0005, recorded through H3); task 8.4 adds the Cards "Select a time" `--list` check; new task 10.3 writes `H3-adr-0005-capability-scoped-contract.patch` with `git apply --check`, and `## Human follow-up` gains H3 (Why manual: the factory may not write `docs/adr/`).
 
 ### R2 — WARNING — The meeting bar title replaces "the app title as the only page heading" without a delta
 - Location: `openspec/changes/add-grid-meeting-range-and-share/design.md:133`; `proposal.md` FR13
@@ -113,7 +114,8 @@
 - Impact: After archive, `main-page` and `app-shell` still require the app title as the only heading in a state where the change removes it; the implementer has no spec saying which heading the meeting state has (one `h1` with the bar title, or none), and the header test changes of 7.4 are unanchored.
 - Fix: In `specs/main-page/spec.md` add MODIFIED "Main page regions" (restated in full) with "while the meeting bar is shown, its title is the only page heading in place of the app title"; add `specs/app-shell/spec.md` with MODIFIED "Shell shows the app title in the active language" carrying the same exception; list both in `proposal.md` → Modified Capabilities. In task 7.4 add to `MainPage.test.tsx`: "with `meetingBar` there is exactly one heading, the bar title".
 - Fix risk: Adds `app-shell` to the touched capabilities; the restated texts must be copied verbatim from `openspec/specs/` apart from the added sentence.
-- Status: open
+- Status: fixed
+- Resolution: added MODIFIED `main-page` → "Main page regions" (verbatim plus "while the meeting bar is shown its title is the only page heading in place of the app title" and the scenario "The meeting bar title is the only heading") and new `specs/app-shell/spec.md` with MODIFIED "Shell shows the app title in the active language" (same exception, document title stays the app title, scenario "The meeting bar title replaces the heading"); both listed in `proposal.md`; D7 states the `h1` is the only heading; task 7.4 asserts exactly one heading in `MainPage.test.tsx` and the AppShell test.
 
 ### R3 — WARNING — The hour-frame auto-scroll keeps running during a meeting and fights the handle drag
 - Location: `openspec/changes/add-grid-meeting-range-and-share/design.md:95`, `:114`
@@ -122,7 +124,8 @@
 - Impact: On a phone in portrait, dragging the start handle into the 32 px left edge zone (FR11) leaves the start's column partly hidden; when the start crosses into the next column, the existing effect smooth-scrolls the panel to centre that column, so the panel jumps about half its width under the finger and the next pointer position maps to a start hours away — against FR10/UX2 ("never jumps"). No task tests a start-handle drag at an edge.
 - Fix: In D6 decide that `GridView` does not let `useHourStripScroll` follow the hour frame while a meeting range is set (e.g. a `isFollowingHourFrame` argument false while `hasMeetingRange`), and add to task 7.2 a `useHourStripScroll.test.tsx` case: "with a meeting range, a frame index change to a hidden column does not scroll the panel", plus in 8.2 a phone scenario dragging the start handle to the left edge whose start ends earlier and never jumps more than one track step per move.
 - Fix risk: After Clear the hour frame stands on the start column, which the user was just looking at; if it is out of view the effect must run once when following resumes — state that in D6 so the "Clear meeting" scenario still finds the frame visible.
-- Status: open
+- Status: fixed
+- Resolution: D6 gains "No hour-frame auto-scroll during a meeting": `useHourStripScroll` takes `isFollowingHourFrame`, `GridView` passes `!hasMeetingRange`, and following resumes once after Clear (D5 updated); `grid-view` → "Handle drag scrolls the strips" now forbids following the hour frame during a meeting and adds the scenarios "Dragging the start handle to the left edge on a phone" and "The hour frame comes back into view after Clear"; task 7.2 adds the `useHourStripScroll.test.tsx` cases, task 8.2 the two phone scenarios (slider value changes by at most 15 per move).
 
 ### R4 — WARNING — The handle drag formula adds `scrollLeft` to a position that already moves with the scroll
 - Location: `openspec/changes/add-grid-meeting-range-and-share/design.md:114`; `tasks.md:250` (`useMeetingHandleDrag.test.tsx` "minutes from `clientX`, `scrollLeft` and pitch")
@@ -131,7 +134,8 @@
 - Impact: With the panel scrolled (phone portrait, the only case FR11 applies), a handle would land `scrollLeft` pixels (often several hours) to the right of the finger. The 7.2 unit test with a stubbed rect passes either way, desktop E2E has `scrollLeft = 0`, and 8.2's phone scenario only checks "the end is after 11:00", so the bug would ship.
 - Fix: In D6 write the handle mapping as `minutes = (clientX − strip.getBoundingClientRect().left) / pitch × 60`, re-read after each auto-scroll frame, the same rule as the cells; in task 7.2 test it with a scrolled panel (rect left shifted by the scroll) expecting the minutes under the pointer; in 8.2's phone scenario assert that after the drag the end handle's centre is within one track step of the pointer's last position.
 - Fix risk: none — the cells already use this rule.
-- Status: open
+- Status: fixed
+- Resolution: D6's drag mapping is now `(clientX − strip.getBoundingClientRect().left) / pitch × 60`, re-read after every move and auto-scroll frame, the same rule as the cells, with no `scrollLeft` added; task 7.2 tests it with a scrolled panel (rect shifted by `−scrollLeft`), task 8.2's phone drag asserts the end handle ends within one track step of the finger (also stated in the `grid-view` scenario).
 
 ### R5 — WARNING — Task 6.4 cannot pass before tasks 7.2–7.4
 - Location: `openspec/changes/add-grid-meeting-range-and-share/tasks.md:244`
@@ -140,7 +144,8 @@
 - Impact: The implement stage reaches 6.4 with no view code: either the task stays unticked, or the implementer pulls 7.2–7.4 forward out of order and the RED/GREEN steps of those tasks lose their meaning.
 - Fix: Move 6.4 (with its `grid_view_hour_frame_unit.feature` change) after 7.4 as task 7.5 under section 7, or split it: write the feature as RED in 6.4 and make "Run …: pass" part of 7.4.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: moved the Grid meeting unit BDD task to 7.5, after 7.4, stating it needs 7.2–7.4; the budget task became 6.4 and the section 6 heading lists only the ids its tasks cover.
 
 ### R6 — WARNING — The finger swipe and finger drag E2E steps name tools that cannot scroll the strips
 - Location: `openspec/changes/add-grid-meeting-range-and-share/tasks.md:256` (8.1 "A swipe on a scrolling strip sets nothing … `page.touchscreen` / `locator.dispatchEvent` touch events"), `tasks.md:257` (8.2 touch drag on a phone)
@@ -149,7 +154,8 @@
 - Impact: With the named tools the swipe scenario cannot pass ("the strips scroll" never holds), or it is weakened to only "no range set", which leaves FR6's "a finger swipe scrolls the strips" untested; 8.2's phone handle drag has the same gap for FR11.
 - Fix: In 8.1 and 8.2 replace "`page.touchscreen` / `locator.dispatchEvent` touch events" by "a CDP finger gesture with `startTouch` / `dragWithFinger` (and `dispatchTouch` to hold at the edge) from `src/test/features/locations/steps/locationsReorderE2eHelpers.ts`", run on `mobile-chrome`.
 - Fix risk: CDP needs a Chromium project; `chromium` and `mobile-chrome` both are, and the scenarios are already scoped to `mobile-chrome`.
-- Status: open
+- Status: fixed
+- Resolution: tasks 8.1 ("A swipe on a scrolling strip sets nothing") and 8.2 (both phone handle drags) now use the CDP finger gesture `startTouch` / `dragWithFinger` / `dispatchTouch` of `src/test/features/locations/steps/locationsReorderE2eHelpers.ts` on `mobile-chrome`, and the swipe asserts that `scrollLeft` changed; `page.touchscreen` / `locator.dispatchEvent` are named as unusable.
 
 ### R7 — SUGGESTION — "meeting text" in the specs vs the new glossary term "Meeting share text"
 - Location: `openspec/changes/add-grid-meeting-range-and-share/specs/meeting-range/spec.md:132,161-162`; `specs/grid-view/spec.md:166,176`; `tasks.md:216`
@@ -158,7 +164,8 @@
 - Impact: The Gherkin steps written from these scenarios carry a name that is not the glossary term, which the glossary rule counts as a synonym.
 - Fix: Either use "meeting share text" in those scenario lines, or name the glossary entry **Meeting text** in task 1.1 (matching the notice «Текст встречи скопирован» / "Meeting text copied") — one word in both places.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: the scenarios and requirement text in `specs/meeting-range/spec.md` and `specs/grid-view/spec.md` (and H2 in `tasks.md`) now say "the meeting share text", the glossary term task 1.1 adds (*Code:* `presentMeetingShareText`); the UI notice «Текст встречи скопирован» / "Meeting text copied" is interface text and stays.
 
 ## Verdict
 
