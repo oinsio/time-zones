@@ -7,7 +7,7 @@ The application frame that every view lives in: it names the app in the user's l
 ## Requirements
 
 ### Requirement: Shell shows the app title in the active language
-The shell SHALL render the app title as the only page heading. The heading, the document title and the page `lang` attribute MUST follow the active UI language, also when it changes while the app is open, without a reload. The supported languages are exactly the locales of the locale registry; today these are English and Russian. <!-- implements FR2 of setup-app-shell-and-pages-deploy; implements FR5, FR9 of add-interface-language-selection -->
+The shell SHALL render the app title as the only page heading, except while the meeting bar is shown (`grid-view` → Meeting bar), when the meeting bar title is the only page heading in place of the app title; the document title stays the app title. The heading, the document title and the page `lang` attribute MUST follow the active UI language, also when it changes while the app is open, without a reload. The supported languages are exactly the locales of the locale registry; today these are English and Russian. <!-- implements FR2 of setup-app-shell-and-pages-deploy; implements FR5, FR9 of add-interface-language-selection; FR13 of add-grid-meeting-range-and-share -->
 
 #### Scenario: English user opens the app
 - **WHEN** the active UI language is English
@@ -23,6 +23,12 @@ The shell SHALL render the app title as the only page heading. The heading, the 
 - **GIVEN** the active UI language is English
 - **WHEN** the user chooses Russian on the settings page
 - **THEN** the document title reads "Часовые пояса" and the page `lang` attribute is `ru` without a reload
+
+#### Scenario: The meeting bar title replaces the heading
+- **GIVEN** the active UI language is English
+- **WHEN** the Grid view shows a meeting range of 2 hours
+- **THEN** the only page heading reads "Meeting · 2 h"
+- **AND** the document title reads "Time Zones"
 
 ### Requirement: Theme follows the system and uses design tokens
 All colors SHALL come from design tokens that have a light and a dark value. The active theme MUST follow the theme preference (see the `settings` capability): Light and Dark apply their token values whatever the system color-scheme preference is, and System, the default, follows the system color-scheme preference. Without a stored theme preference, the system color-scheme preference MUST be applied before the first paint. A stored Light or Dark choice MUST be applied before the main page is first shown. Text MUST use the Manrope font, which MUST be available without network after the first visit. <!-- implements FR9, UX1, NFR-A3 of setup-app-shell-and-pages-deploy; FR4 of add-settings-page-and-device-time-location -->

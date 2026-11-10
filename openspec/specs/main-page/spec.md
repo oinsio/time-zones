@@ -6,7 +6,7 @@ The main page of the app: the page frame (header, content region hosting the act
 ## Requirements
 
 ### Requirement: Main page regions
-The main page SHALL consist of a header with the app title as the only page heading, the Add location button and the settings button (see "Header actions"), a content region hosting the active view, a bottom bar holding the date bar (see the `date-selection` capability) that stays at the bottom of the viewport and is the page's footer landmark, and a polite notices region, out of the document flow, that keeps the offline-ready and update notices and stacks the storage warning with them. The notices region MUST sit above the bottom bar and MUST NOT cover it. <!-- implements FR1, UX3 of add-main-page-scaffold; FR8 of select-date-with-calendar-and-now; FR1, FR2 of add-settings-page-and-device-time-location; FR7 of polish-settings-and-remove-offline-update-notice -->
+The main page SHALL consist of a header with the app title as the only page heading (while the meeting bar is shown — `grid-view` → Meeting bar — its title is the only page heading in place of the app title), the Add location button and the settings button (see "Header actions"), a content region hosting the active view, a bottom bar holding the date bar (see the `date-selection` capability) that stays at the bottom of the viewport and is the page's footer landmark, and a polite notices region, out of the document flow, that keeps the offline-ready and update notices and stacks the storage warning with them. The notices region MUST sit above the bottom bar and MUST NOT cover it. <!-- implements FR1, UX3 of add-main-page-scaffold; FR8 of select-date-with-calendar-and-now; FR1, FR2 of add-settings-page-and-device-time-location; FR7 of polish-settings-and-remove-offline-update-notice; FR13 of add-grid-meeting-range-and-share -->
 
 #### Scenario: User opens the app
 - **WHEN** the user opens the app
@@ -22,6 +22,13 @@ The main page SHALL consist of a header with the app title as the only page head
 #### Scenario: Header keeps its position
 - **WHEN** the page shows the storage warning
 - **THEN** the header keeps its position
+
+#### Scenario: The meeting bar title is the only heading
+- **GIVEN** the interface language is Russian and the Grid view shows Almaty and Moscow
+- **WHEN** the user sets a meeting range from 09:00 to 11:00
+- **THEN** the page has exactly one heading, «Встреча · 2 ч»
+- **WHEN** the user clears the meeting range
+- **THEN** the page has exactly one heading, «Часовые пояса»
 
 ### Requirement: Cards view is registered and lazy
 The registry SHALL contain the Cards view and the Grid view, in this order, each with a title key present in every locale file. Their components MUST be loaded lazily, so a view that is not shown is not part of the initial JavaScript. <!-- implements FR3, NFR-P1 of add-main-page-scaffold; FR7, NFR-P1 of add-view-mode-setting-and-grid-skeleton -->
@@ -119,7 +126,7 @@ The main page in each state (loading, error, empty, offline, storage unavailable
 - **THEN** there is no horizontal scrolling
 
 ### Requirement: Header actions
-The header SHALL hold the Add location button, which opens the location search, and the settings button, which opens the settings page (see the `settings` capability). On every width the header MUST show, from left to right, the Add location button, the app title and the settings button. The Add location button MUST be an icon-only "+" in the accent colour on every width, with no visible text, and MUST be the leftmost control of the header. The centre of the app title MUST be the centre of the page width, within 1 px, on every width. The settings button MUST be the rightmost control of the header on every width. It shows the settings (sliders) icon in the accent colour and has the accessible name "Settings" («Настройки»). The Add location button's accessible name MUST be "Add location" («Добавить место») on every width. While the stored location list is unreadable, the Add location button MUST NOT be shown; the settings button MUST stay at the right and the title MUST stay centred. The slash shortcut MUST keep opening the search, and the content region MUST NOT show a second Add location button. Both buttons MUST be at least 44 × 44 px, and Tab MUST reach them in their visual order. The page MUST NOT scroll horizontally at 320 px and 2560 px. axe-core MUST report no violations with the header in the light and the dark theme at 375 px and 1024 px. The approved screenshots of the main page states MUST show this header. <!-- implements FR1, FR2, NFR-A1, NFR-A2, NFR-A3, NFR-R1, NFR-R3, UX1 of add-settings-page-and-device-time-location; FR3, FR4, NFR-A1, NFR-R2, UX2 of fix-location-card-and-header-layout -->
+The header SHALL hold the Add location button, which opens the location search, and the settings button, which opens the settings page (see the `settings` capability). On every width the header MUST show, from left to right, the Add location button, the app title and the settings button. The Add location button MUST be an icon-only "+" in the accent colour on every width, with no visible text, and MUST be the leftmost control of the header. The centre of the app title MUST be the centre of the page width, within 1 px, on every width. The settings button MUST be the rightmost control of the header on every width. It shows the settings (sliders) icon in the accent colour and has the accessible name "Settings" («Настройки»). The Add location button's accessible name MUST be "Add location" («Добавить место») on every width. While the stored location list is unreadable, the Add location button MUST NOT be shown; the settings button MUST stay at the right and the title MUST stay centred. The slash shortcut MUST keep opening the search, and the content region MUST NOT show a second Add location button. Both buttons MUST be at least 44 × 44 px, and Tab MUST reach them in their visual order. The page MUST NOT scroll horizontally at 320 px and 2560 px. axe-core MUST report no violations with the header in the light and the dark theme at 375 px and 1024 px. The approved screenshots of the main page states MUST show this header. While the meeting bar is shown (`grid-view` → Meeting bar: a meeting range is set and the Grid view shows at least one row), it MUST take the place of the title and both buttons: the Add location button, the settings button and the title are not shown, and the slash shortcut opens nothing; once the meeting range is cleared or the view without the meeting bar is shown, this header comes back unchanged. <!-- implements FR1, FR2, NFR-A1, NFR-A2, NFR-A3, NFR-R1, NFR-R3, UX1 of add-settings-page-and-device-time-location; FR3, FR4, NFR-A1, NFR-R2, UX2 of fix-location-card-and-header-layout; FR13 of add-grid-meeting-range-and-share -->
 
 #### Scenario: Narrow header
 - **GIVEN** the interface language is Russian
@@ -185,6 +192,19 @@ The header SHALL hold the Add location button, which opens the location search, 
 | 1024 |
 | 1440 |
 | 2560 |
+
+#### Scenario: The meeting bar replaces the header
+- **GIVEN** the interface language is Russian and the Grid view shows Almaty and Moscow
+- **WHEN** the user sets a meeting range
+- **THEN** the header shows the meeting bar and no button named «Добавить место» or «Настройки» and no title «Часовые пояса»
+- **AND** pressing `/` opens no search
+- **WHEN** the user clears the meeting range
+- **THEN** the header shows, from left to right, the "+" button named «Добавить место», the title «Часовые пояса» and the button named «Настройки»
+
+#### Scenario: Cards keeps its header with a meeting range
+- **GIVEN** a meeting range was set in the Grid view
+- **WHEN** the view mode becomes Cards (chosen in another tab)
+- **THEN** the header shows the "+" button, the title «Часовые пояса» and the settings button
 
 ### Requirement: Offline without notes
 While the browser is offline, in airplane mode included, the main page SHALL keep working with the same content and MUST NOT show any note because of the missing network or because a check for a new version failed. Going offline and coming back online MUST NOT show or remove anything in the notices region. The update notice, the offline-ready notice and the storage warning keep their own rules. Inputs: the network state, the result of the update check. Output: none. Errors: none. <!-- implements FR7, FR8, UX3 of polish-settings-and-remove-offline-update-notice -->
@@ -330,7 +350,7 @@ The Grid view SHALL show the location rows in list order, all inside one panel s
 | 390 | 844 | dark |
 
 ### Requirement: View contract runs every scenario for every registered view
-The view-contract scenarios SHALL run once for every view of the registry, each run showing its view through the stored view mode, independent of the viewport width. A contract scenario that a view cannot pass yet because a part of its design is not built MAY be excluded for that view only, by a marker on the scenario that names the view and the change that brings the scenario back; the run of every other view MUST still include it. No scenario is excluded for any registered view: Grid runs every `@view-contract` scenario, "Select a time" included. <!-- implements FR8, NFR-A2 of add-view-mode-setting-and-grid-skeleton; FR13 of add-grid-hour-cells-and-hour-frame -->
+The view-contract scenarios SHALL run once for every view of the registry, each run showing its view through the stored view mode, independent of the viewport width. A contract scenario that a view cannot pass yet because a part of its design is not built MAY be excluded for that view only, by a marker on the scenario that names the view and the change that brings the scenario back; the run of every other view MUST still include it. No scenario is excluded for any registered view by a pending marker: Grid runs every `@view-contract` scenario, "Select a time" included. A contract scenario tagged `@meeting-range` belongs to the meeting range capability (ADR-0011) and is not a pending exclusion: it MUST run for every view whose registry entry shows the meeting range (`showsMeetingRange`) and for no other view, and a view without that flag MUST still run every other contract scenario. <!-- implements FR8, NFR-A2 of add-view-mode-setting-and-grid-skeleton; FR13 of add-grid-hour-cells-and-hour-frame; FR17 of add-grid-meeting-range-and-share -->
 
 #### Scenario: One contract run per registered view
 - **WHEN** the end-to-end projects are listed
@@ -341,3 +361,9 @@ The view-contract scenarios SHALL run once for every view of the registry, each 
 - **WHEN** the view contract runs for Grid
 - **THEN** every `@view-contract` scenario runs, "Select a time" included
 - **AND** no `@view-contract` scenario carries a pending exclusion marker
+
+#### Scenario: Meeting scenarios run only for views that show the meeting range
+- **GIVEN** the Grid registry entry shows the meeting range and the Cards entry does not
+- **WHEN** the end-to-end projects are listed
+- **THEN** the Grid view-contract project lists the `@meeting-range` scenario "Set, resize, share and clear"
+- **AND** the Cards view-contract project does not list it and lists every other `@view-contract` scenario
