@@ -7,7 +7,7 @@ index 9da9e0e..ef6fc9a 100644
  
  - Model / presenter / swappable views — .claude/rules/architecture.md, overview: docs/architecture/overview.md
 -- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds, 0009 supported browser engines, 0010 device time location, 0011 meeting range)
-+- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds, 0009 supported browser engines, 0010 device time location, 0011 meeting range, 0012 capability-scoped view contract)
++- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds, 0009 supported browser engines, 0010 device time location, 0011 meeting range, 0013 capability-scoped view contract)
  - Screen design (docs win on conflict): docs/design/README.md
  
  ## Domain Rules
@@ -19,18 +19,18 @@ index 354dc8a..6806cbf 100644
  ## Status
  Accepted (2026-09-28)
  
-+Refined by [ADR-0012](0012-capability-scoped-view-contract-scenarios.md): contract scenarios of a capability a view does not show run only for the views that show it.
++Refined by [ADR-0013](0013-capability-scoped-view-contract-scenarios.md): contract scenarios of a capability a view does not show run only for the views that show it.
 +
  ## Context
  
  [ADR-0002](0002-model-presenter-swappable-views.md) established that interfaces are swappable projections of one model and that users choose the interface in settings. The first release ships a single view — Cards (per-location sliders) — because it is the simplest. The Grid and other views follow later.
-diff --git a/docs/adr/0012-capability-scoped-view-contract-scenarios.md b/docs/adr/0012-capability-scoped-view-contract-scenarios.md
+diff --git a/docs/adr/0013-capability-scoped-view-contract-scenarios.md b/docs/adr/0013-capability-scoped-view-contract-scenarios.md
 new file mode 100644
 index 0000000..bfd5c20
 --- /dev/null
-+++ b/docs/adr/0012-capability-scoped-view-contract-scenarios.md
++++ b/docs/adr/0013-capability-scoped-view-contract-scenarios.md
 @@ -0,0 +1,34 @@
-+# ADR-0012: Capability-scoped view-contract scenarios
++# ADR-0013: Capability-scoped view-contract scenarios
 +
 +## Status
 +Accepted (2026-11-10)

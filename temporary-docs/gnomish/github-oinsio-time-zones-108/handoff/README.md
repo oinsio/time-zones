@@ -16,12 +16,13 @@
 **Why manual:** the system share sheet is a native dialog of a physical device that no browser in the sandbox can open or close.
 **Automated part:** the `TextSharing` contract tests and the E2E share scenarios of task 8.3 cover every outcome with a stubbed `navigator.share` and the real clipboard.
 
-## H3: Record capability-scoped contract scenarios in ADR-0012
+## H3: Record capability-scoped contract scenarios in ADR-0013
 
 **Serves:** FR17
-**Files:** `docs/adr/0012-capability-scoped-view-contract-scenarios.md` (new), `docs/adr/0005-view-registry.md` (Status line only), `CLAUDE.md`
-**Verify:** `git apply --check temporary-docs/gnomish/github-oinsio-time-zones-108/handoff/H3-adr-0012-capability-scoped-contract.patch`, then once applied `grep -n "Refines \[ADR-0005\]" docs/adr/0012-capability-scoped-view-contract-scenarios.md` and `grep -n "Refined by \[ADR-0012\]" docs/adr/0005-view-registry.md`.
+**Files:** `docs/adr/0013-capability-scoped-view-contract-scenarios.md` (new), `docs/adr/0005-view-registry.md` (Status line only), `CLAUDE.md`
+**Verify:** `git apply --check temporary-docs/gnomish/github-oinsio-time-zones-108/handoff/H3-adr-0013-capability-scoped-contract.patch`, then once applied `grep -n "Refines \[ADR-0005\]" docs/adr/0013-capability-scoped-view-contract-scenarios.md` and `grep -n "Refined by \[ADR-0013\]" docs/adr/0005-view-registry.md`.
 **Why manual:** the factory may not write `docs/adr/`.
+**Departure from tasks.md 10.3:** the ADR is numbered 0013, not 0012: 0012 is taken by "User-chosen view" (archived change add-view-mode-setting-and-grid-skeleton), which the docs already link as `0012-user-chosen-view.md`.
 **Automated part:** the `--list` counts of task 8.4 (Grid lists "Set, resize, share and clear", Cards does not) and `main-page` → "Meeting scenarios run only for views that show the meeting range".
 
 ## H4: Record the colour-contrast exception for dimmed hour cells
