@@ -61,7 +61,7 @@ While a meeting range is set, the span of every grid row SHALL be a button named
 - **THEN** the input is closed, the meeting range is still 09:00–11:00 and the focus is on Moscow's span
 
 ### Requirement: Grid layers stay under the page bars and dialogs
-Everything of the grid panel — the row header texts, the hour strips, the row notes, the hour frame, the meeting frame and the meeting handles — SHALL lie below the date bar, the notices region above it, and every dialog of the main page (the search and the calendar) with its backdrop, in every state of the Grid view and at every scroll position of the page and of the strips. An open location menu MUST still lie above the date bar and the grid panel. <!-- implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering -->
+Everything of the grid panel — the row header texts, the hour strips, the row notes, the hour frame, the meeting frame and the meeting handles — SHALL lie below the date bar, the notices region above it, and every dialog of the main page (the search, opened from Add location without a meeting range, and the calendar, in any state) with its backdrop, in every state of the Grid view and at every scroll position of the page and of the strips. An open location menu MUST still lie above the date bar and the grid panel. <!-- implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering -->
 
 #### Scenario: Dialogs cover the grid
 - **GIVEN** the Grid view at 390 by 844 px with Almaty, Moscow, Kolkata and New York and `<state>`
@@ -72,7 +72,6 @@ Everything of the grid panel — the row header texts, the hour strips, the row 
 |---|---|
 | the hour frame | the search |
 | the hour frame | the calendar |
-| the meeting range 09:00–11:00 | the search |
 | the meeting range 09:00–11:00 | the calendar |
 
 #### Scenario: Rows scroll under the date bar
@@ -97,17 +96,17 @@ The hour frame and the meeting frame SHALL be hidden only behind the glyphs of t
 | 1440 | 900 | the meeting frame of 09:00–11:00 |
 
 ### Requirement: Approved screenshots with dialogs over the grid
-Screenshots of the Grid view with the design's sample data (8 March 2026, home Almaty, Almaty, Moscow, Kolkata, New York, Russian interface, light theme, meeting 09:00–11:00 in Almaty) SHALL match their approved baselines on every run: with the search dialog open at 390 × 844 and with the calendar dialog open at 1440 × 900. <!-- implements NFR-R2 of fix-grid-meeting-range-lock-and-layering -->
+Screenshots of the Grid view with the design's sample data (8 March 2026, home Almaty, Almaty, Moscow, Kolkata, New York, Russian interface, light theme) SHALL match their approved baselines on every run: with the hour frame and the search dialog open at 390 × 844, and with the meeting range 09:00–11:00 in Almaty and the calendar dialog open at 1440 × 900. <!-- implements NFR-R2 of fix-grid-meeting-range-lock-and-layering -->
 
 #### Scenario: Approved screenshots with a dialog open
-- **GIVEN** the sample data with the meeting range 09:00–11:00 in Almaty
+- **GIVEN** the sample data with `<state>`
 - **WHEN** the main page is `<width>` by `<height>` px and `<dialog>` is open
 - **THEN** the page matches the approved screenshot
 
-| width | height | dialog |
-|---|---|---|
-| 390 | 844 | the search |
-| 1440 | 900 | the calendar |
+| width | height | state | dialog |
+|---|---|---|---|
+| 390 | 844 | the hour frame | the search |
+| 1440 | 900 | the meeting range 09:00–11:00 | the calendar |
 
 ## MODIFIED Requirements
 
