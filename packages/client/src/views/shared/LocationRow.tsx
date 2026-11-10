@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode, useId } from "react";
+import { forwardRef, type ReactNode, useId, useState } from "react";
 import {
   type TrackMove,
   type WallTimeInputOutcome,
@@ -40,6 +40,8 @@ type LocationRowProps = {
   /** The hour strip of a grid row, shown after the row header and before the row notes. */
   hourStrip?: ReactNode;
   meetingRange?: PresentedLocationMeetingRange;
+  /** Locks the drag handle and the location menu; `false` when omitted. */
+  areRowControlsLocked?: boolean;
 };
 
 /**
@@ -74,6 +76,7 @@ type LocationRowProps = {
  * Implements FR1, FR7, FR10 of add-grid-hour-cells-and-hour-frame (D5): hour strip, then notes, in sticky boxes.
  * Implements FR8 of add-grid-meeting-range-and-share (D8): the meeting span in the row header; the notes live in `RowNotes`.
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
+ * Implements FR1, FR2, UX1 of fix-grid-meeting-range-lock-and-layering (D1): the lock reaches the drag handle and the menu.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -89,14 +92,16 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       rowVariant = LocationRowVariant.CARD,
       hourStrip,
       meetingRange,
+      areRowControlsLocked = false,
     },
     menuButtonRef,
   ) {
     const sortable = useSortableLocationRow(
       row.id,
       prefersReducedMotion,
-      false,
+      areRowControlsLocked,
     );
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const cityId = useId();
     const markId = useId();
     const differenceId = useId();
@@ -108,6 +113,13 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       hasDifference && differenceId,
     ];
     const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
+    const headerBoxLayer = isMenuOpen
+      ? variantClassNames.headerBoxLayerWithOpenMenu
+      : variantClassNames.headerBoxLayer;
+    const headerBoxClassName =
+      variantClassNames.headerBox === undefined
+        ? undefined
+        : `${variantClassNames.headerBox} ${headerBoxLayer}`;
     return (
       <li
         ref={sortable.setItemRef}
@@ -121,13 +133,14 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
         }
         className={`bg-surface py-3 ${variantClassNames.row}${sortable.draggingClassName}`}
       >
-        <OptionalBox className={variantClassNames.headerBox}>
+        <OptionalBox className={headerBoxClassName}>
           {isReorderable && (
             <DragHandle
               ref={sortable.setActivatorNodeRef}
               city={row.cityLabel}
               attributes={sortable.attributes}
               listeners={sortable.listeners}
+              isDisabled={areRowControlsLocked}
             />
           )}
           <ZoneRowContent
@@ -161,6 +174,8 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             city={row.cityLabel}
             items={menuItems}
             isMenuFixedToViewport={variantClassNames.isMenuFixedToViewport}
+            isDisabled={areRowControlsLocked}
+            onOpenChange={setIsMenuOpen}
           />
         </OptionalBox>
         {hourStrip}

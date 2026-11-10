@@ -23,6 +23,10 @@ type LocationMenuProps = {
   items: readonly LocationMenuItem[];
   /** Places the open menu from its button instead of inside its row; `false` when omitted. */
   isMenuFixedToViewport?: boolean;
+  /** Locks the button and closes an open menu; `false` when omitted. */
+  isDisabled?: boolean;
+  /** Called whenever the menu opens or closes. */
+  onOpenChange?: (isOpen: boolean) => void;
 };
 
 // `pointerdown` does not exist before iOS Safari 13; there a press is a touch or a mouse event.
@@ -36,11 +40,18 @@ const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
  * button; a press outside, or focus moving outside, closes it.
  * Implements FR11, FR14, NFR-A2, UX3 of set-home-location-and-show-differences (D7).
  * Implements FR1 of add-grid-hour-cells-and-hour-frame (D5): `isMenuFixedToViewport`.
- * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
+ * Implements FR1, UX1 of fix-grid-meeting-range-lock-and-layering (D1): `isDisabled`.
+ * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5): `onOpenChange`.
  */
 export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
   function LocationMenu(
-    { city, items, isMenuFixedToViewport = false },
+    {
+      city,
+      items,
+      isMenuFixedToViewport = false,
+      isDisabled = false,
+      onOpenChange,
+    },
     forwardedTriggerRef,
   ) {
     const { t } = useTranslation();
@@ -54,6 +65,16 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
       triggerRef,
       isOpen && isMenuFixedToViewport,
     );
+
+    const onOpenChangeRef = useRef(onOpenChange);
+    onOpenChangeRef.current = onOpenChange;
+    useEffect(() => {
+      onOpenChangeRef.current?.(isOpen);
+    }, [isOpen]);
+
+    useEffect(() => {
+      if (isDisabled) setIsOpen(false);
+    }, [isDisabled]);
 
     useEffect(() => {
       if (isOpen) itemRefs.current[focusedIndex]?.focus();
@@ -150,8 +171,9 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
           aria-expanded={isOpen}
           aria-controls={isOpen ? menuId : undefined}
           aria-label={t("locations.locationMenu", { city })}
+          disabled={isDisabled}
           onClick={() => (isOpen ? setIsOpen(false) : openAt(0))}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-xl font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-xl font-bold disabled:cursor-default disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
         >
           <span aria-hidden="true">{LOCATION_MENU_TRIGGER_GLYPH}</span>
         </button>

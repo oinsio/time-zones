@@ -7,6 +7,7 @@ import type { LocationRow, PresentedLocationMeetingRange } from "@/presenter";
  * the hour cell layout). `views/shared` never imports `views/grid`.
  * Implements FR1, FR8, NFR-R2 of add-grid-hour-cells-and-hour-frame (D5).
  * Implements FR7, FR8 of add-grid-meeting-range-and-share (D6, D8).
+ * Implements FR1, FR2 of fix-grid-meeting-range-lock-and-layering (D1): `areRowControlsLocked`.
  */
 export type HourGridSlots = {
   renderHourStrip: (row: LocationRow) => ReactNode;
@@ -18,4 +19,6 @@ export type HourGridSlots = {
   ) => PresentedLocationMeetingRange | undefined;
   panelRef: RefCallback<HTMLUListElement>;
   panelStyle: CSSProperties;
+  /** Whether the drag handle, location menu and wall-time input of every row are locked: while a meeting range is set. */
+  areRowControlsLocked: boolean;
 };

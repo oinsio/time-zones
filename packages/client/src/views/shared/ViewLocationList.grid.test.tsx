@@ -136,6 +136,7 @@ describe("ViewLocationList with grid rows", () => {
             frame: <li data-frame />,
             panelRef: () => undefined,
             panelStyle: {},
+            areRowControlsLocked: false,
           }}
         />
       </LocationsProvider>,
@@ -177,6 +178,7 @@ describe("ViewLocationList with grid rows", () => {
             }),
             panelRef: () => undefined,
             panelStyle: {},
+            areRowControlsLocked: false,
           }}
         />
       </LocationsProvider>,
