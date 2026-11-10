@@ -113,7 +113,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     When(
       "the meeting range is set from {string} to {string}",
-      (_ctx, start: string, end: string) => world.setRange(start, end),
+      (_ctx, start: string, end: string) => {
+        world.setRange(start, end);
+      },
     );
     Then("the meeting range is 09:00–11:00 in Almaty", () =>
       world.expectSpan("09:00–11:00"),

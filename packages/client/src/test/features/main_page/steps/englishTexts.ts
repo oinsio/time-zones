@@ -12,6 +12,7 @@ export const englishLocale = JSON.parse(
   locations: Record<string, string>;
   date: Record<string, string>;
   settings: Record<string, string>;
+  meeting: Record<string, string>;
   mainPage: {
     viewError: string;
     retry: string;

@@ -1,0 +1,66 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 9da9e0e..ef6fc9a 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -15,7 +15,7 @@ IMPORTANT: Before naming or writing any domain type, function, constant, i18n ke
+ ## Architecture
+ 
+ - Model / presenter / swappable views — .claude/rules/architecture.md, overview: docs/architecture/overview.md
+-- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds, 0009 supported browser engines, 0010 device time location, 0011 meeting range)
++- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds, 0009 supported browser engines, 0010 device time location, 0011 meeting range, 0012 capability-scoped view contract)
+ - Screen design (docs win on conflict): docs/design/README.md
+ 
+ ## Domain Rules
+diff --git a/docs/adr/0005-view-registry.md b/docs/adr/0005-view-registry.md
+index 354dc8a..6806cbf 100644
+--- a/docs/adr/0005-view-registry.md
++++ b/docs/adr/0005-view-registry.md
+@@ -3,6 +3,8 @@
+ ## Status
+ Accepted (2026-09-28)
+ 
++Refined by [ADR-0012](0012-capability-scoped-view-contract-scenarios.md): contract scenarios of a capability a view does not show run only for the views that show it.
++
+ ## Context
+ 
+ [ADR-0002](0002-model-presenter-swappable-views.md) established that interfaces are swappable projections of one model and that users choose the interface in settings. The first release ships a single view — Cards (per-location sliders) — because it is the simplest. The Grid and other views follow later.
+diff --git a/docs/adr/0012-capability-scoped-view-contract-scenarios.md b/docs/adr/0012-capability-scoped-view-contract-scenarios.md
+new file mode 100644
+index 0000000..bfd5c20
+--- /dev/null
++++ b/docs/adr/0012-capability-scoped-view-contract-scenarios.md
+@@ -0,0 +1,34 @@
++# ADR-0012: Capability-scoped view-contract scenarios
++
++## Status
++Accepted (2026-11-10)
++
++Refines [ADR-0005](0005-view-registry.md): the view-contract scenarios still run for every registered view, except the scenarios of a capability the view does not show.
++
++## Context
++
++[ADR-0005](0005-view-registry.md) says the view-contract BDD E2E scenarios "run for every registered view" and that a new view cannot skip them. Its only exclusion is a pending tag, meant for a scenario a view cannot pass yet.
++
++[ADR-0011](0011-meeting-range-in-grid-view.md) gives the meeting range to Grid only: "Cards ignore the range". The meeting scenarios (set, resize, share and clear) can never apply to Cards, so a pending tag, which promises that the scenario comes back, does not fit.
++
++## Decision
++
++A contract scenario that carries a capability tag (today `@meeting-range`) runs for every view whose registry entry declares that capability (`showsMeetingRange`) and for no other view. It is not a pending exclusion. A view that declares the capability cannot skip the scenario.
++
++`playwright.bdd.config.ts` derives each view's `grepInvert` from the registry flag, with no list of view ids.
++
++## Consequences
++Positive:
++- A future view that sets `showsMeetingRange` runs the meeting scenarios with no config edit.
++- The contract run of Cards stays green without a pending tag.
++
++Negative:
++- The registry flag now also scopes tests, so removing it from Grid silently drops the scenario. The `--list` counts of the change guard this.
++
++## Alternatives Considered
++**A pending tag for Cards**: it says "not yet", while Cards never gets the range.
++
++**Record the rule in ADR-0011**: ADR-0011 decides the meeting range, not how contract scenarios run.
++
++## References
++`openspec/changes/add-grid-meeting-range-and-share` (D11).

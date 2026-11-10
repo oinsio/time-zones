@@ -86,7 +86,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       "the view mode is Grid, the reference zone is {string}, the current time is {string}, live, and the stored locations are Almaty, Moscow, Kolkata and New York",
       () => openGrid(),
     );
-    When("the user taps column 9 of Moscow", () => tapColumn("Moscow", 9));
+    When("the user taps column 9 of Moscow", () => {
+      tapColumn("Moscow", 9);
+    });
     Then("the meeting range is 09:00–10:00 in Almaty", () =>
       expect(spanOf("Almaty")).toBe("09:00–10:00"),
     );
@@ -194,7 +196,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   // @add-grid-meeting-range-and-share @FR8 @FR13
   f.Scenario("Clear returns the times", ({ Given, When, Then }) => {
     Given("the sample meeting is set", () => openGridWithSampleMeeting());
-    When("the user clears the meeting range", () => clickButton(CLEAR_BUTTON));
+    When("the user clears the meeting range", () => {
+      clickButton(CLEAR_BUTTON);
+    });
     Then(
       "every row shows its single time again and no row shows a day shift mark",
       () => {
@@ -228,9 +232,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Given("the Grid view with the sample meeting", () =>
       openGridWithSampleMeeting(),
     );
-    When("the user chooses {string}", (_ctx, name: string) =>
-      clickButton(name),
-    );
+    When("the user chooses {string}", (_ctx, name: string) => {
+      clickButton(name);
+    });
     Then(
       "no meeting range is set, the hour frame is on column 9 and the header shows {string} with Add location and Settings",
       (_ctx, title: string) => {
@@ -281,9 +285,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         return openGridWithSampleMeeting();
       },
     );
-    When("the user chooses {string}", (_ctx, name: string) =>
-      clickButton(name),
-    );
+    When("the user chooses {string}", (_ctx, name: string) => {
+      clickButton(name);
+    });
     Then("nothing changes and no notice is shown", () => {
       expect(spanOf("Almaty")).toBe("09:00–11:00");
       expect(sharing.sharedTexts).toHaveLength(0);
@@ -306,9 +310,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           return openGridWithSampleMeeting();
         },
       );
-      When("the user chooses {string}", (_ctx, name: string) =>
-        clickButton(name),
-      );
+      When("the user chooses {string}", (_ctx, name: string) => {
+        clickButton(name);
+      });
       Then("the clipboard holds the meeting share text", async () => {
         await screen.findByText(i18n.t("meeting.copiedNotice"));
         expect(sharing.copiedTexts).toHaveLength(1);
@@ -335,9 +339,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         return openGridWithSampleMeeting();
       },
     );
-    When("the user chooses {string}", (_ctx, name: string) =>
-      clickButton(name),
-    );
+    When("the user chooses {string}", (_ctx, name: string) => {
+      clickButton(name);
+    });
     Then("the notice {string} is shown", async (_ctx, notice: string) => {
       expect(await screen.findByText(notice)).toBeInTheDocument();
     });
@@ -353,7 +357,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(frameColumns()).toBe(FIRST_FRAME_COLUMNS);
     });
     Then("no hour frame is shown", () => expect(hourFrameColumn()).toBeNull());
-    When("the user clears the meeting range", () => clickButton(CLEAR_BUTTON));
+    When("the user clears the meeting range", () => {
+      clickButton(CLEAR_BUTTON);
+    });
     Then("the hour frame is on column 9", () =>
       expect(hourFrameColumn()).toBe(9),
     );

@@ -18,6 +18,9 @@ export interface ThemeColours {
   dayWorking: string;
   dayEvening: string;
   hourCellForeground: string;
+  meeting: string;
+  meetingText: string;
+  meetingBar: string;
 }
 
 const TOKENS_FILE = join(process.cwd(), "src", "styles", "tokens.css");
@@ -75,6 +78,9 @@ export function readThemeColours(theme: Theme): ThemeColours {
     hourCellForeground: toComputedRgb(
       readTokenHex(themeBlock, "hour-cell-foreground"),
     ),
+    meeting: toComputedRgb(readTokenHex(themeBlock, "meeting")),
+    meetingText: toComputedRgb(readTokenHex(themeBlock, "meeting-text")),
+    meetingBar: toComputedRgb(readTokenHex(themeBlock, "meeting-bar")),
   };
 }
 
