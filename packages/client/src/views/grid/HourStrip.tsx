@@ -1,131 +1,115 @@
-import type { KeyboardEvent } from "react";
+import { type KeyboardEvent, useId } from "react";
 import { useTranslation } from "react-i18next";
 import {
   HourGridCssVariable,
-  MIDNIGHT_SHADE_SPREAD_PX,
-  OFFSET_EDGE_WIDTH_PX,
+  KeyboardKey,
   TRACK_VALUE_MIN_MINUTES,
 } from "@/constants";
 import type { TrackMove } from "@/controller";
-import {
-  DayPeriod,
-  type PresentedDayTrack,
-  type PresentedHourCell,
-  type PresentedHourStrip,
-} from "@/presenter";
-import { DAY_PERIOD_COLOR_VARIABLES, getTrackMoveForKey } from "@/views/shared";
+import type { PresentedDayTrack, PresentedHourStrip } from "@/presenter";
+import { getTrackMoveForKey } from "@/views/shared";
+import { HourCellView } from "./HourCellView";
+import { useHourCellSelection } from "./useHourCellSelection";
 
 type HourStripProps = {
   city: string;
   /** The row's slider values: the strip is the keyboard time selection of Grid. */
   track: PresentedDayTrack;
   strip: PresentedHourStrip;
-  /** The column of the hour frame; its texts are bold. */
-  hourFrameIndex: number;
+  /** The column of the hour frame, whose texts are bold; none while a meeting range is set. */
+  hourFrameIndex?: number;
+  /** The columns the meeting range overlaps; the other cells are dimmed. */
+  meetingColumns?: { first: number; last: number };
+  cellPitchPx: number;
+  /** The strips scroll horizontally. */
+  isScrollable: boolean;
   onMoveTrack: (move: TrackMove) => void;
+  onSelectCells: (firstColumn: number, lastColumn: number) => void;
+  onSelectFramedHour: () => void;
 };
 
-const MIDNIGHT_SHADE_SHADOW = `inset 0 0 0 ${MIDNIGHT_SHADE_SPREAD_PX}px var(--color-midnight-shade)`;
-const OFFSET_EDGE_SHADOW = `inset ${OFFSET_EDGE_WIDTH_PX}px 0 0 var(--color-foreground)`;
-const SHADOW_SEPARATOR = ", ";
-
-function getCellShadow(cell: PresentedHourCell): string | undefined {
-  const shadows = [
-    cell.midnightMarker ? MIDNIGHT_SHADE_SHADOW : undefined,
-    cell.hasOffsetEdge ? OFFSET_EDGE_SHADOW : undefined,
-  ].filter((shadow) => shadow !== undefined);
-  return shadows.length > 0 ? shadows.join(SHADOW_SEPARATOR) : undefined;
-}
-
-function HourCellView({
-  cell,
-  isFramed,
-}: {
-  cell: PresentedHourCell;
-  isFramed: boolean;
-}) {
-  const digitClassName = `text-base leading-[1.1] ${isFramed ? "font-bold" : "font-medium"}`;
-  const minuteLine = [cell.minuteText, cell.dayPeriodMarker]
-    .filter((text) => text !== "")
-    .join(" ");
-  return (
-    <div
-      data-hour-cell
-      className={`flex h-11 flex-col items-center justify-center gap-px rounded tabular-nums md:h-[38px] lg:h-12 xl:h-[52px] ${
-        cell.dayPeriod === DayPeriod.NIGHT
-          ? "text-foreground"
-          : "text-hour-cell-foreground"
-      }`}
-      style={{
-        backgroundColor: `var(${DAY_PERIOD_COLOR_VARIABLES[cell.dayPeriod]})`,
-        boxShadow: getCellShadow(cell),
-        marginInline: `calc(var(${HourGridCssVariable.CELL_GAP}) / 2)`,
-      }}
-    >
-      {cell.midnightMarker ? (
-        <>
-          <span className="text-[9px] font-bold leading-none">
-            {cell.midnightMarker.monthText}
-          </span>
-          <span className={digitClassName}>{cell.midnightMarker.dayText}</span>
-        </>
-      ) : (
-        <>
-          <span className={digitClassName}>{cell.hourText}</span>
-          {minuteLine !== "" && (
-            <span className="text-[10px] font-semibold leading-none">
-              {minuteLine}
-            </span>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
+const SELECT_KEYS: readonly string[] = [KeyboardKey.ENTER, KeyboardKey.SPACE];
 
 /**
  * The hour strip of a grid row: its hour cells over the reference day, one
  * Tab stop and a slider "Time in {city}" for the keyboard and assistive
- * technology. The cells take no pointer input yet: a tap changes nothing.
+ * technology. A tap or a drag on the cells and Enter on the strip set the
+ * meeting range; the arrow keys move the time.
  * Implements FR1, FR3, FR4, FR5, FR6, FR8, FR11, FR12, NFR-A1, NFR-A2 of
  * add-grid-hour-cells-and-hour-frame (D4, D6).
+ * Implements FR5, FR6, FR7, NFR-A2 of add-grid-meeting-range-and-share (D6).
  */
 export function HourStrip({
   city,
   track,
   strip,
   hourFrameIndex,
+  meetingColumns,
+  cellPitchPx,
+  isScrollable,
   onMoveTrack,
+  onSelectCells,
+  onSelectFramedHour,
 }: HourStripProps) {
   const { t } = useTranslation();
+  const hintId = useId();
+  const selection = useHourCellSelection({
+    cellCount: strip.cells.length,
+    cellPitchPx,
+    isScrollable,
+    onSelectCells,
+  });
   const handleKeyDown = (event: KeyboardEvent) => {
+    if (SELECT_KEYS.includes(event.key)) {
+      event.preventDefault();
+      onSelectFramedHour();
+      return;
+    }
     const move = getTrackMoveForKey(event.key);
     if (move === undefined) return;
     event.preventDefault();
     onMoveTrack(move);
   };
+  const panClassName = isScrollable ? "touch-pan-x touch-pan-y" : "touch-pan-y";
   return (
-    <div
-      role="slider"
-      tabIndex={0}
-      aria-label={t("locations.timeSliderLabel", { city })}
-      aria-valuemin={TRACK_VALUE_MIN_MINUTES}
-      aria-valuemax={track.maxMinutes}
-      aria-valuenow={track.valueMinutes}
-      aria-valuetext={track.valueText}
-      onKeyDown={handleKeyDown}
-      className="grid rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      style={{
-        gridTemplateColumns: `repeat(var(${HourGridCssVariable.CELL_COUNT}), var(${HourGridCssVariable.CELL_PITCH}))`,
-      }}
-    >
-      {strip.cells.map((cell, column) => (
-        <HourCellView
-          key={cell.key}
-          cell={cell}
-          isFramed={column === hourFrameIndex}
-        />
-      ))}
-    </div>
+    <>
+      <div
+        ref={selection.stripRef}
+        role="slider"
+        tabIndex={0}
+        aria-label={t("locations.timeSliderLabel", { city })}
+        data-hour-strip
+        aria-describedby={hintId}
+        aria-valuemin={TRACK_VALUE_MIN_MINUTES}
+        aria-valuemax={track.maxMinutes}
+        aria-valuenow={track.valueMinutes}
+        aria-valuetext={track.valueText}
+        onKeyDown={handleKeyDown}
+        onPointerDown={selection.onPointerDown}
+        onPointerMove={selection.onPointerMove}
+        onPointerUp={selection.onPointerUp}
+        onPointerCancel={selection.onPointerCancel}
+        className={`grid rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${panClassName}`}
+        style={{
+          gridTemplateColumns: `repeat(var(${HourGridCssVariable.CELL_COUNT}), var(${HourGridCssVariable.CELL_PITCH}))`,
+        }}
+      >
+        {strip.cells.map((cell, column) => (
+          <HourCellView
+            key={cell.key}
+            cell={cell}
+            isFramed={column === hourFrameIndex}
+            isDimmed={
+              meetingColumns !== undefined &&
+              (column < meetingColumns.first || column > meetingColumns.last)
+            }
+            onClick={() => selection.onCellClick(column)}
+          />
+        ))}
+      </div>
+      <span id={hintId} hidden>
+        {t("meeting.hourStripHint")}
+      </span>
+    </>
   );
 }

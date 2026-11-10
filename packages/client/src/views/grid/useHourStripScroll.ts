@@ -23,8 +23,14 @@ const PIXEL_UNIT = "px";
  * hour frame is fully visible on opening and whenever it moves out of view.
  * Width and scroll are view state, never stored.
  * Implements NFR-R1, NFR-R2, UX3 of add-grid-hour-cells-and-hour-frame (D5).
+ * Implements FR10, FR11 of add-grid-meeting-range-and-share (D6): while a meeting range
+ * is set the panel does not follow the hour frame; the user and the handle drag scroll it.
  */
-export function useHourStripScroll(hourFrameIndex: number, cellCount: number) {
+export function useHourStripScroll(
+  hourFrameIndex: number,
+  cellCount: number,
+  isFollowingHourFrame = true,
+) {
   const [panelElement, setPanelElement] = useState<HTMLUListElement | null>(
     null,
   );
@@ -51,7 +57,7 @@ export function useHourStripScroll(hourFrameIndex: number, cellCount: number) {
 
   useEffect(() => {
     const panel = panelElement;
-    if (panel === null || !layout.isScrollable) return;
+    if (panel === null || !layout.isScrollable || !isFollowingHourFrame) return;
     const frameStartPx =
       GRID_ROW_PADDING_PX + hourFrameIndex * layout.cellPitchPx;
     const frameEndPx = frameStartPx + layout.cellPitchPx;
@@ -80,7 +86,13 @@ export function useHourStripScroll(hourFrameIndex: number, cellCount: number) {
       panel.scrollLeft = targetPx;
     }
     hasScrolledOnce.current = true;
-  }, [panelElement, hourFrameIndex, layout, prefersReducedMotion]);
+  }, [
+    panelElement,
+    hourFrameIndex,
+    layout,
+    prefersReducedMotion,
+    isFollowingHourFrame,
+  ]);
 
   const panelStyle = useMemo(
     () =>

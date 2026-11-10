@@ -1,41 +1,11 @@
 // Verifies FR1, FR3, FR5, FR6, FR8, FR11, FR12, NFR-A1, NFR-A2 of add-grid-hour-cells-and-hour-frame.
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TrackMove } from "@/controller";
-import { DayPeriod, type PresentedHourStrip } from "@/presenter";
 import { ALMATY_TRACK } from "../shared/dayTrackFixture";
 import { HourStrip } from "./HourStrip";
-
-const cells = Array.from({ length: 24 }, (_, column) => ({
-  key: `cell-${column}`,
-  hourText: String(column),
-  minuteText: column === 5 ? ":30" : "",
-  dayPeriodMarker: column === 6 ? "AM" : "",
-  dayPeriod: column < 9 ? DayPeriod.NIGHT : DayPeriod.WORK,
-  hasOffsetEdge: column === 12,
-  ...(column === 2
-    ? { midnightMarker: { monthText: "MAR", dayText: "8" } }
-    : {}),
-}));
-const STRIP: PresentedHourStrip = { cells };
-
-function renderStrip(overrides: { onMoveTrack?: () => void } = {}) {
-  const onMoveTrack = overrides.onMoveTrack ?? vi.fn();
-  render(
-    <HourStrip
-      city="Almaty"
-      track={ALMATY_TRACK}
-      strip={STRIP}
-      hourFrameIndex={12}
-      onMoveTrack={onMoveTrack}
-    />,
-  );
-  return { onMoveTrack, slider: screen.getByRole("slider") };
-}
-
-const cellOf = (column: number) =>
-  document.querySelectorAll<HTMLElement>("[data-hour-cell]")[column];
+import { cellOf, PITCH_PX, renderStrip, STRIP } from "./hourStripFixture";
 
 describe("HourStrip", () => {
   beforeEach(() => i18n.changeLanguage("en"));
@@ -89,15 +59,6 @@ describe("HourStrip", () => {
     expect(isNotPrevented).toBe(true);
   });
 
-  it("should do nothing on a pointer down or a click on a cell", () => {
-    const { onMoveTrack } = renderStrip();
-
-    fireEvent.pointerDown(cellOf(3));
-    fireEvent.click(cellOf(3));
-
-    expect(onMoveTrack).not.toHaveBeenCalled();
-  });
-
   it("should bold the texts of the framed column only", () => {
     renderStrip();
 
@@ -121,13 +82,17 @@ describe("HourStrip", () => {
         strip={{
           cells: [
             {
-              ...cells[2],
+              ...STRIP.cells[2],
               hasOffsetEdge: true,
             },
           ],
         }}
         hourFrameIndex={0}
+        cellPitchPx={PITCH_PX}
+        isScrollable={false}
         onMoveTrack={vi.fn()}
+        onSelectCells={vi.fn()}
+        onSelectFramedHour={vi.fn()}
       />,
     );
 

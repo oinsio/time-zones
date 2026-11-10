@@ -1,4 +1,5 @@
 // Verifies NFR-R1, NFR-R2, UX3 of add-grid-hour-cells-and-hour-frame (D5).
+// Verifies FR10, FR11 of add-grid-meeting-range-and-share (D6): no follow during a meeting.
 import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installResizeObserverFake } from "@/test/resizeObserverFake";
@@ -8,10 +9,17 @@ const CELL_COUNT = 24;
 const SCROLL_WIDTH = 24 * 36 + 32;
 let panelWidth = 390;
 
-function Panel({ hourFrameIndex }: { hourFrameIndex: number }) {
+function Panel({
+  hourFrameIndex,
+  isFollowingHourFrame = true,
+}: {
+  hourFrameIndex: number;
+  isFollowingHourFrame?: boolean;
+}) {
   const { panelRef, panelStyle } = useHourStripScroll(
     hourFrameIndex,
     CELL_COUNT,
+    isFollowingHourFrame,
   );
   return <ul data-testid="panel" ref={panelRef} style={panelStyle} />;
 }
@@ -101,5 +109,34 @@ describe("useHourStripScroll", () => {
 
     expect(panel.scrollTo).not.toHaveBeenCalled();
     expect(panel.scrollLeft).toBe(0);
+  });
+
+  it("should not scroll to a hidden frame while not following it", () => {
+    const { container, rerender } = render(
+      <Panel hourFrameIndex={3} isFollowingHourFrame={false} />,
+    );
+    const panel = panelOf(container);
+    panel.scrollTo = vi.fn();
+
+    act(() =>
+      rerender(<Panel hourFrameIndex={23} isFollowingHourFrame={false} />),
+    );
+
+    expect(panel.scrollTo).not.toHaveBeenCalled();
+    expect(panel.scrollLeft).toBe(0);
+  });
+
+  it("should scroll the hidden column into view when following again", () => {
+    const { container, rerender } = render(
+      <Panel hourFrameIndex={3} isFollowingHourFrame={false} />,
+    );
+    const panel = panelOf(container);
+    act(() =>
+      rerender(<Panel hourFrameIndex={23} isFollowingHourFrame={false} />),
+    );
+
+    act(() => rerender(<Panel hourFrameIndex={23} isFollowingHourFrame />));
+
+    expect(panel.scrollLeft).toBeGreaterThan(0);
   });
 });
