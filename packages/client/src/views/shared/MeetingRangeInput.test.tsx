@@ -1,8 +1,8 @@
 // Verifies FR3, FR4, NFR-A1, UX2 of fix-grid-meeting-range-lock-and-layering.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MeetingRangeInputOutcome } from "@/controller";
 import i18n from "i18next";
+import { MeetingRangeInputOutcome } from "@/controller";
 import { MeetingRangeInput } from "./MeetingRangeInput";
 
 const START_NAME = "Время начала — Moscow";
