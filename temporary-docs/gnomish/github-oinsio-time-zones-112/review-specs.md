@@ -78,7 +78,8 @@ None.
 - Impact: Implemented as written, these existing E2E scenarios and unit tests fail, which contradicts task 5.2's "keeps passing" check and the 6.2 `pnpm test` run. The implementer then has to guess whether to change the tests or the name, and could weaken assertions while doing it.
 - Fix: In task 4.4, add: "Update `src/views/shared/LocalDateTime.test.tsx`'s meeting-range block: the span is named «Ввести время встречи — {city}, 23:00–01:00» (pass `cityLabel`), and replace 'should open the wall-time input with the local time' with the new test that `MeetingRangeInput` opens". In task 5.1, add: "Change the span locator in `steps/grid_view_meeting_e2e.steps.ts:175` and `steps/grid_view_meeting_spans_e2e.steps.ts:29` to `/^Enter meeting time/` (the meeting state only); run `npx playwright test -c playwright.bdd.config.ts --project chromium --grep \"Meeting frame colour and layers|Spans of the sample meeting|Tap on column 9|Drag the end handle one hour right\"`: passes."
 - Fix risk: none — the edits only touch tests of behaviour the change replaces on purpose, and keep their assertions (span text, colour, topmost element). `meetingGridQueries.tsx:66` (`/^Enter time|^Ввести время/`, Russian unit tests) already matches «Ввести время встречи …» and needs no change.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 4.4 now updates the meeting-range block of `LocalDateTime.test.tsx` (lines 147–150 find the span by «Ввести время встречи — {city}, 23:00–01:00» with `cityLabel`; lines 170–174 are replaced by the "opens `MeetingRangeInput`" test). It also updates `spanOf` in `meetingGridQueries.tsx:66` to `/^Enter meeting time|^Ввести время встречи/`, because the meeting unit session defaults to English (`meetingGridSession.ts:20`), so the review's "needs no change" was wrong. 4.4 then runs `grid_view_meeting_unit.steps.tsx` and `grid_view_meeting_share_unit.steps.tsx`. Task 5.1 changes the span locators at `grid_view_meeting_e2e.steps.ts:175` and `grid_view_meeting_spans_e2e.steps.ts:29` to `/^Enter meeting time/` and runs the four affected scenarios. Task 5.2's "keep passing" check now points to those updated locators.
 
 ### R2 — WARNING — The frame-border coverage check of D7 counts elements painted below the frame, so it cannot pass
 - Location: `openspec/changes/fix-grid-meeting-range-lock-and-layering/design.md:157` (D7) and `tasks.md:34` (5.2, "the in-page `elementsFromPoint` check of D7, sampling every 2 px along both borders")
@@ -87,7 +88,8 @@ None.
 - Impact: Implemented as written, the scenario "The frame border runs through the empty parts of the header" fails on all 4 examples whatever D6 does. The implementer either cannot finish 5.2 or loosens the check ad hoc, and FR8/M6/UX3 end up with no real test.
 - Fix: In D7 and task 5.2, limit the check to what is painted above the frame: sample only the parts of each border that cross a row's sticky header box or notes box (`headerBox` / `notesBox` of `locationRowVariant.ts`). For each point, check only the elements of `elementsFromPoint` that are descendants of that box. Every such element with a non-transparent `background-color` must hold the point in the client rect of one of its text nodes, or be a row note or an `input`. Reword M6's "covered by a non-transparent background" check accordingly in D7 ("inside the header and notes boxes").
 - Fix risk: Low. The sticky boxes (`z-grid-box`) are the only parts of a row that `HourFrame.tsx:9-12` and D5 place above the frame, so restricting to them loses no case FR8 covers. The meeting handles lie outside the rows and stay excluded as before.
-- Status: open
+- Status: fixed
+- Resolution: design.md D7 (Decision) now samples only the border points inside a row's sticky `headerBox` / `notesBox` (`locationRowVariant.ts`, `z-grid-box` by D5). At each point it inspects only that box's descendants among the elements `elementsFromPoint` returns, and states that the hour cells and the row `<li>` below the frame are never inspected. The D7 Negative explains why. Task 5.2 restates the same limit and adds a guard: at least one sampled point per row must lie in an empty part of the header box, so the check cannot pass vacuously. The spec scenario ("covered by an element with a background") and M6 already speak of covering and needed no edit.
 
 ### R3 — WARNING — Screenshot baselines are written for chromium only, but checked on every project
 - Location: `openspec/changes/fix-grid-meeting-range-lock-and-layering/tasks.md:35` (5.3) and `tasks.md:49` (H1)
@@ -96,7 +98,8 @@ None.
 - Impact: The final command of 5.3 fails on `mobile-chrome`: the 2 new baselines are missing there, and its Grid/meeting baselines still show the frame broken beside texts. The task cannot be ticked, or mobile baselines get written unreviewed outside the H1 list.
 - Fix: In task 5.3, drop `--project chromium` from both `--update-snapshots` commands so that `chromium` and `mobile-chrome` baselines are written and re-approved. In H1 and the 7.1 README section, list the new and re-written files under both `__screenshots__/chromium/` and `__screenshots__/mobile-chrome/`.
 - Fix risk: H1 has twice as many images to review. The scenario's "the screen is {int} by {int} px for the locations" step sets the viewport on both projects, so the shots stay comparable. No rule or spec is affected.
-- Status: open
+- Status: fixed
+- Resolution: task 5.3 now writes the new baselines and re-approves the changed Grid/meeting baselines without `--project`, so both `chromium` and `mobile-chrome` get them (baselines are per project via `SCREENSHOT_PATH_TEMPLATE`). It lists the re-written files of both `__screenshots__/` folders in the H1 README section. Task 7.1's Verify line and the H1 follow-up now name the new baselines under both `chromium/` and `mobile-chrome/` (2 per project) and the re-written baselines of either project.
 
 ## Verdict
 
