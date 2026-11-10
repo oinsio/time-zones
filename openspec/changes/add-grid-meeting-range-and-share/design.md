@@ -189,3 +189,21 @@ Negative: the system share sheet itself is never opened by a test (handoff H2).
 
 ### Alternatives Considered
 **Keep the old tap scenario and add a new one**: the two would contradict each other.
+
+## D11. Meeting scenarios in the view contract by capability
+
+### Context
+FR17, NG4. `playwright.bdd.config.ts` runs every `@view-contract` scenario in one project per registry entry (`viewContractProjects`, `grep: VIEW_CONTRACT_TAG_PATTERN`); its only per-view exclusion is `VIEW_CONTRACT_PENDING_TAGS`, meant for a scenario a view "cannot pass yet" and naming "the change that brings the scenario back". Cards never gets a meeting range (NG4, ADR-0011), so a pending tag does not fit it.
+
+### Decision
+- The meeting scenarios of the view contract carry `@view-contract @meeting-range`. `MEETING_RANGE_CONTRACT_TAG_PATTERN = /@meeting-range(?![\w-])/` in `playwright.bdd.config.ts` (the lookahead keeps longer tags such as a future `@meeting-range-…` out).
+- Each contract project's `grepInvert` is the array of its pending pattern and, when its registry entry lacks `showsMeetingRange` (D7), `MEETING_RANGE_CONTRACT_TAG_PATTERN`. The flag the header already reads also decides which views run the meeting scenarios: no list of view ids in the config.
+- `docs/architecture/views.md` → View contract and the glossary **View contract** entry say so. This applies ADR-0005 ("the view-contract BDD E2E scenarios are parameterized by the registry and run for every registered view") to a capability flag of the registry; it is no new global decision.
+
+### Consequences
+Positive: a future view that sets `showsMeetingRange` runs the meeting scenarios with no config edit; Cards' contract run stays green without a pending tag.
+Negative: the registry flag now also scopes tests, so removing it from Grid silently drops the scenario; task 8.4's `--list` count guards this.
+
+### Alternatives Considered
+**A pending tag for Cards**: says "not yet", but Cards never gets the meeting range (NG4).
+**A Grid-only feature without `@view-contract`**: no contract project would run it, so FR17 would not be a contract scenario.

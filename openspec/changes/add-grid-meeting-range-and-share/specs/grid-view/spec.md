@@ -182,7 +182,7 @@ While a meeting range is set and the Grid view shows at least one row, the page 
 - **THEN** the notice «Не удалось поделиться встречей» is shown
 
 ### Requirement: Meeting scenarios of the view contract
-The Grid view SHALL pass the meeting scenarios of the view contract in a real browser: set a meeting range (tap, drag, Enter), resize it (handle drag and handle keys), share it and clear it (Clear meeting and Now). <!-- implements FR17 of add-grid-meeting-range-and-share -->
+The Grid view SHALL pass the meeting scenarios of the view contract in a real browser: set a meeting range (tap, drag, Enter), resize it (handle drag and handle keys), share it and clear it (Clear meeting and Now). A view that does not show the meeting range (Cards, NG4) is not held to these scenarios. <!-- implements FR17 of add-grid-meeting-range-and-share -->
 
 #### Scenario: Set, resize, share and clear
 - **GIVEN** the Grid view with Almaty and Moscow at `2026-03-08T07:30:00Z` in a browser without a system share
