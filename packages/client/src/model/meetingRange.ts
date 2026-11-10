@@ -7,7 +7,6 @@ import {
   TRACK_STEP_MINUTES,
 } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
-import { type DayShift, getDayShift } from "./dayShift";
 import { type ReferenceDay, TrackMove } from "./dayTrack";
 import { getHourCellStart } from "./hourCells";
 
@@ -33,12 +32,6 @@ export type MeetingSpan = {
   endMinutes: number;
   firstColumn: number;
   lastColumn: number;
-};
-
-export type LocationMeetingRange = {
-  localStart: Temporal.ZonedDateTime;
-  localEnd: Temporal.ZonedDateTime;
-  dayShift: DayShift;
 };
 
 const getMinutesFromDayStart = (day: ReferenceDay, instant: Temporal.Instant) =>
@@ -192,18 +185,5 @@ export function moveMeetingRangeToDay(
     start,
     end:
       end.epochMilliseconds < newDay.end.epochMilliseconds ? end : newDay.end,
-  };
-}
-
-/** The range in a location's zone with the day shift of its start. */
-export function getLocationMeetingRange(
-  timeZoneId: string,
-  meeting: MeetingRange,
-  referenceZoneId: string,
-): LocationMeetingRange {
-  return {
-    localStart: meeting.start.toZonedDateTimeISO(timeZoneId),
-    localEnd: meeting.end.toZonedDateTimeISO(timeZoneId),
-    dayShift: getDayShift(timeZoneId, meeting.start, referenceZoneId),
   };
 }

@@ -70,6 +70,10 @@ export { getLocalDateTime } from "./localDateTime";
 export { LocationKind } from "./locationKind";
 export { getLocationMarkKind, LocationMarkKind } from "./locationMark";
 export {
+  getLocationMeetingRange,
+  type LocationMeetingRange,
+} from "./locationMeetingRange";
+export {
   buildLocationId,
   canonicalizeLocationId,
   INITIAL_WORLD_CLOCK_STATE,
@@ -82,14 +86,12 @@ export {
   type WorldClockState,
 } from "./locations";
 export {
-  getLocationMeetingRange,
   getMeetingHandleLimits,
   getMeetingRangeAfterHandleMove,
   getMeetingRangeAtHandleMinutes,
   getMeetingRangeOfCells,
   getMeetingSpan,
   isValidMeetingRange,
-  type LocationMeetingRange,
   MeetingHandle,
   type MeetingHandleLimits,
   type MeetingRange,

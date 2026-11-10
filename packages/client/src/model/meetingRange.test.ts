@@ -4,7 +4,6 @@ import { Temporal } from "@/lib/temporal";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { TrackMove } from "./dayTrack";
 import {
-  getLocationMeetingRange,
   getMeetingHandleLimits,
   getMeetingRangeAfterHandleMove,
   getMeetingRangeAtHandleMinutes,
@@ -168,14 +167,5 @@ describe("moveMeetingRangeToDay", () => {
       second,
     );
     expect(range.end.equals(second.end)).toBe(true);
-  });
-});
-
-describe("getLocationMeetingRange", () => {
-  it("should read the local span and day shift of New York", () => {
-    const local = getLocationMeetingRange("America/New_York", SAMPLE, ALMATY);
-    expect(local.localStart.toPlainTime().toString()).toBe("23:00:00");
-    expect(local.localEnd.toPlainTime().toString()).toBe("01:00:00");
-    expect(local.dayShift).toBe("EARLIER");
   });
 });
