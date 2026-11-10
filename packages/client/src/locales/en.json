@@ -29,6 +29,8 @@
   "locations": {
     "utcOffsetPrefix": "UTC",
     "wallTimeInputLabel": "Enter time — {{city}}, {{time}}",
+    "dayShiftEarlier": "a day earlier",
+    "dayShiftLater": "a day later",
     "wallTimeInputError": "Enter the time as HH:MM",
     "wallTimeHintGap": "{{requestedTime}} does not exist on this day — clocks moved forward. Showing {{shownTime}}.",
     "wallTimeHintAmbiguous": "{{requestedTime}} occurs twice — showing the first ({{zone}}).",
@@ -108,6 +110,22 @@
   },
   "search": {
     "deviceTimeOption": "Device time"
+  },
+  "meeting": {
+    "barTitle": "Meeting · {{duration}}",
+    "durationHours": "{{hours}} h",
+    "durationMinutes": "{{minutes}} min",
+    "durationHoursMinutes": "{{hours}} h {{minutes}} min",
+    "share": "Share meeting",
+    "clear": "Clear meeting",
+    "startHandle": "Meeting start",
+    "endHandle": "Meeting end",
+    "hourStripHint": "Enter — select a meeting at this hour",
+    "shareHeading": "Meeting on {{date}}, {{duration}}",
+    "shareLine": "{{city}}: {{span}}",
+    "shareLineShifted": "{{city}}: {{span}} ({{dayShift}}, {{date}})",
+    "copiedNotice": "Meeting text copied",
+    "shareFailedNotice": "Could not share the meeting"
   },
   "settings": {
     "open": "Settings",

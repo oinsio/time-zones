@@ -41,6 +41,26 @@ export {
   type PresentedLocationMark,
   presentLocationMarks,
 } from "./locationMark";
+// Implements FR8, FR12-FR14 of add-grid-meeting-range-and-share.
+export {
+  type MeetingPresentationContext,
+  type PresentedLocationMeetingRange,
+  presentLocationMeetingRange,
+} from "./locationMeetingRange";
+export {
+  formatMeetingDuration,
+  type PresentedMeetingBar,
+  presentMeetingBar,
+} from "./meetingBar";
+export {
+  type PresentedMeetingHandle,
+  type PresentedMeetingHandles,
+  presentMeetingHandles,
+} from "./meetingHandles";
+export {
+  type MeetingShareRow,
+  presentMeetingShareText,
+} from "./meetingShareText";
 // Implements FR5-FR7 of set-home-location-and-show-differences.
 export {
   formatOffsetDifference,
