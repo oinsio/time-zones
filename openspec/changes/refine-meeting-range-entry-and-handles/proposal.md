@@ -16,7 +16,7 @@ Audience: everyone who plans a meeting in Grid, phone users above all (narrow ha
 - MODIFIED `meeting-range` → **Meeting range invariants**: the ends lie on any whole minute inside the reference day, not on the track step. The shortest range is one minute.
 - MODIFIED `meeting-range` → **Set and clear a meeting range**: the invalid-range examples follow the new invariants.
 - MODIFIED `meeting-range` → **Commands that remove or move the meeting range**: a date change keeps a start that is off the track step at its exact wall-clock time.
-- MODIFIED `meeting-range` → **Meeting handle moves**: a handle lands on the track step. A move never shortens the range below one track step, or below its current length if it is already shorter.
+- MODIFIED `meeting-range` → **Meeting handle moves**: a step move or a drag of a handle lands on the track step; an hour move keeps the minute. A move never shortens the range below one track step, or below its current length if it is already shorter.
 - MODIFIED `meeting-range` → **Set a meeting range from wall-clock times**: any minute is accepted. Equal start and end times are refused with the new error `MEETING_START_EQUALS_END`. An end time not later than the start that cannot cross midnight inside the reference day is refused with the new error `MEETING_END_BEFORE_START`. A range outside the reference day is still refused with `INVALID_MEETING_RANGE`. "The whole reference day" scenario is replaced.
 - MODIFIED `grid-view` → **Meeting range input**: the refusal messages name the actual problem. «…с шагом 15 минут» is removed.
 - MODIFIED `grid-view` → **Meeting handles on the frame**, **Drag a meeting handle**, **Handle drag scrolls the strips**, **Meeting handles are sliders**: the handles stand on the rows visible on screen, the hit area is at least 44 × 44 px, the handle keeps its offset from the pointer (also while the strips auto-scroll), and a release never counts as a tap on an hour cell.
@@ -80,7 +80,7 @@ None.
   - «Встреча должна быть внутри дня» ("The meeting must lie within the day").
 
   The input stays open and nothing changes. «Введите время в формате ЧЧ:ММ» for a text that is not a time is unchanged.
-- FR4: Each meeting handle moves its end onto the track step:
+- FR4: A step move and a drag of a meeting handle land its end on the track step; an hour move keeps the minute; the day's start and end are exact. The limits below may then stop a move off the step:
   - Arrow Right / Arrow Up and Arrow Left / Arrow Down go to the next or previous track step position of the reference day (09:05 → 09:15 or 09:00);
   - Page Up / Page Down move by one hour;
   - Home / End go to the day's start or end;

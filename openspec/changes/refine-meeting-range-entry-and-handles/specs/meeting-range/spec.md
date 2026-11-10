@@ -79,13 +79,13 @@ Now SHALL remove the meeting range and make the reference moment live. A time se
 - **THEN** the meeting range starts at 00:00 on 2026-03-08 and ends at the end of that 23-hour day, 23 hours long
 
 ### Requirement: Meeting handle moves
-A meeting handle SHALL move one end of the meeting range: the start handle the start, the end handle the end. The target of each move lies on the track step:
+A meeting handle SHALL move one end of the meeting range: the start handle the start, the end handle the end. A step move and a pointer position land on the track step, an hour move keeps the minute, and the day's start and end are exact:
 - a move by one step goes to the next or previous track step position of the reference day, counted from its start, so an end off the step reaches the nearest step in that direction;
 - a move by one hour goes 60 minutes forward or back;
 - a move to the start or the end of the reference day goes there;
 - a pointer position goes to the nearest track step.
 
-The target MUST then be limited so that:
+The target MUST then be limited, which may stop it off the track step, so that:
 - the range is never shorter than one track step, or than its current length when that is already shorter;
 - the start is not before the start of the reference day;
 - the end is not after its end.
@@ -121,6 +121,7 @@ The other end never moves. <!-- implements FR10, FR12 of add-grid-meeting-range-
 | 09:00–09:05 | end | day start | 09:00–09:05 |
 | 09:00–09:05 | start | next step | 09:00–09:05 |
 | 09:00–09:05 | end | next step | 09:00–09:15 |
+| 09:05–09:28 | start | next step | 09:13–09:28 |
 
 #### Scenario: A drag cannot cross the other end
 - **GIVEN** the meeting range is 09:00–11:00 in Almaty on 2026-03-08

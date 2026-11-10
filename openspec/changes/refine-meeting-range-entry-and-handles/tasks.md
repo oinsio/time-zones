@@ -46,7 +46,7 @@ Files stay under 200 lines where possible, 300 at most.
   - the case "start off the step" (`04:10`) becomes "start off a whole minute" (`04:10:30`);
   - new cases: `isValidMeetingRange` accepts `04:05`–`04:10` and `04:00`–`04:01`;
   - `getMeetingHandleLimits` of 09:00–09:05 gives start max 540 and end min 545;
-  - `getMeetingRangeAfterHandleMove` gives the 7 rows of `meeting-range` → "Moves from an end off the track step";
+  - `getMeetingRangeAfterHandleMove` gives the 8 rows of `meeting-range` → "Moves from an end off the track step";
   - `getMeetingRangeAtHandleMinutes` of 09:05–11:00, start at 551 minutes, gives 09:15–11:00;
   - `moveMeetingRangeToDay` keeps a 09:05–09:28 range at 09:05–09:28 on 2026-03-09.
 

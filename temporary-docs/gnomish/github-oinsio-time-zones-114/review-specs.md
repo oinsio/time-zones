@@ -134,7 +134,8 @@
 - Impact: low. The scenario table and D1 tell the implementer what to build, but the archived stable spec will state a rule that its own example breaks.
 - Fix: reword `:82` and FR4 as "A step move and a drag land on the track step; an hour move keeps the minute; the day start and end are exact. The limits below may then stop a move off the step." Optionally add the row `09:05–09:28 | start | next step | 09:13–09:28`.
 - Fix risk: none. The behaviour and the tests of tasks 2.1 and 2.5 are unchanged.
-- Status: open
+- Status: fixed
+- Resolution: specs/meeting-range/spec.md "Meeting handle moves" now reads "A step move and a pointer position land on the track step, an hour move keeps the minute, and the day's start and end are exact", says the limits may stop a move off the step, and adds the row `09:05–09:28 | start | next step | 09:13–09:28`; proposal.md FR4 and What Changes are reworded the same way; tasks.md 2.1 counts 8 rows.
 
 ### R6 — SUGGESTION — Proposal Impact lists an untouched file and omits touched ones
 - Location: `openspec/changes/refine-meeting-range-entry-and-handles/proposal.md:197-202`
