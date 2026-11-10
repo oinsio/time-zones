@@ -35,6 +35,7 @@ const MEETING_SPAN_CLASS_NAMES = "text-xl text-meeting-text md:text-[26px]";
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): in a
  * grid row the date comes first and the date and time sit in one line from 768 px.
  * Implements FR8, UX1 of add-grid-meeting-range-and-share (D8): the local span in place of the time and the day shift mark before the date.
+ * Implements FR8, UX3 of fix-grid-meeting-range-lock-and-layering (D6): the surface lies behind the label only.
  */
 export function LocalDateTime({
   localTimeLabel,
@@ -92,9 +93,11 @@ export function LocalDateTime({
           type="button"
           aria-label={wallTimeInputLabel}
           onClick={() => setOpenedDate(localIsoDate)}
-          className={`min-h-11 min-w-11 cursor-text rounded-md bg-surface font-bold leading-none whitespace-nowrap tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${timeClassName}`}
+          className={`min-h-11 min-w-11 cursor-text rounded-md font-bold leading-none whitespace-nowrap tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${timeClassName}`}
         >
-          {meetingRange?.spanLabel ?? localTimeLabel}
+          <span className="bg-surface">
+            {meetingRange?.spanLabel ?? localTimeLabel}
+          </span>
         </button>
       ) : (
         <WallTimeInput

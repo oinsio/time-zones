@@ -51,6 +51,7 @@ type ZoneRowContentProps = {
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): the zone line on the city's line in a grid row.
  * Implements FR10 of add-grid-hour-cells-and-hour-frame (D5): the texts keep the surface background, so the hour frame breaks behind them.
  * Implements FR8 of add-grid-meeting-range-and-share (D8): passes the meeting range to the time.
+ * Implements FR8, UX3 of fix-grid-meeting-range-lock-and-layering (D6): the zone line container has no surface, only its parts.
  */
 export function ZoneRowContent({
   cityLabel,
@@ -117,7 +118,7 @@ export function ZoneRowContent({
           {zoneLineParts.length > 0 && (
             <ZoneLine
               parts={zoneLineParts}
-              className="bg-surface text-sm text-muted-foreground"
+              className="text-sm text-muted-foreground"
             />
           )}
         </span>
