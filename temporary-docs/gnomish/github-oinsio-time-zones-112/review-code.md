@@ -6,8 +6,8 @@
 |---|---|
 | Tasks verified | 20/21 |
 | Requirements traced | 73/74 |
-| CRITICAL | 0 |
-| WARNING | 3 |
+| CRITICAL | 1 |
+| WARNING | 2 |
 | SUGGESTION | 2 |
 
 ## Tasks
@@ -16,7 +16,7 @@
 - ✅ 1.2 — `docs/architecture/domain-model.md:75` (command row) and `:92` (`LIVE --> PINNED`); `docs/architecture/views.md:44-45` (**Locked controls**, **Meeting range input**).
 - ✅ 2.1 — `packages/client/src/model/reduceMeetingRangeWallTimes.test.ts` covers the 4 rows, the refusals, the whole day (`:160`) and a New York gap start (`:164`). `src/model/wallClock.test.ts:69` covers `isCanonicalWallTime`.
 - ✅ 2.2 — `src/model/locationCommands.ts:27,82-92` adds the command. `src/model/wallClock.ts:53` adds `isCanonicalWallTime`, which `reduceWallTime.ts:39` now uses. The reducer is in `src/model/reduceMeetingRangeWallTimes.ts`. The command is routed at `src/model/locations.ts:194-195` and exported from `src/model/index.ts:132`.
-- ❌ 2.3 — The feature and steps exist: `src/test/features/meeting_range/meeting_range_wall_times.feature` has 3 scenarios, `@FR5`. But the steps never assert, with `createInMemoryLocationBackend`, that the saved document has no `meeting` key after the command, so part of the task is ticked but not done (R2).
+- ❌ 2.3 — The feature and steps exist: `src/test/features/meeting_range/meeting_range_wall_times.feature` has 3 scenarios, `@FR5`. But the steps never assert, with `createInMemoryLocationBackend`, that the saved document has no `meeting` key after the command, so part of the task is ticked but not done (R1).
 - ✅ 3.1 — `src/presenter/locationMeetingRange.ts:47-49` adds `startTimeLabel` / `endTimeLabel`; the test is at `src/presenter/locationMeetingRange.test.ts:42-45`.
 - ✅ 3.2 — `src/controller/useMeetingRange.ts:154-178` adds `confirmMeetingRangeInput`, and `src/controller/index.ts:22-26` exports the enum. `src/controller/useMeetingRange.input.test.tsx:47-49` checks the three outcomes, `:74` checks the English text, and `:101` checks that nothing is saved.
 - ✅ 4.1 — `tailwind.config.ts:23-32` has the 8 tokens, and every `z-[n]`, `z-10` and `z-20` is replaced: grep finds none in `src`. `z-page-bar` is at `src/app/MainPage.tsx:65`, `z-dialog` at `src/components/ui/dialog.tsx:24,27`. The tests are `dialog.test.tsx:44-45` and `MainPage.test.tsx:82`.
@@ -39,7 +39,7 @@
 - ✅ FR1 — `GridView.tsx:85` sets `areRowControlsLocked`. It reaches `DragHandle.tsx:35` (`disabled`), `LocationMenu.tsx:74-76,174` (closes and disables) and `useSortableLocationRow.ts:31` (`disabled`). In `LocalDateTime.tsx:75-79` an open wall-time input closes without confirming. Tested by `LocationRow.locked.test.tsx`, the unit and E2E "Controls are locked…" scenarios, and `LocalDateTime.meetingInput.test.tsx:95`.
 - ✅ FR2 — The lock is derived from `meeting !== undefined` (`GridView.tsx:85`). "Cards keeps its controls with a meeting range" passes in unit BDD, and the E2E lock scenario checks the controls after Clear.
 - ✅ FR3 — The span button is named `meeting.rangeInputLabel` (`LocalDateTime.tsx:113-120`) and opens `MeetingRangeInput` with the start field focused and selected (`MeetingRangeInput.tsx:47-50`). Tested by `MeetingRangeInput.test.tsx:36-66` and "The span opens the meeting range input".
-- ✅ FR4 — `MeetingRangeInput.tsx:52-79` handles Enter, blur, Esc and the errors, and `useMeetingRange.ts:154-178` returns the outcomes. Tested by `MeetingRangeInput.test.tsx:67-158` and the unit outlines. The English text of the range error differs from the spec (R1).
+- ✅ FR4 — `MeetingRangeInput.tsx:52-79` handles Enter, blur, Esc and the errors, and `useMeetingRange.ts:154-178` returns the outcomes. Tested by `MeetingRangeInput.test.tsx:67-158` and the unit outlines. The English text of the range error differs from the spec (R2).
 - ✅ FR5 — `reduceMeetingRangeWallTimes.ts:49-97` delegates to `reduceSetMeetingRange`. Tested by `reduceMeetingRangeWallTimes.test.ts` and `meeting_range_wall_times.feature`.
 - ✅ FR6 — `z-dialog` on the overlay and content (`dialog.tsx:24,27`); tested by E2E "Dialogs cover the grid".
 - ✅ FR7 — `z-page-bar` on the footer (`MainPage.tsx:65`), and a header box with an open menu gets `z-location-menu` (`locationRowVariant.ts:74`, `LocationRow.tsx:119-125`). Tested by E2E "Rows scroll under the date bar" and "An open location menu lies above the date bar".
@@ -145,22 +145,22 @@ Not measured: `src/views/shared/hourGridSlots.ts` (types only, no mutants) and `
 
 ## Findings
 
-### R1 — WARNING — English range error text differs from the spec
+### R1 — CRITICAL — Task 2.3 ticked without the stored-document assertion
+- Location: `packages/client/src/test/features/meeting_range/steps/meeting_range_wall_times.steps.ts:31`
+- Rule: `.gnomish` review instructions (a task ticked but not done is CRITICAL); `tasks.md` 2.3
+- Problem: Task 2.3 is ticked `[x]` and asks the unit BDD to "also assert, with `createInMemoryLocationBackend`, that the saved document has no `meeting` key after the command". The steps run only on `createMeetingWorld()` (a bare store over the reducer) with no backend, and no step checks the stored document. The rest of 2.3 (3 scenarios, `@FR5`, real store and reducer) is done, but the ticked task is not fully done.
+- Impact: At the model+store level, nothing proves that a range set from wall-clock times is never persisted (ADR-0011). A regression that writes `meeting` through this new command would pass the feature. Only the hook-level `save` spy in `useMeetingRange.input.test.tsx:101` would catch it.
+- Fix: Add a step "And the stored document has no meeting range" to "Wall-clock times of any location set the range" in `meeting_range_wall_times.feature`. In the steps, run that scenario on `createStoredListApp` from `steps/meetingRangeStoredApp.ts`, dispatching through `useMeetingRange().confirmMeetingRangeInput` or the store. Assert as `meeting_range_commands.steps.ts:72-76` does: `Object.keys(backend.document)` does not contain `"meeting"`.
+- Fix risk: The stored app goes through the controller, so the "When" step must dispatch in `act` and use the immediate write scheduler the helper already wires. The outline's other assertions keep using the store world.
+- Status: open
+
+### R2 — WARNING — English range error text differs from the spec
 - Location: `packages/client/src/locales/en.json:126`
 - Rule: `.claude/rules/i18n.md`; spec `grid-view` → "Meeting range input"
 - Problem: The spec and FR4 fix the English text of the range error as "The meeting must lie within the day, in 15-minute steps". `en.json` has `"rangeInputError": "The meeting must fit inside the day, in 15-minute steps"`. No test checks the English text: every scenario that shows this error runs in Russian.
 - Impact: An English-language user who types an invalid range sees a text that is not the one the spec defines, and nothing would catch a further drift.
 - Fix: Set `meeting.rangeInputError` in `en.json` to "The meeting must lie within the day, in 15-minute steps". Optionally add an English case to `MeetingRangeInput.test.tsx` that asserts the text.
 - Fix risk: none. No test or baseline uses the English string: grep for "fit inside" in `packages/client/src` finds only the locale.
-- Status: open
-
-### R2 — WARNING — Task 2.3 ticked without the stored-document assertion
-- Location: `packages/client/src/test/features/meeting_range/steps/meeting_range_wall_times.steps.ts:31`
-- Rule: `.gnomish` review instructions (a task ticked but not done); `tasks.md` 2.3
-- Problem: Task 2.3 asks the unit BDD to "also assert, with `createInMemoryLocationBackend`, that the saved document has no `meeting` key after the command". The steps run on `createMeetingWorld` (a bare store over the reducer) with no backend, and no step checks the stored document. The rest of 2.3 (3 scenarios, `@FR5`, real store and reducer) is done, and the hook-level spy partly covers the gap, so this is a WARNING, not CRITICAL.
-- Impact: At the model+store level, nothing proves that a range set from wall-clock times is never persisted (ADR-0011). A regression that writes `meeting` through this new command would pass the feature. Only the hook-level `save` spy in `useMeetingRange.input.test.tsx:101` would catch it.
-- Fix: Add a step "And the stored document has no meeting range" to "Wall-clock times of any location set the range" in `meeting_range_wall_times.feature`. In the steps, run that scenario on `createStoredListApp` from `steps/meetingRangeStoredApp.ts`, dispatching through `useMeetingRange().confirmMeetingRangeInput` or the store. Assert as `meeting_range_commands.steps.ts:72-76` does: `Object.keys(backend.document)` does not contain `"meeting"`.
-- Fix risk: The stored app goes through the controller, so the "When" step must dispatch in `act` and use the immediate write scheduler the helper already wires. The outline's other assertions keep using the store world.
 - Status: open
 
 ### R3 — WARNING — `useSortableLocationRow.ts` mutation score below 90%
@@ -173,7 +173,7 @@ Not measured: `src/views/shared/hourGridSlots.ts` (types only, no mutants) and `
 - Status: open
 
 ### R4 — SUGGESTION — Traceability line inserted inside an existing JSDoc sentence
-- Location: `packages/client/src/views/grid/MeetingHandle.tsx:96-98`
+- Location: `packages/client/src/views/grid/MeetingHandle.tsx:42-44`
 - Rule: `.claude/rules/traceability.md`
 - Problem: The new line `Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).` was inserted between "Implements FR9, FR10, FR12, NFR-A1, NFR-A2, NFR-R1, UX1, UX2 of" and its continuation "add-grid-meeting-range-and-share (D6).".
 - Impact: The JSDoc now reads as if the old requirements belong to this change, and the next line has no requirement ids. The link of `add-grid-meeting-range-and-share` to this component is garbled for anyone tracing those ids.
@@ -192,4 +192,4 @@ Not measured: `src/views/shared/hourGridSlots.ts` (types only, no mutants) and `
 
 ## Verdict
 
-Ready. Nothing is CRITICAL. R1, R2 and R3 are WARNINGs that the fix-code stage should fix: R1 is a one-line locale fix, R2 and R3 add tests only. None of them blocks: the behaviour the user sees matches the spec except R1's English wording.
+Not ready. R1 (CRITICAL) blocks: task 2.3 is ticked but its stored-document assertion was never written. R2 (English range error text) and R3 (`useSortableLocationRow.ts` below 90% mutation) are WARNINGs the fix-code stage should fix as well; R1 and R3 add tests only, R2 is a one-line locale fix.
