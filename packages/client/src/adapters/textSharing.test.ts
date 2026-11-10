@@ -92,3 +92,22 @@ describe("browser text sharing details", () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe("browser text sharing rejections", () => {
+  it.each([
+    ["null", null],
+    ["an object without a name", { code: 20 }],
+  ])(
+    "should copy when the share rejects with %s",
+    async (_label, rejection) => {
+      const copied: string[] = [];
+      const sharing = createBrowserTextSharing({
+        share: () => Promise.reject(rejection),
+        clipboard: { writeText: async (text) => void copied.push(text) },
+      });
+
+      expect(await sharing.shareText("text")).toBe(ShareOutcome.COPIED);
+      expect(copied).toEqual(["text"]);
+    },
+  );
+});
