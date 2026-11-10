@@ -172,7 +172,7 @@ No changes.
 - M5: 3 of 3 handle gestures on the sample meeting leave the expected range (09:00–11:00 in Almaty at 1440 × 900):
   - a mouse press 16 px right of the end grip's centre, dragged one cell right and released over another row's hour cell → 09:00–12:00;
   - a press and release on the end handle without movement → 09:00–11:00;
-  - a finger drag of the end handle one cell right with the fallback touch events → 09:00–12:00, with the touch end's default prevented.
+  - from 09:00–10:00, a finger drag of the end handle one cell right with the fallback touch events → 09:00–11:00, with the touch end's default prevented.
 - M6: From 09:05–11:00, Arrow Right on «Начало встречи» gives 09:15–11:00 and Arrow Left gives 09:00–11:00. From 09:00–09:05, Home on «Конец встречи» keeps 09:00–09:05.
 - M7: Scoped Stryker scores at least 90 % (target 95 %) on every changed production file.
 
