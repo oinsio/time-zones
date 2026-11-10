@@ -6,7 +6,7 @@ A wall-time input and each field of the meeting range input SHALL keep the separ
 - one digit when the first digit is 2 and the second is 4–9;
 - otherwise the first two digits.
 
-A text of digits alone that is no longer than its hour is shown as typed. A text that already holds a `:` or a `.`, a space or a letter (the 12-hour texts of `settings`) MUST be shown as typed, and so MUST a text changed by deleting characters or by typing inside it. The caret MUST stay after the last typed character. The separator changes only what the field shows: the accepted and the rejected texts of "Accepted wall-time text" and "Invalid wall-time text" keep their meaning. <!-- implements FR6, UX1 of refine-meeting-range-entry-and-handles -->
+A text of digits alone that is no longer than its hour is shown as typed. A text that already holds a `:` or a `.`, a space or a letter (the 12-hour texts of `settings`) MUST be shown as typed, and so MUST a text changed by deleting characters or by typing inside it. The caret MUST stay after the last typed character. "Accepted wall-time text" and "Invalid wall-time text" are unchanged for a confirmed text. A three-digit `HMM` time whose hour is 0, 1 or 2, such as `130` for 01:30, MUST be typed with a leading zero or a separator (`0130`, `1:30`): typed digit by digit at the end of the field it reads `13:0`, which is an invalid wall-time text. <!-- implements FR6, UX1 of refine-meeting-range-entry-and-handles -->
 
 #### Scenario: Digits typed one by one
 - **GIVEN** the user opened `<input>` of Almaty and its text is selected
@@ -21,6 +21,7 @@ A text of digits alone that is no longer than its hour is shown as typed. A text
 | the wall-time input | 0930 | `0`, `09`, `09:3`, `09:30` |
 | the wall-time input | 2359 | `2`, `23`, `23:5`, `23:59` |
 | the wall-time input | 12345 | `1`, `12`, `12:3`, `12:34`, `12:345` |
+| the wall-time input | 130 | `1`, `13`, `13:0` |
 | the start field of the meeting range input | 905 | `9`, `9:0`, `9:05` |
 | the end field of the meeting range input | 1130 | `1`, `11`, `11:3`, `11:30` |
 
@@ -64,3 +65,4 @@ A text of digits alone that is no longer than its hour is shown as typed. A text
 | `24:00` |
 | `12345` |
 | `9:60` |
+| `130` |

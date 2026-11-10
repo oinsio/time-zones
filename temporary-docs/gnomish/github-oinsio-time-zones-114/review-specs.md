@@ -104,7 +104,8 @@
 - Impact: today a user can type `130` and get 01:30. After the change they get «Введите время в формате ЧЧ:ММ», in both the wall-time input and the meeting range input. No artifact says so and no test pins it, so the implementer and the reviewer cannot tell whether this is intended.
 - Fix: declare the trade-off instead of claiming nothing changes. In the time-selection delta, replace "keep their meaning" with a sentence saying that a three-digit time whose hour is 0, 1 or 2 must be typed with a leading zero or a separator (`0130`, `1:30`), because the digits typed one by one read as `13:0`. Add that case to FR6 and NG3. Add a row `130` → `1`, `13`, `13:0` to "Digits typed one by one", and `130` to "Rejected texts stay rejected". Add the same `130` → `13:0` case to task 3.1's `formatTypedWallTimeText.test.ts`.
 - Fix risk: none for the code. Parsing and the stable "Accepted wall-time text" stay as they are, because a confirmed text `130` (typed inside the text, or pasted into a field that already holds text after the caret) still means 01:30. Adding the row adds one example to the unit BDD of task 4.2 and the E2E of task 5.2.
-- Status: open
+- Status: fixed
+- Resolution: specs/time-selection/spec.md "Time separator while typing" now states the trade-off instead of "keep their meaning" (`130` reads `13:0` and must be typed `0130` or `1:30`), with a `130` → `1`, `13`, `13:0` row in "Digits typed one by one" and `130` in "Rejected texts stay rejected"; proposal.md FR6 and NG3 declare it; design.md D4 states the cost and why the hour rule keeps it; tasks.md 3.1 adds `130`→`13:0`, and 4.2 / 5.2 count 8 and 4 examples.
 
 ### R3 — WARNING — D1 adds a second owner of the "next / previous track step" rule
 - Location: `openspec/changes/refine-meeting-range-entry-and-handles/design.md:41`

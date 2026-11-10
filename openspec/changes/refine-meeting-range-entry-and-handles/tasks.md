@@ -76,6 +76,7 @@ Files stay under 200 lines where possible, 300 at most.
   - `1`→`1`, `10`→`10`, `103`→`10:3`, `1030`→`10:30`;
   - `9`→`9`, `93`→`9:3`, `930`→`9:30`, `0930`→`09:30`;
   - `24`→`2:4`, `2359`→`23:59`, `12345`→`12:345`;
+  - `13`→`13`, `130`→`13:0` (the declared FR6 trade-off);
   - `9:3`, `09.30`, `9 am`, `abc` and the empty text unchanged.
 
   Implement `src/presenter/formatTypedWallTimeText.ts` with `WALL_TIME_SEPARATOR` and the digit limits as constants in `src/constants/timeSelection.ts`, exported through `src/constants/index.ts` and `src/presenter/index.ts`. Run `npx vitest run src/presenter/formatTypedWallTimeText.test.ts`: passes.
@@ -99,7 +100,7 @@ Files stay under 200 lines where possible, 300 at most.
   Implement `src/views/shared/typedTimeFieldText.ts` and use it in `WallTimeInput.tsx` and `MeetingRangeInput.tsx`. Run the three files one at a time: pass.
 - [ ] 4.2 Unit BDD of the input (needs 3.2, 4.1):
   - `src/test/features/grid_view/grid_view_meeting_range_input_unit.feature`: the "Wrong input keeps the input open" table becomes the 5 rows of the delta and is tagged `@FR3 @UX3`; add "A meeting at any minute" (5 examples, `@FR2 @FR3`).
-  - New `src/test/features/time_selection/time_selection_time_separator_unit.feature` with `steps/time_selection_time_separator_unit.steps.tsx` (user-event typing in the app world of the existing wall-time unit steps): "Digits typed one by one" (7 examples), "Texts left as typed" (5), "Backspace removes the separator", "A pasted time gets its separator" and "Rejected texts stay rejected" (3) (`@FR6 @UX1`). The unit copy of "Digits typed one by one" omits the step "the caret is after the last character": the caret is asserted only in the browser (5.2).
+  - New `src/test/features/time_selection/time_selection_time_separator_unit.feature` with `steps/time_selection_time_separator_unit.steps.tsx` (user-event typing in the app world of the existing wall-time unit steps): "Digits typed one by one" (8 examples, `130` → `13:0` included), "Texts left as typed" (5), "Backspace removes the separator", "A pasted time gets its separator" and "Rejected texts stay rejected" (4, `130` included) (`@FR6 @UX1`). The unit copy of "Digits typed one by one" omits the step "the caret is after the last character": the caret is asserted only in the browser (5.2).
 
   Run `npx vitest run src/test/features/grid_view/steps/grid_view_meeting_range_input_unit.steps.tsx`, then `npx vitest run src/test/features/time_selection/steps/time_selection_time_separator_unit.steps.tsx`, then `npx vitest run src/test/features/time_selection/steps/time_selection_wall_time_input_unit.steps.tsx`: pass.
 - [ ] 4.3 RED then GREEN, handle rows (D5):
@@ -162,10 +163,10 @@ Files stay under 200 lines where possible, 300 at most.
   - change the `<li>` width back to `w-6`, rerun "A press beside the grip drags the handle" and confirm it fails;
   - restore both files.
 - [ ] 5.2 `src/test/features/time_selection/time_selection_time_separator_e2e.feature` with `steps/time_selection_time_separator_e2e.steps.ts`. Typing uses `page.keyboard.type` per digit, and the caret is read from `selectionStart`. Scenarios:
-  - "Digits typed one by one" (the 7 examples);
+  - "Digits typed one by one" (the 8 examples);
   - "Backspace removes the separator";
   - "A typed time with the separator is confirmed";
-  - "Rejected texts stay rejected" (`@FR6 @UX1`);
+  - "Rejected texts stay rejected" (4 examples, `130` included) (`@FR6 @UX1`);
   - in Grid, "A meeting at any minute" with the examples Almaty `905`–`928` (typed as digits) → «Meeting · 23 min», and Moscow `7:05`–`9:28` (`@FR2 @FR3`).
 
   New `src/test/features/grid_view/grid_view_meeting_range_messages_e2e.feature` with `steps/grid_view_meeting_range_messages_e2e.steps.ts`: "No accessibility violations with each range message" (6 examples, `@axe-core/playwright`, `@NFR-A1 @FR3`).

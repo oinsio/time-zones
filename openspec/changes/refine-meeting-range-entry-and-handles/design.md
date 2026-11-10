@@ -83,7 +83,7 @@ Best practice that was weighed:
 - `type="time"` is ruled out by the existing spec, and its format follows the system.
 - A mask library (Cleave.js, IMask) is a dependency for one rule.
 
-An insert-only, digits-only mask keeps every accepted and rejected text of `time-selection` as it is. It needs no `:` key, so the numeric keyboard stays. It never reformats an edit the user is making inside the text.
+An insert-only, digits-only mask keeps the parser and every accepted and rejected confirmed text of `time-selection` as it is. Its one cost is declared in FR6: a three-digit time with hour 0–2 (`130`) typed digit by digit reads `13:0` and is refused, so it needs `0130` or `1:30`. Reading `13` as 1 + `3…` would instead break `13:00`, `1330` and every hour 10–19, which are far more common. It needs no `:` key, so the numeric keyboard stays. It never reformats an edit the user is making inside the text.
 
 ### D5. Handles stand on the visible rows (FR7, NFR-P1, NFR-R1)
 
