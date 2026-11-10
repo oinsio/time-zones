@@ -109,12 +109,13 @@ Files stay under 200 lines where possible, 300 at most.
     - after a scroll event it returns the new run;
     - three scroll events before one frame measure once (NFR-P1);
     - an unchanged run causes no re-render (a render counter);
-    - with no strip fully visible it returns `{ 1, 12 }`;
+    - a 38 px strip whose top is 2 px is not a candidate (its 48 px handle would start at −3 px), nor is a 38 px strip whose bottom is 2 px above the date bar;
+    - with no candidate row it returns `{ 1, 12 }`;
     - with `isFrozen` it keeps the last value;
     - without `[data-date-bar]` it uses `window.innerHeight`.
   - `src/app/MainPage.test.tsx` asserts `data-date-bar` on the bottom element that holds the date bar.
 
-  Implement `meetingHandleRow.ts`, `useVisibleStripRows.ts`, `DATE_BAR_SELECTOR` in `src/constants/date.ts` (beside `DATE_BAR_SHORT_FORMAT_OPTIONS`, exported through `src/constants/index.ts`), the attribute in `src/app/MainPage.tsx`, and the wiring in `GridView.tsx` and `MeetingHandle.tsx` (`onDragActiveChange`). Run the three test files one at a time, then `npx vitest run src/views/grid/MeetingHandle.test.tsx`: pass.
+  Implement `meetingHandleRow.ts`, `useVisibleStripRows.ts`, `MEETING_HANDLE_HEIGHT_PX` in `src/constants/meeting.ts`, `DATE_BAR_SELECTOR` in `src/constants/date.ts` (beside `DATE_BAR_SHORT_FORMAT_OPTIONS`, exported through `src/constants/index.ts`), the attribute in `src/app/MainPage.tsx`, and the wiring in `GridView.tsx` and `MeetingHandle.tsx` (`onDragActiveChange`). Run the three test files one at a time, then `npx vitest run src/views/grid/MeetingHandle.test.tsx`: pass.
 - [ ] 4.4 RED then GREEN, hit area, grab offset and release (D6–D8):
   - `src/views/grid/MeetingHandle.test.tsx`: the `<li>` carries `w-11` and `h-12`, and the grip keeps `h-9 w-3` (UX2).
   - `src/views/grid/useMeetingHandleDrag.test.tsx` and `useMeetingHandleDrag.edges.test.tsx`: the assertions that expect the pointer's absolute minutes are updated to press-relative minutes. The fixture's `valueMinutes` 660 plus the travel: the touch drag from x 100 to 256 at the fixture pitch expects `660 + (256 - 100) / pitch * 60`.

@@ -94,7 +94,8 @@
 - Impact: implemented as written, the E2E of task 5.1 fails or flakes at the "middle" scroll position, where strip positions are arbitrary, and a user can get a handle partly under the date bar, which is the defect of task item 3.
 - Fix: in FR7, the grid-view requirement "Meeting handles on the frame" and D5, define a candidate row as one whose meeting handle box would lie fully in the viewport above the date bar: strip centre − half the handle height ≥ 0 and strip centre + half the handle height ≤ the date bar's top (the handle height read from the rendered handle, or a named constant beside the handle's size). Add a case to task 4.3's `useVisibleStripRows.test.tsx`: a strip whose top is 2 px with a 38 px height and a 48 px handle is not a candidate.
 - Fix risk: low. The "Handle rows among the visible rows" table is written in candidate rows and stays valid. At 1440 × 900 with 4 rows every strip is far from the edges, so "Handles of the sample meeting" is unaffected.
-- Status: open
+- Status: fixed
+- Resolution: a candidate row is now one whose centred handle box (strip centre ± half of `MEETING_HANDLE_HEIGHT_PX`, 48 px, new in `constants/meeting.ts`) lies in the viewport above the date bar — proposal.md FR7 and UI States Matrix, specs/grid-view/spec.md "Meeting handles on the frame" and the GIVEN of "Handle rows among the visible rows", design.md D5 "The measurement"; tasks.md 4.3 adds the 2 px-top and 2 px-above-the-bar 38 px strip cases to `useVisibleStripRows.test.tsx` and the constant.
 
 ### R2 — WARNING — The separator rule turns accepted three-digit early-morning texts into rejected ones, undeclared
 - Location: `openspec/changes/refine-meeting-range-entry-and-handles/specs/time-selection/spec.md:187-192`; `proposal.md:53` (NG3), `proposal.md:91` (FR6)

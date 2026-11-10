@@ -17,7 +17,7 @@ A tap or click on an hour cell SHALL set a one-hour meeting range starting at th
 ### Requirement: Meeting handles on the frame
 While a meeting range is set and the list has rows, the Grid view SHALL show two meeting handles in the meeting colour: the start handle centred on the left edge of the meeting frame, the end handle centred on its right edge, each over the hour strip of a row.
 
-The handles MUST stand on the rows the user can see. The candidate rows are those whose hour strip lies fully inside the viewport and above the date bar. When no strip does, every row of the list is a candidate. With `k` candidate rows, counted from 1 in list order, the end handle stands on candidate row `⌈k / 2⌉` and the start handle on the candidate row after it. With one candidate row, both handles stand on it.
+The handles MUST stand on the rows the user can see. The candidate rows are those on which a meeting handle, centred on the row's hour strip, lies fully inside the viewport and above the date bar; the handle is taller than a strip, so the handle's box decides, not the strip's. When no row is a candidate, every row of the list is a candidate. With `k` candidate rows, counted from 1 in list order, the end handle stands on candidate row `⌈k / 2⌉` and the start handle on the candidate row after it. With one candidate row, both handles stand on it.
 
 When the page scrolls or resizes, the handles MUST move to the rows of the new candidates. While a meeting handle is being dragged, neither handle changes its row.
 
@@ -45,7 +45,7 @@ The handles MUST lie above everything in the panel, the row header texts and row
 | 844 | 390 | bottom |
 
 #### Scenario: Handle rows among the visible rows
-- **GIVEN** the rows with fully visible hour strips are rows `<first>` to `<last>` of the list
+- **GIVEN** the candidate rows, on which a centred meeting handle lies fully inside the viewport above the date bar, are rows `<first>` to `<last>` of the list
 - **WHEN** the handle rows are chosen
 - **THEN** the end handle stands on row `<end>` and the start handle on row `<start>`
 

@@ -89,7 +89,7 @@ None.
   No move makes the range shorter than one track step, or shorter than its current length when that is already less than one track step. The other end never moves.
 - FR5: A date change keeps a meeting range whose start is off the track step at its exact wall-clock start in the reference zone and its duration, clamped to the new reference day.
 - FR6: While the user types into a wall-time input or a field of the meeting range input, a field text made only of digits shows the separator `:` after the hour as soon as a minute digit follows. The hour is one digit when the first digit is 3–9, or when it is 2 followed by 4–9; otherwise the hour is two digits. This applies when the typed or pasted characters end at the end of the text. Deleting, editing inside the text, and texts with a separator, a space or a letter are left as typed.
-- FR7: While a meeting range is set and the grid has rows, the two meeting handles stand on the rows whose hour strips are fully visible: in the viewport, above the date bar. The ⌈k / 2⌉ rule applies to those k rows: the end handle on visible row ⌈k / 2⌉, the start handle on the next one, or both on the one visible row. With no fully visible strip, the rule applies to all rows as before. While a handle is dragged, neither handle changes its row.
+- FR7: While a meeting range is set and the grid has rows, the two meeting handles stand on the candidate rows: the rows where a handle, centred on the row's hour strip, lies fully in the viewport above the date bar (the handle is taller than a strip, so the handle's box decides). The ⌈k / 2⌉ rule applies to those k candidate rows: the end handle on candidate row ⌈k / 2⌉, the start handle on the next one, or both on the one candidate row. With no candidate row, the rule applies to all rows as before. While a handle is dragged, neither handle changes its row.
 - FR8: A press anywhere within a meeting handle's hit area, at least 44 × 44 px centred on the frame's edge, drags that handle and never selects hour cells. During the drag the handle's end follows the pointer's horizontal travel along the strips since the press (the strips' scroll included, also while they auto-scroll), rounded to the nearest track step, so a press and release without movement changes nothing. Releasing a handle, wherever the pointer or finger is, never counts as a tap or click on an hour cell: no one-hour range is set.
 
 ### Non-Functional
@@ -120,7 +120,7 @@ None.
 |---|---|---|
 | any | Grid, meeting range set, all rows fit | handles on rows ⌈n / 2⌉ and the next, as before (FR7) |
 | any | Grid, meeting range set, rows scrolled | handles on the visible rows (FR7) |
-| any | no strip fully visible (page scrolled past the grid) | handles on the rows of the whole list (FR7) |
+| any | no candidate row (page scrolled past the grid) | handles on the rows of the whole list (FR7) |
 | any | meeting range input open, a text not a time | «Введите время в формате ЧЧ:ММ» (unchanged) |
 | any | same start and end / end before start / outside the day | the FR3 message, input open, nothing changed |
 | any | handle released over another row's hour cell | range as at the last move (FR8) |
