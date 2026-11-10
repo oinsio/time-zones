@@ -7,8 +7,10 @@ import {
   type WallTimeTarget,
   WallTimeTargetKind,
 } from "@/controller";
-import type { LocationRow as LocationRowModel } from "@/presenter";
-import { ClockChangeNote } from "./ClockChangeNote";
+import type {
+  LocationRow as LocationRowModel,
+  PresentedLocationMeetingRange,
+} from "@/presenter";
 import { DragHandle } from "./DragHandle";
 import { LocationMenu } from "./LocationMenu";
 import {
@@ -16,10 +18,10 @@ import {
   LocationRowVariant,
 } from "./locationRowVariant";
 import { OptionalBox } from "./OptionalBox";
+import { RowNotes } from "./RowNotes";
 import { getReorderTransition } from "./reorderTransition";
 import { useDropSettleAnimation } from "./useDropSettleAnimation";
 import { useLocationMenuItems } from "./useLocationMenuItems";
-import { WallTimeHint } from "./WallTimeHint";
 import { ZoneRowContent } from "./ZoneRowContent";
 
 type LocationRowProps = {
@@ -40,6 +42,7 @@ type LocationRowProps = {
   rowVariant?: LocationRowVariant;
   /** The hour strip of a grid row, shown after the row header and before the row notes. */
   hourStrip?: ReactNode;
+  meetingRange?: PresentedLocationMeetingRange;
 };
 
 /**
@@ -72,6 +75,7 @@ type LocationRowProps = {
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): a card or
  * a row of the grid panel, the same row header.
  * Implements FR1, FR7, FR10 of add-grid-hour-cells-and-hour-frame (D5): hour strip, then notes, in sticky boxes.
+ * Implements FR8 of add-grid-meeting-range-and-share (D8): the meeting span in the row header; the notes live in `RowNotes`.
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -86,6 +90,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       prefersReducedMotion,
       rowVariant = LocationRowVariant.CARD,
       hourStrip,
+      meetingRange,
     },
     menuButtonRef,
   ) {
@@ -173,6 +178,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             onSelectTrackFraction={onSelectTrackFraction}
             onMoveTrack={onMoveTrack}
             rowVariant={rowVariant}
+            meetingRange={meetingRange}
           />
           <LocationMenu
             ref={menuButtonRef}
@@ -182,17 +188,11 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
           />
         </OptionalBox>
         {hourStrip}
-        {(row.wallTimeHint !== undefined ||
-          row.clockChangeNote !== undefined) && (
-          <OptionalBox className={variantClassNames.notesBox}>
-            {row.wallTimeHint !== undefined && (
-              <WallTimeHint text={row.wallTimeHint} />
-            )}
-            {row.clockChangeNote !== undefined && (
-              <ClockChangeNote text={row.clockChangeNote} />
-            )}
-          </OptionalBox>
-        )}
+        <RowNotes
+          wallTimeHint={row.wallTimeHint}
+          clockChangeNote={row.clockChangeNote}
+          boxClassName={variantClassNames.notesBox}
+        />
       </li>
     );
   },

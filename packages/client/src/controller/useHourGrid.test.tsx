@@ -1,4 +1,5 @@
 // Verifies FR8, FR9 of add-grid-hour-cells-and-hour-frame (D3).
+// Verifies FR7 of add-grid-meeting-range-and-share.
 import { act, renderHook } from "@testing-library/react";
 import { type ReactNode, useContext } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -140,6 +141,21 @@ describe("useHourGrid", () => {
     dispatch({ type: LocationCommandType.RESET_TO_NOW });
 
     expect(result.current.grid.hourFrameIndex).toBe(12);
+  });
+
+  it("should report a meeting range only while one is set", () => {
+    const { result, dispatch } = setup();
+    expect(result.current.grid.hasMeetingRange).toBe(false);
+
+    dispatch({
+      type: LocationCommandType.SET_MEETING_RANGE,
+      start: "2026-03-08T04:00:00Z",
+      end: "2026-03-08T06:00:00Z",
+    });
+    expect(result.current.grid.hasMeetingRange).toBe(true);
+
+    dispatch({ type: LocationCommandType.CLEAR_MEETING_RANGE });
+    expect(result.current.grid.hasMeetingRange).toBe(false);
   });
 
   it("should give no strip to a zone the engine rejects", () => {

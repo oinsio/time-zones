@@ -1,4 +1,4 @@
-import { useHourGrid, useTimeSelection } from "@/controller";
+import { useHourGrid, useMeetingRange, useTimeSelection } from "@/controller";
 import {
   type HourGridSlots,
   LocationRowVariant,
@@ -6,22 +6,41 @@ import {
 } from "@/views/shared";
 import { HourFrame } from "./HourFrame";
 import { HourStrip } from "./HourStrip";
+import { MeetingFrame } from "./MeetingFrame";
+import { MeetingHandleSlider } from "./MeetingHandle";
 import { useHourStripScroll } from "./useHourStripScroll";
 
 /**
  * Grid view: the location list as rows of one panel, each a row header over
- * its hour strip, with the hour frame across all rows. A tap on a cell does
- * nothing yet; the strip is the keyboard time selection.
+ * its hour strip, with the hour frame across all rows. A tap or a drag on the
+ * cells, or Enter on a strip, sets the meeting range; while it is set the
+ * meeting frame and the two meeting handles replace the hour frame and every
+ * row shows its local span.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4).
  * Implements FR1, FR8, FR9, FR11, FR12, NFR-R1, NFR-R2 of add-grid-hour-cells-and-hour-frame (D3, D4, D5).
+ * Implements FR5-FR12, NFR-R1, UX1, UX2 of add-grid-meeting-range-and-share (D6, D8).
  */
 export default function GridView() {
-  const { strips, hourFrameIndex, cellCount } = useHourGrid();
+  const { strips, hourFrameIndex, cellCount, hasMeetingRange } = useHourGrid();
   const { moveTrack } = useTimeSelection();
-  const { panelRef, panelStyle } = useHourStripScroll(
+  const { meeting, selectCells, selectFramedHour, moveHandle, dragHandleTo } =
+    useMeetingRange();
+  const { panelRef, panelStyle, layout } = useHourStripScroll(
     hourFrameIndex,
     cellCount,
+    !hasMeetingRange,
   );
+  const meetingColumns = meeting && {
+    first: meeting.span.firstColumn,
+    last: meeting.span.lastColumn,
+  };
+  const handleProps = {
+    rowCount: strips.size,
+    cellPitchPx: layout.cellPitchPx,
+    isScrollable: layout.isScrollable,
+    onMoveHandle: moveHandle,
+    onDragHandleTo: dragHandleTo,
+  };
   const hourGrid: HourGridSlots = {
     renderHourStrip: (row) => {
       const strip = strips.get(row.id);
@@ -30,12 +49,29 @@ export default function GridView() {
           city={row.cityLabel}
           track={row.dayTrack}
           strip={strip}
-          hourFrameIndex={hourFrameIndex}
+          hourFrameIndex={meeting ? undefined : hourFrameIndex}
+          meetingColumns={meetingColumns}
+          cellPitchPx={layout.cellPitchPx}
+          isScrollable={layout.isScrollable}
           onMoveTrack={moveTrack}
+          onSelectCells={selectCells}
+          onSelectFramedHour={selectFramedHour}
         />
       ) : null;
     },
-    frame: <HourFrame hourFrameIndex={hourFrameIndex} />,
+    frame: meeting ? (
+      <>
+        <MeetingFrame span={meeting.span} />
+        <MeetingHandleSlider
+          presented={meeting.handles.start}
+          {...handleProps}
+        />
+        <MeetingHandleSlider presented={meeting.handles.end} {...handleProps} />
+      </>
+    ) : (
+      <HourFrame hourFrameIndex={hourFrameIndex} />
+    ),
+    meetingRangeOf: (row) => meeting?.rowRanges.get(row.id),
     panelRef,
     panelStyle,
   };

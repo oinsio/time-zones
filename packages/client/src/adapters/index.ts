@@ -1,3 +1,9 @@
+// Implements FR15 of add-grid-meeting-range-and-share.
+export {
+  browserTextSharing,
+  createBrowserTextSharing,
+  type SharingNavigator,
+} from "./browserTextSharing";
 export {
   createCompositeCitySearch,
   createFetchCitySearchLoader,
@@ -14,6 +20,11 @@ export {
   createInMemoryPreferencesRepository,
 } from "./inMemoryPreferencesRepository";
 export { inMemoryStorageAvailability } from "./inMemoryStorageAvailability";
+export {
+  createInMemoryTextSharing,
+  type InMemoryTextSharing,
+  type InMemoryTextSharingOptions,
+} from "./inMemoryTextSharing";
 export { loadCitySearch } from "./loadCitySearch";
 export {
   createLocalStorageAvailability,

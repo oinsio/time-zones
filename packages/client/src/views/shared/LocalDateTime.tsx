@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { WallTimeInputOutcome } from "@/controller";
-import type { LocationRow } from "@/presenter";
+import type { LocationRow, PresentedLocationMeetingRange } from "@/presenter";
 import {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
   LocationRowVariant,
@@ -15,7 +15,12 @@ type LocalDateTimeProps = Pick<
   onConfirmWallTime: (text: string, date: string) => WallTimeInputOutcome;
   /** Cards when omitted. */
   rowVariant?: LocationRowVariant;
+  /** The meeting range's local span and day shift mark; the span replaces the time. */
+  meetingRange?: PresentedLocationMeetingRange;
 };
+
+const TIME_CLASS_NAMES = "text-2xl md:text-4xl";
+const MEETING_SPAN_CLASS_NAMES = "text-xl text-meeting-text md:text-[26px]";
 
 /**
  * Local time with the date under it; renders nothing when the time cannot be
@@ -29,6 +34,7 @@ type LocalDateTimeProps = Pick<
  * column width from 768 px, so every track is equally long.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): in a
  * grid row the date comes first and the date and time sit in one line from 768 px.
+ * Implements FR8, UX1 of add-grid-meeting-range-and-share (D8): the local span in place of the time and the day shift mark before the date.
  */
 export function LocalDateTime({
   localTimeLabel,
@@ -37,6 +43,7 @@ export function LocalDateTime({
   wallTimeInputLabel,
   onConfirmWallTime,
   rowVariant = LocationRowVariant.CARD,
+  meetingRange,
 }: LocalDateTimeProps) {
   const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -61,18 +68,33 @@ export function LocalDateTime({
       {localDateLabel}
     </time>
   );
+  const dayShiftMark = meetingRange?.dayShiftLabel !== undefined && (
+    <span className="bg-surface text-sm font-bold text-danger">
+      {meetingRange.dayShiftLabel}
+    </span>
+  );
+  const dateWithMark = dayShiftMark ? (
+    <span className="flex items-baseline gap-x-1">
+      {dayShiftMark}
+      {dateElement}
+    </span>
+  ) : (
+    dateElement
+  );
+  const timeClassName =
+    meetingRange === undefined ? TIME_CLASS_NAMES : MEETING_SPAN_CLASS_NAMES;
   return (
     <span className={`flex shrink-0 items-end ${variantClassNames.dateTime}`}>
-      {variantClassNames.isDateBeforeTime && dateElement}
+      {variantClassNames.isDateBeforeTime && dateWithMark}
       {openedDate === undefined ? (
         <button
           ref={buttonRef}
           type="button"
           aria-label={wallTimeInputLabel}
           onClick={() => setOpenedDate(localIsoDate)}
-          className="min-h-11 min-w-11 cursor-text rounded-md bg-surface text-2xl font-bold leading-none whitespace-nowrap tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent md:text-4xl"
+          className={`min-h-11 min-w-11 cursor-text rounded-md bg-surface font-bold leading-none whitespace-nowrap tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${timeClassName}`}
         >
-          {localTimeLabel}
+          {meetingRange?.spanLabel ?? localTimeLabel}
         </button>
       ) : (
         <WallTimeInput
@@ -82,7 +104,7 @@ export function LocalDateTime({
           onClose={closeField}
         />
       )}
-      {!variantClassNames.isDateBeforeTime && dateElement}
+      {!variantClassNames.isDateBeforeTime && dateWithMark}
     </span>
   );
 }

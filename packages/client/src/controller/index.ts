@@ -17,6 +17,10 @@ export { useHourGrid } from "./useHourGrid";
 export { useInterfaceLanguage } from "./useInterfaceLanguage";
 // Implements FR2, FR6, FR8 of show-here-entry-for-device-time.
 export { LocationsStatus, useLocations } from "./useLocations";
+// Implements FR2, FR5, FR10, FR13, FR15 of add-grid-meeting-range-and-share.
+export { useMeetingBar } from "./useMeetingBar";
+export { type PresentedMeeting, useMeetingRange } from "./useMeetingRange";
+export { MeetingShareNotice, useMeetingShare } from "./useMeetingShare";
 export { PreferencesStatus, usePreferences } from "./usePreferences";
 export { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 export type { PwaUpdateStatus } from "./usePwaUpdateStatus";

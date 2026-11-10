@@ -9,7 +9,7 @@ Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002
 | View | Best for | Screens | Status |
 |---|---|---|---|
 | **Cards** | converting: large exact time per location | phone in portrait, any | first release |
-| **Grid** | planning a meeting: see where working hours overlap and pick a meeting range ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)) | any; all 24 hours fit from about 830 px | hour cells and hour frame; meeting follows |
+| **Grid** | planning a meeting: see where working hours overlap and pick a meeting range ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)) | any; all 24 hours fit from about 830 px | complete: hour cells, hour frame, meeting range, handles and Share meeting |
 
 Future views reuse the same model, e.g. a compact world-clock list.
 
@@ -31,7 +31,7 @@ All rows sit in one panel with dividers, so a frame can cross every row. Each ro
 ```
 
 - **Row header:** drag handle, home or here icon, city, difference, zone line; on the right the date with the day shift mark, the time and the location menu. On a narrow screen it takes two lines (city and zone line on the left, time and date on the right).
-- **Hour cells:** the hour strip is the Grid view's slider for the keyboard; a tap does nothing until the meeting range. One absolute hour of the reference day each, labelled with the location's local start hour (`9`, `9:30`), coloured by its day period. Where a location's local midnight falls the cell shows the date (`MAR` over `8`) instead of `0` and is shaded; the row of the reference zone shows a plain `0`, since its day always starts there. A DST offset edge is a dark line on the cell's left side.
+- **Hour cells:** the hour strip is the Grid view's slider for the keyboard; a tap sets a one-hour meeting range. One absolute hour of the reference day each, labelled with the location's local start hour (`9`, `9:30`), coloured by its day period. Where a location's local midnight falls the cell shows the date (`MAR` over `8`) instead of `0` and is shaded; the row of the reference zone shows a plain `0`, since its day always starts there. A DST offset edge is a dark line on the cell's left side.
 - **Width:** all 24 cells when each is at least 32 px wide (desktop about 58 px, tablet 46 px, phone in landscape 33 px). Otherwise about 9 cells of 36–40 px (phone in portrait) and the strips of all rows scroll horizontally together.
 - **Cell colouring:** by day period. A later setting may offer working hours only or no colouring.
 
@@ -40,8 +40,8 @@ All rows sit in one panel with dividers, so a frame can cross every row. Each ro
 - **Hour frame:** a blue (accent) frame across all rows around the hour cell of the effective instant; its text in the cell is bold. While live it follows the current hour.
 - **Meeting:** tapping a cell sets a one-hour meeting range, dragging across cells stretches it ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)). The frame turns green and spans the range, cells outside it are dimmed, and every row shows its local range in green (`23:00–01:00`).
 - **Meeting handles:** green grips on the left and right side of the meeting frame, placed on different rows so both are easy to grab. They move the start and the end by the 15-minute track step; for assistive technology they are sliders (arrows ±15 min, Page Up / Page Down ±1 h, Home / End the day's ends).
-- **Meeting bar:** while a meeting range is set the header turns green: the title «Встреча · 2 ч», then «Поделиться встречей» (Lucide `Share2`) and «Сбросить выбор встречи» (Lucide `X`). Clear returns the hour frame; the Now button also clears the range.
-- **Layers:** hour cells, then the frame, then the row header texts and row notes, then the meeting handles. Text and notes have the surface background, so the frame breaks behind them and never covers them.
+- **Meeting bar:** while a meeting range is set the header turns green: the title «Встреча · 2 ч», then «Поделиться встречей» (Lucide `Share2`) and «Сбросить выбор встречи» (Lucide `X`). Clear returns the hour frame; the Now button also clears the range. Share sends text only (Q8): the date and duration, then every location's city and local span in list order, with its day shift where its date differs, by the system share where the browser has it and by the clipboard otherwise; a closed share sheet is silent.
+- **Layers:** hour cells, then the frame, then the row header texts and row notes, then the meeting handles; an open location menu stays above them. Text and notes have the surface background, so the frame breaks behind them and never covers them.
 
 ## Cards
 
@@ -136,7 +136,7 @@ Every view must pass the same BDD E2E scenarios:
 
 A scenario a view cannot pass yet because a part of its design is not built is excluded for that view only, by a pending tag that names the view and the change that brings it back ([ADR-0012](../adr/0012-user-chosen-view.md)): no scenario is excluded today.
 
-Grid also passes the meeting scenarios: set, resize, share and clear a meeting range.
+A view whose registry entry shows the meeting range (`showsMeetingRange`, ADR-0005) also passes the meeting scenarios, tagged `@view-contract @meeting-range`: set, resize, share and clear a meeting range. They are a capability of the view, not a pending scenario: a view without the meeting range never runs them. Today only Grid shows it.
 
 ## UI states
 

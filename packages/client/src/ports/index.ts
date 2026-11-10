@@ -19,3 +19,4 @@ export {
   type PreferencesRepository,
 } from "./preferencesRepository";
 export type { StorageAvailability } from "./storageAvailability";
+export { ShareOutcome, type TextSharing } from "./textSharing";

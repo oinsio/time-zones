@@ -9,7 +9,15 @@ interface MainPageProps {
   bottomBar: ReactNode;
   /** The Add location and Settings buttons; they carry their own header placement. */
   headerActions?: ReactNode;
+  /** The meeting bar; while given it takes the header's place (no title, no header actions). */
+  meetingBar?: ReactNode;
 }
+
+const HEADER_CLASS_NAMES =
+  "grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border pt-6 pb-4";
+// Below 360 px the title cannot stay centred beside the 92 px of buttons.
+const MEETING_HEADER_CLASS_NAMES =
+  "-mx-4 grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-meeting bg-meeting-bar px-4 pt-6 pb-4 min-[360px]:grid-cols-[1fr_auto_1fr]";
 
 /**
  * The main page: header with the title and a slot for future controls, the
@@ -23,16 +31,32 @@ interface MainPageProps {
  * DOM order is the Tab order.
  * Implements FR3, FR4, UX2 of fix-location-card-and-header-layout (D3): one
  * header layout on every width, the title centred on the page.
+ * Implements FR13, NFR-R1, UX1 of add-grid-meeting-range-and-share (D7): the meeting bar takes the header's place.
  */
-export function MainPage({ notices, bottomBar, headerActions }: MainPageProps) {
+export function MainPage({
+  notices,
+  bottomBar,
+  headerActions,
+  meetingBar,
+}: MainPageProps) {
   const { t } = useTranslation();
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-screen-2xl flex-col px-4">
-      <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border pt-6 pb-4">
-        <h1 className="order-2 col-start-2 text-center text-2xl font-semibold">
-          {t("app.title")}
-        </h1>
-        {headerActions}
+      <header
+        className={
+          meetingBar === undefined
+            ? HEADER_CLASS_NAMES
+            : MEETING_HEADER_CLASS_NAMES
+        }
+      >
+        {meetingBar ?? (
+          <>
+            <h1 className="order-2 col-start-2 text-center text-2xl font-semibold">
+              {t("app.title")}
+            </h1>
+            {headerActions}
+          </>
+        )}
       </header>
       <main className="flex-1">
         <ViewHost />

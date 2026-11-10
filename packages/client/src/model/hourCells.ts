@@ -44,9 +44,7 @@ function buildHourCells(
   );
   const cellCount = getHourCellCount(day);
   return Array.from({ length: cellCount }, (_, column) => {
-    const start = day.start.add({
-      hours: column * HOUR_CELL_DURATION.hours,
-    });
+    const start = getHourCellStart(day, column);
     const localStart = start.toZonedDateTimeISO(timeZoneId);
     const localDate = localStart.toPlainDate();
     const previousStart = start.subtract(HOUR_CELL_DURATION);
@@ -106,4 +104,16 @@ export function getHourFrameIndex(
     Math.max(Math.floor(minutesFromStart / MINUTES_PER_HOUR), 0),
     lastColumn,
   );
+}
+
+/**
+ * The start of the hour cell in a column: the one owner of the column
+ * arithmetic.
+ * Implements FR5 of add-grid-meeting-range-and-share (D2).
+ */
+export function getHourCellStart(
+  day: ReferenceDay,
+  column: number,
+): Temporal.Instant {
+  return day.start.add({ hours: column * HOUR_CELL_DURATION.hours });
 }

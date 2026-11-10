@@ -1,4 +1,5 @@
 import { Temporal } from "@/lib/temporal";
+import { getReferenceDay } from "./dayTrack";
 import {
   type LocationCommand,
   LocationCommandType,
@@ -6,6 +7,8 @@ import {
   type LocationsReduceResult,
   type WorldClockState,
 } from "./locations";
+import { moveMeetingRangeToDay } from "./meetingRange";
+import { withoutMeetingRange } from "./reduceMeetingRange";
 import {
   getEffectiveInstant,
   getReferenceZone,
@@ -47,16 +50,27 @@ function moveToDate(
       zone,
       date.toPlainDateTime(requestedWallTime),
     );
+    const reference = {
+      mode: ReferenceMode.PINNED,
+      instant,
+      wallClockStatus: status,
+      requestedWallTime,
+    } as const;
+    const { meeting } = state;
     return {
       ok: true,
       state: {
         ...state,
-        reference: {
-          mode: ReferenceMode.PINNED,
-          instant,
-          wallClockStatus: status,
-          requestedWallTime,
-        },
+        reference,
+        ...(meeting === undefined
+          ? {}
+          : {
+              meeting: moveMeetingRangeToDay(
+                meeting,
+                instant,
+                getReferenceDay({ ...state, reference }, now),
+              ),
+            }),
       },
     };
   } catch (e) {
@@ -82,6 +96,7 @@ function buildTargetDateResolver(
  * day, a picked date and the return to now. The commands carry ISO strings
  * only, so they replay deterministically (ADR-0002).
  * Implements FR1, FR2, FR3, FR4, FR6, FR10 of select-date-with-calendar-and-now (D1).
+ * Implements FR3 of add-grid-meeting-range-and-share (D1): the meeting range ends or moves.
  */
 export function reduceReferenceMoment(
   state: WorldClockState,
@@ -89,7 +104,13 @@ export function reduceReferenceMoment(
 ): LocationsReduceResult {
   if (command.type === LocationCommandType.RESET_TO_NOW) {
     if (state.reference.mode === ReferenceMode.LIVE) return { ok: true, state };
-    return { ok: true, state: { ...state, reference: LIVE_REFERENCE_MOMENT } };
+    return {
+      ok: true,
+      state: {
+        ...withoutMeetingRange(state),
+        reference: LIVE_REFERENCE_MOMENT,
+      },
+    };
   }
   try {
     const now = Temporal.Instant.from(command.now);

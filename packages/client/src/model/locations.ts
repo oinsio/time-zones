@@ -11,8 +11,14 @@ import {
 } from "./locationCommands";
 import { buildLocationId } from "./locationId";
 import { LocationKind } from "./locationKind";
+import type { MeetingRange } from "./meetingRange";
 import { moveLocationInList } from "./moveLocation";
 import { reduceHomeLocation } from "./reduceHomeLocation";
+import {
+  followMeetingRange,
+  reduceClearMeetingRange,
+  reduceSetMeetingRange,
+} from "./reduceMeetingRange";
 import { reduceReferenceMoment } from "./reduceReferenceMoment";
 import { reduceSelectInstant } from "./reduceSelectInstant";
 import { reduceWallTime } from "./reduceWallTime";
@@ -35,6 +41,7 @@ export { LocationKind } from "./locationKind";
  * Implements FR1 of select-date-with-calendar-and-now (D1): the reference moment.
  * Implements FR3, FR8 of add-time-sliders-to-location-cards (D1): SELECT_INSTANT.
  * Implements FR1, FR2, FR3, FR10 of set-home-location-and-show-differences (D1).
+ * Implements FR1-FR4 of add-grid-meeting-range-and-share (D1): the meeting range.
  */
 
 export type Location = {
@@ -55,6 +62,11 @@ export type WorldClockState = {
   reference: ReferenceMoment;
   /** Id of the home location, or `null`; always an id of `locations`. */
   homeLocationId: string | null;
+  /**
+   * The meeting range, or `undefined`; never persisted. The reference moment
+   * is pinned at its start while it is set (ADR-0011).
+   */
+  meeting?: MeetingRange;
 };
 
 export const INITIAL_WORLD_CLOCK_STATE: WorldClockState = {
@@ -78,7 +90,13 @@ export function reduceLocations(
 ): LocationsReduceResult {
   const outcome = reduceCommand(state, command);
   return outcome.ok
-    ? { ok: true, state: followReferenceZone(state, outcome.state) }
+    ? {
+        ok: true,
+        state: followMeetingRange(
+          state,
+          followReferenceZone(state, outcome.state),
+        ),
+      }
     : outcome;
 }
 
@@ -170,5 +188,9 @@ function reduceCommand(
       return reduceWallTime(state, command);
     case LocationCommandType.SELECT_INSTANT:
       return reduceSelectInstant(state, command);
+    case LocationCommandType.SET_MEETING_RANGE:
+      return reduceSetMeetingRange(state, command);
+    case LocationCommandType.CLEAR_MEETING_RANGE:
+      return reduceClearMeetingRange(state);
   }
 }

@@ -39,7 +39,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           world.storeLocations(["Almaty", "Moscow"]);
         },
       );
-      When("the main page is shown", world.openApp);
+      When("the main page is shown", () => world.openApp());
       Then(
         "the Grid view shows the rows of Almaty and Moscow, in this order, inside one panel",
         async () => {
@@ -103,7 +103,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       world.storeViewMode(ViewId.GRID);
       world.storeEmptyList();
     });
-    When("the main page is shown", world.openApp);
+    When("the main page is shown", () => world.openApp());
     Then("it shows the empty-state explanation", async () => {
       expect(await screen.findByText(i18n.t("views.emptyState"))).toBeVisible();
     });
@@ -127,7 +127,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         world.storeUnreadableList();
       },
     );
-    When("the main page is shown", world.openApp);
+    When("the main page is shown", () => world.openApp());
     Then("it shows the load error with a Reset action", async () => {
       expect(await screen.findByRole("alert")).toHaveTextContent(
         i18n.t("locations.loadError"),

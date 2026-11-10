@@ -97,3 +97,28 @@ Feature: Main page header in a real browser
       | 375   | dark  |
       | 1024  | light |
       | 1024  | dark  |
+
+  @add-grid-meeting-range-and-share @FR13
+  Scenario: The meeting bar replaces the header
+    Given the locations interface language is Russian
+    And the view mode is Grid
+    And the current time is "2026-03-08T07:30:00Z"
+    And the stored locations are "Almaty", "Moscow"
+    And the screen is 1440 by 900 px for the locations
+    When the user opens the locations app
+    And the user sets the sample meeting
+    Then the header shows the meeting bar, with no button named "Добавить место" or "Настройки" and no title "Часовые пояса"
+    And pressing "/" opens no search
+    When the user clears the meeting
+    Then the header shows, from left to right, the button named "Добавить место", the title "Часовые пояса" and the button named "Настройки"
+
+  @add-grid-meeting-range-and-share @FR13
+  Scenario: Cards keeps its header with a meeting range
+    Given the view mode is Grid
+    And the current time is "2026-03-08T07:30:00Z"
+    And the stored locations are "Almaty", "Moscow"
+    And the screen is 1440 by 900 px for the locations
+    When the user opens the locations app
+    And the user sets the sample meeting
+    And the view mode becomes Cards in another tab
+    Then the header shows, from left to right, the button named "Add location", the title "Time Zones" and the button named "Settings"

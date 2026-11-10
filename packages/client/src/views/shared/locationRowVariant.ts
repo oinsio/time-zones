@@ -44,6 +44,7 @@ const STICKY_BOX_CLASS_NAMES =
  * Implements FR1, FR7, FR10, NFR-R2, NFR-R3, UX3 of add-grid-hour-cells-and-hour-frame (D5):
  * the grid panel scrolls its strips while the sticky boxes keep the header and
  * the notes in place and above the hour frame.
+ * Implements FR9 of add-grid-meeting-range-and-share (D6): an open location menu stays above the meeting handles.
  */
 export const LOCATION_ROW_VARIANT_CLASS_NAMES: Record<
   LocationRowVariant,
@@ -63,7 +64,7 @@ export const LOCATION_ROW_VARIANT_CLASS_NAMES: Record<
   [LocationRowVariant.GRID_ROW]: {
     list: "relative overflow-x-auto overscroll-x-contain rounded-md border border-border",
     row: "flex flex-col gap-y-2 px-[var(--grid-row-padding)] min-w-full w-max border-t border-border first:border-t-0 first:rounded-t-md last:rounded-b-md",
-    headerBox: `${HEADER_LINE_CLASS_NAMES} ${STICKY_BOX_CLASS_NAMES} focus-within:z-[3]`,
+    headerBox: `${HEADER_LINE_CLASS_NAMES} ${STICKY_BOX_CLASS_NAMES} focus-within:z-[4]`,
     notesBox: `${STICKY_BOX_CLASS_NAMES} order-last`,
     placeAndTime: "md:flex-1",
     place: "md:flex-1 md:flex-row md:items-baseline md:gap-x-2",

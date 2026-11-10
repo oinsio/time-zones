@@ -1,6 +1,6 @@
 Feature: Hour frame of the Grid view
   Implements change add-grid-hour-cells-and-hour-frame.
-  As a user I see which hour of every location the shown moment falls in, and a tap on a cell changes nothing yet.
+  As a user I see which hour of every location the shown moment falls in, and a tap on a cell sets a one-hour meeting range.
 
   @add-grid-hour-cells-and-hour-frame @FR8
   Scenario: Frame on the current hour
@@ -33,9 +33,9 @@ Feature: Hour frame of the Grid view
     When the user returns to now
     Then the hour frame is on column 12
 
-  @add-grid-hour-cells-and-hour-frame @FR11
-  Scenario: A tap on a cell changes nothing
+  @add-grid-meeting-range-and-share @FR5
+  Scenario: A tap on a cell sets a one-hour meeting range
     Given the Grid view at "2026-03-08T07:30:00Z", live
     When the user taps column 3 of Moscow
-    Then the store receives no command
-    And Almaty still shows "12:30" and the frame is still on column 12
+    Then the meeting frame encloses column 3
+    And no hour frame is shown and the title is "Meeting · 1 h"

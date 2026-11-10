@@ -1,4 +1,4 @@
-import { Temporal } from "@/lib/temporal";
+import { parseCommandInstant } from "./commandInstant";
 import {
   type LocationCommand,
   type LocationCommandType,
@@ -6,10 +6,9 @@ import {
   type LocationsReduceResult,
   type WorldClockState,
 } from "./locations";
+import { withoutMeetingRange } from "./reduceMeetingRange";
 import { getReferenceZone, ReferenceMode } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
-
-const UTC_DESIGNATOR = "Z";
 
 type SelectInstantCommand = Extract<
   LocationCommand,
@@ -21,25 +20,19 @@ type SelectInstantCommand = Extract<
  * The status is always `UNIQUE`, which ends a gap note. Selecting the
  * instant that is already pinned returns the same state object.
  * Implements FR3, FR5, FR8 of add-time-sliders-to-location-cards (D1).
+ * Implements FR3 of add-grid-meeting-range-and-share (D1): the meeting range ends.
  */
 export function reduceSelectInstant(
   state: WorldClockState,
   command: SelectInstantCommand,
 ): LocationsReduceResult {
-  let instant: Temporal.Instant;
-  try {
-    if (!command.instant.endsWith(UTC_DESIGNATOR)) {
-      throw new RangeError(command.instant);
-    }
-    instant = Temporal.Instant.from(command.instant);
-  } catch (e) {
-    if (e instanceof RangeError) {
-      return { ok: false, error: LocationErrorCode.INVALID_INSTANT };
-    }
-    throw e;
+  const instant = parseCommandInstant(command.instant);
+  if (instant === undefined) {
+    return { ok: false, error: LocationErrorCode.INVALID_INSTANT };
   }
   const { reference } = state;
   if (
+    state.meeting === undefined &&
     reference.mode === ReferenceMode.PINNED &&
     reference.instant.equals(instant)
   ) {
@@ -51,7 +44,7 @@ export function reduceSelectInstant(
   return {
     ok: true,
     state: {
-      ...state,
+      ...withoutMeetingRange(state),
       reference: {
         mode: ReferenceMode.PINNED,
         instant,

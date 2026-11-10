@@ -36,6 +36,8 @@ export {
   collectOffsetEdges,
   type OffsetEdge,
 } from "./dayPeriodWindows";
+// Implements FR1-FR12 of add-grid-meeting-range-and-share.
+export { DayShift, getDayShift } from "./dayShift";
 export {
   type ClockChangeWindow,
   getInstantAfterTrackMove,
@@ -58,6 +60,7 @@ export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
 // Implements FR1, FR2, FR5, FR6, FR8 of add-grid-hour-cells-and-hour-frame.
 export {
   getHourCellCount,
+  getHourCellStart,
   getHourCells,
   getHourFrameIndex,
   type HourCell,
@@ -66,6 +69,10 @@ export {
 export { getLocalDateTime } from "./localDateTime";
 export { LocationKind } from "./locationKind";
 export { getLocationMarkKind, LocationMarkKind } from "./locationMark";
+export {
+  getLocationMeetingRange,
+  type LocationMeetingRange,
+} from "./locationMeetingRange";
 export {
   buildLocationId,
   canonicalizeLocationId,
@@ -78,6 +85,19 @@ export {
   reduceLocations,
   type WorldClockState,
 } from "./locations";
+export {
+  getMeetingHandleLimits,
+  getMeetingRangeAfterHandleMove,
+  getMeetingRangeAtHandleMinutes,
+  getMeetingRangeOfCells,
+  getMeetingSpan,
+  isValidMeetingRange,
+  MeetingHandle,
+  type MeetingHandleLimits,
+  type MeetingRange,
+  type MeetingSpan,
+  moveMeetingRangeToDay,
+} from "./meetingRange";
 export { moveLocationInList } from "./moveLocation";
 export {
   getOffsetDifferenceMinutes,
@@ -87,6 +107,7 @@ export {
   type ParseStoredLocationsResult,
   parseStoredLocations,
 } from "./parseStoredLocations";
+export { withoutMeetingRange } from "./reduceMeetingRange";
 // Implements FR1-FR4, FR6, FR10 of select-date-with-calendar-and-now.
 export {
   getEffectiveInstant,

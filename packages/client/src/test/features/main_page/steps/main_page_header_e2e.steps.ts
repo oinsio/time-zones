@@ -180,3 +180,39 @@ Then(
     expect(reachedNames.indexOf(secondName)).toBeGreaterThan(firstIndex);
   },
 );
+
+// Verifies FR13 of add-grid-meeting-range-and-share: the meeting bar is the whole header while a meeting range is set.
+Then(
+  /^the header shows the meeting bar, with no button named "([^"]+)" or "([^"]+)" and no title "([^"]+)"$/,
+  async ({ locationsWorld }, addName: string, settingsName, title: string) => {
+    const header = headerOf(locationsWorld.page);
+    await expect(header.getByRole(HEADING_ROLE)).toHaveText(/^Встреча · /);
+    await expect(header.getByRole(BUTTON_ROLE, { name: addName })).toHaveCount(
+      0,
+    );
+    await expect(
+      header.getByRole(BUTTON_ROLE, { name: settingsName }),
+    ).toHaveCount(0);
+    await expect(header.getByRole(HEADING_ROLE, { name: title })).toHaveCount(
+      0,
+    );
+  },
+);
+
+Then(/^pressing "\/" opens no search$/, async ({ locationsWorld }) => {
+  const { page } = locationsWorld;
+  await page.keyboard.press("/");
+  await expect(queryField(page)).toHaveCount(0);
+});
+
+// Verifies FR13 of add-grid-meeting-range-and-share: the other tab picks Cards in the settings.
+When(
+  "the view mode becomes Cards in another tab",
+  async ({ locationsWorld }) => {
+    const otherTab = await locationsWorld.openOtherTab();
+    await otherTab
+      .getByRole(BUTTON_ROLE, { name: englishLocale.settings.open })
+      .click();
+    await otherTab.getByRole("radio", { name: "Cards" }).check({ force: true });
+  },
+);

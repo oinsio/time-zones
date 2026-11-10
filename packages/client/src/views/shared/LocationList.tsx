@@ -87,6 +87,7 @@ type LocationListProps = {
  * the rows of one panel with dividers.
  * Implements FR1, FR7, FR8 of add-grid-hour-cells-and-hour-frame (D5): the hour
  * strip of each row and the hour frame as the last child of the panel.
+ * Implements FR8 of add-grid-meeting-range-and-share (D8): the meeting range of each row.
  */
 export function LocationList({
   rows,
@@ -162,6 +163,7 @@ export function LocationList({
               prefersReducedMotion={prefersReducedMotion}
               rowVariant={rowVariant}
               hourStrip={hourGrid?.renderHourStrip(row)}
+              meetingRange={hourGrid?.meetingRangeOf?.(row)}
             />
           ))}
           {hourGrid?.frame}

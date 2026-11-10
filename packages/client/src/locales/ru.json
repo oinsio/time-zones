@@ -29,6 +29,8 @@
   "locations": {
     "utcOffsetPrefix": "UTC",
     "wallTimeInputLabel": "Ввести время — {{city}}, {{time}}",
+    "dayShiftEarlier": "днём раньше",
+    "dayShiftLater": "днём позже",
     "wallTimeInputError": "Введите время в формате ЧЧ:ММ",
     "wallTimeHintGap": "{{requestedTime}} не существует в этот день — часы переведены вперёд. Показано {{shownTime}}",
     "wallTimeHintAmbiguous": "{{requestedTime}} бывает дважды — показано первое ({{zone}})",
@@ -108,6 +110,22 @@
   },
   "search": {
     "deviceTimeOption": "Время устройства"
+  },
+  "meeting": {
+    "barTitle": "Встреча · {{duration}}",
+    "durationHours": "{{hours}} ч",
+    "durationMinutes": "{{minutes}} мин",
+    "durationHoursMinutes": "{{hours}} ч {{minutes}} мин",
+    "share": "Поделиться встречей",
+    "clear": "Сбросить выбор встречи",
+    "startHandle": "Начало встречи",
+    "endHandle": "Конец встречи",
+    "hourStripHint": "Enter — выбрать встречу на этот час",
+    "shareHeading": "Встреча {{date}}, {{duration}}",
+    "shareLine": "{{city}}: {{span}}",
+    "shareLineShifted": "{{city}}: {{span}} ({{dayShift}}, {{date}})",
+    "copiedNotice": "Текст встречи скопирован",
+    "shareFailedNotice": "Не удалось поделиться встречей"
   },
   "settings": {
     "open": "Настройки",

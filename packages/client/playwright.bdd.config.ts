@@ -41,6 +41,12 @@ const { STORAGE_KEYS, PREFERENCES_SCHEMA_VERSION } = await import(
 const { DEFAULT_PREFERENCES } = await import(PREFERENCES_MODULE_PATH);
 const VIEW_CONTRACT_TAG_PATTERN = /@view-contract/;
 /**
+ * A contract scenario of a capability: it runs for the views whose registry
+ * entry shows the meeting range and for no other view.
+ * Implements FR17 of add-grid-meeting-range-and-share (D11).
+ */
+const MEETING_RANGE_CONTRACT_TAG_PATTERN = /@meeting-range(?![\w-])/;
+/**
  * The scenarios a view cannot pass yet, excluded for that view only; the tag
  * names the change that brings the scenario back (ADR-0012).
  * Implements FR8 of add-view-mode-setting-and-grid-skeleton (D5).
@@ -72,23 +78,32 @@ const isCi = !!process.env.CI;
 /**
  * One contract run per registered view; registering a view adds its run. Each
  * run shows its view through the stored view mode, not through the viewport.
+ * A view without `showsMeetingRange` leaves out the `@meeting-range` scenarios.
+ * Implements FR17 of add-grid-meeting-range-and-share (D11).
  */
-const viewContractProjects = viewRegistry.map((view: { id: string }) => ({
-  name: `view-contract-${view.id}`,
-  grep: VIEW_CONTRACT_TAG_PATTERN,
-  grepInvert: VIEW_CONTRACT_PENDING_TAGS[view.id],
-  use: {
-    ...devices["Desktop Chrome"],
-    contractView: {
-      id: view.id,
-      preferencesStorageKey: STORAGE_KEYS.PREFERENCES,
-      preferencesDocument: JSON.stringify({
-        schemaVersion: PREFERENCES_SCHEMA_VERSION,
-        payload: { ...DEFAULT_PREFERENCES, viewMode: view.id },
-      }),
+const viewContractProjects = viewRegistry.map(
+  (view: { id: string; showsMeetingRange?: boolean }) => ({
+    name: `view-contract-${view.id}`,
+    grep: VIEW_CONTRACT_TAG_PATTERN,
+    grepInvert: [
+      VIEW_CONTRACT_PENDING_TAGS[view.id],
+      view.showsMeetingRange === true
+        ? undefined
+        : MEETING_RANGE_CONTRACT_TAG_PATTERN,
+    ].filter((pattern) => pattern !== undefined),
+    use: {
+      ...devices["Desktop Chrome"],
+      contractView: {
+        id: view.id,
+        preferencesStorageKey: STORAGE_KEYS.PREFERENCES,
+        preferencesDocument: JSON.stringify({
+          schemaVersion: PREFERENCES_SCHEMA_VERSION,
+          payload: { ...DEFAULT_PREFERENCES, viewMode: view.id },
+        }),
+      },
     },
-  },
-}));
+  }),
+);
 
 export default defineConfig<ContractViewOptions>({
   testDir,
