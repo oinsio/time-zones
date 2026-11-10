@@ -25,6 +25,22 @@ export {
   OutsidePressEvent,
   ROOT_ELEMENT_ID,
 } from "./dom";
+export {
+  GRID_ROW_PADDING_PX,
+  HOUR_CELL_DURATION,
+  HOUR_CELL_GAP_PX,
+  HOUR_CELL_MINUTE_DIGITS,
+  HOUR_CELL_MINUTE_SEPARATOR,
+  HourGridCssVariable,
+  LOCATION_MENU_OFFSET_PX,
+  MIDNIGHT_SHADE_SPREAD_PX,
+  MIN_FITTING_HOUR_CELL_PX,
+  NARROW_HOUR_CELL_MAX_PX,
+  NARROW_HOUR_CELL_MIN_PX,
+  NARROW_VISIBLE_HOUR_CELLS,
+  OFFSET_EDGE_WIDTH_PX,
+  SHORT_MONTH_TRAILING_STOP,
+} from "./grid";
 export { KeyboardKey } from "./keyboard";
 export { LEGACY_ZONE_PROBE_ID } from "./legacy";
 export {

@@ -12,6 +12,12 @@ export interface ThemeColours {
   border: string;
   overlay: string;
   danger: string;
+  accent: string;
+  dayNight: string;
+  dayMorning: string;
+  dayWorking: string;
+  dayEvening: string;
+  hourCellForeground: string;
 }
 
 const TOKENS_FILE = join(process.cwd(), "src", "styles", "tokens.css");
@@ -61,5 +67,34 @@ export function readThemeColours(theme: Theme): ThemeColours {
     border: toComputedRgb(readTokenHex(themeBlock, "border")),
     overlay: toComputedRgb(readTokenHex(themeBlock, "overlay")),
     danger: toComputedRgb(readTokenHex(themeBlock, "danger")),
+    accent: toComputedRgb(readTokenHex(themeBlock, "accent")),
+    dayNight: toComputedRgb(readTokenHex(themeBlock, "day-night")),
+    dayMorning: toComputedRgb(readTokenHex(themeBlock, "day-morning")),
+    dayWorking: toComputedRgb(readTokenHex(themeBlock, "day-working")),
+    dayEvening: toComputedRgb(readTokenHex(themeBlock, "day-evening")),
+    hourCellForeground: toComputedRgb(
+      readTokenHex(themeBlock, "hour-cell-foreground"),
+    ),
   };
+}
+
+const RGBA_PATTERN = /rgba\(([^)]*)\)/;
+
+/**
+ * The midnight cell shade of a theme as `styles/tokens.css` declares it,
+ * as the computed `rgba(...)` text.
+ * Implements FR5 of add-grid-hour-cells-and-hour-frame (D6).
+ */
+export function readMidnightShade(theme: Theme): string {
+  const tokensCss = readFileSync(TOKENS_FILE, "utf8");
+  const darkStart = tokensCss.indexOf(DARK_THEME_MARKER);
+  const themeBlock =
+    theme === "dark"
+      ? tokensCss.slice(darkStart)
+      : tokensCss.slice(0, darkStart);
+  const shadeMatch = themeBlock.match(
+    new RegExp(`--color-midnight-shade:\\s*${RGBA_PATTERN.source}`),
+  );
+  if (!shadeMatch) throw new Error("Token --color-midnight-shade not found");
+  return `rgba(${shadeMatch[1]})`;
 }

@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { LOCATION_MENU_TRIGGER_GLYPH, OutsidePressEvent } from "@/constants";
 import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import { getMenuKeyAction, MenuKeyAction } from "./locationMenuKeys";
+import { useFixedMenuPosition } from "./useFixedMenuPosition";
 
 export type LocationMenuItem = {
   label: string;
@@ -20,6 +21,8 @@ export type LocationMenuItem = {
 type LocationMenuProps = {
   city: string;
   items: readonly LocationMenuItem[];
+  /** Places the open menu from its button instead of inside its row; `false` when omitted. */
+  isMenuFixedToViewport?: boolean;
 };
 
 // `pointerdown` does not exist before iOS Safari 13; there a press is a touch or a mouse event.
@@ -32,9 +35,13 @@ const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
  * it works on engines without Pointer Events. Escape returns focus to the
  * button; a press outside, or focus moving outside, closes it.
  * Implements FR11, FR14, NFR-A2, UX3 of set-home-location-and-show-differences (D7).
+ * Implements FR1 of add-grid-hour-cells-and-hour-frame (D5): `isMenuFixedToViewport`.
  */
 export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
-  function LocationMenu({ city, items }, forwardedTriggerRef) {
+  function LocationMenu(
+    { city, items, isMenuFixedToViewport = false },
+    forwardedTriggerRef,
+  ) {
     const { t } = useTranslation();
     const menuId = useId();
     const rootRef = useRef<HTMLSpanElement | null>(null);
@@ -42,6 +49,10 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
     const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(0);
+    const fixedPosition = useFixedMenuPosition(
+      triggerRef,
+      isOpen && isMenuFixedToViewport,
+    );
 
     useEffect(() => {
       if (isOpen) itemRefs.current[focusedIndex]?.focus();
@@ -149,7 +160,8 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
             role="menu"
             tabIndex={-1}
             aria-label={t("locations.locationMenu", { city })}
-            className="absolute right-0 top-full z-20 mt-1 flex w-max max-w-full min-w-44 flex-col rounded-md border border-border bg-surface py-1 shadow-lg"
+            style={fixedPosition}
+            className={`${isMenuFixedToViewport ? "fixed" : "absolute right-0 top-full mt-1"} z-20 flex w-max max-w-full min-w-44 flex-col rounded-md border border-border bg-surface py-1 shadow-lg`}
           >
             {items.map((item, index) => (
               <button

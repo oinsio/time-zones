@@ -36,6 +36,8 @@ const config: Config = {
         border: "var(--color-border)",
         overlay: "var(--color-overlay)",
         danger: "var(--color-danger)",
+        "midnight-shade": "var(--color-midnight-shade)",
+        "hour-cell-foreground": "var(--color-hour-cell-foreground)",
         day: {
           night: "var(--color-day-night)",
           morning: "var(--color-day-morning)",

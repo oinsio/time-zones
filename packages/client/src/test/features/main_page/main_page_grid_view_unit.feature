@@ -1,13 +1,14 @@
 Feature: Main page Grid view
-  Implements change add-view-mode-setting-and-grid-skeleton.
-  The Grid view shows the location rows with the shared row headers and no hour cells.
+  Implements change add-view-mode-setting-and-grid-skeleton and add-grid-hour-cells-and-hour-frame.
+  The Grid view shows the location rows with the shared row headers, each over its hour strip.
 
   @add-view-mode-setting-and-grid-skeleton @FR7 @UX3
-  Scenario: Rows in one panel without hour cells
+  @add-grid-hour-cells-and-hour-frame @FR1
+  Scenario: Rows in one panel with hour strips
     Given the view mode is Grid and the stored locations are Almaty and Moscow
     When the main page is shown
     Then the Grid view shows the rows of Almaty and Moscow, in this order, inside one panel
-    And no row has a day track
+    And every row has an hour strip after its row header and no day track
 
   @add-view-mode-setting-and-grid-skeleton @FR7
   Scenario: Typing a time in Grid
@@ -21,6 +22,7 @@ Feature: Main page Grid view
     When the main page is shown
     Then it shows the empty-state explanation
     And the header "Add location" action is available
+    And no hour strip and no hour frame are shown
 
   @add-view-mode-setting-and-grid-skeleton @FR7
   Scenario: Unreadable list in Grid

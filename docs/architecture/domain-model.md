@@ -103,7 +103,8 @@ Selectors take the state and the current instant from the `Clock` and return vie
 | `getReferenceZone(state)` | home location's zone, otherwise `deviceTimeZoneId` | all |
 | `getRows(state)` | display rows: `locations` only, in list order | all views |
 | `getLocationSnapshot(row)` | `ZonedDateTime`, UTC offset, offset difference and day shift (`-1 / 0 / +1`) from the reference zone, day period, is-home and is-here flags | all views |
-| `getHourCells(location)` | cells of the reference day: start instant, local start time, day period, offset edge, is-midnight flag with the new date (never set in the reference zone's row) | grid |
+| `getHourCells(timeZoneId, referenceDay, referenceZoneId)` | cells of the reference day: start instant, local start time, day period, offset edge, midnight date (never set in the reference zone's row) | grid |
+| `getHourFrameIndex(referenceDay, instant)` | the hour frame's column: the cell that contains the instant | grid |
 | `getMeetingSpan(state)` | start and end of the meeting range as fractions of the reference day, or none | grid |
 | `getLocationMeetingRange(row)` | local start and end `ZonedDateTime` of the meeting range and the day shift of the start | grid |
 | `getDayTrack(row)` | position of the reference moment within the reference day (0..1, equal for all rows) and the row's day-period segments over that day, including offset jumps | cards |

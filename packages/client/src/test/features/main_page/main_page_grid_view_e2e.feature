@@ -1,5 +1,5 @@
 Feature: Grid view in a real browser
-  Implements change add-view-mode-setting-and-grid-skeleton.
+  Implements change add-view-mode-setting-and-grid-skeleton and add-grid-hour-cells-and-hour-frame.
   The Grid view fits every screen, keeps the row header in one line on a wide screen, uses the theme tokens and works offline.
 
   @add-view-mode-setting-and-grid-skeleton @NFR-R1
@@ -51,20 +51,60 @@ Feature: Grid view in a real browser
     When the user removes "Moscow"
     Then the Grid view shows only the row of "Almaty"
 
-  @add-view-mode-setting-and-grid-skeleton @UX3
-  Scenario Outline: Approved screenshots of Grid at <width> px in the <theme> theme
+  @add-grid-hour-cells-and-hour-frame @FR7
+  Scenario: Row notes after the hour strip
     Given the view mode is Grid
     And the current time is "2026-03-08T07:30:00Z"
+    And the stored locations are "New York"
+    When the user opens the locations app
+    Then the clock change note of "New York" comes after its hour strip, in the document and on the screen
+
+  @add-grid-hour-cells-and-hour-frame @NFR-R3
+  Scenario: Grid row header in two lines on a phone
+    Given the view mode is Grid
+    And the stored locations are "Almaty", "Moscow"
+    And the screen is 390 px wide for the locations
+    When the user opens the locations app
+    Then the time of "Almaty" is on the line of its city, right of it
+    And the date of "Almaty" is on the line of its zone line, under its time
+
+  @add-grid-hour-cells-and-hour-frame @FR1
+  Scenario Outline: The location menu of <city> is fully visible at <width> by <height> px
+    Given the view mode is Grid
     And the stored locations are "Almaty", "Moscow", "Kolkata", "New York"
+    And the screen is <width> by <height> px for the locations
+    And the user opens the locations app
+    When the user opens the location menu of "<city>"
+    Then the whole menu lies inside the viewport
+    And at the centre of every menu item the topmost element is that item
+
+    Examples:
+      | width | height | city     |
+      | 1440  | 900    | Almaty   |
+      | 1440  | 900    | New York |
+      | 390   | 844    | New York |
+
+  @add-grid-hour-cells-and-hour-frame @NFR-R4 @UX1
+  Scenario Outline: Approved screenshots of Grid at <width> by <height> px in the <theme> theme
+    Given the view mode is Grid
+    And the locations interface language is Russian
+    And the current time is "2026-03-08T07:30:00Z"
+    And the list holds "Almaty", "Moscow", "Kolkata", "New York" and home is "Almaty"
     And the locations screen uses the <theme> theme
-    And the screen is <width> px wide for the locations
+    And the screen is <width> by <height> px for the locations
     When the user opens the locations app
     Then the locations screen matches the approved screenshot
 
     Examples:
-      | width | theme |
-      | 1024  | light |
-      | 1024  | dark  |
+      | width | height | theme |
+      | 1440  | 900    | light |
+      | 1440  | 900    | dark  |
+      | 1180  | 820    | light |
+      | 1180  | 820    | dark  |
+      | 844   | 390    | light |
+      | 844   | 390    | dark  |
+      | 390   | 844    | light |
+      | 390   | 844    | dark  |
 
   @add-view-mode-setting-and-grid-skeleton @FR7 @NFR-A2
   Scenario: Move a Grid row down with the keyboard

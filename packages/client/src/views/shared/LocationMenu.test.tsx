@@ -1,4 +1,5 @@
 // Verifies FR11, NFR-A2 of set-home-location-and-show-differences (D7): the location menu.
+// Verifies FR1 of add-grid-hour-cells-and-hour-frame (D5): the menu of a grid row.
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -157,5 +158,48 @@ describe("LocationMenu", () => {
     await userEvent.click(screen.getByRole("button", { name: "Outside" }));
 
     expect(screen.queryByRole("menu")).toBeNull();
+  });
+});
+
+describe("LocationMenu fixed to the viewport", () => {
+  const renderFixedMenu = (isMenuFixedToViewport: boolean) => {
+    render(
+      <LocationMenu
+        city="Moscow"
+        items={[{ label: "Remove", onSelect: vi.fn() }]}
+        isMenuFixedToViewport={isMenuFixedToViewport}
+      />,
+    );
+    return screen.getByRole("button", { name: "Действия: Moscow" });
+  };
+  const stubTriggerBox = (trigger: HTMLElement, box: Partial<DOMRect>) =>
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(box as DOMRect);
+
+  it("should place the open menu under its button and follow a scroll", async () => {
+    const trigger = renderFixedMenu(true);
+    stubTriggerBox(trigger, { bottom: 100, right: 300 });
+    const viewportWidth = document.documentElement.clientWidth;
+
+    await userEvent.click(trigger);
+    const menu = screen.getByRole("menu");
+
+    expect(menu).toHaveClass("fixed");
+    expect(menu).not.toHaveClass("absolute");
+    expect(menu.style.position).toBe("fixed");
+    expect(menu.style.top).toBe("104px");
+    expect(menu.style.right).toBe(`${viewportWidth - 300}px`);
+    stubTriggerBox(trigger, { bottom: 80, right: 300 });
+    fireEvent.scroll(document.body);
+    expect(menu.style.top).toBe("84px");
+  });
+
+  it("should keep the menu absolute without the flag", async () => {
+    const trigger = renderFixedMenu(false);
+
+    await userEvent.click(trigger);
+
+    const menu = screen.getByRole("menu");
+    expect(menu).toHaveClass("absolute");
+    expect(menu.style.position).toBe("");
   });
 });

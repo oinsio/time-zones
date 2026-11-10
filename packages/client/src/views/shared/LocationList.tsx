@@ -27,6 +27,7 @@ import {
 } from "@/controller";
 import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import type { LocationRow as LocationRowModel } from "@/presenter";
+import type { HourGridSlots } from "./hourGridSlots";
 import { LocationRow } from "./LocationRow";
 import {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
@@ -64,6 +65,8 @@ type LocationListProps = {
   ) => WallTimeInputOutcome;
   /** Cards when omitted. */
   rowVariant?: LocationRowVariant;
+  /** The hour strips, frame and panel of the Grid view. */
+  hourGrid?: HourGridSlots;
 };
 
 /**
@@ -82,6 +85,8 @@ type LocationListProps = {
  * Implements FR1, FR3 of add-wall-time-input-with-hint (D6): `onConfirmWallTime` per row.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): cards, or
  * the rows of one panel with dividers.
+ * Implements FR1, FR7, FR8 of add-grid-hour-cells-and-hour-frame (D5): the hour
+ * strip of each row and the hour frame as the last child of the panel.
  */
 export function LocationList({
   rows,
@@ -92,6 +97,7 @@ export function LocationList({
   onMoveTrack,
   onConfirmWallTime,
   rowVariant = LocationRowVariant.CARD,
+  hourGrid,
 }: LocationListProps) {
   const menuButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const focusIndexAfterRemoval = useRef<number | null>(null);
@@ -135,6 +141,8 @@ export function LocationList({
     >
       <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
         <ul
+          ref={hourGrid?.panelRef}
+          style={hourGrid?.panelStyle}
           data-row-variant={rowVariant}
           className={LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant].list}
         >
@@ -153,8 +161,10 @@ export function LocationList({
               isReorderable={rows.length >= MIN_LOCATIONS_TO_REORDER}
               prefersReducedMotion={prefersReducedMotion}
               rowVariant={rowVariant}
+              hourStrip={hourGrid?.renderHourStrip(row)}
             />
           ))}
+          {hourGrid?.frame}
         </ul>
       </SortableContext>
     </DndContext>

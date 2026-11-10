@@ -44,10 +44,9 @@ const VIEW_CONTRACT_TAG_PATTERN = /@view-contract/;
  * The scenarios a view cannot pass yet, excluded for that view only; the tag
  * names the change that brings the scenario back (ADR-0012).
  * Implements FR8 of add-view-mode-setting-and-grid-skeleton (D5).
+ * Implements FR13 of add-grid-hour-cells-and-hour-frame (D4): no scenario is excluded today.
  */
-const VIEW_CONTRACT_PENDING_TAGS: Partial<Record<string, RegExp>> = {
-  grid: /@grid-pending-hour-cells/,
-};
+const VIEW_CONTRACT_PENDING_TAGS: Partial<Record<string, RegExp>> = {};
 /**
  * One set of baselines serves macOS, Linux and CI. Chromium rasterizes text
  * and focus rings differently on each; on 2026-10-01 the widest macOS-vs-Linux

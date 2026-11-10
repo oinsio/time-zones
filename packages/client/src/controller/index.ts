@@ -13,6 +13,7 @@ export { CitySearchStatus, useCitySearch } from "./useCitySearch";
 export { useDeployTime } from "./useDeployTime";
 export { useDocumentLanguage } from "./useDocumentLanguage";
 export { useHourFormat } from "./useHourFormat";
+export { useHourGrid } from "./useHourGrid";
 export { useInterfaceLanguage } from "./useInterfaceLanguage";
 // Implements FR2, FR6, FR8 of show-here-entry-for-device-time.
 export { LocationsStatus, useLocations } from "./useLocations";

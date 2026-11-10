@@ -27,8 +27,8 @@ export function ZoneLine({
           <span
             className={
               part.kind === ZoneLinePartKind.PLACE
-                ? undefined
-                : "whitespace-nowrap"
+                ? "bg-surface"
+                : "bg-surface whitespace-nowrap"
             }
           >
             {part.text}

@@ -54,14 +54,15 @@ export function LocalDateTime({
     setOpenedDate(undefined);
   };
   const dateElement = (
-    <time dateTime={localIsoDate} className="text-sm text-muted-foreground">
+    <time
+      dateTime={localIsoDate}
+      className="bg-surface text-sm text-muted-foreground"
+    >
       {localDateLabel}
     </time>
   );
   return (
-    <span
-      className={`flex shrink-0 flex-col items-end ${variantClassNames.dateTime}`}
-    >
+    <span className={`flex shrink-0 items-end ${variantClassNames.dateTime}`}>
       {variantClassNames.isDateBeforeTime && dateElement}
       {openedDate === undefined ? (
         <button
@@ -69,7 +70,7 @@ export function LocalDateTime({
           type="button"
           aria-label={wallTimeInputLabel}
           onClick={() => setOpenedDate(localIsoDate)}
-          className="min-h-11 min-w-11 cursor-text rounded-md text-2xl font-bold leading-none whitespace-nowrap tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent md:text-4xl"
+          className="min-h-11 min-w-11 cursor-text rounded-md bg-surface text-2xl font-bold leading-none whitespace-nowrap tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent md:text-4xl"
         >
           {localTimeLabel}
         </button>
