@@ -34,3 +34,7 @@ export const ONE_DAY = 1;
 export const FIRST_DAY_OF_WEEK_BY_LANGUAGE: Readonly<Record<string, number>> & {
   readonly en: number;
 } = { en: 7, ru: 1 };
+
+// Implements FR7 of refine-meeting-range-entry-and-handles (D5).
+/** The locator of the date bar on the main page: the sticky bottom element that holds it. */
+export const DATE_BAR_SELECTOR = "[data-date-bar]";

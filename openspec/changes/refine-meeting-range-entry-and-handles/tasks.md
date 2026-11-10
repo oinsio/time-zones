@@ -107,7 +107,7 @@ Files stay under 200 lines where possible, 300 at most.
   - New `src/test/features/time_selection/time_selection_time_separator_unit.feature` with `steps/time_selection_time_separator_unit.steps.tsx` (user-event typing in the app world of the existing wall-time unit steps): "Digits typed one by one" (8 examples, `130` → `13:0` included), "Texts left as typed" (5), "Backspace removes the separator", "A pasted time gets its separator" and "Rejected texts stay rejected" (4, `130` included) (`@FR6 @UX1`). The unit copy of "Digits typed one by one" omits the step "the caret is after the last character": the caret is asserted only in the browser (5.2).
 
   Run `npx vitest run src/test/features/grid_view/steps/grid_view_meeting_range_input_unit.steps.tsx`, then `npx vitest run src/test/features/time_selection/steps/time_selection_time_separator_unit.steps.tsx`, then `npx vitest run src/test/features/time_selection/steps/time_selection_wall_time_input_unit.steps.tsx`: pass.
-- [ ] 4.3 RED then GREEN, handle rows (D5):
+- [x] 4.3 RED then GREEN, handle rows (D5):
   - `src/views/grid/meetingHandleRow.test.ts`: the existing cases call the new `getMeetingHandleRow(handle, { firstRow: 1, lastRow: n })`; add the 4 rows of `grid-view` → "Handle rows among the visible rows".
   - `src/views/grid/useVisibleStripRows.test.tsx` (new). It uses stubbed `getBoundingClientRect` of 12 strips and a `[data-date-bar]` element, and a stubbed `requestAnimationFrame` that counts frames. Cases:
     - at scroll top it returns rows 1–6;
@@ -121,7 +121,7 @@ Files stay under 200 lines where possible, 300 at most.
   - `src/app/MainPage.test.tsx` asserts `data-date-bar` on the bottom element that holds the date bar.
 
   Implement `meetingHandleRow.ts`, `useVisibleStripRows.ts`, `MEETING_HANDLE_HEIGHT_PX` in `src/constants/meeting.ts`, `DATE_BAR_SELECTOR` in `src/constants/date.ts` (beside `DATE_BAR_SHORT_FORMAT_OPTIONS`, exported through `src/constants/index.ts`), the attribute in `src/app/MainPage.tsx`, and the wiring in `GridView.tsx` and `MeetingHandle.tsx` (`onDragActiveChange`). Run the three test files one at a time, then `npx vitest run src/views/grid/MeetingHandle.test.tsx`: pass.
-- [ ] 4.4 RED then GREEN, hit area, grab offset and release (D6–D8):
+- [x] 4.4 RED then GREEN, hit area, grab offset and release (D6–D8):
   - `src/views/grid/MeetingHandle.test.tsx`: the `<li>` carries `w-11` and `h-12`, and the grip keeps `h-9 w-3` (UX2).
   - `src/views/grid/useMeetingHandleDrag.test.tsx` and `useMeetingHandleDrag.edges.test.tsx`: the assertions that expect the pointer's absolute minutes are updated to press-relative minutes. The fixture's `valueMinutes` 660 plus the travel: the touch drag from x 100 to 256 at the fixture pitch expects `660 + (256 - 100) / pitch * 60`.
   - New cases:

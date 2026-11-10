@@ -33,6 +33,7 @@ const MEETING_HEADER_CLASS_NAMES =
  * header layout on every width, the title centred on the page.
  * Implements FR13, NFR-R1, UX1 of add-grid-meeting-range-and-share (D7): the meeting bar takes the header's place.
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
+ * Implements FR7 of refine-meeting-range-entry-and-handles (D5): `data-date-bar` locates the date bar.
  */
 export function MainPage({
   notices,
@@ -62,7 +63,10 @@ export function MainPage({
       <main className="flex-1">
         <ViewHost />
       </main>
-      <footer className="sticky bottom-0 z-page-bar -mx-4 border-t border-border bg-surface">
+      <footer
+        data-date-bar
+        className="sticky bottom-0 z-page-bar -mx-4 border-t border-border bg-surface"
+      >
         <div
           role="status"
           aria-live="polite"

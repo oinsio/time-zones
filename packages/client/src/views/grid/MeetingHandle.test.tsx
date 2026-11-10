@@ -1,4 +1,5 @@
 // Verifies FR9, FR10, FR12, NFR-A1, NFR-A2, NFR-R1 of add-grid-meeting-range-and-share (D6).
+// Verifies FR7, NFR-A2, UX2 of refine-meeting-range-entry-and-handles.
 import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TrackMove } from "@/controller";
@@ -33,12 +34,17 @@ describe("MeetingHandleSlider", () => {
     expect(slider).toHaveClass("focus-visible:outline-accent");
   });
 
-  it("should offer a hit area of at least 24 by 44 px", () => {
+  // NFR-A2, UX2 of refine-meeting-range-entry-and-handles: a 44 by 48 px hit area, the grip unchanged.
+  it("should offer a hit area of at least 44 by 44 px around the same grip", () => {
     const { container } = renderHandle();
 
     expect(container.querySelector("[data-meeting-handle]")).toHaveClass(
-      "w-6",
+      "w-11",
       "h-12",
+    );
+    expect(container.querySelector("[role=slider] > span")).toHaveClass(
+      "h-9",
+      "w-3",
     );
   });
 
@@ -111,6 +117,33 @@ describe("MeetingHandleSlider", () => {
         (container.querySelector("[data-meeting-handle]") as HTMLElement).style
           .top,
       ).toBe(`${(row - 1) * ROW_HEIGHT_PX + STRIP_HEIGHT_PX / 2}px`);
+    },
+  );
+});
+
+describe("MeetingHandleSlider among candidate rows", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it.each([
+    [MeetingHandle.END, 3],
+    [MeetingHandle.START, 4],
+  ])(
+    "should stand the %s handle among candidate rows 2 to 4 on row %i",
+    (handle, expectedRow) => {
+      installPanelGeometry();
+      const presented =
+        handle === MeetingHandle.END ? END_HANDLE : START_HANDLE;
+
+      const { container } = renderHandle({
+        presented,
+        rowCount: 6,
+        candidateRows: { firstRow: 2, lastRow: 4 },
+      });
+
+      expect(
+        (container.querySelector("[data-meeting-handle]") as HTMLElement).style
+          .top,
+      ).toBe(`${(expectedRow - 1) * ROW_HEIGHT_PX + STRIP_HEIGHT_PX / 2}px`);
     },
   );
 });

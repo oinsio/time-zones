@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useHourGrid, useMeetingRange, useTimeSelection } from "@/controller";
 import {
   type HourGridSlots,
@@ -9,6 +10,7 @@ import { HourStrip } from "./HourStrip";
 import { MeetingFrame } from "./MeetingFrame";
 import { MeetingHandleSlider } from "./MeetingHandle";
 import { useHourStripScroll } from "./useHourStripScroll";
+import { useVisibleStripRows } from "./useVisibleStripRows";
 
 /**
  * Grid view: the location list as rows of one panel, each a row header over
@@ -21,6 +23,7 @@ import { useHourStripScroll } from "./useHourStripScroll";
  * Implements FR5-FR12, NFR-R1, UX1, UX2 of add-grid-meeting-range-and-share (D6, D8).
  * Implements FR1, FR2, UX1 of fix-grid-meeting-range-lock-and-layering (D1): the rows lock while a meeting range is set.
  * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D4): binds the meeting range input.
+ * Implements FR7, NFR-P1 of refine-meeting-range-entry-and-handles (D5): the handles stand on the visible rows.
  */
 export default function GridView() {
   const { strips, hourFrameIndex, cellCount, hasMeetingRange } = useHourGrid();
@@ -33,21 +36,28 @@ export default function GridView() {
     dragHandleTo,
     confirmMeetingRangeInput,
   } = useMeetingRange();
-  const { panelRef, panelStyle, layout } = useHourStripScroll(
+  const { panelRef, panelElement, panelStyle, layout } = useHourStripScroll(
     hourFrameIndex,
     cellCount,
     !hasMeetingRange,
+  );
+  const [isHandleDragging, setIsHandleDragging] = useState(false);
+  const candidateRows = useVisibleStripRows(
+    panelElement,
+    strips.size,
+    isHandleDragging,
   );
   const meetingColumns = meeting && {
     first: meeting.span.firstColumn,
     last: meeting.span.lastColumn,
   };
   const handleProps = {
-    rowCount: strips.size,
+    candidateRows,
     cellPitchPx: layout.cellPitchPx,
     isScrollable: layout.isScrollable,
     onMoveHandle: moveHandle,
     onDragHandleTo: dragHandleTo,
+    onDragActiveChange: setIsHandleDragging,
   };
   const hourGrid: HourGridSlots = {
     renderHourStrip: (row) => {

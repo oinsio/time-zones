@@ -106,5 +106,5 @@ export function useHourStripScroll(
     [panelWidthPx, layout, cellCount],
   );
 
-  return { panelRef: setPanelElement, panelStyle, layout };
+  return { panelRef: setPanelElement, panelElement, panelStyle, layout };
 }

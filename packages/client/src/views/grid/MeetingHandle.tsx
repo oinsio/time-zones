@@ -4,7 +4,10 @@ import type { TrackMove } from "@/controller";
 import type { MeetingHandle } from "@/model";
 import type { PresentedMeetingHandle } from "@/presenter";
 import { getTrackMoveForKey } from "@/views/shared";
-import { getMeetingHandleRow } from "./meetingHandleRow";
+import {
+  getMeetingHandleRow,
+  type MeetingHandleCandidateRows,
+} from "./meetingHandleRow";
 import {
   HOUR_STRIP_SELECTOR,
   useMeetingHandleDrag,
@@ -12,11 +15,14 @@ import {
 
 type MeetingHandleSliderProps = {
   presented: PresentedMeetingHandle;
-  rowCount: number;
+  /** The rows a handle may stand on to stay in view. */
+  candidateRows: MeetingHandleCandidateRows;
   cellPitchPx: number;
   isScrollable: boolean;
   onMoveHandle: (handle: MeetingHandle, move: TrackMove) => void;
   onDragHandleTo: (handle: MeetingHandle, minutes: number) => void;
+  /** Called with `true` when a drag starts and with `false` when it ends. */
+  onDragActiveChange: (isDragging: boolean) => void;
 };
 
 /** The vertical centre of the row's hour strip within the panel, in pixels. */
@@ -42,14 +48,16 @@ function measureStripCentre(
  * Implements FR9, FR10, FR12, NFR-A1, NFR-A2, NFR-R1, UX1, UX2 of
  * add-grid-meeting-range-and-share (D6).
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
+ * Implements FR7, FR8, NFR-A2, UX2 of refine-meeting-range-entry-and-handles (D5, D6): stands among the visible rows, a 44 by 48 px hit area.
  */
 export function MeetingHandleSlider({
   presented,
-  rowCount,
+  candidateRows,
   cellPitchPx,
   isScrollable,
   onMoveHandle,
   onDragHandleTo,
+  onDragActiveChange,
 }: MeetingHandleSliderProps) {
   const { handle } = presented;
   const itemElement = useRef<HTMLLIElement | null>(null);
@@ -59,9 +67,11 @@ export function MeetingHandleSlider({
     handleElement: itemElement,
     cellPitchPx,
     isScrollable,
+    valueMinutes: presented.valueMinutes,
     onDragHandleTo,
+    onDragActiveChange,
   });
-  const rowNumber = getMeetingHandleRow(handle, rowCount);
+  const rowNumber = getMeetingHandleRow(handle, candidateRows);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: measured after every render, as the rows can change height
   useLayoutEffect(() => {
@@ -88,7 +98,7 @@ export function MeetingHandleSlider({
     <li
       ref={itemElement}
       data-meeting-handle={handle}
-      className="absolute z-meeting-handle h-12 w-6 -translate-x-1/2 -translate-y-1/2"
+      className="absolute z-meeting-handle h-12 w-11 -translate-x-1/2 -translate-y-1/2"
       style={{
         left: `calc(var(${HourGridCssVariable.ROW_PADDING}) + ${presented.valueMinutes} / ${MINUTES_PER_HOUR} * var(${HourGridCssVariable.CELL_PITCH}))`,
         top: centreTopPx,

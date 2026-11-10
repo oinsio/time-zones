@@ -6,6 +6,7 @@ import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import type { ReactNode } from "react";
 import { createInMemoryLocationRepository } from "@/adapters";
+import { DATE_BAR_SELECTOR } from "@/constants";
 import { LocationsProvider } from "@/controller";
 import { MainPage } from "./MainPage";
 
@@ -80,6 +81,8 @@ describe("MainPage", () => {
     expect(footer).toContainElement(screen.getByText(BOTTOM_BAR_TEXT));
     expect(screen.getByRole("main")).not.toContainElement(footer);
     expect(footer).toHaveClass("z-page-bar");
+    // FR7 of refine-meeting-range-entry-and-handles: the locator of the date bar.
+    expect(document.querySelector(DATE_BAR_SELECTOR)).toBe(footer);
     expect(
       screen.getByRole("main").compareDocumentPosition(footer) &
         Node.DOCUMENT_POSITION_FOLLOWING,

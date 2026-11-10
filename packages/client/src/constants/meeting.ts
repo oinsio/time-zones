@@ -13,3 +13,9 @@ export const MEETING_HANDLE_AUTO_SCROLL_STEP_PX = 8;
 export const MEETING_DIMMED_OPACITY_CLASS = "opacity-40";
 /** The end handle stands on row `⌈rows / divisor⌉`. */
 export const MEETING_HANDLE_ROW_DIVISOR = 2;
+
+// Implements FR7, FR8 of refine-meeting-range-entry-and-handles (D5, D8).
+/** The height of a meeting handle (`h-12`); a handle centred on a strip must fit on screen. */
+export const MEETING_HANDLE_HEIGHT_PX = 48;
+/** After a handle drag ends, a click within this time is the release, not a tap. */
+export const MEETING_HANDLE_RELEASE_CLICK_WINDOW_MS = 50;

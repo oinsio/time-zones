@@ -3,6 +3,7 @@ import { vi } from "vitest";
 import { MeetingHandle } from "@/model";
 import type { PresentedMeetingHandle } from "@/presenter";
 import { MeetingHandleSlider } from "./MeetingHandle";
+import type { MeetingHandleCandidateRows } from "./meetingHandleRow";
 
 export const END_HANDLE: PresentedMeetingHandle = {
   handle: MeetingHandle.END,
@@ -31,6 +32,7 @@ export const MAX_SCROLL_LEFT_PX = 300;
 type HarnessOptions = {
   presented?: PresentedMeetingHandle;
   rowCount?: number;
+  candidateRows?: MeetingHandleCandidateRows;
   isScrollable?: boolean;
 };
 
@@ -42,10 +44,12 @@ type HarnessOptions = {
 export function renderHandle({
   presented = END_HANDLE,
   rowCount = 4,
+  candidateRows = { firstRow: 1, lastRow: rowCount },
   isScrollable = false,
 }: HarnessOptions = {}) {
   const onMoveHandle = vi.fn();
   const onDragHandleTo = vi.fn();
+  const onDragActiveChange = vi.fn();
   const { container } = render(
     <ul data-testid="panel">
       {Array.from({ length: rowCount }, (_, row) => (
@@ -55,16 +59,17 @@ export function renderHandle({
       ))}
       <MeetingHandleSlider
         presented={presented}
-        rowCount={rowCount}
+        candidateRows={candidateRows}
         cellPitchPx={PITCH_PX}
         isScrollable={isScrollable}
         onMoveHandle={onMoveHandle}
         onDragHandleTo={onDragHandleTo}
+        onDragActiveChange={onDragActiveChange}
       />
     </ul>,
   );
   const panel = container.querySelector("ul") as HTMLUListElement;
-  return { container, panel, onMoveHandle, onDragHandleTo };
+  return { container, panel, onMoveHandle, onDragHandleTo, onDragActiveChange };
 }
 
 /**
