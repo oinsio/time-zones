@@ -191,7 +191,8 @@ No file is below the 90 % minimum. Three are below the 95 % target. For `useMeet
 - Impact: FR2 says setting a range pins the moment "status unique". A regression that drops one of these checks would leave the `GAP` status (and its gap note) after a re-set, and no test would fail. The file scores 92.86 %, below the 95 % target.
 - Fix: in `src/model/reduceMeetingRange.test.ts` add an `it.each` over three states that hold `meeting` = the sample range but whose `reference` is (a) pinned at the start with `wallClockStatus: WallClockStatus.GAP`, (b) pinned at the start with a `wallTimeTarget` set, (c) `LIVE`. In each, `SET_MEETING_RANGE` with the same start and end must return a new state object whose reference is `PINNED`, `UNIQUE`, at the start, without `wallTimeTarget`. Re-run `npx stryker run --mutate 'src/model/reduceMeetingRange.ts'`.
 - Fix risk: none — test only. State (c) cannot arise through commands, but it is a valid unit input for the guard.
-- Status: open
+- Status: fixed
+- Resolution: added three cases to reduceMeetingRange.test.ts ("should repin the same range when the reference has a gap status / a wall time target / is live"); Stryker on reduceMeetingRange.ts now 98.33 % with the three guard mutants killed.
 
 ### R2 — SUGGESTION — The "drag stays on the same step" test cannot fail
 - Location: `packages/client/src/controller/useMeetingRange.test.tsx:106-114` (guard at `packages/client/src/controller/useMeetingRange.ts:132-134`)
@@ -200,7 +201,8 @@ No file is below the 90 % minimum. Three are below the 95 % target. For `useMeet
 - Impact: D5's "a handle drag dispatches only when the step changes" is unguarded. A regression would dispatch on every `pointermove` of a drag and nobody would notice. `useMeetingRange.ts` scores 90.70 %, just above the minimum.
 - Fix: in the test's `renderHook` callback, also read `useContext(LocationsContext)` and return its `store` with the hook result. After `selectCells(9, 10)`, `vi.spyOn(store, "dispatch")` (as task 5.1 says) and assert the spy is not called after `dragHandleTo(MeetingHandle.END, 661)`. Also add a positive case: `dragHandleTo(MeetingHandle.END, 700)` calls it once.
 - Fix risk: low. `LocationsProvider` (`src/controller/LocationsProvider.tsx:62`) creates the store internally and the test's `setup` cannot inject one, so the store has to be read from the context. The spy works because the hook calls `store.dispatch` at call time. Test only, no production change.
-- Status: open
+- Status: fixed
+- Resolution: useMeetingRange.test.tsx now reads the store from LocationsContext and spies on dispatch: "should not dispatch when a drag stays on the same step" and "should dispatch once when a drag reaches another step"; the guard mutants at :132 are killed.
 
 ### R3 — SUGGESTION — Second copy of the UTC-instant parsing rule
 - Location: `packages/client/src/model/reduceMeetingRange.ts:14,21-30`
@@ -209,7 +211,8 @@ No file is below the 90 % minimum. Three are below the 95 % target. For `useMeet
 - Impact: a change to how command instants are accepted (for example, also rejecting offsets other than `Z`, or a different error mapping) has to be made twice. Missing one makes `SET_MEETING_RANGE` and `SELECT_INSTANT` accept different texts for the same CLAUDE.md format ("ISO 8601 with Z suffix").
 - Fix: move `UTC_DESIGNATOR` and `parseInstant` into one model module, e.g. new `src/model/commandInstant.ts` exporting `parseCommandInstant(text): Temporal.Instant | undefined`. Call it from `reduceMeetingRange.ts` and `reduceSelectInstant.ts`, which then returns `INVALID_INSTANT` when it gets `undefined`. Both are in `src/model/`, so a direct relative import is fine (same module).
 - Fix risk: low. `reduceSelectInstant`'s existing tests and mutation run must stay green. Its error code stays `INVALID_INSTANT`, the meeting reducer's stays `INVALID_MEETING_RANGE`.
-- Status: open
+- Status: fixed
+- Resolution: new src/model/commandInstant.ts (parseCommandInstant, tested in commandInstant.test.ts) is used by reduceMeetingRange.ts and reduceSelectInstant.ts; error codes unchanged; reduceSelectInstant.ts stays 100 % under Stryker.
 
 ### R4 — SUGGESTION — `meetingRange.ts` passes the 200-line limit
 - Location: `packages/client/src/model/meetingRange.ts:1-209`
@@ -218,7 +221,8 @@ No file is below the 90 % minimum. Three are below the 95 % target. For `useMeet
 - Impact: the project rule is broken by a file this change created. This is a context-quality cost, not a behaviour defect, so the severity is low (the 300-line hard cap is not reached).
 - Fix: move `LocationMeetingRange` and `getLocationMeetingRange` (lines 38-42 and 198-209) into a new `src/model/locationMeetingRange.ts` next to `dayShift.ts`, and export them from `src/model/index.ts` as today. `meetingRange.ts` then drops under 200 lines. The glossary *Code:* entry names the function, not the file, so no glossary change is needed.
 - Fix risk: low — `src/model/index.ts` re-exports keep every importer (`@/model`) unchanged. `meetingRange.test.ts` imports have to follow the moved function if it imports the file directly.
-- Status: open
+- Status: fixed
+- Resolution: moved LocationMeetingRange and getLocationMeetingRange to src/model/locationMeetingRange.ts (with its test), re-exported from model/index.ts; meetingRange.ts is now 189 lines.
 
 ## Verdict
 
