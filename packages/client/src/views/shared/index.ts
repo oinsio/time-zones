@@ -13,6 +13,8 @@ export {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
   LocationRowVariant,
 } from "./locationRowVariant";
+// Implements FR13 of add-grid-meeting-range-and-share (D7).
+export { MeetingBar } from "./MeetingBar";
 // Implements FR7 of add-view-mode-setting-and-grid-skeleton (D4).
 export { ViewLocationList } from "./ViewLocationList";
 // Implements FR1, FR7 of add-wall-time-input-with-hint.

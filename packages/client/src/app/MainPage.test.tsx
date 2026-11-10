@@ -1,3 +1,4 @@
+// Verifies FR13 of add-grid-meeting-range-and-share (D7): the meeting bar replaces the header.
 // Verifies FR1, UX3 of add-main-page-scaffold: fixed page regions.
 // Verifies FR8 of select-date-with-calendar-and-now (D7): the bottom bar.
 import { render, screen } from "@testing-library/react";
@@ -82,6 +83,46 @@ describe("MainPage", () => {
     renderMainPage(<p>{NOTICE_TEXT}</p>);
     expect(screen.getByRole("contentinfo")).toContainElement(
       screen.getByText(NOTICE_TEXT),
+    );
+  });
+});
+
+describe("MainPage with a meeting bar", () => {
+  const renderWithBar = () =>
+    render(
+      <LocationsProvider repository={createInMemoryLocationRepository()}>
+        <MainPage
+          notices={null}
+          bottomBar={<p>{BOTTOM_BAR_TEXT}</p>}
+          headerActions={<button type="button">header action</button>}
+          meetingBar={<h1>the meeting bar</h1>}
+        />
+      </LocationsProvider>,
+    );
+
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
+  });
+
+  it("should render only the meeting bar in the header", () => {
+    renderWithBar();
+    expect(screen.getByRole("banner")).toContainElement(
+      screen.getByText("the meeting bar"),
+    );
+    expect(screen.queryByText("header action")).toBeNull();
+    expect(screen.queryByText("Time Zones")).toBeNull();
+  });
+
+  it("should have the bar title as the only heading", () => {
+    renderWithBar();
+    expect(screen.getAllByRole("heading")).toHaveLength(1);
+  });
+
+  it("should colour the header with the meeting bar tokens", () => {
+    renderWithBar();
+    expect(screen.getByRole("banner")).toHaveClass(
+      "bg-meeting-bar",
+      "border-meeting",
     );
   });
 });

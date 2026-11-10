@@ -22,6 +22,7 @@ const gridView: ViewDefinition = {
   titleKey: "views.gridTitle",
   icon: Grid3x3,
   component: createRetryableLazyView(() => import("./grid/GridView")),
+  showsMeetingRange: true,
 };
 
 /**

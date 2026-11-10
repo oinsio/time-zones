@@ -1,4 +1,5 @@
 // Verifies FR3, FR6, NFR-P1 of add-view-mode-setting-and-grid-skeleton: the registry holds the lazy Cards and Grid views.
+// Verifies FR13, FR17 of add-grid-meeting-range-and-share: only Grid shows the meeting range.
 
 import i18n from "i18next";
 import { SUPPORTED_LANGUAGES } from "@/locales";
@@ -21,11 +22,21 @@ describe("viewRegistry", () => {
   });
 
   it.each(viewRegistry)("should carry no choice by width for $id", (view) => {
-    expect(Object.keys(view).sort()).toEqual([
+    const { showsMeetingRange: _capability, ...definition } = view;
+    expect(Object.keys(definition).sort()).toEqual([
       "component",
       "icon",
       "id",
       "titleKey",
+    ]);
+  });
+
+  it("should let Grid show the meeting range and Cards not", () => {
+    expect(
+      viewRegistry.map((view) => [view.id, view.showsMeetingRange === true]),
+    ).toEqual([
+      [ViewId.CARDS, false],
+      [ViewId.GRID, true],
     ]);
   });
 

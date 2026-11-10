@@ -1,3 +1,4 @@
+// Verifies FR8, FR9 of add-grid-meeting-range-and-share (D6, D8).
 // Verifies FR7, UX1 of add-main-page-scaffold: the empty state of Cards, and
 // FR10, FR12, FR17, NFR-A2, NFR-A3 of add-locations-via-search, and FR1 of
 // reorder-locations-by-drag-and-drop.
@@ -199,7 +200,7 @@ describe("ViewLocationList with grid rows", () => {
     const headerBox = screen
       .getByRole("button", { name: "Actions for Almaty" })
       .closest("div.sticky");
-    expect(headerBox).toHaveClass("z-[2]", "focus-within:z-[3]");
+    expect(headerBox).toHaveClass("z-[2]", "focus-within:z-[4]");
   });
 
   it("should keep the location menu and the wall-time button on every row", () => {
@@ -262,6 +263,30 @@ describe("ViewLocationList with grid rows", () => {
     expect(screen.getByRole("list").lastElementChild).toHaveAttribute(
       "data-frame",
     );
+  });
+
+  it("should show each row's meeting span from meetingRangeOf in place of its time", () => {
+    render(
+      <LocationsProvider
+        repository={createInMemoryLocationRepository(savedAlmatyAndMoscow())}
+        writeScheduler={immediateWriteScheduler}
+      >
+        <ViewLocationList
+          rowVariant={LocationRowVariant.GRID_ROW}
+          hourGrid={{
+            renderHourStrip: () => null,
+            frame: null,
+            meetingRangeOf: (row) => ({
+              spanLabel: `span of ${row.cityLabel}`,
+            }),
+            panelRef: () => undefined,
+            panelStyle: {},
+          }}
+        />
+      </LocationsProvider>,
+    );
+    expect(screen.getByText("span of Almaty")).toBeInTheDocument();
+    expect(screen.getByText("span of Moscow")).toBeInTheDocument();
   });
 
   it("should show the empty state", () => {

@@ -22,4 +22,10 @@ export interface ViewDefinition {
   titleKey: string;
   icon: ComponentType;
   component: LazyExoticComponent<ComponentType>;
+  /**
+   * The view shows the meeting range (ADR-0011). It decides the meeting bar in
+   * the header and which view-contract scenarios the view runs (`@meeting-range`).
+   * Implements FR13, FR17 of add-grid-meeting-range-and-share (D7, D11).
+   */
+  showsMeetingRange?: boolean;
 }

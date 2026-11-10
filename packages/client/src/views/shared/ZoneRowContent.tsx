@@ -2,6 +2,7 @@ import type { TrackMove, WallTimeInputOutcome } from "@/controller";
 import type {
   PresentedDayTrack,
   PresentedLocationMark,
+  PresentedLocationMeetingRange,
   ZoneLinePart,
 } from "@/presenter";
 import { DayTrack } from "./DayTrack";
@@ -33,6 +34,8 @@ type ZoneRowContentProps = {
   onMoveTrack: (move: TrackMove) => void;
   /** Cards when omitted. */
   rowVariant?: LocationRowVariant;
+  /** The meeting range's local span and day shift mark. */
+  meetingRange?: PresentedLocationMeetingRange;
 };
 
 /**
@@ -47,6 +50,7 @@ type ZoneRowContentProps = {
  * Implements FR5, FR6, NFR-R1, UX1 of show-zone-abbreviations-and-zone-label-setting (D6): the zone line parts.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4): the zone line on the city's line in a grid row.
  * Implements FR10 of add-grid-hour-cells-and-hour-frame (D5): the texts keep the surface background, so the hour frame breaks behind them.
+ * Implements FR8 of add-grid-meeting-range-and-share (D8): passes the meeting range to the time.
  */
 export function ZoneRowContent({
   cityLabel,
@@ -64,6 +68,7 @@ export function ZoneRowContent({
   onSelectTrackFraction,
   onMoveTrack,
   rowVariant = LocationRowVariant.CARD,
+  meetingRange,
 }: ZoneRowContentProps) {
   const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
   const hasDifference = offsetDifferenceLabel !== "";
@@ -123,6 +128,7 @@ export function ZoneRowContent({
           wallTimeInputLabel={wallTimeInputLabel}
           onConfirmWallTime={onConfirmWallTime}
           rowVariant={rowVariant}
+          meetingRange={meetingRange}
         />
       </span>
       {dayTrack && variantClassNames.hasDayTrack && (
