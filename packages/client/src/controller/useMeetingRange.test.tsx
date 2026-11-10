@@ -1,7 +1,7 @@
 // Verifies FR2, FR5, FR6, FR10, FR12, FR13 of add-grid-meeting-range-and-share.
 import { act, renderHook } from "@testing-library/react";
 import i18n from "i18next";
-import type { ReactNode } from "react";
+import { type ReactNode, useContext } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createInMemoryLocationRepository } from "@/adapters";
 import { LocationsProvider, TrackMove } from "@/controller";
@@ -11,6 +11,7 @@ import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
+import { LocationsContext } from "./locationsContext";
 import { useMeetingRange } from "./useMeetingRange";
 
 const cityRow = (label: string) =>
@@ -32,18 +33,24 @@ function setup(extraLocations: ReturnType<typeof cityRow>[] = []) {
     },
   });
   const save = vi.spyOn(repository, "save");
-  const rendered = renderHook(() => useMeetingRange(), {
-    wrapper: ({ children }: { children: ReactNode }) => (
-      <LocationsProvider
-        repository={repository}
-        writeScheduler={createManualWriteScheduler()}
-        clock={clock}
-        tickScheduler={createManualTickScheduler()}
-      >
-        {children}
-      </LocationsProvider>
-    ),
-  });
+  const rendered = renderHook(
+    () => ({
+      ...useMeetingRange(),
+      store: useContext(LocationsContext)?.store,
+    }),
+    {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <LocationsProvider
+          repository={repository}
+          writeScheduler={createManualWriteScheduler()}
+          clock={clock}
+          tickScheduler={createManualTickScheduler()}
+        >
+          {children}
+        </LocationsProvider>
+      ),
+    },
+  );
   const span = () => {
     const { meeting } = rendered.result.current;
     return meeting && [meeting.span.startMinutes, meeting.span.endMinutes];
@@ -103,14 +110,24 @@ describe("useMeetingRange", () => {
     expect(span()).toEqual([540, 705]);
   });
 
-  it("should not touch the store when a drag stays on the same step", () => {
+  it("should not dispatch when a drag stays on the same step", () => {
     const { result } = setup();
     act(() => result.current.selectCells(9, 10));
-    const before = result.current.meeting;
+    const dispatch = vi.spyOn(result.current.store!, "dispatch");
 
     act(() => result.current.dragHandleTo(MeetingHandle.END, 661));
 
-    expect(result.current.meeting).toBe(before);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it("should dispatch once when a drag reaches another step", () => {
+    const { result } = setup();
+    act(() => result.current.selectCells(9, 10));
+    const dispatch = vi.spyOn(result.current.store!, "dispatch");
+
+    act(() => result.current.dragHandleTo(MeetingHandle.END, 700));
+
+    expect(dispatch).toHaveBeenCalledTimes(1);
   });
 
   it("should ignore handle moves without a meeting", () => {
