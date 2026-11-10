@@ -1,15 +1,10 @@
-import {
-  MAX_WALL_TIME_HOUR,
-  MAX_WALL_TIME_MINUTE,
-  WALL_TIME_COMMAND_PATTERN,
-} from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import type { LocationCommand, LocationCommandType } from "./locationCommands";
 import { LocationErrorCode } from "./locationCommands";
 import type { LocationsReduceResult, WorldClockState } from "./locations";
 import { withoutMeetingRange } from "./reduceMeetingRange";
 import { ReferenceMode } from "./referenceMoment";
-import { resolveWallClock } from "./wallClock";
+import { isCanonicalWallTime, resolveWallClock } from "./wallClock";
 
 type SetWallTimeCommand = Extract<
   LocationCommand,
@@ -30,15 +25,6 @@ function findTargetZone(
     ?.timeZoneId;
 }
 
-function isCanonicalTime(time: string): boolean {
-  const groups = WALL_TIME_COMMAND_PATTERN.exec(time)?.groups;
-  return (
-    groups !== undefined &&
-    Number(groups.hour) <= MAX_WALL_TIME_HOUR &&
-    Number(groups.minute) <= MAX_WALL_TIME_MINUTE
-  );
-}
-
 /**
  * Pins the reference moment to a typed wall-clock time in a row's zone. The
  * wall-clock time is resolved by `resolveWallClock` (`compatible`); the
@@ -50,7 +36,7 @@ export function reduceWallTime(
   state: WorldClockState,
   command: SetWallTimeCommand,
 ): LocationsReduceResult {
-  if (!isCanonicalTime(command.time)) {
+  if (!isCanonicalWallTime(command.time)) {
     return fail(LocationErrorCode.INVALID_TIME);
   }
   let date: Temporal.PlainDate;

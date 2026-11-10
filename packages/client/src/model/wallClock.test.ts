@@ -1,7 +1,11 @@
 // Verifies FR4 of select-date-with-calendar-and-now (D2).
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
-import { resolveWallClock, WallClockStatus } from "./wallClock";
+import {
+  isCanonicalWallTime,
+  resolveWallClock,
+  WallClockStatus,
+} from "./wallClock";
 
 describe("resolveWallClock", () => {
   const rows = [
@@ -60,4 +64,16 @@ describe("resolveWallClock", () => {
       ).toBe(true);
     },
   );
+});
+
+describe("isCanonicalWallTime", () => {
+  it.each([
+    ["09:00", true],
+    ["23:59", true],
+    ["9:00", false],
+    ["24:00", false],
+    ["09:60", false],
+  ])("should answer for %s", (time, expected) => {
+    expect(isCanonicalWallTime(time)).toBe(expected);
+  });
 });

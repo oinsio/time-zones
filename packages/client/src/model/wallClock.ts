@@ -1,3 +1,8 @@
+import {
+  MAX_WALL_TIME_HOUR,
+  MAX_WALL_TIME_MINUTE,
+  WALL_TIME_COMMAND_PATTERN,
+} from "@/constants";
 import type { Temporal } from "@/lib/temporal";
 
 /** How a wall-clock time maps to instants in a zone (ADR-0003). */
@@ -39,4 +44,17 @@ export function resolveWallClock(
     instant,
     status: isOverlap ? WallClockStatus.AMBIGUOUS : WallClockStatus.GAP,
   };
+}
+
+/**
+ * Whether the text is a canonical 24-hour `HH:MM` wall-clock time.
+ * Implements FR5 of fix-grid-meeting-range-lock-and-layering (D2).
+ */
+export function isCanonicalWallTime(time: string): boolean {
+  const groups = WALL_TIME_COMMAND_PATTERN.exec(time)?.groups;
+  return (
+    groups !== undefined &&
+    Number(groups.hour) <= MAX_WALL_TIME_HOUR &&
+    Number(groups.minute) <= MAX_WALL_TIME_MINUTE
+  );
 }

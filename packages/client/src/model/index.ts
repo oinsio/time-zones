@@ -128,7 +128,11 @@ export { createStore, type ReduceResult, type Store } from "./store";
 export { canonicalizeTimeZoneId } from "./timeZoneId";
 // Implements FR2, FR6 of show-utc-offset-on-location-rows.
 export { getUtcOffsetMinutes } from "./utcOffset";
-export { resolveWallClock, WallClockStatus } from "./wallClock";
+export {
+  isCanonicalWallTime,
+  resolveWallClock,
+  WallClockStatus,
+} from "./wallClock";
 // Implements FR7, FR9 of add-wall-time-input-with-hint.
 export {
   getWallClockNote,
