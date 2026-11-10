@@ -26,7 +26,7 @@ Then(
   /^"([^"]+)" shows the span "([^"]+)"( in the meeting time colour)?$/,
   async ({ locationsWorld }, city: string, span: string, isColoured) => {
     const timeButton = listRow(locationsWorld.page, city).getByRole("button", {
-      name: /^Enter time/,
+      name: /^Enter meeting time/,
     });
     await expect(timeButton).toHaveText(span);
     if (isColoured) {
