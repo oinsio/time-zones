@@ -15,9 +15,13 @@ Audience: everyone who plans a meeting in Grid, and keyboard users, who cannot d
 - ADDED to `grid-view`: while a meeting range is set, the drag handle, the location menu and the wall-time input of every grid row are locked; they come back when the range is removed.
 - ADDED to `grid-view`: the **meeting range input** — the span of a grid row opens two fields, start and end, in the row's local time; confirming them sets the meeting range.
 - ADDED to `meeting-range`: setting the meeting range from a location's wall-clock start and end.
-- ADDED to `grid-view`: the grid panel lies under the date bar, its notices and every dialog; the frame is hidden only behind text, never behind the empty part of a text's box.
+- ADDED to `grid-view`: the grid panel lies under the date bar, its notices and every dialog.
+- MODIFIED `grid-view` → **Hour frame lies behind texts** and **Meeting frame and dimmed cells**: the frames are hidden only behind text glyphs, the row notes and an open input, never behind the empty part of a text's box.
+- MODIFIED `grid-view` → **Time selection on the hour strip**: in the meeting state the strip's Tab stop follows the row's span or open meeting range input, as the location menu button is locked.
 - MODIFIED `grid-view` → **Meeting span in grid rows**: the span opens the meeting range input instead of the wall-time input.
 - MODIFIED `grid-view` → **Accessible meeting state**: the Tab order skips the locked controls and includes the meeting range input; axe-core also checks the open input.
+- MODIFIED `locations` → **Reorder cards by dragging**, **Reorder cards with the keyboard**, **Location menu**, **Accessible device time location**: the Grid meeting-state exception — the drag handle and the location menu button are locked while a meeting range is set.
+- MODIFIED `time-selection` → **Wall-time input on every row**: in Grid, while a meeting range is set, no row offers the wall-time input; the span opens the meeting range input.
 - Glossary: new **Meeting range input** (`time-selection.md`) with its *RU:* names «Ввести время встречи», «Время начала» and «Время окончания», distinct from the **Meeting handle**'s «Начало встречи» / «Конец встречи»; **Meeting range**, **Wall-time input** (`time-selection.md`), **Drag handle** and **Location menu** (`locations.md`) say they are locked in Grid while a meeting range is set.
 - Docs: `docs/architecture/views.md` (Grid → Hour frame and meeting frame: locked controls, the meeting range input, the layers of the page), `docs/architecture/domain-model.md` (the new command).
 
@@ -29,8 +33,10 @@ None.
 
 ### Modified Capabilities
 
-- `grid-view`: locked row controls in the meeting state, the meeting range input, the layers of the grid panel against the page, the frame visible beside texts; "Meeting span in grid rows" and "Accessible meeting state" change.
+- `grid-view`: locked row controls in the meeting state, the meeting range input, the layers of the grid panel against the page; "Hour frame lies behind texts", "Meeting frame and dimmed cells" (the frame visible beside texts), "Time selection on the hour strip", "Meeting span in grid rows" and "Accessible meeting state" change.
 - `meeting-range`: a meeting range set from a location's wall-clock start and end.
+- `locations`: "Reorder cards by dragging", "Reorder cards with the keyboard", "Location menu" and "Accessible device time location" state that the drag handle and the location menu are locked in Grid while a meeting range is set.
+- `time-selection`: "Wall-time input on every row" states that Grid offers no wall-time input while a meeting range is set.
 
 ## Goals
 

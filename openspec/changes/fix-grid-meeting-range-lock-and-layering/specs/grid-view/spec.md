@@ -86,21 +86,6 @@ Everything of the grid panel — the row header texts, the hour strips, the row 
 - **WHEN** the user opens that row's location menu
 - **THEN** at the centre of every menu item that lies over the date bar, the topmost element is that menu item
 
-### Requirement: Frame lines are visible beside texts
-The hour frame and the meeting frame SHALL be hidden only behind the glyphs of the row header texts — the city, the offset difference, the Here caption, each zone line part, the date, the day shift mark and the time or span — behind the row notes and behind an open wall-time input or meeting range input. Every other point of a frame's border inside a row header MUST be drawn: between and beside zone line parts, inside a time button around its digits, and beside the drag handle and the location menu button. <!-- implements FR8, UX3 of fix-grid-meeting-range-lock-and-layering -->
-
-#### Scenario: The frame border runs through the empty parts of the header
-- **GIVEN** the Grid view at `<width>` by `<height>` px with Almaty, Moscow, Kolkata and New York at `2026-03-08T07:30:00Z` and `<frame>`
-- **WHEN** the main page is shown
-- **THEN** no point of the frame's left and right borders inside a row is covered by an element with a background, except inside the box of a text glyph, a row note or an open input field
-
-| width | height | frame |
-|---|---|---|
-| 390 | 844 | the hour frame |
-| 390 | 844 | the meeting frame of 09:00–11:00 |
-| 1440 | 900 | the hour frame |
-| 1440 | 900 | the meeting frame of 09:00–11:00 |
-
 ### Requirement: Approved screenshots with dialogs over the grid
 Screenshots of the Grid view with the design's sample data (8 March 2026, home Almaty, Almaty, Moscow, Kolkata, New York, Russian interface, light theme) SHALL match their approved baselines on every run: with the hour frame and the search dialog open at 390 × 844, and with the meeting range 09:00–11:00 in Almaty and the calendar dialog open at 1440 × 900. <!-- implements NFR-R2 of fix-grid-meeting-range-lock-and-layering -->
 
@@ -115,6 +100,83 @@ Screenshots of the Grid view with the design's sample data (8 March 2026, home A
 | 1440 | 900 | the meeting range 09:00–11:00 | the calendar |
 
 ## MODIFIED Requirements
+
+### Requirement: Hour frame lies behind texts
+The hour frame SHALL lie above the hour cells and behind the row header texts and the row notes, and MUST NOT receive pointer events. It MUST be hidden only behind the glyphs of the row header texts — the city, the offset difference, the Here caption, each zone line part, the date, the day shift mark and the time or span — behind the row notes and behind an open wall-time input or meeting range input: these keep their background and stay fully visible where the frame passes. Every other point of the frame's border inside a row header MUST be drawn: between and beside zone line parts, inside a time button around its digits, and beside the drag handle and the location menu button. <!-- implements FR10 of add-grid-hour-cells-and-hour-frame; FR8, UX3 of fix-grid-meeting-range-lock-and-layering -->
+
+#### Scenario: Notes and header texts cover the frame
+- **GIVEN** the view mode is Grid, the stored locations are Almaty and New York and the current time is `2026-03-08T07:30:00Z`
+- **WHEN** the main page is 390 by 844 px
+- **THEN** where the hour frame crosses New York's clock change note, the topmost element is the note, not the frame
+- **AND** where the frame's border crosses a row header text (city, zone line, date, time), the topmost element is that text
+
+#### Scenario: The frame border runs through the empty parts of the header
+- **GIVEN** the Grid view at `<width>` by `<height>` px with Almaty, Moscow, Kolkata and New York at `2026-03-08T07:30:00Z` and `<frame>`
+- **WHEN** the main page is shown
+- **THEN** no point of the frame's left and right borders inside a row is covered by an element with a background, except inside the box of a text glyph, a row note or an open input field
+
+| width | height | frame |
+|---|---|---|
+| 390 | 844 | the hour frame |
+| 390 | 844 | the meeting frame of 09:00–11:00 |
+| 1440 | 900 | the hour frame |
+| 1440 | 900 | the meeting frame of 09:00–11:00 |
+
+### Requirement: Meeting frame and dimmed cells
+While a meeting range is set, a meeting frame SHALL surround the range across all rows of the panel, from its start to its end, in the meeting colour of the active theme (`#00AA00` light, `#3DD13D` dark), and no hour frame MUST be shown. Hour cells that do not overlap the range MUST be dimmed to opacity 0.4; a cell that overlaps it even in part is not dimmed. The meeting frame MUST lie above the hour cells and behind the row header texts and row notes, and MUST NOT take pointer events; like the hour frame ("Hour frame lies behind texts") it MUST be hidden only behind text glyphs, the row notes and an open input, and drawn at every other point of its border inside a row header. With no rows, no frame is shown. <!-- implements FR7, UX1 of add-grid-meeting-range-and-share; FR8, UX3 of fix-grid-meeting-range-lock-and-layering -->
+
+#### Scenario: Frame and dimming of the sample meeting
+- **GIVEN** the Grid view with Almaty, Moscow, Kolkata and New York and the meeting range 09:00–11:00 in Almaty on 2026-03-08
+- **WHEN** the main page is shown
+- **THEN** the meeting frame encloses columns 9 and 10 of every row
+- **AND** 22 cells of every row are dimmed and columns 9 and 10 are not
+- **AND** no hour frame is shown
+
+#### Scenario: A quarter-hour range
+- **GIVEN** the meeting range is 09:15–10:30 in Almaty on 2026-03-08
+- **WHEN** the Grid view is shown
+- **THEN** columns 9 and 10 are not dimmed and every other column is
+
+#### Scenario: Meeting frame colour and layers
+- **GIVEN** the Grid view at 390 by 844 px with Almaty and New York, the meeting range 09:00–11:00 in Almaty and the `<theme>` theme
+- **WHEN** the main page is shown
+- **THEN** the meeting frame has the `<theme>` meeting colour
+- **AND** where the frame crosses New York's clock change note or a row header text, the topmost element is the note or the text
+
+| theme |
+|---|
+| light |
+| dark |
+
+### Requirement: Time selection on the hour strip
+The hour strip of every row SHALL be a slider for assistive technology and the keyboard, with the day track's accessible name "Time in {city}" / «Время — {city}», the value in minutes since the start of the reference day from 0 to the track end, and the value text of the row's local time and date. Arrow Right / Arrow Up and Arrow Left / Arrow Down MUST move the reference moment by one track step, Page Up / Page Down by one hour, Home to the start of the reference day and End to the track end, as on a day track. Each move MUST pin the reference moment, change every row's time and move the hour frame. Each strip MUST be one Tab stop, after its row's location menu button — or, while a meeting range is set and the location menu button is locked, after its row's span or open meeting range input — with a visible focus ring in the accent colour; its cells MUST NOT be separate Tab stops. <!-- implements FR12, NFR-A1, NFR-A2 of add-grid-hour-cells-and-hour-frame; NFR-A2 of fix-grid-meeting-range-lock-and-layering -->
+
+#### Scenario: Page Up on Moscow's strip
+- **GIVEN** the view mode is Grid, the reference zone is `Asia/Almaty`, the current time is `2026-03-08T07:30:00Z` and the stored locations are Almaty and Moscow
+- **WHEN** the user focuses Moscow's hour strip and presses Page Up
+- **THEN** Almaty shows `13:30` and Moscow shows `11:30`
+- **AND** the hour frame is on column 13
+
+#### Scenario: Slider name and value of a strip
+- **GIVEN** the interface language is English, the reference zone is `Asia/Almaty`, the current time is `2026-03-08T07:30:00Z` and the stored location is Almaty
+- **WHEN** the Grid view is shown
+- **THEN** the slider "Time in Almaty" has the value 750 within 0 to 1439 and the value text `12:30, Sun, Mar 8`
+
+#### Scenario: Tab order and focus ring
+- **GIVEN** the Grid view with Almaty and Moscow
+- **WHEN** the user tabs from Almaty's location menu button
+- **THEN** Almaty's hour strip has focus with a focus ring in the accent colour
+- **AND** the next Tab leaves the strip for Moscow's row
+
+#### Scenario: No accessibility violations with hour cells
+- **GIVEN** the view mode is Grid and the stored locations are Almaty, Moscow, Kolkata and New York
+- **WHEN** the main page is shown live and after a time selection on an hour strip, in the `<theme>` theme
+- **THEN** axe-core reports no violations
+
+| theme |
+|---|
+| light |
+| dark |
 
 ### Requirement: Meeting span in grid rows
 While a meeting range is set, every grid row SHALL show its local span of the range, `start–end`, in the hour format setting and in the meeting time colour (`#008800` light, `#5EDB5E` dark) in place of its time; its date MUST be the local date of the start. When that date differs from the reference zone's date of the start, the row MUST show the day shift mark «днём раньше» / «днём позже» ("a day earlier" / "a day later") before the date, bold, in the danger colour of the active theme. Without a meeting range Grid shows no day shift mark. The span is the button that opens the meeting range input ("Meeting range input"), not the wall-time input. Only the glyphs of the span carry the surface background, not the rest of its button. <!-- implements FR8, UX1 of add-grid-meeting-range-and-share; FR3, FR8 of fix-grid-meeting-range-lock-and-layering -->
