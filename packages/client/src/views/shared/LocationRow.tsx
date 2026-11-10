@@ -76,6 +76,7 @@ type LocationRowProps = {
  * a row of the grid panel, the same row header.
  * Implements FR1, FR7, FR10 of add-grid-hour-cells-and-hour-frame (D5): hour strip, then notes, in sticky boxes.
  * Implements FR8 of add-grid-meeting-range-and-share (D8): the meeting span in the row header; the notes live in `RowNotes`.
+ * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  */
 export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
   function LocationRow(
@@ -125,7 +126,9 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       hasDifference && differenceId,
     ];
     const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
-    const draggingClassName = isDragging ? " relative z-10 shadow-lg" : "";
+    const draggingClassName = isDragging
+      ? " relative z-dragged-row shadow-lg"
+      : "";
     return (
       <li
         ref={(element) => {

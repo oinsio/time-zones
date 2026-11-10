@@ -24,7 +24,7 @@ describe("HourFrame", () => {
       </ul>,
     );
 
-    expect(container.querySelector("li")).toHaveClass("z-[1]");
+    expect(container.querySelector("li")).toHaveClass("z-grid-frame");
   });
 
   it("should place its left edge by the column", () => {

@@ -57,7 +57,7 @@ describe("LocationRow while dragged", () => {
   it("should be raised above the other cards", () => {
     expect(renderWithDragging(true)).toHaveClass(
       "relative",
-      "z-10",
+      "z-dragged-row",
       "shadow-lg",
     );
   });

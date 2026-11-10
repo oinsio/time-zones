@@ -46,7 +46,7 @@ describe("MeetingHandleSlider", () => {
     const { container } = renderHandle();
 
     expect(container.querySelector("[data-meeting-handle]")).toHaveClass(
-      "z-[3]",
+      "z-meeting-handle",
     );
   });
 

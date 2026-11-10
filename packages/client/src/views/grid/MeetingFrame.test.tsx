@@ -31,7 +31,7 @@ describe("MeetingFrame", () => {
   });
 
   it("should lie above the cells and below the header boxes", () => {
-    expect(renderFrame()).toHaveClass("z-[1]");
+    expect(renderFrame()).toHaveClass("z-grid-frame");
   });
 
   it("should name the columns it encloses", () => {

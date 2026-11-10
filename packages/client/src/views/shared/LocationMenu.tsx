@@ -36,6 +36,7 @@ const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
  * button; a press outside, or focus moving outside, closes it.
  * Implements FR11, FR14, NFR-A2, UX3 of set-home-location-and-show-differences (D7).
  * Implements FR1 of add-grid-hour-cells-and-hour-frame (D5): `isMenuFixedToViewport`.
+ * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  */
 export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
   function LocationMenu(
@@ -161,7 +162,7 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
             tabIndex={-1}
             aria-label={t("locations.locationMenu", { city })}
             style={fixedPosition}
-            className={`${isMenuFixedToViewport ? "fixed" : "absolute right-0 top-full mt-1"} z-20 flex w-max max-w-full min-w-44 flex-col rounded-md border border-border bg-surface py-1 shadow-lg`}
+            className={`${isMenuFixedToViewport ? "fixed" : "absolute right-0 top-full mt-1"} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-border bg-surface py-1 shadow-lg`}
           >
             {items.map((item, index) => (
               <button

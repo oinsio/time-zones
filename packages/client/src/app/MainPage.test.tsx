@@ -1,3 +1,4 @@
+// Verifies FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5): the date bar layer.
 // Verifies FR13 of add-grid-meeting-range-and-share (D7): the meeting bar replaces the header.
 // Verifies FR1, UX3 of add-main-page-scaffold: fixed page regions.
 // Verifies FR8 of select-date-with-calendar-and-now (D7): the bottom bar.
@@ -73,6 +74,7 @@ describe("MainPage", () => {
     const footer = screen.getByRole("contentinfo");
     expect(footer).toContainElement(screen.getByText(BOTTOM_BAR_TEXT));
     expect(screen.getByRole("main")).not.toContainElement(footer);
+    expect(footer).toHaveClass("z-page-bar");
     expect(
       screen.getByRole("main").compareDocumentPosition(footer) &
         Node.DOCUMENT_POSITION_FOLLOWING,

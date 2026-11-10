@@ -91,7 +91,10 @@ describe("ViewLocationList with grid rows", () => {
     const headerBox = screen
       .getByRole("button", { name: "Actions for Almaty" })
       .closest("div.sticky");
-    expect(headerBox).toHaveClass("z-[2]", "focus-within:z-[4]");
+    expect(headerBox).toHaveClass(
+      "z-grid-box",
+      "focus-within:z-grid-box-focused",
+    );
   });
 
   it("should keep the location menu and the wall-time button on every row", () => {
