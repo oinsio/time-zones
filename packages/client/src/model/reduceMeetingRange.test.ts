@@ -10,7 +10,7 @@ import {
   reduceLocations,
   type WorldClockState,
 } from "./locations";
-import { ReferenceMode } from "./referenceMoment";
+import { ReferenceMode, WallTimeTargetKind } from "./referenceMoment";
 import { WallClockStatus } from "./wallClock";
 
 const city = (timeZoneId: string, label: string): Location => ({
@@ -62,6 +62,39 @@ describe("SET_MEETING_RANGE", () => {
 
   it("should return the same state for the same range", () => {
     expect(reduceOk(meetingState, SAMPLE)).toBe(meetingState);
+  });
+
+  it.each([
+    ["a gap status", { wallClockStatus: WallClockStatus.GAP }],
+    [
+      "a wall time target",
+      {
+        wallTimeTarget: {
+          kind: WallTimeTargetKind.LOCATION,
+          locationId: almaty.id,
+        },
+      },
+    ],
+  ] as const)(
+    "should repin the same range when the reference has %s",
+    (_name, extra) => {
+      const { reference } = meetingState;
+      if (reference.mode !== ReferenceMode.PINNED)
+        throw new Error("not pinned");
+      const stale: WorldClockState = {
+        ...meetingState,
+        reference: { ...reference, ...extra },
+      };
+      const next = reduceOk(stale, SAMPLE);
+      expect(next).not.toBe(stale);
+      expect(next.reference).toEqual(reference);
+    },
+  );
+
+  it("should repin the same range when the reference is live", () => {
+    const live = { ...meetingState, reference: baseState.reference };
+    const next = reduceOk(live, SAMPLE);
+    expect(next.reference).toEqual(meetingState.reference);
   });
 
   it("should replace a previous range", () => {
