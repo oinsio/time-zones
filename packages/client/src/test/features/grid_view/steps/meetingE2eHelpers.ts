@@ -1,24 +1,36 @@
 // Implements FR5-FR13, NFR-A2 of add-grid-meeting-range-and-share: locators and gestures of the meeting state in a real browser.
 import { expect, type Locator, type Page } from "@playwright/test";
 import { englishLocale } from "../../main_page/steps/englishTexts";
-import { cellOf, centreOf, panelOf, requireBox } from "./hourGridE2eHelpers";
+import {
+  cellOf,
+  centreOf,
+  HOUR_CELL_SELECTOR,
+  panelOf,
+  requireBox,
+} from "./hourGridE2eHelpers";
 
+const RUSSIAN_CLEAR_NAME = "Сбросить выбор встречи";
 export const MEETING_FRAME_SELECTOR = "[data-meeting-frame-columns]";
 export const HOUR_STRIP_SELECTOR = "[data-hour-strip]";
 const DRAG_STEP_COUNT = 8;
-const SAMPLE_CITY = "Almaty";
 const SAMPLE_START_COLUMN = 9;
 
 export const meetingFrameOf = (page: Page) =>
   page.locator(MEETING_FRAME_SELECTOR);
+/** The handles by their own marker, so that the interface language does not matter. */
 export const startHandleOf = (page: Page) =>
-  page.getByRole("slider", { name: englishLocale.meeting.startHandle });
+  page.locator(`[data-meeting-handle="START"]`).getByRole("slider");
 export const endHandleOf = (page: Page) =>
-  page.getByRole("slider", { name: englishLocale.meeting.endHandle });
+  page.locator(`[data-meeting-handle="END"]`).getByRole("slider");
 export const shareButtonOf = (page: Page) =>
   page.getByRole("button", { name: englishLocale.meeting.share });
+/** The name in English or Russian: the header scenarios run in both. */
 export const clearButtonOf = (page: Page) =>
-  page.getByRole("button", { name: englishLocale.meeting.clear });
+  page.getByRole("button", {
+    name: new RegExp(
+      `^(${englishLocale.meeting.clear}|${RUSSIAN_CLEAR_NAME})$`,
+    ),
+  });
 export const meetingTitleOf = (page: Page) =>
   page.getByRole("heading", { level: 1 });
 
@@ -45,7 +57,10 @@ export async function expectMeetingTimes(
 
 /** A meeting 09:00–10:00 in Almaty: a tap on column 9. */
 export async function tapSampleHour(page: Page) {
-  await cellOf(page, SAMPLE_CITY, SAMPLE_START_COLUMN).click();
+  await stripOfRow(page, 0)
+    .locator(HOUR_CELL_SELECTOR)
+    .nth(SAMPLE_START_COLUMN)
+    .click();
 }
 
 /** The sample meeting 09:00–11:00: the sample hour, then Page Up on the end handle. */
