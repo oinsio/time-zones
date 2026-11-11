@@ -9,7 +9,6 @@ import {
 import {
   cellOf,
   centreOf,
-  frameOf,
   isTopmostAt,
   panelOf,
   requireBox,
@@ -278,32 +277,5 @@ Then(
     expect(
       Math.abs(handleCentre.x - (drag.lastX - drag.pressOffsetPx)),
     ).toBeLessThanOrEqual(pitch / CELLS_PITCH_FRACTION + EDGE_INSET_PX);
-  },
-);
-
-When(
-  "the user scrolls the strips back to the start",
-  async ({ locationsWorld }) => {
-    await panelOf(locationsWorld.page).evaluate((panel) => {
-      panel.scrollLeft = 0;
-    });
-  },
-);
-
-Then(
-  "the hour frame lies inside the strips' visible part",
-  async ({ locationsWorld }) => {
-    const { page } = locationsWorld;
-    const panelBox = await requireBox(panelOf(page));
-    await expect
-      .poll(async () => {
-        const frameBox = await requireBox(frameOf(page));
-        return (
-          frameBox.x >= panelBox.x - EDGE_TOLERANCE_PX &&
-          frameBox.x + frameBox.width <=
-            panelBox.x + panelBox.width + EDGE_TOLERANCE_PX
-        );
-      })
-      .toBe(true);
   },
 );
