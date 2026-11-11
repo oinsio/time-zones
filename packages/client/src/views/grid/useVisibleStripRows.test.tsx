@@ -147,6 +147,30 @@ describe("useVisibleStripRows", () => {
     expect(result.current).toEqual({ firstRow: 2, lastRow: 8 });
   });
 
+  it("should count a strip whose handle ends exactly at the date bar", () => {
+    geometry.barTopPx = 103;
+    const { result } = renderRows();
+    expect(result.current).toEqual({ firstRow: 1, lastRow: 1 });
+  });
+
+  it("should cancel the pending frame and stop listening on unmount", () => {
+    const { unmount } = renderRows();
+    scrollTo(10);
+    unmount();
+    expect(window.cancelAnimationFrame).toHaveBeenCalledWith(1);
+    vi.mocked(window.requestAnimationFrame).mockClear();
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
+    expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+  });
+
+  it("should not cancel a frame on unmount when none is pending", () => {
+    const { unmount } = renderRows();
+    unmount();
+    expect(window.cancelAnimationFrame).not.toHaveBeenCalled();
+  });
+
   it("should use the window height without a date bar", () => {
     dateBar?.remove();
     dateBar = undefined;
