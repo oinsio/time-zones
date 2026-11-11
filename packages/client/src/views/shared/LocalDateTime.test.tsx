@@ -1,3 +1,4 @@
+// Verifies FR6 of refine-meeting-range-entry-and-handles: a confirmed typed time carries its separator.
 // Verifies FR8, UX3 of fix-grid-meeting-range-lock-and-layering (D6): the surface background lies behind the glyphs only.
 // Verifies FR8, UX1 of add-grid-meeting-range-and-share.
 // Verifies FR2, FR6, UX1, UX2, NFR-A2 of show-local-time-and-date-on-location-cards (D5).
@@ -74,7 +75,7 @@ describe("LocalDateTime", () => {
     const field = screen.getByRole("textbox", { name: NAME });
     await userEvent.clear(field);
     await userEvent.type(field, "1040{Enter}");
-    expect(onConfirmWallTime).toHaveBeenCalledWith("1040", "2026-03-08");
+    expect(onConfirmWallTime).toHaveBeenCalledWith("10:40", "2026-03-08");
     expect(screen.getByRole("button", { name: NAME })).toHaveFocus();
   });
 
