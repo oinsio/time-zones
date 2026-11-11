@@ -151,7 +151,8 @@ Run totals: 97.76 %, 97.55 % and 97.11 %. `src/model/locationCommands.ts` and th
 
   Through `/opsx:update`, add this line to the `grid-view` delta scenario "Scrolling re-places the handles cheaply" (`spec.md:59-63`): "AND a scroll that changes the candidate rows but not the handle rows re-renders no meeting handle". Add the same case to tasks.md 4.5. Then add to that scenario in `grid_view_meeting_handle_reach_unit.feature` a step `When a scroll changes the candidate rows but not the handle rows`, followed by the existing `Then no meeting handle is rendered again`. Define the new `When` in `steps/grid_view_meeting_handle_reach_unit.steps.tsx`, with the stubbed rects scrolled so that the run changes and the handle rows stay, and reuse the existing `Then`, which asserts through the `panelReads` counter (`:44`, `:65`, `:164-165`).
 - Fix risk: The memo works only while its props keep their identity. If a later change passes an inline callback, the bail-out silently stops working; the new BDD step guards against that. A render that the memo skips no longer runs the inner layout effect. A row height change still re-measures through the effect's `ResizeObserver` on the panel. Rows are locked while a meeting range is set (`areRowControlsLocked`, `GridView.tsx:95`), so no reorder can keep the row number while the strip under it changes. `MeetingHandle.tsx` grows from 126 to about 140 lines, under the 200-line target; the steps file grows from 239 to about 255 lines, under the 300-line hard cap of `process-invariants.md`.
-- Status: open
+- Status: fixed
+- Resolution: `MeetingHandleSlider` now only computes the row and renders a `memo`-wrapped `MeetingHandleView` taking `rowNumber`; covered by the new unit BDD scenario "A change of the candidate rows that keeps the handle rows renders no handle" (failed red before). The spec/tasks.md lines are outside this stage's remit and were left untouched.
 
 ### R2 — WARNING — Visible rows are measured, and the whole Grid view re-renders on scroll, with no meeting range set
 - Location: `packages/client/src/views/grid/GridView.tsx:44-49`
@@ -160,7 +161,8 @@ Run totals: 97.76 %, 97.55 % and 97.11 %. `src/model/locationCommands.ts` and th
 - Impact: In the most common state of the Grid view (no meeting range), scrolling a 12-location list on a phone forces a layout read of all strips on every animation frame. It also re-renders the whole grid about twice per row scrolled past (once when `firstRow` changes, once when `lastRow` changes). Before this branch, scrolling the Grid did no such work. No requirement forbids it outright (NFR-P1 bounds the re-placing of handles, and there are no handles here), so this is a performance defect, not an unmet requirement. No test would catch it: every hook and BDD case sets a meeting range first.
 - Fix: In `GridView.tsx:45-49`, pass `isHandleDragging || !hasMeetingRange` as the hook's `isFrozen`. The hook then registers nothing and keeps its last value while no meeting range is set (`useVisibleStripRows.ts:57`). It measures again as soon as a range is set, which the existing case "should measure again when the freeze ends" (`useVisibleStripRows.test.tsx:143`) already pins. D5's signature (panel, row count, `isFrozen`) and its "called once in `GridView`" wiring stay as they are. Change the hook's `useEffect` (`useVisibleStripRows.ts:56`) to `useLayoutEffect`, as `MeetingHandle.tsx` already does for its own measurement. Then the first measurement after a range is set happens before the handles are painted. Pin the guard with a scenario "Scrolling without a meeting range measures no strip", tagged `@refine-meeting-range-entry-and-handles @FR7`, in `grid_view_meeting_handle_reach_unit.feature`, with steps in `steps/grid_view_meeting_handle_reach_unit.steps.tsx`: open the Grid with 12 locations and no meeting, `scrollBy` a few rows, `flushFrame`, and assert that the existing `dateBarReads` counter did not change (each measurement reads the date bar once, `useVisibleStripRows.ts:10`). Add the matching scenario under "Meeting handles on the frame" in the `grid-view` delta and a bullet in tasks.md 4.5 through `/opsx:update`, in the same pass as R1.
 - Fix risk: With the fix, the hook keeps a stale run while no meeting range is set. If its first measurement stayed in `useEffect`, the handles of a newly set range could paint for one frame on the run measured the last time a range was set. The switch to `useLayoutEffect` removes that, and its `setState` re-renders before paint. The existing hook tests use `renderHook` and work with either effect. The new steps add about 15 more lines to the steps file; with R1's step it stays under the 300-line hard cap (about 270 lines).
-- Status: open
+- Status: fixed
+- Resolution: `GridView` passes `isHandleDragging || !hasMeetingRange` as `isFrozen`, and the hook measures in `useLayoutEffect`; covered by the new unit BDD scenario "Scrolling without a meeting range measures no strip" (red before). Spec/tasks.md additions are outside this stage's remit.
 
 ### R3 — SUGGESTION — The listener cleanup and the date bar edge of the visible rows are untested
 - Location: `packages/client/src/views/grid/useVisibleStripRows.ts:82-87`
@@ -173,7 +175,8 @@ Run totals: 97.76 %, 97.55 % and 97.11 %. `src/model/locationCommands.ts` and th
 
   Re-run `npx stryker run --mutate 'src/views/grid/useVisibleStripRows.ts'`.
 - Fix risk: none. The fix is test-only and uses the stubs the file already has.
-- Status: open
+- Status: fixed
+- Resolution: Added cases to useVisibleStripRows.test.tsx for the exact date bar edge, cancel on unmount, no listener after unmount and no cancel without a pending frame; Stryker on the file now 100%.
 
 ### R4 — SUGGESTION — M3's digit sequences are not measured in the meeting range input
 - Location: `packages/client/src/test/features/time_selection/time_selection_time_separator_e2e.feature:20-29`
@@ -182,7 +185,8 @@ Run totals: 97.76 %, 97.55 % and 97.11 %. `src/model/locationCommands.ts` and th
 - Impact: M3 cannot be reported as met from the tests. A wiring regression in only one meeting range field, for example `onChange` of the end field passing the wrong previous text (`MeetingRangeInput.tsx:130`), would surface only for the sequences that field is typed with.
 - Fix: Add an `it.each` over the five M3 sequences × the start and end fields to `src/views/shared/MeetingRangeInput.test.tsx`, typing with `@testing-library/user-event` over the selected text, as the existing `905`/`1130` cases do. Mark it `// Verifies M3, FR6 of refine-meeting-range-entry-and-handles.` This is a Vitest case, so the Gherkin scenario and the delta spec stay as they are.
 - Fix risk: none. The fix adds 10 test cases to a file of 233 lines; if that pushes it past 300, put them in a new `MeetingRangeInput.separator.test.tsx`.
-- Status: open
+- Status: fixed
+- Resolution: Added an it.each of the five M3 sequences over the start and end fields in MeetingRangeInput.test.tsx, marked `Verifies M3, FR6`.
 
 
 ## Verdict
