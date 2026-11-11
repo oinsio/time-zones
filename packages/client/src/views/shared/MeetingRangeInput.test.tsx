@@ -1,4 +1,6 @@
 // Verifies FR3, FR4, NFR-A1, UX2 of fix-grid-meeting-range-lock-and-layering.
+// Verifies M3, FR6 of refine-meeting-range-entry-and-handles.
+// Verifies FR3, UX3 of refine-meeting-range-entry-and-handles.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
@@ -33,7 +35,30 @@ const renderInput = (
   };
 };
 
+const M3_SEQUENCES = [
+  ["1030", "10:30"],
+  ["930", "9:30"],
+  ["0930", "09:30"],
+  ["2359", "23:59"],
+  ["12345", "12:345"],
+];
+
 describe("MeetingRangeInput", () => {
+  it.each(
+    [START_NAME, END_NAME].flatMap((name) =>
+      M3_SEQUENCES.map(([digits, shown]) => [name, digits, shown]),
+    ),
+  )(
+    "should show the typed text of %s for %s as %s",
+    async (name, digits, shown) => {
+      renderInput();
+      const field = screen.getByRole("textbox", { name });
+      await userEvent.clear(field);
+      await userEvent.type(field, digits);
+      expect(field).toHaveValue(shown);
+    },
+  );
+
   it.each([START_NAME, END_NAME])(
     "should style the field %s as the meeting span",
     (name) => {
@@ -150,20 +175,46 @@ describe("MeetingRangeInput", () => {
     );
   });
 
-  it("should mark both fields for a refused range and keep the input open", async () => {
-    const { onClose, startField, endField } = renderInput(
-      MeetingRangeInputOutcome.INVALID_RANGE,
-    );
-    await userEvent.type(startField, "{Enter}");
-    const message = screen.getByText(
-      "Встреча должна быть внутри дня, с шагом 15 минут",
-    );
-    for (const field of [startField, endField]) {
-      expect(field).toHaveAttribute("aria-invalid", "true");
-      expect(field).toHaveAttribute("aria-describedby", message.id);
-    }
-    expect(onClose).not.toHaveBeenCalled();
-  });
+  it.each([
+    [
+      MeetingRangeInputOutcome.SAME_START_AND_END,
+      "Начало и окончание встречи совпадают",
+    ],
+    [
+      MeetingRangeInputOutcome.END_BEFORE_START,
+      "Окончание встречи должно быть позже начала",
+    ],
+    [
+      MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY,
+      "Встреча должна быть внутри дня",
+    ],
+  ])(
+    "should mark both fields for %s and keep the input open",
+    async (outcome, text) => {
+      const { onClose, startField, endField } = renderInput(outcome);
+      await userEvent.type(startField, "{Enter}");
+      const message = screen.getByText(text);
+      for (const field of [startField, endField]) {
+        expect(field).toHaveAttribute("aria-invalid", "true");
+        expect(field).toHaveAttribute("aria-describedby", message.id);
+      }
+      expect(onClose).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["start", START_NAME, "905", "9:05"],
+    ["end", END_NAME, "1130", "11:30"],
+  ])(
+    "should show the separator while digits are typed in the %s field",
+    async (_field, name, digits, shown) => {
+      renderInput();
+      const field = screen.getByRole("textbox", { name });
+      await userEvent.clear(field);
+      await userEvent.type(field, digits);
+      expect(field).toHaveValue(shown);
+    },
+  );
 
   it("should show no error before a confirmation", () => {
     const { startField } = renderInput();
@@ -176,22 +227,31 @@ describe("MeetingRangeInput in English", () => {
   beforeEach(() => i18n.changeLanguage("en"));
   afterEach(() => i18n.changeLanguage("ru"));
 
-  // FR4: the English text of the range error.
-  it("should explain a refused range in English", async () => {
+  // FR3: the English text of each refusal.
+  it.each([
+    [
+      MeetingRangeInputOutcome.SAME_START_AND_END,
+      "The meeting start and end are the same",
+    ],
+    [
+      MeetingRangeInputOutcome.END_BEFORE_START,
+      "The meeting must end after it starts",
+    ],
+    [
+      MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY,
+      "The meeting must lie within the day",
+    ],
+  ])("should explain %s in English", async (outcome, text) => {
     render(
       <MeetingRangeInput
         city="Moscow"
         initialStartText="07:00"
         initialEndText="09:00"
-        onConfirm={() => MeetingRangeInputOutcome.INVALID_RANGE}
+        onConfirm={() => outcome}
         onClose={vi.fn()}
       />,
     );
     await userEvent.type(screen.getAllByRole("textbox")[0], "{Enter}");
-    expect(
-      screen.getByText(
-        "The meeting must lie within the day, in 15-minute steps",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText(text)).toBeInTheDocument();
   });
 });

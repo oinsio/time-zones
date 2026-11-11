@@ -2,7 +2,7 @@
 
 Choosing the day the reference moment falls on, and returning to now. Decisions: ADR-0003 (wall-clock input and DST), `docs/architecture/open-questions.md` Q5 and Q7. See [README](README.md) for the entry format.
 
-- **Date bar** — the bar at the bottom of the main page: previous day, the date that opens the calendar, next day, and the Now button. *Code:* `DateBar`, `presentDateBar`. *RU:* «Дата» (its accessible name). *Never:* date control, date picker, footer.
+- **Date bar** — the bar at the bottom of the main page: previous day, the date that opens the calendar, next day, and the Now button. *Code:* `DateBar`, `presentDateBar`, `DATE_BAR_SELECTOR` (its locator on the main page). *RU:* «Дата» (its accessible name). *Never:* date control, date picker, footer.
 - **Date change** — moving the reference moment to another date while keeping the wall-clock time of the reference zone: by a day step or from the calendar. *Code:* `SET_DATE`, `SHIFT_DATE`. *Not:* a time selection.
 - **Calendar** — the dialog that picks a distant date, month by month. *Code:* `CalendarDialog`, `presentCalendarMonth`. *RU:* «Выберите дату». *Never:* datepicker.
 - **Now button** — the button that returns the reference moment to live and removes a meeting range. It is always shown in the date bar: active while the moment is pinned, inactive while live (grey, skipped by Tab, activating it does nothing). *Code:* `DateBar` (the button), `RESET_TO_NOW` (the command). *RU:* «Сейчас». *Never:* Now control, Today button, reset.

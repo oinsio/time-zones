@@ -1,4 +1,5 @@
 // Verifies FR1, FR3, FR4, UX1, UX2 of fix-grid-meeting-range-lock-and-layering.
+// Verifies FR3 of refine-meeting-range-entry-and-handles.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MeetingRangeInputOutcome, WallTimeInputOutcome } from "@/controller";
@@ -80,7 +81,7 @@ describe("LocalDateTime with a meeting range", () => {
       dateTime(
         MEETING_RANGE,
         undefined,
-        vi.fn(() => MeetingRangeInputOutcome.INVALID_RANGE),
+        vi.fn(() => MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY),
       ),
     );
     await userEvent.click(screen.getByRole("button", { name: SPAN_NAME }));
@@ -88,7 +89,7 @@ describe("LocalDateTime with a meeting range", () => {
     await userEvent.keyboard("{Enter}");
 
     expect(
-      screen.getByText("Встреча должна быть внутри дня, с шагом 15 минут"),
+      screen.getByText("Встреча должна быть внутри дня"),
     ).toBeInTheDocument();
   });
 

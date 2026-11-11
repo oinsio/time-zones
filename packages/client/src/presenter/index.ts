@@ -23,6 +23,7 @@ export { type DayPeriodMarkers, getDayPeriodMarkers } from "./dayPeriodMarkers";
 export type { HourLabel, PresentedDayTrack } from "./dayTrack";
 // Implements FR5 of polish-settings-and-remove-offline-update-notice.
 export { formatDeployTime } from "./deployTime";
+export { formatTypedWallTimeText } from "./formatTypedWallTimeText";
 // Implements FR3, FR4, FR5 of add-grid-hour-cells-and-hour-frame.
 export {
   type HourStripContext,

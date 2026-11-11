@@ -1,10 +1,13 @@
 // Verifies FR10, FR11, UX2 of add-grid-meeting-range-and-share (D6).
+// Verifies FR8, NFR-A2 of refine-meeting-range-entry-and-handles (D7, D8).
 import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MeetingHandle } from "@/model";
 import {
+  END_HANDLE,
   installPanelGeometry,
   MAX_SCROLL_LEFT_PX,
+  PITCH_PX,
   renderHandle,
 } from "./meetingHandleFixture";
 
@@ -47,7 +50,10 @@ describe("useMeetingHandleDrag with pointer events", () => {
     fireEvent.pointerDown(slider, pointer(100));
     fireEvent.pointerMove(slider, pointer(256));
 
-    expect(onDragHandleTo).toHaveBeenLastCalledWith(MeetingHandle.END, 360);
+    expect(onDragHandleTo).toHaveBeenLastCalledWith(
+      MeetingHandle.END,
+      END_HANDLE.valueMinutes + ((256 - 100) / PITCH_PX) * 60,
+    );
   });
 
   it("should not shift the minutes by the scroll again", () => {
@@ -56,7 +62,10 @@ describe("useMeetingHandleDrag with pointer events", () => {
     fireEvent.pointerDown(slider, pointer(100));
     fireEvent.pointerMove(slider, pointer(100));
 
-    expect(onDragHandleTo).toHaveBeenLastCalledWith(MeetingHandle.END, 576);
+    expect(onDragHandleTo).toHaveBeenLastCalledWith(
+      MeetingHandle.END,
+      END_HANDLE.valueMinutes,
+    );
   });
 
   it("should do nothing on a move without a press", () => {
@@ -117,7 +126,7 @@ describe("useMeetingHandleDrag with pointer events", () => {
 
     expect(onDragHandleTo).toHaveBeenLastCalledWith(
       MeetingHandle.END,
-      ((380 - (16 - 8)) / 40) * 60,
+      END_HANDLE.valueMinutes + ((380 - (16 - 8) - (100 - 16)) / PITCH_PX) * 60,
     );
   });
 
@@ -212,7 +221,10 @@ describe("useMeetingHandleDrag without Pointer Events", () => {
 
     const allowsScroll = fireEvent.touchMove(slider, touch(256));
 
-    expect(onDragHandleTo).toHaveBeenLastCalledWith(MeetingHandle.END, 360);
+    expect(onDragHandleTo).toHaveBeenLastCalledWith(
+      MeetingHandle.END,
+      END_HANDLE.valueMinutes + ((256 - 100) / PITCH_PX) * 60,
+    );
     expect(allowsScroll).toBe(false);
   });
 

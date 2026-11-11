@@ -40,11 +40,27 @@ export enum MeetingRangeInputOutcome {
   INVALID_START_TEXT = "INVALID_START_TEXT",
   /** The end text is not a time: the input stays open with its error. */
   INVALID_END_TEXT = "INVALID_END_TEXT",
-  /** The times break the meeting range invariants: the input stays open. */
-  INVALID_RANGE = "INVALID_RANGE",
+  /** The start and the end are the same time: the input stays open. */
+  SAME_START_AND_END = "SAME_START_AND_END",
+  /** The end is earlier than the start: the input stays open. */
+  END_BEFORE_START = "END_BEFORE_START",
+  /** The range does not lie inside the reference day: the input stays open. */
+  OUTSIDE_REFERENCE_DAY = "OUTSIDE_REFERENCE_DAY",
   /** The store answered, with a change or another refusal: the input closes. */
   CLOSED = "CLOSED",
 }
+
+/** The refusal of the model that keeps the meeting range input open, by outcome. */
+const OUTCOME_OF_REFUSAL: Partial<
+  Record<LocationErrorCode, MeetingRangeInputOutcome>
+> = {
+  [LocationErrorCode.MEETING_START_EQUALS_END]:
+    MeetingRangeInputOutcome.SAME_START_AND_END,
+  [LocationErrorCode.MEETING_END_BEFORE_START]:
+    MeetingRangeInputOutcome.END_BEFORE_START,
+  [LocationErrorCode.INVALID_MEETING_RANGE]:
+    MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY,
+};
 
 export type PresentedMeeting = {
   range: MeetingRange;
@@ -62,6 +78,7 @@ export type PresentedMeeting = {
  * to the store, never through the write scheduler, so the range is never stored.
  * Implements FR2, FR5, FR6, FR10, FR12, FR13 of add-grid-meeting-range-and-share (D5).
  * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D3): `confirmMeetingRangeInput`.
+ * Implements FR2, FR3 of refine-meeting-range-entry-and-handles (D3): the refusal outcomes.
  */
 export function useMeetingRange() {
   const context = useContext(LocationsContext);
@@ -171,10 +188,10 @@ export function useMeetingRange() {
           start,
           end,
         });
-        return !outcome.ok &&
-          outcome.error === LocationErrorCode.INVALID_MEETING_RANGE
-          ? MeetingRangeInputOutcome.INVALID_RANGE
-          : MeetingRangeInputOutcome.CLOSED;
+        return (
+          (!outcome.ok ? OUTCOME_OF_REFUSAL[outcome.error] : undefined) ??
+          MeetingRangeInputOutcome.CLOSED
+        );
       },
       clearMeetingRange: () => {
         store.dispatch({ type: LocationCommandType.CLEAR_MEETING_RANGE });

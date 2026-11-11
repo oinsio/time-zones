@@ -105,6 +105,20 @@ export function getInstantAtTrackFraction(
   return getInstantAtMinutes(day, steps * TRACK_STEP_MINUTES);
 }
 
+/**
+ * The next or previous track step position from `minutes`, counted from the
+ * day's start: an off-step value reaches the nearest step in that direction.
+ * Implements FR4 of refine-meeting-range-entry-and-handles (D1).
+ */
+export function getMinutesAfterTrackStep(
+  minutes: number,
+  move: TrackMove.NEXT_STEP | TrackMove.PREVIOUS_STEP,
+): number {
+  return move === TrackMove.NEXT_STEP
+    ? (Math.floor(minutes / TRACK_STEP_MINUTES) + 1) * TRACK_STEP_MINUTES
+    : (Math.ceil(minutes / TRACK_STEP_MINUTES) - 1) * TRACK_STEP_MINUTES;
+}
+
 /** The instant after a keyboard move, clamped to the day start and the track end. */
 export function getInstantAfterTrackMove(
   day: ReferenceDay,
@@ -116,8 +130,14 @@ export function getInstantAfterTrackMove(
     Math.floor(elapsed / TRACK_STEP_MINUTES) * TRACK_STEP_MINUTES;
   const ceilStep = Math.ceil(elapsed / TRACK_STEP_MINUTES) * TRACK_STEP_MINUTES;
   const targetMinutes: Record<TrackMove, number> = {
-    [TrackMove.NEXT_STEP]: floorStep + TRACK_STEP_MINUTES,
-    [TrackMove.PREVIOUS_STEP]: ceilStep - TRACK_STEP_MINUTES,
+    [TrackMove.NEXT_STEP]: getMinutesAfterTrackStep(
+      elapsed,
+      TrackMove.NEXT_STEP,
+    ),
+    [TrackMove.PREVIOUS_STEP]: getMinutesAfterTrackStep(
+      elapsed,
+      TrackMove.PREVIOUS_STEP,
+    ),
     [TrackMove.HOUR_FORWARD]: floorStep + TRACK_HOUR_MOVE_MINUTES,
     [TrackMove.HOUR_BACK]: ceilStep - TRACK_HOUR_MOVE_MINUTES,
     [TrackMove.DAY_START]: 0,

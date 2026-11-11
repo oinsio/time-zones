@@ -8,6 +8,7 @@ import type { WallTimeTarget } from "./referenceMoment";
  * Implements FR3, FR8 of add-time-sliders-to-location-cards (D1): SELECT_INSTANT.
  * Implements FR1, FR2, FR3, FR10 of set-home-location-and-show-differences (D1).
  * Implements FR2 of add-grid-meeting-range-and-share (D1): the meeting range commands.
+ * Implements FR2 of refine-meeting-range-entry-and-handles (D2): MEETING_START_EQUALS_END, MEETING_END_BEFORE_START.
  */
 
 export enum LocationCommandType {
@@ -38,6 +39,8 @@ export enum LocationErrorCode {
   INVALID_INSTANT = "INVALID_INSTANT",
   INVALID_TIME = "INVALID_TIME",
   INVALID_MEETING_RANGE = "INVALID_MEETING_RANGE",
+  MEETING_START_EQUALS_END = "MEETING_START_EQUALS_END",
+  MEETING_END_BEFORE_START = "MEETING_END_BEFORE_START",
 }
 
 export type LocationCommand =

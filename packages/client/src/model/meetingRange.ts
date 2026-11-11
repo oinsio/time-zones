@@ -7,13 +7,19 @@ import {
   TRACK_STEP_MINUTES,
 } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
-import { type ReferenceDay, TrackMove } from "./dayTrack";
+import {
+  getMinutesAfterTrackStep,
+  type ReferenceDay,
+  TrackMove,
+} from "./dayTrack";
 import { getHourCellStart } from "./hourCells";
 
 /**
  * The meeting range: a start and an end instant inside one reference day, on
- * the track step (ADR-0011). Pure; lengths come from absolute instants.
+ * whole minutes (ADR-0011, refined by ADR-0013). Pure; lengths come from
+ * absolute instants.
  * Implements FR1, FR3, FR5, FR8, FR10, FR12 of add-grid-meeting-range-and-share (D1, D2).
+ * Implements FR1, FR4, FR5 of refine-meeting-range-entry-and-handles (D1).
  */
 export type MeetingRange = {
   start: Temporal.Instant;
@@ -41,8 +47,8 @@ const getMinutesFromDayStart = (day: ReferenceDay, instant: Temporal.Instant) =>
 const getInstantAtMinutes = (day: ReferenceDay, minutes: number) =>
   day.start.add({ nanoseconds: minutes * NANOSECONDS_PER_MINUTE });
 
-const isOnTrackStep = (day: ReferenceDay, instant: Temporal.Instant) =>
-  getMinutesFromDayStart(day, instant) % TRACK_STEP_MINUTES === 0;
+const isOnWholeMinute = (day: ReferenceDay, instant: Temporal.Instant) =>
+  Number.isInteger(getMinutesFromDayStart(day, instant));
 
 /** Whether the range keeps the invariants of ADR-0011 inside `day`. */
 export function isValidMeetingRange(
@@ -54,8 +60,8 @@ export function isValidMeetingRange(
     start.epochMilliseconds < end.epochMilliseconds &&
     day.start.epochMilliseconds <= start.epochMilliseconds &&
     end.epochMilliseconds <= day.end.epochMilliseconds &&
-    isOnTrackStep(day, start) &&
-    isOnTrackStep(day, end)
+    isOnWholeMinute(day, start) &&
+    isOnWholeMinute(day, end)
   );
 }
 
@@ -83,14 +89,20 @@ export function getMeetingHandleLimits(
   meeting: MeetingRange,
   handle: MeetingHandle,
 ): MeetingHandleLimits {
+  const startMinutes = getMinutesFromDayStart(day, meeting.start);
+  const endMinutes = getMinutesFromDayStart(day, meeting.end);
+  const minimumLengthMinutes = Math.min(
+    TRACK_STEP_MINUTES,
+    endMinutes - startMinutes,
+  );
   if (handle === MeetingHandle.START) {
     return {
       minMinutes: 0,
-      maxMinutes: getMinutesFromDayStart(day, meeting.end) - TRACK_STEP_MINUTES,
+      maxMinutes: endMinutes - minimumLengthMinutes,
     };
   }
   return {
-    minMinutes: getMinutesFromDayStart(day, meeting.start) + TRACK_STEP_MINUTES,
+    minMinutes: startMinutes + minimumLengthMinutes,
     maxMinutes: day.lengthMinutes,
   };
 }
@@ -115,7 +127,7 @@ function putHandleAtMinutes(
     : { start: meeting.start, end: instant };
 }
 
-/** The range after a keyboard move of one handle, limited so the range keeps one step. */
+/** The range after a keyboard move of one handle, limited so the range keeps one step (or its shorter length). */
 export function getMeetingRangeAfterHandleMove(
   day: ReferenceDay,
   meeting: MeetingRange,
@@ -127,8 +139,14 @@ export function getMeetingRangeAfterHandleMove(
     handle === MeetingHandle.START ? meeting.start : meeting.end,
   );
   const targetMinutes: Record<TrackMove, number> = {
-    [TrackMove.NEXT_STEP]: current + TRACK_STEP_MINUTES,
-    [TrackMove.PREVIOUS_STEP]: current - TRACK_STEP_MINUTES,
+    [TrackMove.NEXT_STEP]: getMinutesAfterTrackStep(
+      current,
+      TrackMove.NEXT_STEP,
+    ),
+    [TrackMove.PREVIOUS_STEP]: getMinutesAfterTrackStep(
+      current,
+      TrackMove.PREVIOUS_STEP,
+    ),
     [TrackMove.HOUR_FORWARD]: current + TRACK_HOUR_MOVE_MINUTES,
     [TrackMove.HOUR_BACK]: current - TRACK_HOUR_MOVE_MINUTES,
     [TrackMove.DAY_START]: 0,
@@ -165,18 +183,14 @@ export function getMeetingSpan(
 }
 
 /**
- * The range for a date change: the new start (floored to the step of the new
- * day), the duration kept, the end clamped to the new day's end.
+ * The range for a date change: the new start as given, the duration kept, the end clamped to the new day's end.
  */
 export function moveMeetingRangeToDay(
   meeting: MeetingRange,
   newStart: Temporal.Instant,
   newDay: ReferenceDay,
 ): MeetingRange {
-  const stepMinutes =
-    Math.floor(getMinutesFromDayStart(newDay, newStart) / TRACK_STEP_MINUTES) *
-    TRACK_STEP_MINUTES;
-  const start = getInstantAtMinutes(newDay, stepMinutes);
+  const start = newStart;
   const end = start.add({
     milliseconds:
       meeting.end.epochMilliseconds - meeting.start.epochMilliseconds,

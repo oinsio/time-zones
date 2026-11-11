@@ -18,6 +18,7 @@ Time Zones is a client-only, offline-first PWA. The architecture separates a vie
 | [ADR-0009](../adr/0009-supported-browser-engines.md) | Supported browser engines, boot-time polyfills, no BigInt, legacy zone shim |
 | [ADR-0010](../adr/0010-device-time-location.md) | Device time location: a removable, stored kind of location |
 | [ADR-0012](../adr/0012-user-chosen-view.md) | User-chosen view: no automatic view by width, Cards by default |
+| [ADR-0013](../adr/0013-meeting-range-at-any-minute.md) | Meeting range at any minute: typed ends on any whole minute, handles keep the track step |
 
 ## Layers
 

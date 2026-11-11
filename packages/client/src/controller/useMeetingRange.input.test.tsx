@@ -1,4 +1,5 @@
 // Verifies FR4 of fix-grid-meeting-range-lock-and-layering.
+// Verifies FR2, FR3 of refine-meeting-range-entry-and-handles.
 import { act } from "@testing-library/react";
 import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -43,23 +44,50 @@ describe("useMeetingRange confirmMeetingRangeInput", () => {
     expect(span()).toEqual([600, 750]);
   });
 
+  it("should set a range that starts off the track step and close", () => {
+    const { result, span } = setup();
+    act(() => result.current.selectCells(9, 10));
+    let outcome: MeetingRangeInputOutcome | undefined;
+
+    act(() => {
+      outcome = result.current.confirmMeetingRangeInput(
+        almaty.id,
+        "9:10",
+        "11",
+        DATE,
+      );
+    });
+
+    expect(outcome).toBe(MeetingRangeInputOutcome.CLOSED);
+    expect(span()).toEqual([550, 660]);
+  });
+
   it.each([
-    ["abc", "11", MeetingRangeInputOutcome.INVALID_START_TEXT],
-    ["9", "xyz", MeetingRangeInputOutcome.INVALID_END_TEXT],
-    ["9:10", "11", MeetingRangeInputOutcome.INVALID_RANGE],
+    ["abc", "11", MeetingRangeInputOutcome.INVALID_START_TEXT, DATE, "Almaty"],
+    ["9", "xyz", MeetingRangeInputOutcome.INVALID_END_TEXT, DATE, "Almaty"],
+    ["10", "10", MeetingRangeInputOutcome.SAME_START_AND_END, DATE, "Almaty"],
+    ["12", "10", MeetingRangeInputOutcome.END_BEFORE_START, DATE, "Almaty"],
+    ["22", "2", MeetingRangeInputOutcome.END_BEFORE_START, DATE, "Almaty"],
+    [
+      "13",
+      "14",
+      MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY,
+      "2026-03-07",
+      "New York",
+    ],
   ])(
     "should answer %s / %s with %s and keep the range",
-    (startText, endText, expected) => {
+    (startText, endText, expected, date, city) => {
       const { result, span } = setup();
       act(() => result.current.selectCells(9, 10));
       let outcome: MeetingRangeInputOutcome | undefined;
 
       act(() => {
         outcome = result.current.confirmMeetingRangeInput(
-          almaty.id,
+          cityRow(city).id,
           startText,
           endText,
-          DATE,
+          date,
         );
       });
 

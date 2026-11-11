@@ -1,4 +1,5 @@
 // Verifies FR5 of fix-grid-meeting-range-lock-and-layering.
+// Verifies FR1, FR2 of refine-meeting-range-entry-and-handles.
 import { describe, expect, it } from "vitest";
 import { LocationKind } from "./locationKind";
 import {
@@ -76,6 +77,41 @@ describe("SET_MEETING_RANGE_WALL_TIMES", () => {
     ],
     ["Kolkata", "2026-03-08", "09:30", "11:30", SAMPLE_RANGE],
     ["New York", "2026-03-07", "23:00", "01:00", SAMPLE_RANGE],
+    [
+      "Almaty",
+      "2026-03-08",
+      "09:05",
+      "09:10",
+      "2026-03-08T04:05:00Z/2026-03-08T04:10:00Z",
+    ],
+    [
+      "Almaty",
+      "2026-03-08",
+      "09:00",
+      "09:23",
+      "2026-03-08T04:00:00Z/2026-03-08T04:23:00Z",
+    ],
+    [
+      "Moscow",
+      "2026-03-08",
+      "07:05",
+      "09:28",
+      "2026-03-08T04:05:00Z/2026-03-08T06:28:00Z",
+    ],
+    [
+      "Kolkata",
+      "2026-03-08",
+      "09:37",
+      "10:00",
+      "2026-03-08T04:07:00Z/2026-03-08T04:30:00Z",
+    ],
+    [
+      "New York",
+      "2026-03-07",
+      "23:10",
+      "00:40",
+      "2026-03-08T04:10:00Z/2026-03-08T05:40:00Z",
+    ],
   ])(
     "should set the range from %s wall times",
     (cityLabel, date, start, end, range) => {
@@ -98,15 +134,29 @@ describe("SET_MEETING_RANGE_WALL_TIMES", () => {
     [
       "Almaty",
       "2026-03-08",
-      "09:10",
-      "11:00",
-      LocationErrorCode.INVALID_MEETING_RANGE,
+      "10:00",
+      "10:00",
+      LocationErrorCode.MEETING_START_EQUALS_END,
+    ],
+    [
+      "Almaty",
+      "2026-03-08",
+      "12:00",
+      "10:00",
+      LocationErrorCode.MEETING_END_BEFORE_START,
     ],
     [
       "Almaty",
       "2026-03-08",
       "22:00",
       "02:00",
+      LocationErrorCode.MEETING_END_BEFORE_START,
+    ],
+    [
+      "New York",
+      "2026-03-07",
+      "13:00",
+      "01:00",
       LocationErrorCode.INVALID_MEETING_RANGE,
     ],
     [
@@ -147,18 +197,18 @@ describe("SET_MEETING_RANGE_WALL_TIMES", () => {
     },
   );
 
-  it("should set the whole reference day from 00:00 to 00:00", () => {
+  it("should refuse 00:00 to 00:00 as the same start and end, leaving the state", () => {
     const outcome = setFromWallTimes(
-      baseState,
+      sampleState,
       "Almaty",
       "2026-03-08",
       "00:00",
       "00:00",
     );
-    if (!outcome.ok) throw new Error(outcome.error);
-    expect(rangeOf(outcome.state)).toBe(
-      "2026-03-07T19:00:00Z/2026-03-08T19:00:00Z",
-    );
+    expect(outcome).toEqual({
+      ok: false,
+      error: LocationErrorCode.MEETING_START_EQUALS_END,
+    });
   });
 
   it("should resolve a start in a gap forward", () => {

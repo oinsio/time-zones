@@ -1,3 +1,4 @@
+// Verifies FR8 of refine-meeting-range-entry-and-handles: a finger presses beside the grip and the handle keeps that distance.
 import { expect, type Locator, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
@@ -8,7 +9,6 @@ import {
 import {
   cellOf,
   centreOf,
-  frameOf,
   isTopmostAt,
   panelOf,
   requireBox,
@@ -29,6 +29,8 @@ const HANDLE_ROW_INDEX = { start: 2, end: 1 };
 const EDGE_TOLERANCE_PX = 3;
 const CELLS_PITCH_FRACTION = 4;
 const EDGE_INSET_PX = 6;
+/** The finger presses this far right of the handle's centre: beside the grip, within the hit area. */
+const FINGER_PRESS_OFFSET_PX = 16;
 const HOLD_MOVE_COUNT = 6;
 const MOVE_STEP_PITCH_DIVISOR = 5;
 const READINGS_KEY = "handleValueReadings";
@@ -43,10 +45,20 @@ const HALF = 2;
 type FingerDrag = {
   handle: Locator;
   lastX: number;
+  pressOffsetPx: number;
   readings: number[];
   scrollBefore: number;
 };
 const fingerDrags = new WeakMap<Page, FingerDrag>();
+
+/** A handle stopped by the day's start or end cannot keep its distance from the finger. */
+const isHandleAtItsLimit = async (handle: Locator) => {
+  const value = await handle.getAttribute("aria-valuenow");
+  return (
+    value === (await handle.getAttribute("aria-valuemin")) ||
+    value === (await handle.getAttribute("aria-valuemax"))
+  );
+};
 
 const readHandleValue = async (handle: Locator) =>
   Number(await handle.getAttribute("aria-valuenow"));
@@ -138,7 +150,11 @@ async function dragHandleWithFinger(
   handle: Locator,
   edgeX: number,
 ) {
-  const from = centreOf(await requireBox(handle));
+  const handleCentre = centreOf(await requireBox(handle));
+  const from = {
+    x: handleCentre.x + FINGER_PRESS_OFFSET_PX,
+    y: handleCentre.y,
+  };
   const scrollBefore = await panelOf(page).evaluate(
     (panel) => panel.scrollLeft,
   );
@@ -170,7 +186,13 @@ async function dragHandleWithFinger(
     (key) => Reflect.get(window, key) as number[],
     READINGS_KEY,
   );
-  fingerDrags.set(page, { handle, lastX: edgeX, readings, scrollBefore });
+  fingerDrags.set(page, {
+    handle,
+    lastX: edgeX,
+    pressOffsetPx: FINGER_PRESS_OFFSET_PX,
+    readings,
+    scrollBefore,
+  });
 }
 
 When(
@@ -244,42 +266,16 @@ Then(
 );
 
 Then(
-  /^the (?:end|start) handle is within a quarter of a cell of the finger$/,
+  /^the (?:end|start) handle keeps its distance from the finger at the press$/,
   async ({ locationsWorld }) => {
     const { page } = locationsWorld;
     const drag = fingerDrags.get(page);
     if (!drag) throw new Error("No finger drag was made");
+    if (await isHandleAtItsLimit(drag.handle)) return;
     const handleCentre = centreOf(await requireBox(drag.handle));
     const pitch = (await requireBox(cellOf(page, SAMPLE_CITY, 1))).width;
-    expect(Math.abs(handleCentre.x - drag.lastX)).toBeLessThanOrEqual(
-      pitch / CELLS_PITCH_FRACTION + EDGE_INSET_PX,
-    );
-  },
-);
-
-When(
-  "the user scrolls the strips back to the start",
-  async ({ locationsWorld }) => {
-    await panelOf(locationsWorld.page).evaluate((panel) => {
-      panel.scrollLeft = 0;
-    });
-  },
-);
-
-Then(
-  "the hour frame lies inside the strips' visible part",
-  async ({ locationsWorld }) => {
-    const { page } = locationsWorld;
-    const panelBox = await requireBox(panelOf(page));
-    await expect
-      .poll(async () => {
-        const frameBox = await requireBox(frameOf(page));
-        return (
-          frameBox.x >= panelBox.x - EDGE_TOLERANCE_PX &&
-          frameBox.x + frameBox.width <=
-            panelBox.x + panelBox.width + EDGE_TOLERANCE_PX
-        );
-      })
-      .toBe(true);
+    expect(
+      Math.abs(handleCentre.x - (drag.lastX - drag.pressOffsetPx)),
+    ).toBeLessThanOrEqual(pitch / CELLS_PITCH_FRACTION + EDGE_INSET_PX);
   },
 );
