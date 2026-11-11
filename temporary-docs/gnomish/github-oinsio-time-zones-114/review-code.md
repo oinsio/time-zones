@@ -29,7 +29,7 @@
 - ✅ 5.1 E2E handles — `grid_view_meeting_handle_reach_e2e.feature` (on-screen at 3 positions × 2 viewports, press beside grip, press without movement, hit area, off-step values, arrow keys) with steps; `grid_view_layers_e2e.steps.ts` imports `DATE_BAR_SELECTOR`; auto-scroll scenarios of `grid_view_meeting_handles_e2e.feature` retagged and reworded ("keeps its distance from the finger at the press").
 - ✅ 5.2 E2E separator and messages — `time_selection/time_selection_time_separator_e2e.feature` with steps; `grid_view/grid_view_meeting_range_messages_e2e.feature` (axe, 6 examples) with steps.
 - ✅ 5.3 Existing browser suites — the named scenarios still exist in `grid_view_meeting_handles_e2e.feature`, `time_selection_wall_time_input_e2e.feature` and `grid_view_meeting_lock_e2e.feature`; CI is green.
-- ✅ 6.1 Scoped Stryker — re-measured in this review (see Mutation): every changed production file ≥ 91.8 %.
+- ✅ 6.1 Scoped Stryker — re-measured in this review (see Mutation): every changed production file ≥ 93.4 %.
 - ✅ 6.2 Build, bundle, legacy build, typecheck, lint, tests — CI green on the branch.
 - ✅ 6.3 Screenshots — handoff README H2 records "none re-written"; no `.png` baseline changed in the branch diff.
 - ✅ 6.4 Traceability — `grep -rn "refine-meeting-range-entry-and-handles" packages/client/src` yields FR1–FR8, NFR-A1, NFR-A2, NFR-P1, NFR-R1, UX1–UX3; `grep -rn isOnTrackStep packages/client/src` prints nothing.
@@ -46,7 +46,7 @@
 - ✅ FR6 — `formatTypedWallTimeText.ts`, `typedTimeFieldText.ts`, wired in both inputs; unit and E2E separator features.
 - ✅ FR7 — `useVisibleStripRows.ts`, `meetingHandleRow.ts`, `GridView.tsx:44-49` (frozen while dragging); `useVisibleStripRows.test.tsx`, E2E "Handles stay on screen in a long list".
 - ✅ FR8 — `w-11` hit area, press-relative drag, click guard and `touchend` `preventDefault` in `useMeetingHandleDrag.ts`; unit BDD "A click after a handle drag is not a tap", "Finger drag without Pointer Events"; E2E "A press beside the grip drags the handle", "Press and release without movement".
-- ⚠️ NFR-P1 — one pending frame and an unchanged-run bail-out exist (`useVisibleStripRows.ts:63-76`), but the handles re-render when the candidate run changes and their rows do not; see R1.
+- ⚠️ NFR-P1 — one pending frame and an unchanged-run bail-out exist (`useVisibleStripRows.ts:63-76`), but `MeetingHandleSlider` (`MeetingHandle.tsx:53-89`) re-renders when the candidate run changes and its row does not; see R1.
 - ✅ NFR-A1 — `grid_view_meeting_range_messages_e2e.feature` (axe, 3 messages × 2 themes); `aria-invalid`/`aria-describedby` asserted in `MeetingRangeInput.test.tsx`.
 - ✅ NFR-A2 — slider role and values unchanged in `MeetingHandle.tsx:107-120`; E2E "Slider values off the track step" (545 / `09:05`) and hit-area scenario.
 - ✅ NFR-R1 — E2E "Handles stay on screen in a long list" checks the box inside the viewport above `DATE_BAR_SELECTOR` and the topmost element, at 390 × 844 and 844 × 390, top/middle/bottom.
@@ -60,7 +60,7 @@
 - ✅ M4 — E2E "Handles stay on screen in a long list", 3 positions × 2 handles at 390 × 844.
 - ✅ M5 — E2E "A press beside the grip drags the handle" (09:00–12:00), "Press and release without movement"; unit BDD "Finger drag without Pointer Events" (09:00–11:00, `touchend` default prevented).
 - ✅ M6 — `meeting_range_any_minute.feature` rows 09:05–11:00 start next/previous step and 09:00–09:05 end Home.
-- ✅ M7 — measured in this review: lowest changed file 91.8 % (`useVisibleStripRows.ts`), all others ≥ 95.1 % (see Mutation).
+- ✅ M7 — measured in this review: lowest changed file 93.4 % (`useVisibleStripRows.ts`), all others ≥ 95.1 % (see Mutation).
 - ✅ Scenario: Tap on column 9 — `grid_view_meeting_unit.feature`, `grid_view_meeting_e2e.feature`.
 - ✅ Scenario: Enter on an hour strip — `grid_view_meeting_unit.feature`, `grid_view_meeting_e2e.feature`.
 - ✅ Scenario: Handles of the sample meeting — `grid_view_meeting_handles_e2e.feature`.
@@ -112,7 +112,7 @@
 
 ## Mutation
 
-Measured in this review with scoped Stryker, three runs of at most five files, one at a time (`cd packages/client && npx stryker run --mutate '…'`), read from `reports/mutation/mutation-report.json`:
+Measured in this review with scoped Stryker, three runs of at most five files plus a fourth run of `useVisibleStripRows.ts` alone in this round, one at a time (`cd packages/client && npx stryker run --mutate '…'`), read from `reports/mutation/mutation-report.json`:
 
 | File | Score | Survivors |
 |---|---|---|
@@ -125,7 +125,7 @@ Measured in this review with scoped Stryker, three runs of at most five files, o
 | `src/views/shared/WallTimeInput.tsx` | 100 % | 0 |
 | `src/views/shared/MeetingRangeInput.tsx` | 100 % | 0 |
 | `src/views/grid/meetingHandleRow.ts` | 100 % | 0 |
-| `src/views/grid/useVisibleStripRows.ts` | 91.8 % | 5 (`:27` `<=` → `<` at the date bar edge; `:83` cancel of the pending frame, `:85` removal of the `scroll` listener, see R2) |
+| `src/views/grid/useVisibleStripRows.ts` | 93.4 % | 4 (`:27` `<=` → `<` at the date bar edge; two mutants of the `:83` guard before `cancelAnimationFrame`; `:85` empty event name in the removal of the `resize` listener; re-measured alone in this round, see R2) |
 | `src/views/grid/useMeetingHandleDrag.ts` | 95.1 % | 6 (`:89`, `:138`, `:148`, `:157`, `:179-180`: guards and cleanup paths) |
 | `src/views/grid/MeetingHandle.tsx` | 100 % | 0 |
 | `src/views/grid/GridView.tsx` | 100 % | 0 |
@@ -137,23 +137,23 @@ Measured in this review with scoped Stryker, three runs of at most five files, o
 ## Findings
 
 ### R1 — WARNING — Handles re-render when the candidate run changes but their rows do not
-- Location: `packages/client/src/views/grid/useVisibleStripRows.ts:62-70`
-- Rule: NFR-P1 of the change and the `grid-view` delta → "Meeting handles on the frame": "Re-placing the handles … MUST re-render a handle only when its row changes."
-- Problem: `useVisibleStripRows` compares and publishes the candidate run `{ firstRow, lastRow }`, and the state lives in `GridView` (`GridView.tsx:45-49`). Any change of the run therefore re-renders `GridView`, every hour strip it renders, and both `MeetingHandleSlider`s (none is memoised), even when `getMeetingHandleRow` gives the same rows. Example: run `{ a, a + 4 }` → `{ a, a + 5 }` (one more row fits at the bottom after a small scroll or a date bar height change) keeps the end handle on row `a + 2` and the start handle on `a + 3`, yet both handles re-render and re-run their `useLayoutEffect` strip measurement (`MeetingHandle.tsx:77-89`). The hook also runs, and re-renders the whole grid on every run change, while no meeting range is set and no handle exists. The unit BDD scenario only checks a scroll that leaves the run unchanged, so this case is not tested.
-- Impact: The requirement's re-render bound is not met. During vertical scrolling of a long list, the whole grid re-renders and both handles force a layout read on frames where no handle moves, with or without a meeting. This is the scroll-time work NFR-P1 was written to bound.
-- Fix: In `useVisibleStripRows`, derive the two handle rows with `getMeetingHandleRow` from the measured run. Compare those rows with the published ones, and publish (`setState`) only when one of them changed. Return the rows, and pass each slider its row number in place of `candidateRows`. In `GridView`, pass `isHandleDragging || !hasMeetingRange` as `isFrozen` so nothing is measured without a meeting range. The effect already measures synchronously when `isFrozen` turns false. Extend the "Scrolling re-places the handles cheaply" scenario in `grid_view_meeting_handle_reach_unit.feature` and its steps with "When a scroll changes the candidate rows but not the handle rows / Then no meeting handle is rendered again". Add the matching case to `useVisibleStripRows.test.tsx`.
-- Fix risk: `useVisibleStripRows.test.tsx`, `meetingHandleFixture.tsx` and `MeetingHandle.test.tsx` pass `candidateRows` today and need their props updated. While no meeting range is set, the hook would keep its last value. When a range is set, the effect's first measurement runs after that commit (`useEffect`), so the handles may paint for one frame on stale rows. Switching that first measurement to `useLayoutEffect` avoids it.
+- Location: `packages/client/src/views/grid/MeetingHandle.tsx:53-89`
+- Rule: NFR-P1 of the change and the `grid-view` delta → "Meeting handles on the frame" (`specs/grid-view/spec.md:22`): "Re-placing the handles MUST measure the strips at most once per animation frame and MUST re-render a handle only when its row changes."
+- Problem: As design.md D5 prescribes, `useVisibleStripRows` publishes the candidate run `{ firstRow, lastRow }` into `GridView` state (`GridView.tsx:45-49`), and `GridView` passes it to both `MeetingHandleSlider`s (`GridView.tsx:54-61,83-87`). `MeetingHandleSlider` is a plain function component that takes `candidateRows` and works out its row inside (`MeetingHandle.tsx:74`). So every change of the run re-renders both handles, even when `getMeetingHandleRow` gives the same row. Each re-render also runs their `useLayoutEffect`, which runs after every render (`MeetingHandle.tsx:76-89`): it re-reads the strip and panel rects and re-creates its `ResizeObserver`. Example: the run grows from `{ 1, 5 }` to `{ 1, 6 }` because one more row fits after a small scroll or a resize. The end handle stays on row 3 and the start handle on row 4, yet both re-render. This case is untested: the unit BDD scenario "Scrolling re-places the handles cheaply" (`grid_view_meeting_handle_reach_unit.feature:19-24`) and the delta scenario (`spec.md:59-63`) only check a scroll that leaves the candidate run unchanged.
+- Impact: The requirement's re-render bound ("only when its row changes") is not met. While a long list scrolls, each run change re-renders both handles and forces two layout reads on frames where neither handle moves. This is the scroll-time work NFR-P1 bounds, and no test would catch a regression of it.
+- Fix: Keep D5's wiring unchanged: the hook still returns the candidate rows, `GridView` still calls it once and passes them to both sliders, and `setState` still runs only on a run change. In `MeetingHandle.tsx`, `MeetingHandleSlider` then only computes `rowNumber = getMeetingHandleRow(handle, candidateRows)` and renders a `memo`-wrapped inner component. That component takes `rowNumber` instead of `candidateRows` and holds today's body (drag hook, layout effect, markup). Its other props already keep their identity between such renders: `presented` comes from the `useMemo` at `useMeetingRange.ts:92`, `onMoveHandle`/`onDragHandleTo` come from its `actions` `useMemo` (`:136-200`), `onDragActiveChange` is a `useState` setter, and `cellPitchPx`/`isScrollable` are primitives. Through `/opsx:update`, add this line to the `grid-view` delta scenario "Scrolling re-places the handles cheaply" (`spec.md:59-63`): "AND a scroll that changes the candidate rows but not the handle rows re-renders no meeting handle". Add the same case to tasks.md 4.3 (the `useVisibleStripRows`/handle cases) and 4.5 (the scenario bullet). Then add the matching steps `When a scroll changes the candidate rows but not the handle rows` / `Then no meeting handle is rendered again` to that scenario in `grid_view_meeting_handle_reach_unit.feature`. Define them in `steps/grid_view_meeting_handle_reach_unit.steps.tsx`, with stubbed rects that move the run from `{ 1, 5 }` to `{ 1, 6 }`, asserted through the existing `panelReads` counter (`:44,65`). Also add a render-count case to `MeetingHandle.test.tsx`.
+- Fix risk: The memo works only while its props keep their identity. If a later change passes an inline callback, the bail-out silently stops working; the new BDD step guards against that. The inner layout effect no longer runs on a render that the memo skips. A row height change still re-measures through its `ResizeObserver` on the panel. Rows are locked while a meeting range is set (`areRowControlsLocked`, `GridView.tsx:95`), so no reorder can keep the row number while the strip under it changes. With the inner component in the same file, `MeetingHandle.tsx` grows from 126 to about 140 lines, under the 200-line target. The spec, tasks and Gherkin edits must land in the same fix so they stay aligned.
 - Status: open
 
 ### R2 — SUGGESTION — Cleanup of the visible-row listeners is untested
 - Location: `packages/client/src/views/grid/useVisibleStripRows.ts:82-87`
 - Rule: `.claude/rules/tdd-workflow.md` ("Target mutation score: >=95%")
-- Problem: Scoped Stryker leaves 5 survivors in this file (91.8 %). Among them, removing `cancelAnimationFrame` (`:83`) and emptying the event name of `removeEventListener("scroll", …)` (`:85`) both survive, so no test unmounts the hook and checks that scrolling no longer schedules a measurement.
-- Impact: A regression that leaks the `window` scroll listener or a pending frame after the Grid view unmounts (view switch to Cards) would pass every test. The leaked listener would keep measuring a detached panel on every scroll. Today's code is correct; only the guard is missing.
-- Fix: Add one case to `src/views/grid/useVisibleStripRows.test.tsx`: render the hook, unmount it with a frame pending, dispatch a `scroll` event, and assert that the stubbed `requestAnimationFrame` was not called again and that `cancelAnimationFrame` was called with the pending id. Re-run `npx stryker run --mutate 'src/views/grid/useVisibleStripRows.ts'`.
+- Problem: Scoped Stryker, re-run on this file alone in this round, leaves 4 survivors (93.4 %). Three are in the effect's cleanup: both mutants of the guard `if (pendingFrame !== undefined) window.cancelAnimationFrame(pendingFrame)` (`:83`: condition `false`, and `===`), and the empty event name in `window.removeEventListener("resize", …)` (`:85`). No test unmounts the hook and checks that the pending frame is cancelled or that a later `resize` schedules no measurement.
+- Impact: A regression that leaks the `window` `resize` listener or a pending frame after the Grid view unmounts (a view switch to Cards) would pass every test. The leaked listener would keep measuring a detached panel on every resize. Today's code is correct; only the guard is missing.
+- Fix: Add one case to `src/views/grid/useVisibleStripRows.test.tsx`, using the `requestAnimationFrame`/`cancelAnimationFrame` spies it already installs (`:51-55`). Render the hook, schedule a frame with a `scroll` event, then unmount it. Assert that `cancelAnimationFrame` was called with the pending id. Then dispatch `resize` and assert that `requestAnimationFrame` was not called again. Re-run `npx stryker run --mutate 'src/views/grid/useVisibleStripRows.ts'`.
 - Fix risk: none — test-only, using the stubs the file already has.
 - Status: open
 
 ## Verdict
 
-Ready — there is no CRITICAL finding, so nothing blocks the merge. R1 (WARNING) should be fixed before merging, so that NFR-P1's re-render bound holds. R2 is optional.
+Ready — there is no CRITICAL finding, so nothing blocks the merge. R1 (WARNING) should be fixed before merging, so that NFR-P1's re-render bound ("re-render a handle only when its row changes") holds and is tested. R2 is optional.
