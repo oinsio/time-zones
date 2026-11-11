@@ -1,6 +1,8 @@
 // Verifies FR6, FR7, FR8, UX3 of fix-grid-meeting-range-lock-and-layering: layers of the grid under bars and dialogs in a real browser.
+// Verifies FR7 of refine-meeting-range-entry-and-handles: the date bar is located by DATE_BAR_SELECTOR.
 import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import { DATE_BAR_SELECTOR } from "@/constants";
 import {
   dateButton,
   nowButton,
@@ -32,7 +34,6 @@ const GRID_ELEMENT_SELECTORS = [
   "time",
   "li .sticky span",
 ];
-const DATE_BAR_SELECTOR = "footer";
 const GAP_ABOVE_DATE_BAR_PX = 4;
 const DATE_BAR_SAMPLE_STEP_PX = 8;
 const SCROLL_UNDER_DATE_BAR_PX = 400;

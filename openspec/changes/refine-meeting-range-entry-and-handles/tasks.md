@@ -142,7 +142,7 @@ Files stay under 200 lines where possible, 300 at most.
 
 ## 5. E2E in a real browser (FR3, FR4, FR6–FR8, NFR-A1, NFR-A2, NFR-R1, UX1; D4–D8)
 
-- [ ] 5.1 `src/test/features/grid_view/grid_view_meeting_handle_reach_e2e.feature` with `steps/grid_view_meeting_handle_reach_e2e.steps.ts`, reusing:
+- [x] 5.1 `src/test/features/grid_view/grid_view_meeting_handle_reach_e2e.feature` with `steps/grid_view_meeting_handle_reach_e2e.steps.ts`, reusing:
   - the 12-location list and "the user sets the sample meeting" of `grid_view_layers_e2e.feature`;
   - `isTopmostAt` and `centreOf` from `steps/hourGridE2eHelpers.ts`;
   - "the screen is {int} by {int} px for the locations".

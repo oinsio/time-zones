@@ -101,7 +101,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     await session.reset();
   });
   f.AfterAllScenarios(session.world.finish);
-  f.AfterEachScenario(() => vi.restoreAllMocks());
+  f.AfterEachScenario(() => {
+    vi.restoreAllMocks();
+  });
 
   // @refine-meeting-range-entry-and-handles @FR7
   f.ScenarioOutline(

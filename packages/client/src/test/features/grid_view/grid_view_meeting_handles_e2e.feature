@@ -37,7 +37,7 @@ Feature: Meeting handles of the Grid view in a real browser
     And the user drags the start handle with the mouse to the right edge of column 12 of "Almaty"
     Then the meeting range is from "10:45" to "11:00"
 
-  @add-grid-meeting-range-and-share @FR10 @FR11 @NFR-R1 @UX2
+  @add-grid-meeting-range-and-share @FR10 @FR11 @NFR-R1 @UX2 @refine-meeting-range-entry-and-handles @FR8
   Scenario: Dragging the end handle to the right edge on a phone
     Given the stored locations are "Almaty", "Moscow"
     And the screen is 390 by 844 px for the locations
@@ -46,9 +46,9 @@ Feature: Meeting handles of the Grid view in a real browser
     And the user drags the end handle with a finger to the right edge of the strips and holds it there
     Then the strips have scrolled to the right
     And the meeting range ends later than 11:00
-    And the end handle is within a quarter of a cell of the finger
+    And the end handle keeps its distance from the finger at the press
 
-  @add-grid-meeting-range-and-share @FR10 @FR11 @NFR-R1 @UX2
+  @add-grid-meeting-range-and-share @FR10 @FR11 @NFR-R1 @UX2 @refine-meeting-range-entry-and-handles @FR8
   Scenario: Dragging the start handle to the left edge on a phone
     Given the stored locations are "Almaty", "Moscow"
     And the screen is 390 by 844 px for the locations
@@ -58,7 +58,7 @@ Feature: Meeting handles of the Grid view in a real browser
     Then the strips have scrolled to the left
     And the meeting range starts earlier than 09:00
     And the start handle never changed by more than 15 minutes at a time
-    And the start handle is within a quarter of a cell of the finger
+    And the start handle keeps its distance from the finger at the press
 
   @add-grid-meeting-range-and-share @FR11
   Scenario: The hour frame comes back into view after Clear
