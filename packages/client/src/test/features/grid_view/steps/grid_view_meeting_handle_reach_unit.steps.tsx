@@ -204,11 +204,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario(
     "Scrolling without a meeting range measures no strip",
     ({ Given, When, Then }) => {
-      Given("the Grid view with 12 locations and no meeting range", async () => {
-        installGeometry();
-        await session.openGrid(CITIES);
-        flushFrame();
-      });
+      Given(
+        "the Grid view with 12 locations and no meeting range",
+        async () => {
+          installGeometry();
+          await session.openGrid(CITIES);
+          flushFrame();
+        },
+      );
       When(
         "the user scrolls a few rows and the next animation frame arrives",
         () => {

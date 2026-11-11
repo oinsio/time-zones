@@ -95,7 +95,7 @@ const MeetingHandleView = memo(function MeetingHandleView({
     onDragActiveChange,
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: measured after every render, as the rows can change height
+  // Measured after every render, as the rows can change height
   useLayoutEffect(() => {
     const panel = itemElement.current?.parentElement;
     if (!panel) return;
