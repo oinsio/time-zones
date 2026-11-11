@@ -6,7 +6,7 @@ import { expect, vi } from "vitest";
 import { HourGridCssVariable } from "@/constants";
 import { MeetingHandle } from "@/model";
 import { KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { getMeetingHandleRow } from "@/views/grid/meetingHandleRow";
+import { getMeetingHandleRow } from "@/views/grid";
 import {
   handleOf,
   setSampleMeeting,

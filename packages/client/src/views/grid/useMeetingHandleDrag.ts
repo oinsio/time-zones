@@ -30,8 +30,8 @@ const NO_SCROLL = 0;
 
 /**
  * Drags a meeting handle by pointer, or by finger through touch events where
- * Pointer Events are missing. The minutes come from the pointer's position over
- * the hour strip, the strip's own rect carrying the scroll. Within the edge zone
+ * Pointer Events are missing. The minutes are the handle's minutes at the press
+ * plus the pointer's travel since the press, in hour cells of the strip. Within the edge zone
  * of the panel's visible part the panel scrolls on per animation frame and the
  * last pointer position is applied again.
  * Implements FR10, FR11, UX2 of add-grid-meeting-range-and-share (D6).
