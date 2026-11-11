@@ -1,4 +1,10 @@
-import { type KeyboardEvent, useLayoutEffect, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  memo,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { HourGridCssVariable, MINUTES_PER_HOUR } from "@/constants";
 import type { TrackMove } from "@/controller";
 import type { MeetingHandle } from "@/model";
@@ -13,16 +19,21 @@ import {
   useMeetingHandleDrag,
 } from "./useMeetingHandleDrag";
 
-type MeetingHandleSliderProps = {
+type MeetingHandleViewProps = {
   presented: PresentedMeetingHandle;
-  /** The rows a handle may stand on to stay in view. */
-  candidateRows: MeetingHandleCandidateRows;
+  /** The grid row, counted from 1, the handle stands on. */
+  rowNumber: number;
   cellPitchPx: number;
   isScrollable: boolean;
   onMoveHandle: (handle: MeetingHandle, move: TrackMove) => void;
   onDragHandleTo: (handle: MeetingHandle, minutes: number) => void;
   /** Called with `true` when a drag starts and with `false` when it ends. */
   onDragActiveChange: (isDragging: boolean) => void;
+};
+
+type MeetingHandleSliderProps = Omit<MeetingHandleViewProps, "rowNumber"> & {
+  /** The rows a handle may stand on to stay in view. */
+  candidateRows: MeetingHandleCandidateRows;
 };
 
 /** The vertical centre of the row's hour strip within the panel, in pixels. */
@@ -51,14 +62,26 @@ function measureStripCentre(
  * Implements FR7, FR8, NFR-A2, UX2 of refine-meeting-range-entry-and-handles (D5, D6): stands among the visible rows, a 44 by 48 px hit area.
  */
 export function MeetingHandleSlider({
-  presented,
   candidateRows,
+  ...viewProps
+}: MeetingHandleSliderProps) {
+  const rowNumber = getMeetingHandleRow(
+    viewProps.presented.handle,
+    candidateRows,
+  );
+  return <MeetingHandleView {...viewProps} rowNumber={rowNumber} />;
+}
+
+/** Re-renders only when its row or another prop changes, not with every change of the candidate rows (NFR-P1). */
+const MeetingHandleView = memo(function MeetingHandleView({
+  presented,
+  rowNumber,
   cellPitchPx,
   isScrollable,
   onMoveHandle,
   onDragHandleTo,
   onDragActiveChange,
-}: MeetingHandleSliderProps) {
+}: MeetingHandleViewProps) {
   const { handle } = presented;
   const itemElement = useRef<HTMLLIElement | null>(null);
   const [centreTopPx, setCentreTopPx] = useState(0);
@@ -71,7 +94,6 @@ export function MeetingHandleSlider({
     onDragHandleTo,
     onDragActiveChange,
   });
-  const rowNumber = getMeetingHandleRow(handle, candidateRows);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: measured after every render, as the rows can change height
   useLayoutEffect(() => {
@@ -123,4 +145,4 @@ export function MeetingHandleSlider({
       </div>
     </li>
   );
-}
+});

@@ -36,6 +36,9 @@ const STRIP_PITCH_PX = 50;
 const DATE_BAR_TOP_PX = 400;
 const GRAB_X_PX = 500;
 const TAPPED_COLUMN = 14;
+const SCROLL_TO_FIRST_CANDIDATE_RUN_PX = 121;
+const SCROLL_TO_GROW_RUN_PX = 33;
+const SCROLL_PAST_ROWS_PX = 150;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const session = createMeetingGridSession();
@@ -163,6 +166,59 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       });
       Then("no meeting handle is rendered again", () => {
         expect(panelReads).toBe(panelReadsBefore);
+      });
+    },
+  );
+
+  // @refine-meeting-range-entry-and-handles @NFR-P1
+  f.Scenario(
+    "A change of the candidate rows that keeps the handle rows renders no handle",
+    ({ Given, When, Then }) => {
+      let panelReadsBefore = 0;
+      Given(
+        "the Grid view with 12 locations and the meeting range 09:00–11:00 in Almaty",
+        async () => {
+          installGeometry();
+          await session.openGrid(CITIES);
+          setSampleMeeting();
+          flushFrame();
+          scrollBy(SCROLL_TO_FIRST_CANDIDATE_RUN_PX);
+          flushFrame();
+        },
+      );
+      When(
+        "a scroll changes the candidate rows but not the handle rows",
+        () => {
+          panelReadsBefore = panelReads;
+          scrollBy(SCROLL_TO_GROW_RUN_PX);
+          flushFrame();
+        },
+      );
+      Then("no meeting handle is rendered again", () => {
+        expect(panelReads).toBe(panelReadsBefore);
+      });
+    },
+  );
+
+  // @refine-meeting-range-entry-and-handles @FR7
+  f.Scenario(
+    "Scrolling without a meeting range measures no strip",
+    ({ Given, When, Then }) => {
+      Given("the Grid view with 12 locations and no meeting range", async () => {
+        installGeometry();
+        await session.openGrid(CITIES);
+        flushFrame();
+      });
+      When(
+        "the user scrolls a few rows and the next animation frame arrives",
+        () => {
+          dateBarReads = 0;
+          scrollBy(SCROLL_PAST_ROWS_PX);
+          flushFrame();
+        },
+      );
+      Then("the date bar is not measured", () => {
+        expect(dateBarReads).toBe(0);
       });
     },
   );

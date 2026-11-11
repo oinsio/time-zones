@@ -45,7 +45,7 @@ export default function GridView() {
   const candidateRows = useVisibleStripRows(
     panelElement,
     strips.size,
-    isHandleDragging,
+    isHandleDragging || !hasMeetingRange,
   );
   const meetingColumns = meeting && {
     first: meeting.span.firstColumn,

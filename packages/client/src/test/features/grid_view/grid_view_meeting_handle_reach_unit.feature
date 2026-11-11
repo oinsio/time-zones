@@ -23,6 +23,18 @@ Feature: Meeting handles stay in reach, in jsdom
     When a scroll leaves the candidate rows unchanged
     Then no meeting handle is rendered again
 
+  @refine-meeting-range-entry-and-handles @NFR-P1
+  Scenario: A change of the candidate rows that keeps the handle rows renders no handle
+    Given the Grid view with 12 locations and the meeting range 09:00–11:00 in Almaty
+    When a scroll changes the candidate rows but not the handle rows
+    Then no meeting handle is rendered again
+
+  @refine-meeting-range-entry-and-handles @FR7
+  Scenario: Scrolling without a meeting range measures no strip
+    Given the Grid view with 12 locations and no meeting range
+    When the user scrolls a few rows and the next animation frame arrives
+    Then the date bar is not measured
+
   @refine-meeting-range-entry-and-handles @FR8
   Scenario: A click after a handle drag is not a tap
     Given the Grid view with the meeting range 09:00–11:00 in Almaty

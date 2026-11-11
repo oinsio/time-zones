@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { DATE_BAR_SELECTOR, MEETING_HANDLE_HEIGHT_PX } from "@/constants";
 import type { MeetingHandleCandidateRows } from "./meetingHandleRow";
 import { HOUR_STRIP_SELECTOR } from "./useMeetingHandleDrag";
@@ -53,7 +53,7 @@ export function useVisibleStripRows(
     useState<MeetingHandleCandidateRows>({ firstRow: 1, lastRow: rowCount });
   const publishedRows = useRef(candidateRows);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (panel === null || isFrozen) return;
     let pendingFrame: number | undefined;
     const measure = () => {
