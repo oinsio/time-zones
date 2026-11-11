@@ -185,21 +185,21 @@ Files stay under 200 lines where possible, 300 at most.
 
 ## 6. Verification (all)
 
-- [ ] 6.1 Scoped Stryker, at most 5 files per run, one run at a time, target ≥ 95 % (minimum 90 %, M7). From `packages/client`, run in this order:
+- [x] 6.1 Scoped Stryker, at most 5 files per run, one run at a time, target ≥ 95 % (minimum 90 %, M7). From `packages/client`, run in this order:
   1. `npx stryker run --mutate 'src/model/meetingRange.ts,src/model/dayTrack.ts,src/model/reduceMeetingRangeWallTimes.ts,src/presenter/formatTypedWallTimeText.ts,src/controller/useMeetingRange.ts'` (5 files, the limit);
   2. `npx stryker run --mutate 'src/views/shared/typedTimeFieldText.ts,src/views/shared/WallTimeInput.tsx,src/views/shared/MeetingRangeInput.tsx,src/views/grid/meetingHandleRow.ts,src/views/grid/useVisibleStripRows.ts'`;
   3. `npx stryker run --mutate 'src/views/grid/useMeetingHandleDrag.ts,src/views/grid/MeetingHandle.tsx,src/views/grid/GridView.tsx,src/app/MainPage.tsx'`.
 
   Read `reports/mutation/mutation-report.json` after each run, and add tests for survivors until each run scores ≥ 90 %.
-- [ ] 6.2 Run `pnpm run build`, then `pnpm check:bundle-size`, then `pnpm check:legacy-build`, then `pnpm typecheck`, then `pnpm lint`, then `pnpm test`, one at a time: all pass.
-- [ ] 6.3 Screenshots (NFR-R2): run `npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots"` (both projects). A meeting-state baseline that fails only because a meeting handle now stands on another row: re-write it with the same command plus `--update-snapshots` and that scenario's name in `--grep`, and list the re-written files of `__screenshots__/chromium/` and `__screenshots__/mobile-chrome/` in the H2 README section. A failure for any other reason is a defect to fix. Finally run `npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots"`: passes on every project.
-- [ ] 6.4 Traceability:
+- [x] 6.2 Run `pnpm run build`, then `pnpm check:bundle-size`, then `pnpm check:legacy-build`, then `pnpm typecheck`, then `pnpm lint`, then `pnpm test`, one at a time: all pass.
+- [x] 6.3 Screenshots (NFR-R2): run `npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots"` (both projects). A meeting-state baseline that fails only because a meeting handle now stands on another row: re-write it with the same command plus `--update-snapshots` and that scenario's name in `--grep`, and list the re-written files of `__screenshots__/chromium/` and `__screenshots__/mobile-chrome/` in the H2 README section. A failure for any other reason is a defect to fix. Finally run `npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots"`: passes on every project.
+- [x] 6.4 Traceability:
   - `grep -rn "refine-meeting-range-entry-and-handles" packages/client/src | grep -oE "(FR|NFR-[APR]|UX)[0-9]+" | sort -u` lists FR1–FR8, NFR-A1, NFR-A2, NFR-P1, NFR-R1, UX1–UX3;
   - `grep -rn "isOnTrackStep" packages/client/src` prints nothing.
 
 ## 7. Handoff
 
-- [ ] 7.1 Handoff H1: write `temporary-docs/gnomish/<task>/handoff/H1-adr-0013-meeting-range-any-minute.patch` and the `## H1: Add ADR-0013 (meeting range at any minute)` section of `temporary-docs/gnomish/<task>/handoff/README.md`. Make the patch as `.gnomish/stages/specify/handoff.md` says:
+- [x] 7.1 Handoff H1: write `temporary-docs/gnomish/<task>/handoff/H1-adr-0013-meeting-range-any-minute.patch` and the `## H1: Add ADR-0013 (meeting range at any minute)` section of `temporary-docs/gnomish/<task>/handoff/README.md`. Make the patch as `.gnomish/stages/specify/handoff.md` says:
   1. Write `docs/adr/0013-meeting-range-at-any-minute.md` with the content of design D9.
   2. Add the Status line of `docs/adr/0011-meeting-range-in-grid-view.md`: "Refined by [ADR-0013](0013-meeting-range-at-any-minute.md): the ends lie on any whole minute; the handles keep the track step".
   3. Add "0013 meeting range at any minute" to the ADR list in `CLAUDE.md` → Architecture.
@@ -218,7 +218,7 @@ Files stay under 200 lines where possible, 300 at most.
   - `git diff --quiet -- docs/adr/ CLAUDE.md` succeeds;
   - `test ! -e docs/adr/0013-meeting-range-at-any-minute.md` succeeds;
   - `grep -n "## H1" temporary-docs/gnomish/<task>/handoff/README.md` prints a line.
-- [ ] 7.2 Handoff H2: write the `## H2: Review re-approved meeting screenshots` section of the same README (no patch). It holds:
+- [x] 7.2 Handoff H2: write the `## H2: Review re-approved meeting screenshots` section of the same README (no patch). It holds:
   - **Serves:** NFR-R2, FR7;
   - **Files:** none;
   - **Verify:** the list of baselines re-written in 6.3, or "none re-written";

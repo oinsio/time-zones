@@ -48,4 +48,12 @@ describe("getTypedTimeFieldText", () => {
   it("should insert the separator for another change without an input type", () => {
     expect(getTypedTimeFieldText(changeTo("103", 3), "10")).toBe("10:3");
   });
+
+  it("should insert the separator for a shorter text that is no prefix without an input type", () => {
+    expect(getTypedTimeFieldText(changeTo("103", 3), "1230")).toBe("10:3");
+  });
+
+  it("should insert the separator for an unchanged length without an input type", () => {
+    expect(getTypedTimeFieldText(changeTo("103", 3), "103")).toBe("10:3");
+  });
 });
