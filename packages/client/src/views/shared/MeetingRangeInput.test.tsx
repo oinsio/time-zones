@@ -1,4 +1,5 @@
 // Verifies FR3, FR4, NFR-A1, UX2 of fix-grid-meeting-range-lock-and-layering.
+// Verifies M3, FR6 of refine-meeting-range-entry-and-handles.
 // Verifies FR3, UX3 of refine-meeting-range-entry-and-handles.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -34,7 +35,30 @@ const renderInput = (
   };
 };
 
+const M3_SEQUENCES = [
+  ["1030", "10:30"],
+  ["930", "9:30"],
+  ["0930", "09:30"],
+  ["2359", "23:59"],
+  ["12345", "12:345"],
+];
+
 describe("MeetingRangeInput", () => {
+  it.each(
+    [START_NAME, END_NAME].flatMap((name) =>
+      M3_SEQUENCES.map(([digits, shown]) => [name, digits, shown]),
+    ),
+  )(
+    "should show the typed text of %s for %s as %s",
+    async (name, digits, shown) => {
+      renderInput();
+      const field = screen.getByRole("textbox", { name });
+      await userEvent.clear(field);
+      await userEvent.type(field, digits);
+      expect(field).toHaveValue(shown);
+    },
+  );
+
   it.each([START_NAME, END_NAME])(
     "should style the field %s as the meeting span",
     (name) => {
