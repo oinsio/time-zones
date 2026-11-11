@@ -167,7 +167,7 @@ Files stay under 200 lines where possible, 300 at most.
   - change `getMeetingHandleRow`'s call in `GridView.tsx` back to `{ firstRow: 1, lastRow: rowCount }`, rerun "Handles stay on screen in a long list" and confirm it fails;
   - change the `<li>` width back to `w-6`, rerun "A press beside the grip drags the handle" and confirm it fails;
   - restore both files.
-- [ ] 5.2 `src/test/features/time_selection/time_selection_time_separator_e2e.feature` with `steps/time_selection_time_separator_e2e.steps.ts`. Typing uses `page.keyboard.type` per digit, and the caret is read from `selectionStart`. Scenarios:
+- [x] 5.2 `src/test/features/time_selection/time_selection_time_separator_e2e.feature` with `steps/time_selection_time_separator_e2e.steps.ts`. Typing uses `page.keyboard.type` per digit, and the caret is read from `selectionStart`. Scenarios:
   - "Digits typed one by one" (the 8 examples);
   - "Backspace removes the separator";
   - "A typed time with the separator is confirmed";
@@ -177,7 +177,7 @@ Files stay under 200 lines where possible, 300 at most.
   New `src/test/features/grid_view/grid_view_meeting_range_messages_e2e.feature` with `steps/grid_view_meeting_range_messages_e2e.steps.ts`: "No accessibility violations with each range message" (6 examples, `@axe-core/playwright`, `@NFR-A1 @FR3`).
 
   Run `pnpm test:bdd:gen && npx playwright test -c playwright.bdd.config.ts --project chromium --grep "@refine-meeting-range-entry-and-handles.*(@FR6|@FR3|@NFR-A1)"`: passes. Then run the same command with `--project mobile-chrome`: passes.
-- [ ] 5.3 Existing browser suites keep passing:
+- [x] 5.3 Existing browser suites keep passing:
   - `npx playwright test -c playwright.bdd.config.ts --project chromium --grep "Handles of the sample meeting|Drag the end handle one hour right|Drag the start handle past the end|Dragging the end handle to the right edge on a phone|Dragging the start handle to the left edge on a phone|Slider values of the handles|Keys on the handles"` (`grid_view_meeting_handles_e2e.feature`);
   - then `--grep "Keyboard-only input|Tab confirms the field|The keyboard alone sets the meeting|No accessibility violations with the meeting range input"` (`time_selection_wall_time_input_e2e.feature`, `grid_view_meeting_lock_e2e.feature`).
 
