@@ -54,3 +54,10 @@ export const MAX_WEEK_OF_MONTH = 5;
 export const EPOCH_YEAR = 1970;
 export const EPOCH_WEEKDAY = 4;
 export const GREGORIAN_AVERAGE_DAYS_PER_YEAR = 365.2425;
+
+/**
+ * A zone rules release name: four digits of the year, then one or more
+ * lowercase letters (`2026f`, `2026aa`).
+ * Implements FR5 of add-remote-zone-rules-updates (design D1).
+ */
+export const ZONE_RULES_RELEASE_NAME_PATTERN = /^\d{4}[a-z]+$/;

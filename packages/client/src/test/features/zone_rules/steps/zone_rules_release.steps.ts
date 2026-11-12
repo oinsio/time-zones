@@ -1,9 +1,11 @@
+// @add-remote-zone-rules-updates @FR1: the committed release is read from its file, never named here
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import {
   getLocalTimeType,
+  parseReleaseName,
   parseZoneRulesRelease,
   SECONDS_PER_HOUR,
   type ZoneRules,
@@ -71,14 +73,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
-  // @add-zone-rules-from-iana @FR2
+  // @add-zone-rules-from-iana @add-remote-zone-rules-updates @FR1 @FR2
   f.Scenario("A zone whose last type holds forever", ({ When, Then, And }) => {
     When(
-      "the zone rules of {string} are read from the release {string}",
-      (_ctx, zoneId: string, release: string) => {
-        expect(committedRelease.release).toBe(release);
-        readZoneRules(_ctx, zoneId);
-      },
+      "the zone rules of {string} are read from the committed release",
+      readZoneRules,
     );
     Then(
       "its listed clock changes end with {string} to UTC plus 5 {string}",
@@ -105,10 +104,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "A zone whose listed changes end before the cutoff",
     ({ When, Then, And }) => {
       When(
-        "the zone rules of {string} are read from the release {string}",
-        (_ctx, zoneId: string) => {
-          readZoneRules(_ctx, zoneId);
-        },
+        "the zone rules of {string} are read from the committed release",
+        readZoneRules,
       );
       Then("it lists no clock change after the cutoff", () => {
         expect(zoneRules.changes).toEqual([]);
@@ -140,16 +137,17 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @add-zone-rules-from-iana @FR2
   f.Scenario("The release carries its name", ({ When, Then }) => {
-    When("a release compiled from {string} is read", () => undefined);
-    Then("its release name is {string}", (_ctx, release: string) => {
-      expect(committedRelease.release).toBe(release);
+    When("the committed release is read", () => undefined);
+    Then("its release name is a valid release name", () => {
+      expect(parseReleaseName(committedRelease.release)).toBeDefined();
+      expect(committedRelease.release).toBe(committedDocument.release);
     });
   });
 
   // @add-zone-rules-from-iana @FR8 @G4
   f.Scenario("The committed release passes", ({ When, Then }) => {
     let differences: (ZdumpDifference | undefined)[] = [];
-    When("the zone rules check runs on the committed release {string}", () => {
+    When("the zone rules check runs on the committed release", () => {
       differences = ZDUMP_ZONE_IDS.map((zoneId) =>
         compareWithRelease(committedRelease, zoneId, readZdump(zoneId)),
       );

@@ -1,5 +1,7 @@
 // @add-zone-rules-from-iana @FR2 @NFR-P2: the Vite plugin serving the zone rules
+// @add-remote-zone-rules-updates @FR1: the committed release is read from its file, never named here
 import { describe, expect, it, vi } from "vitest";
+import { parseReleaseName } from "@/lib/zoneRules";
 import {
   createPlugin,
   RELEASE_TEXT,
@@ -17,7 +19,8 @@ describe("virtual:zone-rules", () => {
     const document = JSON.parse(
       source.replace(/^export default /, "").replace(/;$/, ""),
     );
-    expect(document.release).toBe("2026f");
+    expect(document.release).toBe(JSON.parse(RELEASE_TEXT).release);
+    expect(parseReleaseName(document.release)).toBeDefined();
     expect(Object.keys(document.zones).length).toBeGreaterThan(500);
   });
 

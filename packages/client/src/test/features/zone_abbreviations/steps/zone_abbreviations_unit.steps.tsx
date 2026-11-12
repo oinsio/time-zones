@@ -1,3 +1,4 @@
+// @add-remote-zone-rules-updates @FR1: the committed release is read from its file, never named here
 // Verifies FR1, FR2, FR3, FR4, M1 of show-zone-abbreviations-and-zone-label-setting.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
@@ -156,11 +157,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @add-zone-rules-from-iana @FR9
+  // @add-zone-rules-from-iana @add-remote-zone-rules-updates @FR1 @FR9
   f.Scenario("Table built from the release", ({ When, Then, And }) => {
     const table = createTableComparisonSteps(committedRelease.release);
     When(
-      "the abbreviation table is built from the zone rules release {string}",
+      "the abbreviation table is built from the committed zone rules release",
       table.expectBuiltFrom,
     );
     Then(
@@ -170,7 +171,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("{string} has no abbreviation", table.expectNoEntry);
   });
 
-  // @add-zone-rules-from-iana @FR9
+  // @add-zone-rules-from-iana @add-remote-zone-rules-updates @FR1 @FR9
   f.Scenario(
     "Abbreviations kept from the table before",
     ({ Given, When, Then, And }) => {
@@ -180,7 +181,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         table.expectEarlierTable,
       );
       When(
-        "it is compared with the table built from the zone rules release {string}",
+        "it is compared with the table built from the committed zone rules release",
         table.compare,
       );
       Then(

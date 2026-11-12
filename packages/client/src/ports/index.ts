@@ -19,4 +19,15 @@ export {
   type PreferencesRepository,
 } from "./preferencesRepository";
 export type { StorageAvailability } from "./storageAvailability";
+export {
+  type StoredReleaseLoadResult,
+  StoredReleaseLoadStatus,
+  type StoredReleaseRepository,
+} from "./storedReleaseRepository";
 export { ShareOutcome, type TextSharing } from "./textSharing";
+export {
+  isZoneRulesSourceFailure,
+  ZoneRulesSourceFailure,
+  type ZoneRulesVersion,
+  type ZoneRulesVersionSource,
+} from "./zoneRulesVersionSource";

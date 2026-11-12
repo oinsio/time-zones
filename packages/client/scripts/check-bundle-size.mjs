@@ -8,20 +8,28 @@
  * The search data file must exist as a separate JSON asset within its own
  * gzipped budget and must not be referenced by index.html (no preload).
  * Implements NFR-P1, M5 of setup-app-shell-and-pages-deploy (D11) and NFR-P1,
- * M5 of add-main-page-scaffold; NFR-P2, M7 of add-locations-via-search (D8).
- * Implements NFR-P1 of add-view-mode-setting-and-grid-skeleton: one chunk per view.
+ * M5 of add-main-page-scaffold; NFR-P2, M7 of add-locations-via-search (D8);
+ * NFR-P1 of add-view-mode-setting-and-grid-skeleton (one chunk per view).
  * The zone rules asset must exist within its gzipped budget and be fetched by
- * exactly one preload link, never by a modulepreload.
- * Implements NFR-P1, NFR-P2 of add-zone-rules-from-iana.
+ * exactly one preload link, never by a modulepreload (NFR-P1, NFR-P2 of add-zone-rules-from-iana).
+ * The served zone rules files (version file and release file) must exist in the
+ * build and must not be precached. Implements FR2, NFR-P1 of add-remote-zone-rules-updates.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
+import { BUILD_OUT_DIR, ZONE_RULES_ASSET_BUDGET_KB } from "../app.config.ts";
 import {
-  APP_BASE_PATH,
-  BUILD_OUT_DIR,
-  ZONE_RULES_ASSET_BUDGET_KB,
-} from "../app.config.ts";
+  ZONE_RULES_RELEASE_DIRECTORY,
+  ZONE_RULES_VERSION_PATH,
+} from "../src/constants/zoneRules.ts";
+import {
+  collectInitialScriptUrls,
+  resolveBuildFilePath,
+} from "./bundle/initialScripts.ts";
+import { countZoneRulesPreloadLinks } from "./zoneRules/countPreloadLinks.ts";
+import { findPrecachedZoneRulesFiles } from "./zoneRules/precacheExclusion.ts";
+import { findServedReleaseFiles } from "./zoneRules/servedReleaseFiles.ts";
 
 const INITIAL_JS_BUDGET_KB = 150;
 const BYTES_PER_KB = 1024;
@@ -35,29 +43,10 @@ const CITY_SEARCH_DATA_EXTENSION = ".json";
 const CITY_SEARCH_DATA_BUDGET_KB = 30;
 const ZONE_RULES_ASSET_PREFIX = "zone-rules-";
 const ZONE_RULES_ASSET_EXTENSION = ".json";
-const PRELOAD_LINK_PATTERN = /<link[^>]*rel="preload"[^>]*href="([^"]+)"/g;
 const EXPECTED_ZONE_RULES_PRELOAD_COUNT = 1;
-
-const ENTRY_SCRIPT_PATTERN = /<script[^>]*type="module"[^>]*src="([^"]+)"/g;
-const MODULE_PRELOAD_PATTERN =
-  /<link[^>]*rel="modulepreload"[^>]*href="([^"]+)"/g;
+const SERVICE_WORKER_FILE = "sw.js";
 
 const buildDirectory = join(import.meta.dirname, "..", BUILD_OUT_DIR);
-
-function collectInitialScriptUrls(entryHtml) {
-  const scriptUrls = [
-    ...entryHtml.matchAll(ENTRY_SCRIPT_PATTERN),
-    ...entryHtml.matchAll(MODULE_PRELOAD_PATTERN),
-  ].map((urlMatch) => urlMatch[1]);
-  return [...new Set(scriptUrls)];
-}
-
-function resolveBuildFilePath(scriptUrl) {
-  const relativePath = scriptUrl.startsWith(APP_BASE_PATH)
-    ? scriptUrl.slice(APP_BASE_PATH.length)
-    : scriptUrl;
-  return join(buildDirectory, relativePath);
-}
 
 function getGzippedSizeInBytes(filePath) {
   return gzipSync(readFileSync(filePath)).length;
@@ -75,19 +64,9 @@ function findMissingViewChunkPrefix() {
   );
 }
 
-function findCitySearchDataFile() {
+function findAssetFile(prefix, extension) {
   return readdirSync(join(buildDirectory, ASSETS_DIRECTORY)).find(
-    (fileName) =>
-      fileName.startsWith(CITY_SEARCH_DATA_PREFIX) &&
-      fileName.endsWith(CITY_SEARCH_DATA_EXTENSION),
-  );
-}
-
-function findZoneRulesAssetFile() {
-  return readdirSync(join(buildDirectory, ASSETS_DIRECTORY)).find(
-    (fileName) =>
-      fileName.startsWith(ZONE_RULES_ASSET_PREFIX) &&
-      fileName.endsWith(ZONE_RULES_ASSET_EXTENSION),
+    (fileName) => fileName.startsWith(prefix) && fileName.endsWith(extension),
   );
 }
 
@@ -96,7 +75,9 @@ const initialScriptUrls = collectInitialScriptUrls(entryHtml);
 
 let totalGzippedBytes = 0;
 for (const scriptUrl of initialScriptUrls) {
-  const gzippedBytes = getGzippedSizeInBytes(resolveBuildFilePath(scriptUrl));
+  const gzippedBytes = getGzippedSizeInBytes(
+    resolveBuildFilePath(buildDirectory, scriptUrl),
+  );
   totalGzippedBytes += gzippedBytes;
   console.log(`  ${scriptUrl}: ${formatKilobytes(gzippedBytes)} KB gzipped`);
 }
@@ -118,7 +99,10 @@ if (missingViewChunkPrefix !== undefined) {
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
-const citySearchDataFile = findCitySearchDataFile();
+const citySearchDataFile = findAssetFile(
+  CITY_SEARCH_DATA_PREFIX,
+  CITY_SEARCH_DATA_EXTENSION,
+);
 if (citySearchDataFile === undefined) {
   console.error(
     `No ${CITY_SEARCH_DATA_PREFIX}*${CITY_SEARCH_DATA_EXTENSION} file in ${ASSETS_DIRECTORY}/ — the search data must be a separate file`,
@@ -143,7 +127,10 @@ if (citySearchDataBytes > CITY_SEARCH_DATA_BUDGET_KB * BYTES_PER_KB) {
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
-const zoneRulesAssetFile = findZoneRulesAssetFile();
+const zoneRulesAssetFile = findAssetFile(
+  ZONE_RULES_ASSET_PREFIX,
+  ZONE_RULES_ASSET_EXTENSION,
+);
 if (zoneRulesAssetFile === undefined) {
   console.error(
     `No ${ZONE_RULES_ASSET_PREFIX}*${ZONE_RULES_ASSET_EXTENSION} file in ${ASSETS_DIRECTORY}/ — the zone rules must be a separate asset`,
@@ -161,11 +148,10 @@ if (zoneRulesAssetBytes > ZONE_RULES_ASSET_BUDGET_KB * BYTES_PER_KB) {
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
-const zoneRulesPreloadCount = [
-  ...entryHtml.matchAll(PRELOAD_LINK_PATTERN),
-].filter((preloadMatch) =>
-  preloadMatch[1].includes(ZONE_RULES_ASSET_PREFIX),
-).length;
+const zoneRulesPreloadCount = countZoneRulesPreloadLinks(
+  entryHtml,
+  ZONE_RULES_ASSET_PREFIX,
+);
 const isZoneRulesModulePreloaded = collectInitialScriptUrls(entryHtml).some(
   (scriptUrl) => scriptUrl.includes(ZONE_RULES_ASSET_PREFIX),
 );
@@ -179,11 +165,31 @@ if (
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
+const servedReleaseFiles = findServedReleaseFiles(buildDirectory);
+if (
+  !existsSync(join(buildDirectory, ZONE_RULES_VERSION_PATH)) ||
+  servedReleaseFiles.length === 0
+) {
+  console.error(
+    `${ZONE_RULES_VERSION_PATH} and a ${ZONE_RULES_RELEASE_DIRECTORY}<release>.json file must be in the build`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const precachedZoneRulesFiles = findPrecachedZoneRulesFiles(
+  readFileSync(join(buildDirectory, SERVICE_WORKER_FILE), "utf8"),
+);
+if (precachedZoneRulesFiles.length > 0) {
+  console.error(
+    `${SERVICE_WORKER_FILE} precaches ${precachedZoneRulesFiles.join(", ")} — the served zone rules files must be fetched fresh`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
 if (totalGzippedBytes > budgetBytes) {
   console.error(`${summary} — over budget`);
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
-
 console.log(summary);
 console.log(
   `Search data: ${formatKilobytes(citySearchDataBytes)} KB gzipped (budget ${CITY_SEARCH_DATA_BUDGET_KB} KB)`,

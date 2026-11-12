@@ -1,3 +1,4 @@
+import { SETTINGS_FOOTNOTE_CLASS_NAME } from "@/constants";
 import { useDeployTime } from "@/controller";
 
 /**
@@ -8,7 +9,7 @@ import { useDeployTime } from "@/controller";
 export function DeployTime() {
   const deployTime = useDeployTime();
   return (
-    <p data-deploy-time className="text-center text-sm text-accent">
+    <p data-deploy-time className={SETTINGS_FOOTNOTE_CLASS_NAME}>
       {deployTime}
     </p>
   );

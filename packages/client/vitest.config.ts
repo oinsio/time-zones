@@ -7,7 +7,12 @@ import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 import { zoneRulesPlugin } from "./scripts/zoneRules/zoneRulesPlugin";
 
 export default defineConfig({
-  plugins: [react(), zoneDataPlugin(), zoneRulesPlugin(), legacyCoreJsPlugin()],
+  plugins: [
+    react(),
+    zoneDataPlugin(),
+    zoneRulesPlugin({ deployInstant: TEST_DEPLOY_INSTANT }),
+    legacyCoreJsPlugin(),
+  ],
   define: { [DEPLOY_INSTANT_DEFINE]: JSON.stringify(TEST_DEPLOY_INSTANT) },
   test: {
     globals: true,

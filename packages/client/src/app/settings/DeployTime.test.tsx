@@ -43,12 +43,13 @@ describe("DeployTime on the settings page", () => {
     await i18n.changeLanguage("ru");
   });
 
-  it("should be the last element of main", () => {
+  // FR8 of add-remote-zone-rules-updates: the zone rules release line follows it.
+  it("should be followed only by the zone rules release line", () => {
     const { container } = renderPage();
     const main = container.querySelector("main") as HTMLElement;
-    expect(main.lastElementChild).toBe(
-      container.querySelector(DEPLOY_TIME_SELECTOR),
-    );
+    const deployTime = container.querySelector(DEPLOY_TIME_SELECTOR);
+    expect(deployTime?.nextElementSibling).toBe(main.lastElementChild);
+    expect(main.lastElementChild).toHaveAttribute("data-zone-rules-release");
   });
 
   it("should come after the language group, also with the list expanded", async () => {

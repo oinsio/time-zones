@@ -3,6 +3,7 @@ import zoneAbbreviationTable from "virtual:zone-abbreviations";
 import { screen } from "@testing-library/react/pure";
 import { expect, vi } from "vitest";
 import { Temporal } from "@/lib/temporal";
+import { parseReleaseName } from "@/lib/zoneRules";
 import { getZoneAbbreviation, getZoneAbbreviations } from "@/model";
 import abbreviationsBefore from "@/test/zoneRules/fixtures/zone-abbreviations.before.json";
 import abbreviationChanges from "@/test/zoneRules/fixtures/zone-abbreviations.changes.json";
@@ -65,8 +66,9 @@ export const listChangedZoneIds = (): string[] =>
 export const createTableComparisonSteps = (committedReleaseName: string) => {
   let differingZoneIds: string[] = [];
   return {
-    expectBuiltFrom: (_ctx: unknown, releaseName: string) =>
-      expect(committedReleaseName).toBe(releaseName),
+    // @add-remote-zone-rules-updates @FR1: the committed release is any valid release name
+    expectBuiltFrom: () =>
+      expect(parseReleaseName(committedReleaseName)).toBeDefined(),
     expectPairs: (
       _ctx: unknown,
       firstZone: string,

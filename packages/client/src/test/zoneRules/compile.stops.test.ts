@@ -136,11 +136,22 @@ describe("a compile that must stop", () => {
     ["2026"],
     ["../2026f"],
     ["2026F"],
-    ["2026fx"],
+    ["2026A"],
     ["x2026f"],
   ])("rejects the release name %s", async (name) => {
     const run = await compile(VALID_SCENARIO, [name]);
     expect(run.exitCode).not.toBe(0);
     expect(run.urls).toEqual([]);
   });
+});
+
+describe("compile accepts every valid release name (FR5)", () => {
+  // @add-remote-zone-rules-updates @FR5
+  it.each([["2026aa"], ["2026fx"]])(
+    "accepts the release name %s",
+    async (name) => {
+      const run = await compile(VALID_SCENARIO, [name]);
+      expect(run.urls[0]).toContain(`tzdata${name}.tar.gz`);
+    },
+  );
 });

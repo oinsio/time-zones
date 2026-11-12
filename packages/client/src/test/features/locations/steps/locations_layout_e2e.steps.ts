@@ -10,7 +10,7 @@ const CENTER_TOLERANCE_PX = 1;
 const HALF = 2;
 const SCREENSHOT_NAME_SEPARATOR = "-";
 const DEPLOY_TIME_SCREENSHOT_STYLE =
-  "[data-deploy-time] { visibility: hidden; }";
+  "[data-deploy-time], [data-zone-rules-release] { visibility: hidden; }";
 
 // Verifies NFR-R1 of add-locations-via-search.
 Given(
@@ -69,6 +69,7 @@ Then(
       .title.replace(/[^A-Za-z0-9]+/g, SCREENSHOT_NAME_SEPARATOR);
     // Verifies NFR-R1 of support-legacy-ios-12-safari: approved baselines pass unchanged with the legacy CSS fallbacks
     // Verifies NFR-R2 of polish-settings-and-remove-offline-update-notice: the deploy time text is hidden, its line keeps its box
+    // Verifies NFR-R1 of add-remote-zone-rules-updates: the zone rules release line is hidden the same way
     await locationsWorld.page.addStyleTag({
       content: DEPLOY_TIME_SCREENSHOT_STYLE,
     });
