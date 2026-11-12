@@ -176,6 +176,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @add-settings-page-and-device-time-location @FR8 @M7
+  // @add-zone-rules-from-iana @FR5
   f.Scenario("Renamed device time zone", ({ Given, And, When, Then }) => {
     Given("the engine rejects {string} and accepts {string}", async () => {
       engine = await startOnOutdatedZoneData();

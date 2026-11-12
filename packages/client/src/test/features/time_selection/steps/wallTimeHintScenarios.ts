@@ -241,6 +241,7 @@ function registerRenamedZoneScenario(f: FeatureDescriibeCallbackParams) {
   f.AfterEachScenario(restoreZoneData);
 
   // @add-wall-time-input-with-hint @FR13
+  // @add-zone-rules-from-iana @FR5
   f.Scenario(
     "A renamed zone on outdated zone data",
     ({ Given, And, When, Then }) => {

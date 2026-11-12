@@ -59,7 +59,7 @@ Feature: Device time location data and outdated zone data
     Then the storage warning is shown
     And the device time location for "Asia/Almaty" is shown
 
-  @add-settings-page-and-device-time-location @FR8 @M7 @show-zone-abbreviations-and-zone-label-setting @FR6
+  @add-settings-page-and-device-time-location @FR8 @M7 @show-zone-abbreviations-and-zone-label-setting @FR6 @add-zone-rules-from-iana @FR5
   Scenario: Renamed device time zone
     Given the engine rejects "Europe/Kyiv" and accepts "Europe/Kiev"
     And the device reports the time zone "Europe/Kiev"

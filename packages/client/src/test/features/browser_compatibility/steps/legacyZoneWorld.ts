@@ -1,46 +1,20 @@
 import { expect, vi } from "vitest";
 import { LOCATIONS_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
-import { loadLegacySupport } from "@/lib/legacy";
 import { LocationsLoadStatus, SaveOutcome } from "@/ports";
+import {
+  installStaleEngine,
+  restoreEngine,
+} from "@/test/fakeStaleDateTimeFormat";
+import { committedRelease } from "@/test/installZoneRules";
 
-type DateTimeFormatConstructor = typeof Intl.DateTimeFormat;
-
-const nativeDateTimeFormat = Intl.DateTimeFormat;
+/** The wrapper the test setup installed over the real engine. */
+const setupDateTimeFormat = Intl.DateTimeFormat;
 const OUTDATED_ZONE_DATA = ["Europe/Kyiv", "America/Ciudad_Juarez"];
 const DEVICE_ZONE_ID = "Asia/Almaty";
 const SAMPLE_TIME_OF_DAY = "T07:30:00Z";
 
-const hasZone = (zones: readonly string[], timeZone: string) =>
-  zones.some((zone) => zone.toLowerCase() === timeZone.toLowerCase());
-
-/**
- * Stands in for the `Intl.DateTimeFormat` of an engine with zone data older
- * than IANA 2022b: it rejects the zones renamed or added since.
- * Implements FR4 of support-legacy-ios-12-safari (D11).
- */
-function buildOutdatedDateTimeFormat(rejectedZones: string[]) {
-  function OutdatedDateTimeFormat(
-    locales?: string | string[],
-    options?: Intl.DateTimeFormatOptions,
-  ) {
-    const { timeZone } = options ?? {};
-    if (timeZone !== undefined && hasZone(OUTDATED_ZONE_DATA, timeZone)) {
-      rejectedZones.push(timeZone);
-      throw new RangeError(`Invalid time zone specified: ${timeZone}`);
-    }
-    return new nativeDateTimeFormat(locales, options);
-  }
-  Object.defineProperty(OutdatedDateTimeFormat, "prototype", {
-    value: nativeDateTimeFormat.prototype,
-  });
-  return Object.assign(OutdatedDateTimeFormat, {
-    supportedLocalesOf: nativeDateTimeFormat.supportedLocalesOf,
-  }) as unknown as DateTimeFormatConstructor;
-}
-
-/** Fresh copies of the modules that keep the `Intl.DateTimeFormat` they first see. */
-const importFreshModules = async () => {
-  vi.resetModules();
+/** The modules that keep the `Intl.DateTimeFormat` they first see, imported as they are. */
+const importModules = async () => {
   const [adapters, model, presenter, temporal] = await Promise.all([
     import("@/adapters"),
     import("@/model"),
@@ -50,19 +24,33 @@ const importFreshModules = async () => {
   return { adapters, model, presenter, temporal };
 };
 
+/** Fresh copies of the modules that keep the `Intl.DateTimeFormat` they first see. */
+const importFreshModules = async () => {
+  vi.resetModules();
+  return importModules();
+};
+
 export type FreshModules = Awaited<ReturnType<typeof importFreshModules>>;
 
-/** An engine with outdated zone data and the legacy zone shim installed over it. */
+/**
+ * An engine with outdated zone data (the stale-engine fake rejecting the renamed and new
+ * zones) and the zone rules wrapper installed over it.
+ * Implements FR5 of add-zone-rules-from-iana (design D9, D10).
+ */
 export async function startOnOutdatedZoneData() {
-  const rejectedZones: string[] = [];
   vi.resetModules();
-  Intl.DateTimeFormat = buildOutdatedDateTimeFormat(rejectedZones);
-  await loadLegacySupport();
-  return { rejectedZones, modules: await importFreshModules() };
+  const { calls } = installStaleEngine({
+    staleZones: {},
+    rejectedZones: OUTDATED_ZONE_DATA,
+  });
+  const zoneRules = await import("@/lib/zoneRules");
+  zoneRules.installZoneRulesDateTimeFormat(committedRelease);
+  return { calls, modules: await importModules() };
 }
 
 export const restoreZoneData = () => {
-  Intl.DateTimeFormat = nativeDateTimeFormat;
+  restoreEngine();
+  Intl.DateTimeFormat = setupDateTimeFormat;
   localStorage.clear();
   vi.unstubAllGlobals();
   vi.resetModules();
@@ -118,16 +106,6 @@ export const saveAndLoadStoredZoneIds = (
     }),
   ).toBe(SaveOutcome.SAVED);
   return loadStoredZoneIds(modules);
-};
-
-/** The outdated engine was asked for the zone (compared in lower case). */
-export const expectZoneRejectedNatively = (
-  rejectedZones: string[],
-  lowerCaseZone: string,
-) => {
-  expect(rejectedZones.map((zone) => zone.toLowerCase())).toContain(
-    lowerCaseZone,
-  );
 };
 
 /** Adds a location with no country to an empty world clock. */
