@@ -1,5 +1,6 @@
 // FR6 of add-zone-rules-from-iana: what temporal-polyfill asks of Intl.DateTimeFormat
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { realNativeDateTimeFormat } from "@/test/installZoneRules";
 
 const ALMATY_ZONE_ID = "Asia/Almaty";
 const ALMATY_INSTANT = "2026-07-15T08:00:00Z";
@@ -34,7 +35,7 @@ describe("what temporal-polyfill asks of Intl.DateTimeFormat", () => {
   beforeEach(() => {
     constructorOptions = [];
     calledMethods = new Set();
-    class LoggingDateTimeFormat extends installedDateTimeFormat {
+    class LoggingDateTimeFormat extends realNativeDateTimeFormat {
       constructor(
         locales?: string | string[],
         options?: Intl.DateTimeFormatOptions,
@@ -52,7 +53,7 @@ describe("what temporal-polyfill asks of Intl.DateTimeFormat", () => {
       }
     }
     const nativeFormatGetter = Object.getOwnPropertyDescriptor(
-      installedDateTimeFormat.prototype,
+      realNativeDateTimeFormat.prototype,
       "format",
     )?.get;
     Object.defineProperty(LoggingDateTimeFormat.prototype, "format", {

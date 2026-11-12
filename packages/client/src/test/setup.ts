@@ -1,3 +1,5 @@
+// The zone rules wrapper goes in before anything evaluates temporal-polyfill (FR1, D10).
+import "./installZoneRules";
 import "./localStorageMock";
 import "@testing-library/jest-dom";
 import i18n from "i18next";
