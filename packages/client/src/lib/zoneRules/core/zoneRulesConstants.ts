@@ -36,3 +36,9 @@ export const MONTHS_PER_YEAR = 12;
 export const DAYS_PER_WEEK = 7;
 export const DAYS_PER_YEAR_WITHOUT_LEAP_DAY = 365;
 export const MAX_WEEK_OF_MONTH = 5;
+
+/** The epoch day arithmetic: the Unix epoch is a Thursday, the week starts on Sunday. */
+export const EPOCH_YEAR = 1970;
+export const EPOCH_WEEKDAY = 4;
+export const DAYS_PER_COMMON_YEAR = 365;
+export const GREGORIAN_AVERAGE_DAYS_PER_YEAR = 365.2425;
