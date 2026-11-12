@@ -8,11 +8,10 @@
  * The search data file must exist as a separate JSON asset within its own
  * gzipped budget and must not be referenced by index.html (no preload).
  * Implements NFR-P1, M5 of setup-app-shell-and-pages-deploy (D11) and NFR-P1,
- * M5 of add-main-page-scaffold; NFR-P2, M7 of add-locations-via-search (D8).
- * Implements NFR-P1 of add-view-mode-setting-and-grid-skeleton: one chunk per view.
+ * M5 of add-main-page-scaffold; NFR-P2, M7 of add-locations-via-search (D8);
+ * NFR-P1 of add-view-mode-setting-and-grid-skeleton (one chunk per view).
  * The zone rules asset must exist within its gzipped budget and be fetched by
- * exactly one preload link, never by a modulepreload.
- * Implements NFR-P1, NFR-P2 of add-zone-rules-from-iana.
+ * exactly one preload link, never by a modulepreload (NFR-P1, NFR-P2 of add-zone-rules-from-iana).
  * The served zone rules files (version file and release file) must exist in the
  * build and must not be precached. Implements FR2, NFR-P1 of add-remote-zone-rules-updates.
  */
