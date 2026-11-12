@@ -247,7 +247,7 @@ The zone rules SHALL load before the app on every engine from one asset the serv
 - **AND** the failure is logged
 
 ### Requirement: Zone rules within their budgets
-The zone rules asset MUST stay within its gzipped budget, counted apart from the initial JavaScript, which MUST stay within its 150 KB budget. Presenting 50 rows MUST build no more `Intl.DateTimeFormat` instances than before. A wrapper instance MUST build exactly one native formatter, and one `formatToParts` call on it MUST make exactly one native `formatToParts` call. A local time type lookup MUST build no formatter and make no native call. <!-- implements NFR-P1, NFR-P3 of add-zone-rules-from-iana -->
+The zone rules asset MUST stay within its gzipped budget, counted apart from the initial JavaScript, which MUST stay within its 150 KB budget. Presenting 50 rows MUST build no more `Intl.DateTimeFormat` instances than before. A wrapper instance MUST build exactly one native formatter, and one `formatToParts` call on it with a date MUST make exactly one native `formatToParts` call; a call without a date MAY add one call on the one module-level native UTC formatter that reads the current instant. A local time type lookup MUST build no formatter and make no native call. <!-- implements NFR-P1, NFR-P3 of add-zone-rules-from-iana -->
 
 #### Scenario: Asset budget
 - **WHEN** the committed zone rules release is measured gzipped

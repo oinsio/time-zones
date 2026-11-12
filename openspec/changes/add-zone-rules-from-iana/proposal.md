@@ -93,7 +93,7 @@ All paths are under `packages/client/` unless stated otherwise.
 
 - NFR-P1: The initial JavaScript of the modern build stays within the 150 KB gzipped budget of `scripts/check-bundle-size.mjs`. The zone rules asset is counted on its own and MUST stay within `ZONE_RULES_ASSET_BUDGET_KB` gzipped (set from the spike, Q1; target ≤ 24 KB). The build fails on either excess.
 - NFR-P2: The asset is requested in parallel with the app's chunks (a preload link), so start adds one request and no second network round trip.
-- NFR-P3: Presenting 50 rows builds no more `Intl.DateTimeFormat` instances than today (work bound of `replace-wall-clock-row-budgets-with-deterministic-checks`). A wrapper instance builds exactly one native formatter; a `formatToParts` call on it makes exactly one native `formatToParts` call; a local time type lookup builds no formatter and makes no native call.
+- NFR-P3: Presenting 50 rows builds no more `Intl.DateTimeFormat` instances than today (work bound of `replace-wall-clock-row-budgets-with-deterministic-checks`). A wrapper instance builds exactly one native formatter; a `formatToParts` call on it with a date makes exactly one native `formatToParts` call (a call without a date adds one call on the shared clock formatter of design D5); a local time type lookup builds no formatter and makes no native call.
 
 #### Accessibility
 
