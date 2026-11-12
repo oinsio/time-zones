@@ -1,4 +1,4 @@
-// FR2 of add-zone-rules-from-iana: the reader returns a typed error for every defect
+// FR2 of add-zone-rules-from-iana: the reader returns a typed error for a malformed document shape
 import { describe, expect, it } from "vitest";
 import {
   buildDocument,
@@ -11,14 +11,8 @@ import {
   ZoneRulesReleaseErrorCode,
 } from "./zoneRulesRelease.ts";
 
-describe("parseZoneRulesRelease errors", () => {
-  const {
-    INVALID_SHAPE,
-    UNKNOWN_LINK_TARGET,
-    CUTOFF_MISMATCH,
-    CHANGES_NOT_ASCENDING,
-    TYPE_INDEX_OUT_OF_RANGE,
-  } = ZoneRulesReleaseErrorCode;
+describe("parseZoneRulesRelease shape errors", () => {
+  const { INVALID_SHAPE } = ZoneRulesReleaseErrorCode;
   const withNewYork = (overrides: Record<string, unknown>) =>
     buildDocumentWithZone({ ...NEW_YORK_DOCUMENT, ...overrides });
 
@@ -145,94 +139,6 @@ describe("parseZoneRulesRelease errors", () => {
       withNewYork({ futureRule: "??" }),
       INVALID_SHAPE,
       "the future rule of America/New_York",
-    ],
-    [
-      "a cutoff of another instant",
-      buildDocument({ cutoff: 1 }),
-      CUTOFF_MISMATCH,
-      "cutoff",
-    ],
-    [
-      "a link to a missing zone",
-      buildDocument({ zones: { "US/Eastern": "America/New_York" } }),
-      UNKNOWN_LINK_TARGET,
-      "US/Eastern links to America/New_York",
-    ],
-    [
-      "a link to a link",
-      buildDocument({
-        zones: {
-          "America/New_York": NEW_YORK_DOCUMENT,
-          A: "B",
-          B: "America/New_York",
-        },
-      }),
-      UNKNOWN_LINK_TARGET,
-      "A links to B",
-    ],
-    [
-      "a link to a link listed the other way round",
-      buildDocument({
-        zones: {
-          "America/New_York": NEW_YORK_DOCUMENT,
-          B: "America/New_York",
-          A: "B",
-        },
-      }),
-      UNKNOWN_LINK_TARGET,
-      "A links to B",
-    ],
-    [
-      "changes that do not ascend",
-      withNewYork({
-        changes: [
-          [20, 1],
-          [10, 0],
-        ],
-      }),
-      CHANGES_NOT_ASCENDING,
-      "do not ascend",
-    ],
-    [
-      "changes at the same second",
-      withNewYork({
-        changes: [
-          [20, 1],
-          [20, 0],
-        ],
-      }),
-      CHANGES_NOT_ASCENDING,
-      "do not ascend",
-    ],
-    [
-      "a change at the cutoff",
-      withNewYork({ changes: [[0, 1]] }),
-      CHANGES_NOT_ASCENDING,
-      "do not ascend",
-    ],
-    [
-      "a cutoff type index out of range",
-      withNewYork({ cutoffType: 2 }),
-      TYPE_INDEX_OUT_OF_RANGE,
-      "out of range",
-    ],
-    [
-      "a negative cutoff type index",
-      withNewYork({ cutoffType: -1 }),
-      TYPE_INDEX_OUT_OF_RANGE,
-      "out of range",
-    ],
-    [
-      "a cutoff type index that is text",
-      withNewYork({ cutoffType: "0" }),
-      TYPE_INDEX_OUT_OF_RANGE,
-      "out of range",
-    ],
-    [
-      "a change type index out of range",
-      withNewYork({ changes: [[10, 2]] }),
-      TYPE_INDEX_OUT_OF_RANGE,
-      "out of range",
     ],
   ])(
     "returns a typed error for %s",
