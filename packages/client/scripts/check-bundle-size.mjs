@@ -190,7 +190,6 @@ if (totalGzippedBytes > budgetBytes) {
   console.error(`${summary} — over budget`);
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
-
 console.log(summary);
 console.log(
   `Search data: ${formatKilobytes(citySearchDataBytes)} KB gzipped (budget ${CITY_SEARCH_DATA_BUDGET_KB} KB)`,

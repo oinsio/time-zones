@@ -52,28 +52,28 @@ export function useZoneRulesUpdate({
   const check = async () => {
     const activeRelease = getActiveRelease();
     if (activeRelease === undefined || !isOnline()) return;
-    const version = await versionSource.fetchVersion();
-    if (isZoneRulesSourceFailure(version)) return;
-    const name = version.release;
-    if (!isNewerRelease(name, activeRelease.release)) return;
-    const stored = storedReleases.load();
+    const publishedVersion = await versionSource.fetchVersion();
+    if (isZoneRulesSourceFailure(publishedVersion)) return;
+    const publishedRelease = publishedVersion.release;
+    if (!isNewerRelease(publishedRelease, activeRelease.release)) return;
+    const storedLoadResult = storedReleases.load();
     if (
-      stored.status === StoredReleaseLoadStatus.LOADED &&
-      !isNewerRelease(name, stored.release.release)
+      storedLoadResult.status === StoredReleaseLoadStatus.LOADED &&
+      !isNewerRelease(publishedRelease, storedLoadResult.release.release)
     ) {
-      setStoredRelease(stored.release.release);
+      setStoredRelease(storedLoadResult.release.release);
       return;
     }
-    if (unstoredRelease.current === name) return;
-    const document = await versionSource.fetchRelease(name);
-    const downloaded = parseZoneRulesRelease(document);
+    if (unstoredRelease.current === publishedRelease) return;
+    const releaseDocument = await versionSource.fetchRelease(publishedRelease);
+    const downloaded = parseZoneRulesRelease(releaseDocument);
     if (downloaded instanceof ZoneRulesReleaseError) return;
-    if (downloaded.release !== name) return;
-    if (storedReleases.save(document) === SaveOutcome.FAILED) {
-      unstoredRelease.current = name;
+    if (downloaded.release !== publishedRelease) return;
+    if (storedReleases.save(releaseDocument) === SaveOutcome.FAILED) {
+      unstoredRelease.current = publishedRelease;
       return;
     }
-    setStoredRelease(name);
+    setStoredRelease(publishedRelease);
   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: the start-up check runs once, at mount

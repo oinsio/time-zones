@@ -12,10 +12,11 @@ import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
 import {
   compareReleaseNames,
   isNewerRelease,
+  parseReleaseName,
 } from "../../src/lib/zoneRules/core/index.ts";
 import { IANA_RELEASES_URL } from "./downloadRelease.ts";
 
-const TZDATA_ARCHIVE_PATTERN = /tzdata(\d{4}[a-z]+)\.tar\.gz/g;
+const TZDATA_ARCHIVE_PATTERN = /tzdata(\S+?)\.tar\.gz/g;
 const ALREADY_CURRENT_MESSAGE = "already current";
 const OUTPUT_KEY = "release";
 const EXIT_CODE_FAILED = 1;
@@ -24,9 +25,9 @@ const EXIT_CODE_FAILED = 1;
 export function findNewestListedRelease(
   listingHtml: string,
 ): string | undefined {
-  const names = [...listingHtml.matchAll(TZDATA_ARCHIVE_PATTERN)].map((match) =>
-    String(match[1]),
-  );
+  const names = [...listingHtml.matchAll(TZDATA_ARCHIVE_PATTERN)]
+    .map((match) => String(match[1]))
+    .filter((name) => parseReleaseName(name) !== undefined);
   return names.reduce<string | undefined>(
     (newest, name) =>
       newest === undefined || compareReleaseNames(name, newest) > 0
