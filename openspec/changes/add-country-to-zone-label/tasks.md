@@ -58,9 +58,9 @@ Paths are relative to `packages/client/` unless they start with `docs/`. Run tes
 
 ## 8. Verification (all ids)
 
-- [ ] 8.1 Scoped mutation testing (M5), one run, at most 5 files: `cd packages/client && npx stryker run --mutate 'src/preferences/preferences.ts,src/preferences/parseStoredPreferences.ts,src/adapters/preferencesDocument.ts,src/presenter/zoneLine.ts,src/constants/preferences.ts'`. Read `reports/mutation/mutation-report.json`; the score is ≥ 95% (≥ 90% minimum). Kill survivors with tests and re-run the same command.
-- [ ] 8.2 Traceability: from `packages/client`, for each id in `FR1 FR2 FR3 FR4 FR5 FR6 NFR-A1 NFR-R1 UX1 UX2` run `grep -rln "add-country-to-zone-label" src | xargs grep -l "<id>"` and see at least one file; `grep -rn "@add-country-to-zone-label" src/test/features | wc -l` prints at least 15.
-- [ ] 8.3 `pnpm run lint`, then `pnpm run typecheck`, then `pnpm run build`, one at a time; all pass.
+- [x] 8.1 Scoped mutation testing (M5), one run, at most 5 files: `cd packages/client && npx stryker run --mutate 'src/preferences/preferences.ts,src/preferences/parseStoredPreferences.ts,src/adapters/preferencesDocument.ts,src/presenter/zoneLine.ts,src/constants/preferences.ts'`. Read `reports/mutation/mutation-report.json`; the score is ≥ 95% (≥ 90% minimum). Kill survivors with tests and re-run the same command.
+- [x] 8.2 Traceability: from `packages/client`, for each id in `FR1 FR2 FR3 FR4 FR5 FR6 NFR-A1 NFR-R1 UX1 UX2` run `grep -rln "add-country-to-zone-label" src | xargs grep -l "<id>"` and see at least one file; `grep -rn "@add-country-to-zone-label" src/test/features | wc -l` prints at least 15.
+- [x] 8.3 `pnpm run lint`, then `pnpm run typecheck`, then `pnpm run build`, one at a time; all pass.
 
 ## Human follow-up
 

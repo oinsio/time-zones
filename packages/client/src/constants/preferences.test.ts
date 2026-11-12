@@ -3,9 +3,9 @@
 import { describe, expect, it } from "vitest";
 import {
   HOUR_FORMAT_PICTOGRAMS,
-  ZONE_LABEL_PART_ORDER,
   SETTINGS_GROUP_ROW_CLASS_NAME,
   THEME_PREFERENCE_ORDER,
+  ZONE_LABEL_PART_ORDER,
 } from "@/constants";
 import { HourFormat, ThemePreference, ZoneLabelPart } from "@/preferences";
 
