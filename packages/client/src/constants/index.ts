@@ -160,4 +160,8 @@ export {
   UTC_OFFSET_MINUTES_SEPARATOR,
   UTC_OFFSET_PLUS_SIGN,
 } from "./utcOffset";
-export { LOCALIZED_ZONE_ABBREVIATION_KEYS } from "./zoneAbbreviations";
+export {
+  GMT_ZONE_NAME_PREFIX,
+  LETTERS_ONLY_DESIGNATION,
+  LOCALIZED_ZONE_ABBREVIATION_KEYS,
+} from "./zoneAbbreviations";

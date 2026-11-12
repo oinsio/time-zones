@@ -50,11 +50,18 @@ describe("what temporal-polyfill asks of Intl.DateTimeFormat", () => {
         calledMethods.add("resolvedOptions");
         return super.resolvedOptions();
       }
-      override get format() {
-        calledMethods.add("format");
-        return super.format;
-      }
     }
+    const nativeFormatGetter = Object.getOwnPropertyDescriptor(
+      installedDateTimeFormat.prototype,
+      "format",
+    )?.get;
+    Object.defineProperty(LoggingDateTimeFormat.prototype, "format", {
+      configurable: true,
+      get() {
+        calledMethods.add("format");
+        return nativeFormatGetter?.call(this);
+      },
+    });
     Intl.DateTimeFormat = LoggingDateTimeFormat as typeof Intl.DateTimeFormat;
     vi.resetModules();
   });

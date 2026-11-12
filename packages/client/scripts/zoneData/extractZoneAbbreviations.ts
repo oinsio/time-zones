@@ -3,12 +3,11 @@
  * Implements FR1, FR4 of show-zone-abbreviations-and-zone-label-setting (D1).
  */
 
+import { LETTERS_ONLY_DESIGNATION } from "../../src/constants/zoneAbbreviations.ts";
 import { Temporal } from "../../src/lib/temporal.ts";
 
 /** The year whose periods decide which abbreviations a zone uses. */
 export const ZONE_ABBREVIATION_RULES_YEAR = 2026;
-/** A tzdb designation counts as an abbreviation only when it is letters alone. */
-export const LETTERS_ONLY_DESIGNATION = /^[A-Za-z]+$/;
 
 const JANUARY = 1;
 const FIRST_DAY_OF_MONTH = 1;
