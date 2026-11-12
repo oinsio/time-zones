@@ -1,4 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import {
+  fetchZoneRulesVersionSource,
+  localStorageStoredReleaseRepository,
+} from "@/adapters";
 import { ADD_LOCATION_BUTTON_ID, KeyboardKey } from "@/constants";
 import {
   LocationsProvider,
@@ -14,9 +18,14 @@ import {
   useStorageAvailability,
   useThemePreference,
   useViewMode,
+  useZoneRulesUpdate,
 } from "@/controller";
 import { type Clock, systemClock } from "@/lib/temporal";
-import type { TextSharing } from "@/ports";
+import type {
+  StoredReleaseRepository,
+  TextSharing,
+  ZoneRulesVersionSource,
+} from "@/ports";
 import { resolveActiveView, viewRegistry } from "@/views";
 import { DateBar, LocationSearch, MeetingBar } from "@/views/shared";
 import { AppPage } from "./appPage";
@@ -27,6 +36,9 @@ import { SettingsButton } from "./SettingsButton";
 import { StorageWarning } from "./StorageWarning";
 import { UpdateNotice } from "./UpdateNotice";
 import { ViewSkeleton } from "./ViewSkeleton";
+import { ZoneRulesUpdateNoticeSlot } from "./ZoneRulesUpdateNoticeSlot";
+
+const reloadWindow = () => window.location.reload();
 
 /** Loaded on demand so the settings page stays out of the initial JavaScript (NFR-P1 budget). */
 const SettingsPage = lazy(async () => ({
@@ -46,18 +58,25 @@ const SettingsPage = lazy(async () => ({
  * (D5, D7, D10, D11): the preferences, the theme, the page state and the header buttons.
  * Implements FR13, FR15 of add-grid-meeting-range-and-share (D7): the meeting bar, its Clear
  * and Share, and the share notice; `textSharing` is the port Share meeting uses.
+ * Implements FR7 of add-remote-zone-rules-updates (D5): the zone rules update notice;
+ * `zoneRulesVersionSource`, `storedReleases` and `reloadPage` are its ports and its Reload.
  */
-export function AppShell({
-  clock = systemClock,
-  textSharing,
-}: {
+export type AppShellDependencies = {
   clock?: Clock;
   textSharing?: TextSharing;
-}) {
+  zoneRulesVersionSource?: ZoneRulesVersionSource;
+  storedReleases?: StoredReleaseRepository;
+  reloadPage?: () => void;
+};
+
+export function AppShell({
+  clock = systemClock,
+  ...dependencies
+}: AppShellDependencies) {
   return (
     <PreferencesProvider>
       <LocationsProvider clock={clock}>
-        <AppShellContent clock={clock} textSharing={textSharing} />
+        <AppShellContent clock={clock} {...dependencies} />
       </LocationsProvider>
     </PreferencesProvider>
   );
@@ -67,16 +86,21 @@ export function AppShell({
 function AppShellContent({
   clock,
   textSharing,
-}: {
-  clock: Clock;
-  textSharing?: TextSharing;
-}) {
+  zoneRulesVersionSource = fetchZoneRulesVersionSource,
+  storedReleases = localStorageStoredReleaseRepository,
+  reloadPage = reloadWindow,
+}: AppShellDependencies & { clock: Clock }) {
   useDocumentLanguage();
   useThemePreference();
   useInterfaceLanguage();
   const { hasSaveFailed, loadStatus } = useLocations();
   const { isOfflineReady, isUpdateAvailable, applyUpdate, dismiss } =
     usePwaUpdateStatus(clock);
+  const zoneRulesUpdate = useZoneRulesUpdate({
+    clock,
+    versionSource: zoneRulesVersionSource,
+    storedReleases,
+  });
   const isStorageAvailable = useStorageAvailability();
   const [page, setPage] = useState(AppPage.MAIN);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
@@ -117,6 +141,13 @@ function AppShellContent({
       ) : (
         isOfflineReady && <OfflineReadyNotice onDismiss={dismiss} />
       )}
+      <ZoneRulesUpdateNoticeSlot
+        readyRelease={zoneRulesUpdate.readyRelease}
+        isUpdateAvailable={isUpdateAvailable}
+        applyUpdate={applyUpdate}
+        reloadPage={reloadPage}
+        onDismiss={zoneRulesUpdate.dismiss}
+      />
       {(!isStorageAvailable || hasSaveFailed) && <StorageWarning />}
       {notice !== undefined && (
         <MeetingShareNotice kind={notice} onDismiss={dismissNotice} />
