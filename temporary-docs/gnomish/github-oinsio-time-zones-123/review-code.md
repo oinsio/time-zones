@@ -179,7 +179,8 @@ Measured in this review with `npx stryker run --mutate '<files>'` from `packages
 - Impact: task 5.5 is ticked (`- [x] 5.5 Mutation: … score ≥ 95% (minimum 90%) (M6).`, `tasks.md:40`) but its acceptance is not met for this file — a ticked-but-undone task — and M6 is not met for it either; a full `pnpm test:mutation` run reports the file under the threshold.
 - Fix: mark the mutant as equivalent the way the code base already does (`src/app/ViewErrorBoundary.tsx:22`, `src/views/shared/DayTrack.tsx:134`): put `// Stryker disable next-line OptionalChaining: equivalent — useRecheckOnReturn never calls onRecheck while registration is undefined (isEnabled is false)` on the line above the `registration?.update()` call, then rerun `cd packages/client && npx stryker run --mutate 'src/controller/useUpdateRecheckOnReturn.ts'` and confirm 100% (at least 90%) before task 5.5 stays ticked; if the file cannot be brought to ≥ 90%, un-tick 5.5 in `tasks.md`.
 - Fix risk: none for behaviour (a comment only). Keep the `?.` itself: TypeScript needs it, or a non-null assertion, because `registration` is typed `ServiceWorkerRegistration | undefined` inside the callback; replacing it with an `if (registration === undefined) return;` guard would only create another equivalent mutant.
-- Status: open
+- Status: fixed
+- Resolution: added the Stryker equivalent-mutant annotation above `registration?.update()` in useUpdateRecheckOnReturn.ts, as the report proposed; scoped Stryker re-run scores 100% (7 killed, 0 survived).
 
 ## Verdict
 
