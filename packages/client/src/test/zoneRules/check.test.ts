@@ -173,8 +173,10 @@ describe("runZoneRulesCheck with a compiled directory", () => {
     ]);
     const run = await check(["--compiled", compiled]);
     expect(run.exitCode).toBe(1);
-    expect(run.logLines.join("\n")).toContain("Europe/Oslo");
-    expect(run.logLines.join("\n")).toContain("no such zone in the release");
+    expect(run.logLines).toContain(
+      "Europe/Oslo differs at -: zdump says a zone of the release, the release says no such zone in the release",
+    );
+    expect(run.zdumpCalls).toEqual([]);
   });
 
   it("exits 1 when the release holds a zone the compiled files lack", async () => {
@@ -183,8 +185,10 @@ describe("runZoneRulesCheck with a compiled directory", () => {
       createCompiledDirectory(["America/New_York"]),
     ]);
     expect(run.exitCode).toBe(1);
-    expect(run.logLines.join("\n")).toContain("Asia/Kolkata");
-    expect(run.logLines.join("\n")).toContain("no such compiled file");
+    expect(run.logLines).toContain(
+      "Asia/Kolkata differs at -: zdump says a compiled zone file, the release says no such compiled file",
+    );
+    expect(run.zdumpCalls).toEqual([]);
   });
 
   it("exits 1 with the error when the compiled directory does not exist", async () => {
