@@ -67,6 +67,8 @@ export const ZONE_LABEL_PART_VALUES: Record<string, string[]> = {
     "ZONE_ABBREVIATION",
   ],
   "only the UTC offset": ["UTC_OFFSET"],
+  "all toggles on": ["UTC_OFFSET", "ZONE_ABBREVIATION", "COUNTRY"],
+  "all toggles off": [],
   "the UTC offset only": ["UTC_OFFSET"],
   "the zone abbreviation only": ["ZONE_ABBREVIATION"],
   nothing: [],

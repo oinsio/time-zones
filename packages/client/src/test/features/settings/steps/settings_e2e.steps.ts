@@ -1,3 +1,4 @@
+// Verifies FR1, UX1 of add-country-to-zone-label
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
@@ -205,13 +206,14 @@ Then(
 
 // Verifies FR12 of show-zone-abbreviations-and-zone-label-setting: the toggles are named in the interface language.
 Then(
-  "the zone label toggles are {string} and {string}",
+  "the zone label toggles are {string}, {string} and {string}",
   async (
     { locationsWorld },
+    countryName: string,
     abbreviationName: string,
     utcOffsetName: string,
   ) => {
-    for (const name of [abbreviationName, utcOffsetName]) {
+    for (const name of [countryName, abbreviationName, utcOffsetName]) {
       await expect(
         locationsWorld.page
           .getByRole("group", {
