@@ -53,7 +53,7 @@ The app SHALL know the zone abbreviation of a zone at an instant. Inputs: the zo
 | America/Panama | EST |
 
 ### Requirement: One offline abbreviation table
-Cards, the device time location, the wall-time hint, the settings example and the search SHALL read the zone abbreviation from one table built into the app from tzdb when the app is built. Reading it MUST need no network and MUST NOT wait for the search data, so it behaves the same offline and on the first render. The table MUST add at most 5 KB gzipped to the initial JavaScript, and the initial JavaScript MUST stay at most 150 KB gzipped. <!-- implements FR4, NFR-P2 of show-zone-abbreviations-and-zone-label-setting -->
+Cards, the device time location, the wall-time hint, the settings example and the search SHALL read the zone abbreviation from one table built into the app from the zone rules release when the app is built: the tzdb designations of each zone's local time types in the rules year. Every zone of the table built before this change MUST keep its abbreviations, except a zone whose designations an IANA release note after the earlier data changed. Reading it MUST need no network and MUST NOT wait for the search data, so it behaves the same offline and on the first render. The table MUST add at most 5 KB gzipped to the initial JavaScript, and the initial JavaScript MUST stay at most 150 KB gzipped. <!-- implements FR4, NFR-P2 of show-zone-abbreviations-and-zone-label-setting; FR9 of add-zone-rules-from-iana -->
 
 #### Scenario: Available on the first render offline
 - **GIVEN** the app is opened without a network connection
@@ -65,6 +65,17 @@ Cards, the device time location, the wall-time hint, the settings example and th
 - **WHEN** the app is built
 - **THEN** the zone abbreviation table is at most 5 KB gzipped
 - **AND** the initial JavaScript is at most 150 KB gzipped
+
+#### Scenario: Table built from the release
+- **WHEN** the abbreviation table is built from the zone rules release `2026f`
+- **THEN** `America/New_York` has the pair `EST, EDT`, `Europe/Dublin` has `GMT, IST`, `Asia/Kolkata` has `IST`
+- **AND** `Asia/Almaty` has no abbreviation
+
+#### Scenario: Abbreviations kept from the table before
+- **GIVEN** the abbreviation table built from `moment-timezone` before this change
+- **WHEN** it is compared with the table built from the zone rules release `2026f`
+- **THEN** every zone of the earlier table has the same abbreviations in both
+- **AND** the only exceptions are zones whose designations an IANA release note after the `moment-timezone` data changed, each listed with that release
 
 ### Requirement: Abbreviation spelling per interface language
 A zone abbreviation SHALL be shown in the Latin letters of tzdb in every interface language, with one exception: the Russian interface MUST show `MSK` as «МСК». The spelling MUST come from the locale files and exist in English (`MSK`) and Russian («МСК»); a dialect follows its base language, then English. The spelling changes the displayed text only: matching, ordering and the abbreviation pair are decided on the tzdb form. <!-- implements FR3 of show-zone-abbreviations-and-zone-label-setting -->
