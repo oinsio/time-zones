@@ -61,6 +61,7 @@ Negative (with mitigations):
 
 - [Pages caches files for 600 s] → `cache: "no-cache"` revalidates; at most 10 minutes of delay, absorbed by the daily cadence.
 - [A `GITHUB_TOKEN` push triggers no deploy] → the workflow calls the deploy itself with the new commit as `ref`.
+- [The workflow's `pnpm test` and the deploy's `ci.yml` would fail on any tests pinned to the release name `2026f`] → task 8.3 makes those tests compare with the committed release instead (MODIFIED zone-rules and zone-abbreviations requirements). Content assertions (zdump fixtures for New York, Almaty and Dublin; their cutoff types, listed changes and future rules; the abbreviation pairs) stay as compiler regression checks, so a release that changes them fails the run without committing, and the operator notes (task 8.5) name each pin for the human fix.
 - [Schedules stop after 60 idle days] → the operator notes in `zone-rules/README.md` say how to re-enable; `workflow_dispatch` always works; H3 checks the first run.
 - [A future release format an old app cannot read] → the reader rejects it (FR4) and the app stays on what it has; a format change bumps the envelope's schema version with a migration (ADR-0004).
 - [`localStorage` quota on iOS 12] → the document is about 106 KB, far below the 5 MB limit; a failed write still shows the notice (FR9).

@@ -16,6 +16,7 @@ Research behind this proposal: the Android Time Zone Data module (separate data,
 - Glossary (`docs/glossary/`): `zone-rules.md` gains **zone rules update**, **zone rules version file**, **zone rules publication**, **active release**, **stored release**, **release order**; `app-shell.md` gains **zone rules update notice** and the **update recheck** entry names its shared scheduler; `settings.md` gains **zone rules release line**, and the **settings page** and **deploy time** entries list it.
 - Storage: a new document under its own key (ADR-0004 envelope, schema version 1). The locations and preferences documents are unchanged. ADR-0004 stays as it is. A new ADR-0015 "Cached copies of published data" refines it for this kind of document: an unreadable copy is removed silently and the bundled data is used instead, which is its recovery (no reset action), and its writes are not broadcast to other tabs. The persistence line of `.claude/rules/architecture.md` ("Invalid stored data leads to a recoverable error state, never a crash") gains the same exception. Both are written by a human (H1), because the factory may not write `docs/adr/`, `.claude/` or `CLAUDE.md`.
 - One owner for release names: the compiler's own single-letter pattern is replaced by the release order, so `2026aa` compiles too.
+- MODIFIED `zone-rules` ("Content of a zone rules release", "Zone rules check against zdump") and `zone-abbreviations` ("One offline abbreviation table"): they speak of "the committed release" instead of the release name `2026f`, and the tests that assert that name read the committed release instead, so the test suite the publication runs passes for a newer release. Assertions on release content (zdump fixtures, New York, Almaty, Dublin, abbreviation pairs) stay; a release that changes them needs a human change.
 
 ## Capabilities
 
@@ -29,6 +30,8 @@ Research behind this proposal: the Android Time Zone Data module (separate data,
 - `settings`: ADDED "Zone rules release line"; MODIFIED "Deploy time" (no longer the last line of the page).
 - `app-delivery`: ADDED "Zone rules publication" and "Zone rules files are served and not precached"; MODIFIED "Works offline after the first visit".
 - `zone-rules`: MODIFIED "Rules load before the app" (the stored release may be loaded instead of the bundled asset; the engine's data only when neither loads).
+- `zone-rules`: MODIFIED "Content of a zone rules release" and "Zone rules check against zdump" (they name "the committed release" instead of `2026f`).
+- `zone-abbreviations`: MODIFIED "One offline abbreviation table" (built from the committed release, not from `2026f`).
 
 ## Impact
 
@@ -67,7 +70,7 @@ Paths are under `packages/client/` unless stated otherwise; `design.md` names ea
 
 ### Functional
 
-- FR1: A scheduled workflow MUST run daily and on manual dispatch. It MUST determine the newest released IANA release from the `data.iana.org` releases listing (never a `-latest` archive or the development `version` file), compare it with the committed release by the release order, and stop when the committed one is not older. For a newer release it MUST compile it with the zone rules compiler, run the zone rules check, commit the release file to `main` with a message naming the release, and deploy the new commit. A failed step MUST fail the run and MUST NOT commit or deploy.
+- FR1: A scheduled workflow MUST run daily and on manual dispatch. It MUST determine the newest released IANA release from the `data.iana.org` releases listing (never a `-latest` archive or the development `version` file), compare it with the committed release by the release order, and stop when the committed one is not older. For a newer release it MUST compile it with the zone rules compiler, run the zone rules check, commit the release file to `main` with a message naming the release, and deploy the new commit. A failed step MUST fail the run and MUST NOT commit or deploy. The tests and specs that read the committed release MUST hold for any committed release name, so a newer release is not blocked by a pinned name.
 - FR2: The site MUST serve, under the app's base path, the zone rules version file `zone-rules/version.json` (`{ "release": "2026f", "publishedAt": "<ISO 8601 with Z>" }`) and the release file `zone-rules/<release>.json` whose content equals the bundled release of the same build. Neither MUST be precached by the service worker, and neither counts as initial JavaScript.
 - FR3: The app MUST check for a zone rules update when it starts and on every update recheck (on return to the screen, at most once per 15 minutes), only while online and only when an active release is installed. A check reads the version file with a request that revalidates the HTTP cache. When the named release is newer than the active release: if it is already the stored release, the app MUST show the zone rules update notice without a further request; otherwise it MUST download the release file, accept it only when it is a valid zone rules release whose name equals the named one, store it as the stored release and show the notice. When the named release is equal to or older than the active one, nothing happens.
 - FR4: A check that fails (offline, network error, non-2xx status, unparsable version file, invalid release name, invalid release file or one with another name) MUST show nothing and change nothing; the next check runs by the same rule. The stored release MUST NOT be replaced by a rejected download.
@@ -119,7 +122,7 @@ Loading: the check runs in the background and has no loading state; the release 
 
 Feature files tagged `@add-remote-zone-rules-updates`, under `packages/client/src/test/features/`:
 
-- `zone_rules_updates/` (vitest-cucumber): `zone_rules_updates_release_order.feature` (FR5), `zone_rules_updates_check.feature` (FR3, FR4, FR7, FR9, NFR-P1), `zone_rules_updates_active_release.feature` (FR6, NFR-P2), `zone_rules_updates_publication.feature` (FR1, FR2).
+- `zone_rules_updates/` (vitest-cucumber): `zone_rules_updates_release_order.feature` (FR5), `zone_rules_updates_check.feature` (FR3, FR4, FR7, FR9, NFR-P1), `zone_rules_updates_active_release.feature` (FR6, NFR-P2), `zone_rules_updates_publication.feature` (FR1, FR2); the existing `zone_rules/zone_rules_release.feature` and `zone_abbreviations/zone_abbreviations_unit.feature` gain `@add-remote-zone-rules-updates @FR1` on the scenarios that read the committed release.
 - `zone_rules_updates/zone_rules_updates_delivery_e2e.feature` (playwright-bdd): files served and not precached (FR2), a newer release reaches the app and a reload applies it (G2, M2), offline start makes no check (FR4).
 - `app_shell/app_shell_zone_rules_notice_unit.feature` (FR7, UX1, UX2) and `app_shell_zone_rules_notice_e2e.feature` (keyboard, heading, NFR-A1).
 - `settings/settings_zone_rules_release_unit.feature` (FR8) and `settings_zone_rules_release_e2e.feature` (NFR-A1, NFR-R1, UX3).
