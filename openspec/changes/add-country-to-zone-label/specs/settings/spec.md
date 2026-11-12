@@ -3,7 +3,7 @@
 ### Requirement: Zone label
 The settings page SHALL have a "Timezone label" («Обозначение часового пояса») group, between the hour format group and the language group, that decides which zone parts the zone line of every location row shows: "Country" («Страна»), "Abbreviation" («Аббревиатура») and "UTC offset" («Смещение UTC»). The toggles MUST come in the order of the zone line: "Country" first, then "Abbreviation", then "UTC offset", in every interface language. The three are independent toggles: any of the eight combinations is allowed, all off included, and all three are on by default. A toggle MUST apply at once, in the same render, to every location row, the device time location's meta line and the wall-time hint (see the `locations` and `time-selection` capabilities), and MUST NOT change the search. Under the toggles a live example MUST show the zone line of Moscow (country Russia, `Europe/Moscow`) at the effective instant, in the interface language, with the elements the toggles allow, and MUST change with every toggle; while no element of the example is shown, it MUST read "City only" («Только город»). Inputs: the toggles. Output: the zone label in force. Errors: a failed save follows "Preferences without storage". <!-- implements FR12, FR13, FR14, FR15, UX2 of show-zone-abbreviations-and-zone-label-setting; FR1, FR2, FR3, FR4, UX1 of polish-settings-and-remove-offline-update-notice; FR1, FR2, FR5, FR6, UX1 of add-country-to-zone-label -->
 
-#### Scenario: All parts by default
+#### Scenario: Both parts by default
 - **GIVEN** no preferences document is stored
 - **AND** the interface language is English
 - **WHEN** the settings page is shown
@@ -27,6 +27,11 @@ The settings page SHALL have a "Timezone label" («Обозначение час
 | English | nothing | City only |
 | Russian | the country, the zone abbreviation and the UTC offset | Россия, МСК, UTC+3 |
 | Russian | nothing | Только город |
+
+#### Scenario: Both off leaves the country
+- **GIVEN** the list contains Moscow
+- **WHEN** the user turns the "Abbreviation" and "UTC offset" toggles off and goes back
+- **THEN** the Moscow row's zone line is `Russia` alone
 
 #### Scenario: All off leaves the city alone
 - **GIVEN** the list contains Moscow
@@ -101,7 +106,7 @@ The zone label group SHALL keep its three toggles in one row from 640 px; the ca
 | 375 |
 | 1024 |
 
-#### Scenario: One row of toggles on wide screens
+#### Scenario: One row on wide screens
 - **WHEN** the settings page is shown `<width>` px wide in `<language>`
 - **THEN** the three toggles share one row
 
@@ -181,7 +186,7 @@ The theme preference, the hour format, the zone label, the interface language an
 - **THEN** the "Country" toggle is off
 - **AND** the Moscow row shows no country name from the first render
 
-#### Scenario: Existing users get all parts
+#### Scenario: Existing users get both parts
 - **GIVEN** the stored preferences document was written before the zone label existed, with the theme Dark, the hour format 12-hour and the language `ru`
 - **WHEN** the app is opened
 - **THEN** all three zone label toggles are on

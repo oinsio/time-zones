@@ -97,8 +97,8 @@ None beyond the existing "Zone line is fast" bound (NG3).
 
 ## Behavior
 
-- `packages/client/src/test/features/settings/settings_zone_label_unit.feature`, `settings_zone_label_e2e.feature`, `settings_e2e.feature`, `settings_language_e2e.feature` — scenarios tagged `@add-country-to-zone-label`.
-- `packages/client/src/test/features/locations/locations_zone_line_unit.feature`, `locations_device_time_unit.feature` — scenarios tagged `@add-country-to-zone-label`.
+- `packages/client/src/test/features/settings/settings_zone_label_unit.feature`, `settings_zone_label_e2e.feature`, `settings_view_mode_unit.feature`, `settings_storage_unit.feature`, `settings_e2e.feature`, `settings_language_e2e.feature` — scenarios tagged `@add-country-to-zone-label`.
+- `packages/client/src/test/features/locations/locations_zone_line_unit.feature` (its "Meta line follows the zone label" covers the device time location) — scenarios tagged `@add-country-to-zone-label`.
 
 ## Visual Reference
 
