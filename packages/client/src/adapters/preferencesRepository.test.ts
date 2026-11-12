@@ -115,12 +115,12 @@ describe("localStorage preferences repository", () => {
     });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
-        schemaVersion: 4,
+        schemaVersion: 5,
         payload: {
           theme: "DARK",
           hourFormat: "H12",
           interfaceLanguage: "ru",
-          zoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+          zoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION", "COUNTRY"],
           viewMode: null,
         },
       },

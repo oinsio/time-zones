@@ -78,6 +78,7 @@ export function presentLocationRows(
         zoneAbbreviationLabel: zoneMoment.zoneAbbreviationLabel,
         utcOffsetLabel: zoneMoment.utcOffsetLabel,
         zoneLabelParts: context.zoneLabelParts,
+        isDeviceTimeMeta: isDeviceTime,
       }),
       ...(isDeviceTime && {
         accessibleName: translate("locations.deviceTimeName", {

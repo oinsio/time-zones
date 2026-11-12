@@ -1,4 +1,5 @@
 // Verifies FR2, FR3, FR5, FR6, FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
+// Verifies FR3, FR4 of add-country-to-zone-label.
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { fakeClock } from "@/lib/temporal";
@@ -10,7 +11,7 @@ import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
 import { ZoneLinePartKind } from "./zoneLine";
 
-const { UTC_OFFSET, ZONE_ABBREVIATION } = ZoneLabelPart;
+const { UTC_OFFSET, ZONE_ABBREVIATION, COUNTRY } = ZoneLabelPart;
 const july = fakeClock("2026-07-15T12:00:00Z").instant();
 const january = fakeClock("2026-01-15T12:00:00Z").instant();
 
@@ -18,7 +19,7 @@ function present(
   cityLabels: readonly string[],
   {
     language = "en",
-    zoneLabelParts = [UTC_OFFSET, ZONE_ABBREVIATION],
+    zoneLabelParts = [UTC_OFFSET, ZONE_ABBREVIATION, COUNTRY],
     instant = july,
     deviceTimeZoneId = "Asia/Almaty",
     includeDeviceTime = false,
@@ -63,16 +64,29 @@ describe("the zone line of a city row", () => {
 
   it.each([
     [
-      [UTC_OFFSET, ZONE_ABBREVIATION],
+      [UTC_OFFSET, ZONE_ABBREVIATION, COUNTRY],
       ["India", "IST", "UTC+5:30"],
     ],
-    [[UTC_OFFSET], ["India", "UTC+5:30"]],
-    [[ZONE_ABBREVIATION], ["India", "IST"]],
-    [[], ["India"]],
+    [
+      [UTC_OFFSET, COUNTRY],
+      ["India", "UTC+5:30"],
+    ],
+    [
+      [ZONE_ABBREVIATION, COUNTRY],
+      ["India", "IST"],
+    ],
+    [[COUNTRY], ["India"]],
+    [[UTC_OFFSET], ["UTC+5:30"]],
+    [[], []],
   ])("should follow the zone label %j", (zoneLabelParts, expected) => {
     expect(texts(present(["Kolkata"], { zoneLabelParts })[0])).toEqual(
       expected,
     );
+  });
+
+  it("should keep the country name of a row while the country is hidden", () => {
+    const [row] = present(["Kolkata"], { zoneLabelParts: [UTC_OFFSET] });
+    expect(row?.countryName).toBe("India");
   });
 
   it("should type the parts", () => {
@@ -140,6 +154,14 @@ describe("the zone line of the device time row", () => {
       expect(texts(row)).toEqual(expected);
     },
   );
+
+  it("should keep Device time as the first part while the country is hidden", () => {
+    const [row] = present(["Kolkata"], {
+      zoneLabelParts: [UTC_OFFSET],
+      includeDeviceTime: true,
+    });
+    expect(texts(row)).toEqual(["Device time", "UTC+5"]);
+  });
 
   it("should have no abbreviation for Almaty", () => {
     const [row] = present([], { includeDeviceTime: true });

@@ -21,6 +21,11 @@ export enum ZoneLinePartKind {
 
 export type ZoneLinePart = { kind: ZoneLinePartKind; text: string };
 
+/** The zone label parts that map to an element after the place. */
+const ZONE_LABEL_ZONE_PARTS = ZONE_LABEL_PART_ORDER.filter(
+  (part) => part !== ZoneLabelPart.COUNTRY,
+) as readonly (ZoneLabelPart.ZONE_ABBREVIATION | ZoneLabelPart.UTC_OFFSET)[];
+
 type ZoneLineInput = {
   /** Country name, or "Device time" on the device time location; may be empty. */
   placeText: string;
@@ -28,6 +33,8 @@ type ZoneLineInput = {
   zoneAbbreviationLabel: string;
   /** "UTC+5:30" style label; empty when the offset cannot be computed. */
   utcOffsetLabel: string;
+  /** The device time location's "Device time" stays whatever the zone label says. */
+  isDeviceTimeMeta: boolean;
   zoneLabelParts: readonly ZoneLabelPart[];
 };
 
@@ -36,17 +43,21 @@ type ZoneLineInput = {
  * zone abbreviation yields to a UTC offset that reads the same (the `UTC` zone).
  * Implements FR5, FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
  * Implements FR3, UX1 of polish-settings-and-remove-offline-update-notice (D5).
+ * Implements FR3, FR4 of add-country-to-zone-label (D3).
  */
 export function presentZoneLine({
   placeText,
   zoneAbbreviationLabel,
   utcOffsetLabel,
   zoneLabelParts,
+  isDeviceTimeMeta,
 }: ZoneLineInput): ZoneLinePart[] {
   const isOffsetShown = zoneLabelParts.includes(ZoneLabelPart.UTC_OFFSET);
   const isAbbreviationShown =
     zoneLabelParts.includes(ZoneLabelPart.ZONE_ABBREVIATION) &&
     !(isOffsetShown && zoneAbbreviationLabel === utcOffsetLabel);
+  const isPlaceShown =
+    isDeviceTimeMeta || zoneLabelParts.includes(ZoneLabelPart.COUNTRY);
   const zonePartByLabelPart = {
     [ZoneLabelPart.ZONE_ABBREVIATION]: {
       kind: ZoneLinePartKind.ZONE_ABBREVIATION,
@@ -58,8 +69,11 @@ export function presentZoneLine({
     },
   };
   return [
-    { kind: ZoneLinePartKind.PLACE, text: placeText },
-    ...ZONE_LABEL_PART_ORDER.map((part) => zonePartByLabelPart[part]),
+    {
+      kind: ZoneLinePartKind.PLACE,
+      text: isPlaceShown ? placeText : "",
+    },
+    ...ZONE_LABEL_ZONE_PARTS.map((part) => zonePartByLabelPart[part]),
   ].filter((part) => part.text !== "");
 }
 
@@ -100,5 +114,6 @@ export function presentZoneLabelExample({
             translate("locations.utcOffsetPrefix"),
           ),
     zoneLabelParts,
+    isDeviceTimeMeta: false,
   });
 }

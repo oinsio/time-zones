@@ -22,6 +22,7 @@ export enum HourFormat {
 export enum ZoneLabelPart {
   UTC_OFFSET = "UTC_OFFSET",
   ZONE_ABBREVIATION = "ZONE_ABBREVIATION",
+  COUNTRY = "COUNTRY",
 }
 
 export type Preferences = {
@@ -29,7 +30,7 @@ export type Preferences = {
   hourFormat: HourFormat;
   /** Registered locale code; `null` = not chosen, the browser decides. Implements FR7 of add-interface-language-selection (D1). */
   interfaceLanguage: string | null;
-  /** Shown zone parts, in enum order without duplicates; empty leaves only the country. */
+  /** Shown zone parts, in enum order without duplicates; empty shows no zone line part. Implements FR1 of add-country-to-zone-label (D1). */
   zoneLabelParts: readonly ZoneLabelPart[];
   /** Id of the chosen registered view; `null` = none chosen, Cards. Resolved against the view registry by `resolveActiveView`. */
   viewMode: string | null;
