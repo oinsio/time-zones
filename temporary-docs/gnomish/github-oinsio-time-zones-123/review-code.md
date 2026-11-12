@@ -6,8 +6,8 @@
 |---|---|
 | Tasks verified | 38/39 |
 | Requirements traced | 80/86 |
-| CRITICAL | 0 |
-| WARNING | 1 |
+| CRITICAL | 1 |
+| WARNING | 0 |
 | SUGGESTION | 0 |
 
 ## Tasks
@@ -28,7 +28,7 @@
 - ✅ 5.2 — port `src/ports/zoneRulesVersionSource.ts`; adapters `src/adapters/fetchZoneRulesVersionSource.ts:47-70` (`cache: "no-cache"` only on the version request, line 55) and `inMemoryZoneRulesVersionSource.ts`; contract `zoneRulesVersionSource.contract.ts` run by `zoneRulesVersionSource.test.ts`; `fetchZoneRulesVersionSource.test.ts`.
 - ✅ 5.3 — `src/controller/useZoneRulesUpdate.ts:41-95`, exported from `src/controller/index.ts`; `useZoneRulesUpdate.test.tsx:25-160` and `useZoneRulesUpdate.failures.test.tsx:58-89` cover newer, not newer, already stored, no active release, offline, the 6 failures, failed save, recheck 16/5 min, dismissal.
 - ✅ 5.4 — `zone_rules_updates_check.feature` and `zone_rules_updates_stored_release.feature` with `steps/zone_rules_updates_check.steps.tsx` and `steps/zone_rules_updates_stored_release.steps.tsx` (the spec's "Stored release document" and "Dismissed notice stays dismissed" scenarios live in the second file).
-- ❌ 5.5 — the task demands ≥ 95% (minimum 90%) on every listed file; measured in this review `useUpdateRecheckOnReturn.ts` scores 87.50% (one survivor, see R1). The other four files: `useZoneRulesUpdate.ts` 100%, `useRecheckOnReturn.ts` 100%, `fetchZoneRulesVersionSource.ts` 97.30%, `inMemoryZoneRulesVersionSource.ts` 100%.
+- ❌ 5.5 — ticked `[x]` at `tasks.md:40` but not done: the task demands score ≥ 95% (minimum 90%) on its listed files, and `useUpdateRecheckOnReturn.ts` scores 87.50% (7 killed, 1 survived; re-measured in this round, see R1, CRITICAL). The other four files: `useZoneRulesUpdate.ts` 100%, `useRecheckOnReturn.ts` 100%, `fetchZoneRulesVersionSource.ts` 97.30%, `inMemoryZoneRulesVersionSource.ts` 100%.
 - ✅ 6.1 — `src/app/ZoneRulesUpdateNotice.tsx`, `src/app/ZoneRulesUpdateNoticeSlot.tsx:50-64` (Reload = `applyUpdate` when an update waits, else `reloadPage`), wired in `src/app/AppShell.tsx:99-104,144-150`; tests `src/app/AppShell.zoneRules.test.tsx`.
 - ✅ 6.2 — `app_shell/app_shell_zone_rules_notice_unit.feature` (names, reloads, reloads with waiting update, dismisses, both notices, Russian) with `steps/app_shell_zone_rules_notice_unit.steps.tsx`.
 - ✅ 6.3 — `app_shell/app_shell_zone_rules_notice_e2e.feature` (notice appears, keyboard, Escape, axe light/dark) with `steps/app_shell_zone_rules_notice_e2e.steps.ts`.
@@ -75,7 +75,7 @@
 - ✅ M3 — 6 pairs both ways and against themselves plus 4 invalid names in `releaseOrder.test.ts` and `zone_rules_updates_release_order.feature`.
 - ✅ M4 — 6 failure cases with no notice and no write (`zone_rules_updates_check.feature` outline, `useZoneRulesUpdate.failures.test.tsx:58`); older and equal stored release removed at start (`loadZoneRules.stored.test.ts:57`).
 - ✅ M5 — `check-bundle-size.mjs:168-186` checks the built files and the precache in CI; delivery E2E scenario 1 checks the served files and `sw.js`.
-- ⚠️ M6 — measured on 20 new or changed `src/` modules: all ≥ 95% except `useUpdateRecheckOnReturn.ts` at 87.50% (R1).
+- ❌ M6 — measured on 20 new or changed `src/` modules: all ≥ 95% except `useUpdateRecheckOnReturn.ts` at 87.50%, below the 90% minimum (R1, CRITICAL).
 - ⚠️ M7 — `actionlint` and the first dispatch are H2/H3 human steps; not measurable in the sandbox.
 - ✅ Scenario: The newest release in the listing — `zone_rules_updates_publication.feature` + `latestRelease.test.ts` (`2026aa`).
 - ✅ Scenario: Already current — publication outline with `2026f`/`2026g`; CLI prints `already current` in `latestRelease.test.ts`.
@@ -172,15 +172,15 @@ Measured in this review with `npx stryker run --mutate '<files>'` from `packages
 
 ## Findings
 
-### R1 — WARNING — useUpdateRecheckOnReturn below the 90% mutation minimum
+### R1 — CRITICAL — Task 5.5 ticked but useUpdateRecheckOnReturn is below the 90% mutation minimum
 - Location: `packages/client/src/controller/useUpdateRecheckOnReturn.ts:21`
 - Rule: `CLAUDE.md` ("Mutation testing … target >=95%, minimum acceptable >=90%"), `.claude/rules/tdd-workflow.md` Step 5; task 5.5 of `tasks.md`
 - Problem: the refactor of task 5.1 moved the scheduling into `useRecheckOnReturn` and left `onRecheck = useCallback(() => { registration?.update().catch(ignoreFailedUpdateCheck); }, [registration])`. `useRecheckOnReturn` is called with `isEnabled: registration !== undefined`, so `onRecheck` never runs while `registration` is undefined and the `?.` can never short-circuit. Stryker's `OptionalChaining` mutant (`registration.update`) therefore survives, and the file scores 7/8 = 87.50%, below the 90% minimum; task 5.5 is ticked with this file in its list.
-- Impact: the project's mutation gate is broken for a file this change rewrote, and task 5.5's acceptance ("score ≥ 95% (minimum 90%)") is not met; a full `pnpm test:mutation` run reports the file under the threshold.
-- Fix: mark the mutant as equivalent the way the code base already does (`src/app/ViewErrorBoundary.tsx:22`, `src/views/shared/DayTrack.tsx:134`): put `// Stryker disable next-line OptionalChaining: equivalent — useRecheckOnReturn never calls onRecheck while registration is undefined (isEnabled is false)` on the line above the `registration?.update()` call, then rerun `npx stryker run --mutate 'src/controller/useUpdateRecheckOnReturn.ts'` and confirm 100%.
+- Impact: task 5.5 is ticked (`- [x] 5.5 Mutation: … score ≥ 95% (minimum 90%) (M6).`, `tasks.md:40`) but its acceptance is not met for this file — a ticked-but-undone task — and M6 is not met for it either; a full `pnpm test:mutation` run reports the file under the threshold.
+- Fix: mark the mutant as equivalent the way the code base already does (`src/app/ViewErrorBoundary.tsx:22`, `src/views/shared/DayTrack.tsx:134`): put `// Stryker disable next-line OptionalChaining: equivalent — useRecheckOnReturn never calls onRecheck while registration is undefined (isEnabled is false)` on the line above the `registration?.update()` call, then rerun `cd packages/client && npx stryker run --mutate 'src/controller/useUpdateRecheckOnReturn.ts'` and confirm 100% (at least 90%) before task 5.5 stays ticked; if the file cannot be brought to ≥ 90%, un-tick 5.5 in `tasks.md`.
 - Fix risk: none for behaviour (a comment only). Keep the `?.` itself: TypeScript needs it, or a non-null assertion, because `registration` is typed `ServiceWorkerRegistration | undefined` inside the callback; replacing it with an `if (registration === undefined) return;` guard would only create another equivalent mutant.
 - Status: open
 
 ## Verdict
 
-Ready. No CRITICAL findings; the change implements every functional requirement, with traceability and tests at each layer. R1 (WARNING) is a one-line mutation-gate fix and blocks nothing functional. FR1's workflow and M7 wait for the human handoffs H2/H3, as the design says.
+Not ready. Blocking: R1 (CRITICAL) — task 5.5 is ticked while `useUpdateRecheckOnReturn.ts` scores 87.50%, below the 90% minimum, so task 5.5 and M6 are unmet for that file. The change is ready once R1 is fixed and the file is re-measured at ≥ 90% (the proposed equivalent-mutant annotation brings it to 100%). Apart from R1 the change implements every functional requirement with traceability and tests at each layer; FR1's workflow and M7 wait for the human handoffs H2/H3, as the design says, and do not block.
