@@ -35,7 +35,7 @@ Feature: Zone label setting
     Given the list contains "Moscow"
     And the interface language is "en"
     When the user opens the settings
-    And the user turns both toggles off
+    And the user turns the abbreviation and the UTC offset off
     Then the "Moscow" row's zone line is "Russia"
 
   @add-country-to-zone-label @FR3 @UX2

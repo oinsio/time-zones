@@ -9,7 +9,7 @@ Feature: Zone label in a real browser
     Then the group "Обозначение часового пояса" holds the pressed toggle buttons "Страна", "Аббревиатура" and "Смещение UTC" in this order
     And the description of the group "Обозначение часового пояса" contains "Россия"
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-A1 @polish-settings-and-remove-offline-update-notice @FR3 @add-country-to-zone-label
+  @show-zone-abbreviations-and-zone-label-setting @NFR-A1 @polish-settings-and-remove-offline-update-notice @FR3 @add-country-to-zone-label @NFR-A1
   Scenario: Toggle with the keyboard
     Given the locations interface language is English
     And the user opens the settings
@@ -28,7 +28,7 @@ Feature: Zone label in a real browser
     When the user presses the key "Tab"
     Then the toggle "UTC offset" is focused
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-A1 @add-country-to-zone-label
+  @show-zone-abbreviations-and-zone-label-setting @NFR-A1 @add-country-to-zone-label @NFR-A1
   Scenario: Toggle size, focus and pressed icon
     Given the locations interface language is English
     And the zone label shows only the UTC offset
@@ -44,7 +44,7 @@ Feature: Zone label in a real browser
     And the user opens the settings
     Then the description of the group "Timezone label" contains "City only"
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-A1 @M7 @add-country-to-zone-label @M3
+  @show-zone-abbreviations-and-zone-label-setting @NFR-A1 @M7 @add-country-to-zone-label @NFR-A1 @M3
   Scenario Outline: No violations with the zone label group in the <theme> theme with <parts>
     Given the locations screen uses the <theme> theme
     And the zone label shows <parts>
@@ -58,7 +58,7 @@ Feature: Zone label in a real browser
       | dark  | all toggles on   |
       | dark  | all toggles off  |
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @polish-settings-and-remove-offline-update-notice @NFR-R1 @add-country-to-zone-label
+  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @polish-settings-and-remove-offline-update-notice @NFR-R1 @add-country-to-zone-label @NFR-R1
   Scenario Outline: One row on wide screens at <width> px in <language>
     Given the screen is <width> px wide for the locations
     And the locations interface language is <language>
@@ -70,7 +70,7 @@ Feature: Zone label in a real browser
       | 640   | Russian  |
       | 1024  | English  |
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @polish-settings-and-remove-offline-update-notice @NFR-R1 @add-country-to-zone-label @M4
+  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @polish-settings-and-remove-offline-update-notice @NFR-R1 @add-country-to-zone-label @NFR-R1 @M4
   Scenario Outline: Narrow screens at <width> px in <language>
     Given the screen is <width> px wide for the locations
     And the locations interface language is <language>
@@ -87,7 +87,7 @@ Feature: Zone label in a real browser
       | 2560  | Russian  |
       | 2560  | English  |
 
-  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @UX2 @polish-settings-and-remove-offline-update-notice @NFR-R1 @add-country-to-zone-label
+  @show-zone-abbreviations-and-zone-label-setting @NFR-R2 @UX2 @polish-settings-and-remove-offline-update-notice @NFR-R1 @add-country-to-zone-label @NFR-R1
   Scenario Outline: Toggling does not move the toggles at <width> px
     Given the screen is <width> px wide for the locations
     And the user opens the settings

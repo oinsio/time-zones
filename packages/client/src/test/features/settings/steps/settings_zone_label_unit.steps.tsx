@@ -109,7 +109,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Given("the list contains {string}", givenList);
     And("the interface language is {string}", givenLanguage);
     When("the user opens the settings", openSettings);
-    And("the user turns both toggles off", async () => {
+    And("the user turns the abbreviation and the UTC offset off", async () => {
       await world.toggle(UTC_OFFSET_TOGGLE);
       await world.toggle(ABBREVIATION_TOGGLE);
     });
