@@ -10,11 +10,18 @@
  * Implements NFR-P1, M5 of setup-app-shell-and-pages-deploy (D11) and NFR-P1,
  * M5 of add-main-page-scaffold; NFR-P2, M7 of add-locations-via-search (D8).
  * Implements NFR-P1 of add-view-mode-setting-and-grid-skeleton: one chunk per view.
+ * The zone rules asset must exist within its gzipped budget and be fetched by
+ * exactly one preload link, never by a modulepreload.
+ * Implements NFR-P1, NFR-P2 of add-zone-rules-from-iana.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
-import { APP_BASE_PATH, BUILD_OUT_DIR } from "../app.config.ts";
+import {
+  APP_BASE_PATH,
+  BUILD_OUT_DIR,
+  ZONE_RULES_ASSET_BUDGET_KB,
+} from "../app.config.ts";
 
 const INITIAL_JS_BUDGET_KB = 150;
 const BYTES_PER_KB = 1024;
@@ -26,6 +33,10 @@ const VIEW_CHUNK_PREFIXES = ["CardsView-", "GridView-"];
 const CITY_SEARCH_DATA_PREFIX = "city-search-";
 const CITY_SEARCH_DATA_EXTENSION = ".json";
 const CITY_SEARCH_DATA_BUDGET_KB = 30;
+const ZONE_RULES_ASSET_PREFIX = "zone-rules-";
+const ZONE_RULES_ASSET_EXTENSION = ".json";
+const PRELOAD_LINK_PATTERN = /<link[^>]*rel="preload"[^>]*href="([^"]+)"/g;
+const EXPECTED_ZONE_RULES_PRELOAD_COUNT = 1;
 
 const ENTRY_SCRIPT_PATTERN = /<script[^>]*type="module"[^>]*src="([^"]+)"/g;
 const MODULE_PRELOAD_PATTERN =
@@ -69,6 +80,14 @@ function findCitySearchDataFile() {
     (fileName) =>
       fileName.startsWith(CITY_SEARCH_DATA_PREFIX) &&
       fileName.endsWith(CITY_SEARCH_DATA_EXTENSION),
+  );
+}
+
+function findZoneRulesAssetFile() {
+  return readdirSync(join(buildDirectory, ASSETS_DIRECTORY)).find(
+    (fileName) =>
+      fileName.startsWith(ZONE_RULES_ASSET_PREFIX) &&
+      fileName.endsWith(ZONE_RULES_ASSET_EXTENSION),
   );
 }
 
@@ -124,6 +143,42 @@ if (citySearchDataBytes > CITY_SEARCH_DATA_BUDGET_KB * BYTES_PER_KB) {
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
+const zoneRulesAssetFile = findZoneRulesAssetFile();
+if (zoneRulesAssetFile === undefined) {
+  console.error(
+    `No ${ZONE_RULES_ASSET_PREFIX}*${ZONE_RULES_ASSET_EXTENSION} file in ${ASSETS_DIRECTORY}/ — the zone rules must be a separate asset`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const zoneRulesAssetBytes = getGzippedSizeInBytes(
+  join(buildDirectory, ASSETS_DIRECTORY, zoneRulesAssetFile),
+);
+if (zoneRulesAssetBytes > ZONE_RULES_ASSET_BUDGET_KB * BYTES_PER_KB) {
+  console.error(
+    `${zoneRulesAssetFile}: ${formatKilobytes(zoneRulesAssetBytes)} KB gzipped — over the ${ZONE_RULES_ASSET_BUDGET_KB} KB budget`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const zoneRulesPreloadCount = [
+  ...entryHtml.matchAll(PRELOAD_LINK_PATTERN),
+].filter((preloadMatch) =>
+  preloadMatch[1].includes(ZONE_RULES_ASSET_PREFIX),
+).length;
+const isZoneRulesModulePreloaded = collectInitialScriptUrls(entryHtml).some(
+  (scriptUrl) => scriptUrl.includes(ZONE_RULES_ASSET_PREFIX),
+);
+if (
+  zoneRulesPreloadCount !== EXPECTED_ZONE_RULES_PRELOAD_COUNT ||
+  isZoneRulesModulePreloaded
+) {
+  console.error(
+    `${ENTRY_HTML_FILE} must preload ${ZONE_RULES_ASSET_PREFIX}* exactly once and never modulepreload it (found ${zoneRulesPreloadCount} preload links)`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
 if (totalGzippedBytes > budgetBytes) {
   console.error(`${summary} — over budget`);
   process.exit(EXIT_CODE_CHECK_FAILED);
@@ -132,4 +187,7 @@ if (totalGzippedBytes > budgetBytes) {
 console.log(summary);
 console.log(
   `Search data: ${formatKilobytes(citySearchDataBytes)} KB gzipped (budget ${CITY_SEARCH_DATA_BUDGET_KB} KB)`,
+);
+console.log(
+  `Zone rules: ${formatKilobytes(zoneRulesAssetBytes)} KB gzipped (budget ${ZONE_RULES_ASSET_BUDGET_KB} KB)`,
 );

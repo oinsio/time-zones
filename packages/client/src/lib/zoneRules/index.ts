@@ -10,3 +10,4 @@ export {
   getKnownZoneIds,
   installZoneRulesDateTimeFormat,
 } from "./installZoneRules.ts";
+export { loadZoneRules } from "./loadZoneRules.ts";
