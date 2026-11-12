@@ -74,7 +74,8 @@
 - Impact: Following 6.1 literally first changes the two E2E seeds to "the country and the UTC offset" / "the country only", then 7.1 has to undo it; an implementer who stops at 6.1 leaves the E2E scenarios asserting the wrong state, and the grep invites editing `meeting_range_share.feature` rows that must not change.
 - Fix: In `tasks.md` 6.1 change "unless the scenario is changed in 6.2–6.4" to "unless the scenario is changed in 6.2–6.4 or 7.1", and narrow the grep to `src/test/features/settings src/test/features/locations`.
 - Fix risk: none — no other zone label phrase lives outside those two folders (the only other `nothing` hits are `meeting_range_share.feature` and the `main_page` "notices region shows nothing" step).
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 6.1 now excludes scenarios changed in 7.1 (the toggle-size seed and the axe rows) and its grep is narrowed to src/test/features/settings and src/test/features/locations, stating that the nothing column of meeting_range_share.feature stays unchanged.
 
 ### R2 — SUGGESTION — Code comments that describe two parts are not updated by any task
 - Location: `openspec/changes/add-country-to-zone-label/tasks.md:17`, `tasks.md:22`
@@ -83,7 +84,8 @@
 - Impact: After the change `zoneLabelParts: []` hides the country too and step 2 shows three parts, so these JSDoc lines state the old behaviour and mislead the next reader of the owner of the zone label.
 - Fix: Add to task 2.2: "update the JSDoc of `Preferences.zoneLabelParts` to 'empty shows no zone line part' and of `ZONE_LABEL_PART_ORDER` to 'the country, the zone abbreviation, then the UTC offset'"; add to task 3.2: "update the migration JSDoc: step 2 shows every part, step 4 adds the country to a version 4 document".
 - Fix risk: none — comments only.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 2.2 now updates the JSDoc of Preferences.zoneLabelParts ("empty shows no zone line part") and ZONE_LABEL_PART_ORDER (country, zone abbreviation, UTC offset); task 3.2 updates the migration JSDoc in preferencesDocument.ts (step 2 shows every part, step 4 adds the country).
 
 ## Verdict
 
