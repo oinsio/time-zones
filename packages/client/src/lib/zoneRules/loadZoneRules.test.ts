@@ -1,6 +1,7 @@
 // FR10: the release is fetched, parsed and installed; a failure installs nothing.
 // @add-zone-rules-from-iana @FR10
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createInMemoryStoredReleaseRepository } from "@/adapters/storedRelease";
 import { FIXTURE_RELEASE_DOCUMENT } from "@/test/zoneRules/fixtureReleaseDocument";
 import { ZoneRulesReleaseError } from "./core";
 import * as installModule from "./installZoneRules";
@@ -16,6 +17,12 @@ function stubFetch(response: Partial<Response>) {
   return vi.fn(async () => response as Response);
 }
 
+const load = (fetchRelease: typeof fetch) =>
+  loadZoneRules(RELEASE_URL, {
+    storedReleases: createInMemoryStoredReleaseRepository(),
+    fetchRelease,
+  });
+
 describe("loadZoneRules", () => {
   it("should request the release url", async () => {
     vi.spyOn(installModule, "installZoneRulesDateTimeFormat").mockReturnValue();
@@ -24,7 +31,7 @@ describe("loadZoneRules", () => {
       json: async () => FIXTURE_RELEASE_DOCUMENT,
     });
 
-    await loadZoneRules(RELEASE_URL, fetchRelease);
+    await load(fetchRelease);
 
     expect(fetchRelease).toHaveBeenCalledWith(RELEASE_URL);
   });
@@ -34,8 +41,7 @@ describe("loadZoneRules", () => {
       .spyOn(installModule, "installZoneRulesDateTimeFormat")
       .mockReturnValue();
 
-    await loadZoneRules(
-      RELEASE_URL,
+    await load(
       stubFetch({ ok: true, json: async () => FIXTURE_RELEASE_DOCUMENT }),
     );
 
@@ -48,9 +54,9 @@ describe("loadZoneRules", () => {
       "installZoneRulesDateTimeFormat",
     );
 
-    await expect(
-      loadZoneRules(RELEASE_URL, stubFetch({ ok: false, status: 404 })),
-    ).rejects.toThrow(RELEASE_URL);
+    await expect(load(stubFetch({ ok: false, status: 404 }))).rejects.toThrow(
+      RELEASE_URL,
+    );
 
     expect(installSpy).not.toHaveBeenCalled();
   });
@@ -62,10 +68,7 @@ describe("loadZoneRules", () => {
     );
 
     await expect(
-      loadZoneRules(
-        RELEASE_URL,
-        stubFetch({ ok: true, json: async () => ({ nope: true }) }),
-      ),
+      load(stubFetch({ ok: true, json: async () => ({ nope: true }) })),
     ).rejects.toBeInstanceOf(ZoneRulesReleaseError);
 
     expect(installSpy).not.toHaveBeenCalled();
@@ -75,7 +78,7 @@ describe("loadZoneRules", () => {
     const networkError = new Error("offline");
 
     await expect(
-      loadZoneRules(RELEASE_URL, async () => {
+      load(async () => {
         throw networkError;
       }),
     ).rejects.toBe(networkError);

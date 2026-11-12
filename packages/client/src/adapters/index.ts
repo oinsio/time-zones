@@ -39,3 +39,10 @@ export {
   createLocalStoragePreferencesRepository,
   localStoragePreferencesRepository,
 } from "./localStoragePreferencesRepository";
+export {
+  createInMemoryStoredReleaseRepository,
+  createLocalStorageStoredReleaseRepository,
+  type InMemoryStoredReleaseRepositoryOptions,
+  type LocalStorageStoredReleaseRepositoryOptions,
+  localStorageStoredReleaseRepository,
+} from "./storedRelease";

@@ -52,3 +52,15 @@ describe("parseReleaseName", () => {
     },
   );
 });
+
+describe("invalid names", () => {
+  it("should refuse to compare an invalid name", () => {
+    expect(() => compareReleaseNames("latest", "2026a")).toThrow("latest");
+    expect(() => compareReleaseNames("2026a", "latest")).toThrow("latest");
+  });
+
+  it("should find an invalid name never newer and never older", () => {
+    expect(isNewerRelease("latest", "2026a")).toBe(false);
+    expect(isNewerRelease("2026b", "latest")).toBe(false);
+  });
+});
