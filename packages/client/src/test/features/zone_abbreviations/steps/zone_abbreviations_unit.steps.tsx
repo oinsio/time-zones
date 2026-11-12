@@ -1,10 +1,15 @@
 // Verifies FR1, FR2, FR3, FR4, M1 of show-zone-abbreviations-and-zone-label-setting.
+
+import zoneAbbreviationTable from "virtual:zone-abbreviations";
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen } from "@testing-library/react/pure";
 import { expect, vi } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { getZoneAbbreviation, getZoneAbbreviations } from "@/model";
+import { committedRelease } from "@/test/installZoneRules";
+import abbreviationsBefore from "@/test/zoneRules/fixtures/zone-abbreviations.before.json";
+import abbreviationChanges from "@/test/zoneRules/fixtures/zone-abbreviations.changes.json";
 import { createZoneLineWorld } from "../../locations/steps/zoneLineWorld";
 
 const feature = await loadFeature("../zone_abbreviations_unit.feature");
@@ -208,6 +213,77 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         ) => {
           expectRowShows(undefined, first, firstText);
           expectRowShows(undefined, second, secondText);
+        },
+      );
+    },
+  );
+
+  // @add-zone-rules-from-iana @FR9
+  f.Scenario("Table built from the release", ({ When, Then, And }) => {
+    When(
+      "the abbreviation table is built from the zone rules release {string}",
+      (_ctx, release: string) => {
+        expect(committedRelease.release).toBe(release);
+      },
+    );
+    Then(
+      "{string} has the pair {string}, {string} has {string}, {string} has {string}",
+      (
+        _ctx,
+        firstZone: string,
+        firstPair: string,
+        secondZone: string,
+        secondPair: string,
+        thirdZone: string,
+        thirdPair: string,
+      ) => {
+        expect([
+          zoneAbbreviationTable[firstZone]?.join(PAIR_SEPARATOR),
+          zoneAbbreviationTable[secondZone]?.join(PAIR_SEPARATOR),
+          zoneAbbreviationTable[thirdZone]?.join(PAIR_SEPARATOR),
+        ]).toEqual([firstPair, secondPair, thirdPair]);
+      },
+    );
+    And("{string} has no abbreviation", (_ctx, zone: string) => {
+      expect(zoneAbbreviationTable[zone]).toBeUndefined();
+    });
+  });
+
+  // @add-zone-rules-from-iana @FR9
+  f.Scenario(
+    "Abbreviations kept from the table before",
+    ({ Given, When, Then, And }) => {
+      let differingZoneIds: string[] = [];
+      Given("the abbreviation table built before this change", () => {
+        expect(Object.keys(abbreviationsBefore).length).toBeGreaterThan(0);
+      });
+      When(
+        "it is compared with the table built from the zone rules release {string}",
+        () => {
+          differingZoneIds = Object.entries(abbreviationsBefore)
+            .filter(
+              ([zoneId, abbreviations]) =>
+                JSON.stringify(zoneAbbreviationTable[zoneId]) !==
+                JSON.stringify(abbreviations),
+            )
+            .map(([zoneId]) => zoneId);
+        },
+      );
+      Then(
+        "every zone of the earlier table has the same abbreviations in both",
+        () => {
+          const unchangedZoneIds = differingZoneIds.filter(
+            (zoneId) => !(zoneId in abbreviationChanges),
+          );
+          expect(unchangedZoneIds).toEqual([]);
+        },
+      );
+      And(
+        "the only exceptions are zones whose designations an IANA release note changed, each listed with that release",
+        () => {
+          for (const zoneId of Object.keys(abbreviationChanges)) {
+            expect(differingZoneIds).toContain(zoneId);
+          }
         },
       );
     },

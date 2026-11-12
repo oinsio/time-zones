@@ -31,3 +31,22 @@ Feature: Location search by city name
   Scenario: Prefix of the name
     When the user searches for "alm"
     Then "Almaty" is among the results
+
+  @add-zone-rules-from-iana @FR5 @FR9
+  Scenario: A zone the engine rejects is offered
+    Given the engine rejects "America/Ciudad_Juarez"
+    When the user searches for "Ciudad"
+    Then Ciudad Juárez in "America/Ciudad_Juarez" is among the results
+
+  @add-zone-rules-from-iana @FR9
+  Scenario: The engine's own list plays no part
+    Given the engine cannot list its zones
+    When the user searches for "Moscow"
+    Then Moscow in "Europe/Moscow" is among the results
+
+  @add-zone-rules-from-iana @FR9 @UX2
+  Scenario: Offset-only zones are not offered
+    Given the zone rules release holds "Etc/GMT+5", "Etc/GMT-14" and "EST5EDT"
+    When the user searches for "GMT+5"
+    Then no result has a zone in the "Etc" area
+    And no result has an area-less zone other than "UTC"

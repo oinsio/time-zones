@@ -1,51 +1,20 @@
 // @add-zone-rules-from-iana @FR7: compiling a release from a signed IANA archive
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 import { runZoneRulesCompile } from "../../../scripts/zoneRules/compile.ts";
 import { TZDATA_SOURCE_FILES } from "../../../scripts/zoneRules/compileWithZic.ts";
 import { TZ_COORDINATOR_KEY_FINGERPRINT } from "../../../scripts/zoneRules/signing.ts";
+import { createFakeProcessRunner } from "./compileFakes";
 import {
-  createFakeFetch,
-  createFakeProcessRunner,
-  type FakeScenario,
-  VALID_VERIFY_STATUS_FILE,
-} from "./compileFakes";
+  compile,
+  logsMention,
+  RELEASE,
+  VALID_SCENARIO,
+  VALID_STATUS,
+} from "./compileWorld";
 
-const RELEASE = "2026f";
-const VALID_STATUS = readFileSync(VALID_VERIFY_STATUS_FILE, "utf8");
 const OTHER_FINGERPRINT = "0000000000000000000000000000000000000000";
-const VALID_SCENARIO: FakeScenario = {
-  verifyStatus: VALID_STATUS,
-  archiveVersion: RELEASE,
-};
-
-type Run = Awaited<ReturnType<typeof compile>>;
-
-async function compile(scenario: FakeScenario, argv: string[] = [RELEASE]) {
-  const processes = createFakeProcessRunner(scenario);
-  const downloads = createFakeFetch();
-  const writtenFiles = new Map<string, string>();
-  const logLines: string[] = [];
-  const exitCode = await runZoneRulesCompile({
-    argv,
-    runProcess: processes.runProcess,
-    fetchRelease: downloads.fetchRelease,
-    writeFile: async (path, text) => void writtenFiles.set(path, text),
-    log: (line) => logLines.push(line),
-  });
-  return {
-    exitCode,
-    writtenFiles,
-    logLines,
-    calls: processes.calls,
-    urls: downloads.urls,
-  };
-}
-
-function logsMention(run: Run, text: string): boolean {
-  return run.logLines.some((line) => line.includes(text));
-}
 
 describe("compiling a valid archive", () => {
   it("writes a release named after the request with the zones of the archive", async () => {

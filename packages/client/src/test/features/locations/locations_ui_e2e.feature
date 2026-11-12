@@ -149,6 +149,7 @@ Feature: Locations in a real browser
   @set-home-location-and-show-differences @NFR-R2
   @match-home-mark-to-design @NFR-R1 @M4
   @add-settings-page-and-device-time-location @NFR-R3
+  @add-zone-rules-from-iana @NFR-R1 @UX2
   @fix-day-track-handle-overlap-and-end-of-day @NFR-R2
   @add-wall-time-input-with-hint @NFR-R2
   @keep-now-button-visible-when-live @NFR-R2
