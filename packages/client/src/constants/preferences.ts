@@ -75,6 +75,13 @@ export const HOUR_FORMAT_PICTOGRAMS: Record<HourFormat, string> = {
 export const SETTINGS_GROUP_ROW_CLASS_NAME =
   "flex flex-wrap items-center justify-between gap-x-4 gap-y-2";
 
+/**
+ * Tailwind tokens of a plain footnote line at the end of the settings page:
+ * the deploy time and the zone rules release line. Implements FR8, UX3 of
+ * add-remote-zone-rules-updates (D6).
+ */
+export const SETTINGS_FOOTNOTE_CLASS_NAME = "text-center text-sm text-accent";
+
 /** Tailwind tokens of the caption of a settings group. */
 export const SETTINGS_GROUP_CAPTION_CLASS_NAME =
   "text-sm font-semibold text-muted-foreground";

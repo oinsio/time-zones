@@ -86,3 +86,4 @@ export {
   type ZoneLinePart,
   ZoneLinePartKind,
 } from "./zoneLine";
+export { presentZoneRulesRelease } from "./zoneRulesRelease";

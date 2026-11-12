@@ -14,6 +14,7 @@ import { InterfaceLanguageGroup } from "./InterfaceLanguageGroup";
 import { SettingsOptionGroup } from "./SettingsOptionGroup";
 import { ViewModeGroup } from "./ViewModeGroup";
 import { ZoneLabelGroup } from "./ZoneLabelGroup";
+import { ZoneRulesReleaseLine } from "./ZoneRulesReleaseLine";
 
 type SettingsPageProps = {
   /** Contents of the polite notices region, as on the main page. */
@@ -139,6 +140,7 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
           onChoose={setInterfaceLanguage}
         />
         <DeployTime />
+        <ZoneRulesReleaseLine />
       </main>
       <footer className="sticky bottom-0 -mx-4">
         <div

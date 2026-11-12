@@ -13,8 +13,10 @@
  * The zone rules asset must exist within its gzipped budget and be fetched by
  * exactly one preload link, never by a modulepreload.
  * Implements NFR-P1, NFR-P2 of add-zone-rules-from-iana.
+ * The served zone rules files (version file and release file) must exist in the
+ * build and must not be precached. Implements FR2, NFR-P1 of add-remote-zone-rules-updates.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 import {
@@ -22,6 +24,11 @@ import {
   BUILD_OUT_DIR,
   ZONE_RULES_ASSET_BUDGET_KB,
 } from "../app.config.ts";
+import {
+  ZONE_RULES_RELEASE_DIRECTORY,
+  ZONE_RULES_VERSION_PATH,
+} from "../src/constants/zoneRules.ts";
+import { findPrecachedZoneRulesFiles } from "./zoneRules/precacheExclusion.ts";
 
 const INITIAL_JS_BUDGET_KB = 150;
 const BYTES_PER_KB = 1024;
@@ -37,6 +44,8 @@ const ZONE_RULES_ASSET_PREFIX = "zone-rules-";
 const ZONE_RULES_ASSET_EXTENSION = ".json";
 const PRELOAD_LINK_PATTERN = /<link[^>]*rel="preload"[^>]*href="([^"]+)"/g;
 const EXPECTED_ZONE_RULES_PRELOAD_COUNT = 1;
+const SERVICE_WORKER_FILE = "sw.js";
+const RELEASE_FILE_PATTERN = /^\d{4}[a-z]+\.json$/;
 
 const ENTRY_SCRIPT_PATTERN = /<script[^>]*type="module"[^>]*src="([^"]+)"/g;
 const MODULE_PRELOAD_PATTERN =
@@ -175,6 +184,33 @@ if (
 ) {
   console.error(
     `${ENTRY_HTML_FILE} must preload ${ZONE_RULES_ASSET_PREFIX}* exactly once and never modulepreload it (found ${zoneRulesPreloadCount} preload links)`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const servedReleaseFiles = existsSync(
+  join(buildDirectory, ZONE_RULES_RELEASE_DIRECTORY),
+)
+  ? readdirSync(join(buildDirectory, ZONE_RULES_RELEASE_DIRECTORY)).filter(
+      (fileName) => RELEASE_FILE_PATTERN.test(fileName),
+    )
+  : [];
+if (
+  !existsSync(join(buildDirectory, ZONE_RULES_VERSION_PATH)) ||
+  servedReleaseFiles.length === 0
+) {
+  console.error(
+    `${ZONE_RULES_VERSION_PATH} and a ${ZONE_RULES_RELEASE_DIRECTORY}<release>.json file must be in the build`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const precachedZoneRulesFiles = findPrecachedZoneRulesFiles(
+  readFileSync(join(buildDirectory, SERVICE_WORKER_FILE), "utf8"),
+);
+if (precachedZoneRulesFiles.length > 0) {
+  console.error(
+    `${SERVICE_WORKER_FILE} precaches ${precachedZoneRulesFiles.join(", ")} — the served zone rules files must be fetched fresh`,
   );
   process.exit(EXIT_CODE_CHECK_FAILED);
 }

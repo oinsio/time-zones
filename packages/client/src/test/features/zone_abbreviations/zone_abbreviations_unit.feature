@@ -82,15 +82,15 @@ Feature: Zone abbreviations
     When the list is shown
     Then "Kolkata" shows "IST" and "New York" shows "EDT"
 
-  @add-zone-rules-from-iana @FR9
+  @add-zone-rules-from-iana @add-remote-zone-rules-updates @FR1 @FR9
   Scenario: Table built from the release
-    When the abbreviation table is built from the zone rules release "2026f"
+    When the abbreviation table is built from the committed zone rules release
     Then "America/New_York" has the pair "EST, EDT", "Europe/Dublin" has "GMT, IST", "Asia/Kolkata" has "IST"
     And "Asia/Almaty" has no abbreviation
 
-  @add-zone-rules-from-iana @FR9
+  @add-zone-rules-from-iana @add-remote-zone-rules-updates @FR1 @FR9
   Scenario: Abbreviations kept from the table before
     Given the abbreviation table built before this change
-    When it is compared with the table built from the zone rules release "2026f"
+    When it is compared with the table built from the committed zone rules release
     Then every zone of the earlier table has the same abbreviations in both
     And the only exceptions are zones whose designations an IANA release note changed, each listed with that release

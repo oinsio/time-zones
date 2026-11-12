@@ -1,7 +1,8 @@
 // FR1 of add-zone-rules-from-iana: the test setup runs on the committed rules
+// @add-remote-zone-rules-updates @FR1: the committed release is read from its file, never named here
 import { describe, expect, it } from "vitest";
-import { getInstalledRelease } from "@/lib/zoneRules";
-import { realNativeDateTimeFormat } from "./installZoneRules";
+import { getInstalledRelease, parseReleaseName } from "@/lib/zoneRules";
+import { committedRelease, realNativeDateTimeFormat } from "./installZoneRules";
 
 describe("the test setup", () => {
   it("installs the wrapper as Intl.DateTimeFormat", () => {
@@ -15,7 +16,8 @@ describe("the test setup", () => {
     );
   });
 
-  it("installs the committed release 2026f", () => {
-    expect(getInstalledRelease()?.release).toBe("2026f");
+  it("installs the committed release", () => {
+    expect(getInstalledRelease()?.release).toBe(committedRelease.release);
+    expect(parseReleaseName(committedRelease.release)).toBeDefined();
   });
 });

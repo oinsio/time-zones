@@ -3,13 +3,16 @@
  * emitted asset of a build, a dev middleware path when serving),
  * `virtual:zone-rules` (the parsed document, test mode only) and the preload
  * link of the asset in `index.html`.
- * Implements FR2, NFR-P2 of add-zone-rules-from-iana (design D2).
+ * A build also emits the served files of the update check.
+ * Implements FR2, NFR-P2 of add-zone-rules-from-iana (design D2),
+ * FR2 of add-remote-zone-rules-updates (design D7).
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Plugin } from "vite";
 import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
 import { addZoneRulesPreload } from "./addZoneRulesPreload.ts";
+import { buildServedZoneRulesFiles } from "./servedZoneRulesFiles.ts";
 
 const URL_MODULE_ID = "virtual:zone-rules-url";
 const RULES_MODULE_ID = "virtual:zone-rules";
@@ -21,7 +24,14 @@ const CONTENT_TYPE_HEADER = "Content-Type";
 
 type BundleOutput = { type: string; fileName: string; names?: string[] };
 
-export function zoneRulesPlugin(): Plugin {
+export type ZoneRulesPluginOptions = {
+  /** The build instant, named by the version file as `publishedAt`. */
+  deployInstant: string;
+};
+
+export function zoneRulesPlugin({
+  deployInstant,
+}: ZoneRulesPluginOptions): Plugin {
   let isBuild = false;
   let isTestMode = false;
   let base = "/";
@@ -62,6 +72,15 @@ export function zoneRulesPlugin(): Plugin {
         source: readReleaseText(),
       });
       return `export default import.meta.ROLLUP_FILE_URL_${referenceId};`;
+    },
+    generateBundle() {
+      if (!isBuild || isTestMode) return;
+      for (const file of buildServedZoneRulesFiles(
+        readReleaseText(),
+        deployInstant,
+      )) {
+        this.emitFile({ type: "asset", ...file });
+      }
     },
     transformIndexHtml: {
       order: "post",

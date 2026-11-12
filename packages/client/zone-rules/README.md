@@ -54,3 +54,44 @@ Run from `packages/client/`. Both need `zic`, `zdump` and `gpg`, and reach
 
 To bump the release: run `zone-rules:compile <release>`, then
 `zone-rules:check`, and commit `release.json`.
+
+## Publication of a newer release
+
+Implements FR1 of add-remote-zone-rules-updates (design D7).
+
+The workflow `.github/workflows/zone-rules-publication.yml` ("Zone rules
+publication") runs every day and on manual dispatch. It reads the IANA releases
+listing, never a `-latest` archive, with `pnpm zone-rules:latest`, which prints
+`already current` when the committed release is not older than the newest
+`tzdata` release by the release order (`2026z` precedes `2026aa`). For a newer
+release it compiles it (`zone-rules:compile`), runs `zone-rules:check` and
+`pnpm test`, commits `Update zone rules to <release>` to `main` and deploys that
+commit. The deploy publishes `zone-rules/version.json` and
+`zone-rules/<release>.json`; running apps find them at their next check and
+offer a Reload.
+
+- **Dispatch by hand:** Actions → "Zone rules publication" → Run workflow on
+  `main`. It runs the same steps as a scheduled run.
+- **A schedule GitHub disabled:** GitHub stops scheduled workflows of a
+  repository without activity for 60 days. Open the same Actions page and
+  enable the workflow again; dispatch it once to confirm.
+- **A failed run:** nothing was committed or deployed. Read the log of the step
+  that failed (download or signature, compile, check, test). The app keeps
+  serving its current release.
+
+A run can still fail on release content. The compiler and the check are
+regression checks over what IANA changed, so a release that changes one of the
+pinned facts below fails the run, and fixing it is then a human change:
+
+- the `zdump` fixtures `src/test/zoneRules/fixtures/zdump/` (America/New_York,
+  Asia/Almaty, Europe/Dublin, captured from `2026f` with
+  `zdump -v -c 2000,2041`), which the unit BDD scenario "The committed release
+  passes" compares with the committed release in `pnpm test`;
+- the release-content assertions of
+  `src/test/features/zone_rules/steps/zone_rules_release.steps.ts`: New York's
+  cutoff type, last listed change and future rule; Almaty's last listed change
+  and future rule; Dublin's empty change list, cutoff type and future rule;
+- the abbreviation pairs of
+  `src/test/features/zone_abbreviations/zone_abbreviations_unit.feature` with
+  the designations listed in
+  `src/test/zoneRules/fixtures/zone-abbreviations.changes.json`.

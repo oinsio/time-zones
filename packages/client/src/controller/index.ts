@@ -43,6 +43,7 @@ export {
 } from "./useWallTimeInput";
 export { useZoneLabelExample } from "./useZoneLabelExample";
 export { useZoneLabelParts } from "./useZoneLabelParts";
+export { useZoneRulesRelease } from "./useZoneRulesRelease";
 // Implements FR3, FR4, FR7, FR9 of add-remote-zone-rules-updates.
 export { useZoneRulesUpdate, type ZoneRulesUpdate } from "./useZoneRulesUpdate";
 export type { WriteScheduler } from "./writeScheduler";

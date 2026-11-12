@@ -12,6 +12,7 @@
     "check:legacy-build": "node scripts/check-legacy-build.mjs",
     "zone-rules:compile": "node scripts/zoneRules/compile.ts",
     "zone-rules:check": "node scripts/zoneRules/check.ts",
+    "zone-rules:latest": "node scripts/zoneRules/latestRelease.ts",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "bench": "vitest bench --run --mode test --outputJson reports/bench/bench.json",

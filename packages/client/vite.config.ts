@@ -18,12 +18,18 @@ import { mainChunkPreloadPlugin } from "./scripts/legacyBoot/mainChunkPreloadPlu
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 import { zoneRulesPlugin } from "./scripts/zoneRules/zoneRulesPlugin";
+import { ZONE_RULES_RELEASE_DIRECTORY } from "./src/constants/zoneRules";
+
+/** The one build instant: the deploy time of the app and the `publishedAt` of the version file. */
+const DEPLOY_INSTANT = resolveDeployInstant();
+/** The served zone rules files are fetched fresh, never precached (FR2 of add-remote-zone-rules-updates). */
+const ZONE_RULES_PRECACHE_IGNORE_PATTERN = `${ZONE_RULES_RELEASE_DIRECTORY}**`;
 
 const SHARED_VIEWS_PATH = "/src/views/shared/";
 
 export default defineConfig({
   base: APP_BASE_PATH,
-  define: { [DEPLOY_INSTANT_DEFINE]: JSON.stringify(resolveDeployInstant()) },
+  define: { [DEPLOY_INSTANT_DEFINE]: JSON.stringify(DEPLOY_INSTANT) },
   build: {
     outDir: BUILD_OUT_DIR,
     target: BUILD_TARGETS,
@@ -39,7 +45,7 @@ export default defineConfig({
   plugins: [
     react(),
     zoneDataPlugin(),
-    zoneRulesPlugin(),
+    zoneRulesPlugin({ deployInstant: DEPLOY_INSTANT }),
     legacyCoreJsPlugin(),
     mainChunkPreloadPlugin(),
     VitePWA({
@@ -66,6 +72,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,mjs,css,html,ico,png,svg,json,woff2}"],
+        globIgnores: [ZONE_RULES_PRECACHE_IGNORE_PATTERN],
       },
     }),
   ],
