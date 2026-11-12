@@ -266,3 +266,16 @@ The zone rules asset MUST stay within its gzipped budget, counted apart from the
 #### Scenario: Work bound of presenting rows
 - **WHEN** 50 rows are presented twice at two instants
 - **THEN** the second presentation builds no `Intl.DateTimeFormat`
+
+### Requirement: Nothing visible changes
+The change SHALL add no visible element: the main page MUST show no new note, no new control and no new error screen, axe-core MUST report no violations on it, and the approved screenshot baselines in `chromium` and `mobile-chrome` MUST pass unchanged. <!-- implements NFR-A1, NFR-R1, UX2 of add-zone-rules-from-iana -->
+
+#### Scenario: No accessibility violations on the main page
+- **GIVEN** the app started with the zone rules
+- **WHEN** the main page is checked with axe-core
+- **THEN** no violation is reported
+
+#### Scenario: The approved screens stay the same
+- **GIVEN** the app started with the zone rules
+- **WHEN** each approved screen is captured in `chromium` and `mobile-chrome`
+- **THEN** it matches its approved baseline without an update
