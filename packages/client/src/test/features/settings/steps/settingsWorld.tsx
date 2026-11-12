@@ -16,7 +16,7 @@ import {
   type LocationsSyncChannel,
 } from "@/adapters";
 import { SettingsPage } from "@/app/settings";
-import { STORAGE_KEYS } from "@/constants";
+import { PREFERENCES_SCHEMA_VERSION, STORAGE_KEYS } from "@/constants";
 import { LocationsProvider, PreferencesProvider } from "@/controller";
 import { fakeClock } from "@/lib/temporal";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
@@ -84,6 +84,28 @@ export const createSettingsWorld = () => {
     givenNoPreferencesStored: () => localStorage.clear(),
     givenCorruptedPreferences: () =>
       localStorage.setItem(STORAGE_KEYS.PREFERENCES, NOT_JSON),
+    /** Implements FR6 of add-country-to-zone-label: a current document with the country twice. */
+    givenCountryTwiceInZoneLabel: () =>
+      localStorage.setItem(
+        STORAGE_KEYS.PREFERENCES,
+        JSON.stringify({
+          schemaVersion: PREFERENCES_SCHEMA_VERSION,
+          payload: {
+            theme: "SYSTEM",
+            hourFormat: "H24",
+            interfaceLanguage: null,
+            zoneLabelParts: ["COUNTRY", "COUNTRY"],
+            viewMode: null,
+          },
+        }),
+      ),
+    /** The names of the pressed zone label toggles in DOM order. */
+    pressedZoneLabelToggleNames: () =>
+      within(
+        screen.getByRole("group", { name: i18n.t("settings.zoneLabelLabel") }),
+      )
+        .getAllByRole("button", { pressed: true })
+        .map((toggle) => toggle.textContent),
     givenStorageUnavailable: () => {
       storage = {
         ...localStorage,

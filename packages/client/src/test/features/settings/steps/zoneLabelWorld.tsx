@@ -1,3 +1,4 @@
+// Implements FR1, FR3, FR6 of add-country-to-zone-label: the country reads from the example and the rows.
 // Implements FR12, FR13, FR14, FR15 of show-zone-abbreviations-and-zone-label-setting: tabs of the settings page and the rows over real preferences storage.
 import { act, cleanup, render, within } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
@@ -35,6 +36,7 @@ const INSTANT = "2026-07-15T12:00:00Z";
 const PAGE_HIDE_EVENT = "pagehide";
 const EXAMPLE_OFFSET = "UTC+3";
 const EXAMPLE_ABBREVIATIONS = ["MSK", "МСК"];
+const EXAMPLE_COUNTRIES = ["Russia", "Россия"];
 
 type Tab = {
   container: HTMLElement;
@@ -184,6 +186,9 @@ export const createZoneLabelWorld = () => {
         )
           ? [ZoneLabelPart.ZONE_ABBREVIATION]
           : []),
+        ...(EXAMPLE_COUNTRIES.some((country) => example.includes(country))
+          ? [ZoneLabelPart.COUNTRY]
+          : []),
       ];
       return Object.entries(ZONE_LABEL_PART_NAMES).find(
         ([, candidate]) => candidate.join() === parts.join(),
@@ -195,6 +200,9 @@ export const createZoneLabelWorld = () => {
           row.textContent?.startsWith(city),
         ) as HTMLElement,
       ),
+    rowText: (city: string, tab = tabs[0] as Tab) =>
+      rowsOf(tab).find((row) => row.textContent?.startsWith(city))
+        ?.textContent ?? "",
     allRowsZoneLines: (tab = tabs[0] as Tab) =>
       rowsOf(tab).map(readZoneLineElements),
   };
