@@ -45,7 +45,7 @@ async function runChecked(
   }
 }
 
-async function readLinks(
+export async function readLinks(
   sourceDirectory: string,
 ): Promise<Map<string, string>> {
   const links = new Map<string, string>();
@@ -59,36 +59,43 @@ async function readLinks(
   return links;
 }
 
+/** The ids of every compiled zone file, links included. */
+export async function listCompiledZoneIds(
+  outputDirectory: string,
+): Promise<string[]> {
+  const entries = await readdir(outputDirectory, {
+    recursive: true,
+    withFileTypes: true,
+  });
+  return entries
+    .filter((entry) => entry.isFile())
+    .map((entry) =>
+      relative(outputDirectory, join(entry.parentPath, entry.name))
+        .split(sep)
+        .join(ZONE_ID_SEPARATOR),
+    );
+}
+
 async function readCompiledZones(
   outputDirectory: string,
   links: Map<string, string>,
 ): Promise<Map<string, ReleaseZone>> {
   const zones = new Map<string, ReleaseZone>();
-  const entries = await readdir(outputDirectory, {
-    recursive: true,
-    withFileTypes: true,
-  });
-  for (const entry of entries) {
-    if (!entry.isFile()) continue;
-    const filePath = join(entry.parentPath, entry.name);
-    const zoneId = relative(outputDirectory, filePath)
-      .split(sep)
-      .join(ZONE_ID_SEPARATOR);
+  for (const zoneId of await listCompiledZoneIds(outputDirectory)) {
     if (links.has(zoneId)) continue;
-    zones.set(
-      zoneId,
-      truncateToCutoff(readTzif(new Uint8Array(await readFile(filePath)))),
-    );
+    const bytes = await readFile(join(outputDirectory, zoneId));
+    zones.set(zoneId, truncateToCutoff(readTzif(new Uint8Array(bytes))));
   }
   return zones;
 }
 
-export async function compileWithZic(
+/** Unpacks the archive, checks its version and compiles it; returns the directories. */
+export async function compileArchive(
   archivePath: string,
   release: string,
   workDirectory: string,
   runProcess: RunProcess,
-): Promise<CompiledZones> {
+): Promise<{ sourceDirectory: string; outputDirectory: string }> {
   const sourceDirectory = join(workDirectory, "source");
   const outputDirectory = join(workDirectory, "compiled");
   await mkdir(sourceDirectory, { recursive: true });
@@ -113,6 +120,21 @@ export async function compileWithZic(
     outputDirectory,
     ...TZDATA_SOURCE_FILES.map((fileName) => join(sourceDirectory, fileName)),
   ]);
+  return { sourceDirectory, outputDirectory };
+}
+
+export async function compileWithZic(
+  archivePath: string,
+  release: string,
+  workDirectory: string,
+  runProcess: RunProcess,
+): Promise<CompiledZones> {
+  const { sourceDirectory, outputDirectory } = await compileArchive(
+    archivePath,
+    release,
+    workDirectory,
+    runProcess,
+  );
   const links = await readLinks(sourceDirectory);
   return { zones: await readCompiledZones(outputDirectory, links), links };
 }
