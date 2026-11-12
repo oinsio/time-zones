@@ -2,10 +2,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-  parseZoneRulesRelease,
-  ZoneRulesReleaseError,
-} from "@/lib/zoneRules/core";
+import { parseZoneRulesRelease, ZoneRulesReleaseError } from "@/lib/zoneRules";
 import {
   compareWithRelease,
   parseZdumpLines,

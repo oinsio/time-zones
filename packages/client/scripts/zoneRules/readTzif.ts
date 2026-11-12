@@ -30,6 +30,15 @@ const HEADER_LENGTH = 44;
 const COUNTS_OFFSET = 20;
 const COUNT_FIELD_LENGTH = 4;
 const TWO_POW_32 = 2 ** 32;
+const TRANSITION_TIME_LOW_HALF_OFFSET = 4;
+const HEADER_COUNT_FIELD = {
+  universalIndicator: 0,
+  standardIndicator: 1,
+  leapSecond: 2,
+  transition: 3,
+  type: 4,
+  designationByte: 5,
+} as const;
 const TRANSITION_TIME_LENGTH = { versionOne: 4, versionTwo: 8 } as const;
 const LEAP_SECOND_LENGTH = { versionOne: 8, versionTwo: 12 } as const;
 const TYPE_ENTRY_LENGTH = 6;
@@ -49,12 +58,12 @@ function readCounts(view: DataView, headerOffset: number): TzifCounts {
       headerOffset + COUNTS_OFFSET + position * COUNT_FIELD_LENGTH,
     );
   return {
-    universalIndicatorCount: readCount(0),
-    standardIndicatorCount: readCount(1),
-    leapSecondCount: readCount(2),
-    transitionCount: readCount(3),
-    typeCount: readCount(4),
-    designationByteCount: readCount(5),
+    universalIndicatorCount: readCount(HEADER_COUNT_FIELD.universalIndicator),
+    standardIndicatorCount: readCount(HEADER_COUNT_FIELD.standardIndicator),
+    leapSecondCount: readCount(HEADER_COUNT_FIELD.leapSecond),
+    transitionCount: readCount(HEADER_COUNT_FIELD.transition),
+    typeCount: readCount(HEADER_COUNT_FIELD.type),
+    designationByteCount: readCount(HEADER_COUNT_FIELD.designationByte),
   };
 }
 
@@ -99,7 +108,8 @@ function readSixtyFourBitBlock(
   for (let index = 0; index < counts.transitionCount; index++) {
     const timeOffset = blockOffset + index * TRANSITION_TIME_LENGTH.versionTwo;
     const epochSeconds =
-      view.getInt32(timeOffset) * TWO_POW_32 + view.getUint32(timeOffset + 4);
+      view.getInt32(timeOffset) * TWO_POW_32 +
+      view.getUint32(timeOffset + TRANSITION_TIME_LOW_HALF_OFFSET);
     transitions.push([
       epochSeconds,
       bytes[typeIndicesOffset + index] as number,

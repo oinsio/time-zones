@@ -1,9 +1,6 @@
 // @add-zone-rules-from-iana @FR2: writing the release document
 import { describe, expect, it } from "vitest";
-import {
-  parseZoneRulesRelease,
-  ZoneRulesReleaseError,
-} from "@/lib/zoneRules/core";
+import { parseZoneRulesRelease, ZoneRulesReleaseError } from "@/lib/zoneRules";
 import type { ReleaseZone } from "../../../scripts/zoneRules/truncateToCutoff.ts";
 import { writeRelease } from "../../../scripts/zoneRules/writeRelease.ts";
 

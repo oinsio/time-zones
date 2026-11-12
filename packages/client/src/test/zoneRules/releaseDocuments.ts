@@ -2,7 +2,7 @@
  * Release documents for the tests of the release reader.
  * Implements FR2 of add-zone-rules-from-iana.
  */
-import { ZONE_RULES_CUTOFF_EPOCH_SECONDS } from "@/lib/zoneRules/core";
+import { ZONE_RULES_CUTOFF_EPOCH_SECONDS } from "@/lib/zoneRules";
 
 export const NEW_YORK_DOCUMENT = {
   types: [

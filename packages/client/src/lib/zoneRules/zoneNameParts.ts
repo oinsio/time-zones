@@ -12,6 +12,7 @@ import { type LocalTimeType, SECONDS_PER_MINUTE } from "./core/index.ts";
 
 const ZONE_NAME_PART_TYPE = "timeZoneName";
 const OFFSET_MINUTES_SEPARATOR = ":";
+const OFFSET_MINUTES_DIGITS = 2;
 
 function formatGmtOffset(utcOffsetSeconds: number): string {
   const totalMinutes = Math.round(
@@ -24,7 +25,7 @@ function formatGmtOffset(utcOffsetSeconds: number): string {
   const minutesText =
     minutes === 0
       ? ""
-      : `${OFFSET_MINUTES_SEPARATOR}${String(minutes).padStart(2, "0")}`;
+      : `${OFFSET_MINUTES_SEPARATOR}${String(minutes).padStart(OFFSET_MINUTES_DIGITS, "0")}`;
   return `${GMT_ZONE_NAME_PREFIX}${sign}${hours}${minutesText}`;
 }
 

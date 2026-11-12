@@ -5,7 +5,7 @@ import {
   parseZoneRulesRelease,
   ZONE_RULES_CUTOFF_EPOCH_SECONDS,
   ZoneRulesReleaseError,
-} from "@/lib/zoneRules/core";
+} from "@/lib/zoneRules";
 import { readReleaseZonePeriods } from "../../../scripts/zoneRules/releaseZonePeriods.ts";
 
 const SYNTHETIC_ZONE_ID = "Test/Synthetic";
