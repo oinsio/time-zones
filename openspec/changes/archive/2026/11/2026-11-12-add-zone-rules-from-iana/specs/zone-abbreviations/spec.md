@@ -1,0 +1,28 @@
+# Spec Delta
+
+## MODIFIED Requirements
+
+### Requirement: One offline abbreviation table
+Cards, the device time location, the wall-time hint, the settings example and the search SHALL read the zone abbreviation from one table built into the app from the zone rules release when the app is built: the tzdb designations of each zone's local time types in the rules year. Every zone of the table built before this change MUST keep its abbreviations, except a zone whose designations an IANA release note after the earlier data changed. Reading it MUST need no network and MUST NOT wait for the search data, so it behaves the same offline and on the first render. The table MUST add at most 5 KB gzipped to the initial JavaScript, and the initial JavaScript MUST stay at most 150 KB gzipped. <!-- implements FR4, NFR-P2 of show-zone-abbreviations-and-zone-label-setting; FR9 of add-zone-rules-from-iana -->
+
+#### Scenario: Available on the first render offline
+- **GIVEN** the app is opened without a network connection
+- **AND** the list contains New York and the current instant is `2026-07-15T12:00:00Z`
+- **WHEN** the list is first shown
+- **THEN** the New York row shows `EDT` in the same render, without a loading state
+
+#### Scenario: Table size
+- **WHEN** the app is built
+- **THEN** the zone abbreviation table is at most 5 KB gzipped
+- **AND** the initial JavaScript is at most 150 KB gzipped
+
+#### Scenario: Table built from the release
+- **WHEN** the abbreviation table is built from the zone rules release `2026f`
+- **THEN** `America/New_York` has the pair `EST, EDT`, `Europe/Dublin` has `GMT, IST`, `Asia/Kolkata` has `IST`
+- **AND** `Asia/Almaty` has no abbreviation
+
+#### Scenario: Abbreviations kept from the table before
+- **GIVEN** the abbreviation table built from `moment-timezone` before this change
+- **WHEN** it is compared with the table built from the zone rules release `2026f`
+- **THEN** every zone of the earlier table has the same abbreviations in both
+- **AND** the only exceptions are zones whose designations an IANA release note after the `moment-timezone` data changed, each listed with that release

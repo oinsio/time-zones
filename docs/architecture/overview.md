@@ -73,11 +73,15 @@ Target layout inside `packages/client/` (folders marked "exists" are in place; t
 assets/
   app-icon-source.png      single source of every PWA icon (exists)
 app.config.ts              base path, app name, colors shared by Vite, manifest, E2E (exists)
+scripts/zoneRules/         compiler and zdump check of the zone rules release, Vite plugin of its asset (exists)
+zone-rules/                release.json: the committed zone rules of one IANA release, and its README (exists)
 src/
   main.tsx                 entry point: mounts AppShell inside AppErrorBoundary (exists)
   app/                     shell, not a view: AppShell, notices, recovery screen (exists)
     index.ts
   lib/temporal.ts          Temporal re-export, Clock port (exists)
+  lib/zoneRules/           the app's own zone data: release reader, future rule, lookup (core/),
+                           the Intl.DateTimeFormat wrapper, getKnownZoneIds, loadZoneRules at boot (exists)
   styles/                  design tokens (light/dark) and globals (exists)
   model/                   pure TS: state, commands, reducer, selectors, invariants
     index.ts               public API of the model (exists, empty)

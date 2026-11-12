@@ -47,7 +47,7 @@ After one successful online visit, the application SHALL open without network an
 - **THEN** the shell is shown with the app title
 
 ### Requirement: Checks on every pull request
-Every pull request SHALL run lint, typecheck, unit tests, the production build with the bundle size budget, and the smoke E2E scenarios. Any failing step MUST fail the check. The result of the unit tests MUST NOT depend on the speed or load of the runner: no unit test may compare a measured duration with a limit. Every pull request MUST also run the timing benchmark in a separate job that reports the median of each timed operation and warns about every median above its budget, and that job MUST NOT fail the check. The check MUST also fail when the built JavaScript does not parse at the Safari 12 level or uses a regular-expression lookbehind, when the built CSS contains an `inset` shorthand or a `dvh` height without a preceding `vh` fallback in the same rule, or when production sources contain BigInt. <!-- implements FR12, NFR-P1 of setup-app-shell-and-pages-deploy; FR6, FR7, FR8 of replace-wall-clock-row-budgets-with-deterministic-checks; FR13 of support-legacy-ios-12-safari -->
+Every pull request SHALL run lint, typecheck, unit tests, the production build with the bundle size budget, and the smoke E2E scenarios. Any failing step MUST fail the check. The result of the unit tests MUST NOT depend on the speed or load of the runner: no unit test may compare a measured duration with a limit. Every pull request MUST also run the timing benchmark in a separate job that reports the median of each timed operation and warns about every median above its budget, and that job MUST NOT fail the check. The check MUST also fail when the built JavaScript does not parse at the Safari 12 level or uses a regular-expression lookbehind, when the built CSS contains an `inset` shorthand or a `dvh` height without a preceding `vh` fallback in the same rule, or when production sources contain BigInt. The check MUST also run the zone rules check against `zdump -v` and fail on one difference, and MUST fail when the zone rules asset exceeds its gzipped budget. <!-- implements FR12, NFR-P1 of setup-app-shell-and-pages-deploy; FR6, FR7, FR8 of replace-wall-clock-row-budgets-with-deterministic-checks; FR13 of support-legacy-ios-12-safari; FR8, NFR-P1 of add-zone-rules-from-iana -->
 
 #### Scenario: A check fails
 - **WHEN** a pull request introduces a lint, type, test, build or budget failure
@@ -81,6 +81,14 @@ Every pull request SHALL run lint, typecheck, unit tests, the production build w
 #### Scenario: Sources use BigInt
 - **WHEN** a pull request adds a BigInt literal, `BigInt(` or `epochNanoseconds` to production sources
 - **THEN** the pull request check is reported as failed
+
+#### Scenario: Zone rules differ from zdump
+- **WHEN** a pull request changes the committed zone rules release so that one zone's offset differs from `zdump -v` at a clock change
+- **THEN** the pull request check is reported as failed and names the zone
+
+#### Scenario: Zone rules asset exceeds its budget
+- **WHEN** the zone rules asset of the build exceeds its gzipped budget
+- **THEN** the build check fails and reports the actual size
 
 ### Requirement: Automatic deploy from main
 Every push to `main` SHALL run the same checks and, only when all pass, publish the build to GitHub Pages. A failed check MUST leave the previously published version live. Deploys MUST NOT run concurrently. <!-- implements FR13, NFR-P2 of setup-app-shell-and-pages-deploy -->

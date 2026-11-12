@@ -23,6 +23,9 @@ function createLoaders(needsLegacy: boolean, legacyLoad?: () => Promise<void>) {
         vi.fn(async () => {
           callLog.push("legacy");
         }),
+      loadZoneRules: vi.fn(async () => {
+        callLog.push("rules");
+      }),
       loadApp: vi.fn(async () => {
         callLog.push("app");
       }),
@@ -48,7 +51,10 @@ describe("bootApp", () => {
 
     await bootApp(steps);
 
-    expect(callLog).toEqual(["legacy", "app"]);
+    expect(callLog.filter((step) => step !== "rules")).toEqual([
+      "legacy",
+      "app",
+    ]);
   });
 
   it("should still load the app when legacy support fails", async () => {
@@ -76,16 +82,55 @@ describe("bootApp", () => {
   });
 });
 
+// @add-zone-rules-from-iana @FR10
+describe("bootApp zone rules step", () => {
+  it("should run legacy support, then the rules, then the app", async () => {
+    const { steps, callLog } = createLoaders(true);
+
+    await bootApp(steps);
+
+    expect(callLog).toEqual(["legacy", "rules", "app"]);
+  });
+
+  it("should load the rules without legacy support when nothing is missing", async () => {
+    const { steps, callLog } = createLoaders(false);
+
+    await bootApp(steps);
+
+    expect(callLog).toEqual(["rules", "app"]);
+  });
+
+  it("should still load the app and log the error when the rules fail", async () => {
+    const rulesError = new Error("asset missing");
+    const { steps } = createLoaders(false);
+    steps.loadZoneRules = vi.fn(() => Promise.reject(rulesError));
+    const errorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    await bootApp(steps);
+
+    expect(errorSpy).toHaveBeenCalledWith(rulesError);
+    expect(steps.loadApp).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("static imports before the shim", () => {
-  const legacyDirectory = join(SOURCE_ROOT, "lib", "legacy");
+  const sourceDirectories = [
+    join(SOURCE_ROOT, "lib", "legacy"),
+    join(SOURCE_ROOT, "lib", "zoneRules"),
+    join(SOURCE_ROOT, "lib", "zoneRules", "core"),
+  ];
   const bootSources = [
     join(SOURCE_ROOT, "boot.ts"),
-    ...readdirSync(legacyDirectory)
-      .filter(
-        (name) =>
-          name.endsWith(".ts") && !/\.(test|temporal\.test)\.ts$/.test(name),
-      )
-      .map((name) => join(legacyDirectory, name)),
+    ...sourceDirectories.flatMap((directory) =>
+      readdirSync(directory)
+        .filter(
+          (name) =>
+            name.endsWith(".ts") && !/\.(test|temporal\.test)\.ts$/.test(name),
+        )
+        .map((name) => join(directory, name)),
+    ),
   ];
 
   it.each(bootSources)(

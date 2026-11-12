@@ -17,6 +17,7 @@ import { resolveDeployInstant } from "./scripts/deployInstant/resolveDeployInsta
 import { mainChunkPreloadPlugin } from "./scripts/legacyBoot/mainChunkPreloadPlugin";
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
+import { zoneRulesPlugin } from "./scripts/zoneRules/zoneRulesPlugin";
 
 const SHARED_VIEWS_PATH = "/src/views/shared/";
 
@@ -38,6 +39,7 @@ export default defineConfig({
   plugins: [
     react(),
     zoneDataPlugin(),
+    zoneRulesPlugin(),
     legacyCoreJsPlugin(),
     mainChunkPreloadPlugin(),
     VitePWA({

@@ -249,7 +249,7 @@ Feature: Type an exact time in any row
     And the date bar shows no note
     And only "New York" shows a wall-time hint
 
-  @add-wall-time-input-with-hint @FR13
+  @add-wall-time-input-with-hint @FR13 @add-zone-rules-from-iana @FR5
   Scenario: A renamed zone on outdated zone data
     Given the engine rejects "Europe/Kyiv" and accepts "Europe/Kiev"
     And the device time zone is "Asia/Almaty"

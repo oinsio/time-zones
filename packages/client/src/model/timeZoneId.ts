@@ -7,7 +7,8 @@ const EPOCH_MILLISECONDS = 0;
 /**
  * Canonical IANA identifier for a user or stored input, or `undefined` when
  * the input is not an IANA zone (an unknown name or a raw UTC offset).
- * Implements FR9 of add-locations-via-search, FR3 of support-legacy-ios-12-safari.
+ * Implements FR9 of add-locations-via-search, FR3 of support-legacy-ios-12-safari,
+ * FR5 of add-zone-rules-from-iana.
  */
 export function canonicalizeTimeZoneId(input: string): string | undefined {
   if (OFFSET_PREFIXES.some((prefix) => input.startsWith(prefix))) {

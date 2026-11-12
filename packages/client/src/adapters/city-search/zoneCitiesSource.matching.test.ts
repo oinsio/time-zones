@@ -1,6 +1,12 @@
-// Verifies FR2, FR3 of add-locations-via-search (D7).
-import { describe, expect, it } from "vitest";
+// Verifies FR2, FR3 of add-locations-via-search (D7); FR5, FR9 of add-zone-rules-from-iana (D6).
+import { describe, expect, it, vi } from "vitest";
+import { installZoneRulesDateTimeFormat } from "@/lib/zoneRules";
 import { SearchMatchKind } from "@/ports";
+import {
+  installStaleEngine,
+  restoreEngine,
+} from "@/test/fakeStaleDateTimeFormat";
+import { committedRelease } from "@/test/installZoneRules";
 
 import { almaty, idsOf, moscow, newYork, utc } from "./zoneCitiesFixtures";
 import { createZoneCitiesSource } from "./zoneCitiesSource";
@@ -97,24 +103,17 @@ describe("zone cities source edge cases", () => {
     expect(idsOf(source)).toEqual(["Europe/Moscow", "UTC"]);
   });
 
-  it("should use every data zone when the browser has no supportedValuesOf", () => {
-    const original = Object.getOwnPropertyDescriptor(
-      Intl,
-      "supportedValuesOf",
-    ) as PropertyDescriptor;
-    Object.defineProperty(Intl, "supportedValuesOf", {
-      ...original,
-      value: undefined,
-    });
-    try {
-      expect(idsOf(createZoneCitiesSource([moscow, almaty]))).toEqual([
-        "Europe/Moscow",
-        "Asia/Almaty",
-        "UTC",
-      ]);
-    } finally {
-      Object.defineProperty(Intl, "supportedValuesOf", original);
-    }
+  it("should filter out a record whose zone is not in the installed release", () => {
+    const unknownZone = { ...moscow, timeZoneId: "Mars/Olympus_Mons" };
+    expect(idsOf(createZoneCitiesSource([moscow, unknownZone]))).not.toContain(
+      "Mars/Olympus_Mons",
+    );
+  });
+
+  it("should keep every record when no release is installed", () => {
+    expect(
+      idsOf(createZoneCitiesSource([moscow, almaty], () => undefined)),
+    ).toEqual(["Europe/Moscow", "Asia/Almaty", "UTC"]);
   });
 
   it("should not match the end of a word", () => {
@@ -131,5 +130,57 @@ describe("zone cities source edge cases", () => {
     );
     expect(source.match("mos")).toHaveLength(1);
     expect(source.match("russia")).toEqual([]);
+  });
+});
+
+describe("zone cities source on the installed release", () => {
+  const ciudadJuarez = {
+    timeZoneId: "America/Ciudad_Juarez",
+    names: { en: "Ciudad Juárez", ru: "Сьюдад-Хуарес" },
+    countryCode: "MX",
+  };
+
+  it("should offer a zone the engine rejects", () => {
+    installStaleEngine({
+      staleZones: {},
+      rejectedZones: ["America/Ciudad_Juarez"],
+    });
+    installZoneRulesDateTimeFormat(committedRelease);
+    try {
+      expect(idsOf(createZoneCitiesSource([moscow, ciudadJuarez]))).toContain(
+        "America/Ciudad_Juarez",
+      );
+    } finally {
+      restoreEngine();
+    }
+  });
+
+  it("should offer no zone of the Etc area and no area-less zone but UTC", () => {
+    const offeredIds = idsOf(createZoneCitiesSource([moscow]));
+    expect(offeredIds.filter((id) => id.startsWith("Etc/"))).toEqual([]);
+    expect(offeredIds.filter((id) => !id.includes("/"))).toEqual(["UTC"]);
+  });
+
+  it.each(["Etc/GMT+5", "EST5EDT", "CET"])("should not offer %s", (zoneId) => {
+    expect(idsOf(createZoneCitiesSource([moscow]))).not.toContain(zoneId);
+  });
+
+  it("should offer Europe/Oslo", () => {
+    expect(idsOf(createZoneCitiesSource([moscow]))).toContain("Europe/Oslo");
+  });
+});
+
+describe("zone cities source without an installed release", () => {
+  it("should keep every record plus UTC when no lister is given", async () => {
+    // FR10 of add-zone-rules-from-iana (design D6)
+    vi.resetModules();
+    const { createZoneCitiesSource: createFreshSource } = await import(
+      "./zoneCitiesSource"
+    );
+    expect(idsOf(createFreshSource([moscow, almaty]))).toEqual([
+      "Europe/Moscow",
+      "Asia/Almaty",
+      "UTC",
+    ]);
   });
 });

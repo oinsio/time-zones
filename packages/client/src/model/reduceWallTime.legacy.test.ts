@@ -1,38 +1,25 @@
-// Verifies FR13 of add-wall-time-input-with-hint (D1, M8): a renamed zone on outdated zone data.
+// Verifies FR13 of add-wall-time-input-with-hint (M8); FR5 of add-zone-rules-from-iana:
+// a renamed zone on outdated zone data, known from the zone rules.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createLegacyZoneDateTimeFormat } from "@/lib/legacy";
+import { installZoneRulesDateTimeFormat } from "@/lib/zoneRules";
 import { LocationKind } from "@/model";
+import {
+  installStaleEngine,
+  restoreEngine,
+} from "@/test/fakeStaleDateTimeFormat";
+import { committedRelease } from "@/test/installZoneRules";
 
 const RENAMED_ZONE_ID = "Europe/Kyiv";
-const LEGACY_ZONE_ID = "Europe/Kiev";
 
-describe("SET_WALL_TIME on an engine that knows Europe/Kyiv only as Europe/Kiev", () => {
-  const nativeDateTimeFormat = Intl.DateTimeFormat;
-
+describe("SET_WALL_TIME on an engine that rejects Europe/Kyiv", () => {
   beforeEach(() => {
-    function FakeNative(
-      locales?: string | string[],
-      options?: Intl.DateTimeFormatOptions,
-    ) {
-      if (options?.timeZone?.toLowerCase() === RENAMED_ZONE_ID.toLowerCase()) {
-        throw new RangeError(`Invalid time zone ${options.timeZone}`);
-      }
-      return new nativeDateTimeFormat(locales, options);
-    }
-    Object.defineProperty(FakeNative, "prototype", {
-      value: nativeDateTimeFormat.prototype,
-    });
-    const nativeStandIn = Object.assign(FakeNative, {
-      supportedLocalesOf: nativeDateTimeFormat.supportedLocalesOf,
-    }) as unknown as typeof Intl.DateTimeFormat;
-    Intl.DateTimeFormat = createLegacyZoneDateTimeFormat(nativeStandIn, {
-      [RENAMED_ZONE_ID]: [LEGACY_ZONE_ID],
-    });
+    installStaleEngine({ staleZones: {}, rejectedZones: [RENAMED_ZONE_ID] });
+    installZoneRulesDateTimeFormat(committedRelease);
     vi.resetModules();
   });
 
   afterEach(() => {
-    Intl.DateTimeFormat = nativeDateTimeFormat;
+    restoreEngine();
     vi.resetModules();
   });
 

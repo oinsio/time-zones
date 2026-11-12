@@ -1,16 +1,11 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
+import { needsLegacySupport } from "@/lib/legacy";
 import { HourFormat } from "@/preferences";
 import {
-  addLocationTo,
   checkAlmatyDayStops,
-  expectZoneRejectedNatively,
-  type FreshModules,
-  loadStoredZoneIds,
   restoreZoneData,
-  saveAndLoadStoredZoneIds,
-  seedStoredLocation,
   startOnOutdatedZoneData,
 } from "./legacyZoneWorld";
 
@@ -18,27 +13,21 @@ const feature = await loadFeature(
   "../browser_compatibility_legacy_zones.feature",
 );
 
-const UTC_PREFIX = "UTC";
+const KYIV_ZONE_ID = "Europe/Kyiv";
+const KYIV_INSTANT = "2026-03-08T07:30:00Z";
+const KYIV_TIME = "09:30";
 const LANGUAGE = "en";
 const MINUTE_PRECISION = 6;
 
 type DayStops = Awaited<ReturnType<typeof checkAlmatyDayStops>>;
-type AddOutcome = ReturnType<FreshModules["model"]["reduceLocations"]>;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let engine: Awaited<ReturnType<typeof startOnOutdatedZoneData>>;
-  let instantText = "";
-  let addOutcome: AddOutcome;
   let withoutBigInt: DayStops;
 
-  const addLocation = (label: string, timeZoneId: string) => {
-    addOutcome = addLocationTo(engine.modules, label, timeZoneId);
-  };
   const givenOutdatedZoneData = async () => {
     engine = await startOnOutdatedZoneData();
   };
-  const expectNativeRejectedKyiv = () =>
-    expectZoneRejectedNatively(engine.rejectedZones, "europe/kyiv");
 
   f.AfterEachScenario(restoreZoneData);
 
@@ -75,124 +64,31 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @support-legacy-ios-12-safari @FR4
-  f.Scenario("Adding a renamed zone", ({ Given, When, Then, And }) => {
-    Given(
-      "the engine rejects {string} and accepts {string}",
-      givenOutdatedZoneData,
-    );
-    When(
-      "the user adds {string} with the zone {string}",
-      (_ctx, label: string, zone: string) => addLocation(label, zone),
-    );
-    Then(
-      "the location is added with the zone {string}",
-      (_ctx, zone: string) => {
-        expectNativeRejectedKyiv();
-        expect(addOutcome.ok).toBe(true);
-        if (addOutcome.ok) {
-          expect(addOutcome.state.locations.map((l) => l.timeZoneId)).toEqual([
-            zone,
-          ]);
-        }
-      },
-    );
-    And("the stored list holds {string}", (_ctx, zone: string) => {
-      if (!addOutcome.ok) throw new Error("the location was not added");
-      expect(
-        saveAndLoadStoredZoneIds(engine.modules, addOutcome.state.locations),
-      ).toEqual([zone]);
-    });
-  });
-
-  // @support-legacy-ios-12-safari @FR4
-  f.Scenario("A renamed zone shows its time", ({ Given, And, When, Then }) => {
-    Given(
-      "the engine rejects {string} and accepts {string}",
-      givenOutdatedZoneData,
-    );
-    And(
-      "the stored list contains {string} with the zone {string}",
-      (_ctx, label: string, zone: string) => seedStoredLocation(label, zone),
-    );
-    And("the current instant is {string}", (_ctx, instant: string) => {
-      instantText = instant;
-    });
-    let card = { time: "", offset: "" };
-    When("the app starts", () => {
-      const { model, presenter, temporal } = engine.modules;
-      const [zone] = loadStoredZoneIds(engine.modules);
-      const instant = temporal.Temporal.Instant.from(instantText);
-      const local = model.getLocalDateTime(zone, instant);
-      const offsetMinutes = model.getUtcOffsetMinutes(zone, instant);
-      card = {
-        time: local
-          ? presenter.formatLocalTime(local, LANGUAGE, HourFormat.H24)
-          : "",
-        offset:
-          offsetMinutes === undefined
-            ? ""
-            : presenter.formatUtcOffset(offsetMinutes, UTC_PREFIX),
-      };
-    });
-    Then(
-      "the {string} card shows {string} and {string}",
-      (_ctx, _label: string, time: string, offset: string) => {
-        expectNativeRejectedKyiv();
-        expect(card).toEqual({ time, offset });
-      },
-    );
-    And("the stored list is read without error", () => {
-      expect(loadStoredZoneIds(engine.modules)).toEqual(["Europe/Kyiv"]);
-    });
-  });
-
-  // @support-legacy-ios-12-safari @FR4 @M3
-  f.ScenarioOutline(
-    "A wall-clock time in a renamed zone",
-    ({ Given, When, Then }, variables) => {
-      let resolved: ReturnType<FreshModules["model"]["resolveWallClock"]>;
-      Given(
-        "the engine rejects {string} and accepts {string}",
-        givenOutdatedZoneData,
-      );
-      When(
-        "the wall-clock time <wall clock> in {string} is resolved",
-        (_ctx, zone: string) => {
-          const { model, temporal } = engine.modules;
-          resolved = model.resolveWallClock(
-            zone,
-            temporal.Temporal.PlainDateTime.from(variables["wall clock"]),
-          );
-        },
-      );
-      Then("it resolves to <instant> with the status <status>", () => {
-        expectNativeRejectedKyiv();
-        expect(resolved.instant.toString()).toBe(
-          engine.modules.temporal.Temporal.Instant.from(
-            variables.instant,
-          ).toString(),
+  // @add-zone-rules-from-iana @FR5
+  f.Scenario(
+    "Outdated zone data alone needs no polyfills",
+    ({ Given, And, When, Then }) => {
+      let isLegacySupportNeeded = true;
+      Given("the engine has every required built-in", () => undefined);
+      And("the engine rejects {string}", givenOutdatedZoneData);
+      When("the app starts", () => {
+        isLegacySupportNeeded = needsLegacySupport();
+      });
+      Then("the polyfills are not requested", () => {
+        expect(isLegacySupportNeeded).toBe(false);
+      });
+      And("Kyiv shows its time from the zone rules", () => {
+        const { model, presenter, temporal } = engine.modules;
+        const instant = temporal.Temporal.Instant.from(KYIV_INSTANT);
+        const local = model.getLocalDateTime(KYIV_ZONE_ID, instant);
+        expect(local).toBeDefined();
+        expect(
+          local && presenter.formatLocalTime(local, LANGUAGE, HourFormat.H24),
+        ).toBe(KYIV_TIME);
+        expect(engine.calls.map((call) => call.timeZone)).not.toContain(
+          KYIV_ZONE_ID,
         );
-        expect(resolved.status).toBe(variables.status);
       });
     },
   );
-
-  // @support-legacy-ios-12-safari @FR4
-  f.Scenario("A zone rejected under every name", ({ Given, When, Then }) => {
-    Given(
-      "the engine rejects {string} under every name",
-      givenOutdatedZoneData,
-    );
-    When(
-      "the user adds {string} with the zone {string}",
-      (_ctx, label: string, zone: string) => addLocation(label, zone),
-    );
-    Then("the location is rejected as an unknown time zone", () => {
-      expect(addOutcome).toEqual({
-        ok: false,
-        error: engine.modules.model.LocationErrorCode.UNKNOWN_TIME_ZONE,
-      });
-    });
-  });
 });

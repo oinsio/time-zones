@@ -21,7 +21,7 @@ The application SHALL support the latest Chrome, Firefox, Edge and Safari, and i
 - **AND** no error is thrown
 
 ### Requirement: Polyfills only where needed
-Built-ins missing on a legacy engine SHALL be installed before any application module or library runs. An engine that has every required built-in MUST NOT download the polyfills. The polyfills MUST NOT count towards the initial JavaScript budget. <!-- implements FR2, NFR-P1, NFR-P2 of support-legacy-ios-12-safari -->
+Built-ins missing on a legacy engine SHALL be installed before any application module or library runs. An engine that has every required built-in MUST NOT download the polyfills. The polyfills MUST NOT count towards the initial JavaScript budget. A legacy engine is recognised by its missing built-ins only; the state of the engine's zone data plays no part, because the zone rules of the app replace it on every engine. <!-- implements FR2, NFR-P1, NFR-P2 of support-legacy-ios-12-safari; FR5 of add-zone-rules-from-iana -->
 
 #### Scenario: Modern engine skips the polyfills
 - **GIVEN** the engine has every required built-in
@@ -40,6 +40,13 @@ Built-ins missing on a legacy engine SHALL be installed before any application m
 - **THEN** its initial JavaScript is at most 150 KB gzipped
 - **AND** the polyfills are not part of it
 
+#### Scenario: Outdated zone data alone needs no polyfills
+- **GIVEN** the engine has every required built-in
+- **AND** the engine rejects `Europe/Kyiv`
+- **WHEN** the app starts
+- **THEN** the polyfills are not requested
+- **AND** Kyiv shows its time from the zone rules
+
 ### Requirement: No BigInt at run time
 Production code SHALL NOT create, read or compare BigInt values at run time. That covers BigInt literals, the `BigInt` function and the nanosecond values of an instant (`epochNanoseconds`). Instants MUST be compared and measured in milliseconds. <!-- implements FR3 of support-legacy-ios-12-safari -->
 
@@ -52,39 +59,6 @@ Production code SHALL NOT create, read or compare BigInt values at run time. Tha
 - **WHEN** the zone `Asia/Almaty` is checked and its day-period colours are computed for `2026-03-08`
 - **THEN** the zone is accepted
 - **AND** the colour stops equal those computed with `BigInt` present
-
-### Requirement: Renamed zones on outdated zone data
-When the engine rejects a canonical IANA zone but accepts one of its legacy names, every date and time operation on that zone SHALL use the legacy name, including resolving a wall-clock time with an explicit disambiguation. Stored and compared identifiers MUST stay canonical. A zone the engine rejects under every name MUST behave as an unknown zone. <!-- implements FR4 of support-legacy-ios-12-safari -->
-
-#### Scenario: Adding a renamed zone
-- **GIVEN** the engine rejects `Europe/Kyiv` and accepts `Europe/Kiev`
-- **WHEN** the user adds Kyiv with the zone `Europe/Kyiv`
-- **THEN** the location is added with the zone `Europe/Kyiv`
-- **AND** the stored list holds `Europe/Kyiv`
-
-#### Scenario: A renamed zone shows its time
-- **GIVEN** the engine rejects `Europe/Kyiv` and accepts `Europe/Kiev`
-- **AND** the stored list contains Kyiv with the zone `Europe/Kyiv`
-- **AND** the current instant is `2026-03-08T07:30:00Z`
-- **WHEN** the app starts
-- **THEN** the Kyiv card shows `09:30` and `UTC+2`
-- **AND** the stored list is read without error
-
-#### Scenario: A wall-clock time in a renamed zone
-- **GIVEN** the engine rejects `Europe/Kyiv` and accepts `Europe/Kiev`
-- **WHEN** the wall-clock time `<wall clock>` in `Europe/Kyiv` is resolved
-- **THEN** it resolves to `<instant>` with the status `<status>`
-
-| wall clock | instant | status |
-|---|---|---|
-| `2026-03-08T10:00` | `2026-03-08T08:00:00Z` | `UNIQUE` |
-| `2026-03-29T03:30` | `2026-03-29T01:30:00Z` | `GAP` |
-| `2026-10-25T03:30` | `2026-10-25T00:30:00Z` | `AMBIGUOUS` |
-
-#### Scenario: A zone rejected under every name
-- **GIVEN** the engine rejects `America/Ciudad_Juarez` and has no legacy name for it
-- **WHEN** a location with that zone is added
-- **THEN** the location is rejected as an unknown time zone
 
 ### Requirement: Missing country names
 On an engine without `Intl.DisplayNames`, presenting a country SHALL yield an empty name and MUST NOT throw. Rows and search results MUST show no separator or placeholder where the country name would be. <!-- implements FR5, UX3 of support-legacy-ios-12-safari -->

@@ -41,6 +41,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         await loadLegacySupport();
         loadOrder.push(POLYFILLS_STEP);
       },
+      loadZoneRules: async () => undefined,
       loadApp: async () => {
         loadOrder.push(APP_STEP);
       },

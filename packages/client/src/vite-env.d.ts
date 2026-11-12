@@ -29,6 +29,18 @@ declare module "virtual:zone-abbreviations" {
   export default zoneAbbreviations;
 }
 
+declare module "virtual:zone-rules-url" {
+  /** URL of the emitted zone rules release (`zone-rules/release.json`). */
+  const zoneRulesUrl: string;
+  export default zoneRulesUrl;
+}
+
+declare module "virtual:zone-rules" {
+  /** The zone rules release document, resolvable only in Vitest (mode "test"). */
+  const zoneRulesDocument: unknown;
+  export default zoneRulesDocument;
+}
+
 declare module "virtual:legacy-core-js" {
   // Side-effect module: installs the core-js polyfills a legacy engine lacks.
 }

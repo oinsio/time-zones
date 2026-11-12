@@ -1,0 +1,26 @@
+Asia/Almaty  -9223372036854775808 = NULL
+Asia/Almaty  -9223372036854689408 = NULL
+Asia/Almaty  Sat Mar 25 19:59:59 2000 UT = Sun Mar 26 01:59:59 2000 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 25 20:00:00 2000 UT = Sun Mar 26 03:00:00 2000 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 28 19:59:59 2000 UT = Sun Oct 29 02:59:59 2000 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 28 20:00:00 2000 UT = Sun Oct 29 02:00:00 2000 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 24 19:59:59 2001 UT = Sun Mar 25 01:59:59 2001 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 24 20:00:00 2001 UT = Sun Mar 25 03:00:00 2001 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 27 19:59:59 2001 UT = Sun Oct 28 02:59:59 2001 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 27 20:00:00 2001 UT = Sun Oct 28 02:00:00 2001 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 30 19:59:59 2002 UT = Sun Mar 31 01:59:59 2002 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 30 20:00:00 2002 UT = Sun Mar 31 03:00:00 2002 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 26 19:59:59 2002 UT = Sun Oct 27 02:59:59 2002 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 26 20:00:00 2002 UT = Sun Oct 27 02:00:00 2002 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 29 19:59:59 2003 UT = Sun Mar 30 01:59:59 2003 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 29 20:00:00 2003 UT = Sun Mar 30 03:00:00 2003 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 25 19:59:59 2003 UT = Sun Oct 26 02:59:59 2003 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 25 20:00:00 2003 UT = Sun Oct 26 02:00:00 2003 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 27 19:59:59 2004 UT = Sun Mar 28 01:59:59 2004 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Sat Mar 27 20:00:00 2004 UT = Sun Mar 28 03:00:00 2004 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 30 19:59:59 2004 UT = Sun Oct 31 02:59:59 2004 +07 isdst=1 gmtoff=25200
+Asia/Almaty  Sat Oct 30 20:00:00 2004 UT = Sun Oct 31 02:00:00 2004 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Thu Feb 29 17:59:59 2024 UT = Thu Feb 29 23:59:59 2024 +06 isdst=0 gmtoff=21600
+Asia/Almaty  Thu Feb 29 18:00:00 2024 UT = Thu Feb 29 23:00:00 2024 +05 isdst=0 gmtoff=18000
+Asia/Almaty  9223372036854689407 = NULL
+Asia/Almaty  9223372036854775807 = NULL

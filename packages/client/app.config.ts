@@ -50,3 +50,17 @@ export const DEPLOY_INSTANT_DEFINE = "__APP_DEPLOY_INSTANT__";
 
 /** The deploy instant of every Vitest run, so that tests do not depend on the build. */
 export const TEST_DEPLOY_INSTANT = "2026-03-08T07:30:00.000Z";
+
+/**
+ * Gzipped size ceiling of the zone rules asset, in KB: the committed release
+ * measures 18 204 bytes gzipped (17.8 KB); plus 20 %, rounded up.
+ * Implements NFR-P1 of add-zone-rules-from-iana (D2).
+ */
+export const ZONE_RULES_ASSET_BUDGET_KB = 22;
+
+/**
+ * The committed zone rules release, relative to the package root; read by the
+ * compiler, the check, the Vite plugin and the budget steps.
+ * Implements FR2 of add-zone-rules-from-iana (D1).
+ */
+export const ZONE_RULES_RELEASE_FILE = "zone-rules/release.json";

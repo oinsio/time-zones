@@ -4,9 +4,10 @@ import { configDefaults, defineConfig } from "vitest/config";
 import { DEPLOY_INSTANT_DEFINE, TEST_DEPLOY_INSTANT } from "./app.config";
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
+import { zoneRulesPlugin } from "./scripts/zoneRules/zoneRulesPlugin";
 
 export default defineConfig({
-  plugins: [react(), zoneDataPlugin(), legacyCoreJsPlugin()],
+  plugins: [react(), zoneDataPlugin(), zoneRulesPlugin(), legacyCoreJsPlugin()],
   define: { [DEPLOY_INSTANT_DEFINE]: JSON.stringify(TEST_DEPLOY_INSTANT) },
   test: {
     globals: true,

@@ -3,6 +3,8 @@
  * CLDR JSON. Implements FR1, FR2, FR3, FR9 of add-locations-via-search (D6).
  */
 
+import { ETC_ZONE_AREA } from "../../src/lib/zoneRules/core/index.ts";
+
 export type ZoneCityRecord = {
   timeZoneId: string;
   names: { en: string; ru: string };
@@ -27,7 +29,6 @@ type ZoneNameNode = { exemplarCity?: string } & Record<string, unknown>;
 
 const UTC_KEY = "utc";
 const UTC_ZONE_ID = "UTC";
-const ETC_AREA = "Etc";
 const ALIAS_SEPARATOR = " ";
 const ZONE_ID_SEPARATOR = "/";
 const COUNTRY_CODE_LENGTH = 2;
@@ -99,7 +100,7 @@ function resolveCountryCode(
 ): string {
   const isRegionalZone =
     canonicalZoneId.includes(ZONE_ID_SEPARATOR) &&
-    !canonicalZoneId.startsWith(`${ETC_AREA}${ZONE_ID_SEPARATOR}`);
+    !canonicalZoneId.startsWith(`${ETC_ZONE_AREA}${ZONE_ID_SEPARATOR}`);
   if (!isRegionalZone) return "";
   const countryCode =
     COUNTRY_CODE_OVERRIDES[key] ??
@@ -129,7 +130,8 @@ export function extractZoneData(input: ZoneDataInput): ZoneData {
     for (const alias of aliases) {
       if (alias !== canonicalZoneId) timeZoneAliases[alias] = canonicalZoneId;
     }
-    if (canonicalZoneId.startsWith(`${ETC_AREA}${ZONE_ID_SEPARATOR}`)) continue;
+    if (canonicalZoneId.startsWith(`${ETC_ZONE_AREA}${ZONE_ID_SEPARATOR}`))
+      continue;
     const englishName =
       findExemplarCity(englishNames, cldrZoneId) ??
       deriveCityFromZoneId(canonicalZoneId);

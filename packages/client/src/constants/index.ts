@@ -43,7 +43,6 @@ export {
   SHORT_MONTH_TRAILING_STOP,
 } from "./grid";
 export { KeyboardKey } from "./keyboard";
-export { LEGACY_ZONE_PROBE_ID } from "./legacy";
 export {
   CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
   DEPLOY_DATE_FORMAT_OPTIONS,
@@ -160,4 +159,8 @@ export {
   UTC_OFFSET_MINUTES_SEPARATOR,
   UTC_OFFSET_PLUS_SIGN,
 } from "./utcOffset";
-export { LOCALIZED_ZONE_ABBREVIATION_KEYS } from "./zoneAbbreviations";
+export {
+  GMT_ZONE_NAME_PREFIX,
+  LETTERS_ONLY_DESIGNATION,
+  LOCALIZED_ZONE_ABBREVIATION_KEYS,
+} from "./zoneAbbreviations";
