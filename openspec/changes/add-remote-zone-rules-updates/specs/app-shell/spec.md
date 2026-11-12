@@ -3,7 +3,7 @@
 ## ADDED Requirements
 
 ### Requirement: Zone rules update notice
-When a check finds a newer zone rules release than the active one, stored or downloaded, the shell SHALL show a non-blocking notice naming the release, with a Reload action and a dismiss control, in the notices region after the update notice. Reload MUST reload the page, and when a new version is also waiting, Reload MUST apply that version as the update notice's Reload does, so either Reload applies both. The app MUST NOT reload by itself. The notice MUST NOT cover the page heading and MUST behave as the update notice for keyboard and focus. <!-- implements FR7, UX1, UX2, NFR-A1 of add-remote-zone-rules-updates -->
+When a check finds a newer zone rules release than the active one that is the stored release (stored before or by this check; see zone-rules-updates "Stored release document"), the shell SHALL show a non-blocking notice naming the release, with a Reload action and a dismiss control, in the notices region after the update notice. Reload MUST reload the page, and when a new version is also waiting, Reload MUST apply that version as the update notice's Reload does, so either Reload applies both. The app MUST NOT reload by itself. The notice MUST NOT cover the page heading and MUST behave as the update notice for keyboard and focus. <!-- implements FR7, UX1, UX2, NFR-A1 of add-remote-zone-rules-updates -->
 
 #### Scenario: Notice names the release
 - **WHEN** a check finds the newer release `2026g`

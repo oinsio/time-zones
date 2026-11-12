@@ -136,7 +136,7 @@ At start, before the zone rules are installed, the app SHALL make active the sto
 - **THEN** the active release is `2026g`
 
 ### Requirement: Stored release document
-The stored release SHALL be kept under its own storage key as an envelope `{ schemaVersion: 1, payload }` whose payload is the zone rules release document. The locations and preferences documents MUST be unchanged. When storage is unavailable or the write fails, a downloaded newer release MUST still show the notice and MUST NOT be stored. <!-- implements FR9 of add-remote-zone-rules-updates -->
+The stored release SHALL be kept under its own storage key as an envelope `{ schemaVersion: 1, payload }` whose payload is the zone rules release document. The locations and preferences documents MUST be unchanged. When storage is unavailable or the write fails, the downloaded release MUST NOT be stored, the zone rules update notice MUST NOT be shown (its Reload could not use the release), and that release file MUST NOT be downloaded again for the rest of the page's life; the release then arrives with the deploy that publishes it, through the update notice. <!-- implements FR9 of add-remote-zone-rules-updates -->
 
 #### Scenario: Envelope
 - **WHEN** `2026g` is stored
@@ -146,8 +146,14 @@ The stored release SHALL be kept under its own storage key as an envelope `{ sch
 #### Scenario: Storage unavailable
 - **GIVEN** storage is unavailable and the version file names a newer release
 - **WHEN** the app checks for a zone rules update
-- **THEN** the zone rules update notice is shown
+- **THEN** the zone rules update notice is not shown
 - **AND** nothing is written
+
+#### Scenario: An unstored release is not downloaded again
+- **GIVEN** a save of the newer release `2026g` failed
+- **WHEN** the app checks again for a zone rules update and the version file still names `2026g`
+- **THEN** only the version file is requested
+- **AND** the zone rules update notice is not shown
 
 ### Requirement: Dismissed notice stays dismissed
 Once the user dismisses the zone rules update notice for a release, the notice MUST stay hidden for the page's life until a newer release is stored. <!-- implements FR7 of add-remote-zone-rules-updates -->

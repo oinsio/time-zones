@@ -78,7 +78,7 @@ Paths are under `packages/client/` unless stated otherwise; `design.md` names ea
 - FR6: At start, before the zone rules wrapper is installed, the app MUST choose the active release: the stored release when it is readable, valid and newer than the bundled one, otherwise the bundled one; when the bundled release cannot be loaded, a valid stored release is used. An unreadable or invalid stored release MUST be removed silently; a stored release older than or equal to the bundled one MUST be removed.
 - FR7: The zone rules update notice MUST read "Time zone rules `<release>` are ready. Reload to use them." («Доступны правила часовых поясов `<release>`. Перезагрузите, чтобы применить.») with a Reload action and a dismiss control. Reload reloads the page; the app MUST NOT reload by itself; the notice MUST behave as the update notice for keyboard and focus; a dismissed notice stays hidden for the page's life until a newer release is stored.
 - FR8: The settings page MUST show the zone rules release line directly after the deploy time: "Time zone rules: `<release>`" («Правила часовых поясов: `<release>`»), naming the active release, in the accent colour of the deploy time, as plain text. Its strings MUST exist in every locale file. When no release is active the line is absent.
-- FR9: The stored release MUST be kept under its own storage key in the ADR-0004 envelope with schema version 1; the locations and preferences documents are unchanged. When storage is unavailable or the write fails, a downloaded newer release MUST still show the notice and MUST NOT be stored.
+- FR9: The stored release MUST be kept under its own storage key in the ADR-0004 envelope with schema version 1; the locations and preferences documents are unchanged. When storage is unavailable or the write fails, the downloaded release MUST NOT be stored, the zone rules update notice MUST NOT be shown (its Reload could not use the release), and that release file MUST NOT be downloaded again for the rest of the page's life; the release then arrives with the deploy that publishes it, through the update notice.
 
 ### Non-Functional
 
@@ -113,7 +113,7 @@ Paths are under `packages/client/` unless stated otherwise; `design.md` names ea
 | any | no active release (rules failed to load) | no check; no release line (FR3, FR8) |
 | any | start, stored release newer and valid | stored release active; settings name it (FR6) |
 | any | start, stored release older, equal or invalid | bundled release active; stored one removed (FR6) |
-| online | storage unavailable, newer release published | notice shown, nothing stored (FR9) |
+| online | storage unavailable, newer release published | no notice, nothing stored, not downloaded again this page life (FR9) |
 | any | settings page | release line after the deploy time (FR8) |
 
 Loading: the check runs in the background and has no loading state; the release line is known before the first render. Empty: no stored release is the normal case (bundled release active).
