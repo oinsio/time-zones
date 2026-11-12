@@ -26,6 +26,10 @@ export type FakeScenario = {
   archiveVersion: string;
   /** The exit code of `gpg --import`. */
   importExitCode?: number;
+  /** The exit code of `tar`, with its error text; the archive is not unpacked. */
+  tarFailure?: { exitCode: number; stderr: string };
+  /** The exit code of `zic`, with its error text; nothing is compiled. */
+  zicFailure?: { exitCode: number; stderr: string };
 };
 
 export const VALID_VERIFY_STATUS_FILE = join(
@@ -66,7 +70,7 @@ function playTar(args: string[], scenario: FakeScenario) {
   writeFileSync(join(directory, "asia"), "Zone Asia/Kolkata 5:30 - IST\n");
   writeFileSync(
     join(directory, "backward"),
-    "# a comment\nLink\tAsia/Kolkata\tAsia/Calcutta\nLink Asia/Calcutta Asia/Calcutta2\n",
+    "# a comment\n#Link Bogus/Target Bogus/Name\nLink\tAsia/Kolkata\tAsia/Calcutta\nLink Asia/Calcutta Asia/Calcutta2\nLink  \t Asia/Kolkata \t  Asia/Calcutta3\n",
   );
 }
 
@@ -86,6 +90,7 @@ function playZic(args: string[]) {
   writeTzif(outputDirectory, "Asia/Kolkata", kolkata);
   writeTzif(outputDirectory, "Asia/Calcutta", kolkata);
   writeTzif(outputDirectory, "Asia/Calcutta2", kolkata);
+  writeTzif(outputDirectory, "Asia/Calcutta3", kolkata);
 }
 
 export function createFakeProcessRunner(scenario: FakeScenario): {
@@ -100,6 +105,12 @@ export function createFakeProcessRunner(scenario: FakeScenario): {
     }
     if (command === "gpg" && args.includes("--verify")) {
       return { ...SUCCESS, stdout: scenario.verifyStatus };
+    }
+    if (command === "tar" && scenario.tarFailure) {
+      return { ...scenario.tarFailure, stdout: "" };
+    }
+    if (command === "zic" && scenario.zicFailure) {
+      return { ...scenario.zicFailure, stdout: "" };
     }
     if (command === "tar") playTar(args, scenario);
     if (command === "zic") playZic(args);

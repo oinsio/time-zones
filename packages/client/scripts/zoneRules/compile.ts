@@ -71,6 +71,7 @@ export async function runZoneRulesCompile(
   }
 }
 
+// Stryker disable all: the entry point binds the real dependencies; Node smoke runs cover it
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   process.exitCode = await runZoneRulesCompile({
     argv: process.argv.slice(FIRST_ARGUMENT_INDEX),
@@ -80,3 +81,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     log: console.log,
   });
 }
+// Stryker restore all

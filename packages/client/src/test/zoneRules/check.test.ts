@@ -1,5 +1,11 @@
 // @add-zone-rules-from-iana @FR8: the zone rules check against zdump
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -18,6 +24,7 @@ const COMPILED_ZONE_IDS = [
   "Asia/Kolkata",
   "Asia/Calcutta",
   "Asia/Calcutta2",
+  "Asia/Calcutta3",
 ];
 const NEW_YORK_ZDUMP = readFileSync(
   join(__dirname, "fixtures", "zdump", "America_New_York.txt"),
@@ -40,12 +47,13 @@ function buildReleaseText(
       "Asia/Kolkata": FIXTURE_KOLKATA,
       "Asia/Calcutta": "Asia/Kolkata",
       "Asia/Calcutta2": "Asia/Kolkata",
+      "Asia/Calcutta3": "Asia/Kolkata",
     },
   });
 }
 
 function createCompiledDirectory(zoneIds = COMPILED_ZONE_IDS): string {
-  const directory = mkdtempSync(join(tmpdir(), "zone-rules-check-test-"));
+  const directory = mkdtempSync(join(tmpdir(), "compiled-fixture-"));
   for (const zoneId of zoneIds) {
     mkdirSync(dirname(join(directory, zoneId)), { recursive: true });
     writeFileSync(join(directory, zoneId), "");
@@ -54,11 +62,15 @@ function createCompiledDirectory(zoneIds = COMPILED_ZONE_IDS): string {
 }
 
 /** Plays zdump: America/New_York gets the captured fixture, every other zone no line. */
-function createZdumpRunner(zdumpCalls: string[][]): RunProcess {
+function createZdumpRunner(
+  zdumpCalls: string[][],
+  zdumpFailure = false,
+): RunProcess {
   return async (command, args) => {
     if (command !== "zdump") return { exitCode: 0, stdout: "", stderr: "" };
     zdumpCalls.push(args);
     const paths = args.slice(3);
+    if (zdumpFailure) return { exitCode: 3, stdout: "", stderr: "zdump broke" };
     const stdout = paths
       .filter((path) => path.endsWith("America/New_York"))
       .flatMap((path) =>
@@ -67,11 +79,25 @@ function createZdumpRunner(zdumpCalls: string[][]): RunProcess {
           .map((line) => line.replace(/^\S+/, path)),
       )
       .join("\n");
-    return { exitCode: 0, stdout, stderr: "" };
+    const kolkataLines = paths
+      .filter((path) => path.endsWith("Asia/Kolkata"))
+      .map(
+        (path) =>
+          `${path}  Sat Jan  1 00:00:05 2000 UT = Sat Jan  1 05:30:05 2000 IST isdst=0 gmtoff=19800`,
+      );
+    return {
+      exitCode: 0,
+      stdout: [stdout, ...kolkataLines].filter(Boolean).join("\n"),
+      stderr: "",
+    };
   };
 }
 
-async function check(argv: string[], releaseText = buildReleaseText()) {
+async function check(
+  argv: string[],
+  releaseText = buildReleaseText(),
+  zdumpFailure = false,
+) {
   const zdumpCalls: string[][] = [];
   const logLines: string[] = [];
   const downloads = createFakeFetch();
@@ -79,7 +105,7 @@ async function check(argv: string[], releaseText = buildReleaseText()) {
     verifyStatus: readFileSync(VALID_VERIFY_STATUS_FILE, "utf8"),
     archiveVersion: "2026f",
   });
-  const zdumpRunner = createZdumpRunner(zdumpCalls);
+  const zdumpRunner = createZdumpRunner(zdumpCalls, zdumpFailure);
   const readPaths: string[] = [];
   const exitCode = await runZoneRulesCheck({
     argv,
@@ -148,6 +174,7 @@ describe("runZoneRulesCheck with a compiled directory", () => {
     const run = await check(["--compiled", compiled]);
     expect(run.exitCode).toBe(1);
     expect(run.logLines.join("\n")).toContain("Europe/Oslo");
+    expect(run.logLines.join("\n")).toContain("no such zone in the release");
   });
 
   it("exits 1 when the release holds a zone the compiled files lack", async () => {
@@ -157,6 +184,7 @@ describe("runZoneRulesCheck with a compiled directory", () => {
     ]);
     expect(run.exitCode).toBe(1);
     expect(run.logLines.join("\n")).toContain("Asia/Kolkata");
+    expect(run.logLines.join("\n")).toContain("no such compiled file");
   });
 
   it("exits 1 with the error when the compiled directory does not exist", async () => {
@@ -165,9 +193,53 @@ describe("runZoneRulesCheck with a compiled directory", () => {
     expect(run.logLines.join("\n")).toContain("/nonexistent/compiled");
   });
 
-  it("exits 1 when the release file is not a release", async () => {
+  it("exits 1 and says why when the release file is not a release", async () => {
     const run = await check(["--compiled", createCompiledDirectory()], "{}");
     expect(run.exitCode).toBe(1);
+    expect(run.logLines.join("\n")).toContain("Invalid zone rules release");
+  });
+
+  it("exits 1 and says why when zdump fails", async () => {
+    const run = await check(
+      ["--compiled", createCompiledDirectory()],
+      buildReleaseText(),
+      true,
+    );
+    expect(run.exitCode).toBe(1);
+    expect(run.logLines.join("\n")).toContain(
+      "zdump failed (exit 3): zdump broke",
+    );
+  });
+
+  it("finds a difference in a zone after the first one", async () => {
+    const alteredKolkata = JSON.stringify({
+      release: "2026f",
+      cutoff: 946684800,
+      zones: {
+        "America/New_York": FIXTURE_NEW_YORK,
+        "Asia/Kolkata": { ...FIXTURE_KOLKATA, futureRule: "IST-5:31" },
+        "Asia/Calcutta": "Asia/Kolkata",
+        "Asia/Calcutta2": "Asia/Kolkata",
+        "Asia/Calcutta3": "Asia/Kolkata",
+      },
+    });
+    const run = await check(
+      ["--compiled", createCompiledDirectory()],
+      alteredKolkata,
+    );
+    expect(run.exitCode).toBe(1);
+    expect(run.logLines.join("\n")).toContain("Asia/Kolkata");
+  });
+
+  it("leaves no temporary directory behind", async () => {
+    const countWorkDirectories = () =>
+      readdirSync(tmpdir()).filter((name) =>
+        name.startsWith("zone-rules-check-"),
+      ).length;
+    const before = countWorkDirectories();
+    await check([]);
+    await check(["--compiled", createCompiledDirectory()]);
+    expect(countWorkDirectories()).toBe(before);
   });
 
   it("exits 1 when the release file cannot be read", async () => {

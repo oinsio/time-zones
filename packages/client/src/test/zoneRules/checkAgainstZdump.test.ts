@@ -57,6 +57,33 @@ describe("parseZdumpLines", () => {
     expect(parseZdumpLines(readZdumpFixture("Asia/Almaty")).length).toBe(22);
   });
 
+  it.each([
+    ["Jan", 1, 946684800 + 0],
+    ["Feb", 2, 949363200],
+    ["Mar", 3, 951868800],
+    ["Apr", 4, 954547200],
+    ["May", 5, 957139200],
+    ["Jun", 6, 959817600],
+    ["Jul", 7, 962409600],
+    ["Aug", 8, 965088000],
+    ["Sep", 9, 967766400],
+    ["Oct", 10, 970358400],
+    ["Nov", 11, 973036800],
+    ["Dec", 12, 975628800],
+  ])(
+    "reads the month %s as month %i of the year",
+    (monthName, _month, firstOfMonthEpochSeconds) => {
+      const [entry] = parseZdumpLines(
+        `Zone  Sat ${monthName}  1 00:00:00 2000 UT = Sat ${monthName}  1 00:00:00 2000 UTC isdst=0 gmtoff=0`,
+      );
+      expect(entry?.epochSeconds).toBe(firstOfMonthEpochSeconds);
+    },
+  );
+
+  it("skips a line of spaces", () => {
+    expect(parseZdumpLines("   \n")).toEqual([]);
+  });
+
   it("skips empty lines", () => {
     expect(parseZdumpLines("\n\n")).toEqual([]);
   });
@@ -106,8 +133,49 @@ describe("compareWithRelease", () => {
   });
 
   it("reports a zone the release does not hold", () => {
-    expect(compareWithRelease(release, "Mars/Olympus_Mons", [])).toMatchObject({
+    expect(compareWithRelease(release, "Mars/Olympus_Mons", [])).toEqual({
       zoneId: "Mars/Olympus_Mons",
+      instant: "-",
+      expected: "a zone in zdump",
+      actual: "no such zone in the release",
+    });
+  });
+
+  describe("each field of the local time type", () => {
+    const CUTOFF = 946684800;
+    const standardRelease = parseRelease({
+      release: "test",
+      cutoff: CUTOFF,
+      zones: {
+        X: {
+          types: [[3600, "A", 0]],
+          cutoffType: 0,
+          changes: [],
+          futureRule: "",
+        },
+      },
+    });
+    const matching = {
+      epochSeconds: CUTOFF + 5,
+      utcOffsetSeconds: 3600,
+      designation: "A",
+      isDaylightSavingTime: false,
+    };
+
+    it("finds no difference when all three fields match", () => {
+      expect(
+        compareWithRelease(standardRelease, "X", [matching]),
+      ).toBeUndefined();
+    });
+
+    it.each([
+      ["the offset", { utcOffsetSeconds: 7200 }],
+      ["the designation", { designation: "B" }],
+      ["the daylight saving flag", { isDaylightSavingTime: true }],
+    ])("finds a difference in only %s", (_description, change) => {
+      expect(
+        compareWithRelease(standardRelease, "X", [{ ...matching, ...change }]),
+      ).toMatchObject({ zoneId: "X" });
     });
   });
 

@@ -37,9 +37,68 @@ describe("readTzif", () => {
       types: [EST],
       transitions: [],
       footer: "",
-      versionOneBlock: Uint8Array.of(9, 9, 9, 9, 9, 9, 9),
+      versionOne: {
+        counts: {
+          time: 0,
+          type: 1,
+          char: 1,
+          leap: 0,
+          standard: 0,
+          universal: 0,
+        },
+        block: Uint8Array.of(9, 9, 9, 9, 9, 9, 9),
+      },
     });
     expect(readTzif(bytes).types).toEqual([EST]);
+  });
+
+  it("skips a version 1 block with transitions, leap seconds and indicators", () => {
+    // 2 transitions of 4 bytes and 2 type indices, 1 type of 6 bytes, 1 designation byte,
+    // 1 leap second of 8 bytes, 1 standard and 1 universal indicator
+    const blockLength = 2 * 4 + 2 + 6 + 1 + 8 + 1 + 1;
+    const bytes = buildTzif({
+      types: [EST, EDT],
+      transitions: [[1_000_000_000, 1]],
+      footer: "EST5EDT",
+      versionOne: {
+        counts: {
+          time: 2,
+          type: 1,
+          char: 1,
+          leap: 1,
+          standard: 1,
+          universal: 1,
+        },
+        block: new Uint8Array(blockLength).fill(9),
+      },
+    });
+    expect(readTzif(bytes)).toMatchObject({
+      footer: "EST5EDT",
+      types: [EST, EDT],
+    });
+  });
+
+  it("skips the leap seconds and indicators of the 64-bit block", () => {
+    const bytes = buildTzif({
+      types: [EST],
+      transitions: [[1_000_000_000, 0]],
+      footer: "EST5",
+      extraCounts: { leap: 2, standard: 1, universal: 3 },
+    });
+    expect(readTzif(bytes).footer).toBe("EST5");
+  });
+
+  it("rejects data where the footer does not start on a newline", () => {
+    const bytes = buildTzif({ types: [EST], transitions: [], footer: "EST5" });
+    bytes[bytes.length - "\nEST5\n".length] = "X".charCodeAt(0);
+    expect(() => readTzif(bytes)).toThrow("ends");
+  });
+
+  it("reads the daylight saving flag of the first type as set and of the second as clear", () => {
+    const bytes = buildTzif({ types: [EDT, EST], transitions: [], footer: "" });
+    expect(
+      readTzif(bytes).types.map((type) => type.isDaylightSavingTime),
+    ).toEqual([true, false]);
   });
 
   it("reads a transition time above 2^31 and one before 1970", () => {

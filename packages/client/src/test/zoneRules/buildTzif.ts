@@ -15,8 +15,19 @@ export type BuildTzifOptions = {
   types: BuiltTzifType[];
   transitions: [epochSeconds: number, typeIndex: number][];
   footer: string;
-  /** Bytes of the version 1 data block (it is skipped by readers). */
-  versionOneBlock?: Uint8Array;
+  /** Counts of the version 1 header, and its data block that readers skip. */
+  versionOne?: { counts: HeaderCounts; block: Uint8Array };
+  /** Leap second and indicator counts of the 64-bit header; their bytes are written as zeros. */
+  extraCounts?: Pick<HeaderCounts, "leap" | "standard" | "universal">;
+};
+
+export type HeaderCounts = {
+  time: number;
+  type: number;
+  char: number;
+  leap: number;
+  standard: number;
+  universal: number;
 };
 
 const HEADER_LENGTH = 44;
@@ -31,7 +42,7 @@ const NEWLINE = 10;
 function buildHeader(
   magic: string,
   version: number,
-  counts: { time: number; type: number; char: number },
+  counts: HeaderCounts,
 ): Uint8Array {
   const header = new Uint8Array(HEADER_LENGTH);
   const view = new DataView(header.buffer);
@@ -39,7 +50,14 @@ function buildHeader(
     header[index] = magic.charCodeAt(index);
   }
   header[VERSION_OFFSET] = version;
-  const orderedCounts = [0, 0, 0, counts.time, counts.type, counts.char];
+  const orderedCounts = [
+    counts.universal,
+    counts.standard,
+    counts.leap,
+    counts.time,
+    counts.type,
+    counts.char,
+  ];
   for (let index = 0; index < COUNTS_PER_HEADER; index++) {
     view.setUint32(
       COUNTS_OFFSET + index * COUNT_FIELD_LENGTH,
@@ -64,14 +82,26 @@ function encodeDesignations(types: BuiltTzifType[]): {
   return { characters, indices };
 }
 
+const SIXTY_FOUR_BIT_LEAP_SECOND_LENGTH = 12;
+
 function buildSixtyFourBitBlock(options: BuildTzifOptions): {
-  counts: { time: number; type: number; char: number };
+  counts: HeaderCounts;
   bytes: Uint8Array;
 } {
+  const extraCounts = options.extraCounts ?? {
+    leap: 0,
+    standard: 0,
+    universal: 0,
+  };
   const { characters, indices } = encodeDesignations(options.types);
   const timeLength = options.transitions.length;
   const bytes = new Uint8Array(
-    timeLength * 9 + options.types.length * 6 + characters.length,
+    timeLength * 9 +
+      options.types.length * 6 +
+      characters.length +
+      extraCounts.leap * SIXTY_FOUR_BIT_LEAP_SECOND_LENGTH +
+      extraCounts.standard +
+      extraCounts.universal,
   );
   const view = new DataView(bytes.buffer);
   let offset = 0;
@@ -94,6 +124,7 @@ function buildSixtyFourBitBlock(options: BuildTzifOptions): {
       time: timeLength,
       type: options.types.length,
       char: characters.length,
+      ...extraCounts,
     },
     bytes,
   };
@@ -102,12 +133,15 @@ function buildSixtyFourBitBlock(options: BuildTzifOptions): {
 export function buildTzif(options: BuildTzifOptions): Uint8Array {
   const magic = options.magic ?? "TZif";
   const version = options.version ?? 50;
-  const versionOneBlock = options.versionOneBlock ?? new Uint8Array(7);
+  const versionOne = options.versionOne ?? {
+    counts: { time: 0, type: 1, char: 1, leap: 0, standard: 0, universal: 0 },
+    block: new Uint8Array(7),
+  };
   const { counts, bytes } = buildSixtyFourBitBlock(options);
   const footer = new TextEncoder().encode(options.footer);
   const parts = [
-    buildHeader(magic, version, { time: 0, type: 1, char: 1 }),
-    versionOneBlock,
+    buildHeader(magic, version, versionOne.counts),
+    versionOne.block,
     buildHeader(magic, version, counts),
     bytes,
     Uint8Array.of(NEWLINE),
