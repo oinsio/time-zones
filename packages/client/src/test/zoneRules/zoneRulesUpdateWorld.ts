@@ -10,7 +10,7 @@ import {
   createInMemoryZoneRulesVersionSource,
   type InMemoryZoneRulesVersionSourceScript,
 } from "@/adapters";
-import { useZoneRulesUpdate } from "@/controller/useZoneRulesUpdate";
+import { useZoneRulesUpdate } from "@/controller";
 import type { ZoneRulesRelease } from "@/lib/zoneRules";
 import type { StoredReleaseRepository } from "@/ports";
 import { setPageVisibility } from "@/test/pageVisibility";

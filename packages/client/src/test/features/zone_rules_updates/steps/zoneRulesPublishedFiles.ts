@@ -5,6 +5,7 @@
  */
 import { readFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
+import { Temporal } from "@/lib/temporal";
 import { ZONE_RULES_RELEASE_FILE } from "../../../../../app.config";
 
 const JSON_CONTENT_TYPE = "application/json";
@@ -57,7 +58,10 @@ export async function publishNewerRelease(page: Page): Promise<string> {
   await page.route(VERSION_FILE_URL_PATTERN, (route) =>
     route.fulfill({
       contentType: JSON_CONTENT_TYPE,
-      body: JSON.stringify({ release, publishedAt: new Date().toISOString() }),
+      body: JSON.stringify({
+        release,
+        publishedAt: Temporal.Now.instant().toString(),
+      }),
     }),
   );
   await page.route(`**/zone-rules/${release}.json`, (route) =>

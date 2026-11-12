@@ -2,7 +2,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { StoredReleaseLoadStatus, ZoneRulesSourceFailure } from "@/ports";
+import { StoredReleaseLoadStatus } from "@/ports";
 import { resetPageVisibility } from "@/test/pageVisibility";
 import { buildReleaseDocument } from "@/test/zoneRules/buildReleaseDocument";
 import {
@@ -11,37 +11,11 @@ import {
   SIXTEEN_MINUTES_LATER,
   type ZoneRulesUpdateWorldOptions,
 } from "@/test/zoneRules/zoneRulesUpdateWorld";
+import { FAILURE_OPTIONS } from "./zoneRulesCheckFailureOptions";
 
 const feature = await loadFeature("../zone_rules_updates_check.feature");
 
 const FIVE_MINUTES_AFTER_THE_RETURN = "2026-03-08T07:51:00Z";
-
-const FAILURE_OPTIONS: Record<string, ZoneRulesUpdateWorldOptions> = {
-  "the version file request fails": {
-    script: { version: ZoneRulesSourceFailure.REQUEST_FAILED },
-  },
-  "the version file returns status 404": {
-    script: { version: ZoneRulesSourceFailure.REQUEST_FAILED },
-  },
-  "the version file is not JSON": {
-    script: { version: ZoneRulesSourceFailure.UNPARSABLE },
-  },
-  'the version file names the invalid release name "latest"': {
-    script: { version: { release: "latest" } },
-  },
-  'the release file of "2026g" is not a valid zone rules release': {
-    script: {
-      version: { release: "2026g" },
-      releases: { "2026g": { release: "2026g" } },
-    },
-  },
-  'the release file of "2026g" names the release "2026h"': {
-    script: {
-      version: { release: "2026g" },
-      releases: { "2026g": buildReleaseDocument("2026h") },
-    },
-  },
-};
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let options: ZoneRulesUpdateWorldOptions = {};
