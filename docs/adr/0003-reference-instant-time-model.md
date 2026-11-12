@@ -3,6 +3,8 @@
 ## Status
 Accepted (2026-09-28). Refined by [ADR-0007](0007-reference-zone-and-device-time.md): "home location" below means the reference zone (home if set, otherwise the device time zone).
 
+The "Known limitation" below (time zone rules come from the browser) is superseded by [ADR-0014](0014-zone-rules-from-iana.md): the app ships and updates its own zone rules.
+
 ## Context
 
 Every screen answers one question: "what time is it in each location at a given moment?". The moment can be *now* or a moment the user picked — by tapping an hour, dragging a slider, typing "08:00" in some zone, or changing the date.

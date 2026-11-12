@@ -3,6 +3,8 @@
 ## Status
 Accepted (2026-10-29)
 
+The legacy zone shim and its probe are superseded by [ADR-0014](0014-zone-rules-from-iana.md); the boot sequence and the other decisions stand.
+
 ## Context
 The app must run on the latest Chrome, Firefox, Edge and Safari, and on iOS Safari 12.5, the last release for iPhone 5s/6 and iPad Air / mini 2–3. That engine has no optional chaining, no nullish coalescing, no lookbehind in regular expressions, no BigInt, no `Array#at`, no `ResizeObserver` and no `Intl.DisplayNames`, and its zone data predates the IANA 2022b renames (`Europe/Kyiv`). Modern browsers must not pay for this. Driven by `support-legacy-ios-12-safari`.
 
