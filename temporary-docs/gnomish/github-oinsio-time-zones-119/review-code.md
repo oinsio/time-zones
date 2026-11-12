@@ -22,7 +22,7 @@ All paths below are under `packages/client/` unless they start with `docs/`, `op
 - ✅ 3.2 — `core/futureRule.ts:154` `parseFutureRule` (with `core/futureRuleTokens.ts`); `core/futureRule.test.ts`.
 - ✅ 3.3 — `core/futureRuleOffset.ts` `resolveFutureRule` with a per-rule `WeakMap` memo, `core/epochDays.ts` integer arithmetic (no `Date`, no Temporal); tests `futureRuleOffset.test.ts`, `epochDays.test.ts`.
 - ✅ 3.4 — `core/localTimeType.ts:49-63` three ranges with binary search; `core/localTimeType.test.ts`.
-- ✅ 3.5 — measured in this review: every core file at or above 94% once the zero-test static survivors are discounted (see Mutation); core files import only `./*.ts`.
+- ✅ 3.5 — measured in this review with the core tests alone and no setup file (see Mutation, run B): `futureRule.ts` 99.21%, `futureRuleTokens.ts` 96.88%, `readZoneRules.ts` 97.96%, `zoneRulesRelease.ts` 100%; with the narrowed config (run A): `localTimeType.ts` 100%, `futureRuleOffset.ts` 97.50%, `epochDays.ts` 95.77%. Every core file is ≥ 95%. Core files import only `./*.ts`.
 - ✅ 4.1 — `scripts/zoneRules/signing.ts:10-11` fingerprint `7E3792A9…62AA7E34` and `2031-07-24`; `zone-rules/README.md:23-38` "Signing key" section with owner, fingerprint, expiry and the 2026-11-12 human verification.
 - ✅ 4.2 — `scripts/zoneRules/readTzif.ts` (64-bit block, v1 rejected); `src/test/zoneRules/readTzif.test.ts`, `buildTzif.ts`, `fixtures/America_New_York.tzif`.
 - ✅ 4.3 — `scripts/zoneRules/truncateToCutoff.ts:64`, `writeRelease.ts:36`; `src/test/zoneRules/truncateToCutoff.test.ts`, `writeRelease.test.ts`.
@@ -34,7 +34,7 @@ All paths below are under `packages/client/` unless they start with `docs/`, `op
 - ✅ 5.2 — `src/lib/zoneRules/dateTimeFormatWrapper.ts:160` `createZoneRulesDateTimeFormat`, `installZoneRules.ts` (`installZoneRulesDateTimeFormat`, `getKnownZoneIds`, `getInstalledRelease`), `currentInstant.ts` (no `Date.now`), `zoneNameParts.ts`; tests `dateTimeFormatWrapper.test.ts`, `.names.test.ts`, `.clock.test.ts`. The current-instant test is weak: see R1.
 - ✅ 5.3 — `dateTimeFormatWrapper.polyfill.test.ts:158-215` (Almaty 13:00/+05:00, `resolveWallClock` rows, Ciudad Juárez, no Almaty construction after the install, case-insensitive at `:210-211`).
 - ✅ 5.4 — `src/model/reduceWallTime.legacy.test.ts:16` over `installStaleEngine` and the wrapper.
-- ✅ 5.5 — `dateTimeFormatWrapper.ts` measures 88.57% raw; all 5 survivors that keep it below 90% ran zero tests (an artifact of static mutants, see Mutation). Without them it is 95.38%.
+- ✅ 5.5 — `dateTimeFormatWrapper.ts`: Stryker reports 88.57% (62/70). Five of its 8 survivors ran zero tests even with coverage analysis off. They break the wrapper that `src/test/setup.ts` installs, so no test file loads. Two of them were re-applied by hand to a copy of the package, and `npx vitest run src/lib/zoneRules/dateTimeFormatWrapper.test.ts` failed with a `TypeError` in the setup (see Mutation, run C). A normal test run therefore kills them, and the score is 67/70 = 95.71%. Of the rest, one survivor is equivalent and two are the low-stakes `formatRangeToParts` case noted in Mutation. `zoneNameParts.ts` 96.55%, `loadZoneRules.ts` 100%. `currentInstant.ts` (60%, R1) and `installZoneRules.ts` (87.5%, R3) are counted under M6.
 - ✅ 6.1 — `scripts/zoneRules/zoneRulesPlugin.ts:24`, `addZoneRulesPreload.ts:9`; `src/vite-env.d.ts:32,38`; `vite.config.ts:42`, `vitest.config.ts`; tests `src/test/zoneRules/addZoneRulesPreload.test.ts`, `zoneRulesPlugin.test.ts`.
 - ✅ 6.2 — `src/lib/zoneRules/loadZoneRules.ts`; `src/lib/legacy/bootApp.ts` (rules step after legacy support, `console.error` on rejection); `src/boot.ts`; tests `loadZoneRules.test.ts`, `bootApp.test.ts:121-122` (source scan covers `lib/zoneRules` and `core`).
 - ✅ 6.3 — `src/test/installZoneRules.ts` (exports `realNativeDateTimeFormat`, `committedRelease`); `src/test/setup.ts:2` imports it first; `src/test/installZoneRules.test.ts`.
@@ -86,7 +86,7 @@ All paths below are under `packages/client/` unless they start with `docs/`, `op
 - ✅ M3 — `zone_rules_lookup.feature` (Almaty `13:00`, `UTC+5` with the stale fake) and `zone_rules_known_zones.feature` (Ciudad Juárez `02:00`, `UTC−6`).
 - ✅ M4 — sign, negative DST, hours outside 0–24, never-firing rule, angle brackets and after 2037 in `zone_rules_future_rule.feature`/`futureRuleOffset.test.ts`; 64-bit block only in `readTzif.test.ts`.
 - ✅ M5 — `check-bundle-size.mjs` checks initial JS ≤ 150 KB, the asset ≤ `ZONE_RULES_ASSET_BUDGET_KB` and exactly one preload; CI green.
-- ⚠️ M6 — not met for three logic modules: `currentInstant.ts` 60% (R1), `check.ts` 89.74% (R2), `installZoneRules.ts` 87.5% (R3). Every other module is ≥ 90% (see Mutation).
+- ⚠️ M6 — not met for three logic modules: `currentInstant.ts` 60% (R1), `check.ts` 89.74% (R2), `installZoneRules.ts` 87.5% (R3). Every other measured module is ≥ 90%. For the four static core files this comes from run B, without the setup file. For the wrapper it comes from counting its setup-crash mutants as killed, which run C reproduced by hand. See Mutation.
 - ✅ M7 — `moment-timezone` absent from `package.json`; the production grep for `supportedValuesOf`, `isZoneDataOutdated`, `LEGACY_ZONE_PROBE_ID` and `zoneShim` prints nothing.
 - ✅ Scenario: A check fails — unchanged CI behaviour; the new zone rules checks are build checks (`check-bundle-size.mjs`) and H1.
 - ✅ Scenario: Bundle exceeds the budget — unchanged; `scripts/check-bundle-size.mjs` initial JS check.
@@ -137,7 +137,7 @@ All paths below are under `packages/client/` unless they start with `docs/`, `op
 - ✅ Scenario: Zone names — `zone_rules_wrapper.feature` outline + steps.
 - ✅ Scenario: Resolved options keep the requested id — `zone_rules_wrapper.feature` outline + steps.
 - ✅ Scenario: Unknown zones fall through — `zone_rules_wrapper.feature` + steps.
-- ✅ Scenario: A formatter without a date formats the current instant — `zone_rules_wrapper.feature` + steps, `dateTimeFormatWrapper.clock.test.ts:105-114` (weak, see R1).
+- ✅ Scenario: A formatter without a date formats the current instant — `zone_rules_wrapper.feature` + steps, `dateTimeFormatWrapper.clock.test.ts:106-115` (weak, see R1).
 - ✅ Scenario: A valid archive compiles — `zone_rules_compile.feature` + `steps/zone_rules_compile.steps.ts`.
 - ✅ Scenario: The archive comes from the release address — `zone_rules_compile.feature` + steps.
 - ✅ Scenario: A bad signature stops the compiler — `zone_rules_compile.feature` + steps.
@@ -158,62 +158,67 @@ All paths below are under `packages/client/` unless they start with `docs/`, `op
 
 ## Mutation
 
-**How it was measured.** Stryker was run on each file listed below, at most five files per run, one run at a time. A first run with the project config (`npx stryker run --mutate '<5 zoneRules files>'`) did not finish within 590 s and was stopped. `src/test/setup.ts` installs the wrapper for every test, so the dry run executes the whole unit suite as "related". The later runs therefore used a throwaway config outside the repository (`/tmp/zr/stryker.narrow.config.mjs`). It loads `vitest.config.ts` unchanged and only narrows `test.include` to the tests of the mutated files: `src/lib/zoneRules/**`, `src/test/zoneRules/*`, `src/test/*.test.ts`, the `zone_rules` steps, and, for the batches that need them, the `zone_abbreviations`, `location_search`, `browser_compatibility`, `src/lib/legacy`, `src/adapters/city-search` and `src/model/timeZoneId` tests. Those are the only tests that target these files, but the scores are a lower bound.
+**How it was measured.** Stryker was run on each file listed below, at most five files per run, one run at a time, never in the background. Every config used lives outside the repository and imports `packages/client/stryker.config.mjs` and `vitest.config.ts` unchanged except for the field named.
 
-**Zero-test survivors.** Some mutants are "static": the code runs while the test setup loads the release (`parseZoneRulesRelease`, `parseFutureRule`, the wrapper constructor). In these runs Stryker marked them Survived with `testsCompleted: 0`, meaning no test ran against them. They are counted as not measured, not as gaps. Both numbers are given.
+- **Run A (narrowed include).** A first run with the project config (`npx stryker run --mutate '<5 zoneRules files>'`) did not finish within 590 s and was stopped. `src/test/setup.ts` installs the wrapper for every test, so the dry run executes the whole unit suite. Run A therefore narrowed only `test.include` to the tests that target the mutated files (`src/lib/zoneRules/**`, `src/test/zoneRules/*`, `src/test/*.test.ts`, the `zone_rules` steps and, per batch, the `zone_abbreviations`, `location_search`, `browser_compatibility`, `src/lib/legacy`, `src/adapters/city-search` and `src/model/timeZoneId` tests). The scores are a lower bound.
+- **Zero-test survivors.** In run A, the static mutants of `parseZoneRulesRelease`, `parseFutureRule` and the wrapper came back Survived with `testsCompleted: 0`. A re-run of `futureRuleTokens.ts` and `zoneRulesRelease.ts` with `coverageAnalysis: "off"` gave the same 50.00% / 50.00%, again with `testsCompleted: 0`, so per-test coverage analysis does not cause them. The cause is `src/test/installZoneRules.ts:16-17`, imported first by `src/test/setup.ts`. It parses the committed release at import time and throws if that fails, so such a mutant crashes the setup before any test is collected. The Stryker vitest runner records that crash as Survived with zero tests.
+- **Run B (no setup file).** The core tests import only `./*.ts` and need no setup, so `futureRule.ts`, `futureRuleTokens.ts`, `readZoneRules.ts` and `zoneRulesRelease.ts` were re-measured with `test.include = ["src/lib/zoneRules/core/*.test.ts"]` and `test.setupFiles = []`. These are the scores in the table, and the remaining survivors all ran tests.
+- **Run C (wrapper).** The wrapper's tests need the setup, so run B does not apply to it. With `coverageAnalysis: "off"`, its 5 zero-test survivors (lines 145, 147, 163, 169 and 171 of `dateTimeFormatWrapper.ts`) are all static. Two of them were applied by hand to a copy of the package in `/tmp`: line 171 `options?.timeZone?.toLowerCase()` → `options?.timeZone.toLowerCase()`, and line 147's map callback → `() => undefined`. In both cases `npx vitest run src/lib/zoneRules/dateTimeFormatWrapper.test.ts` failed (`TypeError` in the setup, "no tests", exit 1), while the unmodified copy passed (14 tests). A normal test run kills them, so the table counts the five as killed. The other three are real survivors: line 171 `?? ""` → `?? "Stryker was here!"` is equivalent, because the lower-cased lookup misses either way. Line 90's `part.source === "startRange"` → `false`/`""` survives because the only cross-change range test (`dateTimeFormatWrapper.clock.test.ts:28-44`) checks a shared zone-name part. No app code calls `formatRange`, so this is noted here, not raised as a finding.
 
-| File | Raw score | Zero-test survivors | Score without them |
-|---|---|---|---|
-| `src/lib/zoneRules/dateTimeFormatWrapper.ts` | 88.57% | 5 | 95.38% |
-| `src/lib/zoneRules/currentInstant.ts` | 60.00% | 0 | 60.00% (R1) |
-| `src/lib/zoneRules/zoneNameParts.ts` | 96.55% | 0 | 96.55% |
-| `src/lib/zoneRules/installZoneRules.ts` | 87.50% | 0 | 87.50% (R3) |
-| `src/lib/zoneRules/loadZoneRules.ts` | 100% | 0 | 100% |
-| `src/lib/zoneRules/core/localTimeType.ts` | 100% | 0 | 100% |
-| `src/lib/zoneRules/core/futureRuleOffset.ts` | 97.50% | 0 | 97.50% |
-| `src/lib/zoneRules/core/epochDays.ts` | 95.77% | 0 | 95.77% |
-| `src/lib/zoneRules/core/futureRule.ts` | 51.59% | 60 | 98.48% |
-| `src/lib/zoneRules/core/futureRuleTokens.ts` | 50.00% | 30 | 94.12% |
-| `src/lib/zoneRules/core/readZoneRules.ts` | 59.18% | 38 | 96.67% |
-| `src/lib/zoneRules/core/zoneRulesRelease.ts` | 50.00% | 29 | 100% |
-| `scripts/zoneRules/readTzif.ts` | 94.68% | 0 | 94.68% |
-| `scripts/zoneRules/truncateToCutoff.ts` | 100% | 0 | 100% |
-| `scripts/zoneRules/writeRelease.ts` | 92.59% | 0 | 92.59% |
-| `scripts/zoneRules/checkAgainstZdump.ts` | 96.88% | 0 | 96.88% |
-| `scripts/zoneRules/verifySignature.ts` | 97.73% | 0 | 97.73% |
-| `scripts/zoneRules/downloadRelease.ts` | 100% | 0 | 100% |
-| `scripts/zoneRules/compileWithZic.ts` | 97.14% | 0 | 97.14% |
-| `scripts/zoneRules/compile.ts` | 91.67% | 0 | 91.67% |
-| `scripts/zoneRules/check.ts` | 89.74% | 0 | 89.74% (R2) |
-| `scripts/zoneRules/releaseZonePeriods.ts` | 100% | 0 | 100% |
-| `scripts/zoneRules/zoneRulesPlugin.ts` | 91.78% | 0 | 91.78% |
-| `scripts/zoneRules/addZoneRulesPreload.ts` | 100% | 0 | 100% |
-| `src/adapters/city-search/zoneCitiesSource.ts` | 97.92% | 0 | 97.92% |
-| `src/lib/legacy/bootApp.ts` | 100% | 0 | 100% |
-| `src/lib/legacy/needsLegacySupport.ts` | 100% | 0 | 100% |
-| `src/lib/legacy/installLegacySupport.ts` | 100% | 0 | 100% |
-| `src/model/timeZoneId.ts` | 94.12% | 0 | 94.12% |
+The project's own `pnpm test:mutation` will still show the setup-crash mutants as Survived. Read its numbers for these five files with the method above in mind.
 
-`scripts/zoneData/zoneDataPlugin.ts` got 0% with every mutant NoCoverage. It runs inside the Vite config and no unit test imports it, which was already true before this change, so it was not measurable this way. M6 does not cover it. The zero-test numbers for the static core files are not proven kills: a run with the project config and a longer time limit would confirm them.
+| File | Score | Run |
+|---|---|---|
+| `src/lib/zoneRules/dateTimeFormatWrapper.ts` | 95.71% (Stryker 88.57%; 5 setup-crash mutants counted as killed) | C |
+| `src/lib/zoneRules/currentInstant.ts` | 60.00% (R1) | A |
+| `src/lib/zoneRules/zoneNameParts.ts` | 96.55% | A |
+| `src/lib/zoneRules/installZoneRules.ts` | 87.50% (R3) | A |
+| `src/lib/zoneRules/loadZoneRules.ts` | 100% | A |
+| `src/lib/zoneRules/core/localTimeType.ts` | 100% | A |
+| `src/lib/zoneRules/core/futureRuleOffset.ts` | 97.50% | A |
+| `src/lib/zoneRules/core/epochDays.ts` | 95.77% | A |
+| `src/lib/zoneRules/core/futureRule.ts` | 99.21% | B |
+| `src/lib/zoneRules/core/futureRuleTokens.ts` | 96.88% | B |
+| `src/lib/zoneRules/core/readZoneRules.ts` | 97.96% | B |
+| `src/lib/zoneRules/core/zoneRulesRelease.ts` | 100% | B |
+| `scripts/zoneRules/readTzif.ts` | 94.68% | A |
+| `scripts/zoneRules/truncateToCutoff.ts` | 100% | A |
+| `scripts/zoneRules/writeRelease.ts` | 92.59% | A |
+| `scripts/zoneRules/checkAgainstZdump.ts` | 96.88% | A |
+| `scripts/zoneRules/verifySignature.ts` | 97.73% | A |
+| `scripts/zoneRules/downloadRelease.ts` | 100% | A |
+| `scripts/zoneRules/compileWithZic.ts` | 97.14% | A |
+| `scripts/zoneRules/compile.ts` | 91.67% | A |
+| `scripts/zoneRules/check.ts` | 89.74% (R2) | A |
+| `scripts/zoneRules/releaseZonePeriods.ts` | 100% | A |
+| `scripts/zoneRules/zoneRulesPlugin.ts` | 91.78% | A |
+| `scripts/zoneRules/addZoneRulesPreload.ts` | 100% | A |
+| `src/adapters/city-search/zoneCitiesSource.ts` | 97.92% | A |
+| `src/lib/legacy/bootApp.ts` | 100% | A |
+| `src/lib/legacy/needsLegacySupport.ts` | 100% | A |
+| `src/lib/legacy/installLegacySupport.ts` | 100% | A |
+| `src/model/timeZoneId.ts` | 94.12% | A |
+
+`scripts/zoneData/zoneDataPlugin.ts` got 0% with every mutant NoCoverage. It runs inside the Vite config and no unit test imports it, which was already true before this change, so it was not measurable this way. M6 does not cover it.
 
 ## Findings
 
 ### R1 — WARNING — The current-instant reader is tested only on its hour
-- Location: `packages/client/src/lib/zoneRules/dateTimeFormatWrapper.clock.test.ts:75-114` (the code under test: `packages/client/src/lib/zoneRules/currentInstant.ts:45-61`)
+- Location: `packages/client/src/lib/zoneRules/dateTimeFormatWrapper.clock.test.ts:70-115` (the code under test: `packages/client/src/lib/zoneRules/currentInstant.ts:41-61`)
 - Rule: `.claude/rules/tdd-workflow.md` (mutation ≥ 95%, minimum 90%); M6 of the proposal
 - Problem: `createCurrentInstantReader` turns the year, month, day, hour, minute, second and fractional-second parts of the native UTC clock formatter into epoch milliseconds. Its only test fixes the clock at `2026-07-15T08:00:00.000Z` (minute, second and millisecond are all 0) and asserts only `format()` → `"13:00"` with time-only options. Stryker leaves 10 of 25 mutants alive (60%). Reading `"month"` or `"day"` as `""`, dropping the minute, second or millisecond term, and turning `*` into `/` for minutes and seconds all survive.
 - Impact: a regression that misreads the month, the day, the minutes or the seconds of "now" goes unnoticed. For example, a wrapper `format()` with a date option would show January for a July "now", or `13:00` at 13:47. FR6's scenario "A formatter without a date formats the current instant" would still pass. The file fails M6 (minimum 90%).
-- Fix: in `dateTimeFormatWrapper.clock.test.ts`, change `FIXED_INSTANT` to an instant where every field matters, e.g. `2026-11-28T19:47:31.250Z` (Almaty has no clock change near it). Add a case asserting that `formatToParts()` without a date returns the same parts as `formatToParts(FIXED_INSTANT)` with all fields to the second plus `fractionalSecondDigits: 3`. Optionally test `createCurrentInstantReader(ClockNative)()` directly for `FIXED_INSTANT`. Re-run `npx stryker run --mutate 'src/lib/zoneRules/currentInstant.ts'` to ≥ 90%.
-- Fix risk: none — test-only. Keep the `ClockNative` proxy that substitutes `FIXED_INSTANT` for a date-less call, and keep the file under 200 lines (it has 146).
+- Fix: keep `FIXED_INSTANT` (`2026-07-15T08:00:00Z`) and the existing case "reads the instant the native UTC formatter reports" (`format()` → `"13:00"`) unchanged. Task 5.2 and the spec scenario "A formatter without a date formats the current instant" require that case. Give `createClockNative` an optional `currentInstant` parameter that defaults to `FIXED_INSTANT` and is used by the proxy's date-less `formatToParts`. Add a second case with a current instant whose month, day, hour, minute, second and millisecond are all non-zero and that crosses midnight in Almaty, e.g. `2026-11-28T19:47:31.250Z` (Almaty +05:00 → `2026-11-29 00:47:31.250`; no clock change near it). Assert that the wrapper's `formatToParts()` without a date, for `timeZone: "Asia/Almaty"` with `year`, `month`, `day`, `hour`, `minute`, `second` (`hourCycle: "h23"`) and `fractionalSecondDigits: 3`, equals `formatToParts(thatInstant)` on the same formatter. Re-run `npx stryker run --mutate 'src/lib/zoneRules/currentInstant.ts'` to ≥ 90%.
+- Fix risk: low, test-only. The `13:00` case and the work-bound cases (one native construction, two native calls without a date) keep using the default instant, so their assertions do not change. Each case builds its own `ClockNative`, so the two instants do not share state. The file grows from 146 to about 170 lines, still under 200.
 - Status: open
 
 ### R2 — WARNING — `check.ts` is below the mutation minimum; its missing-zone tests assert too loosely
-- Location: `packages/client/scripts/zoneRules/check.ts:94-114` (`findMissingZone`) and `:79-84`; the tests at `packages/client/src/test/zoneRules/check.test.ts:169-186`
+- Location: `packages/client/scripts/zoneRules/check.ts:93-114` (`findMissingZone`) and `:75-84`; the tests at `packages/client/src/test/zoneRules/check.test.ts:169-187`
 - Rule: `.claude/rules/tdd-workflow.md` (minimum 90%); task 4.7 and M6 of the change
-- Problem: task 4.7 is ticked, but `check.ts` measures 89.74% (70/78). The tests "exits 1 when the compiled files hold a zone the release lacks" and "… the release holds a zone the compiled files lack" exist. They only check that the log contains the zone id and `no such zone in the release`. The fallback through `compareWithRelease` logs the same substring after running `zdump`, so the `findMissingZone` branch is never told apart. The survivors: `(zoneId) => !release.zones.has(zoneId)` → `() => undefined`, the `instant: "-"` and `expected` texts emptied, `if (!path) continue` dropped, the whitespace regex of `groupZdumpLinesByZone` weakened, `rm(…, { force: true })` flipped, and the uncovered `?? ""` for `--compiled` without a directory.
-- Impact: if the compiler silently drops a zone, or the release keeps a zone IANA removed, the check is supposed to stop before running `zdump` and say which side lacks the zone. A regression in `findMissingZone` would still exit 1 through the fallback, but run `zdump` and print a misleading message, and no test would notice. The ticked task 4.7 is not met.
-- Fix: tighten the two existing cases at `check.test.ts:169-186` instead of adding new ones. Assert the exact logged line (`Europe/Oslo differs at -: zdump says a zone of the release, the release says no such zone in the release`, and the `a compiled zone file` / `no such compiled file` line for `Asia/Kolkata`) and that no `zdump` call was recorded. Add one case for `--compiled` given without a directory (exit 1 with the check's error). If that case pushes the file past 300 lines, put it in a sibling `check.arguments.test.ts`. Re-run `npx stryker run --mutate 'scripts/zoneRules/check.ts'` to ≥ 90%.
-- Fix risk: none for behaviour. A new sibling file needs the fakes of `compileFakes.ts`/`compileWorld.ts` and the `// FR8 of add-zone-rules-from-iana` header.
+- Problem: task 4.7 is ticked, but `check.ts` measures 89.74% (70/78). The tests "exits 1 when the compiled files hold a zone the release lacks" and "… the release holds a zone the compiled files lack" exist. They only check that the log contains the zone id and a substring. For `Europe/Oslo`, the fallback through `compareWithRelease` (`checkAgainstZdump.ts:132-138`) logs the same `no such zone in the release` after running `zdump`. So the `findMissingZone` branch is never told apart from the fallback. The 8 survivors: `(zoneId) => !release.zones.has(zoneId)` → `() => undefined`; `instant: "-"` emptied; the two `expected` texts (`a zone of the release`, `a compiled zone file`) emptied; `if (!path) continue` dropped; the whitespace regex of `groupZdumpLinesByZone` weakened; `rm(…, { force: true })` flipped; and `argv[compiledOptionIndex + 1] ?? ""` changed.
+- Impact: if the compiler silently drops a zone, or the release keeps a zone IANA removed, the check is supposed to stop before running `zdump` and say which side lacks the zone. A regression in `findMissingZone` would still exit 1 through the fallback, but it would run `zdump` and print `zdump says a zone in zdump`, the wrong side, and no test would notice. Ticked task 4.7 (mutation ≥ 90%) is not met.
+- Fix: tighten the two existing cases at `check.test.ts:169-187` in place, without adding a case. For `Europe/Oslo`, assert `run.logLines` contains exactly `Europe/Oslo differs at -: zdump says a zone of the release, the release says no such zone in the release`. For `Asia/Kolkata`, assert exactly `Asia/Kolkata differs at -: zdump says a compiled zone file, the release says no such compiled file`. In both cases also assert `run.zdumpCalls` is empty (the `check()` helper already returns it, `check.test.ts:126`). This kills the first four survivors listed above: 74/78 = 94.9%. Do not add a case for `--compiled` without a directory. `resolve("")` is the working directory, so the outcome depends on where vitest runs. Re-run `npx stryker run --mutate 'scripts/zoneRules/check.ts'` to confirm ≥ 90%.
+- Fix risk: low, test-only. It replaces 2 `toContain` lines per case with 2 assertions, so `check.test.ts` stays at about 294 lines and does not depend on R5's split. The exact lines follow the format at `check.ts:166-168`. If R5 splits the file first, apply the same edit to whichever sibling holds these two cases.
 - Status: open
 
 ### R3 — WARNING — The "no release installed" path of the zone list is untested where it runs
@@ -238,11 +243,11 @@ All paths below are under `packages/client/` unless they start with `docs/`, `op
 - Location: `packages/client/src/test/zoneRules/check.test.ts` (294 lines), `src/test/features/zone_abbreviations/steps/zone_abbreviations_unit.steps.tsx` (291, was 215), `src/lib/zoneRules/core/zoneRulesRelease.errors.test.ts` (246), `src/test/zoneRules/checkAgainstZdump.test.ts` (239), `src/test/zoneRules/compile.test.ts` (233), `src/test/features/zone_rules/steps/zone_rules_lookup.steps.ts` (232), `src/test/features/zone_rules/steps/zone_rules_release.steps.ts` (221), `src/test/zoneRules/zoneRulesPlugin.test.ts` (216), `src/lib/zoneRules/dateTimeFormatWrapper.polyfill.test.ts` (215), `src/test/zoneRules/truncateToCutoff.test.ts` (214)
 - Rule: `CLAUDE.md` Process Invariants ("Files must stay under 200 lines for AI context quality"); `.claude/rules/process-invariants.md` ("Target 100–200 lines per file; 300 is a hard cap, used only when splitting would hurt clarity"); tasks.md conventions ("every new or changed file stays under 200 lines")
 - Problem: ten files this branch created or grew are between 214 and 294 lines. Two are within 10 lines of the 300 hard cap. None records why splitting would hurt clarity, and the tasks' own `wc -l` verification fails for them.
-- Impact: the project caps file size because long files degrade AI context. `check.test.ts` is 6 lines short of the hard cap, so R2's extra case barely fits.
+- Impact: the project caps file size because long files degrade AI context, and the tasks' own `wc -l` checks fail for these ten files. `check.test.ts` is 6 lines short of the 300 hard cap, so any further case there breaks the cap.
 - Fix: split each plain test file by its `describe` groups into siblings with the same header comment, e.g. `check.test.ts` into `check.compiled.test.ts` and `check.download.test.ts`, and `zoneRulesRelease.errors.test.ts` into shape and consistency errors. For the three steps files, which `.claude/rules/bdd-unit.md` binds one-to-one to their feature, move helper functions into a world module next to the existing ones (`src/test/zoneRules/compileWorld.ts`, `src/test/staleEngineWorld.ts`) rather than splitting the steps file.
 - Fix risk: low; no behaviour change. Keep each file's `FR-x of add-zone-rules-from-iana` header so the M1 loop still finds every id, and keep `f.Scenario` names exactly as in the features.
 - Status: open
 
 ## Verdict
 
-Not ready. Nothing is CRITICAL. The wrapper, the lookup, the future rule, the compiler and the check behave as specified, and the committed `2026f` release matches `zdump` (`0 differences`, re-run here). Five WARNINGs should be fixed before archive: R1 (untested current-instant fields, M6), R2 (`check.ts` below the mutation minimum; ticked task 4.7 not met), R3 (untested no-release fallback of the zone list, M6), R4 (the release was reformatted away from the compiler's output; size records and budget basis are wrong) and R5 (files over the 200-line limit). The FR8 CI step waits on the human handoff H1.
+Not ready. Nothing is CRITICAL. The wrapper, the lookup, the future rule, the compiler and the check behave as specified, and the committed `2026f` release matches `zdump` (`0 differences`, re-run here). The static core files and the wrapper reach ≥ 95% once measured past the test-setup crash (Mutation, runs B and C). Five WARNINGs block the archive: R1 (untested current-instant fields; `currentInstant.ts` 60%, M6), R2 (`check.ts` 89.74%; ticked task 4.7 not met), R3 (untested no-release fallback of the zone list; `installZoneRules.ts` 87.5%, M6), R4 (the release was reformatted away from the compiler's output; size records and budget basis are wrong) and R5 (files over the 200-line limit). The FR8 CI step waits on the human handoff H1.
