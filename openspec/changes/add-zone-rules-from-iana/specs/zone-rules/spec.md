@@ -233,6 +233,8 @@ The zone rules SHALL load before the app on every engine from one asset the serv
 - **GIVEN** the app was opened online once
 - **WHEN** it is opened without a network connection
 - **THEN** the main page shows the stored locations with times from the rules
+- **AND** the zone rules asset is served from the service worker's precache
+- **AND** no zone rules load failure is logged
 
 #### Scenario: The asset is requested with the app
 - **WHEN** the app is opened online
