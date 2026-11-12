@@ -29,7 +29,7 @@ Source paths are under `packages/client/`; commands run from `packages/client/` 
 - [x] 4.1 TDD `src/lib/zoneRules/activeRelease.ts` (D3, FR6): `chooseActiveRelease`. Tests in `activeRelease.test.ts`: stored newer → stored, no clear; stored equal or older → bundled, clear; nothing stored → bundled, no clear; bundled missing and stored valid → stored; both missing → none. Verify red, then green, with `npx vitest run src/lib/zoneRules/activeRelease.test.ts`.
 - [x] 4.2 TDD `loadZoneRules(releaseUrl, { storedReleases, fetchRelease })` and `src/boot.ts` (D3, FR6, NFR-P2). Extend `src/lib/zoneRules/loadZoneRules.test.ts` with the in-memory repository: stored `2026g` whose `Asia/Almaty` rule is UTC+4 over bundled `2026f` → `getInstalledRelease()?.release` is `2026g` and the wrapper reports `+04:00`; stored older or equal → cleared, bundled installed; `UNREADABLE` → cleared, bundled installed; failed fetch with stored valid → stored installed; failed fetch with nothing stored → rejects (the MODIFIED zone-rules scenario "A failed load still starts the app": `bootApp` then logs and starts with the engine's data, unchanged in `src/lib/legacy/bootApp.test.ts`); storage `load` called once and `fetchRelease` called once. `boot.ts` passes `localStorageStoredReleaseRepository`. Verify red, then green, with `npx vitest run src/lib/zoneRules/loadZoneRules.test.ts`, then `npx vitest run src/lib/legacy/bootApp.test.ts`.
 - [x] 4.3 BDD `zone_rules_updates_active_release.feature` + `steps/zone_rules_updates_active_release.steps.ts` (FR6, NFR-P2): the spec's five scenarios of "Active release at start" through `loadZoneRules` with the in-memory repository and a fetch stub counting requests. Verify with `npx vitest run src/test/features/zone_rules_updates/steps/zone_rules_updates_active_release.steps.ts`.
-- [ ] 4.4 Mutation: `npx stryker run --mutate 'src/lib/zoneRules/core/releaseOrder.ts,src/lib/zoneRules/activeRelease.ts,src/lib/zoneRules/loadZoneRules.ts,src/adapters/storedRelease/localStorageStoredReleaseRepository.ts,src/adapters/storedRelease/inMemoryStoredReleaseRepository.ts'`; read `reports/mutation/mutation-report.json`; score ≥ 95% (minimum 90%), adding tests for survivors (M6).
+- [x] 4.4 Mutation: `npx stryker run --mutate 'src/lib/zoneRules/core/releaseOrder.ts,src/lib/zoneRules/activeRelease.ts,src/lib/zoneRules/loadZoneRules.ts,src/adapters/storedRelease/localStorageStoredReleaseRepository.ts,src/adapters/storedRelease/inMemoryStoredReleaseRepository.ts'`; read `reports/mutation/mutation-report.json`; score ≥ 95% (minimum 90%), adding tests for survivors (M6).
 
 ## 5. The check (TDD)
 
@@ -78,10 +78,10 @@ Source paths are under `packages/client/`; commands run from `packages/client/` 
 
 ## 11. Integration
 
-- [ ] 11.1 Run, one at a time: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm run build`, `pnpm --filter @time-zones/client check:bundle-size`, `pnpm --filter @time-zones/client check:legacy-build`; all pass (NFR-P1, G5).
-- [ ] 11.2 Run `pnpm --filter @time-zones/client test:bdd` once: every baseline passes, axe scenarios report no violations (NFR-A1, NFR-R1).
-- [ ] 11.3 Traceability (M1): from the root this prints nothing: `for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 FR9 NFR-P1 NFR-P2 NFR-A1 NFR-R1 UX1 UX2 UX3; do grep -rlE "add-remote-zone-rules-updates.*[@ ,]$id([^0-9]|$)|[@ ,]$id([^0-9]|$).*add-remote-zone-rules-updates" packages/client/src packages/client/scripts packages/client/vite.config.ts >/dev/null || echo "missing $id"; done`.
-- [ ] 11.4 Glossary review: every new type, hook, port, constant and i18n key is a term of task 1.3; from the root `grep -rniE "auto-update|autoupdate" packages/client/src` prints nothing.
+- [x] 11.1 Run, one at a time: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm run build`, `pnpm --filter @time-zones/client check:bundle-size`, `pnpm --filter @time-zones/client check:legacy-build`; all pass (NFR-P1, G5).
+- [x] 11.2 Run `pnpm --filter @time-zones/client test:bdd` once: every baseline passes, axe scenarios report no violations (NFR-A1, NFR-R1).
+- [x] 11.3 Traceability (M1): from the root this prints nothing: `for id in FR1 FR2 FR3 FR4 FR5 FR6 FR7 FR8 FR9 NFR-P1 NFR-P2 NFR-A1 NFR-R1 UX1 UX2 UX3; do grep -rlE "add-remote-zone-rules-updates.*[@ ,]$id([^0-9]|$)|[@ ,]$id([^0-9]|$).*add-remote-zone-rules-updates" packages/client/src packages/client/scripts packages/client/vite.config.ts >/dev/null || echo "missing $id"; done`.
+- [x] 11.4 Glossary review: every new type, hook, port, constant and i18n key is a term of task 1.3; from the root `grep -rniE "auto-update|autoupdate" packages/client/src` prints nothing.
 
 ## Human follow-up
 
