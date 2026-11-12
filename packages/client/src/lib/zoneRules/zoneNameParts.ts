@@ -3,11 +3,13 @@
  * it is letters alone, otherwise `GMT±H` or `GMT±H:MM` from the offset.
  * Implements FR6 of add-zone-rules-from-iana (design D5).
  */
-import { GMT_ZONE_NAME_PREFIX, LETTERS_ONLY_DESIGNATION } from "@/constants";
-import type { LocalTimeType } from "./core/index.ts";
+import {
+  GMT_ZONE_NAME_PREFIX,
+  LETTERS_ONLY_DESIGNATION,
+  MINUTES_PER_HOUR,
+} from "@/constants";
+import { type LocalTimeType, SECONDS_PER_MINUTE } from "./core/index.ts";
 
-const SECONDS_PER_MINUTE = 60;
-const MINUTES_PER_HOUR = 60;
 const ZONE_NAME_PART_TYPE = "timeZoneName";
 const OFFSET_MINUTES_SEPARATOR = ":";
 

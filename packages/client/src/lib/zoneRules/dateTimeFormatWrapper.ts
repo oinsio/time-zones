@@ -7,9 +7,11 @@
  * Implements FR1, FR6, NFR-P3 of add-zone-rules-from-iana (design D5).
  */
 
+import { UTC_ZONE_ID } from "@/constants";
 import {
   getLocalTimeType,
   type LocalTimeType,
+  MILLISECONDS_PER_SECOND,
   type ZoneRules,
   type ZoneRulesRelease,
 } from "./core/index.ts";
@@ -18,9 +20,6 @@ import { formatZoneName, replaceZoneNameParts } from "./zoneNameParts.ts";
 
 type DateTimeFormatConstructor = typeof Intl.DateTimeFormat;
 type DateArgument = Date | number | undefined;
-
-const UTC_TIME_ZONE = "UTC";
-const MILLISECONDS_PER_SECOND = 1000;
 
 type ZoneFormatterState = {
   zoneId: string;
@@ -176,7 +175,7 @@ export function createZoneRulesDateTimeFormat(
     }
     const utcFormatter = new nativeDateTimeFormat(locales, {
       ...options,
-      timeZone: UTC_TIME_ZONE,
+      timeZone: UTC_ZONE_ID,
     });
     return createZoneFormatter(nativeDateTimeFormat, {
       ...knownZone,

@@ -4,8 +4,8 @@
  * nothing; `bootApp` then starts the app on the engine's own data.
  * Implements FR10 of add-zone-rules-from-iana (design D3).
  */
-import { parseZoneRulesRelease, ZoneRulesReleaseError } from "./core";
-import { installZoneRulesDateTimeFormat } from "./installZoneRules";
+import { parseZoneRulesRelease, ZoneRulesReleaseError } from "./core/index.ts";
+import { installZoneRulesDateTimeFormat } from "./installZoneRules.ts";
 
 export async function loadZoneRules(
   releaseUrl: string,

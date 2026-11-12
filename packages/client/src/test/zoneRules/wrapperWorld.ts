@@ -1,10 +1,10 @@
 // Implements FR6 of add-zone-rules-from-iana: shared set-up of the wrapper tests.
 import { Temporal } from "@/lib/temporal";
 import {
+  createZoneRulesDateTimeFormat,
   parseZoneRulesRelease,
   ZoneRulesReleaseError,
-} from "@/lib/zoneRules/core";
-import { createZoneRulesDateTimeFormat } from "@/lib/zoneRules/dateTimeFormatWrapper";
+} from "@/lib/zoneRules";
 import {
   createStaleDateTimeFormat,
   type StaleEngineCall,

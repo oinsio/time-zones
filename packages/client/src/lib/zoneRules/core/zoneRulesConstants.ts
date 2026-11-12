@@ -28,6 +28,9 @@ export const RuleDateKind = {
 export type RuleDateKind = (typeof RuleDateKind)[keyof typeof RuleDateKind];
 
 export const SECONDS_PER_MINUTE = 60;
+
+/** Milliseconds in one second. */
+export const MILLISECONDS_PER_SECOND = 1000;
 export const SECONDS_PER_HOUR = 3600;
 export const SECONDS_PER_DAY = 86400;
 

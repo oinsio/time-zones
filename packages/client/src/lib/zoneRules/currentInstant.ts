@@ -5,13 +5,14 @@
  * epoch day arithmetic of the core turns into epoch milliseconds.
  * Implements FR6 of add-zone-rules-from-iana (design D5).
  */
-import { getEpochDayFromCivilDate } from "./core/index.ts";
+import { MINUTES_PER_HOUR, UTC_ZONE_ID } from "@/constants";
+import {
+  getEpochDayFromCivilDate,
+  MILLISECONDS_PER_SECOND,
+  SECONDS_PER_MINUTE,
+} from "./core/index.ts";
 
 const CLOCK_LOCALE = "en-US";
-const CLOCK_TIME_ZONE = "UTC";
-const MILLISECONDS_PER_SECOND = 1000;
-const SECONDS_PER_MINUTE = 60;
-const MINUTES_PER_HOUR = 60;
 const HOURS_PER_DAY = 24;
 const FRACTIONAL_SECOND_DIGITS = 3;
 const MILLISECONDS_PER_DAY =
@@ -24,7 +25,7 @@ const MILLISECONDS_PER_HOUR =
 const MILLISECONDS_PER_MINUTE = SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
 
 const CLOCK_OPTIONS = {
-  timeZone: CLOCK_TIME_ZONE,
+  timeZone: UTC_ZONE_ID,
   year: "numeric",
   month: "numeric",
   day: "numeric",

@@ -7,8 +7,14 @@ export const LOCALIZED_ZONE_ABBREVIATION_KEYS: Readonly<
   Record<string, string>
 > = { MSK: "locations.zoneAbbreviationMsk" };
 
-/** A tzdb designation counts as an abbreviation only when it is letters alone. */
+/**
+ * A tzdb designation counts as an abbreviation only when it is letters alone.
+ * Implements FR6, FR9 of add-zone-rules-from-iana.
+ */
 export const LETTERS_ONLY_DESIGNATION = /^[A-Za-z]+$/;
 
-/** The prefix of a zone name written from the offset, such as `GMT+5`. */
+/**
+ * The prefix of a zone name written from the offset, such as `GMT+5`.
+ * Implements FR6, FR9 of add-zone-rules-from-iana.
+ */
 export const GMT_ZONE_NAME_PREFIX = "GMT";
