@@ -12,6 +12,11 @@ export {
   splitIntoWords,
 } from "./city-search";
 export {
+  createFetchZoneRulesVersionSource,
+  type FetchZoneRulesVersionSourceOptions,
+  fetchZoneRulesVersionSource,
+} from "./fetchZoneRulesVersionSource";
+export {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
 } from "./inMemoryLocationRepository";
@@ -25,6 +30,11 @@ export {
   type InMemoryTextSharing,
   type InMemoryTextSharingOptions,
 } from "./inMemoryTextSharing";
+export {
+  createInMemoryZoneRulesVersionSource,
+  type InMemoryZoneRulesVersionSource,
+  type InMemoryZoneRulesVersionSourceScript,
+} from "./inMemoryZoneRulesVersionSource";
 export { loadCitySearch } from "./loadCitySearch";
 export {
   createLocalStorageAvailability,

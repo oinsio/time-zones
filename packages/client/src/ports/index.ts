@@ -25,3 +25,9 @@ export {
   type StoredReleaseRepository,
 } from "./storedReleaseRepository";
 export { ShareOutcome, type TextSharing } from "./textSharing";
+export {
+  isZoneRulesSourceFailure,
+  ZoneRulesSourceFailure,
+  type ZoneRulesVersion,
+  type ZoneRulesVersionSource,
+} from "./zoneRulesVersionSource";
