@@ -2,102 +2,95 @@
 
 ## Context
 
-Driven by FR1–FR9, NFR-P1, NFR-P2, NFR-A1, NFR-R1 and UX1–UX3 of `proposal.md` (see proposal.md — Why) and by ADR-0014 items 5 and 6. Builds on `add-zone-rules-from-iana`: its `ZoneRulesRelease` reader, `installZoneRulesDateTimeFormat`, `loadZoneRules` (boot step), the asset plugin and the compiler and check scripts under `scripts/zoneRules/`. Current state, checked in `packages/client/` and `.github/`:
+Driven by FR1–FR9, NFR-P1, NFR-P2, NFR-A1, NFR-R1 and UX1–UX3 of `proposal.md`, and by ADR-0014 items 5 and 6. Follows ADR-0002 (layers), ADR-0004 (envelope, ports, contract tests), ADR-0008 (work is counted, never timed) and ADR-0009 (boot order, update recheck). Builds on the landed `add-zone-rules-from-iana`. Current state, checked in `packages/client/` and `.github/`:
 
-- `src/controller/usePwaUpdateStatus.ts` holds the update check; `useUpdateRecheckOnReturn.ts` runs a callback on `visibilitychange` at most once per `UPDATE_RECHECK_INTERVAL_MS` (15 min, `src/constants/update.ts`) with an injected `Clock`. `AppShell` takes an optional `clock` and renders the notices region; `app_shell_notices.steps.ts` is 273 lines, so new notice tests go into new files. `fakeServiceWorkerModule` lives in `src/test/fakeServiceWorker.ts`.
-- Storage: `STORAGE_KEYS` in `src/constants/storage.ts`; repositories follow ADR-0004 (`{ schemaVersion, payload }`, a storage adapter, an in-memory adapter, shared contract tests; `useStorageAvailability` reports unavailable storage). `localStorage` is the store of both existing documents; the release document (tens of kilobytes) fits its limits.
-- Settings: the deploy time line (`useDeployTime`, `presentDeployTime` in `src/presenter/deployTime.ts`, `DeployTime` component, `settings.deployTime`) is the last line of the page, in the accent colour; screenshots hide its text (`settings_deploy_time_e2e.feature`).
-- Build and deploy: `vite.config.ts` registers the PWA with `workbox.globPatterns` covering `json`; `deploy.yml` runs on `push` to `main` and `workflow_dispatch`, calls `ci.yml` and deploys to GitHub Pages; pushes made with the default `GITHUB_TOKEN` trigger no workflow. GitHub Pages sets `Cache-Control: max-age=600` on every file and allows no custom headers. GitHub disables a repository's schedules after 60 days without commits; a workflow's own commits count as activity.
-- IANA: `https://data.iana.org/time-zones/releases/` lists `tzdata<release>.tar.gz` files; `https://data.iana.org/time-zones/tzdb/version` names the development version (may be ahead of the last release). The `-latest` links and the `version` file inside them have lagged (2026c).
-
-## Goals / Non-Goals
-
-**Goals:** the data path (publication → version file → check → store → next start) has one owner per step, every step is testable with fakes, and a failure anywhere leaves the app on a release that passed the check.
-
-**Non-Goals:** applying a release without reload (the polyfill memoizes zones), a staging channel, more than one stored release.
+- Boot: `src/boot.ts` calls `bootApp` (`src/lib/legacy/bootApp.ts`) with `loadZoneRules: () => loadZoneRules(zoneRulesUrl)`; `zoneRulesUrl` comes from `virtual:zone-rules-url`. `loadZoneRules(releaseUrl, fetchRelease)` (`src/lib/zoneRules/loadZoneRules.ts`) fetches the asset, reads it with `parseZoneRulesRelease` and calls `installZoneRulesDateTimeFormat`; a failure rejects and `bootApp` logs it and starts the app on the engine's data. `getInstalledRelease()` (`installZoneRules.ts`) returns the installed `ZoneRulesRelease` (`{ release, zones }`) and has no caller outside `src/lib/zoneRules/`. Nothing may evaluate Temporal before the wrapper is installed; `src/adapters/index.ts` re-exports adapters that import the model, so `boot.ts` cannot import it.
+- Release names: the reader accepts any string as `release`; the compiler (`scripts/zoneRules/compile.ts`) checks its argument with its own `RELEASE_NAME = /^\d{4}[a-z]$/` (one letter only). The compiler downloads from `IANA_RELEASES_URL = "https://data.iana.org/time-zones/releases/"` (`downloadRelease.ts`). Scripts import the reader through `../../src/lib/zoneRules/core/index.ts`. The committed release is `zone-rules/release.json` (`ZONE_RULES_RELEASE_FILE` in `app.config.ts`), release `2026f`, 105 590 bytes.
+- Update recheck: `src/controller/useUpdateRecheckOnReturn.ts` runs `registration.update()` on `visibilitychange` at most once per `UPDATE_RECHECK_INTERVAL_MS` (`src/constants/update.ts`) with an injected `Clock`, swallowing failures (`ignoreFailedUpdateCheck`). `usePwaUpdateStatus(clock)` returns `isUpdateAvailable` and `applyUpdate` (`updateServiceWorker(true)`).
+- Shell: `src/app/AppShell.tsx` (168 lines) renders the notices region: `UpdateNotice` (built on `Notice` + `NoticeButton`; `Notice` dismisses on Esc), `OfflineReadyNotice`, `StorageWarning`, `MeetingShareNotice`. `app.reload` and `app.dismiss` exist in `src/locales/en.json`. `app_shell_notices.steps.ts` is 273 lines, so new notice tests go into new files.
+- Storage: `STORAGE_KEYS` (`src/constants/storage.ts`) holds `LOCATIONS` and `PREFERENCES`; ports live in `src/ports/` (`locationRepository.ts`: `load()` → `LocationsLoadStatus.LOADED | EMPTY | UNREADABLE`, `save`/`clear` → `SaveOutcome`), adapters and shared contract suites in `src/adapters/` (`locationRepository.contract.ts`). `useStorageAvailability` drives `StorageWarning`.
+- Settings: `src/app/settings/SettingsPage.tsx` renders `DeployTime` (`<p data-deploy-time className="text-center text-sm text-accent">`) last; `DeployTime.test.tsx` asserts "should be the last element of main". Screenshots hide its text with `DEPLOY_TIME_SCREENSHOT_STYLE = "[data-deploy-time] { visibility: hidden; }"` in `src/test/features/locations/steps/locations_layout_e2e.steps.ts`.
+- Build: `vite.config.ts` registers `zoneRulesPlugin()` and Workbox with `globPatterns: ["**/*.{js,mjs,css,html,ico,png,svg,json,woff2}"]`, so any emitted JSON is precached today; `resolveDeployInstant()` (`scripts/deployInstant/`) gives the build instant. `scripts/check-bundle-size.mjs` checks the initial JavaScript and the hashed `assets/zone-rules-*.json` against `ZONE_RULES_ASSET_BUDGET_KB`. E2E runs on `pnpm build && pnpm preview` (`playwright.bdd.config.ts`). Runtime code can read the build's base path as `import.meta.env.BASE_URL` (`vite/client` types are referenced in `src/vite-env.d.ts`).
+- Workflows: `deploy.yml` runs on `push` to `main` and `workflow_dispatch`, calls `ci.yml` (`workflow_call`, input `upload-pages-artifact`) whose `actions/checkout@v5` checks out the triggering commit, then deploys to Pages. A push made with `GITHUB_TOKEN` triggers no workflow. GitHub Pages serves every file with `Cache-Control: max-age=600`.
 
 ## Decision
 
-### D1. Release order as one pure function (FR5)
+### D1. Release order: one owner in the core (FR5)
 
-`src/lib/zoneRules/releaseOrder.ts`: `parseReleaseName(text)` → `{ year, letters }` or `undefined` (`^\d{4}[a-z]+$`), `compareReleases(a, b)` → negative, zero, positive: year first, then letter-sequence length, then lexicographic letters. Used by the check (newer than active?), the start (stored newer than bundled?) and the workflow (`scripts/zoneRules/latestRelease.ts` imports the same module). One owner: the glossary term **release order**.
+`src/lib/zoneRules/core/releaseOrder.ts`: `parseReleaseName(text)` → `{ year, letters }` or `undefined` (pattern `ZONE_RULES_RELEASE_NAME_PATTERN = /^\d{4}[a-z]+$/` in `core/zoneRulesConstants.ts`), `compareReleaseNames(left, right)` → negative, zero or positive: year, then letter count, then letters; `isNewerRelease(candidate, current)`. Exported through `core/index.ts`. Callers: the check (D4), the start (D3), `latestRelease.ts` (D7) and `compile.ts`, whose `RELEASE_NAME` is replaced by `parseReleaseName`.
 
-### D2. Stored release through a repository port (FR6, FR9)
+### D2. Stored release behind a repository port (FR6, FR9)
 
-`src/ports/ZoneRulesRepository.ts`: `read(): StoredZoneRules | undefined | ZoneRulesStorageError`, `write(release)`, `remove()`. Adapters `localStorageZoneRulesRepository` (key `STORAGE_KEYS.ZONE_RULES = "time-zones:zone-rules"`, envelope schema version 1, payload the release document) and `createInMemoryZoneRulesRepository`; shared contract tests as for the other repositories. Invalid JSON, a foreign envelope or a payload the release reader rejects read as `UNREADABLE`, which the caller removes. No cross-tab sync: the document is written at most once per release, and each tab chooses its active release at its own start.
+Port `src/ports/storedReleaseRepository.ts`, shaped like `LocationRepository` and synchronous: `load()` → `{ status: StoredReleaseLoadStatus.LOADED, release: ZoneRulesRelease, document: unknown } | EMPTY | UNREADABLE`; `save(document)` → `SaveOutcome`; `clear()` → `SaveOutcome`. `save` takes the release JSON as downloaded (the parsed `ZoneRulesRelease` holds a `Map` and does not serialize). Adapters in a sub-module `src/adapters/storedRelease/` with its own `index.ts` (as `adapters/city-search/` has): `localStorageStoredReleaseRepository` (key `STORAGE_KEYS.ZONE_RULES = "time-zones:zone-rules"`, envelope `{ schemaVersion: STORED_RELEASE_SCHEMA_VERSION (1), payload }`; invalid JSON, a missing or other schema version, or a payload `parseZoneRulesRelease` rejects → `UNREADABLE`; a throwing `localStorage` → `UNREADABLE` on load and `FAILED` on write) and `createInMemoryStoredReleaseRepository`. The sub-module imports only `@/lib/zoneRules`, `@/constants` and `@/ports`, so `boot.ts` can import `@/adapters/storedRelease` without evaluating Temporal; `src/adapters/index.ts` re-exports it for the controller. One contract suite `storedReleaseRepository.contract.ts` runs against both.
 
-### D3. Active release at boot (FR6, NFR-P2)
+ADR-0004 asks for an error state with a reset action on invalid data and for broadcasting writes to other tabs. The stored release is a cached copy of a published file, not user data: discarding it loses nothing, and other tabs learn of it at their next check (D4). This exception is global to persistence, so it is not settled here: H1 hands the amendment of ADR-0004 to a human.
 
-`src/lib/zoneRules/activeRelease.ts`: `chooseActiveRelease({ bundled, stored })` → `{ release, source: BUNDLED | STORED, discardStored: boolean }`, pure. `loadZoneRules` (from the first change) becomes: read the repository synchronously (`localStorage` is synchronous, so no extra await before the app), fetch the bundled asset, call `chooseActiveRelease`, remove the stored document when `discardStored`, install the wrapper with the chosen release, and remember `{ release, source }` in `getInstalledRelease()` for the settings line and the check. A repository error counts as "no stored release". This keeps every zone fact behind `installZoneRulesDateTimeFormat`.
+### D3. Active release at start (FR6, NFR-P2)
 
-### D4. The check as one controller hook on the existing recheck (FR3, FR4, NFR-P1)
+`src/lib/zoneRules/activeRelease.ts`: `chooseActiveRelease({ bundled, stored })`, pure, both `ZoneRulesRelease | undefined` → `{ active: ZoneRulesRelease | undefined, shouldClearStored: boolean }`: stored newer than bundled (or bundled missing) → stored; otherwise bundled, and `shouldClearStored` when a stored release exists. `loadZoneRules(releaseUrl, { storedReleases, fetchRelease })` reads `storedReleases.load()` once before the fetch (an `UNREADABLE` result is cleared and counts as none), fetches and reads the bundled asset (a failure counts as none), chooses, clears when told, installs the chosen release, and rejects only when nothing could be installed (so `bootApp` keeps its log). `boot.ts` passes `localStorageStoredReleaseRepository`. The active release for every later reader stays `getInstalledRelease()`; no second "active release" state is added.
 
-`src/controller/useZoneRulesUpdate.ts` takes a `ZoneRulesVersionSource` (port: `fetchVersion()`, `fetchRelease(name)`), the repository, a `Clock` and `navigator.onLine` (injected as `isOnline`). It runs `checkForUpdate()` once at mount and on each tick of `useUpdateRecheckOnReturn`, which is generalized to accept a second callback (or called twice with the same registration-independent signature: the hook today takes the registration; this change extracts its scheduling into `useRecheckOnReturn(onRecheck, clock)` and keeps `useUpdateRecheckOnReturn` as its first caller). `checkForUpdate`: if offline, return; `fetchVersion()`; parse the name (D1); compare with the active release and the stored release; if newer than both, `fetchRelease(name)`, parse with the release reader, `repository.write`, set `pendingRelease` in state. Every failure path returns silently and is reported nowhere (as the update check is, `ignoreFailedUpdateCheck`). The adapter `fetchZoneRulesVersionSource` uses `fetch(url, { cache: "no-cache" })` for the version file (a conditional request against the Pages ETag, which is how the 600 s `max-age` is bypassed) and a plain fetch for the immutable release file. URLs come from `ZONE_RULES_VERSION_PATH = "zone-rules/version.json"` and `ZONE_RULES_RELEASE_PATH(name)` under `APP_BASE_PATH`.
+### D4. The check: one controller hook on the shared recheck (FR3, FR4, FR9, NFR-P1)
 
-### D5. Notice and dismissal (FR7, UX1, UX2)
+- `src/controller/useRecheckOnReturn.ts`: the scheduling of `useUpdateRecheckOnReturn` extracted as `useRecheckOnReturn({ onRecheck, clock, isEnabled })`; `useUpdateRecheckOnReturn` becomes its caller with unchanged behaviour and tests.
+- Port `src/ports/zoneRulesVersionSource.ts`: `fetchVersion()` → `{ release: string }` or `ZoneRulesSourceFailure`; `fetchRelease(name)` → the release JSON (`unknown`) or `ZoneRulesSourceFailure` (enum `REQUEST_FAILED`, `UNPARSABLE`); never throws. Adapters `src/adapters/fetchZoneRulesVersionSource.ts` (`fetch(url, { cache: "no-cache" })` for the version file, a conditional request that beats the 600 s `max-age`; a plain `fetch` for the release file, whose name changes with its content; URLs `${import.meta.env.BASE_URL}${ZONE_RULES_VERSION_PATH}` and `${BASE_URL}${ZONE_RULES_RELEASE_DIRECTORY}<name>.json`, constants in `src/constants/zoneRules.ts`) and `src/adapters/inMemoryZoneRulesVersionSource.ts` (counts requests, scripted failures); contract `zoneRulesVersionSource.contract.ts`.
+- `src/controller/useZoneRulesUpdate.ts`: `useZoneRulesUpdate({ clock, versionSource, storedReleases, isOnline = () => navigator.onLine, getActiveRelease = getInstalledRelease })` → `{ readyRelease: string | undefined, dismiss() }`. A check at mount and on each recheck: no active release or offline → return; `fetchVersion`; invalid name or not newer than the active release → return; `storedReleases.load()` names it → `readyRelease`; else `fetchRelease`, `parseZoneRulesRelease`, name must equal → `save` (a `FAILED` save still sets `readyRelease`) → `readyRelease`. Every failure returns silently. Dismissal (`dismissedRelease` in hook state) hides the notice until a newer `readyRelease`.
 
-`AppShell` reads `pendingRelease` and `dismissedRelease` from `useZoneRulesUpdate` and renders `ZoneRulesUpdateNotice` in the notices region, after the update notice, with the same `Notice` block (Reload → `window.location.reload()`, Dismiss → `dismissedRelease = pendingRelease`). The notice is shown when `pendingRelease` is set and differs from `dismissedRelease`; both live in component state, so a dismissal lasts the page's life, and a newer stored release shows again. Strings: `app.zoneRulesReady` ("Time zone rules {{release}} are ready. Reload to use them." / «Доступны правила часовых поясов {{release}}. Перезагрузите, чтобы применить.»), reusing `app.reload` and `app.dismiss`.
+### D5. Notice and its Reload (FR7, UX1, UX2)
 
-### D6. Settings line next to the deploy time (FR8, UX3, NFR-R1)
+`src/app/ZoneRulesUpdateNotice.tsx` on `Notice` + `NoticeButton`, message `app.zoneRulesReady` with `{{release}}`, reusing `app.reload`. `AppShell` (optional props `zoneRulesVersionSource`, `storedReleases`, `reloadPage`, defaulting to the real adapters and `() => window.location.reload()`) renders it after the update or offline-ready notice. Reload calls `applyUpdate` when `isUpdateAvailable` (a plain reload would leave the waiting service worker waiting), else `reloadPage`; the update notice's Reload already restarts the page, which applies the stored release. To keep `AppShell.tsx` under 200 lines, the wiring sits in a small `src/app/ZoneRulesUpdateNoticeSlot.tsx`.
 
-`useZoneRulesRelease()` returns `getInstalledRelease().release`; `presentZoneRulesRelease(release, translate)` → the text; `ZoneRulesReleaseLine` renders it with the deploy time's classes (extract the shared class list into one constant next to `DeployTime`, so the two lines cannot drift). String `settings.zoneRulesRelease` ("Time zone rules: {{release}}" / «Правила часовых поясов: {{release}}»). Screenshots: the release text is hidden the way the deploy time is (same `data-screenshot-hidden` hook), baselines re-approved once.
+### D6. Release line after the deploy time (FR8, UX3, NFR-R1)
 
-### D7. Publication workflow and served files (FR1, FR2)
+`src/presenter/zoneRulesRelease.ts`: `presentZoneRulesRelease(release, translate)` → text. `src/controller/useZoneRulesRelease.ts` reads `getInstalledRelease()?.release` and presents it. `src/app/settings/ZoneRulesReleaseLine.tsx` renders `<p data-zone-rules-release>` with `SETTINGS_FOOTNOTE_CLASS_NAME`, one constant shared with `DeployTime` so the two lines cannot drift, and nothing when no release is active. String `settings.zoneRulesRelease`. Screenshots hide its text as the deploy time's (the release name changes with every publication, which would otherwise break the baselines each time).
 
-- `scripts/zoneRules/latestRelease.ts`: `findLatestRelease(indexHtml)` parses the `releases/` directory listing for `tzdata(\d{4}[a-z]+)\.tar\.gz` and returns the newest by D1 (Q1 of the proposal: the listing names released versions only; `tzdb/version` may name an unreleased one). The CLI `zone-rules:latest` prints it.
-- `.github/workflows/zone-rules-publication.yml`: `on: schedule: cron "17 4 * * *"` (off the hour, GitHub's advice against load spikes) and `workflow_dispatch`; `permissions: contents: write`; steps: checkout, pnpm, `zone-rules:latest` → `latest`, read the committed release → `committed`, stop when equal (`::notice::already current`), `zone-rules:compile $latest` (needs `gpg`, `zic`, `tar`; all on `ubuntu-latest`), `zone-rules:check`, `pnpm test` of `src/test/zoneRules` (the release-shaped tests), `git commit -m "Update zone rules to $latest"` as `github-actions[bot]`, `git push`. A second job `deploy` with `needs: publish` and `if: needs.publish.outputs.updated == 'true'` runs `uses: ./.github/workflows/deploy.yml` (which gains `on: workflow_call`), because a `GITHUB_TOKEN` push fires no `push` workflow. The run's own commit keeps the repository active for the 60-day schedule rule; the operator still sees a failed run by GitHub's email.
-- Served files: `zoneRulesPlugin` (first change) also emits `zone-rules/version.json` (`{ release, publishedAt: resolveDeployInstant() }`) and `zone-rules/<release>.json` (the same bytes as the hashed asset) as unhashed assets, and `vite.config.ts` adds `workbox.globIgnores: ["zone-rules/**"]`. The hashed asset stays precached and preloaded for the start; the unhashed files are the remote channel. `check-bundle-size.mjs` asserts the two files exist and are neither preloaded nor precached (reads `dist/sw.js` for the manifest).
+### D7. Served files and publication (FR1, FR2)
 
-### D8. Tests (FR1–FR9)
-
-Unit and BDD with fakes: an in-memory version source (`createFakeZoneRulesVersionSource({ version, releases, failures })`), the in-memory repository, `createSwitchableClock`, `setPageVisibility`, and `isOnline` injected. The workflow's pure parts (`findLatestRelease`, the "already current" decision) are unit-tested; the YAML is checked with `actionlint` and by its first run. E2E (Chromium): `page.route` serves a `version.json` one letter above the bundled release and a release file copied from the build with its `release` field renamed; the notice appears; after `page.reload()` the settings page names the new release and Almaty's offset follows a deliberately altered rule in that file (`+04:00`), which proves the stored release is active.
+- `scripts/zoneRules/servedZoneRulesFiles.ts`: `buildServedZoneRulesFiles(releaseText, deployInstant)` → `[{ fileName: "zone-rules/version.json", source }, { fileName: "zone-rules/<release>.json", source: releaseText }]`. `zoneRulesPlugin({ deployInstant })` emits them in a build (`emitFile` with a fixed `fileName`); `vite.config.ts` passes the one `resolveDeployInstant()` value and adds `workbox.globIgnores: ["zone-rules/**"]` (the hashed `assets/zone-rules-*.json` stays precached for offline start). `scripts/zoneRules/precacheExclusion.ts`: `findPrecachedZoneRulesFiles(serviceWorkerText)`; `check-bundle-size.mjs` fails when the two files are missing or listed.
+- `scripts/zoneRules/latestRelease.ts`: `findNewestListedRelease(listingHtml)` (names from `tzdata(\d{4}[a-z]+)\.tar\.gz`, newest by D1) and `findReleaseToPublish(listingHtml, committedRelease)` → the name or `undefined`. CLI (script `zone-rules:latest`) fetches `IANA_RELEASES_URL`, reads the committed release, prints `already current` or the name, and writes `release=<name>` to `$GITHUB_OUTPUT` when set.
+- Workflow (H2): `.github/workflows/zone-rules-publication.yml`, `schedule: cron "17 4 * * *"` and `workflow_dispatch`; job `publish` (`contents: write`): checkout, pnpm install, `zone-rules:latest`, then only for a name: `zone-rules:compile <name>`, `zone-rules:check`, `pnpm test`, commit `Update zone rules to <name>` as `github-actions[bot]`, push, output the new commit SHA. Job `deploy` (`needs: publish`, `if` a name was published) `uses: ./.github/workflows/deploy.yml` with `ref: <sha>` and the permissions the deploy needs. `deploy.yml` gains `workflow_call` with input `ref` passed to `ci.yml`, which gains input `ref` for its checkout; without it a called run would deploy the commit that triggered the schedule, not the new one.
 
 ## Consequences
 
 Positive:
 
-- Freshness is bounded by IANA plus one day and one reload; no app release is needed for a rules change.
-- Every step is a pure function or a port with a fake; the no-downgrade rule is one comparison in one module.
-- The published files ride the existing Pages deploy; no server, no third party.
+- Freshness is bounded by IANA plus one day and one reload, without an app release.
+- Each step has one owner and a fake: release order, stored release port, version source port, the check hook; no downgrade is one comparison in one module.
+- The files ride the existing Pages deploy; no server, no third party.
 
-Negative (risks, each with its mitigation):
+Negative (with mitigations):
 
-- [GitHub Pages caches every file for 600 s and allows no headers] → the version file is fetched with `cache: "no-cache"` (a conditional request), and a check happens at most every 15 minutes anyway; a release may be visible up to 10 minutes late, which the one-day cadence absorbs.
-- [A `GITHUB_TOKEN` push triggers no deploy] → the publication workflow calls the deploy workflow itself (D7).
-- [The schedule is disabled after 60 idle days] → the workflow's own commits are activity only when releases happen; the operator is told in the README of the workflow to re-enable it, and `workflow_dispatch` always works. Accepted.
-- [A release file is served before the matching app build is live, or after] → the release file is self-contained and the app validates its shape and name; an app can use any newer release regardless of which build it came with.
-- [A user with an old installed app downloads a release whose format a future change has altered] → the envelope and the release document carry versions; an unparsable release is ignored (FR4), and a format change bumps `schemaVersion` with a migration (ADR-0004).
-- [`localStorage` quota on iOS 12 with a 60 KB document] → far below the 5 MB limit; a failed write is `storage unavailable` and the notice is still shown (FR9).
-- [Two notices at once crowd the region] → both use the one-line `Notice` block and stack; UX2 accepts it, the E2E scenario checks neither covers the heading.
+- [Pages caches files for 600 s] → `cache: "no-cache"` revalidates; at most 10 minutes of delay, absorbed by the daily cadence.
+- [A `GITHUB_TOKEN` push triggers no deploy] → the workflow calls the deploy itself with the new commit as `ref`.
+- [Schedules stop after 60 idle days] → the operator notes in `zone-rules/README.md` say how to re-enable; `workflow_dispatch` always works; H3 checks the first run.
+- [A future release format an old app cannot read] → the reader rejects it (FR4) and the app stays on what it has; a format change bumps the envelope's schema version with a migration (ADR-0004).
+- [`localStorage` quota on iOS 12] → the document is about 106 KB, far below the 5 MB limit; a failed write still shows the notice (FR9).
+- [Two notices crowd the region] → both are one-line `Notice` blocks; the E2E scenario checks the heading stays visible.
 
 ## Alternatives Considered
 
-**D2 — localStorage over IndexedDB.** IndexedDB is asynchronous and would force an `await` before the wrapper is installed at boot; `localStorage` is synchronous and already the store of ADR-0004. Rejected IndexedDB for now.
+**IndexedDB for the stored release**: asynchronous, adding a wait before the wrapper at boot; `localStorage` is synchronous and already ADR-0004's store. Rejected.
 
-**D3 — Applying a downloaded release live.** The polyfill memoizes zone objects and their offsets for the page's life; a live swap would leave existing rows stale. Rejected (NG1); Reload is the Android pattern (apply at restart).
+**Applying a downloaded release live**: the polyfill memoizes zones for the page's life, leaving rows stale. Rejected (NG1); Reload is the Android pattern.
 
-**D4 — Polling on a timer.** Wakes hidden pages and runs offline; the existing visibility-based recheck already encodes the right cadence. Rejected. Checking only at start: an installed iOS PWA is never restarted (ADR-0009), so it would never update. Rejected.
+**A timer for checks**: wakes hidden pages and runs offline. Rejected. **Checking only at start**: an installed iOS PWA is never restarted (ADR-0009). Rejected.
 
-**D7 — Pull request instead of a direct commit.** Safer for code, but the data is machine-produced and machine-verified by `zdump`, and a PR would wait for a human for a change that is urgent by nature. Rejected (NG3); the check is the gate. A dedicated token (PAT) to trigger the deploy by push: a secret to rotate; calling the deploy workflow needs none. Rejected. Publishing the release files to a separate branch or bucket: a second deploy path to keep alive. Rejected.
+**Broadcasting the stored release to other tabs**: a second channel for a rare event; each tab finds the stored release at its next check and shows the notice without a download (D4). Rejected.
 
-**D7 — Release discovery.** `tzdb/version`: names the development version, which can be ahead of the last release; the `-latest` archive: lagging caches and a once-wrong `version` file. Rejected in favour of the releases listing.
+**A pull request per release**: waits for a human on an urgent, machine-verified change. Rejected (NG3). **A personal access token so the push triggers the deploy**: a secret to rotate. Rejected.
 
-**D6 — Showing the pending release too.** "2026c (2026d after reload)" doubles the texts and the states for a fact the notice already states. Rejected (Q3).
+**`tzdb/version` or the `-latest` archive for discovery**: the first names development versions, the second has lagged. Rejected for the releases listing.
+
+**Showing a pending release on the settings page**: doubles texts and states for what the notice says. Rejected (Q3).
 
 ## Migration Plan
 
-A new storage key; existing documents untouched. First deploy publishes the files and the workflow; the first scheduled run either stops as current or commits a newer release. Rollback: revert the change; a stored release document left behind is ignored by a build without this change (unknown key) and can be removed by a later cleanup.
-
-## Open Questions
-
-- The cron hour (`17 4 * * *` UTC) can be changed without touching specs or tasks.
+A new storage key; existing documents untouched. Rollback: revert; a leftover `time-zones:zone-rules` document is ignored by a build without this change.
 
 ## Sources
 
-- Android Time Zone Data module (release ordering, no downgrade, apply at restart): https://source.android.com/docs/core/ota/modular-system/timezone
-- GitHub Actions schedule caveats (delays, disabled after 60 days): https://docs.github.com/actions/using-workflows/events-that-trigger-workflows#schedule
-- `GITHUB_TOKEN` pushes trigger no workflow runs: https://docs.github.com/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
-- GitHub Pages caching: https://docs.github.com/pages (600 s `max-age`, no custom headers)
-- IANA releases listing: https://data.iana.org/time-zones/releases/; `-latest` and `version` lag: https://lists.iana.org/hyperkitty/list/tz@iana.org/thread/NVHSX2PAQIT44U5FCCEVNJJYXQMMTJSA/
-- Elixir `tz` daily update and Python `tzdata` maintainer guide: https://preview.hex.pm/preview/tz/0.26.5/show/lib/tz/update_periodically.ex, https://tzdata.python.org/maintaining.html
-- `@tubular/time` polling (at most hourly, listeners report changed / unchanged / error): https://github.com/kshetline/tubular_time
+- Android Time Zone Data module: https://source.android.com/docs/core/ota/modular-system/timezone
+- GitHub Actions schedules (delays, disabled after 60 days): https://docs.github.com/actions/using-workflows/events-that-trigger-workflows#schedule
+- `GITHUB_TOKEN` pushes trigger no runs: https://docs.github.com/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+- IANA releases listing: https://data.iana.org/time-zones/releases/; `-latest` lag: https://lists.iana.org/hyperkitty/list/tz@iana.org/thread/NVHSX2PAQIT44U5FCCEVNJJYXQMMTJSA/
+- Elixir `tz`, Python `tzdata`: https://preview.hex.pm/preview/tz/0.26.5/show/lib/tz/update_periodically.ex, https://tzdata.python.org/maintaining.html
+- `@tubular/time`: https://github.com/kshetline/tubular_time
