@@ -5,6 +5,7 @@ export const STORAGE_AVAILABILITY_PROBE_KEY = "time-zones:storage-probe";
 export const STORAGE_KEYS = {
   LOCATIONS: "time-zones:locations",
   PREFERENCES: "time-zones:preferences",
+  ZONE_RULES: "time-zones:zone-rules",
 } as const;
 
 /** Name of the BroadcastChannel that syncs the locations between tabs. */

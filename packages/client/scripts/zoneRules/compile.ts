@@ -2,13 +2,14 @@
  * The zone rules compiler: `pnpm --filter @time-zones/client zone-rules:compile
  * 2026f` downloads the release from IANA, verifies its signature against the
  * pinned key, compiles it with `zic -b slim` and writes the release file.
- * Implements FR7 of add-zone-rules-from-iana (design D7).
+ * Implements FR7 of add-zone-rules-from-iana (design D7), FR5 of add-remote-zone-rules-updates.
  */
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
+import { parseReleaseName } from "../../src/lib/zoneRules/core/index.ts";
 import { compileWithZic } from "./compileWithZic.ts";
 import { downloadRelease, fetchBytes } from "./downloadRelease.ts";
 import type { FetchRelease, RunProcess } from "./processTypes.ts";
@@ -18,7 +19,6 @@ import { writeRelease } from "./writeRelease.ts";
 
 const USAGE =
   "Usage: node scripts/zoneRules/compile.ts <release>  (a release name such as 2026f)";
-const RELEASE_NAME = /^\d{4}[a-z]$/;
 const WORK_DIRECTORY_PREFIX = "zone-rules-compile-";
 const FIRST_ARGUMENT_INDEX = 2;
 
@@ -35,7 +35,7 @@ export async function runZoneRulesCompile(
   dependencies: ZoneRulesCompileDependencies,
 ): Promise<number> {
   const [release] = dependencies.argv;
-  if (release === undefined || !RELEASE_NAME.test(release)) {
+  if (release === undefined || parseReleaseName(release) === undefined) {
     dependencies.log(USAGE);
     return 1;
   }
