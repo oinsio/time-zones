@@ -4,15 +4,21 @@
  */
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { ZONE_RULES_RELEASE_DIRECTORY } from "../../src/constants/zoneRules.ts";
-
-const RELEASE_FILE_PATTERN = /^\d{4}[a-z]+\.json$/;
+import {
+  ZONE_RULES_RELEASE_DIRECTORY,
+  ZONE_RULES_RELEASE_FILE_EXTENSION,
+} from "../../src/constants/zoneRules.ts";
+import { parseReleaseName } from "../../src/lib/zoneRules/core/index.ts";
 
 export function findServedReleaseFiles(buildDirectory: string): string[] {
   const releaseDirectory = join(buildDirectory, ZONE_RULES_RELEASE_DIRECTORY);
   return existsSync(releaseDirectory)
-    ? readdirSync(releaseDirectory).filter((fileName) =>
-        RELEASE_FILE_PATTERN.test(fileName),
+    ? readdirSync(releaseDirectory).filter(
+        (fileName) =>
+          fileName.endsWith(ZONE_RULES_RELEASE_FILE_EXTENSION) &&
+          parseReleaseName(
+            fileName.slice(0, -ZONE_RULES_RELEASE_FILE_EXTENSION.length),
+          ) !== undefined,
       )
     : [];
 }

@@ -1,5 +1,6 @@
 import {
   ZONE_RULES_RELEASE_DIRECTORY,
+  ZONE_RULES_RELEASE_FILE_EXTENSION,
   ZONE_RULES_VERSION_PATH,
 } from "@/constants";
 import {
@@ -13,8 +14,6 @@ export type FetchZoneRulesVersionSourceOptions = {
   /** The build's base path, ending in a slash. */
   baseUrl?: string;
 };
-
-const RELEASE_FILE_EXTENSION = ".json";
 
 const isZoneRulesVersion = (document: unknown): document is ZoneRulesVersion =>
   typeof document === "object" &&
@@ -64,7 +63,7 @@ export function createFetchZoneRulesVersionSource({
     fetchRelease: (name) =>
       readJson(() =>
         fetchFile(
-          `${baseUrl}${ZONE_RULES_RELEASE_DIRECTORY}${name}${RELEASE_FILE_EXTENSION}`,
+          `${baseUrl}${ZONE_RULES_RELEASE_DIRECTORY}${name}${ZONE_RULES_RELEASE_FILE_EXTENSION}`,
         ),
       ),
   };

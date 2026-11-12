@@ -7,10 +7,9 @@
 // Node loads this script in strip-only mode: the constants file, not the barrel, which reads Vite defines.
 import {
   ZONE_RULES_RELEASE_DIRECTORY,
+  ZONE_RULES_RELEASE_FILE_EXTENSION,
   ZONE_RULES_VERSION_PATH,
 } from "../../src/constants/zoneRules.ts";
-
-const RELEASE_FILE_EXTENSION = ".json";
 
 export type ServedZoneRulesFile = { fileName: string; source: string };
 
@@ -25,7 +24,7 @@ export function buildServedZoneRulesFiles(
       source: JSON.stringify({ release, publishedAt: deployInstant }),
     },
     {
-      fileName: `${ZONE_RULES_RELEASE_DIRECTORY}${release}${RELEASE_FILE_EXTENSION}`,
+      fileName: `${ZONE_RULES_RELEASE_DIRECTORY}${release}${ZONE_RULES_RELEASE_FILE_EXTENSION}`,
       source: releaseText,
     },
   ];
