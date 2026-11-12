@@ -10,7 +10,7 @@ import {
   ZoneLabelPart,
 } from ".";
 
-const STORED_ZONE_LABEL_PARTS = ["UTC_OFFSET", "ZONE_ABBREVIATION"];
+const STORED_ZONE_LABEL_PARTS = ["UTC_OFFSET", "ZONE_ABBREVIATION", "COUNTRY"];
 
 describe("DEFAULT_PREFERENCES", () => {
   it("should follow the system theme in the 24-hour format", () => {
@@ -22,6 +22,7 @@ describe("DEFAULT_PREFERENCES", () => {
       zoneLabelParts: [
         ZoneLabelPart.UTC_OFFSET,
         ZoneLabelPart.ZONE_ABBREVIATION,
+        ZoneLabelPart.COUNTRY,
       ],
     });
   });

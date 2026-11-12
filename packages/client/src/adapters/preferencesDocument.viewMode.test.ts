@@ -1,5 +1,6 @@
 // Verifies FR3, FR4 of add-view-mode-setting-and-grid-skeleton.
 import { describe, expect, it } from "vitest";
+import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DEFAULT_PREFERENCES,
@@ -36,7 +37,7 @@ describe("the view mode in the preferences document", () => {
         theme: ThemePreference.DARK,
         hourFormat: HourFormat.H12,
         interfaceLanguage: "ru",
-        zoneLabelParts: [ZoneLabelPart.UTC_OFFSET],
+        zoneLabelParts: [ZoneLabelPart.UTC_OFFSET, ZoneLabelPart.COUNTRY],
         viewMode: null,
       },
     });
@@ -65,7 +66,7 @@ describe("the view mode in the preferences document", () => {
         viewMode: "grid",
       }),
     );
-    expect(written.schemaVersion).toBe(VERSION_WITH_VIEW_MODE);
+    expect(written.schemaVersion).toBe(PREFERENCES_SCHEMA_VERSION);
     expect(written.payload.viewMode).toBe("grid");
   });
 
