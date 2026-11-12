@@ -17,6 +17,8 @@ import {
 import type { FutureRule, RuleDate } from "./futureRule.ts";
 import {
   DAYS_PER_WEEK,
+  FIRST_DAY_OF_MONTH,
+  JANUARY,
   RuleDateKind,
   SECONDS_PER_DAY,
 } from "./zoneRulesConstants.ts";
@@ -36,8 +38,6 @@ type YearTransitions = {
 };
 
 const NEIGHBOURING_YEARS = [-1, 0, 1];
-const JANUARY = 1;
-const FIRST_DAY = 1;
 const LEAP_DAY_JULIAN_NUMBER = 60;
 
 const cachesByRule = new WeakMap<FutureRule, RuleCache>();
@@ -74,7 +74,11 @@ function getMonthWeekDayEpochDay(
   year: number,
   date: Extract<RuleDate, { kind: typeof RuleDateKind.MONTH_WEEK_DAY }>,
 ): number {
-  const firstOfMonth = getEpochDayFromCivilDate(year, date.month, FIRST_DAY);
+  const firstOfMonth = getEpochDayFromCivilDate(
+    year,
+    date.month,
+    FIRST_DAY_OF_MONTH,
+  );
   const daysToFirstMatch =
     (date.weekday - getWeekdayOfEpochDay(firstOfMonth) + DAYS_PER_WEEK) %
     DAYS_PER_WEEK;
@@ -87,7 +91,7 @@ function getMonthWeekDayEpochDay(
 }
 
 function getRuleDateEpochDay(year: number, date: RuleDate): number {
-  const yearStart = getEpochDayFromCivilDate(year, JANUARY, FIRST_DAY);
+  const yearStart = getEpochDayFromCivilDate(year, JANUARY, FIRST_DAY_OF_MONTH);
   switch (date.kind) {
     case RuleDateKind.MONTH_WEEK_DAY:
       return getMonthWeekDayEpochDay(year, date);

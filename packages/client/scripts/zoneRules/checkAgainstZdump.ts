@@ -7,10 +7,14 @@
  * Implements FR8 of add-zone-rules-from-iana (design D7).
  */
 import {
+  BINARY_SEARCH_MIDPOINT_DIVISOR,
   getCivilDateFromEpochDay,
   getEpochDayFromCivilDate,
   getLocalTimeType,
   type LocalTimeType,
+  SECONDS_PER_DAY,
+  SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE,
   type ZoneRulesRelease,
 } from "../../src/lib/zoneRules/core/index.ts";
 
@@ -46,10 +50,6 @@ const MONTH_NAMES = [
   "Nov",
   "Dec",
 ];
-const SECONDS_PER_MINUTE = 60;
-const SECONDS_PER_HOUR = 3600;
-const SECONDS_PER_DAY = 86400;
-const MIDPOINT_DIVISOR = 2;
 const SECOND_APART = 1;
 const ISO_PAD_LENGTH = 2;
 
@@ -145,7 +145,8 @@ export function compareWithRelease(
             {
               entry,
               epochSeconds: Math.floor(
-                (entry.epochSeconds + next.epochSeconds) / MIDPOINT_DIVISOR,
+                (entry.epochSeconds + next.epochSeconds) /
+                  BINARY_SEARCH_MIDPOINT_DIVISOR,
               ),
             },
           ]

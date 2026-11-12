@@ -6,7 +6,10 @@
  * Implements FR4 of add-zone-rules-from-iana.
  */
 import { resolveFutureRule } from "./futureRuleOffset.ts";
-import { ZONE_RULES_CUTOFF_EPOCH_SECONDS } from "./zoneRulesConstants.ts";
+import {
+  BINARY_SEARCH_MIDPOINT_DIVISOR,
+  ZONE_RULES_CUTOFF_EPOCH_SECONDS,
+} from "./zoneRulesConstants.ts";
 import type {
   ListedClockChange,
   LocalTimeType,
@@ -32,7 +35,7 @@ function findLatestChangeIndex(
   let high = changes.length - 1;
   let latestIndex = NO_CHANGE_AT_OR_BEFORE;
   while (low <= high) {
-    const middle = Math.floor((low + high) / 2);
+    const middle = Math.floor((low + high) / BINARY_SEARCH_MIDPOINT_DIVISOR);
     if (getChangeAt(changes, middle).epochSeconds <= epochSeconds) {
       latestIndex = middle;
       low = middle + 1;

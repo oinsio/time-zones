@@ -10,10 +10,16 @@ export { type FutureRule, parseFutureRule } from "./futureRule.ts";
 export { resolveFutureRule } from "./futureRuleOffset.ts";
 export { getLocalTimeType } from "./localTimeType.ts";
 export {
+  BINARY_SEARCH_MIDPOINT_DIVISOR,
   ETC_ZONE_AREA,
+  FIRST_DAY_OF_MONTH,
   FUTURE_RULE_DEFAULT_TRANSITION_SECONDS,
   FUTURE_RULE_MAX_TRANSITION_HOURS,
   FUTURE_RULE_MIN_DESIGNATION_LENGTH,
+  HOURS_PER_DAY,
+  JANUARY,
+  MILLISECONDS_PER_DAY,
+  MILLISECONDS_PER_HOUR,
   MILLISECONDS_PER_SECOND,
   RuleDateKind,
   SECONDS_PER_DAY,

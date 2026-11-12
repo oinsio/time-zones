@@ -33,15 +33,24 @@ export const SECONDS_PER_MINUTE = 60;
 export const MILLISECONDS_PER_SECOND = 1000;
 export const SECONDS_PER_HOUR = 3600;
 export const SECONDS_PER_DAY = 86400;
+export const HOURS_PER_DAY = 24;
+export const MILLISECONDS_PER_HOUR = SECONDS_PER_HOUR * MILLISECONDS_PER_SECOND;
+export const MILLISECONDS_PER_DAY = SECONDS_PER_DAY * MILLISECONDS_PER_SECOND;
+
+/** The first month and the first day of a month or year. */
+export const JANUARY = 1;
+export const FIRST_DAY_OF_MONTH = 1;
+
+/** Splits a sorted range in two halves for a binary search. */
+export const BINARY_SEARCH_MIDPOINT_DIVISOR = 2;
 
 /** The calendar facts a future rule date is read against. */
 export const MONTHS_PER_YEAR = 12;
 export const DAYS_PER_WEEK = 7;
-export const DAYS_PER_YEAR_WITHOUT_LEAP_DAY = 365;
+export const DAYS_PER_COMMON_YEAR = 365;
 export const MAX_WEEK_OF_MONTH = 5;
 
 /** The epoch day arithmetic: the Unix epoch is a Thursday, the week starts on Sunday. */
 export const EPOCH_YEAR = 1970;
 export const EPOCH_WEEKDAY = 4;
-export const DAYS_PER_COMMON_YEAR = 365;
 export const GREGORIAN_AVERAGE_DAYS_PER_YEAR = 365.2425;

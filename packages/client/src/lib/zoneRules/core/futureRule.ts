@@ -11,8 +11,9 @@ import {
   readDesignation,
 } from "./futureRuleTokens.ts";
 import {
+  DAYS_PER_COMMON_YEAR,
   DAYS_PER_WEEK,
-  DAYS_PER_YEAR_WITHOUT_LEAP_DAY,
+  FIRST_DAY_OF_MONTH,
   FUTURE_RULE_DEFAULT_TRANSITION_SECONDS,
   MAX_WEEK_OF_MONTH,
   MONTHS_PER_YEAR,
@@ -52,7 +53,6 @@ const DAY_NUMBER = /^(J?)(\d{1,3})/;
 const MONTH_WEEK_DAY = /^M(\d{1,2})\.(\d)\.(\d)/;
 const TIME_SEPARATOR = "/";
 const RULE_SEPARATOR = ",";
-const FIRST_DAY_OF_YEAR = 1;
 const LAST_WEEKDAY = DAYS_PER_WEEK - 1;
 const DAYLIGHT_SAVING_STEP_SECONDS = SECONDS_PER_HOUR;
 
@@ -85,8 +85,8 @@ function readDayRule(text: string): Read<DayRule> | undefined {
   const isJulian = dayNumber[1] !== "";
   const day = Number(dayNumber[2]);
   const isInRange = isJulian
-    ? day >= FIRST_DAY_OF_YEAR && day <= DAYS_PER_YEAR_WITHOUT_LEAP_DAY
-    : day <= DAYS_PER_YEAR_WITHOUT_LEAP_DAY;
+    ? day >= FIRST_DAY_OF_MONTH && day <= DAYS_PER_COMMON_YEAR
+    : day <= DAYS_PER_COMMON_YEAR;
   return isInRange
     ? {
         value: {

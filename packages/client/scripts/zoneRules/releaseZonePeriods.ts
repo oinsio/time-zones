@@ -6,8 +6,12 @@
  * Implements FR9 of add-zone-rules-from-iana (design D8).
  */
 import {
+  BINARY_SEARCH_MIDPOINT_DIVISOR,
+  FIRST_DAY_OF_MONTH,
   getEpochDayFromCivilDate,
+  JANUARY,
   type LocalTimeType,
+  MILLISECONDS_PER_SECOND,
   resolveFutureRule,
   SECONDS_PER_DAY,
   SECONDS_PER_MINUTE,
@@ -19,9 +23,6 @@ import {
   type ZonePeriod,
 } from "../zoneData/extractZoneAbbreviations.ts";
 
-const MILLISECONDS_PER_SECOND = 1000;
-const JANUARY = 1;
-const FIRST_DAY_OF_MONTH = 1;
 /** The future rule is read through the year after the rules year. */
 const FUTURE_RULE_LAST_YEAR = ZONE_ABBREVIATION_RULES_YEAR + 1;
 
@@ -63,7 +64,7 @@ function findTransitionSecond(
   let low = lowEpochSeconds;
   let high = highEpochSeconds;
   while (high - low > 1) {
-    const middle = Math.floor((low + high) / 2);
+    const middle = Math.floor((low + high) / BINARY_SEARCH_MIDPOINT_DIVISOR);
     if (isSameLocalTimeType(resolveFutureRule(rule, middle), before)) {
       low = middle;
     } else {
