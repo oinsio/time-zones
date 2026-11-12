@@ -17,12 +17,13 @@ The normative dictionary of the project's ubiquitous language. If a term is here
 | Context | File | What it covers |
 |---|---|---|
 | Time | [time.md](time.md) | the reference moment, zones, wall-clock time, offsets, the clock |
+| Zone rules | [zone-rules.md](zone-rules.md) | the compiled IANA zone data, local time types, the future rule, the wrapper, the compiler and the check |
 | Locations | [locations.md](locations.md) | the user's list of places, the Here mark, reorder |
 | Time selection | [time-selection.md](time-selection.md) | the reference day, day tracks, day periods |
 | Date selection | [date-selection.md](date-selection.md) | the date bar, the calendar, Now, DST notes |
 | Search | [search.md](search.md) | finding a city and adding it as a location |
 | Settings | [settings.md](settings.md) | the settings page, the theme preference, the hour format, the interface language, the locale registry |
-| Browser compatibility | [browser-compatibility.md](browser-compatibility.md) | supported engines, legacy engines, legacy support, the legacy zone shim |
+| Browser compatibility | [browser-compatibility.md](browser-compatibility.md) | supported engines, legacy engines, legacy support |
 | Views | [views.md](views.md) | interchangeable interfaces over the model |
 | App shell | [app-shell.md](app-shell.md) | notices, recovery, storage and offline states |
 | Architecture | [architecture.md](architecture.md) | layers, ports, commands, test stand-ins |
