@@ -48,8 +48,8 @@ The zone rules of a release SHALL hold, for every zone id of the IANA release in
 - **THEN** they equal the zone rules of `Asia/Kolkata`
 
 #### Scenario: The release carries its name
-- **WHEN** a release compiled from `tzdata2026c.tar.gz` is read
-- **THEN** its release name is `2026c`
+- **WHEN** a release compiled from `tzdata2026f.tar.gz` is read
+- **THEN** its release name is `2026f`
 
 ### Requirement: Future rule evaluation
 The future rule SHALL be interpreted as RFC 9636 §3.3 defines the POSIX TZ string and its extensions, with POSIX offsets (positive west) converted to the app's offsets (positive east). <!-- implements FR3 of add-zone-rules-from-iana -->
@@ -169,8 +169,8 @@ A script SHALL compile a release by name: download `tzdata<release>.tar.gz` and 
 
 #### Scenario: A valid archive compiles
 - **GIVEN** a tzdata archive and a signature that verifies against the pinned fingerprint
-- **WHEN** the release `2026c` is compiled
-- **THEN** a release named `2026c` is written with the zone rules of every zone id of the archive
+- **WHEN** the release `2026f` is compiled
+- **THEN** a release named `2026f` is written with the zone rules of every zone id of the archive
 
 #### Scenario: A bad signature stops the compiler
 - **GIVEN** an archive whose signature does not verify
@@ -179,7 +179,7 @@ A script SHALL compile a release by name: download `tzdata<release>.tar.gz` and 
 
 #### Scenario: A version mismatch stops the compiler
 - **GIVEN** an archive whose `version` file reads `2026b`
-- **WHEN** the release `2026c` is compiled
+- **WHEN** the release `2026f` is compiled
 - **THEN** the compiler stops without writing a release and names both versions
 
 #### Scenario: Truncation keeps the cutoff type
