@@ -25,7 +25,7 @@ Feature: Zone label persistence
     Then the zone label shows "the zone abbreviation and the UTC offset"
     And no location row shows a country name from the first render
 
-  @show-zone-abbreviations-and-zone-label-setting @FR15 @M6
+  @show-zone-abbreviations-and-zone-label-setting @FR15 @M6 @add-country-to-zone-label @FR6
   Scenario: Existing users get both parts
     Given the stored preferences document was written before the zone label existed, with the theme "Dark", the hour format "12-hour" and the language "ru"
     When the user opens the settings
@@ -42,10 +42,10 @@ Feature: Zone label persistence
 
   @add-country-to-zone-label @FR6 @M2
   Scenario: Existing users keep the country
-    Given the stored preferences document was written before the zone label had the country, with the theme "Dark", the hour format "12-hour", the language "ru" and only the UTC offset in the zone label
+    Given the stored preferences document was written before the zone label had the country, with the theme "Dark", the hour format "12-hour", the language "ru", the view "Grid" and only the UTC offset in the zone label
     When the user opens the settings
     Then the zone label shows "the country and the UTC offset"
-    And the theme "Dark", the hour format "12-hour" and the language "ru" are in force
+    And the theme "Dark", the hour format "12-hour", the language "ru" and the view "Grid" are in force
     And the stored document is not rewritten until the user changes a setting
 
   @add-country-to-zone-label @FR6

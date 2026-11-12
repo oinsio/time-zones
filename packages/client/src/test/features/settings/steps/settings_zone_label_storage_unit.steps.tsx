@@ -31,6 +31,7 @@ const THEME_STORED_VALUES: Record<string, string> = { Dark: "DARK" };
 const HOUR_FORMAT_STORED_VALUES: Record<string, string> = {
   "12-hour": "H12",
 };
+const VIEW_STORED_IDS: Record<string, string> = { Grid: "grid" };
 const THEME_LABEL_KEYS: Record<string, string> = { Dark: "settings.themeDark" };
 const HOUR_FORMAT_LABEL_KEYS: Record<string, string> = {
   "12-hour": "settings.hourFormat12",
@@ -135,6 +136,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   );
 
   // @show-zone-abbreviations-and-zone-label-setting @FR15 @M6
+  // @add-country-to-zone-label @FR6
   f.Scenario("Existing users get both parts", ({ Given, When, Then, And }) => {
     Given(
       "the stored preferences document was written before the zone label existed, with the theme {string}, the hour format {string} and the language {string}",
@@ -167,8 +169,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "Existing users keep the country",
     ({ Given, When, Then, And }) => {
       Given(
-        "the stored preferences document was written before the zone label had the country, with the theme {string}, the hour format {string}, the language {string} and only the UTC offset in the zone label",
-        (_ctx, theme: string, hourFormat: string, language: string) => {
+        "the stored preferences document was written before the zone label had the country, with the theme {string}, the hour format {string}, the language {string}, the view {string} and only the UTC offset in the zone label",
+        (
+          _ctx,
+          theme: string,
+          hourFormat: string,
+          language: string,
+          viewName: string,
+        ) => {
           legacyDocumentText = JSON.stringify({
             schemaVersion: SCHEMA_VERSION_BEFORE_COUNTRY,
             payload: {
@@ -176,7 +184,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
               hourFormat: HOUR_FORMAT_STORED_VALUES[hourFormat],
               interfaceLanguage: language,
               zoneLabelParts: [ZoneLabelPart.UTC_OFFSET],
-              viewMode: null,
+              viewMode: VIEW_STORED_IDS[viewName],
             },
           });
           world.storeRaw(legacyDocumentText);
@@ -185,8 +193,19 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       When("the user opens the settings", openSettings);
       Then("the zone label shows {string}", expectZoneLabel);
       And(
-        "the theme {string}, the hour format {string} and the language {string} are in force",
-        expectPreferencesInForce,
+        "the theme {string}, the hour format {string}, the language {string} and the view {string} are in force",
+        (
+          _ctx,
+          theme: string,
+          hourFormat: string,
+          language: string,
+          viewName: string,
+        ) => {
+          expectPreferencesInForce(_ctx, theme, hourFormat, language);
+          expect(world.storedText()).toContain(
+            `"viewMode":"${VIEW_STORED_IDS[viewName]}"`,
+          );
+        },
       );
       And(
         "the stored document is not rewritten until the user changes a setting",
