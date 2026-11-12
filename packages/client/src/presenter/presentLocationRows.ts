@@ -39,6 +39,7 @@ export type LocationRow = PresentedZoneMoment & {
  * Implements FR1, FR2, FR5 of mark-device-time-zone-in-location-list (D4).
  * Implements FR1, FR4 of match-here-mark-to-design (D2): the row's mark.
  * Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).
+ * Implements FR4 of add-country-to-zone-label (D3): the zone line keeps "Device time" when the country is hidden.
  * Implements FR1 of add-time-sliders-to-location-cards (D5): the day track.
  * Implements FR5, FR6, FR7 of set-home-location-and-show-differences (D3-D5).
  * Implements FR7, NFR-A2 of add-wall-time-input-with-hint (D7): passes `cityLabel` to the zone part.
