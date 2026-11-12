@@ -2,14 +2,20 @@
  * Vite plugin serving the CLDR-derived zone data as virtual modules.
  * Implements FR2, FR9, FR16 of add-locations-via-search (D6, D8).
  * Implements FR1, FR4 of show-zone-abbreviations-and-zone-label-setting (D1).
+ * Implements FR9 of add-zone-rules-from-iana (D8): abbreviations from the release.
  */
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { resolve } from "node:path";
 import type { Plugin } from "vite";
+import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
 import {
-  extractZoneAbbreviations,
-  type ZonePeriod,
-} from "./extractZoneAbbreviations.ts";
+  parseZoneRulesRelease,
+  type ZoneRulesRelease,
+  ZoneRulesReleaseError,
+} from "../../src/lib/zoneRules/core/index.ts";
+import { readReleaseZonePeriods } from "../zoneRules/releaseZonePeriods.ts";
+import { extractZoneAbbreviations } from "./extractZoneAbbreviations.ts";
 import { extractZoneData, type ZoneData } from "./extractZoneData.ts";
 
 const ALIASES_MODULE_ID = "virtual:time-zone-aliases";
@@ -17,7 +23,6 @@ const CITIES_URL_MODULE_ID = "virtual:zone-cities-url";
 const CITIES_MODULE_ID = "virtual:zone-cities";
 const ABBREVIATIONS_MODULE_ID = "virtual:zone-abbreviations";
 const UTC_ZONE_ID = "UTC";
-const ZONE_ABBREVIATIONS_PACKAGE = "moment-timezone";
 const RESOLVED_ID_PREFIX = "\0";
 const TEST_MODE = "test";
 const ZONE_CITIES_ASSET_NAME = "city-search.json";
@@ -32,13 +37,6 @@ const nodeRequire = createRequire(import.meta.url);
 let cachedZoneData: ZoneData | undefined;
 let cachedZoneAbbreviations: string | undefined;
 
-interface TzdbZone {
-  abbrs: string[];
-  /** Minutes west of UTC, as moment-timezone stores them. */
-  offsets: number[];
-  untils: number[];
-}
-
 function readJson(specifier: string): unknown {
   return JSON.parse(readFileSync(nodeRequire.resolve(specifier), "utf8"));
 }
@@ -52,30 +50,23 @@ function loadZoneData(): ZoneData {
   return cachedZoneData;
 }
 
-/** Reads the tzdb periods of a zone, turning minutes west of UTC into minutes east. */
-function readTzdbZonePeriods(
-  zoneId: string,
-): readonly ZonePeriod[] | undefined {
-  const tzdb = nodeRequire(ZONE_ABBREVIATIONS_PACKAGE) as {
-    tz: { zone(zoneId: string): TzdbZone | null };
-  };
-  const zone = tzdb.tz.zone(zoneId);
-  if (!zone) return undefined;
-  return zone.abbrs.map((designation, index) => ({
-    designation,
-    utcOffsetMinutes: -(zone.offsets[index] ?? 0),
-    untilEpochMilliseconds: zone.untils[index] ?? Infinity,
-  }));
+function readZoneRulesRelease(releaseFilePath: string): ZoneRulesRelease {
+  const release = parseZoneRulesRelease(
+    JSON.parse(readFileSync(releaseFilePath, "utf8")),
+  );
+  if (release instanceof ZoneRulesReleaseError) throw release;
+  return release;
 }
 
-function loadZoneAbbreviations(): string {
+function loadZoneAbbreviations(releaseFilePath: string): string {
+  const release = readZoneRulesRelease(releaseFilePath);
   cachedZoneAbbreviations ??= JSON.stringify(
     extractZoneAbbreviations(
       [
         ...loadZoneData().zoneCities.map((record) => record.timeZoneId),
         UTC_ZONE_ID,
       ],
-      readTzdbZonePeriods,
+      (zoneId) => readReleaseZonePeriods(release, zoneId),
     ),
   );
   return cachedZoneAbbreviations;
@@ -85,12 +76,14 @@ export function zoneDataPlugin(): Plugin {
   let isBuild = false;
   let isTestMode = false;
   let base = "/";
+  let releaseFilePath = ZONE_RULES_RELEASE_FILE;
   return {
     name: "time-zones-zone-data",
     configResolved(config) {
       isBuild = config.command === "build";
       isTestMode = config.mode === TEST_MODE;
       base = config.base;
+      releaseFilePath = resolve(config.root, ZONE_RULES_RELEASE_FILE);
     },
     configureServer(server) {
       const devPath = `${base}${ZONE_CITIES_DEV_FILE_NAME}`;
@@ -113,7 +106,7 @@ export function zoneDataPlugin(): Plugin {
         return `export default ${JSON.stringify(loadZoneData().timeZoneAliases)};`;
       }
       if (resolvedId === `${RESOLVED_ID_PREFIX}${ABBREVIATIONS_MODULE_ID}`) {
-        return `export default ${loadZoneAbbreviations()};`;
+        return `export default ${loadZoneAbbreviations(releaseFilePath)};`;
       }
       if (resolvedId === `${RESOLVED_ID_PREFIX}${CITIES_MODULE_ID}`) {
         return `export default ${JSON.stringify(loadZoneData().zoneCities)};`;

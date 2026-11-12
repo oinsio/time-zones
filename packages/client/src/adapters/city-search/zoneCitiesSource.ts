@@ -5,6 +5,7 @@ import {
   REGION_DISPLAY_TYPE,
   UTC_ZONE_ID,
 } from "@/constants";
+import { ETC_ZONE_AREA, getKnownZoneIds } from "@/lib/zoneRules";
 import { canonicalizeTimeZoneId, getZoneAbbreviations } from "@/model";
 import {
   type CityRecord,
@@ -15,13 +16,22 @@ import type { CitySource, ZoneCityData } from "./citySource";
 import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
 import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
 
-/** Zones the browser knows, or `undefined` when it cannot list them. */
+/** Zones the search may offer, or `undefined` when no zone list is known. */
 export type ListTimeZones = () => readonly string[] | undefined;
 
-const listBrowserTimeZones: ListTimeZones = () =>
-  typeof Intl.supportedValuesOf === "function"
-    ? Intl.supportedValuesOf("timeZone")
-    : undefined;
+const AREA_SEPARATOR = "/";
+
+/**
+ * The zones of the installed release that have an area outside `Etc`: no
+ * offset-only zone and no area-less id.
+ * Implements FR9 of add-zone-rules-from-iana (design D6).
+ */
+const listKnownZones: ListTimeZones = () =>
+  getKnownZoneIds()?.filter(
+    (zoneId) =>
+      zoneId.includes(AREA_SEPARATOR) &&
+      !zoneId.startsWith(`${ETC_ZONE_AREA}${AREA_SEPARATOR}`),
+  );
 
 type SearchableText = { normalized: string; words: string[] };
 
@@ -83,7 +93,7 @@ function readCountryTexts(countryCode: string): SearchableText[] {
 }
 
 /**
- * One record per browser-known IANA zone, joined with the build-time CLDR
+ * One record per zone of the installed release, joined with the build-time CLDR
  * city names.
  * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
  * Implements FR5, FR10 of add-interface-language-selection (D5): names in the language fallback order.
@@ -91,7 +101,7 @@ function readCountryTexts(countryCode: string): SearchableText[] {
  */
 export function createZoneCitiesSource(
   zoneCities: readonly ZoneCityData[],
-  listTimeZones: ListTimeZones = listBrowserTimeZones,
+  listTimeZones: ListTimeZones = listKnownZones,
 ): CitySource {
   const dataByZoneId = new Map<string, ZoneCityData>();
   for (const zone of zoneCities) {
