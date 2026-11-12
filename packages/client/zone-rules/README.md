@@ -15,8 +15,10 @@ the cutoff `2000-01-01T00:00:00Z`, D1 JSON with link entries):
   gzipped without link entries);
 - below the 30 KB ceiling, so the D1 format stays (no D1-compact).
 
-`ZONE_RULES_ASSET_BUDGET_KB = 29` in `app.config.ts` is the gzipped size plus
-20 %, rounded up.
+The spike did not yet drop the types nothing uses. The committed release
+(`release.json`, 105 590 bytes) gzips to 18 204 bytes, so
+`ZONE_RULES_ASSET_BUDGET_KB = 22` in `app.config.ts` is that size plus 20 %,
+rounded up.
 
 ## Signing key
 
@@ -34,3 +36,21 @@ time.
   keys.openpgp.org, keyserver.ubuntu.com and `github.com/eggert.gpg`; it signs
   `tzdata2026f.tar.gz` on `data.iana.org` and the tag `2026f` of
   `github.com/eggert/tz`.
+
+## Commands
+
+Run from `packages/client/`. Both need `zic`, `zdump` and `gpg`, and reach
+`data.iana.org` (never a `-latest` link).
+
+- `pnpm zone-rules:compile 2026f`: downloads `tzdata2026f.tar.gz` and its
+  `.asc`, verifies the signature against the pinned key (every `gpg` call runs
+  with a temporary `GNUPGHOME`), compiles with `zic -b slim`, truncates to the
+  cutoff `2000-01-01T00:00:00Z` and writes `zone-rules/release.json`.
+- `pnpm zone-rules:check`: compiles the release the committed file names (or
+  takes `--compiled <dir>` of an already compiled release), runs
+  `zdump -v -c 2000,2041` on every compiled file and compares it with the
+  committed file. It prints `0 differences` or the first difference and exits
+  non-zero.
+
+To bump the release: run `zone-rules:compile <release>`, then
+`zone-rules:check`, and commit `release.json`.

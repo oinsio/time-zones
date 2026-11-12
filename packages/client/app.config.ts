@@ -52,11 +52,11 @@ export const DEPLOY_INSTANT_DEFINE = "__APP_DEPLOY_INSTANT__";
 export const TEST_DEPLOY_INSTANT = "2026-03-08T07:30:00.000Z";
 
 /**
- * Gzipped size ceiling of the zone rules asset, in KB: the release measured in
- * the spike of task 1.1 (24 350 bytes gzipped) plus 20 %, rounded up.
+ * Gzipped size ceiling of the zone rules asset, in KB: the committed release
+ * measures 18 204 bytes gzipped (17.8 KB); plus 20 %, rounded up.
  * Implements NFR-P1 of add-zone-rules-from-iana (D2).
  */
-export const ZONE_RULES_ASSET_BUDGET_KB = 29;
+export const ZONE_RULES_ASSET_BUDGET_KB = 22;
 
 /**
  * The committed zone rules release, relative to the package root; read by the
