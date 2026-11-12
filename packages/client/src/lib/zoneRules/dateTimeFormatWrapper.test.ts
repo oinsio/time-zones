@@ -106,7 +106,29 @@ describe("formatting in Russian keeps the locale", () => {
   });
 });
 
+describe("the formatter can be spied on like a native one", () => {
+  it.each([
+    "format",
+    "formatToParts",
+    "resolvedOptions",
+    "formatRange",
+    "formatRangeToParts",
+  ] as const)("allows replacing %s", (method) => {
+    const { Wrapper } = createWrapper();
+    const formatter = new Wrapper("en", { timeZone: "Asia/Almaty" });
+    const descriptor = Object.getOwnPropertyDescriptor(formatter, method);
+    expect(descriptor?.configurable).toBe(true);
+    expect(descriptor?.writable).toBe(true);
+  });
+});
+
 describe("the constructor looks like Intl.DateTimeFormat", () => {
+  it("takes options without a zone to the native constructor", () => {
+    const { Wrapper, calls } = createWrapper();
+    new Wrapper("en", { hour: "numeric" });
+    expect(calls).toEqual([{ timeZone: undefined, isRejected: false }]);
+  });
+
   it("keeps prototype, supportedLocalesOf and instanceof", () => {
     const { Wrapper } = createWrapper();
     const formatter = new Wrapper("en", { timeZone: "Asia/Almaty" });

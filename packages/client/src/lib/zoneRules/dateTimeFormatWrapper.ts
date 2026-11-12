@@ -33,8 +33,7 @@ function toEpochMilliseconds(
   date: DateArgument,
   readCurrentInstant: () => number,
 ): number {
-  if (date === undefined) return readCurrentInstant();
-  return typeof date === "number" ? date : date.valueOf();
+  return date === undefined ? readCurrentInstant() : Number(date);
 }
 
 function getLocalTimeTypeAt(
@@ -140,11 +139,16 @@ function createZoneFormatter(
   return formatter;
 }
 
-function indexZoneIdsByLowerCase(
+type KnownZone = { zoneId: string; rules: ZoneRules };
+
+function indexZonesByLowerCaseId(
   release: ZoneRulesRelease,
-): Map<string, string> {
+): Map<string, KnownZone> {
   return new Map(
-    [...release.zones.keys()].map((zoneId) => [zoneId.toLowerCase(), zoneId]),
+    [...release.zones].map(([zoneId, rules]) => [
+      zoneId.toLowerCase(),
+      { zoneId, rules },
+    ]),
   );
 }
 
@@ -158,17 +162,16 @@ export function createZoneRulesDateTimeFormat(
   nativeDateTimeFormat: DateTimeFormatConstructor,
   release: ZoneRulesRelease,
 ): DateTimeFormatConstructor {
-  const zoneIdsByLowerCase = indexZoneIdsByLowerCase(release);
+  const zonesByLowerCaseId = indexZonesByLowerCaseId(release);
   const readCurrentInstant = createCurrentInstantReader(nativeDateTimeFormat);
   function ZoneRulesDateTimeFormat(
     locales?: string | string[],
     options?: Intl.DateTimeFormatOptions,
   ) {
-    const zoneId = zoneIdsByLowerCase.get(
+    const knownZone = zonesByLowerCaseId.get(
       options?.timeZone?.toLowerCase() ?? "",
     );
-    const rules = zoneId === undefined ? undefined : release.zones.get(zoneId);
-    if (zoneId === undefined || rules === undefined) {
+    if (knownZone === undefined) {
       return new nativeDateTimeFormat(locales, options);
     }
     const utcFormatter = new nativeDateTimeFormat(locales, {
@@ -176,8 +179,7 @@ export function createZoneRulesDateTimeFormat(
       timeZone: UTC_TIME_ZONE,
     });
     return createZoneFormatter(nativeDateTimeFormat, {
-      zoneId,
-      rules,
+      ...knownZone,
       utcFormatter,
       readCurrentInstant,
     });

@@ -6,15 +6,17 @@ import zoneRulesDocument from "virtual:zone-rules";
 import {
   installZoneRulesDateTimeFormat,
   parseZoneRulesRelease,
+  type ZoneRulesRelease,
   ZoneRulesReleaseError,
 } from "@/lib/zoneRules";
 
 /** The engine's own constructor, which the stale-engine fake delegates to. */
 export const realNativeDateTimeFormat = Intl.DateTimeFormat;
 
-const committedRelease = parseZoneRulesRelease(zoneRulesDocument);
-if (committedRelease instanceof ZoneRulesReleaseError) throw committedRelease;
+const parsedRelease = parseZoneRulesRelease(zoneRulesDocument);
+if (parsedRelease instanceof ZoneRulesReleaseError) throw parsedRelease;
 
-export { committedRelease };
+/** The committed release, parsed once. */
+export const committedRelease: ZoneRulesRelease = parsedRelease;
 
 installZoneRulesDateTimeFormat(committedRelease);

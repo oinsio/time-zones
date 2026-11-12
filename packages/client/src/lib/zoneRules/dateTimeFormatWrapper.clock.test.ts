@@ -25,7 +25,7 @@ describe("formatRange", () => {
     expect(text).toContain("15:00");
   });
 
-  it("gives the zone name of each end its own offset", () => {
+  it("names the zone once, by the offset at the end of the range", () => {
     const { Wrapper } = createWrapper();
     const formatter = new Wrapper("en", {
       timeZone: "America/New_York",
@@ -41,9 +41,7 @@ describe("formatRange", () => {
     const zoneNames = parts
       .filter((part) => part.type === "timeZoneName")
       .map((part) => part.value);
-    expect(zoneNames.every((name) => name === "EDT" || name === "EST")).toBe(
-      true,
-    );
+    expect(zoneNames).toEqual(["EDT"]);
   });
 
   it("is absent when the native prototype has none", () => {
