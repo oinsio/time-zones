@@ -34,8 +34,26 @@ const DEFAULT_INSTANT = "2026-07-15T12:00:00Z";
 const DEFAULT_DEVICE_ZONE = "UTC";
 const LIST_SEPARATOR = /, | and /;
 
+/**
+ * Zone label phrases of the features and the parts they stand for.
+ * Implements FR1, FR3 of add-country-to-zone-label (D6).
+ */
 export const ZONE_LABEL_PART_NAMES = {
-  "the UTC offset and the zone abbreviation": [
+  "the country, the zone abbreviation and the UTC offset": [
+    ZoneLabelPart.UTC_OFFSET,
+    ZoneLabelPart.ZONE_ABBREVIATION,
+    ZoneLabelPart.COUNTRY,
+  ],
+  "the country and the UTC offset": [
+    ZoneLabelPart.UTC_OFFSET,
+    ZoneLabelPart.COUNTRY,
+  ],
+  "the country and the zone abbreviation": [
+    ZoneLabelPart.ZONE_ABBREVIATION,
+    ZoneLabelPart.COUNTRY,
+  ],
+  "the country only": [ZoneLabelPart.COUNTRY],
+  "the zone abbreviation and the UTC offset": [
     ZoneLabelPart.UTC_OFFSET,
     ZoneLabelPart.ZONE_ABBREVIATION,
   ],

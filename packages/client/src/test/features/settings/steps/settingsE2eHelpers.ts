@@ -52,17 +52,29 @@ export const seedPreferences = async (page: Page, documentText: string) =>
   );
 
 export const ZONE_LABEL_GROUP_ROLE = "group";
+/** Implements FR1, FR3 of add-country-to-zone-label (D6). */
 export const ZONE_LABEL_PART_VALUES: Record<string, string[]> = {
-  "the UTC offset and the zone abbreviation": [
+  "the country, the zone abbreviation and the UTC offset": [
+    "UTC_OFFSET",
+    "ZONE_ABBREVIATION",
+    "COUNTRY",
+  ],
+  "the country and the UTC offset": ["UTC_OFFSET", "COUNTRY"],
+  "the country and the zone abbreviation": ["ZONE_ABBREVIATION", "COUNTRY"],
+  "the country only": ["COUNTRY"],
+  "the zone abbreviation and the UTC offset": [
     "UTC_OFFSET",
     "ZONE_ABBREVIATION",
   ],
   "only the UTC offset": ["UTC_OFFSET"],
+  "the UTC offset only": ["UTC_OFFSET"],
   "the zone abbreviation only": ["ZONE_ABBREVIATION"],
   nothing: [],
 };
 export const ALL_ZONE_LABEL_PARTS =
-  ZONE_LABEL_PART_VALUES["the UTC offset and the zone abbreviation"];
+  ZONE_LABEL_PART_VALUES[
+    "the country, the zone abbreviation and the UTC offset"
+  ];
 export const MIN_TOGGLE_SIZE_PX = 44;
 export const ZONE_LABEL_TAB_LIMIT = 30;
 const SEEDED_THEME = "SYSTEM";
