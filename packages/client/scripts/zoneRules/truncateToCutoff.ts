@@ -41,9 +41,12 @@ function isSameType(first: ReleaseType, second: ReleaseType): boolean {
 
 function findCutoffType(zone: TzifZone): LocalTimeType {
   const [firstType] = zone.types;
-  const lastBeforeCutoff = zone.transitions.findLast(
-    ([epochSeconds]) => epochSeconds <= ZONE_RULES_CUTOFF_EPOCH_SECONDS,
-  );
+  let lastBeforeCutoff: TzifZone["transitions"][number] | undefined;
+  for (const transition of zone.transitions) {
+    if (transition[0] <= ZONE_RULES_CUTOFF_EPOCH_SECONDS) {
+      lastBeforeCutoff = transition;
+    }
+  }
   const hasChangeAfterCutoff = zone.transitions.some(
     ([epochSeconds]) => epochSeconds > ZONE_RULES_CUTOFF_EPOCH_SECONDS,
   );
