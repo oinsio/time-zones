@@ -2,7 +2,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
-import { afterEach, expect } from "vitest";
+import { expect } from "vitest";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import {
   type FreshModules,
@@ -51,7 +51,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let modules: FreshModules;
   let addOutcome: AddOutcome;
 
-  afterEach(stopStaleEngine);
+  f.AfterEachScenario(stopStaleEngine);
 
   const givenEngineRejects = async (_ctx: unknown, zoneId: string) => {
     modules = (

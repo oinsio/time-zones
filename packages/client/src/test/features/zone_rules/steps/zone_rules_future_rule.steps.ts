@@ -70,7 +70,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         rule = readRule(ruleText);
       });
       When(
-        "it is evaluated one second before and at {string} (02:00 EST)",
+        "it is evaluated one second before and at {string}",
         (_ctx, instant: string) => {
           const transitionSeconds = toEpochSeconds(instant);
           offsetsSeconds = [transitionSeconds - 1, transitionSeconds].map(

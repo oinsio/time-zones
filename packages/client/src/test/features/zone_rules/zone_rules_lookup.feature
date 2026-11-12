@@ -23,23 +23,23 @@ Feature: Zone rules lookup
   @add-zone-rules-from-iana @FR4
   Scenario: Before the cutoff the cutoff type holds
     When the local time type of "Europe/Moscow" at "1995-07-15T12:00:00Z" is read
-    Then it is the type in force at "2000-01-01T00:00:00Z", UTC+3 "MSK"
+    Then it is the type in force at "2000-01-01T00:00:00Z", UTC plus 3 "MSK"
 
   @add-zone-rules-from-iana @FR1 @UX1 @M3
   Scenario: A stale engine shows the current rules
-    Given the engine's own data places "Asia/Almaty" at UTC+6
+    Given the engine's own data places "Asia/Almaty" at UTC plus 6
     And the list contains Almaty
     When the rows are presented at "2026-07-15T08:00:00Z"
     Then the Almaty row shows "13:00" and "UTC+5"
 
   @add-zone-rules-from-iana @FR1 @UX1 @M3
   Scenario: Temporal and the presenter agree
-    Given the engine's own data places "Asia/Almaty" at UTC+6
+    Given the engine's own data places "Asia/Almaty" at UTC plus 6
     When the local time, the hour labels, the wall-time hint and the date bar of Almaty are presented at "2026-07-15T08:00:00Z"
-    Then every one of them shows the "13:00" local time of UTC+5
+    Then every one of them shows the "13:00" local time of UTC plus 5
 
   @add-zone-rules-from-iana @FR1 @UX1
   Scenario: Wall-clock resolution uses the rules
-    Given the engine's own data places "Asia/Almaty" at UTC+6
+    Given the engine's own data places "Asia/Almaty" at UTC plus 6
     When the wall-clock time "2026-07-15T13:00" in "Asia/Almaty" is resolved
     Then it resolves to "2026-07-15T08:00:00Z" with the status "UNIQUE"

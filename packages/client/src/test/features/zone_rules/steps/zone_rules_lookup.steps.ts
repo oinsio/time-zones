@@ -2,7 +2,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
-import { afterEach, expect } from "vitest";
+import { expect } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import {
   getLocalTimeType,
@@ -106,7 +106,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let localTimeType: LocalTimeType;
   let modules: FreshModules;
 
-  afterEach(stopStaleEngine);
+  f.AfterEachScenario(stopStaleEngine);
 
   const givenStaleAlmaty = async () => {
     modules = (await startOnStaleEngine()).modules;
@@ -140,7 +140,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
     Then(
-      "it is the type in force at {string}, UTC+3 {string}",
+      "it is the type in force at {string}, UTC plus 3 {string}",
       (_ctx, cutoffInstant: string, designation: string) => {
         expect(localTimeType).toEqual(
           readLocalTimeType("Europe/Moscow", cutoffInstant),
@@ -156,7 +156,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "A stale engine shows the current rules",
     ({ Given, And, When, Then }) => {
       let rowTexts: string[] = [];
-      Given("the engine's own data places {string} at UTC+6", givenStaleAlmaty);
+      Given(
+        "the engine's own data places {string} at UTC plus 6",
+        givenStaleAlmaty,
+      );
       And("the list contains Almaty", () => undefined);
       When("the rows are presented at {string}", (_ctx, instant: string) => {
         const { row } = presentAlmaty(modules, instant);
@@ -174,7 +177,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   // @add-zone-rules-from-iana @FR1 @UX1 @M3
   f.Scenario("Temporal and the presenter agree", ({ Given, When, Then }) => {
     let presented: ReturnType<typeof presentAlmaty>;
-    Given("the engine's own data places {string} at UTC+6", givenStaleAlmaty);
+    Given(
+      "the engine's own data places {string} at UTC plus 6",
+      givenStaleAlmaty,
+    );
     When(
       "the local time, the hour labels, the wall-time hint and the date bar of Almaty are presented at {string}",
       (_ctx, instant: string) => {
@@ -182,7 +188,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
     Then(
-      "every one of them shows the {string} local time of UTC+5",
+      "every one of them shows the {string} local time of UTC plus 5",
       (_ctx, time: string) => {
         const [hourText] = time.split(":");
         expect(presented.row.localTimeLabel).toBe(time);
@@ -198,7 +204,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "Wall-clock resolution uses the rules",
     ({ Given, When, Then }) => {
       let resolved: ReturnType<FreshModules["model"]["resolveWallClock"]>;
-      Given("the engine's own data places {string} at UTC+6", givenStaleAlmaty);
+      Given(
+        "the engine's own data places {string} at UTC plus 6",
+        givenStaleAlmaty,
+      );
       When(
         "the wall-clock time {string} in {string} is resolved",
         (_ctx, wallClock: string, zoneId: string) => {

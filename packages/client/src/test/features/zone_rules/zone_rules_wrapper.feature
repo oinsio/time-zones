@@ -3,7 +3,7 @@ Feature: Zone rules date and time formatting
 
   @add-zone-rules-from-iana @FR6
   Scenario: Parts come from the rules
-    Given the engine's own data places "Asia/Almaty" at UTC+6
+    Given the engine's own data places "Asia/Almaty" at UTC plus 6
     When "2026-07-15T08:00:00Z" is split into parts in "Asia/Almaty" with hour, minute, day, month and year
     Then the hour part is "13", the minute part "00", the day "15", the month "7" and the year "2026"
 

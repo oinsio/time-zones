@@ -1,7 +1,7 @@
 // Implements FR6 of add-zone-rules-from-iana: executable scenarios of the Intl.DateTimeFormat wrapper.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { afterEach, expect, vi } from "vitest";
+import { expect, vi } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { realNativeDateTimeFormat } from "@/test/installZoneRules";
 import {
@@ -23,7 +23,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.BeforeEachScenario(() => {
     world = createWrapper();
   });
-  afterEach(() => {
+  f.AfterEachScenario(() => {
     vi.restoreAllMocks();
   });
 
@@ -32,7 +32,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @add-zone-rules-from-iana @FR6
   f.Scenario("Parts come from the rules", ({ Given, When, Then }) => {
-    Given("the engine's own data places {string} at UTC+6", () => undefined);
+    Given(
+      "the engine's own data places {string} at UTC plus 6",
+      () => undefined,
+    );
     When(
       "{string} is split into parts in {string} with hour, minute, day, month and year",
       (_ctx, instant: string, zoneId: string) => {
@@ -138,6 +141,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     ({ Given, When, Then }) => {
       Given("the current instant is {string}", (_ctx, instant: string) => {
         const formatToParts = realNativeDateTimeFormat.prototype.formatToParts;
+        // The wrapper reads the native prototype when it is created, so create it after the spy.
         vi.spyOn(
           realNativeDateTimeFormat.prototype,
           "formatToParts",
@@ -147,6 +151,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         ) {
           return formatToParts.call(this, date ?? toMilliseconds(instant));
         });
+        world = createWrapper();
       });
       When(
         "a formatter for {string} with hour and minute formats without a date",

@@ -1,7 +1,8 @@
 // FR4 of add-zone-rules-from-iana: the local time type at an instant
+
+import zoneRulesDocument from "virtual:zone-rules";
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
-import { FIXTURE_RELEASE_DOCUMENT } from "@/test/zoneRules/fixtureReleaseDocument";
 import { getLocalTimeType } from "./localTimeType.ts";
 import {
   parseZoneRulesRelease,
@@ -12,7 +13,7 @@ import {
 const SECONDS_PER_HOUR = 3600;
 const MILLISECONDS_PER_SECOND = 1000;
 
-const release = parseZoneRulesRelease(FIXTURE_RELEASE_DOCUMENT);
+const release = parseZoneRulesRelease(zoneRulesDocument);
 if (release instanceof ZoneRulesReleaseError) throw release;
 const zonesById = release.zones;
 

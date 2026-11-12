@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { afterEach, expect, vi } from "vitest";
+import { expect, vi } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { getLocalTimeType } from "@/lib/zoneRules";
 import {
@@ -45,7 +45,7 @@ const sampledInstants = Array.from(
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let workCount: WorkCount | undefined;
 
-  afterEach(() => {
+  f.AfterEachScenario(() => {
     workCount?.stop();
     workCount = undefined;
     vi.restoreAllMocks();
@@ -71,7 +71,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("Work bound of a lookup", ({ When, Then, And }) => {
     let nativeFormatToParts: ReturnType<typeof spyOnNativeFormatToParts>;
     When(
-      "the local time type of {string} at 100 instants is read",
+      "the local time type of {string} is read at {int} instants",
       (_ctx, zoneId: string) => {
         const zoneRules = committedRelease.zones.get(zoneId);
         if (!zoneRules) throw new Error(`The release lacks ${zoneId}`);
@@ -95,7 +95,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     const world = createWrapper();
     let nativeFormatToParts: ReturnType<typeof spyOnNativeFormatToParts>;
     When(
-      "one formatter for {string} is created and split into parts at 100 instants",
+      "one formatter for {string} is created and split into parts at {int} instants",
       (_ctx, zoneId: string) => {
         nativeFormatToParts = spyOnNativeFormatToParts();
         const formatter = new world.Wrapper("en", {
@@ -108,14 +108,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then("exactly one native Intl.DateTimeFormat is built", () => {
       expect(world.calls).toHaveLength(1);
     });
-    And("exactly 100 native formatToParts calls are made", () => {
+    And("exactly {int} native formatToParts calls are made", () => {
       expect(nativeFormatToParts).toHaveBeenCalledTimes(SAMPLED_INSTANT_COUNT);
     });
   });
 
   // @add-zone-rules-from-iana @NFR-P1 @NFR-P3
   f.Scenario("Work bound of presenting rows", ({ When, Then }) => {
-    When("50 rows are presented twice at two instants", () => {
+    When("{int} rows are presented twice at two instants", () => {
       const locations = buildBudgetLocations(BUDGET_ROW_COUNT);
       presentBudgetRows(locations, { timestamp: BUDGET_FIRST_MOMENT });
       workCount = startWorkCount();

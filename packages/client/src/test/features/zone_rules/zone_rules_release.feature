@@ -16,14 +16,14 @@ Feature: Zone rules release
   @add-zone-rules-from-iana @FR2
   Scenario: A zone whose last type holds forever
     When the zone rules of "Asia/Almaty" are read from the release "2026f"
-    Then its listed clock changes end with "2024-02-29T18:00:00Z" to UTC+5 "+05"
+    Then its listed clock changes end with "2024-02-29T18:00:00Z" to UTC plus 5 "+05"
     And it has a standard-only future rule "<+05>-5"
 
   @add-zone-rules-from-iana @FR2
   Scenario: A zone whose listed changes end before the cutoff
     When the zone rules of "Europe/Dublin" are read from the release "2026f"
     Then it lists no clock change after the cutoff
-    And its cutoff type is UTC+0 "GMT" with the daylight saving flag set, as its future rule "IST-1GMT0,M10.5.0,M3.5.0/1" gives at "2000-01-01T00:00:00Z"
+    And its cutoff type is UTC plus 0 "GMT" with the daylight saving flag set, as its future rule "IST-1GMT0,M10.5.0,M3.5.0/1" gives at "2000-01-01T00:00:00Z"
 
   @add-zone-rules-from-iana @FR2
   Scenario: A link resolves to its target's rules
@@ -69,7 +69,7 @@ Feature: Zone rules release
   Scenario: Truncation keeps the cutoff type
     Given a TZif file of "Europe/Moscow" with clock changes before and after "2000-01-01T00:00:00Z"
     When it is truncated to the cutoff
-    Then the cutoff type is UTC+3 "MSK" and no clock change before the cutoff is kept
+    Then the cutoff type is UTC plus 3 "MSK" and no clock change before the cutoff is kept
 
   @add-zone-rules-from-iana @FR8 @G4
   Scenario: The committed release passes

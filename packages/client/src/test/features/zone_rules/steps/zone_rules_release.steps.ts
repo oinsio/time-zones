@@ -122,7 +122,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
     Then(
-      "its listed clock changes end with {string} to UTC+5 {string}",
+      "its listed clock changes end with {string} to UTC plus 5 {string}",
       (_ctx, instant: string, designation: string) => {
         const lastChange = zoneRules.changes.at(-1);
         expect(lastChange?.epochSeconds).toBe(toEpochSeconds(instant));
@@ -155,7 +155,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         expect(zoneRules.changes).toEqual([]);
       });
       And(
-        "its cutoff type is UTC+0 {string} with the daylight saving flag set, as its future rule {string} gives at {string}",
+        "its cutoff type is UTC plus 0 {string} with the daylight saving flag set, as its future rule {string} gives at {string}",
         (_ctx, designation: string, ruleText: string, instant: string) => {
           expect(readFutureRuleText("Europe/Dublin")).toBe(ruleText);
           expect(zoneRules.cutoffType).toEqual({
@@ -332,7 +332,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       truncated = truncateToCutoff(zone);
     });
     Then(
-      "the cutoff type is UTC+3 {string} and no clock change before the cutoff is kept",
+      "the cutoff type is UTC plus 3 {string} and no clock change before the cutoff is kept",
       (_ctx, designation: string) => {
         const [cutoffOffset, cutoffDesignation] =
           truncated.types[truncated.cutoffType];
@@ -340,10 +340,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           3 * SECONDS_PER_HOUR,
           designation,
         ]);
-        for (const [epochSeconds] of truncated.changes) {
-          expect(epochSeconds).toBeGreaterThan(
-            toEpochSeconds("2000-01-01T00:00:00Z"),
-          );
+        // A listed change is stored as seconds after the cutoff: a change before it would be negative.
+        for (const [secondsAfterCutoff] of truncated.changes) {
+          expect(secondsAfterCutoff).toBeGreaterThan(0);
         }
       },
     );

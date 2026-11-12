@@ -25,7 +25,7 @@ Feature: Zone rules future rule
   @add-zone-rules-from-iana @FR3 @M4
   Scenario: Transitions are read in the local time in force
     Given the future rule "EST5EDT,M3.2.0,M11.1.0"
-    When it is evaluated one second before and at "2040-03-11T07:00:00Z" (02:00 EST)
+    When it is evaluated one second before and at "2040-03-11T07:00:00Z"
     Then the offsets are "−05:00" and then "−04:00"
 
   @add-zone-rules-from-iana @FR3 @M4

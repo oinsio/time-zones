@@ -4,7 +4,7 @@ import type {
   StepTest,
 } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { afterEach, expect } from "vitest";
+import { expect } from "vitest";
 import { ETC_ZONE_AREA } from "@/lib/zoneRules";
 import { committedRelease } from "@/test/installZoneRules";
 import { startOnStaleEngine, stopStaleEngine } from "@/test/staleEngineWorld";
@@ -90,7 +90,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
-  afterEach(() => {
+  f.AfterEachScenario(() => {
     stopStaleEngine();
     Object.defineProperty(Intl, "supportedValuesOf", supportedValuesOfBefore);
   });
