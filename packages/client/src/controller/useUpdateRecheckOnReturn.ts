@@ -18,6 +18,7 @@ export function useUpdateRecheckOnReturn(
   clock: Clock,
 ): void {
   const onRecheck = useCallback(() => {
+    // Stryker disable next-line OptionalChaining: equivalent — useRecheckOnReturn never calls onRecheck while registration is undefined (isEnabled is false)
     registration?.update().catch(ignoreFailedUpdateCheck);
   }, [registration]);
   useRecheckOnReturn({
