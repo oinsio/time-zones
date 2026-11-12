@@ -147,7 +147,7 @@ No changes.
 - M3: With a fake native `Intl.DateTimeFormat` that reports UTC+6 for Asia/Almaty and rejects `America/Ciudad_Juarez`, the Almaty card shows `13:00` and `UTC+5` at `2026-07-15T08:00:00Z`, and Ciudad Juárez is added and shows `02:00` and `UTC−6`.
 - M4: The seven RFC 9636 pitfall cases (sign, negative DST, hours outside 0–24, never-firing transitions, angle-bracket names, after 2037, 64-bit block only) each have a passing scenario or unit test.
 - M5: Initial JavaScript ≤ 150 KB gzipped; zone rules asset ≤ `ZONE_RULES_ASSET_BUDGET_KB`; exactly 1 `<link rel="preload">` for the asset in `dist/index.html`.
-- M6: Mutation score ≥ 95% (minimum 90%) on `src/lib/zoneRules/` and `scripts/zoneRules/`.
+- M6: Mutation score ≥ 95% (minimum 90%) on every module of `src/lib/zoneRules/` and `scripts/zoneRules/` that holds logic; the constants-only files (`core/zoneRulesConstants.ts`, `scripts/zoneRules/signing.ts`) and the re-exporting `index.ts` files hold none and are left out.
 - M7: `moment-timezone` is absent from `packages/client/package.json`, and a grep of production sources (`packages/client/src` without tests, steps and `src/test/`, plus `packages/client/scripts`) for `supportedValuesOf`, `isZoneDataOutdated`, `LEGACY_ZONE_PROBE_ID` and `zoneShim` prints nothing.
 
 ## Open Questions
