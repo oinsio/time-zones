@@ -14,7 +14,7 @@ Research behind this proposal: the Android Time Zone Data module (separate data,
 - ADDED: the **zone rules release line** on the settings page directly after the deploy time: "Time zone rules: 2026f" («Правила часовых поясов: 2026f»), naming the active release.
 - MODIFIED: `app-shell` gains the zone rules update notice next to the update notice; `settings`: the deploy time is no longer the last line (the release line follows it); `app-delivery` gains the publication and the served files, and the offline requirement states that those files are not precached.
 - Glossary (`docs/glossary/`): `zone-rules.md` gains **zone rules update**, **zone rules version file**, **zone rules publication**, **active release**, **stored release**, **release order**; `app-shell.md` gains **zone rules update notice** and the **update recheck** entry names its shared scheduler; `settings.md` gains **zone rules release line**, and the **settings page** and **deploy time** entries list it.
-- Storage: a new document under its own key (ADR-0004 envelope, schema version 1). The locations and preferences documents are unchanged. ADR-0004 gets an amendment for documents that are cached copies of published data (silent discard, no cross-tab broadcast), handed to a human (H1).
+- Storage: a new document under its own key (ADR-0004 envelope, schema version 1). The locations and preferences documents are unchanged. ADR-0004 stays as it is. A new ADR-0015 "Cached copies of published data" refines it for this kind of document: an unreadable copy is removed silently and the bundled data is used instead, which is its recovery (no reset action), and its writes are not broadcast to other tabs. The persistence line of `.claude/rules/architecture.md` ("Invalid stored data leads to a recoverable error state, never a crash") gains the same exception. Both are written by a human (H1), because the factory may not write `docs/adr/`, `.claude/` or `CLAUDE.md`.
 - One owner for release names: the compiler's own single-letter pattern is replaced by the release order, so `2026aa` compiles too.
 
 ## Capabilities
@@ -36,7 +36,7 @@ Paths are under `packages/client/` unless stated otherwise; `design.md` names ea
 - New: release order in `src/lib/zoneRules/core/`, active release choice in `src/lib/zoneRules/`, two ports in `src/ports/` (stored release, version source) with their adapters in `src/adapters/`, the check hook in `src/controller/`, the notice in `src/app/`, the release line in `src/app/settings/` with its presenter, constants in `src/constants/`, strings in `src/locales/en.json` and `ru.json`.
 - Changed: `src/boot.ts` and `loadZoneRules` (active release at start), `src/controller/useUpdateRecheckOnReturn.ts` (shared scheduler), `src/app/AppShell.tsx`, `src/app/settings/SettingsPage.tsx`, `scripts/zoneRules/zoneRulesPlugin.ts`, `scripts/zoneRules/compile.ts`, `vite.config.ts`, `scripts/check-bundle-size.mjs`, `zone-rules/README.md`; new `scripts/zoneRules/latestRelease.ts` with a `package.json` script.
 - Settings screenshot baselines re-approved once with the line present and its text hidden.
-- Handed to a human (`tasks.md`, Human follow-up): the workflow files under `.github/workflows/` (H2), the ADR-0004 amendment (H1), the first run on `main` (H3).
+- Handed to a human (`tasks.md`, Human follow-up): the workflow files under `.github/workflows/` (H2), the new ADR-0015 with its lines in `CLAUDE.md` and `.claude/rules/architecture.md` (H1), the first run on `main` (H3).
 
 ## Goals
 

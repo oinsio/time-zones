@@ -16,7 +16,7 @@ Source paths are under `packages/client/`; commands run from `packages/client/` 
 ## 2. Release order (TDD)
 
 - [ ] 2.1 TDD `src/lib/zoneRules/core/releaseOrder.ts` (D1, FR5, M3): `parseReleaseName`, `compareReleaseNames`, `isNewerRelease`, exported from `core/index.ts`. Tests in `releaseOrder.test.ts` with `it.each` over the spec's 6 pairs in both directions and against themselves, and the 4 invalid names. Verify red, then green, with `npx vitest run src/lib/zoneRules/core/releaseOrder.test.ts`.
-- [ ] 2.2 `scripts/zoneRules/compile.ts` validates its argument with `parseReleaseName` instead of its own `RELEASE_NAME` (FR5); add a case to `src/test/zoneRules/compile.stops.test.ts` that `2026aa` passes the name check and `2026A` is refused. Verify with `npx vitest run src/test/zoneRules/compile.stops.test.ts`, then `grep -c "RELEASE_NAME = " scripts/zoneRules/compile.ts` prints 0.
+- [ ] 2.2 `scripts/zoneRules/compile.ts` validates its argument with `parseReleaseName` instead of its own `RELEASE_NAME` (FR5). In `src/test/zoneRules/compile.stops.test.ts`, the `it.each` "rejects the release name %s" lists `2026fx`, which is a valid name under FR5 (`^\d{4}[a-z]+$`) and would now pass: remove `2026fx` from that list and add `2026A` to it (`latest`, `2026`, `../2026f`, `2026F`, `x2026f` stay); add an `it.each` "accepts the release name %s" over `2026aa` and `2026fx` that asserts the run gets past the name check (its first download URL names `tzdata<name>.tar.gz`). Verify with `npx vitest run src/test/zoneRules/compile.stops.test.ts`, then `grep -c "RELEASE_NAME = " scripts/zoneRules/compile.ts` prints 0.
 - [ ] 2.3 BDD `src/test/features/zone_rules_updates/zone_rules_updates_release_order.feature` + `steps/zone_rules_updates_release_order.steps.ts` (FR5): the spec's "Ordered pairs" and "Invalid names". Verify with `npx vitest run src/test/features/zone_rules_updates/steps/zone_rules_updates_release_order.steps.ts`.
 
 ## 3. Stored release (TDD)
@@ -67,7 +67,11 @@ Source paths are under `packages/client/`; commands run from `packages/client/` 
 
 ## 10. Handoff patches
 
-- [ ] 10.1 Handoff H1: write `H1-adr-0004-cached-documents.patch` and its README section in `temporary-docs/gnomish/<task>/handoff/`. The patch adds to `docs/adr/0004-local-persistence-strategy.md` a "Cached copies of published data" paragraph: such a document (the stored zone rules release) is discarded silently when unreadable, with no reset offered, and is not broadcast to other tabs, which read it at their next check; amended by `add-remote-zone-rules-updates`. Verify from the root with `git apply --check temporary-docs/gnomish/<task>/handoff/H1-adr-0004-cached-documents.patch`.
+- [ ] 10.1 Handoff H1: write `H1-adr-0015-cached-published-data.patch` and its README section in `temporary-docs/gnomish/<task>/handoff/`. The patch leaves `docs/adr/0004-local-persistence-strategy.md` unchanged and:
+  - adds `docs/adr/0015-cached-copies-of-published-data.md` in the format of `.claude/rules/adr.md` (Status `Accepted (<merge date>)`, Context, Decision, Consequences, Alternatives Considered): it refines ADR-0004 for documents that are cached copies of data the site publishes (the first is the stored zone rules release of `add-remote-zone-rules-updates`). Such a document keeps the ADR-0004 envelope, port and contract tests; when it is unreadable it is removed silently and the bundled data is used, which is its recoverable state, with no error state and no reset action; its writes are not broadcast, and other tabs read it at their next check. User data stays fully under ADR-0004;
+  - in `.claude/rules/architecture.md`, extends the line "Invalid stored data leads to a recoverable error state, never a crash" with "; a cached copy of published data is removed silently and the bundled data is used instead (ADR-0015)";
+  - in `CLAUDE.md`, adds `0015 cached copies of published data` to the ADR list.
+  Verify from the root with `git apply --check temporary-docs/gnomish/<task>/handoff/H1-adr-0015-cached-published-data.patch` and `git diff --quiet -- docs/adr/0004-local-persistence-strategy.md .claude/rules/architecture.md CLAUDE.md` (the targets stay untouched in the working copy).
 - [ ] 10.2 Handoff H2: write `H2-zone-rules-publication-workflow.patch` and its README section. The patch adds `.github/workflows/zone-rules-publication.yml` as D7 describes, gives `deploy.yml` an `on: workflow_call` with input `ref`, and gives `ci.yml` an input `ref` used by its checkout (default: the triggering commit), each with `# Implements FR1 of add-remote-zone-rules-updates`. Verify from the root with `git apply --check temporary-docs/gnomish/<task>/handoff/H2-zone-rules-publication-workflow.patch`; the README's **Verify** lists `actionlint .github/workflows/zone-rules-publication.yml .github/workflows/deploy.yml .github/workflows/ci.yml`.
 - [ ] 10.3 Handoff H3: write the README section for H3 (no patch) with the steps of the Human follow-up bullet below. Verify with `grep -c "^## H3" temporary-docs/gnomish/<task>/handoff/README.md` prints 1.
 
@@ -80,9 +84,9 @@ Source paths are under `packages/client/`; commands run from `packages/client/` 
 
 ## Human follow-up
 
-- H1 (FR6, FR9): apply `H1-adr-0004-cached-documents.patch` — amends ADR-0004 for cached copies of published data (silent discard, no cross-tab broadcast), which the stored release is (design D2).
-  Why manual: the factory may not write `docs/adr/`.
-  Automated part: the stored release contract tests and the active release tests (tasks 3.1, 4.1–4.3) prove the behaviour the amendment describes.
+- H1 (FR6, FR9): review and apply `H1-adr-0015-cached-published-data.patch` — adds ADR-0015 "Cached copies of published data", which refines ADR-0004 (unchanged) for the stored release: silent removal of an unreadable copy with the bundled data as the recovery, no reset action, no cross-tab broadcast (design D2); adds the matching exception to the persistence line of `.claude/rules/architecture.md` and the ADR to the list in `CLAUDE.md`.
+  Why manual: the factory may not write `docs/adr/`, `.claude/` or `CLAUDE.md`, and accepting a global ADR is a judgement only a human can make.
+  Automated part: the stored release contract tests and the active release tests (tasks 3.1, 4.1–4.3) prove the behaviour ADR-0015 describes; `git apply --check` proves the patch applies.
 - H2 (FR1): apply `H2-zone-rules-publication-workflow.patch` — adds the daily and manual publication workflow and lets `deploy.yml` and `ci.yml` deploy a given commit.
   Why manual: the factory may not edit `.github/`.
   Automated part: the release decision (`findReleaseToPublish`), the compiler, the zone rules check and the served files are tested in `pnpm test` (tasks 2.2, 8.1–8.3); `git apply --check` proves the patch applies.
