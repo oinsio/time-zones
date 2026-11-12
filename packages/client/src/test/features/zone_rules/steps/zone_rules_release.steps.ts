@@ -1,6 +1,3 @@
-// Implements FR2, FR7, FR8 of add-zone-rules-from-iana: executable scenarios of the release and its compiler.
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
@@ -13,45 +10,24 @@ import {
   ZoneRulesReleaseError,
 } from "@/lib/zoneRules";
 import { committedRelease } from "@/test/installZoneRules";
-import { ZONE_RULES_RELEASE_FILE } from "../../../../../app.config";
 import {
   compareWithRelease,
-  parseZdumpLines,
   type ZdumpDifference,
 } from "../../../../../scripts/zoneRules/checkAgainstZdump.ts";
 
+import {
+  committedDocument,
+  LISTED_CHANGES_END_YEAR,
+  MILLISECONDS_PER_SECOND,
+  readFutureRuleText,
+  readZdump,
+  readZone,
+  toEpochSeconds,
+  WRONG_NEW_YORK_FUTURE_RULE,
+  ZDUMP_ZONE_IDS,
+} from "./zoneRulesReleaseWorld";
+
 const feature = await loadFeature("../zone_rules_release.feature");
-
-const MILLISECONDS_PER_SECOND = 1000;
-const LISTED_CHANGES_END_YEAR = 2007;
-const ZDUMP_ZONE_IDS = ["America/New_York", "Asia/Almaty", "Europe/Dublin"];
-const ZDUMP_DIRECTORY = join(__dirname, "../../../zoneRules/fixtures/zdump");
-const WRONG_NEW_YORK_FUTURE_RULE = "EST5EDT,M3.2.0,M10.1.0";
-
-const committedDocument = JSON.parse(
-  readFileSync(ZONE_RULES_RELEASE_FILE, "utf8"),
-);
-const toEpochSeconds = (instant: string) =>
-  Temporal.Instant.from(instant).epochMilliseconds / MILLISECONDS_PER_SECOND;
-
-function readZone(zoneId: string): ZoneRules {
-  const zoneRules = committedRelease.zones.get(zoneId);
-  if (!zoneRules) throw new Error(`The release lacks ${zoneId}`);
-  return zoneRules;
-}
-
-function readFutureRuleText(zoneId: string): string {
-  return committedDocument.zones[zoneId].futureRule;
-}
-
-function readZdump(zoneId: string) {
-  return parseZdumpLines(
-    readFileSync(
-      join(ZDUMP_DIRECTORY, `${zoneId.replace("/", "_")}.txt`),
-      "utf8",
-    ),
-  );
-}
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let zoneRules: ZoneRules;
