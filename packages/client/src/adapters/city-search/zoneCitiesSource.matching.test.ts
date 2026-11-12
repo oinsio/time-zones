@@ -1,5 +1,5 @@
 // Verifies FR2, FR3 of add-locations-via-search (D7); FR5, FR9 of add-zone-rules-from-iana (D6).
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { installZoneRulesDateTimeFormat } from "@/lib/zoneRules";
 import { SearchMatchKind } from "@/ports";
 import {
@@ -167,5 +167,20 @@ describe("zone cities source on the installed release", () => {
 
   it("should offer Europe/Oslo", () => {
     expect(idsOf(createZoneCitiesSource([moscow]))).toContain("Europe/Oslo");
+  });
+});
+
+describe("zone cities source without an installed release", () => {
+  it("should keep every record plus UTC when no lister is given", async () => {
+    // FR10 of add-zone-rules-from-iana (design D6)
+    vi.resetModules();
+    const { createZoneCitiesSource: createFreshSource } = await import(
+      "./zoneCitiesSource"
+    );
+    expect(idsOf(createFreshSource([moscow, almaty]))).toEqual([
+      "Europe/Moscow",
+      "Asia/Almaty",
+      "UTC",
+    ]);
   });
 });
