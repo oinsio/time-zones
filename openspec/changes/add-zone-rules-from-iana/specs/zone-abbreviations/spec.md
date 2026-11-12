@@ -19,4 +19,4 @@ Cards, the device time location, the wall-time hint, the settings example and th
 - **WHEN** the abbreviation table is built from the zone rules release
 - **THEN** `America/New_York` has the pair `EST, EDT`, `Europe/Dublin` has `GMT, IST`, `Asia/Kolkata` has `IST`
 - **AND** `Asia/Almaty` has no abbreviation
-- **AND** the table equals the one built from the same release's tzdb periods before this change
+- **AND** every zone of the table built before this change keeps its abbreviations, except a zone listed with the IANA release note that changed its designations

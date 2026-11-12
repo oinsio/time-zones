@@ -71,8 +71,8 @@ The future rule SHALL be interpreted as RFC 9636 §3.3 defines the POSIX TZ stri
 | `<+05>-5` | 2040-07-15T12:00:00Z | +05:00 | +05 |
 | `<+0530>-5:30` | 2040-07-15T12:00:00Z | +05:30 | +0530 |
 | `NZST-12NZDT,M9.5.0,M4.1.0/3` | 2040-01-15T12:00:00Z | +13:00 | NZDT |
-| `AEST-10AEDT,M10.1.0,M4.1.0/3` | 2040-04-01T15:30:00Z | +11:00 | AEDT |
-| `AEST-10AEDT,M10.1.0,M4.1.0/3` | 2040-04-01T16:30:00Z | +10:00 | AEST |
+| `AEST-10AEDT,M10.1.0,M4.1.0/3` | 2040-03-31T15:30:00Z | +11:00 | AEDT |
+| `AEST-10AEDT,M10.1.0,M4.1.0/3` | 2040-03-31T16:30:00Z | +10:00 | AEST |
 
 #### Scenario: Transitions are read in the local time in force
 - **GIVEN** the future rule `EST5EDT,M3.2.0,M11.1.0`
@@ -85,8 +85,8 @@ The future rule SHALL be interpreted as RFC 9636 §3.3 defines the POSIX TZ stri
 
 | rule | instant | offset |
 |---|---|---|
-| `STD3DST,J59/2,J60/2` | 2040-02-29T12:00:00Z | −03:00 |
-| `STD3DST,J59/2,J60/2` | 2040-03-01T12:00:00Z | −02:00 |
+| `STD3DST,J60/2,J61/2` | 2040-02-29T12:00:00Z | −03:00 |
+| `STD3DST,J60/2,J61/2` | 2040-03-01T12:00:00Z | −02:00 |
 | `STD3DST,59/2,60/2` | 2040-02-29T12:00:00Z | −02:00 |
 
 ### Requirement: Local time type lookup

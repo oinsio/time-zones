@@ -41,7 +41,9 @@ All paths are under `packages/client/` unless stated otherwise.
 - New `src/lib/zoneRules/`: the release format and its reader, the future rule parser and evaluator, the lookup, the `Intl.DateTimeFormat` wrapper. `src/boot.ts` and `src/lib/legacy/bootApp.ts`: the rules load and the wrapper install before the app. `src/lib/legacy/zoneShim.ts`, `needsLegacySupport.ts`, `installLegacySupport.ts`, `src/constants/legacy.ts`: shim and probe removed.
 - New `scripts/zoneRules/`: the compiler (download, signature check, `zic`, TZif reader, truncation, JSON writer), the `zdump` check, the Vite plugin serving the release as an asset; the committed release under `zone-rules/`. `scripts/zoneData/zoneDataPlugin.ts` and `extractZoneAbbreviations.ts`: periods from the release. `scripts/check-bundle-size.mjs`: the asset budget. `package.json`: scripts `zone-rules:compile`, `zone-rules:check`; `moment-timezone` removed.
 - `src/model/timeZoneId.ts` (known zones through the wrapper), `src/adapters/city-search/zoneCitiesSource.ts` (zone list), `src/vite-env.d.ts` (virtual modules).
-- `.github/workflows/ci.yml`: the zone rules check step. `docs/glossary/`, `docs/architecture/overview.md`, `docs/adr/0014-zone-rules-from-iana.md` (written).
+- `src/lib/legacy/zoneShim.errors.test.ts`, `src/model/reduceWallTime.legacy.test.ts`, `src/lib/legacy/installLegacySupport.test.ts`: tests of the removed shim deleted or rewritten. `LETTERS_ONLY_DESIGNATION` moves from `scripts/zoneData/extractZoneAbbreviations.ts` to `src/constants/zoneAbbreviations.ts`, so the wrapper and the table share one owner.
+- `docs/glossary/`, `docs/architecture/overview.md`, `docs/adr/0014-zone-rules-from-iana.md` (written).
+- Human follow-up (paths the factory may not edit, delivered as patches): `.github/workflows/ci.yml` gains the zone rules check step (H1); `.claude/rules/temporal.md` gains the zone rules line (H2); ADR-0006 gains a status note that the search's zone list comes from the zone rules release (H3).
 - New dev dependencies: none planned; `zic` and `zdump` come from the operating system (macOS and `ubuntu-latest` ship them). Removed: `moment-timezone`.
 - Tests: new unit and BDD features under `src/test/features/zone_rules/`; `browser_compatibility_legacy_zones.feature` rewritten; new scenarios in `zone_abbreviations` and `location_search` features.
 
@@ -65,7 +67,7 @@ All paths are under `packages/client/` unless stated otherwise.
 ## Users & Scenarios
 
 - U1: The owner opens the installed app on an iPad mini 2 (iOS 12.5.7) with Almaty, Moscow and New York. Almaty shows 13:00 for 08:00 UTC, one hour earlier than the iPad's own clock app would say.
-- U2: On the same iPad the owner adds Ciudad Juárez from search; the card appears with its time and UTC−7 in summer.
+- U2: On the same iPad the owner adds Ciudad Juárez from search; the card appears with its time and UTC−6 (MDT) in summer.
 - U3: A user on current Safari, whose macOS has not received the latest IANA release, sees the same times as a user on Chrome.
 - U4: A user pins 2040-07-15 in the date bar; Dublin shows IST, UTC+1, and New York EDT, UTC−4.
 
@@ -137,11 +139,11 @@ No changes.
 
 - M1: 100% of FR1–FR10, NFR-P1–P3, NFR-A1, NFR-R1, UX1 and UX2 have at least one automated test or CI check naming `add-zone-rules-from-iana` with the id.
 - M2: The zone rules check reports 0 differences against `zdump -v` for every zone of the committed release over 2000–2040.
-- M3: With a fake native `Intl.DateTimeFormat` that reports UTC+6 for Asia/Almaty and rejects `America/Ciudad_Juarez`, the Almaty card shows `13:00` and `UTC+5` at `2026-07-15T08:00:00Z`, and Ciudad Juárez is added and shows `01:00` and `UTC−7`.
+- M3: With a fake native `Intl.DateTimeFormat` that reports UTC+6 for Asia/Almaty and rejects `America/Ciudad_Juarez`, the Almaty card shows `13:00` and `UTC+5` at `2026-07-15T08:00:00Z`, and Ciudad Juárez is added and shows `02:00` and `UTC−6`.
 - M4: The seven RFC 9636 pitfall cases (sign, negative DST, hours outside 0–24, never-firing transitions, angle-bracket names, after 2037, 64-bit block only) each have a passing scenario.
 - M5: Initial JavaScript ≤ 150 KB gzipped; zone rules asset ≤ `ZONE_RULES_ASSET_BUDGET_KB`; the asset is preloaded (1 `<link rel="preload">` or `modulepreload` for it in `dist/index.html`).
 - M6: Mutation score ≥ 95% (minimum 90%) on `src/lib/zoneRules/` and `scripts/zoneRules/`.
-- M7: `moment-timezone` is absent from `packages/client/package.json`, and `grep -rn "supportedValuesOf\|isZoneDataOutdated\|LEGACY_ZONE_PROBE_ID" packages/client/src` prints nothing.
+- M7: `moment-timezone` is absent from `packages/client/package.json`, and `grep -rn "supportedValuesOf\|isZoneDataOutdated\|LEGACY_ZONE_PROBE_ID\|zoneShim" packages/client/src packages/client/scripts --include=*.ts --include=*.tsx | grep -vE "\.test\.tsx?:|/src/test/"` prints nothing (production sources only; test worlds may still list the engine's zones).
 
 ## Open Questions
 
