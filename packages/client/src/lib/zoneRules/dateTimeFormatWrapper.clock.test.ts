@@ -73,7 +73,7 @@ describe("a formatter without a date formats the current instant", () => {
     "2026-07-15T08:00:00Z",
   ).epochMilliseconds;
 
-  function createClockNative() {
+  function createClockNative(currentInstant = FIXED_INSTANT) {
     const log = { constructions: 0, formatToPartsCalls: 0 };
     function ClockNative(
       locales?: string | string[],
@@ -87,7 +87,7 @@ describe("a formatter without a date formats the current instant", () => {
           if (property === "formatToParts") {
             return (date?: number) => {
               log.formatToPartsCalls += 1;
-              return target.formatToParts(date ?? FIXED_INSTANT);
+              return target.formatToParts(date ?? currentInstant);
             };
           }
           return typeof value === "function" ? value.bind(target) : value;
@@ -112,6 +112,27 @@ describe("a formatter without a date formats the current instant", () => {
         ...CLOCK_TIME_OPTIONS,
       }).format(),
     ).toBe("13:00");
+  });
+
+  it("reads every field of the current instant", () => {
+    // FR6 of add-zone-rules-from-iana: month, day, minute, second, millisecond
+    const instant = Temporal.Instant.from(
+      "2026-11-28T19:47:31.250Z",
+    ).epochMilliseconds;
+    const { Native } = createClockNative(instant);
+    const Wrapper = createZoneRulesDateTimeFormat(Native, fixtureRelease);
+    const formatter = new Wrapper("en", {
+      timeZone: "Asia/Almaty",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hourCycle: "h23",
+      fractionalSecondDigits: 3,
+    });
+    expect(formatter.formatToParts()).toEqual(formatter.formatToParts(instant));
   });
 
   it("builds exactly one native formatter per instance", () => {
