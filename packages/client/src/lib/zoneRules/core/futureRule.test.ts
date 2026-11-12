@@ -89,6 +89,38 @@ describe("parseFutureRule", () => {
     });
   });
 
+  it.each([
+    ["M1.1.0", 1, 1, 0],
+    ["M12.5.6", 12, 5, 6],
+  ])("accepts the boundary date %s", (text, month, week, weekday) => {
+    expect(
+      parseFutureRule(`EST5EDT,${text},M11.1.0`)?.daylight?.start,
+    ).toMatchObject({ month, week, weekday });
+  });
+
+  it.each([
+    ["J1", RuleDateKind.JULIAN_NO_LEAP, 1],
+    ["J365", RuleDateKind.JULIAN_NO_LEAP, 365],
+    ["0", RuleDateKind.ZERO_BASED, 0],
+    ["365", RuleDateKind.ZERO_BASED, 365],
+  ])("accepts the boundary day %s", (text, kind, day) => {
+    expect(
+      parseFutureRule(`EST5EDT,${text},M11.1.0`)?.daylight?.start,
+    ).toMatchObject({ kind, day });
+  });
+
+  it("accepts 59 minutes and 59 seconds in an offset", () => {
+    expect(parseFutureRule("<+05>-5:59:59")?.standard.offsetSeconds).toBe(
+      5 * SECONDS_PER_HOUR + 59 * 60 + 59,
+    );
+  });
+
+  it("reads an explicit daylight offset", () => {
+    expect(
+      parseFutureRule("EST5EDT3,M3.2.0,M11.1.0")?.daylight?.offsetSeconds,
+    ).toBe(-3 * SECONDS_PER_HOUR);
+  });
+
   it("accepts the largest hour of a transition time", () => {
     expect(
       parseFutureRule("EST5EDT,M3.2.0/167:59:59,M11.1.0/-167:59:59")?.daylight,
@@ -115,6 +147,16 @@ describe("parseFutureRule", () => {
     ["trailing text", "<+05>-5x"],
     ["an unclosed angle bracket", "<+05-5"],
     ["an empty text", ""],
+    ["a day that is not a number", "EST5EDT,X,M11.1.0"],
+    ["an end that is not a day", "EST5EDT,M3.2.0,Q"],
+    ["text after the end date", "EST5EDT,M3.2.0,M11.1.0x"],
+    ["a month of 0", "EST5EDT,M0.1.0,M11.1.0"],
+    ["a week of 0", "EST5EDT,M3.0.0,M11.1.0"],
+    ["60 minutes in an offset", "<+05>-5:60"],
+    ["60 seconds in an offset", "<+05>-5:30:60"],
+    ["60 minutes in a transition time", "EST5EDT,M3.2.0/2:60,M11.1.0"],
+    ["a text that starts with a number", "5EST"],
+    ["a text that starts with a symbol", "<+05>-5,"],
   ])("rejects %s", (_description, text) => {
     expect(parseFutureRule(text)).toBeUndefined();
   });

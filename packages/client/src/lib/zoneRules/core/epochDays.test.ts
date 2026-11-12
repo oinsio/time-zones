@@ -55,9 +55,9 @@ describe("epoch days", () => {
     expect(getWeekdayOfEpochDay(-1)).toBe(THURSDAY - 1);
   });
 
-  it("round-trips every day of 2096 to 2104", () => {
-    const firstDay = getEpochDayFromCivilDate(2096, 1, 1);
-    const lastDay = getEpochDayFromCivilDate(2104, 12, 31);
+  it("round-trips every day of 1960 to 2110", () => {
+    const firstDay = getEpochDayFromCivilDate(1960, 1, 1);
+    const lastDay = getEpochDayFromCivilDate(2110, 12, 31);
     for (let epochDay = firstDay; epochDay <= lastDay; epochDay++) {
       const { year, month, day } = getCivilDateFromEpochDay(epochDay);
       expect(getEpochDayFromCivilDate(year, month, day)).toBe(epochDay);

@@ -158,8 +158,7 @@ function readZoneRules(
   if (typeof rawZone.futureRule !== "string") {
     return shapeError(`the future rule of ${zoneId}`);
   }
-  const futureRule =
-    rawZone.futureRule === "" ? undefined : parseFutureRule(rawZone.futureRule);
+  const futureRule = parseFutureRule(rawZone.futureRule);
   if (rawZone.futureRule !== "" && !futureRule) {
     return shapeError(`the future rule of ${zoneId}`);
   }

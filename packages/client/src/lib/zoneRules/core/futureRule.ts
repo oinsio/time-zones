@@ -78,7 +78,9 @@ function readDesignation(text: string): Read<string> | undefined {
 function readClockTime(text: string): Read<number> | undefined {
   const match = CLOCK_TIME.exec(text);
   if (!match) return undefined;
-  const [consumed, sign, hours, minutes = "0", seconds = "0"] = match;
+  const [consumed, sign, hours] = match;
+  const minutes = match[3] ?? 0;
+  const seconds = match[4] ?? 0;
   if (
     Number(hours) > FUTURE_RULE_MAX_TRANSITION_HOURS ||
     Number(minutes) > MAX_MINUTES_OR_SECONDS ||

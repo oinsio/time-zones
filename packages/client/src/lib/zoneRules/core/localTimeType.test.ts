@@ -64,7 +64,7 @@ describe("getLocalTimeType", () => {
   });
 
   it("holds the cutoff type of a zone without changes before the cutoff, whatever its future rule says", () => {
-    expect(readLocalTimeType("Europe/Dublin", "1999-12-31T23:59:59Z")).toEqual({
+    expect(readLocalTimeType("Europe/Dublin", "1999-07-15T12:00:00Z")).toEqual({
       offsetHours: 0,
       designation: "GMT",
     });

@@ -10,7 +10,6 @@ import {
   EPOCH_WEEKDAY,
   EPOCH_YEAR,
   GREGORIAN_AVERAGE_DAYS_PER_YEAR,
-  MONTHS_PER_YEAR,
 } from "./zoneRulesConstants.ts";
 
 export type CivilDate = { year: number; month: number; day: number };
@@ -74,7 +73,7 @@ export function getCivilDateFromEpochDay(epochDay: number): CivilDate {
   const year = getYearOfEpochDay(epochDay);
   let dayOfYear = epochDay - getEpochDayOfYearStart(year);
   let month = 1;
-  while (month < MONTHS_PER_YEAR && dayOfYear >= getDaysInMonth(year, month)) {
+  while (dayOfYear >= getDaysInMonth(year, month)) {
     dayOfYear -= getDaysInMonth(year, month);
     month++;
   }

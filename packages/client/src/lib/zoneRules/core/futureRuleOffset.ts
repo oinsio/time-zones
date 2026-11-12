@@ -26,7 +26,7 @@ type DaylightRule = NonNullable<FutureRule["daylight"]>;
 
 type RuleCache = {
   standardType: LocalTimeType;
-  daylightType: LocalTimeType | undefined;
+  daylight: { rule: DaylightRule; type: LocalTimeType } | undefined;
   transitionsByYear: Map<number, YearTransitions>;
 };
 
@@ -50,10 +50,13 @@ function buildCache(rule: FutureRule): RuleCache {
       designation: standard.designation,
       isDaylightSavingTime: false,
     },
-    daylightType: daylight && {
-      utcOffsetSeconds: daylight.offsetSeconds,
-      designation: daylight.designation,
-      isDaylightSavingTime: true,
+    daylight: daylight && {
+      rule: daylight,
+      type: {
+        utcOffsetSeconds: daylight.offsetSeconds,
+        designation: daylight.designation,
+        isDaylightSavingTime: true,
+      },
     },
     transitionsByYear: new Map(),
   };
@@ -140,15 +143,15 @@ export function resolveFutureRule(
   epochSeconds: number,
 ): LocalTimeType {
   const cache = getCache(rule);
-  const { daylight } = rule;
-  if (!daylight || !cache.daylightType) return cache.standardType;
+  const { daylight } = cache;
+  if (!daylight) return cache.standardType;
   const year = getYearOfEpochDay(Math.floor(epochSeconds / SECONDS_PER_DAY));
   let latestEpochSeconds = -Infinity;
   let typeInForce = cache.standardType;
   for (const yearShift of NEIGHBOURING_YEARS) {
     const { startEpochSeconds, endEpochSeconds } = getYearTransitions(
       cache,
-      daylight,
+      daylight.rule,
       year + yearShift,
     );
     if (
@@ -164,7 +167,7 @@ export function resolveFutureRule(
       startEpochSeconds >= latestEpochSeconds
     ) {
       latestEpochSeconds = startEpochSeconds;
-      typeInForce = cache.daylightType;
+      typeInForce = daylight.type;
     }
   }
   return typeInForce;
