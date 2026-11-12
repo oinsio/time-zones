@@ -30,7 +30,7 @@ export function isLeapYear(year: number): boolean {
 
 export function getDaysInMonth(year: number, month: number): number {
   const isLeapFebruary = month === FEBRUARY && isLeapYear(year);
-  return DAYS_IN_MONTHS[month - 1] + (isLeapFebruary ? 1 : 0);
+  return (DAYS_IN_MONTHS[month - 1] as number) + (isLeapFebruary ? 1 : 0);
 }
 
 function countLeapYearsBefore(year: number): number {

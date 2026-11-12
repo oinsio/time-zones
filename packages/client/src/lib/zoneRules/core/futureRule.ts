@@ -40,6 +40,12 @@ export type FutureRule = {
   daylight?: FutureRuleType & { start: RuleDate; end: RuleDate };
 };
 
+type DayRule = RuleDate extends infer Date
+  ? Date extends unknown
+    ? Omit<Date, "timeSeconds">
+    : never
+  : never;
+
 type Read<Value> = { value: Value; rest: string };
 
 const ANGLE_BRACKET_DESIGNATION = /^<([A-Za-z0-9+-]*)>/;
@@ -90,12 +96,12 @@ function readClockTime(text: string): Read<number> | undefined {
   };
 }
 
-function readDayRule(
-  text: string,
-): Read<Omit<RuleDate, "timeSeconds">> | undefined {
+function readDayRule(text: string): Read<DayRule> | undefined {
   const monthWeekDay = MONTH_WEEK_DAY.exec(text);
   if (monthWeekDay) {
-    const [consumed, month, week, weekday] = monthWeekDay.map(Number);
+    const month = Number(monthWeekDay[1]);
+    const week = Number(monthWeekDay[2]);
+    const weekday = Number(monthWeekDay[3]);
     const isInRange =
       month >= 1 &&
       month <= MONTHS_PER_YEAR &&
@@ -194,7 +200,7 @@ export function parseFutureRule(text: string): FutureRule | undefined {
   const start = readRuleDate(daylightType.rest.slice(RULE_SEPARATOR.length));
   if (!start?.rest.startsWith(RULE_SEPARATOR)) return undefined;
   const end = readRuleDate(start.rest.slice(RULE_SEPARATOR.length));
-  if (!end || end.rest !== "") return undefined;
+  if (end?.rest !== "") return undefined;
   return {
     standard: standard.value,
     daylight: { ...daylightType.value, start: start.value, end: end.value },

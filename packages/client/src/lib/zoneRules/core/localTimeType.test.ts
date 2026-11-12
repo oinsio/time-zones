@@ -14,9 +14,10 @@ const MILLISECONDS_PER_SECOND = 1000;
 
 const release = parseZoneRulesRelease(FIXTURE_RELEASE_DOCUMENT);
 if (release instanceof ZoneRulesReleaseError) throw release;
+const zonesById = release.zones;
 
 function getZoneRules(zoneId: string): ZoneRules {
-  const zoneRules = release.zones.get(zoneId);
+  const zoneRules = zonesById.get(zoneId);
   if (!zoneRules) throw new Error(`The fixture release lacks ${zoneId}`);
   return zoneRules;
 }
