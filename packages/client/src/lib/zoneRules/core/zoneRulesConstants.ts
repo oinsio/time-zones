@@ -26,3 +26,13 @@ export const RuleDateKind = {
   MONTH_WEEK_DAY: "MONTH_WEEK_DAY",
 } as const;
 export type RuleDateKind = (typeof RuleDateKind)[keyof typeof RuleDateKind];
+
+export const SECONDS_PER_MINUTE = 60;
+export const SECONDS_PER_HOUR = 3600;
+export const SECONDS_PER_DAY = 86400;
+
+/** The calendar facts a future rule date is read against. */
+export const MONTHS_PER_YEAR = 12;
+export const DAYS_PER_WEEK = 7;
+export const DAYS_PER_YEAR_WITHOUT_LEAP_DAY = 365;
+export const MAX_WEEK_OF_MONTH = 5;
