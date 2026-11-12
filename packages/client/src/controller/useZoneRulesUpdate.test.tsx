@@ -1,14 +1,23 @@
 // Verifies FR3, FR7, FR9, NFR-P1 of add-remote-zone-rules-updates: the check finds a newer release.
-import { afterEach, describe, expect, it } from "vitest";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  createInMemoryStoredReleaseRepository,
+  createInMemoryZoneRulesVersionSource,
+} from "@/adapters";
 import { StoredReleaseLoadStatus } from "@/ports";
 import { resetPageVisibility } from "@/test/pageVisibility";
+import { createSwitchableClock } from "@/test/switchableClock";
 import { buildReleaseDocument } from "@/test/zoneRules/buildReleaseDocument";
 import {
+  CHECK_START,
   createZoneRulesUpdateWorld,
   FIVE_MINUTES_LATER,
   publishing,
+  releaseNamed,
   SIXTEEN_MINUTES_LATER,
 } from "@/test/zoneRules/zoneRulesUpdateWorld";
+import { useZoneRulesUpdate } from "./useZoneRulesUpdate";
 
 afterEach(resetPageVisibility);
 
@@ -118,5 +127,39 @@ describe("useZoneRulesUpdate dismissal", () => {
     world.versionSource.setRelease("2026h", buildReleaseDocument("2026h"));
     await world.returnToPage(SIXTEEN_MINUTES_LATER);
     expect(world.result.current.readyRelease).toBe("2026h");
+  });
+});
+
+describe("useZoneRulesUpdate default online state", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const renderWithoutInjectedOnlineState = (isOnline: boolean) => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(isOnline);
+    const versionSource = createInMemoryZoneRulesVersionSource(
+      publishing("2026g"),
+    );
+    renderHook(() =>
+      useZoneRulesUpdate({
+        clock: createSwitchableClock(CHECK_START),
+        versionSource,
+        storedReleases: createInMemoryStoredReleaseRepository(),
+        getActiveRelease: () => releaseNamed("2026f"),
+      }),
+    );
+    return versionSource;
+  };
+
+  it("should make no request while the browser reports offline", async () => {
+    const versionSource = renderWithoutInjectedOnlineState(false);
+    await act(async () => undefined);
+    expect(versionSource.versionRequestCount()).toBe(0);
+  });
+
+  it("should check while the browser reports online", async () => {
+    const versionSource = renderWithoutInjectedOnlineState(true);
+    await act(async () => undefined);
+    expect(versionSource.versionRequestCount()).toBe(1);
   });
 });

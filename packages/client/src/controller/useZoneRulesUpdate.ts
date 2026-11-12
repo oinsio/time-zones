@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Clock } from "@/lib/temporal";
 import {
   getInstalledRelease,
@@ -49,7 +49,7 @@ export function useZoneRulesUpdate({
   const [dismissedRelease, setDismissedRelease] = useState<string>();
   const unstoredRelease = useRef<string>();
 
-  const check = useCallback(async () => {
+  const check = async () => {
     const activeRelease = getActiveRelease();
     if (activeRelease === undefined || !isOnline()) return;
     const version = await versionSource.fetchVersion();
@@ -66,7 +66,6 @@ export function useZoneRulesUpdate({
     }
     if (unstoredRelease.current === name) return;
     const document = await versionSource.fetchRelease(name);
-    if (isZoneRulesSourceFailure(document)) return;
     const downloaded = parseZoneRulesRelease(document);
     if (downloaded instanceof ZoneRulesReleaseError) return;
     if (downloaded.release !== name) return;
@@ -75,7 +74,7 @@ export function useZoneRulesUpdate({
       return;
     }
     setStoredRelease(name);
-  }, [getActiveRelease, isOnline, versionSource, storedReleases]);
+  };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: the start-up check runs once, at mount
   useEffect(() => {
