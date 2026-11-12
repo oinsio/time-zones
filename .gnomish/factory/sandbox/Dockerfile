@@ -86,9 +86,13 @@ RUN env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy sh -ec ' \
       rm -rf /var/lib/apt/lists/*'
 
 # Loopback bypasses the guard: vite preview and Playwright talk to each other during test:bdd.
+# Node's own fetch and http(s) clients ignore HTTP(S)_PROXY unless NODE_USE_ENV_PROXY is set: without
+# it a Node script resolves the host itself, finds no DNS in the box and fails before the guard ever
+# sees the request — so an allowlisted host stays unreachable and no egress denial is recorded.
 # The agent CLI's telemetry and auto-update would only show up as egress denials, so they are off.
 ENV NO_PROXY=localhost,127.0.0.1,::1 \
     no_proxy=localhost,127.0.0.1,::1 \
+    NODE_USE_ENV_PROXY=1 \
     NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
     CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 \
     DISABLE_AUTOUPDATER=1 \
