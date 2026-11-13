@@ -13,6 +13,7 @@ import { expect, vi } from "vitest";
 import {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
+  type GeoNamesCityData,
 } from "@/adapters";
 import { AppShell, MainPage } from "@/app";
 import { DEVICE_TIME_LOCATION_ID, KeyboardKey } from "@/constants";
@@ -46,7 +47,7 @@ const EMPTY_LIST = "empty";
 type LocationsHandle = ReturnType<typeof useLocations>;
 
 /** Per-scenario state and the step handlers shared by the device time features. */
-export const createDeviceTimeWorld = () => {
+export const createDeviceTimeWorld = (cityData?: GeoNamesCityData) => {
   let deviceZone = "UTC";
   let instant = DEFAULT_INSTANT;
   let cities: string[] = [];
@@ -57,7 +58,7 @@ export const createDeviceTimeWorld = () => {
   let backend: ReturnType<typeof createInMemoryLocationBackend>;
   let clock = createSwitchableClock(instant, deviceZone);
   let tickScheduler = createManualTickScheduler();
-  const dataLoader = createDataLoaderState();
+  const dataLoader = createDataLoaderState(cityData);
 
   const Probe = () => {
     latestLocations = useLocations();

@@ -1,5 +1,6 @@
 // Implements FR8 of add-settings-page-and-device-time-location (D4): the city data loader of the device time features.
 import zoneCities from "virtual:zone-cities";
+import type { GeoNamesCityData } from "@/adapters";
 import { createCompositeCitySearch } from "@/adapters";
 import type { LoadCitySearch } from "@/ports";
 
@@ -10,7 +11,8 @@ export enum DataMode {
 }
 
 /** Counts the requests and answers them as the scenario says. */
-export const createDataLoaderState = () => {
+/** `cityData` defaults to no GeoNames cities: the device time features are about zone cities. */
+export const createDataLoaderState = (cityData?: GeoNamesCityData) => {
   let mode = DataMode.LOADED;
   let requestCount = 0;
   let releaseData: () => void = () => undefined;
@@ -30,7 +32,7 @@ export const createDataLoaderState = () => {
       requestCount += 1;
       if (mode === DataMode.FAILING)
         return Promise.reject(new Error("offline"));
-      const search = createCompositeCitySearch(zoneCities);
+      const search = createCompositeCitySearch(zoneCities, cityData);
       if (mode === DataMode.LOADED) return Promise.resolve(search);
       return new Promise((resolve) => {
         releaseData = () => resolve(search);

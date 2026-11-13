@@ -19,7 +19,7 @@ const feature = await loadFeature(
 );
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
-  const world = createDeviceTimeWorld();
+  const world = createDeviceTimeWorld(fullCityData);
   let storedDocumentBeforeSwitches: unknown;
   let dialectCityLabel = "";
 
@@ -81,6 +81,35 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         switchLanguage("ru"),
       );
       Then("the row now reads {string}", expectRowReads);
+    },
+  );
+
+  // @add-geonames-city-source @FR9
+  f.Scenario(
+    "A city that is not the zone city",
+    ({ Given, And, When, Then }) => {
+      Given("the interface language is {string}", world.givenLanguage);
+      And("the zone cities data is loaded", world.givenData(DataMode.LOADED));
+      And("the list is {string}", world.givenList);
+      When("the user opens the app", world.openApp);
+      And(
+        'the user switches the interface language to "en"',
+        switchLanguage("en"),
+      );
+      Then("the row reads {string}", expectRowReads);
+      And("a Moscow row in the same list still reads {string}", expectRowReads);
+    },
+  );
+
+  // @add-geonames-city-source @FR9
+  f.Scenario(
+    "Namesakes in one zone read the same",
+    ({ Given, And, When, Then }) => {
+      Given("the interface language is {string}", world.givenLanguage);
+      And("the zone cities data is loaded", world.givenData(DataMode.LOADED));
+      And("the list is {string}", world.givenList);
+      When("the user opens the app", world.openApp);
+      Then("the row reads {string}", expectRowReads);
     },
   );
 

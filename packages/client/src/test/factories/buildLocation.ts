@@ -42,5 +42,8 @@ export const KNOWN_CITIES: Record<
   Jerusalem: { timeZoneId: "Asia/Jerusalem", countryCode: "IL" },
   "St. Vincent": { timeZoneId: "America/St_Vincent", countryCode: "VC" },
   Santiago: { timeZoneId: "America/Santiago", countryCode: "CL" },
+  Kazan: { timeZoneId: "Europe/Moscow", countryCode: "RU" },
+  Казань: { timeZoneId: "Europe/Moscow", countryCode: "RU" },
+  Springfield: { timeZoneId: "America/Chicago", countryCode: "US" },
   UTC: { timeZoneId: "UTC", countryCode: "" },
 };
