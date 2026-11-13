@@ -3,12 +3,13 @@
  * with its line number.
  * Implements FR1, FR2 of add-geonames-city-source (D8).
  */
-import { COLUMN_SEPARATOR, FLAG_TRUE } from "./constants.ts";
+
 import type {
   Admin1Row,
   AlternateNameRow,
   GeoNamesCityRow,
 } from "./cityDataTypes.ts";
+import { COLUMN_SEPARATOR, FLAG_TRUE } from "./constants.ts";
 
 const CITY_COLUMNS = {
   geonameId: 0,
@@ -32,6 +33,10 @@ const ALTERNATE_COLUMNS = {
 } as const;
 const ADMIN1_COLUMNS = { key: 0, name: 1, geonameId: 3, count: 4 } as const;
 
+function readColumn(columns: string[], index: number): string {
+  return columns[index] ?? "";
+}
+
 function splitLine(line: string, columnCount: number, lineNumber: number) {
   const columns = line.split(COLUMN_SEPARATOR);
   if (columns.length < columnCount) {
@@ -52,20 +57,27 @@ function readNumber(text: string, field: string, lineNumber: number): number {
   return value;
 }
 
-export function parseCityRow(line: string, lineNumber: number): GeoNamesCityRow {
+export function parseCityRow(
+  line: string,
+  lineNumber: number,
+): GeoNamesCityRow {
   const columns = splitLine(line, CITY_COLUMNS.count, lineNumber);
   return {
-    geonameId: readNumber(columns[CITY_COLUMNS.geonameId], "ID", lineNumber),
-    name: columns[CITY_COLUMNS.name],
-    countryCode: columns[CITY_COLUMNS.countryCode],
-    admin1Code: columns[CITY_COLUMNS.admin1Code],
-    featureCode: columns[CITY_COLUMNS.featureCode],
+    geonameId: readNumber(
+      readColumn(columns, CITY_COLUMNS.geonameId),
+      "ID",
+      lineNumber,
+    ),
+    name: readColumn(columns, CITY_COLUMNS.name),
+    countryCode: readColumn(columns, CITY_COLUMNS.countryCode),
+    admin1Code: readColumn(columns, CITY_COLUMNS.admin1Code),
+    featureCode: readColumn(columns, CITY_COLUMNS.featureCode),
     population: readNumber(
-      columns[CITY_COLUMNS.population],
+      readColumn(columns, CITY_COLUMNS.population),
       "population",
       lineNumber,
     ),
-    timeZoneId: columns[CITY_COLUMNS.timeZoneId],
+    timeZoneId: readColumn(columns, CITY_COLUMNS.timeZoneId),
   };
 }
 
@@ -75,21 +87,31 @@ export function parseAlternateNameRow(
 ): AlternateNameRow {
   const columns = splitLine(line, ALTERNATE_COLUMNS.count, lineNumber);
   return {
-    geonameId: readNumber(columns[ALTERNATE_COLUMNS.geonameId], "ID", lineNumber),
-    language: columns[ALTERNATE_COLUMNS.language],
-    name: columns[ALTERNATE_COLUMNS.name],
-    isPreferred: columns[ALTERNATE_COLUMNS.isPreferred] === FLAG_TRUE,
-    isShort: columns[ALTERNATE_COLUMNS.isShort] === FLAG_TRUE,
-    isColloquial: columns[ALTERNATE_COLUMNS.isColloquial] === FLAG_TRUE,
-    isHistoric: columns[ALTERNATE_COLUMNS.isHistoric] === FLAG_TRUE,
+    geonameId: readNumber(
+      readColumn(columns, ALTERNATE_COLUMNS.geonameId),
+      "ID",
+      lineNumber,
+    ),
+    language: readColumn(columns, ALTERNATE_COLUMNS.language),
+    name: readColumn(columns, ALTERNATE_COLUMNS.name),
+    isPreferred:
+      readColumn(columns, ALTERNATE_COLUMNS.isPreferred) === FLAG_TRUE,
+    isShort: readColumn(columns, ALTERNATE_COLUMNS.isShort) === FLAG_TRUE,
+    isColloquial:
+      readColumn(columns, ALTERNATE_COLUMNS.isColloquial) === FLAG_TRUE,
+    isHistoric: readColumn(columns, ALTERNATE_COLUMNS.isHistoric) === FLAG_TRUE,
   };
 }
 
 export function parseAdmin1Row(line: string, lineNumber: number): Admin1Row {
   const columns = splitLine(line, ADMIN1_COLUMNS.count, lineNumber);
   return {
-    key: columns[ADMIN1_COLUMNS.key],
-    name: columns[ADMIN1_COLUMNS.name],
-    geonameId: readNumber(columns[ADMIN1_COLUMNS.geonameId], "ID", lineNumber),
+    key: readColumn(columns, ADMIN1_COLUMNS.key),
+    name: readColumn(columns, ADMIN1_COLUMNS.name),
+    geonameId: readNumber(
+      readColumn(columns, ADMIN1_COLUMNS.geonameId),
+      "ID",
+      lineNumber,
+    ),
   };
 }

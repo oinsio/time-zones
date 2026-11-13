@@ -1,5 +1,6 @@
 import type { CityNameLanguage } from "@/constants";
 import { MAX_SEARCH_RESULTS, POPULAR_TIME_ZONE_IDS } from "@/constants";
+import { normalizeSearchText } from "@/lib/searchText";
 import {
   type CitySearch,
   type CitySearchResult,
@@ -9,7 +10,6 @@ import {
 import { createAbbreviationSource } from "./abbreviationSource";
 import type { ZoneCityData } from "./citySource";
 import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
-import { normalizeSearchText } from "@/lib/searchText";
 import { createZoneCitiesSource } from "./zoneCitiesSource";
 
 /** Match kinds, best first. */

@@ -49,7 +49,9 @@ function findNamesakes(candidates: NamesakeCandidate[]): NamesakeCandidate[] {
   return [...namesakes];
 }
 
-export function markNamesakes(candidates: NamesakeCandidate[]): NamesakeRegions {
+export function markNamesakes(
+  candidates: NamesakeCandidate[],
+): NamesakeRegions {
   const namesakes = findNamesakes(candidates);
   const pairs = new Map<string, [string, string]>();
   for (const namesake of namesakes) {

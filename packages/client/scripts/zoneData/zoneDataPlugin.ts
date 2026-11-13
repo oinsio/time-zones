@@ -5,7 +5,6 @@
  * Implements FR9 of add-zone-rules-from-iana (D8): abbreviations from the release.
  */
 import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import type { Plugin } from "vite";
 import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
@@ -16,7 +15,7 @@ import {
 } from "../../src/lib/zoneRules/core/index.ts";
 import { readReleaseZonePeriods } from "../zoneRules/releaseZonePeriods.ts";
 import { extractZoneAbbreviations } from "./extractZoneAbbreviations.ts";
-import { extractZoneData, type ZoneData } from "./extractZoneData.ts";
+import { loadZoneData } from "./loadZoneData.ts";
 
 const ALIASES_MODULE_ID = "virtual:time-zone-aliases";
 const CITIES_URL_MODULE_ID = "virtual:zone-cities-url";
@@ -27,28 +26,10 @@ const RESOLVED_ID_PREFIX = "\0";
 const TEST_MODE = "test";
 const ZONE_CITIES_ASSET_NAME = "city-search.json";
 const ZONE_CITIES_DEV_FILE_NAME = "city-search.json";
-const BCP47_TIME_ZONE_FILE = "cldr-bcp47/bcp47/timezone.json";
-const ENGLISH_ZONE_NAMES_FILE = "cldr-dates-full/main/en/timeZoneNames.json";
-const RUSSIAN_ZONE_NAMES_FILE = "cldr-dates-full/main/ru/timeZoneNames.json";
 const JSON_CONTENT_TYPE = "application/json";
 const CONTENT_TYPE_HEADER = "Content-Type";
 
-const nodeRequire = createRequire(import.meta.url);
-let cachedZoneData: ZoneData | undefined;
 let cachedZoneAbbreviations: string | undefined;
-
-function readJson(specifier: string): unknown {
-  return JSON.parse(readFileSync(nodeRequire.resolve(specifier), "utf8"));
-}
-
-function loadZoneData(): ZoneData {
-  cachedZoneData ??= extractZoneData({
-    bcp47TimeZones: readJson(BCP47_TIME_ZONE_FILE),
-    englishZoneNames: readJson(ENGLISH_ZONE_NAMES_FILE),
-    russianZoneNames: readJson(RUSSIAN_ZONE_NAMES_FILE),
-  });
-  return cachedZoneData;
-}
 
 function readZoneRulesRelease(releaseFilePath: string): ZoneRulesRelease {
   const release = parseZoneRulesRelease(

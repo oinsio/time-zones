@@ -23,17 +23,29 @@ function candidate(
 describe("markNamesakes", () => {
   it("should give namesakes of one country their regions", () => {
     const { regions, regionIndexById } = markNamesakes([
-      candidate("1", "US", "Springfield", "Спрингфилд", ["Illinois", "Иллинойс"]),
-      candidate("2", "US", "Springfield", "Спрингфилд", ["Missouri", "Миссури"]),
+      candidate("1", "US", "Springfield", "Спрингфилд", [
+        "Illinois",
+        "Иллинойс",
+      ]),
+      candidate("2", "US", "Springfield", "Спрингфилд", [
+        "Missouri",
+        "Миссури",
+      ]),
     ]);
-    expect(regions.map(([english]) => english)).toEqual(["Illinois", "Missouri"]);
+    expect(regions.map(([english]) => english)).toEqual([
+      "Illinois",
+      "Missouri",
+    ]);
     expect(regionIndexById.get("1")).toBe(0);
     expect(regionIndexById.get("2")).toBe(1);
   });
 
   it("should give no region to the same name in different countries", () => {
     const { regionIndexById } = markNamesakes([
-      candidate("1", "CA", "Victoria", "Виктория", ["British Columbia", "Британская Колумбия"]),
+      candidate("1", "CA", "Victoria", "Виктория", [
+        "British Columbia",
+        "Британская Колумбия",
+      ]),
       candidate("2", "SC", "Victoria", "Виктория", ["Mahé", "Маэ"]),
     ]);
     expect(regionIndexById.size).toBe(0);
@@ -76,7 +88,10 @@ describe("markNamesakes", () => {
       candidate("1", "US", "A", "А", ["Zeta", "Зета"]),
       candidate("2", "US", "A", "А", ["Alpha", "Альфа"]),
     ]);
-    expect(regions).toEqual([["Alpha", "Альфа"], ["Zeta", "Зета"]]);
+    expect(regions).toEqual([
+      ["Alpha", "Альфа"],
+      ["Zeta", "Зета"],
+    ]);
   });
 
   it("should throw naming the city when a namesake has no region", () => {

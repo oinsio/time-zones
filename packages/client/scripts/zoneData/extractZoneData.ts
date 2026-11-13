@@ -89,7 +89,7 @@ function findExemplarCity(
 
 function deriveCityFromZoneId(canonicalZoneId: string): string {
   return (
-    canonicalZoneId.split(ZONE_ID_SEPARATOR).at(-1)?.replaceAll("_", " ") ?? ""
+    canonicalZoneId.split(ZONE_ID_SEPARATOR).at(-1)?.replace(/_/g, " ") ?? ""
   );
 }
 

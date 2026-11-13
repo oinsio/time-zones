@@ -3,10 +3,7 @@
  * Implements FR2 of add-geonames-city-source (D8).
  */
 import type { AlternateNameRow, CityNames } from "./cityDataTypes.ts";
-import {
-  NAME_LANGUAGE_ENGLISH,
-  NAME_LANGUAGE_RUSSIAN,
-} from "./constants.ts";
+import { NAME_LANGUAGE_ENGLISH, NAME_LANGUAGE_RUSSIAN } from "./constants.ts";
 
 export type NameOverrides = Record<number, Partial<CityNames>>;
 

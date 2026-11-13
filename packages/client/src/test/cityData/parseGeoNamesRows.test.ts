@@ -7,8 +7,25 @@ import {
 } from "../../../scripts/cityData/parseGeoNamesRows.ts";
 
 const CITY_LINE = [
-  "551487", "Kazan", "Kazan", "Kasan,Казань", "55.78874", "49.12214", "P", "PPLA",
-  "RU", "", "73", "", "", "", "1243500", "", "116", "Europe/Moscow", "2023-01-01",
+  "551487",
+  "Kazan",
+  "Kazan",
+  "Kasan,Казань",
+  "55.78874",
+  "49.12214",
+  "P",
+  "PPLA",
+  "RU",
+  "",
+  "73",
+  "",
+  "",
+  "",
+  "1243500",
+  "",
+  "116",
+  "Europe/Moscow",
+  "2023-01-01",
 ].join("\t");
 
 describe("parseCityRow", () => {
@@ -35,7 +52,9 @@ describe("parseCityRow", () => {
 
 describe("parseAlternateNameRow", () => {
   it("should read language, name and flags", () => {
-    const line = ["1", "551487", "ru", "Казань", "1", "", "", "", "", ""].join("\t");
+    const line = ["1", "551487", "ru", "Казань", "1", "", "", "", "", ""].join(
+      "\t",
+    );
     expect(parseAlternateNameRow(line, 1)).toEqual({
       geonameId: 551487,
       language: "ru",

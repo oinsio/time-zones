@@ -20,7 +20,8 @@ export const NAME_LANGUAGES: readonly string[] = [
   NAME_LANGUAGE_RUSSIAN,
 ];
 
-export const GEONAMES_DUMP_BASE_URL = "https://download.geonames.org/export/dump/";
+export const GEONAMES_DUMP_BASE_URL =
+  "https://download.geonames.org/export/dump/";
 export const CITIES_ARCHIVE_NAME = "cities15000.zip";
 export const CITIES_FILE_NAME = "cities15000.txt";
 export const ALTERNATE_NAMES_ARCHIVE_NAME = "alternateNamesV2.zip";

@@ -12,6 +12,7 @@
     "check:legacy-build": "node scripts/check-legacy-build.mjs",
     "zone-rules:compile": "node scripts/zoneRules/compile.ts",
     "zone-rules:check": "node scripts/zoneRules/check.ts",
+    "city-data:compile": "node scripts/cityData/compile.ts",
     "zone-rules:latest": "node scripts/zoneRules/latestRelease.ts",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
