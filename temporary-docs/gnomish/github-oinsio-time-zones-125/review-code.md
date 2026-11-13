@@ -129,7 +129,8 @@ One scoped run: `cd packages/client && npx stryker run --mutate 'src/preferences
 - Impact: The `@M2` executable scenario would stay green if migration step 4, or the app path after it, dropped the stored interface language or view mode (e.g. step 4 returning `{ zoneLabelParts: [...] }` without spreading the payload). The regression is still caught by the adapter unit test `preferencesDocument.zoneLabel.test.ts:78-106`, so the cost is a misleading BDD step, not an untested requirement.
 - Fix: In that step assert what is in force on the settings page instead of the stored text: the view radio `screen.getByRole("radio", { name: i18n.t("views.gridTitle") })` is checked, and the language button `screen.getByRole("button", { name: i18n.t("settings.languageButton", { language: "Русский" }) })` is present (the same assertion `settings_view_mode_unit.steps.tsx:174-178` uses), mapping the feature's `"ru"` to its native name with a small lookup constant in the step file.
 - Fix risk: the scenario passes `"ru"` while the assertion needs the native name, so a lookup is needed; if the `zoneLabelWorld` render does not mount the language group the way the view-mode world does, the language assertion must stay on the view only. No production code changes.
-- Status: open
+- Status: fixed
+- Resolution: the "Existing users keep the country" step now asserts the Grid view radio is checked on the rendered settings page (settings_zone_label_storage_unit.steps.tsx). The language stays asserted on the stored text: the zoneLabelWorld does not mount the app shell that applies the language, so the Russian button is absent there (tried, failed); migration is also covered by preferencesDocument.zoneLabel.test.ts.
 
 ### R2 — SUGGESTION — Two step files of this change exceed the 200-line target
 - Location: `packages/client/src/test/features/settings/steps/settings_zone_label_storage_unit.steps.tsx:1` (new, 267 lines); `packages/client/src/test/features/locations/steps/locations_zone_line_unit.steps.tsx:1` (212 → 277 lines)
@@ -138,7 +139,8 @@ One scoped run: `cd packages/client && npx stryker run --mutate 'src/preferences
 - Impact: Larger step files are what the project rule says degrade AI context quality; both files are within 25 lines of the hard cap, so the next scenario added to either breaks the cap.
 - Fix: Move the locations scenarios this change added ("No zone line when every part is hidden", "Hiding the country applies to every row at once") into a new `locations_zone_line_country_unit.feature` with its own `steps/locations_zone_line_country_unit.steps.tsx` reusing `zoneLineWorld.tsx`; move the two cross-tab scenarios of `settings_zone_label_storage_unit.feature` into `settings_zone_label_sync_unit.feature` with their own steps file reusing `zoneLabelWorld.tsx`. Keep the tags.
 - Fix risk: vitest-cucumber binds one step file to one feature file, so the scenarios must move with their Gherkin and keep their tags; shared helpers already live in the world files, so the split only duplicates the `vi.mock` / `loadFeature` boilerplate.
-- Status: open
+- Status: rejected (not-worth-it)
+- Resolution: both files are under the 300-line hard cap of process-invariants.md, which allows it when splitting costs clarity; locations_zone_line_unit.steps.tsx was already 212 lines before this change. Moving scenarios between feature files risks tag and screenshot churn for no behavioural gain.
 
 ## Verdict
 

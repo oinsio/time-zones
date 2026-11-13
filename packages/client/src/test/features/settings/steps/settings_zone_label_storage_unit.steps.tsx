@@ -32,6 +32,7 @@ const HOUR_FORMAT_STORED_VALUES: Record<string, string> = {
   "12-hour": "H12",
 };
 const VIEW_STORED_IDS: Record<string, string> = { Grid: "grid" };
+const VIEW_TITLE_KEYS: Record<string, string> = { Grid: "views.gridTitle" };
 const THEME_LABEL_KEYS: Record<string, string> = { Dark: "settings.themeDark" };
 const HOUR_FORMAT_LABEL_KEYS: Record<string, string> = {
   "12-hour": "settings.hourFormat12",
@@ -67,7 +68,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         name: i18n.t(HOUR_FORMAT_LABEL_KEYS[hourFormat]),
       }),
     ).toBeChecked();
-    // The app shell applies the language (see the language storage scenarios); the stored document keeps it.
+    // The settings world does not mount the app shell that applies the language, so the stored document is the only place it shows.
     expect(world.storedText()).toContain(`"interfaceLanguage":"${language}"`);
   };
   const expectDocumentNotRewritten = () => {
@@ -202,9 +203,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           viewName: string,
         ) => {
           expectPreferencesInForce(_ctx, theme, hourFormat, language);
-          expect(world.storedText()).toContain(
-            `"viewMode":"${VIEW_STORED_IDS[viewName]}"`,
-          );
+          expect(
+            screen.getByRole("radio", {
+              name: i18n.t(VIEW_TITLE_KEYS[viewName]),
+            }),
+          ).toBeChecked();
         },
       );
       And(
