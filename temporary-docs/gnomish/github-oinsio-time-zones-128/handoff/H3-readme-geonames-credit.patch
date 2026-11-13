@@ -1,0 +1,20 @@
+diff --git a/README.md b/README.md
+index e737068..c7f3552 100644
+--- a/README.md
++++ b/README.md
+@@ -288,3 +288,5 @@ Full reference: the factory's [operator guides](https://github.com/oinsio/gnomis
+ ## License
+ 
+ [Apache License 2.0](LICENSE)
++
++City data: [GeoNames](https://www.geonames.org/), CC BY 4.0 ([details](packages/client/city-data/README.md))
+diff --git a/README.ru.md b/README.ru.md
+index 4bdd3e8..128def4 100644
+--- a/README.ru.md
++++ b/README.ru.md
+@@ -288,3 +288,5 @@ Java 25 и релиз фабрики остаются на хосте: сама
+ ## Лицензия
+ 
+ [Apache License 2.0](LICENSE)
++
++Данные о городах: [GeoNames](https://www.geonames.org/), CC BY 4.0 ([подробнее](packages/client/city-data/README.md))

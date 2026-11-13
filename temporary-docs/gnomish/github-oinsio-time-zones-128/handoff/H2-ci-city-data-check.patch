@@ -1,0 +1,15 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index b816dc3..28af59a 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -40,6 +40,10 @@ jobs:
+ 
+       - run: pnpm typecheck
+ 
++      # implements FR12 of add-geonames-city-source
++      - name: Check city data
++        run: pnpm --filter @time-zones/client city-data:check
++
+       - run: pnpm test
+ 
+       - run: pnpm build

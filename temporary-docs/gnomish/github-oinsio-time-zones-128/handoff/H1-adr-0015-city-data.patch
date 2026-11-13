@@ -1,0 +1,64 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 38ebad2..0894bb9 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -15,7 +15,7 @@ IMPORTANT: Before naming or writing any domain type, function, constant, i18n ke
+ ## Architecture
+ 
+ - Model / presenter / swappable views — .claude/rules/architecture.md, overview: docs/architecture/overview.md
+-- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds, 0009 supported browser engines, 0010 device time location, 0011 meeting range, 0014 zone rules from IANA)
++- ADRs: docs/adr/ (0002 layers, 0003 time model, 0004 persistence, 0005 view registry, 0006 city data sources, 0007 reference zone, 0008 performance budgets as work bounds, 0009 supported browser engines, 0010 device time location, 0011 meeting range, 0014 zone rules from IANA, 0015 city data from GeoNames)
+ - Screen design (docs win on conflict): docs/design/README.md
+ 
+ ## Domain Rules
+diff --git a/docs/adr/0006-city-data-sources.md b/docs/adr/0006-city-data-sources.md
+index 60dd297..dfe1152 100644
+--- a/docs/adr/0006-city-data-sources.md
++++ b/docs/adr/0006-city-data-sources.md
+@@ -3,6 +3,8 @@
+ ## Status
+ Accepted (2026-09-28)
+ 
++GeoNamesSource is added by `add-geonames-city-source`; duplicates are removed per city and population orders after `rank` ([ADR-0015](0015-city-data-from-geonames.md)).
++
+ ## Context
+ 
+ Users add locations by searching for a city, a country or a time zone abbreviation. IANA provides about 400 time zone identifiers but no city database. A full city database (e.g. GeoNames with 15-25k cities, regions and localized names) weighs hundreds of kilobytes and needs a data pipeline and license review.
+diff --git a/docs/adr/0015-city-data-from-geonames.md b/docs/adr/0015-city-data-from-geonames.md
+new file mode 100644
+index 0000000..70de5c7
+--- /dev/null
++++ b/docs/adr/0015-city-data-from-geonames.md
+@@ -0,0 +1,32 @@
++# ADR-0015: City data from GeoNames, compiled offline and committed
++
++## Status
++Accepted (2026-11-13)
++
++## Context
++
++ADR-0006 left room for a richer city source behind the `CitySearch` port. The zone cities alone find one city per time zone, so Kazan, Munich or Boston cannot be added by name. Related: ADR-0006, ADR-0014.
++
++## Decision
++
++City data comes from GeoNames (CC BY 4.0): every city with a population of at least 100 000 and every capital, with English and Russian names, country, canonical IANA zone and population. A maintainer command (`city-data:compile`) downloads the dumps, compiles one file and commits it; `city-data:check` validates it offline in CI. The build, the tests and CI never contact GeoNames.
++
++The composite adapter removes duplicates by city (record ID) instead of by zone and name, so namesakes in one zone stay separate results, and orders results by match kind, then `rank`, then population, then name.
++
++## Consequences
++
++Positive:
++- About 6 000 more cities are found, in both languages, behind the unchanged port.
++- A build without network and a reviewable data change.
++
++Negative:
++- The search data file grows and its budget is raised for it.
++- GeoNames can lag behind tzdb; compiling fails on a zone the release lacks.
++
++## Alternatives Considered
++
++**Download at build time**: a 205 MB download makes the build slow and network-dependent.
++
++**npm city packages (`city-timezones`, `@vvo/tzdb`, `worldcities`)**: no Russian names and no control over the threshold.
++
++**Wikidata**: heavier pipeline and less regular zone data than GeoNames.

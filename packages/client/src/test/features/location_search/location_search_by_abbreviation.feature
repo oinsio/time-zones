@@ -67,7 +67,7 @@ Feature: Location search by time zone abbreviation
     When the user searches for "IST"
     Then the first three results are "Kolkata" with "IST", "Dublin" with "GMT / IST" and "Jerusalem" with "IST / IDT", in that order
     And "IST" is the emphasised abbreviation in each of them
-    And 4 results are announced
+    And 5 results are announced
 
   @show-zone-abbreviations-and-zone-label-setting @FR10 @UX3
   Scenario: The matched half of a pair is emphasised
