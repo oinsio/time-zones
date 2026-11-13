@@ -33,13 +33,6 @@ Feature: Zone label persistence
     And the theme "Dark", the hour format "12-hour" and the language "ru" are in force
     And the stored document is not rewritten until the user changes a setting
 
-  @show-zone-abbreviations-and-zone-label-setting @FR15
-  Scenario: Another tab changes the zone label
-    Given the list contains "Moscow"
-    And the app is open in two tabs
-    When the user turns the UTC offset off in the first tab
-    Then the second tab shows no UTC offset on its location rows without a reload
-
   @add-country-to-zone-label @FR6 @M2
   Scenario: Existing users keep the country
     Given the stored preferences document was written before the zone label had the country, with the theme "Dark", the hour format "12-hour", the language "ru", the view "Grid" and only the UTC offset in the zone label
@@ -47,10 +40,3 @@ Feature: Zone label persistence
     Then the zone label shows "the country and the UTC offset"
     And the theme "Dark", the hour format "12-hour", the language "ru" and the view "Grid" are in force
     And the stored document is not rewritten until the user changes a setting
-
-  @add-country-to-zone-label @FR6
-  Scenario: Another tab changes the country
-    Given the list contains "Moscow"
-    And the app is open in two tabs
-    When the user turns the country off in the first tab
-    Then the second tab shows no country name on its Moscow row without a reload

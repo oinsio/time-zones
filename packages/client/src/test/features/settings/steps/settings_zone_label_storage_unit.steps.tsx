@@ -18,7 +18,6 @@ vi.mock(
 const feature = await loadFeature(
   "../settings_zone_label_storage_unit.feature",
 );
-const UTC_OFFSET_TOGGLE = "UTC offset";
 const COUNTRY_TOGGLE = "Country";
 const ABBREVIATION_TOGGLE = "Abbreviation";
 /** The schema version before the zone label existed. */
@@ -26,7 +25,6 @@ const SCHEMA_VERSION_BEFORE_ZONE_LABEL = 2;
 /** The schema version before the zone label had the country. */
 const SCHEMA_VERSION_BEFORE_COUNTRY = 4;
 const COUNTRY_NAMES = ["Russia", "Россия"];
-const COUNTRY_NAME_PATTERN = new RegExp(COUNTRY_NAMES.join("|"));
 const THEME_STORED_VALUES: Record<string, string> = { Dark: "DARK" };
 const HOUR_FORMAT_STORED_VALUES: Record<string, string> = {
   "12-hour": "H12",
@@ -213,57 +211,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And(
         "the stored document is not rewritten until the user changes a setting",
         expectDocumentNotRewritten,
-      );
-    },
-  );
-
-  // @add-country-to-zone-label @FR6
-  f.Scenario(
-    "Another tab changes the country",
-    ({ Given, And, When, Then }) => {
-      Given("the list contains {string}", givenList);
-      And("the app is open in two tabs", () => {
-        world.givenTwoTabs();
-        world.openTab();
-        world.openTab();
-      });
-      When("the user turns the country off in the first tab", async () => {
-        await world.toggle(COUNTRY_TOGGLE, world.openedTabs()[0]);
-        world.runPendingWrite(world.openedTabs()[0]);
-      });
-      Then(
-        "the second tab shows no country name on its Moscow row without a reload",
-        () =>
-          expect(
-            world.rowZoneLine("Moscow", world.openedTabs()[1]),
-          ).not.toContainEqual(expect.stringMatching(COUNTRY_NAME_PATTERN)),
-      );
-    },
-  );
-
-  // @show-zone-abbreviations-and-zone-label-setting @FR15
-  f.Scenario(
-    "Another tab changes the zone label",
-    ({ Given, And, When, Then }) => {
-      Given("the list contains {string}", givenList);
-      And("the app is open in two tabs", () => {
-        world.givenTwoTabs();
-        world.openTab();
-        world.openTab();
-      });
-      When("the user turns the UTC offset off in the first tab", async () => {
-        await world.toggle(UTC_OFFSET_TOGGLE, world.openedTabs()[0]);
-        world.runPendingWrite(world.openedTabs()[0]);
-      });
-      Then(
-        "the second tab shows no UTC offset on its location rows without a reload",
-        () =>
-          expect(
-            world
-              .allRowsZoneLines(world.openedTabs()[1])
-              .flat()
-              .filter((element) => element.startsWith("UTC")),
-          ).toEqual([]),
       );
     },
   );

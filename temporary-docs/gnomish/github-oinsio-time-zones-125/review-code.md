@@ -139,8 +139,8 @@ One scoped run: `cd packages/client && npx stryker run --mutate 'src/preferences
 - Impact: Larger step files are what the project rule says degrade AI context quality; both files are within 25 lines of the hard cap, so the next scenario added to either breaks the cap.
 - Fix: Move the locations scenarios this change added ("No zone line when every part is hidden", "Hiding the country applies to every row at once") into a new `locations_zone_line_country_unit.feature` with its own `steps/locations_zone_line_country_unit.steps.tsx` reusing `zoneLineWorld.tsx`; move the two cross-tab scenarios of `settings_zone_label_storage_unit.feature` into `settings_zone_label_sync_unit.feature` with their own steps file reusing `zoneLabelWorld.tsx`. Keep the tags.
 - Fix risk: vitest-cucumber binds one step file to one feature file, so the scenarios must move with their Gherkin and keep their tags; shared helpers already live in the world files, so the split only duplicates the `vi.mock` / `loadFeature` boilerplate.
-- Status: rejected (not-worth-it)
-- Resolution: both files are under the 300-line hard cap of process-invariants.md, which allows it when splitting costs clarity; locations_zone_line_unit.steps.tsx was already 212 lines before this change. Moving scenarios between feature files risks tag and screenshot churn for no behavioural gain.
+- Status: fixed
+- Resolution: split by moving scenarios with their tags. The two cross-tab scenarios went to settings_zone_label_sync_unit.feature and its steps file, reusing zoneLabelWorld. The two country scenarios went to locations_zone_line_country_unit.feature and its steps file, with the same world helpers as zoneLineWorld. The steps files are now 217 and 219 lines, down from 270 and 277, and the new ones are 81 and 108. All moved scenarios pass unchanged.
 
 ## Verdict
 

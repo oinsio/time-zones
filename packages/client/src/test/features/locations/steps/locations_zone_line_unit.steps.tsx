@@ -19,10 +19,7 @@ vi.mock(
 const feature = await loadFeature("../locations_zone_line_unit.feature");
 const ELEMENT_SEPARATOR = ", ";
 const ABBREVIATION_TOGGLE = "Abbreviation";
-const COUNTRY_TOGGLE = "Country";
 const NO_ELEMENT_TEXT = "no element";
-const COUNTRY_NAMES = ["Russia", "India"];
-const DEVICE_TIME_TEXT = "Device time";
 
 type PartsName = keyof typeof ZONE_LABEL_PART_NAMES;
 
@@ -98,29 +95,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         'the {string} zone line elements are "<elements>"',
         (_ctx, city: string) =>
           thenElements(undefined, city, variables.elements),
-      );
-    },
-  );
-
-  // @add-country-to-zone-label @FR3 @UX2
-  f.Scenario(
-    "No zone line when every part is hidden",
-    ({ Given, And, When, Then }) => {
-      Given("the interface language is {string}", givenLanguage);
-      And("the zone label shows {string}", givenZoneLabel);
-      And("the current instant is {string}", givenInstant);
-      And("the list contains {string}", givenList);
-      When("the user opens the app", openApp);
-      Then("the {string} row has no zone line", (_ctx, city: string) =>
-        expect(world.rowOf(city).querySelector("[data-zone-line]")).toBeNull(),
-      );
-      And(
-        "the {string} row shows its city, its local time and its offset difference",
-        (_ctx, city: string) => {
-          const rowText = world.rowOf(city).textContent ?? "";
-          expect(rowText).toContain(city);
-          expect(rowText).toMatch(/\d:\d\d/);
-        },
       );
     },
   );
@@ -202,41 +176,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           expect(readZoneLineElements(row)).not.toContain("IST");
         }
       });
-      And(
-        "the city labels, local times and offset differences are unchanged",
-        () => expect(rowTextsWithoutZoneLine()).toEqual(rowTextsBefore),
-      );
-    },
-  );
-
-  // @add-country-to-zone-label @FR3 @FR4
-  f.Scenario(
-    "Hiding the country applies to every row at once",
-    ({ Given, And, When, Then }) => {
-      Given("the interface language is {string}", givenLanguage);
-      And("the list is {string}", givenList);
-      When("the user opens the app", openApp);
-      And(
-        "the user turns the country off in the settings and goes back",
-        async () => {
-          rowTextsBefore = rowTextsWithoutZoneLine();
-          await world.toggleInSettings(COUNTRY_TOGGLE);
-        },
-      );
-      Then("no row shows a country name", () => {
-        for (const row of screen.getAllByRole("listitem")) {
-          for (const countryName of COUNTRY_NAMES) {
-            expect(readZoneLineElements(row)).not.toContain(countryName);
-          }
-        }
-      });
-      And(
-        "the device time location still shows {string}",
-        (_ctx, text: string) => {
-          expect(text).toBe(DEVICE_TIME_TEXT);
-          expect(readZoneLineElements(world.deviceTimeRowOf())[0]).toBe(text);
-        },
-      );
       And(
         "the city labels, local times and offset differences are unchanged",
         () => expect(rowTextsWithoutZoneLine()).toEqual(rowTextsBefore),

@@ -31,16 +31,6 @@ Feature: Zone line on location rows
       | the zone abbreviation only                            | IST                  |
       | nothing                                               | no element           |
 
-  @add-country-to-zone-label @FR3 @UX2
-  Scenario: No zone line when every part is hidden
-    Given the interface language is "en"
-    And the zone label shows "nothing"
-    And the current instant is "2026-07-15T12:00:00Z"
-    And the list contains "Kolkata"
-    When the user opens the app
-    Then the "Kolkata" row has no zone line
-    And the "Kolkata" row shows its city, its local time and its offset difference
-
   @show-zone-abbreviations-and-zone-label-setting @FR2 @FR5
   Scenario: The abbreviation follows the reference moment
     Given the list contains "New York" and "Dublin"
@@ -73,16 +63,6 @@ Feature: Zone line on location rows
     When the user opens the app
     And the user turns the zone abbreviation off in the settings and goes back
     Then no row shows a zone abbreviation
-    And the city labels, local times and offset differences are unchanged
-
-  @add-country-to-zone-label @FR3 @FR4
-  Scenario: Hiding the country applies to every row at once
-    Given the interface language is "en"
-    And the list is "the device time location, Moscow, Kolkata"
-    When the user opens the app
-    And the user turns the country off in the settings and goes back
-    Then no row shows a country name
-    And the device time location still shows "Device time"
     And the city labels, local times and offset differences are unchanged
 
   @show-zone-abbreviations-and-zone-label-setting @FR5
