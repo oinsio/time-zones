@@ -97,7 +97,7 @@ Audience: every user who adds a location, in English and in Russian.
 #### Performance
 
 - NFR-P1: The search data SHALL be one separate file of at most 130 KB gzipped, not part of the initial JavaScript and not preloaded; the initial JavaScript stays at most 150 KB gzipped.
-- NFR-P2: One non-empty query over the full data SHALL normalize exactly one text, the query, build at most one collator and build no country-name formatter. Preparing the data for search SHALL build at most one country-name formatter per city-name language.
+- NFR-P2: Preparing the loaded search data for search, once, during the first query over it, SHALL build at most one country-name formatter per city-name language. Every non-empty query over prepared data SHALL normalize exactly one text, the query, build at most one collator and build no country-name formatter.
 - NFR-P3: Loading the search data for city labels or the exemplar city, without a query, SHALL normalize no text. Asking for one city label SHALL NOT scan every city record.
 - NFR-P4: One query over the full data SHALL take at most 50 ms in the timing benchmark, which is reported and does not block the pull request (ADR-0008).
 
@@ -132,7 +132,7 @@ Audience: every user who adds a location, in English and in Russian.
 
 ## Behavior
 
-- `packages/client/src/test/features/location_search/location_search_by_name.feature`, `location_search_by_country.feature`, `location_search_ranking.feature`, `location_search_performance.feature` and new `location_search_namesakes.feature`, `location_search_namesakes_e2e.feature` — scenarios tagged `@add-geonames-city-source`.
+- `packages/client/src/test/features/location_search/location_search_by_name.feature`, `location_search_by_country.feature`, `location_search_ranking.feature`, `location_search_performance.feature` and new `location_search_namesakes_unit.feature`, `location_search_namesakes_e2e.feature` — scenarios tagged `@add-geonames-city-source`.
 - `packages/client/src/test/features/locations/` city label features — scenarios tagged `@add-geonames-city-source`.
 - `packages/client/src/test/features/settings/` new `settings_city_data_attribution_e2e.feature` — scenarios tagged `@add-geonames-city-source`.
 
@@ -150,7 +150,7 @@ No changes.
 - M2: The built search data file is at most 130 KB gzipped (measured estimate 116 KB) and the initial JavaScript stays at most 150 KB gzipped.
 - M3: 10 of 10 cities that the search does not find today are found in English and in Russian: Kazan, Saint Petersburg, Barcelona, San Francisco, Boston, Munich, Osaka, Mumbai, Rio de Janeiro, Milan.
 - M4: 100% of the cities of the committed city data have a zone of the bundled zone rules release, and at least 95% have a Russian name written in Cyrillic.
-- M5: 0 pairs of results with the same visible city, region and country text among the top 50 results of the 10 sample queries.
+- M5: 0 pairs of results with the same visible city, region and country text among the top 50 results of the 13 sample queries (the 10 of today plus Kazan, Казань and Springfield).
 - M6: 0 axe-core violations in the results with regions and on the settings page, in 2 themes.
 - M7: Mutation score ≥ 95% (minimum acceptable 90%) on the new and changed production files of `src/adapters/city-search/`, `src/presenter/presentSearchResults.ts` and `scripts/cityData/`.
 

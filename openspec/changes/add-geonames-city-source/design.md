@@ -78,7 +78,7 @@ The served search data file is `{ "zoneCities": [...as today...], "cityData": <t
 A new `CitySource` in `src/adapters/city-search/geoNamesCitySource.ts`. The name and country matching (`toSearchableText`, `findMatchKind`, `readCountryTexts`) moves from `zoneCitiesSource.ts` into one shared module, `cityTextMatching.ts`, used by both sources — the matching rule keeps one owner.
 
 - Country texts are read through one cache per search: one `Intl.DisplayNames` per city-name language, one lookup per country code (today: one formatter per record and language). This is the "at most one country-name formatter per language" bound of NFR-P2.
-- Searchable texts are built lazily, on the first `match` call, and memoized. Loading the data for city labels or the exemplar city normalizes nothing (NFR-P3).
+- Searchable texts are built lazily, on the first `match` call, and memoized. Loading the data for city labels or the exemplar city normalizes nothing (NFR-P3). That first `match` is the one-time preparation of NFR-P2: it normalizes every city and country text once and builds the country-name formatters; every later query normalizes only itself. The work-bound scenarios therefore count queries over a prepared search (the shared search in `searchWorld.ts` runs one preparation query when it is built), and a separate scenario counts the formatters of the preparation on a freshly built search.
 - The source skips cities whose zone is not in `getKnownZoneIds()` (FR11), reusing `listKnownZones` of the zone cities source.
 
 ### D7. Composite adapter: per-city results, order, label lookup (FR4, FR5, FR6, FR8, FR9)
@@ -99,7 +99,7 @@ New `scripts/cityData/`, mirroring `scripts/zoneRules/`:
 - `checkCityData.ts` — pure validation of the committed object against the bundled release and the thresholds of the `city-data` spec; `check.ts` is its command-line entry. "The bundled release" is the zone ID set of `parseZoneRulesRelease(...).zones` read from `ZONE_RULES_RELEASE_FILE` (`app.config.ts`), imported through `src/lib/zoneRules/core/index.ts`; the compiler checks zones against the same set.
 - Commands: `pnpm city-data:compile` (maintainer, network) and `pnpm city-data:check` (CI, offline), the latter a step of the `ci.yml` check job before `pnpm test` (handoff H2).
 - The scripts run under Node's type stripping like `scripts/zoneRules/` (`"zone-rules:compile": "node scripts/zoneRules/compile.ts"`), so they use no `enum` or `namespace`. Vitest collects only `src/**/*.{test,steps}.{ts,tsx}` (`vitest.config.ts`), so their tests live under `src/test/cityData/`, as the tests of `scripts/zoneRules/` live under `src/test/zoneRules/`.
-- Thresholds and URLs are constants in `scripts/cityData/constants.ts`; the budget `CITY_SEARCH_DATA_BUDGET_KB = 130` replaces the literal in `check-bundle-size.mjs`.
+- Thresholds and URLs are constants in `scripts/cityData/constants.ts`; the budget `CITY_SEARCH_DATA_BUDGET_KB` moves from the script-local constant `30` in `check-bundle-size.mjs` to `app.config.ts` as `130`, next to `ZONE_RULES_ASSET_BUDGET_KB`, which the script already imports from there.
 
 `zoneDataPlugin.ts` reads the committed file and serves the merged object (D5) for the build asset, the dev middleware and `virtual:zone-cities` in test mode.
 
