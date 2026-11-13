@@ -106,7 +106,8 @@
 - Impact: Task 4.3 as written replaces the zone-lister parameter with `cityData`. Every call that passes `() => [...]` stops type-checking, and the seam that the FR9-of-add-zone-rules-from-iana tests use to fake the installed release disappears. The implementer has to redesign the signature mid-task, against a design that says nothing changes for callers. The characterization run of `zoneCitiesSource.matching.test.ts` in the same task then fails.
 - Fix: In design D7 (third bullet) and task 4.3, make the signature `createZoneCitiesSource(zoneCities, listTimeZones = listKnownZones, cityData = EMPTY_GEONAMES_CITY_DATA)`. Say that `createCompositeCitySearch` passes `undefined` for the lister (keeping the default) and the parsed `cityData`. In design D6 and task 4.4, have `createGeoNamesCitySource(cityData, listTimeZones = listKnownZones)` take the same exported `ListTimeZones` default, and export `listKnownZones` from `zoneCitiesSource.ts` (or move it to `cityTextMatching.ts`). Task 4.4's "skips cities whose zone is not in the listed zones" test then injects the lister the same way the zone-cities tests do.
 - Fix risk: Passing `undefined` positionally to reach a default is slightly awkward. An options object would read better but would touch all the call sites listed above, so it costs more. No other artifact depends on the two-parameter form.
-- Status: open
+- Status: fixed
+- Resolution: confirmed at `zoneCitiesSource.ts:29,102-104`. Design D7 and task 4.3 now keep the zone lister as the second parameter: `createZoneCitiesSource(zoneCities, listTimeZones = listKnownZones, cityData = EMPTY_GEONAMES_CITY_DATA)`. Task 4.5 and D7 build the source as `createZoneCitiesSource(zoneCities, undefined, cityData)`. Design D6 and task 4.4 give `createGeoNamesCitySource(cityData, listTimeZones = listKnownZones)`, and the test injects the lister. Task 4.3 moves `listKnownZones` into `cityTextMatching.ts` and exports it there, so it has one owner.
 
 ### R2 — WARNING — The new "city data attribution" concept has no glossary entry, and the settings glossary entries are not updated
 - Location: `openspec/changes/add-geonames-city-source/proposal.md:18-24`, `openspec/changes/add-geonames-city-source/tasks.md:7`
@@ -115,7 +116,8 @@
 - Impact: The change ships a domain name, a component and an i18n key with no glossary owner. The settings glossary then describes the page without its last line. The next change that touches the settings page has no term to reuse, and the Russian wording «Данные о городах» is not pinned as the *RU:* name (`.claude/rules/i18n.md`).
 - Fix: Add to `proposal.md` "What Changes" a new term **City data attribution** in `docs/glossary/settings.md`, with changed terms **Settings page** (ends with the attribution) and **Deploy time** (followed by the release line, then the attribution). Extend task 1.1 (or add 1.3) to write them: *Code:* `CityDataAttribution`, `settings.cityDataAttribution`, `GEONAMES_URL`; *RU:* «Данные о городах: GeoNames, CC BY 4.0». Verify with `grep -n "City data attribution" docs/glossary/settings.md`.
 - Fix risk: none. It is a docs-only edit under `docs/glossary/`, which the implement stage may write.
-- Status: open
+- Status: fixed
+- Resolution: confirmed at `docs/glossary/settings.md:5,11`. The `proposal.md` "What Changes" list now has the new term **City data attribution** (with its *RU:* name) and the changed terms **Settings page** and **Deploy time** in `docs/glossary/settings.md`, and Impact lists that file. Task 1.1 writes the entry (*Code:* `CityDataAttribution`, `settings.cityDataAttribution`, `GEONAMES_URL`) and updates both terms, with grep checks. Design "Context" names the new term next to D10.
 
 ### R3 — WARNING — Two requirement clauses have no scenario and no test: FR12's size budget and NFR-P3's "no full scan"
 - Location: `openspec/changes/add-geonames-city-source/proposal.md:91`, `openspec/changes/add-geonames-city-source/proposal.md:101`
@@ -124,7 +126,8 @@
 - Impact: As written, `city-data:check` will not check any size, so FR12 is implemented only in part. The NFR-P3 scan bound has no blocking check, so a regression to a linear scan in `getCityLabel` passes every test. Task 9.3's traceability grep cannot show coverage for either clause.
 - Fix: In `proposal.md` FR12, drop "or its size budget". The served file's size is NFR-P1, checked by `check:bundle-size` (tasks 3.3, 9.4). In NFR-P3, drop the second sentence and keep it as the rationale it already is in design D7 ("NFR-P3: one zone's records are scanned, never all"). If the bound should stay a requirement instead, add a unit test to task 4.5 (`createCompositeCitySearch.cityLabel.test.ts`) that builds the search over `cityData` with a large synthetic zone and asserts the lookup reads only that zone's records (for example through a counted `isCityNameOfRecord` spy), and add a matching scenario to "Search is fast and lazy".
 - Fix risk: Dropping the clauses removes two promises the proposal made. Neither is a user-visible behaviour, and both stay enforced or recorded elsewhere (NFR-P1, design D7). The test alternative adds work to task 4.5 and needs a spy seam in the composite adapter.
-- Status: open
+- Status: fixed
+- Resolution: took the first fix. `proposal.md` FR12 now ends at "breaks FR1, FR2, FR11 or its format". It adds that the size of the served file is NFR-P1, which the bundle size check covers (tasks 3.3, 9.4). This matches the `city-data` "The committed city data is checked" requirement and task 3.1. NFR-P3 drops "Asking for one city label SHALL NOT scan every city record". Its first sentence stays, covered by the "Loading without a query does no search work" scenario and task 6.5. Design D7 still keeps the per-zone lookup map, now worded as a design choice in support of NFR-P3 rather than a tested requirement.
 
 ### R4 — SUGGESTION — Task 4.2 renames `parseZoneCityRecords` without naming its re-export in the module index
 - Location: `openspec/changes/add-geonames-city-source/tasks.md:30`
@@ -133,7 +136,8 @@
 - Impact: The `typecheck` step of task 4.2 fails on the stale re-export until the implementer finds it. It costs one extra round, not a wrong build.
 - Fix: Add to task 4.2: "update the re-export in `src/adapters/city-search/index.ts` to `parseCitySearchData` (no other module imports the old name)".
 - Fix risk: none. `grep` finds no other importer of `parseZoneCityRecords` outside `fetchCitySearch.ts` and the index.
-- Status: open
+- Status: fixed
+- Resolution: confirmed at `src/adapters/city-search/index.ts:4-7`. Task 4.2 now says to change the re-export in `src/adapters/city-search/index.ts` from `parseZoneCityRecords` to `parseCitySearchData`. A grep found the old name only in `fetchCitySearch.ts`, its test and the index.
 
 ## Verdict
 
