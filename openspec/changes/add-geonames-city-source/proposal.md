@@ -22,7 +22,7 @@ Audience: every user who adds a location, in English and in Russian.
   - **Namesake** — a city record that shares a name, in English or Russian, and a country with another city record.
   - **Region** — the first-level administrative division of a namesake (`Illinois`), shown in its search result. *RU:* shown as a value only, no label.
 - Glossary, changed terms: **City record** (its ID is unique per city, it carries the population, the region is present for namesakes only), **Zone cities source** (unchanged meaning; its records are the zone cities), **Search result** (may show a region), **City label** in `docs/glossary/locations.md` (any city record of the zone). The abbreviations table gains GeoNames.
-- New ADR-0015 records the long-lived decision: city data comes from GeoNames, is compiled offline and committed. ADR-0006 stays accepted and unchanged; its "later" source is the one this change adds.
+- New ADR-0015 records the long-lived decisions: city data comes from GeoNames, is compiled offline and committed; the composite adapter removes duplicates by city (record ID) instead of by zone and name, and orders by population after popularity. ADR-0006 stays accepted and gets a status note pointing at ADR-0015 for these two refinements of its "Composite adapter" section; its "later" source is the one this change adds. The ADR files, the ADR list in `CLAUDE.md`, the CI step and the root README credit are delivered as handoff patches (`tasks.md`, Human follow-up).
 
 ## Capabilities
 
@@ -38,11 +38,11 @@ Audience: every user who adds a location, in English and in Russian.
 
 ## Impact
 
-- `packages/client/scripts/cityData/` (new: download, compile, check), `packages/client/city-data/` (new: the committed dataset and its README), `packages/client/package.json` scripts, `.github/workflows/ci.yml` (the check).
+- `packages/client/scripts/cityData/` (new: download, compile, check; their tests under `src/test/cityData/`), `packages/client/city-data/` (new: the committed dataset and its README), `packages/client/package.json` scripts, `.github/workflows/ci.yml` (the check, by handoff patch).
 - `scripts/zoneData/zoneDataPlugin.ts` (serves the merged search data file), `scripts/check-bundle-size.mjs` and `app.config.ts` (the new budget).
-- `src/ports/CitySearch.ts` (`CityRecord`), `src/adapters/city-search/` (new GeoNames source, composite adapter, data parsing), `src/presenter/presentSearchResults.ts`, `src/views/shared/LocationSearchResults.tsx`, `src/app/settings/` (attribution), `src/constants/`, `src/locales/en.json` and `ru.json`.
+- `src/ports/citySearch.ts` (`CityRecord`), `src/adapters/city-search/` (new GeoNames source, composite adapter, data parsing), `src/presenter/presentSearchResults.ts`, `src/views/shared/LocationSearchResults.tsx`, `src/app/settings/` (attribution), `src/constants/`, `src/locales/en.json` and `ru.json`.
 - Features under `src/test/features/location_search/`, `locations/`, `settings/`, the search benchmark, approved search and settings screenshots.
-- `docs/adr/0015-*.md`, `docs/glossary/search.md`, `docs/glossary/locations.md`, `docs/glossary/README.md`, `docs/architecture/domain-model.md`, `README.md` and `README.ru.md` (data credit).
+- `docs/glossary/search.md`, `docs/glossary/locations.md`, `docs/glossary/README.md`, `docs/architecture/domain-model.md`; by handoff patch: `docs/adr/0015-city-data-from-geonames.md`, a status note in `docs/adr/0006-city-data-sources.md`, the ADR list in `CLAUDE.md`, `README.md` and `README.ru.md` (data credit).
 - No new runtime dependency, no new port, no new storage key, no change of the stored location list. The compile command needs the system `unzip` and about 250 MB of temporary disk space; the build does not.
 
 ## Goals

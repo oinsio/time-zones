@@ -9,6 +9,7 @@ See `proposal.md` for the motivation. The current state that shapes the approach
 - The file is requested when the search opens, or once in the background while the list holds a location (city labels, exemplar city).
 - Measured on the GeoNames dump of 2026-11-13: 6 368 cities with a population ≥ 100 000 or capitals, 335 zones, about 118 namesake records; names in English and Russian for all of them gzip to about 116 KB.
 - Glossary owners touched: **City search** (`CitySearch`, `useCitySearch`), **City source** (`CitySource`), **City record** (`CityRecord`), **Zone cities source** (`createZoneCitiesSource`), **Exemplar city** (`getExemplarCity`), **City label** (`getCityLabel`, `isCityNameOfRecord`, `useCityLabels`), **Search result** (`PresentedSearchResult`, `presentSearchResults`), country name (`presentCountryName`), time zone ID (`canonicalizeTimeZoneId`). Each is extended in place; no concept gets a second owner.
+- ADR-0006 (Accepted) says the composite adapter "removes duplicates by canonical `timeZoneId` and name" and "ranks by match quality, then by `rank`". With per-city records, two namesakes in one zone (Springfield, Illinois and Springfield, Missouri, both `America/Chicago`) share zone and name but are different cities. This change does not settle that global rule itself: ADR-0015 records it, and ADR-0006 gets a status note pointing at ADR-0015 (handoff H1, because the implement stage may not write `docs/adr/`). D3 and D7 implement what ADR-0015 records.
 
 ## Goals / Non-Goals
 
@@ -31,7 +32,7 @@ The build emits one asset with the zone cities (from CLDR, as today) and the Geo
 
 ### D2. `CityRecord` identity, population and region (FR1, FR4, FR5, FR7)
 
-`CityRecord` (owner of **City record**) changes:
+`CityRecord` (owner of **City record**, `src/ports/citySearch.ts`) changes:
 
 - `id` — unique per city: the zone ID for a zone city (unchanged), the decimal GeoNames ID for a GeoNames city. The two cannot collide: a zone ID is never all digits.
 - `population: number` — new; `0` when unknown (a zone city with no GeoNames match, `UTC`).
@@ -95,7 +96,8 @@ New `scripts/cityData/`, mirroring `scripts/zoneRules/`:
 - `download.ts` — fetches `cities15000.zip`, `alternateNamesV2.zip` (205 MB) and `admin1CodesASCII.txt` from `download.geonames.org` into a temporary directory and extracts them with the system `unzip` through the existing `runChildProcess`. No new dependency.
 - `compileCityData.ts` — pure: rows in, dataset out. Filters (population ≥ 100 000 or feature code `PPLC`), picks names (FR2), canonicalizes zones through the alias map of `extractZoneData` and fails on a zone outside the bundled release (FR11), merges exemplar cities (D3), marks namesakes (D4). Alternate names are read as a stream and only rows for the selected IDs and languages `en`, `ru` are kept, so memory stays small.
 - `checkCityData.ts` — pure validation of the committed object against the bundled release and the thresholds of the `city-data` spec; `check.ts` is its command-line entry.
-- Commands: `pnpm city-data:compile` (maintainer, network) and `pnpm city-data:check` (CI, offline), the latter a step of the `ci.yml` check job before `pnpm test`.
+- Commands: `pnpm city-data:compile` (maintainer, network) and `pnpm city-data:check` (CI, offline), the latter a step of the `ci.yml` check job before `pnpm test` (handoff H2).
+- The scripts run under Node's type stripping like `scripts/zoneRules/` (`"zone-rules:compile": "node scripts/zoneRules/compile.ts"`), so they use no `enum` or `namespace`. Vitest collects only `src/**/*.{test,steps}.{ts,tsx}` (`vitest.config.ts`), so their tests live under `src/test/cityData/`, as the tests of `scripts/zoneRules/` live under `src/test/zoneRules/`.
 - Thresholds and URLs are constants in `scripts/cityData/constants.ts`; the budget `CITY_SEARCH_DATA_BUDGET_KB = 130` replaces the literal in `check-bundle-size.mjs`.
 
 `zoneDataPlugin.ts` reads the committed file and serves the merged object (D5) for the build asset, the dev middleware and `virtual:zone-cities` in test mode.
@@ -106,7 +108,7 @@ New `scripts/cityData/`, mirroring `scripts/zoneRules/`:
 
 ### D10. Attribution (FR13, UX4, NFR-A2)
 
-A new `CityDataAttribution` component in `src/app/settings/`, modelled on `GnomishFactoryCredit` (link, new tab, `rel="noopener noreferrer"`, 44 px, token colours), rendered after `InterfaceLanguageGroup`. The URL is `GEONAMES_URL` in `src/constants/`; the text is `settings.cityDataAttribution`. `packages/client/city-data/README.md` and the root READMEs carry the credit and licence.
+A new `CityDataAttribution` component in `src/app/settings/`, modelled on `GnomishFactoryCredit` (link, new tab, `rel="noopener noreferrer"`, 44 px, token colours), rendered as the last child of the settings `<main>`, after `ZoneRulesReleaseLine` (UX4: below every settings group and line). The URL is `GEONAMES_URL` in `src/constants/`; the text is `settings.cityDataAttribution`. `packages/client/city-data/README.md` carries the credit and licence; the root READMEs get it through handoff H3.
 
 ## Consequences
 
