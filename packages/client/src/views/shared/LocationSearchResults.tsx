@@ -4,6 +4,7 @@ import type { PresentedSearchResult } from "@/presenter";
 import { cn } from "@/shared/lib/cn";
 
 const ABBREVIATION_PAIR_SEPARATOR = " / ";
+const REGION_COUNTRY_SEPARATOR = ", ";
 
 type LocationSearchResultsProps = {
   listboxId: string;
@@ -15,12 +16,19 @@ type LocationSearchResultsProps = {
   onChoose: (result: PresentedSearchResult) => void;
 };
 
+/** The region, then the country; the country alone without a region. */
+const secondaryLine = (result: PresentedSearchResult): string =>
+  [result.regionName, result.countryName]
+    .filter((part) => part !== undefined && part !== "")
+    .join(REGION_COUNTRY_SEPARATOR);
+
 /**
  * The listbox of search results; added results are disabled and marked.
  * Implements FR5, FR8, UX3 of add-locations-via-search (D10).
  * Implements FR11 of add-settings-page-and-device-time-location (D12): the
  * Device time option comes first.
  * Implements FR10, FR11, NFR-A2, UX3 of show-zone-abbreviations-and-zone-label-setting (D8): the abbreviation pair, the matched one bold.
+ * Implements FR4, FR7, UX1, NFR-A1 of add-geonames-city-source (D9): options keyed by result ID, the region on the secondary line.
  */
 export function LocationSearchResults({
   listboxId,
@@ -51,7 +59,7 @@ export function LocationSearchResults({
       )}
       {results.map((result, resultPosition) => (
         <div
-          key={`${result.timeZoneId}-${result.cityName}`}
+          key={result.id}
           id={`${optionIdPrefix}${resultPosition + optionOffset}`}
           role="option"
           tabIndex={-1}
@@ -88,9 +96,9 @@ export function LocationSearchResults({
                 </span>
               )}
             </span>
-            {result.countryName !== "" && (
-              <span className="text-sm text-muted-foreground">
-                {result.countryName}
+            {secondaryLine(result) !== "" && (
+              <span className="break-words text-sm text-muted-foreground">
+                {secondaryLine(result)}
               </span>
             )}
           </span>
