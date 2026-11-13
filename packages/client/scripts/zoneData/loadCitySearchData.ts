@@ -5,22 +5,29 @@
  */
 import { readFileSync } from "node:fs";
 import type { CityDataset } from "../cityData/cityDataTypes.ts";
+import {
+  type ServedCityData,
+  toServedCityData,
+} from "../cityData/toServedCityData.ts";
 import type { ZoneCityRecord } from "./extractZoneData.ts";
 import { loadZoneData } from "./loadZoneData.ts";
 
 export type CitySearchData = {
   zoneCities: ZoneCityRecord[];
-  cityData: Omit<CityDataset, "source">;
+  cityData: ServedCityData;
 };
 
 let cachedCitySearchData: CitySearchData | undefined;
 
 export function loadCitySearchData(datasetFilePath: string): CitySearchData {
   if (cachedCitySearchData === undefined) {
-    const { source: _source, ...cityData } = JSON.parse(
+    const dataset = JSON.parse(
       readFileSync(datasetFilePath, "utf8"),
     ) as CityDataset;
-    cachedCitySearchData = { zoneCities: loadZoneData().zoneCities, cityData };
+    cachedCitySearchData = {
+      zoneCities: loadZoneData().zoneCities,
+      cityData: toServedCityData(dataset),
+    };
   }
   return cachedCitySearchData;
 }

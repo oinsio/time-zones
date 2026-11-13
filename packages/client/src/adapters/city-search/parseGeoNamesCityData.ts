@@ -3,7 +3,7 @@ import type { GeoNamesCityData, GeoNamesCityEntry } from "./citySource";
 
 /**
  * Validates the `cityData` section of the search data file (design D5) and
- * expands its tuples: a Russian name of `0` becomes the English name, region
+ * rebuilds the city tuples from its columns (the IDs are differences, a region index of -1 is none) and expands them: a Russian name of `0` becomes the English name, region
  * and zone indexes become their names. Returns `undefined` when it is invalid.
  * Implements FR14 of add-geonames-city-source (D5).
  */
@@ -12,6 +12,16 @@ const NO_RUSSIAN_NAME_MARKER = 0;
 const TUPLE_LENGTH_WITHOUT_REGION = 6;
 const TUPLE_LENGTH_WITH_REGION = 7;
 const REGION_NAME_COUNT = 2;
+const NO_REGION_INDEX = -1;
+const COLUMN_NAMES = [
+  "idDifferences",
+  "englishNames",
+  "russianNames",
+  "countryCodes",
+  "zoneIndexes",
+  "populations",
+  "regionIndexes",
+] as const;
 
 type Names = Record<CityNameLanguage, string>;
 
@@ -96,17 +106,39 @@ function readZoneCityRegions(
   return zoneCityRegions;
 }
 
+/** The city tuples of the served columns, or `undefined` when the columns are not equal-length arrays. */
+function readCityTuples(columns: unknown): unknown[][] | undefined {
+  if (!isRecord(columns)) return undefined;
+  const lists = COLUMN_NAMES.map((name) => columns[name]);
+  if (!lists.every(Array.isArray)) return undefined;
+  const [idDifferences, ...otherColumns] = lists as unknown[][];
+  const cityCount = (idDifferences as unknown[]).length;
+  if (otherColumns.some((column) => column.length !== cityCount)) {
+    return undefined;
+  }
+  let id = 0;
+  return Array.from({ length: cityCount }, (_, index) => {
+    id += Number(idDifferences?.[index]);
+    const [english, russian, countryCode, zoneIndex, population, regionIndex] =
+      otherColumns.map((column) => column[index]);
+    return regionIndex === NO_REGION_INDEX
+      ? [id, english, russian, countryCode, zoneIndex, population]
+      : [id, english, russian, countryCode, zoneIndex, population, regionIndex];
+  });
+}
+
 export function parseGeoNamesCityData(
   payload: unknown,
 ): GeoNamesCityData | undefined {
   if (!isRecord(payload)) return undefined;
-  const { zones, cities, zoneCityPopulations } = payload;
+  const { zones, zoneCityPopulations } = payload;
+  const cities = readCityTuples(payload.columns);
   const regions = readRegions(payload.regions);
   if (
     !Array.isArray(zones) ||
     !zones.every(isString) ||
     regions === undefined ||
-    !Array.isArray(cities) ||
+    cities === undefined ||
     !isRecord(zoneCityPopulations) ||
     !Object.values(zoneCityPopulations).every(Number.isInteger)
   ) {

@@ -107,20 +107,49 @@ describe("parse city search data", () => {
     names: { en: "Moscow", ru: "Москва" },
     countryCode: "RU",
   };
+  type Tuple = unknown[];
+  /** The served columns of city tuples: IDs as differences, -1 for no region. */
+  const columnsOf = (tuples: Tuple[]) => {
+    let previousId = 0;
+    return {
+      idDifferences: tuples.map(([id]) => {
+        const difference = Number(id) - previousId;
+        previousId = Number(id);
+        return difference;
+      }),
+      englishNames: tuples.map((tuple) => tuple[1]),
+      russianNames: tuples.map((tuple) => tuple[2]),
+      countryCodes: tuples.map((tuple) => tuple[3]),
+      zoneIndexes: tuples.map((tuple) => tuple[4]),
+      populations: tuples.map((tuple) => tuple[5]),
+      regionIndexes: tuples.map((tuple) => tuple[6] ?? -1),
+    };
+  };
+  const validTuples: Tuple[] = [
+    [551487, "Kazan", "Казань", "RU", 0, 1243500],
+    [4250542, "Springfield", 0, "US", 0, 114394, 0],
+  ];
   const validCityData = {
     zones: ["Europe/Moscow"],
     regions: [["Illinois", "Иллинойс"]],
-    cities: [
-      [551487, "Kazan", "Казань", "RU", 0, 1243500],
-      [4250542, "Springfield", 0, "US", 0, 114394, 0],
-    ],
+    columns: columnsOf(validTuples),
     zoneCityPopulations: { "Europe/Moscow": 10381222 },
     zoneCityRegions: { "Europe/Moscow": 0 },
+  };
+  const toCityData = (overrides: Record<string, unknown>) => {
+    const { cities, ...others } = overrides;
+    return {
+      ...validCityData,
+      ...(cities === undefined
+        ? {}
+        : { columns: columnsOf(cities as Tuple[]) }),
+      ...others,
+    };
   };
   const parse = (overrides: Record<string, unknown> = {}) =>
     parseCitySearchData({
       zoneCities: [validRecord],
-      cityData: { ...validCityData, ...overrides },
+      cityData: toCityData(overrides),
     });
 
   it("should accept valid zone cities and city data", () => {
@@ -163,8 +192,19 @@ describe("parse city search data", () => {
   });
 
   it.each([
-    ["a tuple with too few fields", { cities: [[1, "A", "А", "RU", 0]] }],
-    ["a non-array city", { cities: ["x"] }],
+    ["a missing columns section", { columns: undefined }],
+    [
+      "a missing column",
+      { columns: { ...validCityData.columns, populations: undefined } },
+    ],
+    [
+      "columns of different lengths",
+      { columns: { ...validCityData.columns, populations: [1] } },
+    ],
+    [
+      "a non-numeric ID difference",
+      { columns: { ...validCityData.columns, idDifferences: ["x", 1] } },
+    ],
     ["a bad tuple", { cities: [[1, 5, "А", "RU", 0, 1]] }],
     ["a bad Russian name", { cities: [[1, "A", 5, "RU", 0, 1]] }],
     ["a zone index out of range", { cities: [[1, "A", "А", "RU", 9, 1]] }],

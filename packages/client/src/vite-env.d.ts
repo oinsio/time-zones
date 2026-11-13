@@ -21,15 +21,20 @@ declare module "virtual:zone-cities" {
     countryCode: string;
   }[];
   export default zoneCities;
-  /** The committed GeoNames city data without its source record (design D5). */
+  /** The committed GeoNames city data without its source record, the cities as columns (design D5). */
   export const cityData: {
     formatVersion: number;
     zones: string[];
     regions: [string, string][];
-    cities: (
-      | [number, string, string | 0, string, number, number]
-      | [number, string, string | 0, string, number, number, number]
-    )[];
+    columns: {
+      idDifferences: number[];
+      englishNames: string[];
+      russianNames: (string | 0)[];
+      countryCodes: string[];
+      zoneIndexes: number[];
+      populations: number[];
+      regionIndexes: number[];
+    };
     zoneCityPopulations: Record<string, number>;
     zoneCityRegions: Record<string, number>;
   };

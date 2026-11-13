@@ -46,3 +46,11 @@ running CI never request anything from GeoNames. A city whose zone the bundled
 zone rules release does not hold fails the run; fix it with an entry in
 `ZONE_OVERRIDES` (`scripts/cityData/zoneOverrides.ts`), and fix a wrong name
 with an entry in `NAME_OVERRIDES`.
+
+## Size and speed
+
+The committed file gzips to 143 948 bytes as one tuple per city. The search data
+file the build serves holds the cities as columns (the IDs as differences),
+which gzips better: the whole file, with the zone cities, measures 119.4 KB
+against the 130 KB budget (`CITY_SEARCH_DATA_BUDGET_KB`). The benchmark "search
+one query over the full data" reports a mean of about 0.3 ms, far below 50 ms.
