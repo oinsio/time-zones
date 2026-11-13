@@ -86,6 +86,16 @@ export const createDeployTimeWorld = () => {
     },
     chooseHourFormat: (hourFormatName: HourFormatName) =>
       userEvent.click(screen.getByRole("radio", { name: hourFormatName })),
+    /** The elements of the settings main that come after the deploy time. */
+    elementsAfterDeployTime: () => {
+      const main = container?.querySelector("main");
+      const children = [...(main?.children ?? [])];
+      return children.slice(
+        children.indexOf(
+          container?.querySelector(DEPLOY_TIME_SELECTOR) as Element,
+        ) + 1,
+      );
+    },
     /** The deploy time text with the no-break spaces of ICU written as spaces. */
     deployTimeText: () =>
       (

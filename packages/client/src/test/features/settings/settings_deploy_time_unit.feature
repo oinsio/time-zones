@@ -29,3 +29,8 @@ Feature: Deploy time on the settings page
     And the browser is offline
     When the settings page is shown
     Then the deploy time shows the build instant, not the current time
+
+  @add-geonames-city-source @FR13 @UX4
+  Scenario: Only the release line and the attribution follow the deploy time
+    When the settings page is shown
+    Then the deploy time is followed by the zone rules release line and the city data attribution, in this order and nothing else

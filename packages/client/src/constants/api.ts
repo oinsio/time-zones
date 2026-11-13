@@ -4,3 +4,9 @@
  */
 export const GNOMISH_FACTORY_LANDING_URL =
   "https://oinsio.github.io/gnomish-factory/";
+
+/**
+ * Home page of GeoNames, linked from the city data attribution of the settings page.
+ * Implements FR13 of add-geonames-city-source (D10).
+ */
+export const GEONAMES_URL = "https://www.geonames.org/";

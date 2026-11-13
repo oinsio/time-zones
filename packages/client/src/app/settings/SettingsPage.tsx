@@ -8,6 +8,7 @@ import {
   usePreferences,
 } from "@/controller";
 import { HourFormat, ThemePreference } from "@/preferences";
+import { CityDataAttribution } from "./CityDataAttribution";
 import { DeployTime } from "./DeployTime";
 import { GnomishFactoryCredit } from "./GnomishFactoryCredit";
 import { InterfaceLanguageGroup } from "./InterfaceLanguageGroup";
@@ -52,6 +53,7 @@ const HOUR_FORMAT_LABEL_KEYS = {
  * Implements FR12 of show-zone-abbreviations-and-zone-label-setting (D7): the zone label group.
  * Implements FR1, FR2, FR3, FR4 of compact-settings-controls (D1-D3).
  * Implements FR1, FR2 of add-view-mode-setting-and-grid-skeleton (D2): the view group after the hour format.
+ * Implements FR13, UX4 of add-geonames-city-source (D10): the city data attribution as the last line.
  */
 export function SettingsPage({ notices, onBack }: SettingsPageProps) {
   const { t } = useTranslation();
@@ -141,6 +143,7 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
         />
         <DeployTime />
         <ZoneRulesReleaseLine />
+        <CityDataAttribution />
       </main>
       <footer className="sticky bottom-0 -mx-4">
         <div

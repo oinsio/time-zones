@@ -9,6 +9,7 @@ import {
   createInMemoryPreferencesRepository,
 } from "@/adapters";
 import { SettingsPage } from "@/app/settings";
+import { GEONAMES_URL } from "@/constants";
 import { LocationsProvider, PreferencesProvider } from "@/controller";
 import { fakeClock } from "@/lib/temporal";
 import * as zoneRules from "@/lib/zoneRules";
@@ -98,17 +99,17 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
-  // @add-remote-zone-rules-updates @FR8
+  // @add-remote-zone-rules-updates @FR8 @add-geonames-city-source @FR13 @UX4
   f.Scenario("No active release", ({ Given, When, Then }) => {
     Given("the zone rules failed to load at start", () => activate(undefined));
     When("the settings page is shown in {string}", showSettings);
     Then(
-      "the deploy time is the last line and no release line is shown",
+      "the deploy time is the last line before the city data attribution and no release line is shown",
       () => {
         const main = container.querySelector("main") as HTMLElement;
-        expect(main.lastElementChild).toBe(
-          container.querySelector(DEPLOY_TIME_SELECTOR),
-        );
+        const deployTime = container.querySelector(DEPLOY_TIME_SELECTOR);
+        expect(deployTime?.nextElementSibling).toBe(main.lastElementChild);
+        expect(main.lastElementChild).toHaveAttribute("href", GEONAMES_URL);
         expect(container.querySelector(LINE_SELECTOR)).toBeNull();
       },
     );

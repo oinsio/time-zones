@@ -18,8 +18,8 @@ Feature: Zone rules release line
     When the settings page is shown in "English"
     Then the line after the deploy time reads "Time zone rules: 2026g"
 
-  @add-remote-zone-rules-updates @FR8
+  @add-remote-zone-rules-updates @FR8 @add-geonames-city-source @FR13 @UX4
   Scenario: No active release
     Given the zone rules failed to load at start
     When the settings page is shown in "English"
-    Then the deploy time is the last line and no release line is shown
+    Then the deploy time is the last line before the city data attribution and no release line is shown

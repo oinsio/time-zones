@@ -1,7 +1,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { APP_DEPLOY_INSTANT } from "@/constants";
+import { APP_DEPLOY_INSTANT, GEONAMES_URL } from "@/constants";
 import {
   createDeployTimeWorld,
   type HourFormatName,
@@ -96,6 +96,30 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Then(
         "the deploy time shows the build instant, not the current time",
         () => expect(world.deployTimeText()).toBe(textBeforeLater),
+      );
+    },
+  );
+
+  // @add-geonames-city-source @FR13 @UX4
+  f.Scenario(
+    "Only the release line and the attribution follow the deploy time",
+    ({ When, Then }) => {
+      When("the settings page is shown", () =>
+        world.showSettings({
+          zone: DEFAULT_ZONE,
+          language: ENGLISH,
+          hourFormat: HOUR_FORMAT_24,
+        }),
+      );
+      Then(
+        "the deploy time is followed by the zone rules release line and the city data attribution, in this order and nothing else",
+        () => {
+          const [releaseLine, attribution, ...others] =
+            world.elementsAfterDeployTime();
+          expect(releaseLine).toHaveAttribute("data-zone-rules-release");
+          expect(attribution).toHaveAttribute("href", GEONAMES_URL);
+          expect(others).toEqual([]);
+        },
       );
     },
   );

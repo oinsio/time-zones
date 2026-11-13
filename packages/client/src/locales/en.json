@@ -139,6 +139,7 @@
     "title": "Settings",
     "back": "Back",
     "gnomishFactoryCredit": "Built with Gnomish Factory",
+    "cityDataAttribution": "City data: GeoNames, CC BY 4.0",
     "themeLabel": "Theme",
     "themeLight": "Light",
     "themeDark": "Dark",
