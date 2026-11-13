@@ -11,6 +11,7 @@ import { createCompositeCitySearch } from "@/adapters";
 import { resolveCityNameLanguage } from "@/locales";
 import { LocationsLoadStatus } from "@/ports";
 import { DIALECT_REGISTRY } from "@/test/factories/localeFixtures";
+import { fullCityData } from "@/test/fullCityData";
 import { createDeviceTimeWorld, DataMode } from "./deviceTimeWorld";
 
 const feature = await loadFeature(
@@ -182,7 +183,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       When(
         'the city label of {string} stored as {string} is read in "ru-KZ"',
         (_ctx, timeZoneId: string, storedLabel: string) => {
-          dialectCityLabel = createCompositeCitySearch(zoneCities).getCityLabel(
+          dialectCityLabel = createCompositeCitySearch(
+            zoneCities,
+            fullCityData,
+          ).getCityLabel(
             timeZoneId,
             storedLabel,
             resolveCityNameLanguage("ru-KZ", DIALECT_REGISTRY),

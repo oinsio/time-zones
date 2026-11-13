@@ -14,6 +14,7 @@ import {
 } from "@/adapters";
 import { LocationsProvider, useLocations } from "@/controller";
 import { type CitySearch, LocationsLoadStatus } from "@/ports";
+import { fullCityData } from "@/test/fullCityData";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
@@ -48,7 +49,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   const presentFiftyLoaded = async () => {
-    const search = createCompositeCitySearch(zoneCities);
+    const search = createCompositeCitySearch(zoneCities, fullCityData);
     getCityLabelSpy = vi.spyOn(search, "getCityLabel");
     clock = createSwitchableClock(FIRST_MOMENT, BUDGET_ZONE);
     tickScheduler = createManualTickScheduler();

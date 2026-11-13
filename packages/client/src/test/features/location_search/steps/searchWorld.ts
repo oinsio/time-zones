@@ -2,13 +2,15 @@ import zoneCities from "virtual:zone-cities";
 import { createCompositeCitySearch } from "@/adapters/city-search";
 import type { CityNameLanguage } from "@/constants";
 import type { CitySearchResult } from "@/ports";
+import { fullCityData } from "@/test/fullCityData";
 import { startWorkCount } from "@/test/workCounters";
 
 /** The real search over the real extracted data, built once per test file. */
-const citySearch = createCompositeCitySearch(zoneCities);
+const citySearch = createCompositeCitySearch(zoneCities, fullCityData);
 
 /** A search built now: it reads country names at construction, so build it after changing `Intl`. */
-export const buildCitySearch = () => createCompositeCitySearch(zoneCities);
+export const buildCitySearch = () =>
+  createCompositeCitySearch(zoneCities, fullCityData);
 
 export type SearchWorld = {
   language: CityNameLanguage;
