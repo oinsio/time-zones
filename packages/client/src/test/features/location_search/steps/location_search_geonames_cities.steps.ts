@@ -146,8 +146,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         rejectedZones: [zoneId],
       });
       world.citySearch = modules.adapters.createCompositeCitySearch(
-        (await import("virtual:zone-cities")).default,
-        (await import("@/test/fullCityData")).fullCityData,
+        zoneCities,
+        fullCityData,
       );
     });
     When("the user searches for {string}", (_ctx, query: string) =>
