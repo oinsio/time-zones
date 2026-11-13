@@ -49,7 +49,7 @@ The compiler needs the CLDR zone data for this; it calls the existing `extractZo
 
 ### D4. Regions are decided at compile time, for namesakes only (FR7, UX2)
 
-The compiler groups all records (zone cities included) by country code and normalized name, in each language; a record in a group of two or more is a namesake and gets its admin1 name in English (`admin1CodesASCII.txt`) and Russian (alternate names of the admin1 feature, English as the fallback). Region names are stored once in a `regions` table and referenced by index. For a zone city that is a namesake the region is stored in a `zoneCityRegions` map.
+The compiler (`markNamesakes`, called by `compileCityData`) groups all records (zone cities included) by country code and name normalized with `normalizeSearchText` (D11), in each language; a record in a group of two or more is a namesake and gets its admin1 name in English (`admin1CodesASCII.txt`) and Russian (alternate names of the admin1 feature, English as the fallback). Region names are stored once in a `regions` table and referenced by index. For a zone city that is a namesake the region is stored in a `zoneCityRegions` map.
 
 The presenter shows the region whenever the record has one — it holds no namesake logic. That keeps the rule in one place (the compiler, checked by `city-data:check`) and the data small (about 118 records carry a region).
 
@@ -94,8 +94,8 @@ A new `CitySource` in `src/adapters/city-search/geoNamesCitySource.ts`. The name
 New `scripts/cityData/`, mirroring `scripts/zoneRules/`:
 
 - `download.ts` — fetches `cities15000.zip`, `alternateNamesV2.zip` (205 MB) and `admin1CodesASCII.txt` from `download.geonames.org` into a temporary directory and extracts them with the system `unzip` through the existing `runChildProcess`. No new dependency.
-- `compileCityData.ts` — pure: rows in, dataset out. Filters (population ≥ 100 000 or feature code `PPLC`), picks names (FR2), canonicalizes zones through the alias map of `extractZoneData` and fails on a zone outside the bundled release (FR11), merges exemplar cities (D3), marks namesakes (D4). Alternate names are read as a stream and only rows for the selected IDs and languages `en`, `ru` are kept, so memory stays small.
-- `checkCityData.ts` — pure validation of the committed object against the bundled release and the thresholds of the `city-data` spec; `check.ts` is its command-line entry.
+- `compileCityData.ts` — pure: rows in, dataset out. Filters (population ≥ 100 000 or feature code `PPLC`), picks names (FR2), canonicalizes zones through the alias map of `extractZoneData` and fails on a zone outside the bundled release (FR11), merges exemplar cities (D3), marks namesakes through `markNamesakes` (D4). Every script imports from `src/` only through an index that plain Node can load (`src/lib/zoneRules/core/index.ts`, `src/lib/searchText/index.ts`, D11), never through `@/` or an extensionless index. Alternate names are read as a stream and only rows for the selected IDs and languages `en`, `ru` are kept, so memory stays small.
+- `checkCityData.ts` — pure validation of the committed object against the bundled release and the thresholds of the `city-data` spec; `check.ts` is its command-line entry. "The bundled release" is the zone ID set of `parseZoneRulesRelease(...).zones` read from `ZONE_RULES_RELEASE_FILE` (`app.config.ts`), imported through `src/lib/zoneRules/core/index.ts`; the compiler checks zones against the same set.
 - Commands: `pnpm city-data:compile` (maintainer, network) and `pnpm city-data:check` (CI, offline), the latter a step of the `ci.yml` check job before `pnpm test` (handoff H2).
 - The scripts run under Node's type stripping like `scripts/zoneRules/` (`"zone-rules:compile": "node scripts/zoneRules/compile.ts"`), so they use no `enum` or `namespace`. Vitest collects only `src/**/*.{test,steps}.{ts,tsx}` (`vitest.config.ts`), so their tests live under `src/test/cityData/`, as the tests of `scripts/zoneRules/` live under `src/test/zoneRules/`.
 - Thresholds and URLs are constants in `scripts/cityData/constants.ts`; the budget `CITY_SEARCH_DATA_BUDGET_KB = 130` replaces the literal in `check-bundle-size.mjs`.
@@ -109,6 +109,12 @@ New `scripts/cityData/`, mirroring `scripts/zoneRules/`:
 ### D10. Attribution (FR13, UX4, NFR-A2)
 
 A new `CityDataAttribution` component in `src/app/settings/`, modelled on `GnomishFactoryCredit` (link, new tab, `rel="noopener noreferrer"`, 44 px, token colours), rendered as the last child of the settings `<main>`, after `ZoneRulesReleaseLine` (UX4: below every settings group and line). The URL is `GEONAMES_URL` in `src/constants/`; the text is `settings.cityDataAttribution`. `packages/client/city-data/README.md` carries the credit and licence; the root READMEs get it through handoff H3.
+
+### D11. Search text normalization moves to a module plain Node can load (FR3, FR7)
+
+The compiler (D3, D4) must normalize names exactly as the search does, so it reuses `normalizeSearchText` rather than writing a second normalizer. Its current home, `src/adapters/city-search/`, cannot be imported by `node scripts/cityData/*.ts`: the module's `index.ts` exports without file extensions (`export { createCompositeCitySearch } from "./createCompositeCitySearch";`) and `createCompositeCitySearch.ts` imports through the `@/` alias, neither of which Node's resolver understands; importing the internal file directly would break "Import only through `index.ts` of a module".
+
+`normalizeSearchText` and `splitIntoWords` therefore move unchanged to `src/lib/searchText/`, whose `index.ts` exports with `.ts` extensions and which imports nothing — the pattern of `src/lib/zoneRules/core/index.ts`, which `scripts/zoneRules/` and `scripts/zoneData/extractZoneData.ts` already import as `../../src/lib/zoneRules/core/index.ts`. The city search adapters import it from `@/lib/searchText`, and `src/adapters/city-search/index.ts` re-exports it, so existing callers (`src/locales/filterLocales.ts` through `@/adapters`) do not change. The normalizer keeps one owner. A unit test spawns plain `node` to import the module, so a regression that only Vitest's resolver would hide fails the suite.
 
 ## Consequences
 
