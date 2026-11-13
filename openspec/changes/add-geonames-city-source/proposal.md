@@ -13,7 +13,7 @@ Audience: every user who adds a location, in English and in Russian.
 - ADDED `city-data`: a compiled dataset of cities from GeoNames (CC BY 4.0) — every city with a population of at least 100 000 and every country capital, about 6 400 cities, each with its IANA zone, country, population and English and Russian names. A maintainer command compiles it; the result is committed, so the app build and CI never contact GeoNames. A check validates the committed dataset.
 - MODIFIED `location-search`: the search offers these cities next to the zone cities. A zone may appear in the results several times, once per city; each city appears at most once. Results are ordered by match kind, popular locations, population, then name. A country query lists the zone cities of the country first, then its other cities. A result whose city has a namesake in the same country shows its region. The search data file grows from at most 30 KB to at most 130 KB gzipped.
 - MODIFIED `locations`: the city label of a city location follows the interface language for any city record of its zone, not only for the zone's exemplar city.
-- MODIFIED `settings`: the settings page shows the GeoNames attribution with a link, as the CC BY 4.0 licence requires.
+- MODIFIED `settings`: the settings page shows the GeoNames attribution with a link, as the CC BY 4.0 licence requires; it becomes the last line, after the zone rules release line.
 - Unchanged: search by abbreviation, the suggestions, the device time option and the exemplar city of the device time location keep using the zone cities only. The stored location list keeps its format.
 - Glossary (`docs/glossary/search.md`), new terms:
   - **GeoNames source** — the city source with the cities of the city data that are not zone cities.
@@ -34,7 +34,7 @@ Audience: every user who adds a location, in English and in Russian.
 
 - `location-search`: MODIFIED "Search by country", "Result order and content", "Search is fast and lazy"; ADDED "Search finds GeoNames cities", "Region of a namesake", "Cities offered come from the release", "Namesakes in one zone are one location", "Region in results is accessible and fits".
 - `locations`: MODIFIED "City label in the interface language".
-- `settings`: ADDED "City data attribution", "Accessible and responsive attribution".
+- `settings`: ADDED "City data attribution", "Accessible and responsive attribution"; MODIFIED "Deploy time" and "Zone rules release line" (the attribution, not the release line, is now the last line of the page).
 
 ## Impact
 
