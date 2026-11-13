@@ -1,7 +1,12 @@
 // Verifies FR8, FR12 of show-here-entry-for-device-time: exemplar city.
 // Verifies FR1 of show-city-labels-in-interface-language: city label.
 import zoneCities from "virtual:zone-cities";
+import { describe, expect, it } from "vitest";
 import { describeCitySearchContract } from "./citySearch.contract";
+import {
+  cityData,
+  zoneCities as fixtureZoneCities,
+} from "./compositeGeoNamesFixtures";
 import { createCompositeCitySearch } from "./createCompositeCitySearch";
 
 describeCitySearchContract("createCompositeCitySearch", {
@@ -39,4 +44,23 @@ describeCitySearchContract("createCompositeCitySearch", {
       cityLabel: "Base",
     },
   ],
+});
+
+// Verifies FR10 of add-geonames-city-source: GeoNames cities do not change the exemplar city.
+describe("exemplar city with GeoNames cities", () => {
+  const search = createCompositeCitySearch(fixtureZoneCities, cityData);
+
+  it.each([
+    ["en", "Moscow"],
+    ["ru", "Москва"],
+  ] as const)("should stay the zone city in %s", (language, expected) => {
+    expect(search.getExemplarCity("Europe/Moscow", language)).toBe(expected);
+  });
+
+  it("should offer the same suggestions", () => {
+    const withoutCities = createCompositeCitySearch(fixtureZoneCities);
+    expect(search.suggest().map((result) => result.record.id)).toEqual(
+      withoutCities.suggest().map((result) => result.record.id),
+    );
+  });
 });

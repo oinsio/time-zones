@@ -31,6 +31,14 @@ describe("fetch city search loader", () => {
     );
   });
 
+  it("should resolve to a search that finds a city of the city data", async () => {
+    const fetchResource = vi.fn().mockResolvedValue(respondWith(searchData));
+    const citySearch = await createLoader(fetchResource)();
+    expect(citySearch.search("Kazan", "en")[0]?.record.timeZoneId).toBe(
+      "Europe/Moscow",
+    );
+  });
+
   it("should request the data url", async () => {
     const fetchResource = vi.fn().mockResolvedValue(respondWith(searchData));
     await createLoader(fetchResource)();

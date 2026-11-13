@@ -65,7 +65,7 @@ export function createFetchCitySearchLoader({
   return async (): Promise<CitySearch> => {
     const response = await fetchResource(dataUrl);
     if (!response.ok) throw new Error(SEARCH_DATA_ERROR.REQUEST_FAILED);
-    const { zoneCities } = parseCitySearchData(await response.json());
-    return createCompositeCitySearch(zoneCities);
+    const { zoneCities, cityData } = parseCitySearchData(await response.json());
+    return createCompositeCitySearch(zoneCities, cityData);
   };
 }
