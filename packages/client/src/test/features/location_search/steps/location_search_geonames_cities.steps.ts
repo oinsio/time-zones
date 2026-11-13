@@ -24,7 +24,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const intlDateTimeFormatBefore = Intl.DateTimeFormat;
 
   f.BeforeEachScenario(() => {
-    Object.assign(world, createSearchWorld());
+    Object.assign(world, createSearchWorld(), { citySearch: undefined });
   });
   f.AfterEachScenario(() => {
     stopStaleEngine();
