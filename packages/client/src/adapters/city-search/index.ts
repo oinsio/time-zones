@@ -4,5 +4,5 @@ export { createCompositeCitySearch } from "./createCompositeCitySearch";
 export { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
 export {
   createFetchCitySearchLoader,
-  parseZoneCityRecords,
+  parseCitySearchData,
 } from "./fetchCitySearch";

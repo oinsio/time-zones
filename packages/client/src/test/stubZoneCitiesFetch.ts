@@ -1,4 +1,4 @@
-import zoneCities from "virtual:zone-cities";
+import zoneCities, { cityData } from "virtual:zone-cities";
 import zoneCitiesUrl from "virtual:zone-cities-url";
 
 /**
@@ -9,7 +9,7 @@ import zoneCitiesUrl from "virtual:zone-cities-url";
 export function stubZoneCitiesFetch() {
   const fetchStub = vi.fn((input: RequestInfo | URL) =>
     String(input) === zoneCitiesUrl
-      ? Promise.resolve(Response.json(zoneCities))
+      ? Promise.resolve(Response.json({ zoneCities, cityData }))
       : Promise.reject(new Error(`Unexpected request: ${String(input)}`)),
   );
   vi.stubGlobal("fetch", fetchStub);
