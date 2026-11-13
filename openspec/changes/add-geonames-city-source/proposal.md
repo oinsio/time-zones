@@ -90,7 +90,7 @@ Audience: every user who adds a location, in English and in Russian.
 - FR9: The city label of a city location SHALL follow the interface language when the stored label is a name of any city record of the location's zone.
 - FR10: Search by abbreviation, the suggestions, the device time option and the exemplar city of a zone SHALL keep using the zone cities only.
 - FR11: Every zone of the city data SHALL be a canonical zone ID of the bundled zone rules release. The search SHALL offer a city only while its zone is in the installed zone rules release.
-- FR12: The city data SHALL be compiled from the GeoNames dumps by one maintainer command into a committed file that records the date of the dump. The app build, the tests and CI SHALL NOT contact GeoNames. A check command, run in CI, SHALL fail when the committed file breaks FR1, FR2, FR11, its format or its size budget.
+- FR12: The city data SHALL be compiled from the GeoNames dumps by one maintainer command into a committed file that records the date of the dump. The app build, the tests and CI SHALL NOT contact GeoNames. A check command, run in CI, SHALL fail when the committed file breaks FR1, FR2, FR11 or its format. The size of the served search data file is NFR-P1, checked by the bundle size check.
 - FR13: The settings page SHALL show the attribution "City data: GeoNames, CC BY 4.0" with a link to GeoNames, in English and Russian; the repository SHALL credit GeoNames and the licence next to the committed dataset and in the README.
 - FR14: The loading, error, retry and offline states of the search data SHALL stay as they are: one data file, one request.
 
@@ -100,7 +100,7 @@ Audience: every user who adds a location, in English and in Russian.
 
 - NFR-P1: The search data SHALL be one separate file of at most 130 KB gzipped, not part of the initial JavaScript and not preloaded; the initial JavaScript stays at most 150 KB gzipped.
 - NFR-P2: Preparing the loaded search data for search, once, during the first query over it, SHALL build at most one country-name formatter per city-name language. Every non-empty query over prepared data SHALL normalize exactly one text, the query, build at most one collator and build no country-name formatter.
-- NFR-P3: Loading the search data for city labels or the exemplar city, without a query, SHALL normalize no text. Asking for one city label SHALL NOT scan every city record.
+- NFR-P3: Loading the search data for city labels or the exemplar city, without a query, SHALL normalize no text.
 - NFR-P4: One query over the full data SHALL take at most 50 ms in the timing benchmark, which is reported and does not block the pull request (ADR-0008).
 
 #### Accessibility
