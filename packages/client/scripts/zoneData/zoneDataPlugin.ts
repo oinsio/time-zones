@@ -13,8 +13,10 @@ import {
   type ZoneRulesRelease,
   ZoneRulesReleaseError,
 } from "../../src/lib/zoneRules/core/index.ts";
+import { DATASET_PATH } from "../cityData/constants.ts";
 import { readReleaseZonePeriods } from "../zoneRules/releaseZonePeriods.ts";
 import { extractZoneAbbreviations } from "./extractZoneAbbreviations.ts";
+import { loadCitySearchData } from "./loadCitySearchData.ts";
 import { loadZoneData } from "./loadZoneData.ts";
 
 const ALIASES_MODULE_ID = "virtual:time-zone-aliases";
@@ -58,6 +60,7 @@ export function zoneDataPlugin(): Plugin {
   let isTestMode = false;
   let base = "/";
   let releaseFilePath = ZONE_RULES_RELEASE_FILE;
+  let datasetFilePath = DATASET_PATH;
   return {
     name: "time-zones-zone-data",
     configResolved(config) {
@@ -65,13 +68,14 @@ export function zoneDataPlugin(): Plugin {
       isTestMode = config.mode === TEST_MODE;
       base = config.base;
       releaseFilePath = resolve(config.root, ZONE_RULES_RELEASE_FILE);
+      datasetFilePath = resolve(config.root, DATASET_PATH);
     },
     configureServer(server) {
       const devPath = `${base}${ZONE_CITIES_DEV_FILE_NAME}`;
       server.middlewares.use((request, response, next) => {
         if (request.url?.split("?")[0] !== devPath) return next();
         response.setHeader(CONTENT_TYPE_HEADER, JSON_CONTENT_TYPE);
-        response.end(JSON.stringify(loadZoneData().zoneCities));
+        response.end(JSON.stringify(loadCitySearchData(datasetFilePath)));
       });
     },
     resolveId(source) {
@@ -90,7 +94,8 @@ export function zoneDataPlugin(): Plugin {
         return `export default ${loadZoneAbbreviations(releaseFilePath)};`;
       }
       if (resolvedId === `${RESOLVED_ID_PREFIX}${CITIES_MODULE_ID}`) {
-        return `export default ${JSON.stringify(loadZoneData().zoneCities)};`;
+        const { zoneCities, cityData } = loadCitySearchData(datasetFilePath);
+        return `export default ${JSON.stringify(zoneCities)};\nexport const cityData = ${JSON.stringify(cityData)};`;
       }
       if (resolvedId === `${RESOLVED_ID_PREFIX}${CITIES_URL_MODULE_ID}`) {
         if (!isBuild) {
@@ -99,7 +104,7 @@ export function zoneDataPlugin(): Plugin {
         const referenceId = this.emitFile({
           type: "asset",
           name: ZONE_CITIES_ASSET_NAME,
-          source: JSON.stringify(loadZoneData().zoneCities),
+          source: JSON.stringify(loadCitySearchData(datasetFilePath)),
         });
         return `export default import.meta.ROLLUP_FILE_URL_${referenceId};`;
       }

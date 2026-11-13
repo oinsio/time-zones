@@ -36,7 +36,10 @@ function groupByName(
   return [...groups.values()];
 }
 
-function findNamesakes(candidates: NamesakeCandidate[]): NamesakeCandidate[] {
+/** The candidates that share a country and a normalized name in either language with another. */
+export function findNamesakes(
+  candidates: NamesakeCandidate[],
+): NamesakeCandidate[] {
   const namesakes = new Set<NamesakeCandidate>();
   const groups = [
     ...groupByName(candidates, (candidate) => candidate.names.en),

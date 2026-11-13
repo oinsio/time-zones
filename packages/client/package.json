@@ -13,6 +13,7 @@
     "zone-rules:compile": "node scripts/zoneRules/compile.ts",
     "zone-rules:check": "node scripts/zoneRules/check.ts",
     "city-data:compile": "node scripts/cityData/compile.ts",
+    "city-data:check": "node scripts/cityData/check.ts",
     "zone-rules:latest": "node scripts/zoneRules/latestRelease.ts",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",

@@ -21,6 +21,18 @@ declare module "virtual:zone-cities" {
     countryCode: string;
   }[];
   export default zoneCities;
+  /** The committed GeoNames city data without its source record (design D5). */
+  export const cityData: {
+    formatVersion: number;
+    zones: string[];
+    regions: [string, string][];
+    cities: (
+      | [number, string, string | 0, string, number, number]
+      | [number, string, string | 0, string, number, number, number]
+    )[];
+    zoneCityPopulations: Record<string, number>;
+    zoneCityRegions: Record<string, number>;
+  };
 }
 
 declare module "virtual:zone-abbreviations" {

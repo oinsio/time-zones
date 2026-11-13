@@ -35,3 +35,7 @@ export const ADMIN1_KEY_SEPARATOR = ".";
 export const ADMIN1_FEATURE_PREFIX = "ADM1";
 export const FLAG_TRUE = "1";
 export const NO_RUSSIAN_NAME_MARKER = 0;
+
+export const COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/;
+export const CYRILLIC_PATTERN = /[Ѐ-ӿ]/;
+export const PERCENT_FACTOR = 100;
