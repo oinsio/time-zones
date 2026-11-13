@@ -40,9 +40,9 @@ Audience: every user who adds a location, in English and in Russian.
 
 - `packages/client/scripts/cityData/` (new: download, compile, check; their tests under `src/test/cityData/`), `packages/client/city-data/` (new: the committed dataset and its README), `packages/client/package.json` scripts, `.github/workflows/ci.yml` (the check, by handoff patch).
 - `scripts/zoneData/zoneDataPlugin.ts` (serves the merged search data file), `scripts/check-bundle-size.mjs` and `app.config.ts` (the new budget).
-- `src/ports/citySearch.ts` (`CityRecord`), `src/adapters/city-search/` (new GeoNames source, composite adapter, data parsing), `src/presenter/presentSearchResults.ts`, `src/views/shared/LocationSearchResults.tsx`, `src/app/settings/` (attribution), `src/constants/`, `src/locales/en.json` and `ru.json`.
+- `src/ports/citySearch.ts` (`CityRecord`), `src/adapters/city-search/` (new GeoNames source, composite adapter, data parsing), `src/lib/searchText/` (search text normalization, moved from `src/adapters/city-search/` so the scripts can load it), `src/presenter/presentSearchResults.ts`, `src/views/shared/LocationSearchResults.tsx`, `src/app/settings/` (attribution), `src/constants/`, `src/locales/en.json` and `ru.json`.
 - Features under `src/test/features/location_search/`, `locations/`, `settings/`, the search benchmark, approved search and settings screenshots.
-- `docs/glossary/search.md`, `docs/glossary/locations.md`, `docs/glossary/README.md`, `docs/architecture/domain-model.md`; by handoff patch: `docs/adr/0015-city-data-from-geonames.md`, a status note in `docs/adr/0006-city-data-sources.md`, the ADR list in `CLAUDE.md`, `README.md` and `README.ru.md` (data credit).
+- `docs/glossary/search.md`, `docs/glossary/locations.md`, `docs/glossary/README.md`, `docs/architecture/domain-model.md`, `docs/architecture/overview.md`; by handoff patch: `docs/adr/0015-city-data-from-geonames.md`, a status note in `docs/adr/0006-city-data-sources.md`, the ADR list in `CLAUDE.md`, `README.md` and `README.ru.md` (data credit).
 - No new runtime dependency, no new port, no new storage key, no change of the stored location list. The compile command needs the system `unzip` and about 250 MB of temporary disk space; the build does not.
 
 ## Goals
