@@ -38,6 +38,7 @@ The normative dictionary of the project's ubiquitous language. If a term is here
 | DST | daylight saving time |
 | E2E | end-to-end test in a real browser (playwright-bdd) |
 | FR / NFR | functional / non-functional requirement (`.claude/rules/traceability.md`) |
+| GeoNames | the geographical database that is the source of the city data (CC BY 4.0) |
 | IA | information architecture (`docs/ia/`) |
 | IANA | Internet Assigned Numbers Authority, keeper of the time zone database |
 | ISO 8601 | the date and time format of stored timestamps (`2025-01-15T10:30:00.000Z`) |
