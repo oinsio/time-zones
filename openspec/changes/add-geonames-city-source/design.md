@@ -85,6 +85,7 @@ A new `CitySource` in `src/adapters/city-search/geoNamesCitySource.ts`. The name
 
 - `keepFirstResultPerZone` becomes `keepFirstResultPerCity`, keyed by `record.id`. Abbreviation results still come first, so a zone city matched by abbreviation keeps that kind.
 - The comparator becomes: match kind → for `COUNTRY` matches, zone cities (`id === timeZoneId`) first → `rank` descending → `population` descending → collator on the name. One collator per query, as today.
+- The signatures become `createCompositeCitySearch(zoneCities, cityData = EMPTY_GEONAMES_CITY_DATA)` and `createZoneCitiesSource(zoneCities, cityData = EMPTY_GEONAMES_CITY_DATA)`: the loader passes the parsed `cityData`, while the tests that are about zone cities alone keep passing the array, so the change does not ripple through every test that builds a search.
 - `getExemplarCity` and `suggest` keep reading the zone cities map.
 - `getCityLabel(timeZoneId, storedLabel, language)` reads a `Map<zone ID, CityRecord[]>` built once at load without normalization, ordered zone city first, then by population descending, and returns the first record that satisfies `isCityNameOfRecord` (NFR-P3: one zone's records are scanned, never all).
 - `presentSearchResults` keeps `isAdded` as zone + `isCityNameOfRecord`; with per-city records this gives "namesakes in one zone are one location" (FR8) with no new rule. It adds `id` (the list key in the view, which today is zone + city name) and `regionName?: string` in the interface language.
@@ -101,7 +102,7 @@ New `scripts/cityData/`, mirroring `scripts/zoneRules/`:
 - The scripts run under Node's type stripping like `scripts/zoneRules/` (`"zone-rules:compile": "node scripts/zoneRules/compile.ts"`), so they use no `enum` or `namespace`. Vitest collects only `src/**/*.{test,steps}.{ts,tsx}` (`vitest.config.ts`), so their tests live under `src/test/cityData/`, as the tests of `scripts/zoneRules/` live under `src/test/zoneRules/`.
 - Thresholds and URLs are constants in `scripts/cityData/constants.ts`; the budget `CITY_SEARCH_DATA_BUDGET_KB` moves from the script-local constant `30` in `check-bundle-size.mjs` to `app.config.ts` as `130`, next to `ZONE_RULES_ASSET_BUDGET_KB`, which the script already imports from there.
 
-`zoneDataPlugin.ts` reads the committed file and serves the merged object (D5) for the build asset, the dev middleware and `virtual:zone-cities` in test mode.
+`zoneDataPlugin.ts` reads the committed file and serves the merged object (D5) as the build asset and from the dev middleware. In test mode `virtual:zone-cities` keeps its default export (the zone cities array) and adds a named `cityData` export, so its existing importers compile unchanged and only the tests about the whole search import the second section.
 
 ### D9. Region on the result row (FR7, NFR-A1, NFR-R1)
 
