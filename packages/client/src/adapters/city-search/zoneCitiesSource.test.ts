@@ -103,12 +103,13 @@ describe("zone cities source without Intl.DisplayNames", () => {
 
   it("should match a country name only while Intl.DisplayNames exists", () => {
     const withNames = createZoneCitiesSource([almaty], () => ["Asia/Almaty"]);
+    const matchesWithNames = withNames.match("kazakhstan");
     vi.stubGlobal("Intl", { ...Intl, DisplayNames: undefined });
     const withoutNames = createZoneCitiesSource([almaty], () => [
       "Asia/Almaty",
     ]);
 
-    expect(withNames.match("kazakhstan")).toHaveLength(1);
+    expect(matchesWithNames).toHaveLength(1);
     expect(withoutNames.match("kazakhstan")).toEqual([]);
   });
 
@@ -117,5 +118,38 @@ describe("zone cities source without Intl.DisplayNames", () => {
     const source = createZoneCitiesSource([almaty], () => ["Asia/Almaty"]);
 
     expect(source.match("almaty")).toHaveLength(1);
+  });
+});
+
+// Verifies FR5, FR7 of add-geonames-city-source (D2, D3, D4).
+describe("zone cities source with city data", () => {
+  const cityData = {
+    cities: [],
+    zoneCityPopulations: { "Europe/Moscow": 10_381_222 },
+    zoneCityRegions: {
+      "Europe/Moscow": { en: "Moscow Oblast", ru: "Московская область" },
+    },
+  };
+  const source = createZoneCitiesSource(
+    [moscow, almaty],
+    () => ["Europe/Moscow", "Asia/Almaty"],
+    cityData,
+  );
+  const recordOf = (id: string) =>
+    source.records.find((record) => record.id === id);
+
+  it("should take the population of a zone city from the city data", () => {
+    expect(recordOf("Europe/Moscow")?.population).toBe(10_381_222);
+  });
+
+  it("should take the region of a zone city from the city data", () => {
+    expect(recordOf("Europe/Moscow")?.region).toEqual(
+      cityData.zoneCityRegions["Europe/Moscow"],
+    );
+  });
+
+  it("should give a zone with no entry no population and no region", () => {
+    expect(recordOf("Asia/Almaty")?.population).toBe(0);
+    expect(recordOf("Asia/Almaty")).not.toHaveProperty("region");
   });
 });
