@@ -71,11 +71,11 @@ ENV PATH=/opt/node/bin:${PATH} \
 # libatomic1, which the Node binary links against; jq for the repository's scripts; gh from
 # GitHub's own apt repository (the distribution's is too old for `gh pr list --json`); procps gives
 # `ps`, which tree-kill (Stryker, vitest) needs to stop its child processes; tini is PID 1 (see
-# ENTRYPOINT below); Chromium's shared libraries through Playwright's own list. The proxy variables
+# ENTRYPOINT below); unzip extracts the GeoNames dumps (city-data:compile); Chromium's shared libraries through Playwright's own list. The proxy variables
 # are unset for this one step only.
 RUN env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy sh -ec ' \
       apt-get update; \
-      apt-get install -y --no-install-recommends libatomic1 jq gnupg procps tini; \
+      apt-get install -y --no-install-recommends libatomic1 jq gnupg procps tini unzip; \
       curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
         -o /usr/share/keyrings/githubcli-archive-keyring.gpg; \
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \

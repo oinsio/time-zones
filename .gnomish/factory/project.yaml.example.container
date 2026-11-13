@@ -21,7 +21,7 @@ factory:
   sandbox:
     # Built from sandbox/Dockerfile by build-sandbox, which reads this tag. Bump it whenever
     # the image changes (a new Node, pnpm, openspec or Playwright in the repository).
-    image: time-zones-gnomish-sandbox:7
+    image: time-zones-gnomish-sandbox:8
     # The agent's provider, the npm registry (pnpm install in implement) and the GitHub API
     # (gh in deliver). Every denial is listed by `gnomish status` — add a host only once you
     # know which tool asked for it.
@@ -33,6 +33,8 @@ factory:
       # and the page that names the newest release.
       - data.iana.org
       - www.iana.org
+      # GeoNames dumps: cities, alternate names, admin1 codes (city-data:compile).
+      - download.geonames.org
     # `gh` in the deliver stage authenticates with GH_TOKEN, exported by the gnomish wrapper.
     env-passthrough:
       - GH_TOKEN
