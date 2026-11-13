@@ -90,6 +90,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
                   countryCode,
                   aliases: [],
                   rank: 1,
+                  population: 0,
                 },
                 matchKind: SearchMatchKind.CITY_PREFIX,
               },

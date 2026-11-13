@@ -12,7 +12,10 @@ export enum SearchMatchKind {
 
 /** A place that can be added, per ADR-0006. */
 export type CityRecord = {
-  /** The canonical time zone identifier. */
+  /**
+   * Unique per city: the canonical time zone identifier for a zone city, the
+   * decimal GeoNames ID for a GeoNames city.
+   */
   id: string;
   timeZoneId: string;
   names: Record<CityNameLanguage, string>;
@@ -22,6 +25,13 @@ export type CityRecord = {
   aliases: readonly string[];
   /** Larger means more prominent; popular locations first. */
   rank: number;
+  /** Inhabitants; 0 when unknown. Implements FR5 of add-geonames-city-source (D2). */
+  population: number;
+  /**
+   * First-level division in each language, present for namesakes only.
+   * Implements FR7 of add-geonames-city-source (D2, D4).
+   */
+  region?: Record<CityNameLanguage, string>;
 };
 
 /**

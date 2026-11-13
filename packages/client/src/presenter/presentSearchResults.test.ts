@@ -17,6 +17,7 @@ const moscowRecord: CityRecord = {
   countryCode: "RU",
   aliases: ["MSK"],
   rank: 7,
+  population: 0,
 };
 const resultFor = (
   record: CityRecord,

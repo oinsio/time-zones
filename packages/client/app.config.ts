@@ -59,6 +59,13 @@ export const TEST_DEPLOY_INSTANT = "2026-03-08T07:30:00.000Z";
 export const ZONE_RULES_ASSET_BUDGET_KB = 22;
 
 /**
+ * Gzipped size ceiling of the search data file (the zone cities and the GeoNames
+ * city data), in KB, measured by `check-bundle-size.mjs`.
+ * Implements NFR-P1, M2 of add-geonames-city-source (D1).
+ */
+export const CITY_SEARCH_DATA_BUDGET_KB = 130;
+
+/**
  * The committed zone rules release, relative to the package root; read by the
  * compiler, the check, the Vite plugin and the budget steps.
  * Implements FR2 of add-zone-rules-from-iana (D1).

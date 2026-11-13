@@ -77,6 +77,7 @@ function buildRecord(
     countryCode: data?.countryCode ?? "",
     aliases: getZoneAbbreviations(timeZoneId),
     rank: calculateRank(timeZoneId),
+    population: 0,
   };
 }
 

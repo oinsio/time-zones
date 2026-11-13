@@ -9,21 +9,25 @@ export interface CitySourceScenario {
 
 /**
  * Contract every `CitySource` must satisfy (ADR-0006).
- * Verifies FR2–FR4, FR9 of add-locations-via-search.
+ * Verifies FR2–FR4, FR9 of add-locations-via-search; FR1 of add-geonames-city-source (D2).
  */
 export const describeCitySourceContract = (
   sourceName: string,
   scenario: CitySourceScenario,
 ) => {
   describe(`CitySource contract: ${sourceName}`, () => {
-    it("should hold records with canonical identifiers", () => {
+    it("should hold records with canonical zones", () => {
       const source = scenario.createSource();
       const notCanonical = source.records.filter(
         (record) =>
-          record.id !== record.timeZoneId ||
           canonicalizeTimeZoneId(record.timeZoneId) !== record.timeZoneId,
       );
       expect(notCanonical).toEqual([]);
+    });
+
+    it("should hold records with unique identifiers", () => {
+      const ids = scenario.createSource().records.map((record) => record.id);
+      expect(new Set(ids).size).toBe(ids.length);
     });
 
     it("should hold records with non-empty English and Russian names", () => {

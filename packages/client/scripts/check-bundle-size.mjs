@@ -5,11 +5,13 @@
  * modulepreload links; lazily imported chunks are not counted.
  * Also fails when a registered view (Cards, Grid) is not a separate chunk,
  * because that chunk is what keeps views out of the initial JavaScript.
- * The search data file must exist as a separate JSON asset within its own
- * gzipped budget and must not be referenced by index.html (no preload).
+ * The search data file (zone cities plus the GeoNames city data) must exist as
+ * a separate JSON asset within its own gzipped budget, CITY_SEARCH_DATA_BUDGET_KB
+ * of app.config.ts, and must not be referenced by index.html (no preload).
  * Implements NFR-P1, M5 of setup-app-shell-and-pages-deploy (D11) and NFR-P1,
  * M5 of add-main-page-scaffold; NFR-P2, M7 of add-locations-via-search (D8);
- * NFR-P1 of add-view-mode-setting-and-grid-skeleton (one chunk per view).
+ * NFR-P1 of add-view-mode-setting-and-grid-skeleton (one chunk per view);
+ * NFR-P1, M2 of add-geonames-city-source (the search data budget).
  * The zone rules asset must exist within its gzipped budget and be fetched by
  * exactly one preload link, never by a modulepreload (NFR-P1, NFR-P2 of add-zone-rules-from-iana).
  * The served zone rules files (version file and release file) must exist in the
@@ -18,7 +20,11 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
-import { BUILD_OUT_DIR, ZONE_RULES_ASSET_BUDGET_KB } from "../app.config.ts";
+import {
+  BUILD_OUT_DIR,
+  CITY_SEARCH_DATA_BUDGET_KB,
+  ZONE_RULES_ASSET_BUDGET_KB,
+} from "../app.config.ts";
 import {
   ZONE_RULES_RELEASE_DIRECTORY,
   ZONE_RULES_VERSION_PATH,
@@ -40,7 +46,6 @@ const ASSETS_DIRECTORY = "assets";
 const VIEW_CHUNK_PREFIXES = ["CardsView-", "GridView-"];
 const CITY_SEARCH_DATA_PREFIX = "city-search-";
 const CITY_SEARCH_DATA_EXTENSION = ".json";
-const CITY_SEARCH_DATA_BUDGET_KB = 30;
 const ZONE_RULES_ASSET_PREFIX = "zone-rules-";
 const ZONE_RULES_ASSET_EXTENSION = ".json";
 const EXPECTED_ZONE_RULES_PRELOAD_COUNT = 1;
