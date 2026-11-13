@@ -1,4 +1,5 @@
 // Verifies FR2, FR3, FR4 of add-view-mode-setting-and-grid-skeleton.
+// Verifies FR6 of add-country-to-zone-label.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen, waitFor } from "@testing-library/react/pure";
@@ -137,7 +138,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
-  // @add-view-mode-setting-and-grid-skeleton @FR3 @FR4
+  // @add-view-mode-setting-and-grid-skeleton @FR3 @FR4 @add-country-to-zone-label @FR6
   f.Scenario("Existing users get Cards", ({ Given, When, Then, And }) => {
     Given(
       "the stored preferences document was written before the view mode existed, with the theme Dark, the hour format 12-hour, the language {string} and only the UTC offset in the zone label",
@@ -162,7 +163,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
     And(
-      "the theme Dark, the hour format 12-hour, the language {string} and the zone label with only the UTC offset are in force",
+      "the theme Dark, the hour format 12-hour, the language {string} and the zone label with the country and the UTC offset are in force",
       (_ctx, languageName: string) => {
         expect(world.checkedOptionOf(i18n.t("settings.themeLabel"))).toBe(
           i18n.t("settings.themeDark"),
@@ -177,7 +178,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         ).toBeInTheDocument();
         expect(
           world.pressedTogglesOf(i18n.t("settings.zoneLabelLabel")),
-        ).toEqual([i18n.t("settings.zoneLabelUtcOffset")]);
+        ).toEqual([
+          i18n.t("settings.zoneLabelCountry"),
+          i18n.t("settings.zoneLabelUtcOffset"),
+        ]);
       },
     );
     And(

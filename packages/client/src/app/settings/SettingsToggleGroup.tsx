@@ -27,6 +27,7 @@ type SettingsToggleGroupProps<Value extends string> = {
  * slot keeps its size when the toggle is off, so toggling moves nothing.
  * Implements FR16, NFR-A1, NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting (D7).
  * Implements FR6 of compact-settings-controls (D5).
+ * Implements NFR-R1 of add-country-to-zone-label (D5): the toggles may wrap.
  */
 export function SettingsToggleGroup<Value extends string>({
   caption,
@@ -48,7 +49,7 @@ export function SettingsToggleGroup<Value extends string>({
         <span id={captionId} className={SETTINGS_GROUP_CAPTION_CLASS_NAME}>
           {caption}
         </span>
-        <div className="flex flex-nowrap gap-2">
+        <div className="flex flex-wrap gap-2">
           {options.map(({ value, label }) => {
             const isSelected = selectedValues.includes(value);
             return (

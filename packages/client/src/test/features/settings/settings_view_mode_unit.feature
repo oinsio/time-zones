@@ -35,12 +35,12 @@ Feature: Settings view mode
     Then the main page shows the Grid view from its first render
     And the view group checks "Grid"
 
-  @add-view-mode-setting-and-grid-skeleton @FR3 @FR4
+  @add-view-mode-setting-and-grid-skeleton @FR3 @FR4 @add-country-to-zone-label @FR6
   Scenario: Existing users get Cards
     Given the stored preferences document was written before the view mode existed, with the theme Dark, the hour format 12-hour, the language "ru" and only the UTC offset in the zone label
     When the app is opened
     Then the main page shows the Cards view and the view group checks "Карточки"
-    And the theme Dark, the hour format 12-hour, the language "Русский" and the zone label with only the UTC offset are in force
+    And the theme Dark, the hour format 12-hour, the language "Русский" and the zone label with the country and the UTC offset are in force
     And the stored document is not rewritten until the user changes a setting
 
   @add-view-mode-setting-and-grid-skeleton @FR4

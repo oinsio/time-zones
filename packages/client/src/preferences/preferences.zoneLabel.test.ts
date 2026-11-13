@@ -1,4 +1,5 @@
 // Verifies FR13, FR15 of show-zone-abbreviations-and-zone-label-setting.
+// Verifies FR1, FR6 of add-country-to-zone-label.
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_PREFERENCES,
@@ -8,7 +9,7 @@ import {
   ZoneLabelPart,
 } from ".";
 
-const { UTC_OFFSET, ZONE_ABBREVIATION } = ZoneLabelPart;
+const { UTC_OFFSET, ZONE_ABBREVIATION, COUNTRY } = ZoneLabelPart;
 
 function setPart(
   zoneLabelParts: readonly ZoneLabelPart[],
@@ -32,21 +33,24 @@ function parseParts(zoneLabelParts: unknown) {
 }
 
 describe("DEFAULT_PREFERENCES.zoneLabelParts", () => {
-  it("should show both parts", () => {
+  it("should show every part", () => {
     expect(DEFAULT_PREFERENCES.zoneLabelParts).toEqual([
       UTC_OFFSET,
       ZONE_ABBREVIATION,
+      COUNTRY,
     ]);
   });
 });
 
 describe("SET_ZONE_LABEL_PART", () => {
   it.each([
-    [UTC_OFFSET, [ZONE_ABBREVIATION]],
-    [ZONE_ABBREVIATION, [UTC_OFFSET]],
+    [UTC_OFFSET, [ZONE_ABBREVIATION, COUNTRY]],
+    [ZONE_ABBREVIATION, [UTC_OFFSET, COUNTRY]],
+    [COUNTRY, [UTC_OFFSET, ZONE_ABBREVIATION]],
   ])("should hide %s", (part, expected) => {
     expect(
-      setPart([UTC_OFFSET, ZONE_ABBREVIATION], part, false).zoneLabelParts,
+      setPart([UTC_OFFSET, ZONE_ABBREVIATION, COUNTRY], part, false)
+        .zoneLabelParts,
     ).toEqual(expected);
   });
 
@@ -55,6 +59,9 @@ describe("SET_ZONE_LABEL_PART", () => {
     [ZONE_ABBREVIATION, [UTC_OFFSET], [UTC_OFFSET, ZONE_ABBREVIATION]],
     [UTC_OFFSET, [], [UTC_OFFSET]],
     [ZONE_ABBREVIATION, [], [ZONE_ABBREVIATION]],
+    [COUNTRY, [], [COUNTRY]],
+    [COUNTRY, [UTC_OFFSET], [UTC_OFFSET, COUNTRY]],
+    [COUNTRY, [ZONE_ABBREVIATION], [ZONE_ABBREVIATION, COUNTRY]],
   ])("should show %s in enum order", (part, before, expected) => {
     expect(setPart(before, part, true).zoneLabelParts).toEqual(expected);
   });
@@ -87,6 +94,8 @@ describe("parseStoredPreferences zone label parts", () => {
     [["UTC_OFFSET"]],
     [["ZONE_ABBREVIATION"]],
     [["UTC_OFFSET", "ZONE_ABBREVIATION"]],
+    [["COUNTRY"]],
+    [["COUNTRY", "UTC_OFFSET"]],
     [["ZONE_ABBREVIATION", "UTC_OFFSET"]],
   ])("should accept %j", (stored) => {
     expect(parseParts(stored)).toMatchObject({ ok: true });
@@ -98,10 +107,17 @@ describe("parseStoredPreferences zone label parts", () => {
     });
   });
 
+  it("should keep the country last", () => {
+    expect(parseParts(["COUNTRY", "UTC_OFFSET"])).toMatchObject({
+      preferences: { zoneLabelParts: [UTC_OFFSET, COUNTRY] },
+    });
+  });
+
   it.each([
     ["a non-array", "UTC_OFFSET"],
     ["a missing value", undefined],
-    ["an unknown value", ["UTC_OFFSET", "COUNTRY"]],
+    ["an unknown value", ["CITY"]],
+    ["a duplicate country", ["COUNTRY", "COUNTRY"]],
     ["a duplicate", ["UTC_OFFSET", "UTC_OFFSET"]],
   ])("should reject %s", (_name, stored) => {
     expect(parseParts(stored)).toEqual({ ok: false });

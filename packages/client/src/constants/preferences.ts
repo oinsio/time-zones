@@ -2,7 +2,7 @@ import { HourFormat, ThemePreference, ZoneLabelPart } from "@/preferences";
 import { KeyboardKey } from "./keyboard";
 
 /** Version of the stored preferences document (ADR-0004 envelope). */
-export const PREFERENCES_SCHEMA_VERSION = 4;
+export const PREFERENCES_SCHEMA_VERSION = 5;
 
 /**
  * The zone of the live example under the zone label group.
@@ -16,10 +16,12 @@ export const ZONE_LABEL_EXAMPLE = {
 
 /**
  * The order of the zone label parts in the zone line and in the zone label
- * group: the zone abbreviation, then the UTC offset.
- * Implements FR3, UX1 of polish-settings-and-remove-offline-update-notice (D5).
+ * group: the country, the zone abbreviation, then the UTC offset.
+ * Implements FR3, UX1 of polish-settings-and-remove-offline-update-notice (D5)
+ * and FR2 of add-country-to-zone-label.
  */
 export const ZONE_LABEL_PART_ORDER: readonly ZoneLabelPart[] = [
+  ZoneLabelPart.COUNTRY,
   ZoneLabelPart.ZONE_ABBREVIATION,
   ZoneLabelPart.UTC_OFFSET,
 ];

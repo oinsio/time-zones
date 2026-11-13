@@ -43,20 +43,20 @@ Feature: Settings page in a real browser
     And the options "Light", "Dark" and "System" are named in the group "Theme"
 
   @add-settings-page-and-device-time-location @FR16 @add-gnomish-factory-credit @FR2 @keep-gnomish-factory-name-untranslated-in-credit @FR1 @add-interface-language-selection @FR13 @show-zone-abbreviations-and-zone-label-setting @FR12 @polish-settings-and-remove-offline-update-notice @FR1 @FR2 @FR4 @M2
-  @add-view-mode-setting-and-grid-skeleton @NFR-R1 @FR1
+  @add-view-mode-setting-and-grid-skeleton @NFR-R1 @FR1 @add-country-to-zone-label @FR1 @UX1
   Scenario Outline: Both languages
     Given the locations interface language is <language>
     And the user opens the settings
     Then the settings heading is "<heading>"
     And the groups are named "<theme>", "<hour format>", "<view>", "<zone label>" and "<language group>"
     And the view options are named "<cards>" and "<grid>", in this order
-    And the zone label toggles are "<abbreviation>" and "<utc offset>"
+    And the zone label toggles are "<country>", "<abbreviation>" and "<utc offset>"
     And the Gnomish Factory credit is "<credit>"
 
     Examples:
-      | language | heading   | theme | hour format    | view | cards     | grid   | zone label                 | abbreviation | utc offset   | language group | credit                            |
-      | Russian  | Настройки | Тема  | Формат времени | Вид  | Карточки  | Сетка  | Обозначение часового пояса | Аббревиатура | Смещение UTC | Язык           | Создано с помощью Gnomish Factory |
-      | English  | Settings  | Theme | Hour format    | View | Cards     | Grid   | Timezone label             | Abbreviation | UTC offset   | Language       | Built with Gnomish Factory        |
+      | language | heading   | theme | hour format    | view | cards     | grid   | zone label                 | country | abbreviation | utc offset   | language group | credit                            |
+      | Russian  | Настройки | Тема  | Формат времени | Вид  | Карточки  | Сетка  | Обозначение часового пояса | Страна  | Аббревиатура | Смещение UTC | Язык           | Создано с помощью Gnomish Factory |
+      | English  | Settings  | Theme | Hour format    | View | Cards     | Grid   | Timezone label             | Country | Abbreviation | UTC offset   | Language       | Built with Gnomish Factory        |
 
   @add-settings-page-and-device-time-location @NFR-A1 @NFR-A3 @add-gnomish-factory-credit @NFR-A1 @move-and-restyle-gnomish-factory-credit @NFR-A2 @keep-gnomish-factory-name-untranslated-in-credit @NFR-A1
   Scenario Outline: Settings have no accessibility violations in the <theme> theme
@@ -91,7 +91,7 @@ Feature: Settings page in a real browser
   @add-settings-page-and-device-time-location @NFR-R3 @M6 @add-gnomish-factory-credit @NFR-R2 @move-and-restyle-gnomish-factory-credit @NFR-R2 @add-interface-language-selection @NFR-R2
   @show-zone-abbreviations-and-zone-label-setting @NFR-R3 @polish-settings-and-remove-offline-update-notice @NFR-R2
   @compact-settings-controls @NFR-R2 @add-view-mode-setting-and-grid-skeleton @NFR-R2
-  @add-remote-zone-rules-updates @NFR-R1
+  @add-remote-zone-rules-updates @NFR-R1 @add-country-to-zone-label @NFR-R1
   Scenario Outline: Approved screenshots of the settings at <width> px in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the screen is <width> px wide for the locations

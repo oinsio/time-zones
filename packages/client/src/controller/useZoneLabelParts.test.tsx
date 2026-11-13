@@ -34,6 +34,9 @@ describe("useZoneLabelParts", () => {
         false,
       ),
     );
-    expect(result.current.parts).toEqual([ZoneLabelPart.ZONE_ABBREVIATION]);
+    expect(result.current.parts).toEqual([
+      ZoneLabelPart.ZONE_ABBREVIATION,
+      ZoneLabelPart.COUNTRY,
+    ]);
   });
 });

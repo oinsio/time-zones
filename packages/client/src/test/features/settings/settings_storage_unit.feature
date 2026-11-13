@@ -10,6 +10,13 @@ Feature: Preferences storage
     Then the main page was shown with the default preferences
     And the settings page shows the note with a Reset action
 
+  @add-country-to-zone-label @FR6
+  Scenario: The country twice
+    Given the stored preferences document of the current version holds the country twice in the zone label
+    When the user opens the app and the settings page
+    Then the main page was shown with all three zone label parts
+    And the settings page shows the note with a Reset action
+
   @add-settings-page-and-device-time-location @FR7
   Scenario: Reset
     Given the note about unreadable settings is shown

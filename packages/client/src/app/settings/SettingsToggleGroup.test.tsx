@@ -1,4 +1,5 @@
 // Verifies FR16, NFR-A1 of show-zone-abbreviations-and-zone-label-setting (D7).
+// Verifies NFR-R1 of add-country-to-zone-label.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SettingsToggleGroup } from "./SettingsToggleGroup";
@@ -24,6 +25,15 @@ function renderGroup(selectedValues: readonly string[] = ["B"]) {
 }
 
 describe("SettingsToggleGroup", () => {
+  it("should let the toggles wrap onto further rows", () => {
+    renderGroup();
+    const container = screen.getByRole("button", {
+      name: "Option A",
+    }).parentElement;
+    expect(container).toHaveClass("flex-wrap");
+    expect(container).not.toHaveClass("flex-nowrap");
+  });
+
   it("should be a group named by its caption and described by the description", () => {
     renderGroup();
     expect(

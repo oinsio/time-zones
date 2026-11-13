@@ -10,13 +10,16 @@ import { ZoneLine } from "@/views/shared";
 import { SettingsToggleGroup } from "./SettingsToggleGroup";
 
 const ZONE_LABEL_PART_LABEL_KEYS = {
+  [ZoneLabelPart.COUNTRY]: "settings.zoneLabelCountry",
   [ZoneLabelPart.UTC_OFFSET]: "settings.zoneLabelUtcOffset",
   [ZoneLabelPart.ZONE_ABBREVIATION]: "settings.zoneLabelAbbreviation",
 } as const;
 
 /**
- * The zone label group: a toggle for the UTC offset and one for the zone
- * abbreviation, with a live example of the zone line under them.
+ * The zone label group: a toggle for the country, one for the zone
+ * abbreviation and one for the UTC offset, with a live example of the zone line
+ * under them; with no part shown the example reads "City only".
+ * Implements FR1, FR2, FR5, UX1 of add-country-to-zone-label (D4).
  * Implements FR1, FR2, FR3, FR4, UX1 of polish-settings-and-remove-offline-update-notice (D5).
  * Implements FR12, FR13, FR14, NFR-A1, NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting (D7).
  */
@@ -37,7 +40,11 @@ export function ZoneLabelGroup() {
       description={
         <>
           <span className="sr-only">{t("settings.zoneLabelExample")} </span>
-          <ZoneLine parts={exampleParts} isTextSeparated />
+          {exampleParts.length === 0 ? (
+            t("settings.zoneLabelExampleCityOnly")
+          ) : (
+            <ZoneLine parts={exampleParts} isTextSeparated />
+          )}
         </>
       }
     />

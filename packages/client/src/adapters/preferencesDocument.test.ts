@@ -13,7 +13,11 @@ import {
   serializePreferencesDocument,
 } from "./preferencesDocument";
 
-const BOTH_PARTS = [ZoneLabelPart.UTC_OFFSET, ZoneLabelPart.ZONE_ABBREVIATION];
+const ALL_PARTS = [
+  ZoneLabelPart.UTC_OFFSET,
+  ZoneLabelPart.ZONE_ABBREVIATION,
+  ZoneLabelPart.COUNTRY,
+];
 
 const versionOneDocument = JSON.stringify({
   schemaVersion: 1,
@@ -28,7 +32,7 @@ describe("deserializePreferencesDocument", () => {
         theme: ThemePreference.DARK,
         hourFormat: HourFormat.H12,
         interfaceLanguage: "ru",
-        zoneLabelParts: BOTH_PARTS,
+        zoneLabelParts: ALL_PARTS,
         viewMode: null,
       },
     });
@@ -100,17 +104,17 @@ describe("serializePreferencesDocument", () => {
           theme: ThemePreference.DARK,
           hourFormat: HourFormat.H12,
           interfaceLanguage: "ru",
-          zoneLabelParts: BOTH_PARTS,
+          zoneLabelParts: ALL_PARTS,
           viewMode: null,
         }),
       ),
     ).toEqual({
-      schemaVersion: 4,
+      schemaVersion: 5,
       payload: {
         theme: "DARK",
         hourFormat: "H12",
         interfaceLanguage: "ru",
-        zoneLabelParts: BOTH_PARTS,
+        zoneLabelParts: ALL_PARTS,
         viewMode: null,
       },
     });

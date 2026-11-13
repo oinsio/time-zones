@@ -1,4 +1,5 @@
 // Verifies FR3, FR4, FR5, FR7, FR16 of add-settings-page-and-device-time-location (D10).
+// Verifies FR1, FR2 of add-country-to-zone-label.
 // Verifies FR12, FR14 of show-zone-abbreviations-and-zone-label-setting (D7).
 // Verifies FR1, FR2, FR3, FR4 of compact-settings-controls.
 // Verifies FR1, FR2 of add-view-mode-setting-and-grid-skeleton (D2): the view group after the hour format.
@@ -131,6 +132,7 @@ describe("SettingsPage", () => {
         zoneLabelParts: [
           ZoneLabelPart.UTC_OFFSET,
           ZoneLabelPart.ZONE_ABBREVIATION,
+          ZoneLabelPart.COUNTRY,
         ],
       },
     });
@@ -164,9 +166,15 @@ describe("SettingsPage", () => {
     ).toBeTruthy();
   });
 
-  it("should show both zone label toggles on and the example by default", () => {
+  it("should show every zone label toggle on and the example by default", () => {
     renderSettingsPage();
     const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
+    expect(
+      within(zoneLabel).getByRole("button", {
+        name: "Country",
+        pressed: true,
+      }),
+    ).toBeInTheDocument();
     expect(
       within(zoneLabel).getByRole("button", {
         name: "UTC offset",
@@ -188,7 +196,7 @@ describe("SettingsPage", () => {
     const toggleNames = within(zoneLabel)
       .getAllByRole("button")
       .map((button) => button.textContent);
-    expect(toggleNames).toEqual(["Abbreviation", "UTC offset"]);
+    expect(toggleNames).toEqual(["Country", "Abbreviation", "UTC offset"]);
   });
 
   it("should change the example in the same render as the Abbreviation toggle", async () => {
@@ -204,7 +212,9 @@ describe("SettingsPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Abbreviation" }));
     writeScheduler.runPending();
     expect(repository.load()).toMatchObject({
-      preferences: { zoneLabelParts: [ZoneLabelPart.UTC_OFFSET] },
+      preferences: {
+        zoneLabelParts: [ZoneLabelPart.UTC_OFFSET, ZoneLabelPart.COUNTRY],
+      },
     });
   });
 

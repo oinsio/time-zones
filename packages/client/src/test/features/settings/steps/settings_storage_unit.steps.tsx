@@ -1,4 +1,5 @@
 // Verifies FR7 of add-settings-page-and-device-time-location.
+// Verifies FR6 of add-country-to-zone-label.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import userEvent from "@testing-library/user-event";
@@ -13,6 +14,7 @@ import { createSettingsWorld } from "./settingsWorld";
 const feature = await loadFeature("../settings_storage_unit.feature");
 const DEFAULT_THEME_OPTION = "System";
 const DEFAULT_HOUR_FORMAT_OPTION = "24-hour";
+const ZONE_LABEL_TOGGLE_NAMES = ["Country", "Abbreviation", "UTC offset"];
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createSettingsWorld();
@@ -36,6 +38,26 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then("the main page was shown with the default preferences", () => {
       world.expectThemeChecked(DEFAULT_THEME_OPTION);
       world.expectHourFormatChecked(DEFAULT_HOUR_FORMAT_OPTION);
+    });
+    And("the settings page shows the note with a Reset action", () => {
+      expectNoteShown("settings.unreadable");
+      expect(world.resetButton()).toBeVisible();
+    });
+  });
+
+  // @add-country-to-zone-label @FR6
+  f.Scenario("The country twice", ({ Given, When, Then, And }) => {
+    Given(
+      "the stored preferences document of the current version holds the country twice in the zone label",
+      world.givenCountryTwiceInZoneLabel,
+    );
+    When("the user opens the app and the settings page", () => {
+      world.openPage();
+    });
+    Then("the main page was shown with all three zone label parts", () => {
+      expect(world.pressedZoneLabelToggleNames()).toEqual(
+        ZONE_LABEL_TOGGLE_NAMES,
+      );
     });
     And("the settings page shows the note with a Reset action", () => {
       expectNoteShown("settings.unreadable");

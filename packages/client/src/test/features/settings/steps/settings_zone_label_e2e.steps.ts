@@ -1,8 +1,8 @@
+// Verifies FR2, NFR-A1, NFR-R1 of add-country-to-zone-label
 import { expect, type Locator } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import {
-  ANY_LANGUAGE_ZONE_LABEL_GROUP_NAME,
   BUTTON_ROLE,
   MIN_TOGGLE_SIZE_PX,
   seedZoneLabelParts,
@@ -16,10 +16,9 @@ const { Given, When, Then } = createBdd(test);
 const ELEMENT_SEPARATOR = ", ";
 const ZONE_LINE_ELEMENTS = "[data-zone-line] > span";
 const PRESSED_ATTRIBUTE = "aria-pressed";
-const TOGGLE_NAMES = ["UTC offset", "Abbreviation"];
+const TOGGLE_NAMES = ["Country", "Abbreviation", "UTC offset"];
 const NO_OUTLINE_STYLE = "none";
 const ROW_TOLERANCE_PX = 1;
-const HALF = 2;
 
 const requireBox = async (locator: Locator) => {
   const box = await locator.boundingBox();
@@ -54,20 +53,25 @@ Given(
 
 // Verifies FR12 of show-zone-abbreviations-and-zone-label-setting: names and pressed state.
 Then(
-  "the group {string} holds the pressed toggle buttons {string} and {string} in this order",
+  "the group {string} holds the pressed toggle buttons {string}, {string} and {string} in this order",
   async (
     { locationsWorld },
     groupName: string,
     first: string,
     second: string,
+    third: string,
   ) => {
     const group = zoneLabelGroupOf(locationsWorld.page, groupName);
-    for (const name of [first, second]) {
+    for (const name of [first, second, third]) {
       await expect(
         group.getByRole(BUTTON_ROLE, { name, exact: true }),
       ).toHaveAttribute(PRESSED_ATTRIBUTE, "true");
     }
-    await expect(group.getByRole(BUTTON_ROLE)).toHaveText([first, second]);
+    await expect(group.getByRole(BUTTON_ROLE)).toHaveText([
+      first,
+      second,
+      third,
+    ]);
   },
 );
 
@@ -176,32 +180,21 @@ Then(
   },
 );
 
-// Verifies NFR-R2 of show-zone-abbreviations-and-zone-label-setting: one row.
+// Verifies NFR-R1 of add-country-to-zone-label: one row.
 Then(
-  "the zone label caption and both toggles share one row",
+  "the three zone label toggles share one row",
   async ({ locationsWorld }) => {
-    const { page } = locationsWorld;
-    const captionBox = await requireBox(
-      zoneLabelGroupOf(page).getByText(ANY_LANGUAGE_ZONE_LABEL_GROUP_NAME),
+    const boxes = await Promise.all(
+      (await togglesOf(locationsWorld.page)).map(requireBox),
     );
-    const captionMiddle = captionBox.y + captionBox.height / HALF;
-    for (const toggle of await togglesOf(page)) {
-      const box = await requireBox(toggle);
-      expect(captionMiddle).toBeGreaterThanOrEqual(box.y);
-      expect(captionMiddle).toBeLessThanOrEqual(box.y + box.height);
+    expect(boxes).toHaveLength(TOGGLE_NAMES.length);
+    for (const box of boxes) {
+      expect(Math.abs(box.y - boxes[0].y)).toBeLessThanOrEqual(
+        ROW_TOLERANCE_PX,
+      );
     }
   },
 );
-
-Then("both zone label toggles share one row", async ({ locationsWorld }) => {
-  const boxes = await Promise.all(
-    (await togglesOf(locationsWorld.page)).map(requireBox),
-  );
-  expect(boxes).toHaveLength(TOGGLE_NAMES.length);
-  expect(Math.abs(boxes[0].y - boxes[1].y)).toBeLessThanOrEqual(
-    ROW_TOLERANCE_PX,
-  );
-});
 
 // Verifies NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting: no layout jump.
 const boxesBeforeToggling = new WeakMap<
@@ -226,7 +219,7 @@ When(
 );
 
 Then(
-  "both zone label toggles keep their position and size",
+  "the three zone label toggles keep their position and size",
   async ({ locationsWorld }) => {
     const boxesAfter = await Promise.all(
       (await togglesOf(locationsWorld.page)).map(requireBox),

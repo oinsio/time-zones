@@ -32,7 +32,7 @@ classDiagram
         ThemePreference theme  "LIGHT | DARK | SYSTEM"
         HourFormat hourFormat  "H12 | H24"
         string? interfaceLanguage "registered locale code; null = follow the browser"
-        ZoneLabelPart[] zoneLabelParts "UTC_OFFSET | ZONE_ABBREVIATION, each optional"
+        ZoneLabelPart[] zoneLabelParts "COUNTRY | ZONE_ABBREVIATION | UTC_OFFSET, each optional"
         string? viewMode       "registered ViewId; null = Cards"
     }
     WorldClockState "1" o-- "*" Location

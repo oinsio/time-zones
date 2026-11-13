@@ -2,16 +2,16 @@ Feature: Zone line on location rows
   Implements change show-zone-abbreviations-and-zone-label-setting.
   As a user I read the country, the zone abbreviation and the UTC offset of each location as separate elements, as the zone label allows.
 
-  @show-zone-abbreviations-and-zone-label-setting @FR5
+  @show-zone-abbreviations-and-zone-label-setting @FR5 @add-country-to-zone-label @FR3
   Scenario: Country, abbreviation and offset
     Given the interface language is "ru"
-    And the zone label shows "the UTC offset and the zone abbreviation"
+    And the zone label shows "the country, the zone abbreviation and the UTC offset"
     And the current instant is "2026-07-15T12:00:00Z"
     And the list contains "Kolkata"
     When the user opens the app
     Then the "Kolkata" zone line elements are "Индия", "IST", "UTC+5:30"
 
-  @show-zone-abbreviations-and-zone-label-setting @FR5 @FR13 @M4
+  @show-zone-abbreviations-and-zone-label-setting @FR5 @FR13 @M4 @add-country-to-zone-label @FR3 @M1
   Scenario Outline: The zone label decides the elements
     Given the interface language is "en"
     And the current instant is "2026-07-15T12:00:00Z"
@@ -21,11 +21,15 @@ Feature: Zone line on location rows
     Then the "Kolkata" zone line elements are "<elements>"
 
     Examples:
-      | parts                                    | elements             |
-      | the UTC offset and the zone abbreviation | India, IST, UTC+5:30 |
-      | the UTC offset only                      | India, UTC+5:30      |
-      | the zone abbreviation only               | India, IST           |
-      | nothing                                  | India                |
+      | parts                                                | elements             |
+      | the country, the zone abbreviation and the UTC offset | India, IST, UTC+5:30 |
+      | the country and the UTC offset                        | India, UTC+5:30      |
+      | the country and the zone abbreviation                 | India, IST           |
+      | the country only                                      | India                |
+      | the zone abbreviation and the UTC offset              | IST, UTC+5:30        |
+      | the UTC offset only                                   | UTC+5:30             |
+      | the zone abbreviation only                            | IST                  |
+      | nothing                                               | no element           |
 
   @show-zone-abbreviations-and-zone-label-setting @FR2 @FR5
   Scenario: The abbreviation follows the reference moment
@@ -64,12 +68,12 @@ Feature: Zone line on location rows
   @show-zone-abbreviations-and-zone-label-setting @FR5
   Scenario: Offset hidden by the zone label
     Given the current instant is "2026-07-15T12:00:00Z"
-    And the zone label shows "the zone abbreviation only"
+    And the zone label shows "the country and the zone abbreviation"
     And the list contains "Moscow"
     When the user opens the app
     Then the "Moscow" zone line elements are "Russia, MSK"
 
-  @show-zone-abbreviations-and-zone-label-setting @FR6
+  @show-zone-abbreviations-and-zone-label-setting @FR6 @add-country-to-zone-label @FR4
   Scenario Outline: Meta line follows the zone label
     Given the device time zone is "Europe/Moscow"
     And the interface language is "ru"
@@ -79,8 +83,10 @@ Feature: Zone line on location rows
     Then the meta line is "<meta line>"
 
     Examples:
-      | parts                                    | meta line                       |
-      | the UTC offset and the zone abbreviation | Время устройства, МСК, UTC+3    |
-      | the UTC offset only                      | Время устройства, UTC+3         |
-      | the zone abbreviation only               | Время устройства, МСК           |
-      | nothing                                  | Время устройства                |
+      | parts                                                 | meta line                    |
+      | the country, the zone abbreviation and the UTC offset | Время устройства, МСК, UTC+3 |
+      | the zone abbreviation and the UTC offset              | Время устройства, МСК, UTC+3 |
+      | the country and the UTC offset                        | Время устройства, UTC+3      |
+      | the country and the zone abbreviation                 | Время устройства, МСК        |
+      | the country only                                      | Время устройства             |
+      | nothing                                               | Время устройства             |

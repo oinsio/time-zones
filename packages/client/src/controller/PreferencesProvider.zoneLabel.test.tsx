@@ -32,12 +32,15 @@ describe("PreferencesProvider zone label", () => {
     );
     expect(result.current.preferences.zoneLabelParts).toEqual([
       ZoneLabelPart.UTC_OFFSET,
+      ZoneLabelPart.COUNTRY,
     ]);
     expect(saveSpy).not.toHaveBeenCalled();
     act(() => writeScheduler.runPending());
     expect(saveSpy).toHaveBeenCalledTimes(1);
     expect(repository.load()).toMatchObject({
-      preferences: { zoneLabelParts: [ZoneLabelPart.UTC_OFFSET] },
+      preferences: {
+        zoneLabelParts: [ZoneLabelPart.UTC_OFFSET, ZoneLabelPart.COUNTRY],
+      },
     });
   });
 

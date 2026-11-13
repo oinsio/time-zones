@@ -1,4 +1,5 @@
 // Verifies FR2, FR5, FR6, FR13, UX1, UX2, M4 of show-zone-abbreviations-and-zone-label-setting.
+// Verifies FR3, FR4, UX2, M1 of add-country-to-zone-label.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen } from "@testing-library/react/pure";
@@ -18,6 +19,7 @@ vi.mock(
 const feature = await loadFeature("../locations_zone_line_unit.feature");
 const ELEMENT_SEPARATOR = ", ";
 const ABBREVIATION_TOGGLE = "Abbreviation";
+const NO_ELEMENT_TEXT = "no element";
 
 type PartsName = keyof typeof ZONE_LABEL_PART_NAMES;
 
@@ -47,7 +49,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     world.setDeviceZone(zone);
   const openApp = () => world.open();
   const thenElements = (_ctx: unknown, city: string, elements: string) =>
-    expect(world.zoneLineOf(city)).toEqual(elements.split(ELEMENT_SEPARATOR));
+    expect(world.zoneLineOf(city)).toEqual(
+      elements === NO_ELEMENT_TEXT ? [] : elements.split(ELEMENT_SEPARATOR),
+    );
   const thenShows = (
     _ctx: unknown,
     first: string,
@@ -59,7 +63,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     expect(world.zoneLineOf(second)).toContain(secondText);
   };
 
-  // @show-zone-abbreviations-and-zone-label-setting @FR5
+  // @show-zone-abbreviations-and-zone-label-setting @FR5 @add-country-to-zone-label @FR3
   f.Scenario(
     "Country, abbreviation and offset",
     ({ Given, And, When, Then }) => {
