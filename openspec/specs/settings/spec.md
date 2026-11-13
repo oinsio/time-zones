@@ -149,7 +149,7 @@ In both hour formats, a wall-time input SHALL accept, in addition to the 24-hour
 | 24-hour | English |
 
 ### Requirement: Preferences are kept on the device
-The theme preference, the hour format, the zone label, the interface language and the view mode SHALL be saved on the device as one versioned document and restored when the app is opened again, also offline. A stored Light or Dark choice, a stored interface language and a stored view mode MUST be in force when the main page is first shown. Nothing MUST be written for the preferences until the user changes a setting. A chosen setting MUST apply at once; its write MUST be debounced and MUST NOT block the interface, and a pending write MUST be flushed when the page is hidden. The preferences MUST NOT be part of the locations document, and a change of the preferences MUST NOT write the locations document. Without a chosen interface language the document records none, and the browser-driven language applies (see the `app-shell` capability). Without a chosen view the document records none, and Cards is shown. A document written by an earlier version of the app MUST be migrated step by step: a document without an interface language gets the one from the legacy `language` key when that key exists, otherwise none is chosen; a document without a zone label gets the zone label with both the UTC offset and the zone abbreviation shown; a document without a view mode gets no chosen view; every other stored choice is kept. When no preferences document exists but the legacy key does, its value MUST be the chosen interface language, without a write. The next write or Reset MUST remove the legacy key, and the app MUST NOT write the legacy key again. Inputs: the stored document, the legacy key. Output: the preferences in force. <!-- implements FR4, FR7 of add-settings-page-and-device-time-location; implements FR7, FR8 of add-interface-language-selection; FR15 of show-zone-abbreviations-and-zone-label-setting; FR3, FR4 of add-view-mode-setting-and-grid-skeleton -->
+The theme preference, the hour format, the zone label, the interface language and the view mode SHALL be saved on the device as one versioned document and restored when the app is opened again, also offline. A stored Light or Dark choice, a stored interface language and a stored view mode MUST be in force when the main page is first shown. Nothing MUST be written for the preferences until the user changes a setting. A chosen setting MUST apply at once; its write MUST be debounced and MUST NOT block the interface, and a pending write MUST be flushed when the page is hidden. The preferences MUST NOT be part of the locations document, and a change of the preferences MUST NOT write the locations document. Without a chosen interface language the document records none, and the browser-driven language applies (see the `app-shell` capability). Without a chosen view the document records none, and Cards is shown. A document written by an earlier version of the app MUST be migrated step by step: a document without an interface language gets the one from the legacy `language` key when that key exists, otherwise none is chosen; a document without a zone label gets the zone label with the country, the zone abbreviation and the UTC offset shown; a document without a view mode gets no chosen view; a document written before the zone label had the country gets the country shown and keeps its zone abbreviation and UTC offset choices; every other stored choice is kept. When no preferences document exists but the legacy key does, its value MUST be the chosen interface language, without a write. The next write or Reset MUST remove the legacy key, and the app MUST NOT write the legacy key again. Inputs: the stored document, the legacy key. Output: the preferences in force. <!-- implements FR4, FR7 of add-settings-page-and-device-time-location; implements FR7, FR8 of add-interface-language-selection; FR15 of show-zone-abbreviations-and-zone-label-setting; FR3, FR4 of add-view-mode-setting-and-grid-skeleton; FR6 of add-country-to-zone-label -->
 
 #### Scenario: Choices survive a reload
 - **GIVEN** the user chose the theme Dark and the hour format 12-hour
@@ -190,20 +190,40 @@ The theme preference, the hour format, the zone label, the interface language an
 #### Scenario: The zone label survives a reload
 - **GIVEN** the user turned the zone abbreviation off
 - **WHEN** the app is opened again
-- **THEN** the "Abbreviation" toggle is off and the "UTC offset" toggle is on
+- **THEN** the "Abbreviation" toggle is off and the "Country" and "UTC offset" toggles are on
 - **AND** no location row shows a zone abbreviation from the first render
+
+#### Scenario: The country choice survives a reload
+- **GIVEN** the list contains Moscow
+- **AND** the user turned the country off
+- **WHEN** the app is opened again
+- **THEN** the "Country" toggle is off
+- **AND** the Moscow row shows no country name from the first render
 
 #### Scenario: Existing users get both parts
 - **GIVEN** the stored preferences document was written before the zone label existed, with the theme Dark, the hour format 12-hour and the language `ru`
 - **WHEN** the app is opened
-- **THEN** both zone label toggles are on
+- **THEN** all three zone label toggles are on
 - **AND** the theme Dark, the hour format 12-hour and the language «Русский» are in force
+- **AND** the stored document is not rewritten until the user changes a setting
+
+#### Scenario: Existing users keep the country
+- **GIVEN** the stored preferences document was written before the zone label had the country, with the theme Dark, the hour format 12-hour, the language `ru`, the view "Grid" and only the UTC offset in the zone label
+- **WHEN** the app is opened
+- **THEN** the "Country" and "UTC offset" toggles are on and the "Abbreviation" toggle is off
+- **AND** the theme Dark, the hour format 12-hour, the language «Русский» and the view "Grid" are in force
 - **AND** the stored document is not rewritten until the user changes a setting
 
 #### Scenario: Another tab changes the zone label
 - **GIVEN** the app is open in two tabs
 - **WHEN** the user turns the UTC offset off in the first tab
 - **THEN** the second tab shows no UTC offset on its location rows without a reload
+
+#### Scenario: Another tab changes the country
+- **GIVEN** the list contains Moscow
+- **AND** the app is open in two tabs
+- **WHEN** the user turns the country off in the first tab
+- **THEN** the second tab shows no country name on its Moscow row without a reload
 
 #### Scenario: The view survives a reload
 - **GIVEN** the user chose the view "Grid"
@@ -215,7 +235,7 @@ The theme preference, the hour format, the zone label, the interface language an
 - **GIVEN** the stored preferences document was written before the view mode existed, with the theme Dark, the hour format 12-hour, the language `ru` and only the UTC offset in the zone label
 - **WHEN** the app is opened
 - **THEN** the main page shows the Cards view and the view group checks «Карточки»
-- **AND** the theme Dark, the hour format 12-hour, the language «Русский» and the zone label with only the UTC offset are in force
+- **AND** the theme Dark, the hour format 12-hour, the language «Русский» and the zone label with the country and the UTC offset are in force
 - **AND** the stored document is not rewritten until the user changes a setting
 
 #### Scenario: Another tab changes the view
@@ -224,7 +244,7 @@ The theme preference, the hour format, the zone label, the interface language an
 - **THEN** the second tab shows the Grid view without a reload
 
 ### Requirement: Unreadable stored preferences
-When the stored preferences document is not valid JSON, does not match the expected document, holds an unknown option (an unknown zone label part or the same part twice included, a view mode that is neither a non-empty text nor "none chosen"), or was written by a newer version of the app, the app SHALL start with the default preferences (System, 24-hour, the zone label with both the UTC offset and the zone abbreviation shown, no chosen interface language, so the browser-driven language applies, and no chosen view, so Cards is shown) and MUST NOT show a blank page or block the main page. A stored view mode that names no registered view MUST NOT make the document unreadable. The settings page MUST then show a note that the settings could not be read, with a Reset action. Reset MUST clear the stored preferences document and the legacy `language` key and remove the note. Reset MUST also bring back the browser-driven interface language at once. The app MUST NOT overwrite the unreadable document by itself; a change of a setting, the interface language included, replaces it. <!-- implements FR7 of add-settings-page-and-device-time-location; implements FR12 of add-interface-language-selection; FR15 of show-zone-abbreviations-and-zone-label-setting; FR3, FR4 of add-view-mode-setting-and-grid-skeleton -->
+When the stored preferences document is not valid JSON, does not match the expected document, holds an unknown option (an unknown zone label part or the same part twice included, a view mode that is neither a non-empty text nor "none chosen"), or was written by a newer version of the app, the app SHALL start with the default preferences (System, 24-hour, the zone label with the country, the zone abbreviation and the UTC offset shown, no chosen interface language, so the browser-driven language applies, and no chosen view, so Cards is shown) and MUST NOT show a blank page or block the main page. A stored view mode that names no registered view MUST NOT make the document unreadable. The settings page MUST then show a note that the settings could not be read, with a Reset action. Reset MUST clear the stored preferences document and the legacy `language` key and remove the note. Reset MUST also bring back the browser-driven interface language at once. The app MUST NOT overwrite the unreadable document by itself; a change of a setting, the interface language included, replaces it. <!-- implements FR7 of add-settings-page-and-device-time-location; implements FR12 of add-interface-language-selection; FR15 of show-zone-abbreviations-and-zone-label-setting; FR3, FR4 of add-view-mode-setting-and-grid-skeleton; FR6 of add-country-to-zone-label -->
 
 #### Scenario: Corrupted preferences
 - **GIVEN** the stored preferences document is not valid JSON
@@ -249,6 +269,12 @@ When the stored preferences document is not valid JSON, does not match the expec
 - **GIVEN** the stored preferences document of the current version holds the view mode `42` as a number
 - **WHEN** the user opens the app and the settings page
 - **THEN** the main page was shown with the Cards view
+- **AND** the settings page shows the note with a Reset action
+
+#### Scenario: The country twice
+- **GIVEN** the stored preferences document of the current version holds the country twice in the zone label
+- **WHEN** the user opens the app and the settings page
+- **THEN** the main page was shown with all three zone label parts
 - **AND** the settings page shows the note with a Reset action
 
 ### Requirement: Preferences without storage
@@ -280,19 +306,19 @@ A change of the preferences, the interface language included, in one tab SHALL b
 - **THEN** the second tab is in Russian without a reload
 
 ### Requirement: Settings strings are localized
-Every string of the settings button, the settings page, its options, its notes, its Reset action, its Gnomish Factory credit, its language group, its view group and its deploy time SHALL exist in every locale file, and Russian MUST use the glossary names: «Настройки», «Тема», «Светлая», «Тёмная», «Системная», «Формат времени», «12 часов», «24 часа», «Вид», «Карточки», «Сетка», «Обозначение часового пояса», «Аббревиатура», «Смещение UTC», «Развёрнуто», «Создано с помощью Gnomish Factory». The name of the Gnomish Factory is a brand name: in the credit of every interface language, English, Russian and any language added later, it MUST read exactly `Gnomish Factory`, in Latin letters, and MUST NOT be translated or transliterated into the interface language. The language button's accessible name is "Language: <native name>" («Язык: <native name>»), the search field label "Search languages" («Поиск языка») and the empty search text "No languages found" («Языки не найдены»). Language names in the list are never translated. <!-- implements FR16 of add-settings-page-and-device-time-location; implements FR2 of add-gnomish-factory-credit; implements FR1, FR2 of keep-gnomish-factory-name-untranslated-in-credit; implements FR13, UX1 of add-interface-language-selection; FR12 of show-zone-abbreviations-and-zone-label-setting; FR1, FR2, FR3, FR5 of polish-settings-and-remove-offline-update-notice; FR1 of add-view-mode-setting-and-grid-skeleton -->
+Every string of the settings button, the settings page, its options, its notes, its Reset action, its Gnomish Factory credit, its language group, its view group and its deploy time SHALL exist in every locale file, and Russian MUST use the glossary names: «Настройки», «Тема», «Светлая», «Тёмная», «Системная», «Формат времени», «12 часов», «24 часа», «Вид», «Карточки», «Сетка», «Обозначение часового пояса», «Страна», «Аббревиатура», «Смещение UTC», «Только город», «Развёрнуто», «Создано с помощью Gnomish Factory». The name of the Gnomish Factory is a brand name: in the credit of every interface language, English, Russian and any language added later, it MUST read exactly `Gnomish Factory`, in Latin letters, and MUST NOT be translated or transliterated into the interface language. The language button's accessible name is "Language: <native name>" («Язык: <native name>»), the search field label "Search languages" («Поиск языка») and the empty search text "No languages found" («Языки не найдены»). Language names in the list are never translated. <!-- implements FR16 of add-settings-page-and-device-time-location; implements FR2 of add-gnomish-factory-credit; implements FR1, FR2 of keep-gnomish-factory-name-untranslated-in-credit; implements FR13, UX1 of add-interface-language-selection; FR12 of show-zone-abbreviations-and-zone-label-setting; FR1, FR2, FR3, FR5 of polish-settings-and-remove-offline-update-notice; FR1 of add-view-mode-setting-and-grid-skeleton; FR1, FR5, UX1 of add-country-to-zone-label -->
 
 #### Scenario: Both languages
 - **WHEN** the settings page is shown in `<language>`
 - **THEN** the heading is `<heading>` and the groups are `<theme>`, `<hour format>`, `<view>`, `<zone label>` and `<language group>`
-- **AND** the zone label toggles are `<abbreviation>` and `<utc offset>`, in this order
+- **AND** the zone label toggles are `<country>`, `<abbreviation>` and `<utc offset>`, in this order
 - **AND** the view options are `<cards>` and `<grid>`, in this order
 - **AND** the credit is `<credit>`
 
-| language | heading | theme | hour format | view | cards | grid | zone label | abbreviation | utc offset | language group | credit |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| English | Settings | Theme | Hour format | View | Cards | Grid | Timezone label | Abbreviation | UTC offset | Language | Built with Gnomish Factory |
-| Russian | Настройки | Тема | Формат времени | Вид | Карточки | Сетка | Обозначение часового пояса | Аббревиатура | Смещение UTC | Язык | Создано с помощью Gnomish Factory |
+| language | heading | theme | hour format | view | cards | grid | zone label | country | abbreviation | utc offset | language group | credit |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| English | Settings | Theme | Hour format | View | Cards | Grid | Timezone label | Country | Abbreviation | UTC offset | Language | Built with Gnomish Factory |
+| Russian | Настройки | Тема | Формат времени | Вид | Карточки | Сетка | Обозначение часового пояса | Страна | Аббревиатура | Смещение UTC | Язык | Создано с помощью Gnomish Factory |
 
 #### Scenario: The factory name is never translated
 - **GIVEN** the app supports the interface languages English and Russian, and any language added later
@@ -623,13 +649,13 @@ The language group SHALL use only the app's design tokens: the button and the ro
 | dark | expanded |
 
 ### Requirement: Zone label
-The settings page SHALL have a "Timezone label" («Обозначение часового пояса») group, between the hour format group and the language group, that decides which zone parts the zone line of every location row shows: "Abbreviation" («Аббревиатура») and "UTC offset" («Смещение UTC»). The toggles MUST come in the order of the zone line: "Abbreviation" first, then "UTC offset", in every interface language. The two are independent toggles: any of the four combinations is allowed, both off included, and both are on by default. A toggle MUST apply at once, in the same render, to every location row, the device time location's meta line and the wall-time hint (see the `locations` and `time-selection` capabilities), and MUST NOT change the search. Under the toggles a live example MUST show the zone line of Moscow (country Russia, `Europe/Moscow`) at the effective instant, in the interface language, with the elements the toggles allow, and MUST change with every toggle. Inputs: the toggles. Output: the zone label in force. Errors: a failed save follows "Preferences without storage". <!-- implements FR12, FR13, FR14, FR15, UX2 of show-zone-abbreviations-and-zone-label-setting; FR1, FR2, FR3, FR4, UX1 of polish-settings-and-remove-offline-update-notice -->
+The settings page SHALL have a "Timezone label" («Обозначение часового пояса») group, between the hour format group and the language group, that decides which zone parts the zone line of every location row shows: "Country" («Страна»), "Abbreviation" («Аббревиатура») and "UTC offset" («Смещение UTC»). The toggles MUST come in the order of the zone line: "Country" first, then "Abbreviation", then "UTC offset", in every interface language. The three are independent toggles: any of the eight combinations is allowed, all off included, and all three are on by default. A toggle MUST apply at once, in the same render, to every location row, the device time location's meta line and the wall-time hint (see the `locations` and `time-selection` capabilities), and MUST NOT change the search. Under the toggles a live example MUST show the zone line of Moscow (country Russia, `Europe/Moscow`) at the effective instant, in the interface language, with the elements the toggles allow, and MUST change with every toggle; while no element of the example is shown, it MUST read "City only" («Только город»). Inputs: the toggles. Output: the zone label in force. Errors: a failed save follows "Preferences without storage". <!-- implements FR12, FR13, FR14, FR15, UX2 of show-zone-abbreviations-and-zone-label-setting; FR1, FR2, FR3, FR4, UX1 of polish-settings-and-remove-offline-update-notice; FR1, FR2, FR5, FR6, UX1 of add-country-to-zone-label -->
 
 #### Scenario: Both parts by default
 - **GIVEN** no preferences document is stored
 - **AND** the interface language is English
 - **WHEN** the settings page is shown
-- **THEN** the "Abbreviation" and "UTC offset" toggles are both on, in this order
+- **THEN** the "Country", "Abbreviation" and "UTC offset" toggles are all on, in this order
 - **AND** the example shows `Russia`, `MSK`, `UTC+3`
 
 #### Scenario: The example follows the toggles
@@ -639,23 +665,33 @@ The settings page SHALL have a "Timezone label" («Обозначение час
 
 | language | parts | example |
 |---|---|---|
-| English | the UTC offset and the zone abbreviation | Russia, MSK, UTC+3 |
-| English | the UTC offset only | Russia, UTC+3 |
-| English | the zone abbreviation only | Russia, MSK |
-| English | nothing | Russia |
-| Russian | the UTC offset and the zone abbreviation | Россия, МСК, UTC+3 |
+| English | the country, the zone abbreviation and the UTC offset | Russia, MSK, UTC+3 |
+| English | the country and the UTC offset | Russia, UTC+3 |
+| English | the country and the zone abbreviation | Russia, MSK |
+| English | the country only | Russia |
+| English | the zone abbreviation and the UTC offset | MSK, UTC+3 |
+| English | the UTC offset only | UTC+3 |
+| English | the zone abbreviation only | MSK |
+| English | nothing | City only |
+| Russian | the country, the zone abbreviation and the UTC offset | Россия, МСК, UTC+3 |
+| Russian | nothing | Только город |
 
 #### Scenario: Both off leaves the country
 - **GIVEN** the list contains Moscow
-- **WHEN** the user turns both toggles off and goes back
+- **WHEN** the user turns the "Abbreviation" and "UTC offset" toggles off and goes back
 - **THEN** the Moscow row's zone line is `Russia` alone
 
+#### Scenario: All off leaves the city alone
+- **GIVEN** the list contains Moscow
+- **WHEN** the user turns all three toggles off and goes back
+- **THEN** the Moscow row shows its city and no zone line
+
 #### Scenario: A toggle writes the preferences once
-- **WHEN** the user turns the zone abbreviation off
-- **THEN** the stored preferences document holds the zone label with the UTC offset only, after the debounce
+- **WHEN** the user turns the country off
+- **THEN** the stored preferences document holds the zone label with the zone abbreviation and the UTC offset, after the debounce
 
 ### Requirement: Toggle group
-The zone label group SHALL be built from one reusable toggle group: a caption and any number of options, each an independent toggle that is on or off, shown in one row after the caption. The group MUST take the options and the set of options that are on, and report each toggle the user makes, so a later setting can use it with other options without a new component. The toggle group and the option group MUST share one row layout. The toggle group's options stay separate toggle buttons, so they read as independent switches. <!-- implements FR16 of show-zone-abbreviations-and-zone-label-setting; FR6, UX3 of compact-settings-controls -->
+The zone label group SHALL be built from one reusable toggle group: a caption and any number of options, each an independent toggle that is on or off, shown after the caption in one row while they fit and wrapping onto further rows only when they do not. The group MUST take the options and the set of options that are on, and report each toggle the user makes, so a later setting can use it with other options without a new component. The toggle group and the option group MUST share one row layout. The toggle group's options stay separate toggle buttons, so they read as independent switches. <!-- implements FR16 of show-zone-abbreviations-and-zone-label-setting; FR6, UX3 of compact-settings-controls; NFR-R1 of add-country-to-zone-label -->
 
 #### Scenario: A group with three options
 - **GIVEN** a toggle group with the caption "Sample" and the options A, B and C, of which B is on
@@ -664,31 +700,35 @@ The zone label group SHALL be built from one reusable toggle group: a caption an
 - **AND** B stays on and C stays off
 
 ### Requirement: Accessible zone label
-The zone label group SHALL be a group named by its caption ("Timezone label", «Обозначение часового пояса»). Each toggle MUST be a button named by its label that exposes its pressed state, MUST be its own Tab stop, and MUST toggle with Space and with Enter. The Tab order of the toggles MUST be their visual order: "Abbreviation", then "UTC offset". Each toggle MUST be at least 44 × 44 px, show its pressed state by a check icon as well as by colour, and keep a visible focus outline. The live example MUST be the group's accessible description. axe-core MUST report no violations on the settings page in the light and the dark theme. <!-- implements NFR-A1 of show-zone-abbreviations-and-zone-label-setting; NFR-A2 of polish-settings-and-remove-offline-update-notice -->
+The zone label group SHALL be a group named by its caption ("Timezone label", «Обозначение часового пояса»). Each toggle MUST be a button named by its label that exposes its pressed state, MUST be its own Tab stop, and MUST toggle with Space and with Enter. The Tab order of the toggles MUST be their visual order: "Country", then "Abbreviation", then "UTC offset". Each toggle MUST be at least 44 × 44 px, show its pressed state by a check icon as well as by colour, and keep a visible focus outline. The live example, "City only" included, MUST be the group's accessible description. axe-core MUST report no violations on the settings page in the light and the dark theme. <!-- implements NFR-A1 of show-zone-abbreviations-and-zone-label-setting; NFR-A2 of polish-settings-and-remove-offline-update-notice; FR2, NFR-A1 of add-country-to-zone-label -->
 
 #### Scenario: Names and pressed state
 - **GIVEN** the interface language is Russian
 - **WHEN** the settings page is shown
-- **THEN** a group named «Обозначение часового пояса» holds the pressed toggle buttons «Аббревиатура» and «Смещение UTC», in this order
+- **THEN** a group named «Обозначение часового пояса» holds the pressed toggle buttons «Страна», «Аббревиатура» and «Смещение UTC», in this order
 - **AND** its description contains «Россия»
 
 #### Scenario: Toggle with the keyboard
-- **GIVEN** the settings page is shown with both toggles on
-- **WHEN** the user tabs to "Abbreviation" and presses Space
-- **THEN** "Abbreviation" is not pressed and the example shows `Russia`, `UTC+3`
+- **GIVEN** the settings page is shown in English with all toggles on
+- **WHEN** the user tabs to "Country" and presses Space
+- **THEN** "Country" is not pressed and the example shows `MSK`, `UTC+3`
 - **WHEN** the user presses Enter
-- **THEN** "Abbreviation" is pressed again
+- **THEN** "Country" is pressed again
 
 #### Scenario: Tab order follows the zone line
 - **GIVEN** the settings page is shown in English
-- **WHEN** the user tabs from "Abbreviation" once
-- **THEN** "UTC offset" has the focus
+- **WHEN** the user tabs from "Country" once and then once more
+- **THEN** "Abbreviation" and then "UTC offset" has the focus
 
 #### Scenario: Toggle size, focus and pressed icon
-- **WHEN** the settings page is shown with the "UTC offset" toggle on and the "Abbreviation" toggle off
+- **WHEN** the settings page is shown with the "UTC offset" toggle on and the "Country" and "Abbreviation" toggles off
 - **THEN** each toggle is at least 44 × 44 px
 - **AND** the focused toggle shows a focus outline
 - **AND** only the "UTC offset" toggle shows the check icon
+
+#### Scenario: City only is the description
+- **GIVEN** the settings page is shown in English with all toggles off
+- **THEN** the description of the group contains "City only"
 
 #### Scenario: No violations with the zone label group
 - **WHEN** axe-core checks the settings page in the `<theme>` theme with `<parts>`
@@ -696,16 +736,18 @@ The zone label group SHALL be a group named by its caption ("Timezone label", «
 
 | theme | parts |
 |---|---|
-| light | both toggles on |
-| dark | both toggles off |
+| light | all toggles on |
+| light | all toggles off |
+| dark | all toggles on |
+| dark | all toggles off |
 
 ### Requirement: Zone label layout
-The zone label group SHALL take one row of the settings page: its caption and both toggles side by side from 640 px. Below 640 px the toggles MAY move under the caption, but they MUST stay in one row together. The example MUST be under the toggles. Turning a toggle on or off MUST NOT move or resize either toggle. The settings page MUST NOT scroll horizontally at 320 px and 2560 px in English and Russian. <!-- implements NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting -->
+The zone label group SHALL keep its three toggles in one row from 640 px; the caption shares that row where it fits and otherwise sits above it. Below 640 px the toggles MAY wrap onto further rows, but no toggle MUST shrink below 44 × 44 px. The example MUST be under the toggles. Turning a toggle on or off MUST NOT move or resize any toggle. The settings page MUST NOT scroll horizontally at 320 px, 375 px and 2560 px in English and Russian. <!-- implements NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting; NFR-R1 of add-country-to-zone-label -->
 
 #### Scenario: Toggling does not move the toggles
-- **GIVEN** the settings page is shown `<width>` px wide with both toggles on
-- **WHEN** the user turns "Abbreviation" off
-- **THEN** both toggles keep their position and size
+- **GIVEN** the settings page is shown `<width>` px wide with all toggles on
+- **WHEN** the user turns "Country" off
+- **THEN** all three toggles keep their position and size
 
 | width |
 |---|
@@ -714,7 +756,7 @@ The zone label group SHALL take one row of the settings page: its caption and bo
 
 #### Scenario: One row on wide screens
 - **WHEN** the settings page is shown `<width>` px wide in `<language>`
-- **THEN** the caption and both toggles share one row
+- **THEN** the three toggles share one row
 
 | width | language |
 |---|---|
@@ -722,15 +764,23 @@ The zone label group SHALL take one row of the settings page: its caption and bo
 | 1024 | English |
 
 #### Scenario: Narrow screens
-- **WHEN** the settings page is shown `<width>` px wide in Russian
-- **THEN** both toggles share one row
+- **WHEN** the settings page is shown `<width>` px wide in `<language>`
+- **THEN** every toggle is at least 44 × 44 px
 - **AND** the page does not scroll horizontally
 
-| width |
-|---|
-| 320 |
-| 375 |
-| 2560 |
+| width | language |
+|---|---|
+| 320 | Russian |
+| 320 | English |
+| 375 | Russian |
+| 375 | English |
+| 2560 | Russian |
+| 2560 | English |
+
+#### Scenario: Re-approved settings screenshots
+- **GIVEN** an approved screenshot state of the settings page
+- **WHEN** it is rendered at its approved width and theme
+- **THEN** it matches the screenshot re-approved for this change with the "Country" toggle
 
 ### Requirement: Deploy time
 The settings page SHALL show the deploy time directly after the language group, also while the language list is expanded; only the zone rules release line follows it. The deploy time is the instant at which the running build of the app was made; it MUST be fixed into the build, MUST be the same online and offline and after a reload, and MUST change only with a new build. The line MUST read "Deployed `<date>` at `<time>`" («Развёрнуто `<date>` в `<time>`»): the date with the day, the month name and the year, and the time in the hour format, both in the interface language and in the device time zone. It MUST follow a change of the interface language and of the hour format at once, without a reload. The line MUST be plain text: not a link, not a Tab stop and not a live region. Its colour MUST be the accent colour of the settings page icons (the back button's chevron) in the light and the dark theme, and axe-core MUST report no violations on the settings page in both themes. The line MUST fit one line from 375 px; at 320 px it MAY wrap between words but MUST NOT make the page scroll horizontally. Inputs: the build instant, the interface language, the hour format, the device time zone. Output: the deploy time line. Errors: none; the build instant is always present. <!-- implements FR5, FR6, NFR-A1, NFR-R1, UX2 of polish-settings-and-remove-offline-update-notice; FR8 of add-remote-zone-rules-updates -->
