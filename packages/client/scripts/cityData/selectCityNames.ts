@@ -8,7 +8,10 @@ import { NAME_LANGUAGE_ENGLISH, NAME_LANGUAGE_RUSSIAN } from "./constants.ts";
 export type NameOverrides = Record<number, Partial<CityNames>>;
 
 /** Hand fixes for names GeoNames gets wrong, keyed by GeoNames ID; each entry says why. */
-export const NAME_OVERRIDES: NameOverrides = {};
+export const NAME_OVERRIDES: NameOverrides = {
+  // GeoNames' main name is the transliteration "Kazan’" with a trailing apostrophe; the common English name is Kazan
+  551487: { en: "Kazan" },
+};
 
 function ofLanguage(alternates: AlternateNameRow[], language: string) {
   return alternates.filter((alternate) => alternate.language === language);
