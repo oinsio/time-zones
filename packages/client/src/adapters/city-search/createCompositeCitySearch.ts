@@ -9,7 +9,7 @@ import {
 import { createAbbreviationSource } from "./abbreviationSource";
 import type { ZoneCityData } from "./citySource";
 import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
-import { normalizeSearchText } from "./normalizeSearchText";
+import { normalizeSearchText } from "@/lib/searchText";
 import { createZoneCitiesSource } from "./zoneCitiesSource";
 
 /** Match kinds, best first. */

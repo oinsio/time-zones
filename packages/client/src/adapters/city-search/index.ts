@@ -5,4 +5,4 @@ export {
   createFetchCitySearchLoader,
   parseZoneCityRecords,
 } from "./fetchCitySearch";
-export { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
+export { normalizeSearchText, splitIntoWords } from "@/lib/searchText";

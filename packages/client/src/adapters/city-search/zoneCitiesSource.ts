@@ -14,7 +14,7 @@ import {
 } from "@/ports";
 import type { CitySource, ZoneCityData } from "./citySource";
 import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
-import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
+import { normalizeSearchText, splitIntoWords } from "@/lib/searchText";
 
 /** Zones the search may offer, or `undefined` when no zone list is known. */
 export type ListTimeZones = () => readonly string[] | undefined;
