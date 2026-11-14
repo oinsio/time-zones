@@ -44,6 +44,8 @@ export type CompileRun = {
   writes: Map<string, string>;
   log: string[];
   commands: string[];
+  /** The temporary directory the run extracted into. */
+  workDirectory: string;
 };
 
 export async function runCompile(options: {
@@ -54,6 +56,7 @@ export async function runCompile(options: {
   const writes = new Map<string, string>();
   const log: string[] = [];
   const commands: string[] = [];
+  let workDirectory = "";
   const exitCode = await runCityDataCompile({
     fetchDump: async (url) => {
       if (options.failDownloadOf && url.endsWith(options.failDownloadOf)) {
@@ -65,6 +68,7 @@ export async function runCompile(options: {
     },
     runProcess: async (command, args) => {
       commands.push(command);
+      workDirectory = args[args.length - 1];
       if (options.unzipExitCode) {
         return {
           exitCode: options.unzipExitCode,
@@ -73,6 +77,7 @@ export async function runCompile(options: {
         };
       }
       const directory = args[args.length - 1];
+      workDirectory = directory;
       await writeFile(
         join(directory, "cities15000.txt"),
         options.cityLines.join("\n"),
@@ -86,5 +91,5 @@ export async function runCompile(options: {
     },
     log: (line) => log.push(line),
   });
-  return { exitCode, writes, log, commands };
+  return { exitCode, writes, log, commands, workDirectory };
 }

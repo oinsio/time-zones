@@ -74,7 +74,13 @@ describe("downloadDumps", () => {
       "https://download.geonames.org/export/dump/admin1CodesASCII.txt",
     ]);
     expect(commands.map(([command]) => command)).toEqual(["unzip", "unzip"]);
-    expect(commands[0]).toContain(join(directory, "cities15000.zip"));
+    expect(commands[0]).toEqual([
+      "unzip",
+      "-o",
+      join(directory, "cities15000.zip"),
+      "-d",
+      directory,
+    ]);
     expect(paths.citiesPath).toBe(join(directory, "cities15000.txt"));
     expect(paths.alternateNamesPath).toBe(
       join(directory, "alternateNamesV2.txt"),

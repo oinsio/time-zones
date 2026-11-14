@@ -93,3 +93,54 @@ describe("parseAdmin1Row", () => {
     expect(() => parseAdmin1Row("US.IL", 2)).toThrow(/line 2/);
   });
 });
+
+describe("parse errors name the field", () => {
+  it.each([
+    [
+      "the city ID",
+      () => parseCityRow(CITY_LINE.replace("551487", "abc"), 7),
+      'line 7: ID "abc"',
+    ],
+    [
+      "the city population",
+      () => parseCityRow(CITY_LINE.replace("1243500", "many"), 7),
+      'line 7: population "many"',
+    ],
+    [
+      "an empty city population",
+      () => parseCityRow(CITY_LINE.replace("1243500", ""), 7),
+      'line 7: population ""',
+    ],
+    [
+      "the alternate name ID",
+      () =>
+        parseAlternateNameRow(
+          ["1", "x", "ru", "Х", "", "", "", "", "", ""].join("\t"),
+          4,
+        ),
+      'line 4: ID "x"',
+    ],
+    [
+      "an empty alternate name ID",
+      () =>
+        parseAlternateNameRow(
+          ["1", "", "ru", "Х", "", "", "", "", "", ""].join("\t"),
+          4,
+        ),
+      'line 4: ID ""',
+    ],
+    [
+      "the admin1 ID",
+      () => parseAdmin1Row("US.IL\tIllinois\tIllinois\tx", 2),
+      'line 2: ID "x"',
+    ],
+  ])("should name %s", (_, parse, message) => {
+    expect(parse).toThrow(message);
+  });
+
+  it("should not take a fractional number for an integer", () => {
+    expect(() => parseCityRow(CITY_LINE.replace("1243500", "1.5"), 1)).toThrow(
+      "is not an integer",
+    );
+  });
+});

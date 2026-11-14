@@ -1,4 +1,5 @@
 // Verifies FR1, FR11, FR12 of add-geonames-city-source (D8): the compile entry with stubbed I/O.
+import { access } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { cityLine, runCompile } from "./compileWorld.ts";
 
@@ -53,5 +54,21 @@ describe("runCityDataCompile", () => {
     const run = await runCompile({ cityLines: [KAZAN, "broken"] });
     expect(run.exitCode).not.toBe(0);
     expect(run.log.join("\n")).toContain("line 2");
+  });
+
+  it.each([
+    ["succeeds", { cityLines: [KAZAN] }],
+    ["fails", { cityLines: [KAZAN], unzipExitCode: 9 }],
+  ])(
+    "should remove the temporary directory when the run %s",
+    async (_, options) => {
+      const run = await runCompile(options);
+      await expect(access(run.workDirectory)).rejects.toThrow();
+    },
+  );
+
+  it("should skip blank lines of the city dump", async () => {
+    const run = await runCompile({ cityLines: [KAZAN, "", "  "] });
+    expect(run.exitCode).toBe(0);
   });
 });
