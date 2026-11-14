@@ -39,14 +39,14 @@ Rules for every task:
   - extend "Day periods" with the day colouring and the working time rule (Monday to Friday by local date, local time at every instant, half-cell rule).
 
   `docs/architecture/views.md`:
-  - "Cell colouring" covers the three colourings for both views;
+  - the "Cell colouring" bullet of Grid becomes "Day colouring" and covers the three colourings for both views (the Cards section gets the same pointer);
   - "Day-period colors" applies to Time of day;
   - "Visual style" gets the non-working grey of D6 and the hour frame colour of D7;
   - "Overlays → Settings" lists the colouring group and the working hours row.
 
   `docs/architecture/open-questions.md`: amend Q3's decision. Time of day keeps the constants, and the Working hours colouring uses the user's working hours, as in this change.
 
-  Verify: `grep -n "add-day-colouring-setting\|WORKING_HOURS\|non-working" docs/architecture/domain-model.md docs/architecture/views.md docs/architecture/open-questions.md` prints a line in each file.
+  Verify: `grep -n "add-day-colouring-setting\|WORKING_HOURS\|non-working" docs/architecture/domain-model.md docs/architecture/views.md docs/architecture/open-questions.md` prints a line in each file, and `grep -rni "cell colouring" docs/architecture docs/glossary` prints nothing.
 
 ## 2. Preferences model and stored document (FR2, FR3, FR6, FR7; design D1, D2)
 
