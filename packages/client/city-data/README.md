@@ -11,7 +11,7 @@ City data: [GeoNames](https://www.geonames.org/), licensed under
 GeoNames on its settings page. The file records the licence and the date of the
 dump it was compiled from.
 
-- Dump date: **2026-11-13** (`cities15000.zip`, `alternateNamesV2.zip`,
+- Dump date: **2026-11-14** (`cities15000.zip`, `alternateNamesV2.zip`,
   `admin1CodesASCII.txt` from `download.geonames.org/export/dump/`).
 
 ## Contents
