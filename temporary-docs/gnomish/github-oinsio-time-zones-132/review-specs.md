@@ -103,7 +103,8 @@ Paths are relative to `packages/client/` unless they start with `openspec/` or `
 - Impact: Implemented as written, the field stops every Escape. With the focus in a working hours field, Esc never leaves the settings page, which breaks the stable requirement without declaring it. The existing "Esc leaves settings" e2e scenario (`settings_e2e.feature:20`) presses Esc with the focus on the heading, so it does not catch this. If the implementer does not stop Escape, the restore scenario cannot be seen in the real app, because the page closes on the same key.
 - Fix: Decide it as the language list does. In D8 and in the "Working hours row" requirement, write: "Esc in a field whose texts differ from the stored texts, or while the hint is shown, restores the stored texts, removes the hint and keeps the page open. Otherwise Esc is not stopped and leaves the settings page." In `SettingsTimeRangeGroup`, call `stopPropagation` for Escape only in that case, instead of relying on `isKeyKeptInField` for Escape. Add `## MODIFIED Requirements` → "Open the settings page" to the settings delta: restate the stable text in full and extend the exception to "while a working hours field holds unconfirmed or refused text, Esc first restores it". Add a scenario "Esc restores first, then leaves" to `settings_day_colouring_e2e.feature` (task 9.1), because it needs the real `AppShell` listener. Add a unit case to task 8.2 that Escape propagates when the texts equal the given ones. List the MODIFIED requirement in proposal.md "Capabilities".
 - Fix risk: The MODIFIED block must copy the long stable requirement verbatim apart from the added clause, or it silently changes other behaviour. `SettingsTimeRangeGroup` must still stop Enter and the arrow keys as `isKeyKeptInField` does today.
-- Status: open
+- Status: fixed
+- Resolution: specs/settings/spec.md: the "Working hours row" requirement now says Esc in a field restores only while its texts differ from the stored ones or the hint is shown, otherwise Esc leaves the page; a new `## MODIFIED Requirements` block restates the stable "Open the settings page" verbatim with that one added Esc exception and a new scenario "Esc in a working hours field restores first, then leaves". design.md D8 stops Escape only in that case (Enter and arrows still kept by `isKeyKeptInField`); tasks.md 8.2 adds the "Esc bubbles when there is nothing to undo" unit case, 9.1 adds the e2e scenario; proposal.md What Changes and Capabilities name the MODIFIED requirement.
 
 ### R2 — WARNING — "Settings page layout" is changed but not declared MODIFIED
 - Location: `openspec/changes/add-day-colouring-setting/specs/settings/spec.md:154`; stable `openspec/specs/settings/spec.md:384`
@@ -112,7 +113,8 @@ Paths are relative to `packages/client/` unless they start with `openspec/` or `
 - Impact: After the archive, the stable spec describes the approved settings screenshots without the colouring group. Next to it sits an ADDED requirement whose last sentence is a one-time instruction ("are re-approved once"). The next change that touches the settings page reads a stale screenshot description, and the two requirements disagree on what the approved images contain.
 - Fix: Add `### Requirement: Settings page layout` under `## MODIFIED Requirements` in the settings delta. Restate the stable text and add to the screenshot list: "the colouring group as three icons in the order Plain, Time of day, Working hours with Time of day checked, and no working hours row". Also add the `add-day-colouring-setting` NFR-R2 id to its implements comment. Remove the re-approval sentence from the ADDED "Colouring settings layout". Name the MODIFIED requirement in proposal.md "Capabilities" (line 27) and in task 9.4.
 - Fix risk: The restated text must keep every stable clause and scenario. Do not add the colouring group to the stable "one row at 320 px" list, because NFR-R1 does not ask for 320 px.
-- Status: open
+- Status: fixed
+- Resolution: specs/settings/spec.md: added MODIFIED "Settings page layout", the stable text and scenarios restated with the colouring group (Plain, Time of day, Working hours; Time of day checked; no working hours row) added to the screenshot list and NFR-R2 of add-day-colouring-setting added to its implements comment; the 320 px one-row list is left unchanged. The re-approval sentence and NFR-R2 were removed from the ADDED "Colouring settings layout". proposal.md Capabilities and tasks.md 9.4 name the MODIFIED requirement.
 
 ### R3 — SUGGESTION — The digit token on the non-working grey cannot be expressed by the planned class map
 - Location: `openspec/changes/add-day-colouring-setting/design.md:103-106` and `:83`; `tasks.md:171,176,184`
@@ -121,7 +123,8 @@ Paths are relative to `packages/client/` unless they start with `openspec/` or `
 - Impact: The implementer must guess. The wrong guess passes the unit tests and fails only at the axe-core Grid × Working hours × dark run of task 9.2, late in the plan.
 - Fix: In D6, write that the digits on the non-working grey use `--color-foreground` in both themes. The light value `#18181b` equals the light hour-cell foreground (about 14.8:1), and the dark value `#eef2fa` gives about 8.4:1. In D4 and task 6.2, spell out the map: night and non-working → `text-foreground`, the other three periods → `text-hour-cell-foreground` (as today), plain and working time → `text-accent-foreground`. Add to task 6.3 that a non-working cell gets `text-foreground`.
 - Fix risk: none. The light value is unchanged, and Time of day keeps today's classes.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 now says the digits on the non-working grey use `--color-foreground` in both themes (light #18181b equals the light hour-cell foreground; dark #0f1729 would give about 1.9:1). D4 and tasks.md 6.2 spell out the class map (night and non-working → `text-foreground`, morning/work/evening → `text-hour-cell-foreground`, plain and working time → `text-accent-foreground`); task 6.3 adds the non-working cell case to HourStrip.test.tsx.
 
 ### R4 — SUGGESTION — The Working hours frame rows run on a Sunday with no accent cells
 - Location: `openspec/changes/add-day-colouring-setting/specs/grid-view/spec.md:77-88`
@@ -130,7 +133,8 @@ Paths are relative to `packages/client/` unless they start with `openspec/` or `
 - Impact: The real-browser check of the Working hours rows never covers the case the scenario is named for. A regression that only affects frames over working cells would not be caught.
 - Fix: For the two Working hours rows, use `2026-03-09T06:00:00Z` and column 11 (Almaty 11:00, Monday, working). Do this by adding `<instant>` and `<column>` columns to the outline, and keep the Plain rows as they are.
 - Fix risk: none. The steps already take the instant and the column as parameters in the other frame scenarios.
-- Status: open
+- Status: fixed
+- Resolution: specs/grid-view/spec.md outline "Frame in the foreground colour on accent cells" now has `<instant>` and `<column>` columns: the Plain rows keep 2026-03-08T07:30:00Z and column 12, the Working hours rows use 2026-03-09T06:00:00Z and column 11 (Almaty Monday 11:00, a working cell).
 
 ## Verdict
 
