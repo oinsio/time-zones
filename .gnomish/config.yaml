@@ -10,7 +10,8 @@ schemaVersion: "1"
 autonomy:
   # How many attempts one stage gets before the task escalates to a human.
   # A stage may override this in its own stage.yaml `autonomy:` block.
-  attemptLimit: 2
+  # Doubled (was 2) when tasks outgrew the previous limit.
+  attemptLimit: 4
 
 # The tracker the factory claims tasks from.
 tracker:

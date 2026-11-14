@@ -28,8 +28,10 @@ executor:
   type: agent-cli
   model: claude-haiku-5-5
   settings:
-    maxTurns: 5
-    roundTimeout: 300s
+    # Doubled (was 5) when tasks outgrew the previous limit.
+    maxTurns: 10
+    # Doubled (was 300s) when tasks outgrew the previous limit.
+    roundTimeout: 600s
     allowedTools:
       - Bash
     disallowedTools:
@@ -80,4 +82,5 @@ verify:
 # auto = go to next stage; manual = wait for a human.
 advancement: auto
 autonomy:
-  attemptLimit: 2
+  # Doubled (was 2) when tasks outgrew the previous limit.
+  attemptLimit: 4

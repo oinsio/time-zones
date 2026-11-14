@@ -21,9 +21,11 @@ executor:
   # Only these four keys are accepted.
   settings:
     # Agent turns per round.
-    maxTurns: 15
+    # Doubled (was 15) when tasks outgrew the previous limit.
+    maxTurns: 30
     # Round is killed after this; counts as infra failure, not an attempt.
-    roundTimeout: 600s
+    # Doubled (was 600s) when tasks outgrew the previous limit.
+    roundTimeout: 1200s
     # Cannot widen what .claude/settings.json denies.
     allowedTools:
       - Read
