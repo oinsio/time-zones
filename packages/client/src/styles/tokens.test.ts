@@ -1,6 +1,7 @@
 // Verifies FR4, NFR-A3 of add-settings-page-and-device-time-location (D7).
 // Verifies NFR-A3 of keep-now-button-visible-when-live.
 // Verifies UX5, NFR-A1 of add-locations-via-search (D10).
+// Verifies NFR-A3, UX4 of add-day-colouring-setting.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -105,6 +106,69 @@ describe.each(["light", "dark"] as const)(
     });
   },
 );
+
+/** Each day colour's fill token and the token its digits use (D6, the classes of `DAY_COLOUR_FOREGROUND_CLASS_NAMES`). */
+const DAY_COLOUR_TOKENS = [
+  ["night", "day-night", "foreground"],
+  ["morning", "day-morning", "hour-cell-foreground"],
+  ["work", "day-work", "hour-cell-foreground"],
+  ["evening", "day-evening", "hour-cell-foreground"],
+  ["plain", "accent", "accent-foreground"],
+  ["working time", "accent", "accent-foreground"],
+  ["non-working time", "day-non-working", "foreground"],
+] as const;
+const DAY_PERIOD_TOKENS = [
+  "day-night",
+  "day-morning",
+  "day-work",
+  "day-evening",
+];
+
+describe.each(["light", "dark"] as const)("day colours (%s theme)", (theme) => {
+  it.each(DAY_COLOUR_TOKENS)(
+    "should give the digits on %s at least 4.5:1",
+    (_, fillToken, digitToken) => {
+      expect(
+        contrastRatio(
+          readRequired(theme, digitToken),
+          readRequired(theme, fillToken),
+        ),
+      ).toBeGreaterThanOrEqual(MIN_TEXT_CONTRAST);
+    },
+  );
+
+  it.each(DAY_COLOUR_TOKENS)(
+    "should keep the handle at least 3:1 against %s",
+    (_, fillToken) => {
+      const fill = readRequired(theme, fillToken);
+      const bestRatio = Math.max(
+        contrastRatio(readRequired(theme, "surface"), fill),
+        contrastRatio(readRequired(theme, "foreground"), fill),
+      );
+      expect(bestRatio).toBeGreaterThanOrEqual(MIN_NON_TEXT_CONTRAST);
+    },
+  );
+
+  it("should make the non-working grey differ from the accent", () => {
+    expect(readRequired(theme, "day-non-working")).not.toBe(
+      readRequired(theme, "accent"),
+    );
+  });
+});
+
+describe("the non-working grey against the day-period colours", () => {
+  it.each(DAY_PERIOD_TOKENS)("should be lighter than %s in light", (token) => {
+    expect(luminance(readRequired("light", "day-non-working"))).toBeGreaterThan(
+      luminance(readRequired("light", token)),
+    );
+  });
+
+  it.each(DAY_PERIOD_TOKENS)("should be darker than %s in dark", (token) => {
+    expect(luminance(readRequired("dark", "day-non-working"))).toBeLessThan(
+      luminance(readRequired("dark", token)),
+    );
+  });
+});
 
 describe("theme blocks", () => {
   it("should give the forced dark block and the system dark block the same values", () => {

@@ -105,7 +105,7 @@ Rules for every task:
 
 ## 4. Presenter: day colours and working hours texts (FR2, FR5, FR9–FR13, NFR-P1, UX5; design D4, D5)
 
-- [ ] 4.1 RED then GREEN, `src/presenter/dayColours.ts` with `src/presenter/dayColours.test.ts`:
+- [x] 4.1 RED then GREEN, `src/presenter/dayColours.ts` with `src/presenter/dayColours.test.ts`:
   - `DayColour`, `DayColourStop`, `presentDayColourStops`: Plain is one stop `0` plain; Time of day equals the mapped `getDayPeriodStops`; Working hours equals the mapped `getWorkingTimeStops`; the same array on a repeated call;
   - `presentHourCellColour`;
   - `getHourFrameColour`, which is `ACCENT` only for Time of day.
@@ -113,21 +113,21 @@ Rules for every task:
   Export them from `src/presenter/index.ts`.
 
   Verify: `npx vitest run src/presenter/dayColours.test.ts` fails, then passes.
-- [ ] 4.2 RED then GREEN, `src/presenter/dayTrack.ts`, `presentZoneMoment.ts` and `presentLocationRows.ts`:
+- [x] 4.2 RED then GREEN, `src/presenter/dayTrack.ts`, `presentZoneMoment.ts` and `presentLocationRows.ts`:
   - `DayTrackContext` and `LocationRowsContext` gain `dayColouring` and `workingHours`;
   - `PresentedDayTrack.stops` becomes `readonly DayColourStop[]`, from `presentDayColourStops`.
 
   Add cases to `src/presenter/dayTrack.test.ts` (Plain: one stop; Working hours: the Almaty Monday stops) and update its existing period expectations to `DayColour` values. Update `src/views/shared/dayTrackFixture.tsx`, `src/test/features/time_selection/steps/dayColourChecks.ts` and every other reader found by `grep -rn "stops" src --include=*.ts --include=*.tsx`. Their default colouring is Time of day.
 
   Verify: `npx vitest run src/presenter/dayTrack.test.ts`, then `npx vitest run src/presenter/presentLocationRows.test.ts`, one at a time, pass.
-- [ ] 4.3 RED then GREEN, `src/presenter/hourStrip.ts`:
+- [x] 4.3 RED then GREEN, `src/presenter/hourStrip.ts`:
   - `HourStripContext` gains `dayColouring` and `workingHours`, and they join the strip cache key;
   - `PresentedHourCell.dayPeriod` is replaced by `dayColour`, from `presentHourCellColour` and `getHourCellWorkingFlags`.
 
   Add cases to `src/presenter/hourStrip.test.ts` (Plain: every cell plain; Working hours: the Almaty 09:07 columns; the same strip on a repeated call; a new strip after a colouring change). Update `src/views/grid/hourStripFixture.tsx`, `src/test/features/grid_view/steps/hourCellsWorld.ts` and the other readers found by `grep -rn "dayPeriod\b" src --include=*.ts --include=*.tsx`.
 
   Verify: `npx vitest run src/presenter/hourStrip.test.ts` passes.
-- [ ] 4.4 RED then GREEN, `src/presenter/workingHours.ts` with `src/presenter/workingHours.test.ts`:
+- [x] 4.4 RED then GREEN, `src/presenter/workingHours.ts` with `src/presenter/workingHours.test.ts`:
   - `formatWorkingHoursTime` and `presentWorkingHoursTexts`: `10:00` / `18:00` and `09:07` in 24-hour; `10:00 AM` / `6:00 PM` and `5:30 PM` in English 12-hour; the Russian 12-hour markers from `getDayPeriodMarkers`;
   - a repeated call builds no formatter (`startWorkCount` from `src/test/workCounters.ts`).
 
@@ -137,14 +137,14 @@ Rules for every task:
 
 ## 5. Controller (FR3, FR5, FR6, FR7, FR13; design D4, D5)
 
-- [ ] 5.1 RED then GREEN, `src/controller/preferencesContext.ts` and `PreferencesProvider.tsx`:
+- [x] 5.1 RED then GREEN, `src/controller/preferencesContext.ts` and `PreferencesProvider.tsx`:
   - `setDayColouring` and `setWorkingHours`;
   - new `src/controller/useDayColouring.ts`, returning `{ dayColouring, workingHours }`, with the default outside a provider.
 
   Tests in new `src/controller/PreferencesProvider.dayColouring.test.tsx`: a change applies at once and is written once after the debounce (manual write scheduler), another tab's change is applied (two `createInMemoryPreferencesRepository` instances on one `createInMemoryPreferencesBackend`), and `useDayColouring` outside a provider returns the defaults. `PreferencesProvider.tsx` stays under 200 lines.
 
   Verify: `npx vitest run src/controller/PreferencesProvider.dayColouring.test.tsx` fails, then passes.
-- [ ] 5.2 RED then GREEN, new `src/controller/useWorkingHoursInput.ts` with `useWorkingHoursInput.test.tsx`:
+- [x] 5.2 RED then GREEN, new `src/controller/useWorkingHoursInput.ts` with `useWorkingHoursInput.test.tsx`:
   - the outcome enum `WorkingHoursInputOutcome`;
   - `SAVED` for `907` / `18:00` (stores `09:07`);
   - `INVALID_START_TEXT` for `25:00`;
@@ -166,12 +166,12 @@ Rules for every task:
 
 ## 6. Tokens, views and the work period rename (FR2, FR9–FR13, NFR-A3, UX4; design D4, D6, D7)
 
-- [ ] 6.1 RED then GREEN, `src/styles/tokens.css`: `--color-day-non-working` (`#ececef` light, `#3b4660` dark) in all three theme blocks (D6), and its `day.non-working` entry in the `colors` of `tailwind.config.ts`. In the same task rename the work-period token `--color-day-working` to `--color-day-work` (values unchanged) in `tokens.css`, `tailwind.config.ts` (`day.working` → `day.work`), `src/views/shared/dayTrackGradient.ts` and `dayTrackGradient.test.ts`, `src/views/grid/HourStrip.test.tsx`, `src/test/features/main_page/steps/themeTokens.ts` (`dayWorking` → `dayWork`), `src/test/features/grid_view/steps/grid_view_hour_cells_e2e.steps.ts` and `src/test/features/time_selection/steps/time_selection_labels_e2e.steps.ts`.
+- [x] 6.1 RED then GREEN, `src/styles/tokens.css`: `--color-day-non-working` (`#ececef` light, `#3b4660` dark) in all three theme blocks (D6), and its `day.non-working` entry in the `colors` of `tailwind.config.ts`. In the same task rename the work-period token `--color-day-working` to `--color-day-work` (values unchanged) in `tokens.css`, `tailwind.config.ts` (`day.working` → `day.work`), `src/views/shared/dayTrackGradient.ts` and `dayTrackGradient.test.ts`, `src/views/grid/HourStrip.test.tsx`, `src/test/features/main_page/steps/themeTokens.ts` (`dayWorking` → `dayWork`), `src/test/features/grid_view/steps/grid_view_hour_cells_e2e.steps.ts` and `src/test/features/time_selection/steps/time_selection_labels_e2e.steps.ts`.
 
   `src/styles/tokens.test.ts`, for both themes: for each of the seven day colours, the digit colour of D6 against the cell colour is ≥ 4.5:1, and the handle's surface fill or foreground border against the cell colour is ≥ 3:1 (NFR-A3, M5). The non-working grey differs from the accent. UX4: in the light theme the non-working grey has a higher relative luminance than each of `--color-day-night`, `--color-day-morning`, `--color-day-work` and `--color-day-evening`, and in the dark theme a lower one than each of them (the `day-colouring` scenario "Digit contrast on every cell colour"). The existing "same values in both dark blocks" check covers the new token.
 
   Verify: `npx vitest run src/styles/tokens.test.ts` fails, then passes. Then `grep -rn "day-working\|dayWorking\|day\.working" src tailwind.config.ts` prints nothing.
-- [ ] 6.2 RED then GREEN, `src/views/shared/dayTrackGradient.ts`:
+- [x] 6.2 RED then GREEN, `src/views/shared/dayTrackGradient.ts`:
   - `DAY_COLOUR_VARIABLES` (plain and working time → `--color-accent`, non-working → `--color-day-non-working`, the periods unchanged);
   - `DAY_COLOUR_FOREGROUND_CLASS_NAMES` (D4: night and non-working → `text-foreground`, morning, work and evening → `text-hour-cell-foreground`, plain and working time → `text-accent-foreground`);
   - `buildDayTrackGradient(stops: readonly DayColourStop[])`, where a single stop is written as two stops of its colour at `0%` and `100%` (D4), never one stop and never `none`.
@@ -179,7 +179,7 @@ Rules for every task:
   Export from `src/views/shared/index.ts`. Update `dayTrackGradient.test.ts` with these cases, which assert the built string and so do not depend on how jsdom parses CSS: a single plain stop gives exactly `linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) 100%)`; a single non-working stop gives the same with `--color-day-non-working`; every built gradient has at least two colour stops (`it.each` over Plain, a Working hours track with no edge, the Almaty Monday stops and the Time of day stops); a hard working edge gives two stops at one percentage. The real-browser check is the scenario "One-colour tracks are drawn in a real browser" of task 9.2.
 
   Verify: `npx vitest run src/views/shared/dayTrackGradient.test.ts` passes, then `npx vitest run src/views/shared/DayTrack.test.tsx` passes.
-- [ ] 6.3 RED then GREEN, `src/views/grid/HourCellView.tsx`: the background comes from `DAY_COLOUR_VARIABLES[cell.dayColour]` and the digit class from `DAY_COLOUR_FOREGROUND_CLASS_NAMES`. `src/views/grid/HourFrame.tsx` takes `colour` and `GridView.tsx` passes `hourFrameColour`.
+- [x] 6.3 RED then GREEN, `src/views/grid/HourCellView.tsx`: the background comes from `DAY_COLOUR_VARIABLES[cell.dayColour]` and the digit class from `DAY_COLOUR_FOREGROUND_CLASS_NAMES`. `src/views/grid/HourFrame.tsx` takes `colour` and `GridView.tsx` passes `hourFrameColour`.
 
   Tests in `src/views/grid/HourStrip.test.tsx` (a plain cell gets the accent variable and the `text-accent-foreground` class; a non-working cell gets `--color-day-non-working` and the `text-foreground` class) and `src/views/grid/HourFrame.test.tsx` (the foreground border for `FOREGROUND`).
 

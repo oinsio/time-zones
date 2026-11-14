@@ -1,7 +1,7 @@
 // Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
 import { render } from "@testing-library/react";
 import { vi } from "vitest";
-import { DayPeriod, type PresentedDayTrack } from "@/presenter";
+import { DayColour, type PresentedDayTrack } from "@/presenter";
 import { DayTrack } from "./DayTrack";
 
 export const ALMATY_LABELS = ["00", "06", "12", "18", "00"];
@@ -11,9 +11,9 @@ export const ALMATY_TRACK: PresentedDayTrack = {
   maxMinutes: 1439,
   valueText: "12:30, Sun, Mar 8",
   stops: [
-    { fraction: 0.270833, period: DayPeriod.NIGHT },
-    { fraction: 0.3125, period: DayPeriod.MORNING },
-    { fraction: 0.380208, period: DayPeriod.WORK },
+    { fraction: 0.270833, colour: DayColour.NIGHT },
+    { fraction: 0.3125, colour: DayColour.MORNING },
+    { fraction: 0.380208, colour: DayColour.WORK },
   ],
   hourLabels: ALMATY_LABELS.map((label, labelIndex) => ({
     fraction: labelIndex / (ALMATY_LABELS.length - 1),

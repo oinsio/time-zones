@@ -9,7 +9,7 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { WallTimeInputOutcome, WallTimeTargetKind } from "@/controller";
-import { DayPeriod } from "@/presenter";
+import { DayColour } from "@/presenter";
 import { renderKolkataRow as renderRow } from "./locationRowFixture";
 
 describe("LocationRow", () => {
@@ -119,7 +119,7 @@ describe("LocationRow day track", () => {
     valueMinutes: 720,
     maxMinutes: 1439,
     valueText: "12:00, Sun, Mar 8",
-    stops: [{ fraction: 0.3, period: DayPeriod.NIGHT }],
+    stops: [{ fraction: 0.3, colour: DayColour.NIGHT }],
     hourLabels: [],
   };
 

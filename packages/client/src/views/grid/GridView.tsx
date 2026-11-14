@@ -26,7 +26,13 @@ import { useVisibleStripRows } from "./useVisibleStripRows";
  * Implements FR7, NFR-P1 of refine-meeting-range-entry-and-handles (D5): the handles stand on the visible rows.
  */
 export default function GridView() {
-  const { strips, hourFrameIndex, cellCount, hasMeetingRange } = useHourGrid();
+  const {
+    strips,
+    hourFrameIndex,
+    cellCount,
+    hasMeetingRange,
+    hourFrameColour,
+  } = useHourGrid();
   const { moveTrack } = useTimeSelection();
   const {
     meeting,
@@ -87,7 +93,7 @@ export default function GridView() {
         <MeetingHandleSlider presented={meeting.handles.end} {...handleProps} />
       </>
     ) : (
-      <HourFrame hourFrameIndex={hourFrameIndex} />
+      <HourFrame hourFrameIndex={hourFrameIndex} colour={hourFrameColour} />
     ),
     meetingRangeOf: (row) => meeting?.rowRanges.get(row.id),
     panelRef,

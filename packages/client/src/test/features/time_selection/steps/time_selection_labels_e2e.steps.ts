@@ -19,7 +19,7 @@ const MIN_TOUCH_TARGET_PX = 44;
 const DAY_PERIOD_TOKENS = [
   "--color-day-night",
   "--color-day-morning",
-  "--color-day-working",
+  "--color-day-work",
   "--color-day-evening",
 ];
 const WIDE_SCREEN_HEIGHT_PX = 800;
