@@ -9,7 +9,12 @@ import i18n from "i18next";
 import { createInMemoryPreferencesRepository } from "@/adapters";
 import { GEONAMES_URL } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
-import { HourFormat, ThemePreference, ZoneLabelPart } from "@/preferences";
+import {
+  DEFAULT_PREFERENCES,
+  HourFormat,
+  ThemePreference,
+  ZoneLabelPart,
+} from "@/preferences";
 import { renderSettingsPage } from "./renderSettingsPage";
 
 const themeGroup = () => screen.getByRole("radiogroup", { name: "Theme" });
@@ -130,6 +135,8 @@ describe("SettingsPage", () => {
         hourFormat: HourFormat.H12,
         interfaceLanguage: null,
         viewMode: null,
+        dayColouring: DEFAULT_PREFERENCES.dayColouring,
+        workingHours: DEFAULT_PREFERENCES.workingHours,
         zoneLabelParts: [
           ZoneLabelPart.UTC_OFFSET,
           ZoneLabelPart.ZONE_ABBREVIATION,
@@ -148,13 +155,13 @@ describe("SettingsPage", () => {
     ).toBeChecked();
   });
 
-  it("should list the groups as Theme, Hour format, View, Zone label, Language", () => {
+  it("should list the groups as Theme, Hour format, View, Colouring, Zone label, Language", () => {
     renderSettingsPage();
     const groupNames = screen.getAllByRole("radiogroup").map((group) => {
       const captionId = group.getAttribute("aria-labelledby") ?? "";
       return document.getElementById(captionId)?.textContent;
     });
-    expect(groupNames).toEqual(["Theme", "Hour format", "View"]);
+    expect(groupNames).toEqual(["Theme", "Hour format", "View", "Colouring"]);
     const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     expect(
       hourGroup().compareDocumentPosition(zoneLabel) &
@@ -285,5 +292,23 @@ describe("SettingsPage city data attribution", () => {
     expect(attribution.previousElementSibling).toHaveAttribute(
       "data-zone-rules-release",
     );
+  });
+});
+
+describe("SettingsPage day colouring", () => {
+  beforeEach(() => i18n.changeLanguage("en"));
+  afterEach(() => i18n.changeLanguage("ru"));
+
+  it("should show the working hours row directly under the colouring group only in Working hours", async () => {
+    renderSettingsPage();
+    expect(screen.queryByRole("group", { name: "Working hours" })).toBeNull();
+    await userEvent.click(screen.getByRole("radio", { name: "Working hours" }));
+    const row = screen.getByRole("group", { name: "Working hours" });
+    const colouring = screen.getByRole("radiogroup", { name: "Colouring" });
+    expect(colouring.compareDocumentPosition(row)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    await userEvent.click(screen.getByRole("radio", { name: "Plain" }));
+    expect(screen.queryByRole("group", { name: "Working hours" })).toBeNull();
   });
 });

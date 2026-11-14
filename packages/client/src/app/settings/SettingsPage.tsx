@@ -9,11 +9,13 @@ import {
 } from "@/controller";
 import { HourFormat, ThemePreference } from "@/preferences";
 import { CityDataAttribution } from "./CityDataAttribution";
+import { DayColouringGroup } from "./DayColouringGroup";
 import { DeployTime } from "./DeployTime";
 import { GnomishFactoryCredit } from "./GnomishFactoryCredit";
 import { InterfaceLanguageGroup } from "./InterfaceLanguageGroup";
 import { SettingsOptionGroup } from "./SettingsOptionGroup";
 import { ViewModeGroup } from "./ViewModeGroup";
+import { WorkingHoursGroup } from "./WorkingHoursGroup";
 import { ZoneLabelGroup } from "./ZoneLabelGroup";
 import { ZoneRulesReleaseLine } from "./ZoneRulesReleaseLine";
 
@@ -54,6 +56,7 @@ const HOUR_FORMAT_LABEL_KEYS = {
  * Implements FR1, FR2, FR3, FR4 of compact-settings-controls (D1-D3).
  * Implements FR1, FR2 of add-view-mode-setting-and-grid-skeleton (D2): the view group after the hour format.
  * Implements FR13, UX4 of add-geonames-city-source (D10): the city data attribution as the last line.
+ * Implements FR1, FR4, FR6 of add-day-colouring-setting (D8): the colouring group and the working hours row after the view group.
  */
 export function SettingsPage({ notices, onBack }: SettingsPageProps) {
   const { t } = useTranslation();
@@ -136,6 +139,8 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
           onSelect={setHourFormat}
         />
         <ViewModeGroup />
+        <DayColouringGroup />
+        <WorkingHoursGroup />
         <ZoneLabelGroup />
         <InterfaceLanguageGroup
           activeCode={activeLanguage.code}

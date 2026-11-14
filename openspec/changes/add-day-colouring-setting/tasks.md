@@ -156,7 +156,7 @@ Rules for every task:
   Export from `src/controller/index.ts`.
 
   Verify: `npx vitest run src/controller/useWorkingHoursInput.test.tsx` fails, then passes.
-- [ ] 5.3 RED then GREEN, `src/controller/useLocations.ts` and `useHourGrid.ts`:
+- [x] 5.3 RED then GREEN, `src/controller/useLocations.ts` and `useHourGrid.ts`:
   - pass `dayColouring` and `workingHours` from `useDayColouring` to the presenter and add them to the memo dependencies;
   - `useHourGrid` returns `hourFrameColour`.
 
@@ -184,7 +184,7 @@ Rules for every task:
   Tests in `src/views/grid/HourStrip.test.tsx` (a plain cell gets the accent variable and the `text-accent-foreground` class; a non-working cell gets `--color-day-non-working` and the `text-foreground` class) and `src/views/grid/HourFrame.test.tsx` (the foreground border for `FOREGROUND`).
 
   Verify: `npx vitest run src/views/grid/HourStrip.test.tsx`, then `npx vitest run src/views/grid/HourFrame.test.tsx`, one at a time, pass.
-- [ ] 6.4 Rename the work period in the existing executable specs, so that they say what the modified `time-selection` requirement "Day-period colours" and `grid-view` requirement "Hour cell colour" say, and "working" is left to working time (the `day-colouring` stops `working` / `non-working`). This is a rename with no behaviour change (`.claude/rules/glossary.md`: "Renaming the concept means renaming the code, specs and translations in the same change"):
+- [x] 6.4 Rename the work period in the existing executable specs, so that they say what the modified `time-selection` requirement "Day-period colours" and `grid-view` requirement "Hour cell colour" say, and "working" is left to working time (the `day-colouring` stops `working` / `non-working`). This is a rename with no behaviour change (`.claude/rules/glossary.md`: "Renaming the concept means renaming the code, specs and translations in the same change"):
   - `src/test/features/time_selection/time_selection_day_colours.feature` (lines 15, 16 and 35): every stop named `working` becomes `work`, e.g. `0.380208 work`; in `steps/dayColourChecks.ts` the stop name key `working` becomes `work`;
   - `src/test/features/grid_view/grid_view_hour_cells_unit.feature:29` and `steps/grid_view_hour_cells_unit.steps.tsx:61`: "9-17 working hours" becomes "9-17 work";
   - `src/test/features/grid_view/grid_view_hour_cells_e2e.feature:20,23` and `steps/grid_view_hour_cells_e2e.steps.ts:42,95,97`: "night, morning, working hours and evening colours" becomes "night, morning, work and evening colours", "the working hours cell" becomes "the work cell", and the comment on line 95 says "work cells".
@@ -205,10 +205,10 @@ Rules for every task:
 
 ## 8. Settings controls (FR1, FR4–FR6, FR14, FR15, UX1–UX3, UX5; design D8, D9)
 
-- [ ] 8.1 Add the keys of D9 to `src/locales/en.json` and `src/locales/ru.json`.
+- [x] 8.1 Add the keys of D9 to `src/locales/en.json` and `src/locales/ru.json`.
 
   Verify: `npx vitest run src/locales/locales.test.ts` passes (its "should have identical key sets in every locale file" check covers the new keys).
-- [ ] 8.2 RED then GREEN, new `src/app/settings/SettingsTimeRangeGroup.tsx` with `SettingsTimeRangeGroup.test.tsx`: the two scenarios of the `settings` requirement "Time range group", plus these cases:
+- [x] 8.2 RED then GREEN, new `src/app/settings/SettingsTimeRangeGroup.tsx` with `SettingsTimeRangeGroup.test.tsx`: the two scenarios of the `settings` requirement "Time range group", plus these cases:
   - Esc with edited texts, or with a hint shown, calls `onRestore` and does not bubble;
   - Esc with the texts it was given and no hint does not call `onRestore` and bubbles (`settings` requirement "Open the settings page", design D8);
   - blur inside the row does not confirm, and blur out of it does;
@@ -216,7 +216,7 @@ Rules for every task:
   - Enter and the arrow keys do not bubble.
 
   Verify: `npx vitest run src/app/settings/SettingsTimeRangeGroup.test.tsx` fails, then passes.
-- [ ] 8.3 RED then GREEN, new `src/app/settings/DayColouringGroup.tsx` and `WorkingHoursGroup.tsx`, placed in `SettingsPage.tsx` after `ViewModeGroup` (export from `src/app/settings/index.ts` if the module lists its parts). Tests: `DayColouringGroup.test.tsx` (options in order, Time of day checked by default, a choice calls `setDayColouring`) and `WorkingHoursGroup.test.tsx` (absent unless Working hours, texts in both hour formats, each outcome's hint, Esc restores, a change from outside resets the texts).
+- [x] 8.3 RED then GREEN, new `src/app/settings/DayColouringGroup.tsx` and `WorkingHoursGroup.tsx`, placed in `SettingsPage.tsx` after `ViewModeGroup` (export from `src/app/settings/index.ts` if the module lists its parts). Tests: `DayColouringGroup.test.tsx` (options in order, Time of day checked by default, a choice calls `setDayColouring`) and `WorkingHoursGroup.test.tsx` (absent unless Working hours, texts in both hour formats, each outcome's hint, Esc restores, a change from outside resets the texts).
 
   Verify: `npx vitest run src/app/settings/DayColouringGroup.test.tsx`, then `npx vitest run src/app/settings/WorkingHoursGroup.test.tsx`, then `npx vitest run src/app/settings/SettingsPage.test.tsx`, one at a time, pass.
 - [ ] 8.4 Unit BDD:
