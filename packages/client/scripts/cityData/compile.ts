@@ -9,7 +9,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
-import { Temporal } from "../../src/lib/temporal.ts";
 import { loadZoneData } from "../zoneData/loadZoneData.ts";
 import { fetchBytes } from "../zoneRules/downloadRelease.ts";
 import type { FetchRelease, RunProcess } from "../zoneRules/processTypes.ts";
@@ -26,7 +25,6 @@ import { readReleaseZoneIds } from "./readReleaseZoneIds.ts";
 import { serializeCityDataset } from "./serializeCityDataset.ts";
 
 const LINE_SEPARATOR = "\n";
-const UTC_ZONE_ID = "UTC";
 
 export type CityDataCompileDependencies = {
   runProcess: RunProcess;
@@ -45,10 +43,6 @@ function parseLines<Row>(
     .map((line, index) => ({ line, lineNumber: index + 1 }))
     .filter(({ line }) => line.trim() !== "")
     .map(({ line, lineNumber }) => parseLine(line, lineNumber));
-}
-
-function readDumpDate(): string {
-  return Temporal.Now.plainDateISO(UTC_ZONE_ID).toString();
 }
 
 /** Runs the whole flow and returns the exit code; writes the dataset only on success. */
@@ -84,7 +78,7 @@ export async function runCityDataCompile(
       releaseZones: readReleaseZoneIds(
         await dependencies.readFile(ZONE_RULES_RELEASE_FILE),
       ),
-      dumpDate: readDumpDate(),
+      dumpDate: paths.dumpDate,
     });
     await dependencies.writeFile(DATASET_PATH, serializeCityDataset(dataset));
     dependencies.log(

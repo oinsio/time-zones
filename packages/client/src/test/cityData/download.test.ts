@@ -17,9 +17,12 @@ afterEach(async () => {
   await rm(directory, { recursive: true, force: true });
 });
 
+const LISTING =
+  "-rw-r--r--  3.0 unx 12345678 tx 3456789 defN 20261113.031500 cities15000.txt";
+
 const unzipSucceeds: RunProcess = async () => ({
   exitCode: 0,
-  stdout: "",
+  stdout: LISTING,
   stderr: "",
 });
 
@@ -71,7 +74,7 @@ describe("downloadDumps", () => {
       },
       async (command, args) => {
         commands.push([command, ...args]);
-        return { exitCode: 0, stdout: "", stderr: "" };
+        return { exitCode: 0, stdout: LISTING, stderr: "" };
       },
       directory,
     );
@@ -80,7 +83,11 @@ describe("downloadDumps", () => {
       "https://download.geonames.org/export/dump/alternateNamesV2.zip",
       "https://download.geonames.org/export/dump/admin1CodesASCII.txt",
     ]);
-    expect(commands.map(([command]) => command)).toEqual(["unzip", "unzip"]);
+    expect(commands.map(([command]) => command)).toEqual([
+      "unzip",
+      "unzip",
+      "unzip",
+    ]);
     expect(commands[0]).toEqual([
       "unzip",
       "-o",
@@ -88,6 +95,14 @@ describe("downloadDumps", () => {
       "-d",
       directory,
     ]);
+    expect(commands[2]).toEqual([
+      "unzip",
+      "-Z",
+      "-T",
+      join(directory, "cities15000.zip"),
+      "cities15000.txt",
+    ]);
+    expect(paths.dumpDate).toBe("2026-11-13");
     expect(paths.citiesPath).toBe(join(directory, "cities15000.txt"));
     expect(paths.alternateNamesPath).toBe(
       join(directory, "alternateNamesV2.txt"),
@@ -106,6 +121,36 @@ describe("downloadDumps", () => {
         directory,
       ),
     ).rejects.toThrow(/alternateNamesV2\.zip.*HTTP 503/);
+  });
+
+  it("should throw naming the dump when its listing fails", async () => {
+    await expect(
+      downloadDumps(
+        async () => Uint8Array.of(1),
+        async (_, args) =>
+          args[0] === "-Z"
+            ? { exitCode: 1, stdout: LISTING, stderr: "no such entry" }
+            : { exitCode: 0, stdout: "", stderr: "" },
+        directory,
+      ),
+    ).rejects.toThrow(/date of the dump cities15000\.zip.*no such entry/);
+  });
+
+  it.each([
+    ["an unparsable listing", "no time here"],
+    ["an impossible date", "defN 20261345.031500 cities15000.txt"],
+  ])("should throw naming the dump for %s", async (_, listing) => {
+    await expect(
+      downloadDumps(
+        async () => Uint8Array.of(1),
+        async (_command, args) => ({
+          exitCode: 0,
+          stdout: args[0] === "-Z" ? listing : "",
+          stderr: "",
+        }),
+        directory,
+      ),
+    ).rejects.toThrow(`date of the dump cities15000.zip failed: ${listing}`);
   });
 
   it("should throw naming the archive when unzip fails", async () => {

@@ -28,6 +28,9 @@ export const ALTERNATE_NAMES_ARCHIVE_NAME = "alternateNamesV2.zip";
 export const ALTERNATE_NAMES_FILE_NAME = "alternateNamesV2.txt";
 export const ADMIN1_FILE_NAME = "admin1CodesASCII.txt";
 export const UNZIP_COMMAND = "unzip";
+/** Info-ZIP zipinfo mode with entry times as `yyyymmdd.hhmmss`: names the day GeoNames built the dump. */
+export const UNZIP_LIST_FLAGS: readonly string[] = ["-Z", "-T"];
+export const DUMP_ENTRY_TIME_PATTERN = /(\d{4})(\d{2})(\d{2})\.\d{6}/;
 export const WORK_DIRECTORY_PREFIX = "city-data-compile-";
 
 export const COLUMN_SEPARATOR = "\t";

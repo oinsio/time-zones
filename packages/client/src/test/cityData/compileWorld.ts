@@ -8,6 +8,9 @@ import { join } from "node:path";
 import { runCityDataCompile } from "../../../scripts/cityData/compile.ts";
 
 const CITY_COLUMNS = 19;
+export const DUMP_DATE = "2026-11-13";
+const DUMP_LISTING =
+  "-rw-r--r--  3.0 unx 12345678 tx 3456789 defN 20261113.031500 cities15000.txt";
 
 export function cityLine(
   id: number,
@@ -68,6 +71,9 @@ export async function runCompile(options: {
     },
     runProcess: async (command, args) => {
       commands.push(command);
+      if (args[0] === "-Z") {
+        return { exitCode: 0, stdout: DUMP_LISTING, stderr: "" };
+      }
       workDirectory = args[args.length - 1];
       if (options.unzipExitCode) {
         return {

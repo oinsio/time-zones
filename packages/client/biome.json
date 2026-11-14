@@ -3,6 +3,10 @@
   "root": false,
   "extends": "//",
   "files": {
-    "includes": ["**", "!zone-rules/release.json"]
+    "includes": [
+      "**",
+      "!zone-rules/release.json",
+      "!city-data/geonames-cities.json"
+    ]
   }
 }

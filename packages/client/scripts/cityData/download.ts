@@ -8,6 +8,7 @@ import { createReadStream } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
+import { Temporal } from "../../src/lib/temporal.ts";
 import type { FetchRelease, RunProcess } from "../zoneRules/processTypes.ts";
 import type { AlternateNamesByCity } from "./cityDataTypes.ts";
 import {
@@ -17,9 +18,11 @@ import {
   CITIES_ARCHIVE_NAME,
   CITIES_FILE_NAME,
   COLUMN_SEPARATOR,
+  DUMP_ENTRY_TIME_PATTERN,
   GEONAMES_DUMP_BASE_URL,
   NAME_LANGUAGES,
   UNZIP_COMMAND,
+  UNZIP_LIST_FLAGS,
 } from "./constants.ts";
 import { parseAlternateNameRow } from "./parseGeoNamesRows.ts";
 
@@ -33,6 +36,8 @@ export type DumpPaths = {
   citiesPath: string;
   alternateNamesPath: string;
   admin1Path: string;
+  /** The day GeoNames built the cities dump, as an ISO date. */
+  dumpDate: string;
 };
 
 async function fetchDumpFile(
@@ -71,6 +76,36 @@ async function extractArchive(
   }
 }
 
+function dumpDateError(archiveName: string, cause: string): Error {
+  return new Error(
+    `Reading the date of the dump ${archiveName} failed: ${cause}`,
+  );
+}
+
+/** Reads the build day of the dump from the entry time in its archive; the time has no zone, so only its date is taken. */
+async function readDumpDate(
+  runProcess: RunProcess,
+  archivePath: string,
+  archiveName: string,
+  entryName: string,
+): Promise<string> {
+  const { exitCode, stdout, stderr } = await runProcess(UNZIP_COMMAND, [
+    ...UNZIP_LIST_FLAGS,
+    archivePath,
+    entryName,
+  ]);
+  const match = DUMP_ENTRY_TIME_PATTERN.exec(stdout);
+  const failure = exitCode !== 0 ? stderr : stdout;
+  if (exitCode !== 0 || match === null)
+    throw dumpDateError(archiveName, failure);
+  const [, year, month, day] = match;
+  try {
+    return Temporal.PlainDate.from(`${year}-${month}-${day}`).toString();
+  } catch {
+    throw dumpDateError(archiveName, stdout);
+  }
+}
+
 /** Fetches the dumps into `directory`; a failed download throws naming the dump. */
 export async function downloadDumps(
   fetchDump: FetchRelease,
@@ -104,7 +139,14 @@ export async function downloadDumps(
     ALTERNATE_NAMES_ARCHIVE_NAME,
     directory,
   );
+  const dumpDate = await readDumpDate(
+    runProcess,
+    citiesArchive,
+    CITIES_ARCHIVE_NAME,
+    CITIES_FILE_NAME,
+  );
   return {
+    dumpDate,
     citiesPath: join(directory, CITIES_FILE_NAME),
     alternateNamesPath: join(directory, ALTERNATE_NAMES_FILE_NAME),
     admin1Path,

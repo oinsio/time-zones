@@ -1,7 +1,7 @@
 // Verifies FR1, FR11, FR12 of add-geonames-city-source (D8): the compile entry with stubbed I/O.
 import { access } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { cityLine, runCompile } from "./compileWorld.ts";
+import { cityLine, DUMP_DATE, runCompile } from "./compileWorld.ts";
 
 const KAZAN = cityLine(551487, "Kazan", "Europe/Moscow");
 
@@ -14,7 +14,7 @@ describe("runCityDataCompile", () => {
     expect(dataset.cities).toEqual([
       [551487, "Kazan", "Казань", "RU", 0, 500000],
     ]);
-    expect(dataset.source.dumpDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(dataset.source.dumpDate).toBe(DUMP_DATE);
   });
 
   it("should log the written path and the city count", async () => {
