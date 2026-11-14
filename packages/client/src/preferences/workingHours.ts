@@ -1,5 +1,3 @@
-import { Temporal } from "@/lib/temporal";
-
 /**
  * Working hours: one start and one end for every location, read in each
  * location's local time. Canonical ISO 8601 wall-clock times `HH:MM`.
@@ -23,14 +21,15 @@ const CANONICAL_WALL_TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 const isCanonicalWallTime = (value: unknown): value is string =>
   typeof value === "string" && CANONICAL_WALL_TIME_PATTERN.test(value);
 
-/** Names the fault of a range, or `undefined` when the start is before the end. */
+/**
+ * Names the fault of a range, or `undefined` when the start is before the end.
+ * Canonical `HH:MM` texts compare in time order, so no Temporal is loaded here:
+ * the preferences module is imported before the zone rules are installed.
+ */
 export function checkWorkingHours(
   workingHours: WorkingHours,
 ): WorkingHoursError | undefined {
-  return Temporal.PlainTime.compare(
-    Temporal.PlainTime.from(workingHours.start),
-    Temporal.PlainTime.from(workingHours.end),
-  ) < 0
+  return workingHours.start < workingHours.end
     ? undefined
     : WorkingHoursError.START_NOT_BEFORE_END;
 }

@@ -175,13 +175,12 @@ export const createDayColouringSettingsWorld = () => {
       within(colouringGroup(tab))
         .getAllByRole("radio")
         .map((radio) => (radio as HTMLInputElement).closest("label")?.title),
-    checkedOptionName: (tab = firstTab()) =>
-      (
-        within(colouringGroup(tab))
-          .getAllByRole("radio")
-          .find((radio) => (radio as HTMLInputElement).checked)
-          ?.closest("label") as HTMLElement
-      ).title,
+    checkedOptionName: (tab = firstTab()) => {
+      const checkedRadio = within(colouringGroup(tab))
+        .getAllByRole("radio")
+        .find((radio) => (radio as HTMLInputElement).checked);
+      return checkedRadio?.closest("label")?.title ?? "";
+    },
     chooseColouring: (name: string, tab = firstTab()) =>
       userEvent.click(within(colouringGroup(tab)).getByRole("radio", { name })),
     chooseHourFormat: (name: string) =>
