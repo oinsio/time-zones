@@ -261,16 +261,16 @@ Rules for every task:
 
 ## 10. Integration checks (all ids)
 
-- [ ] 10.1 Run the whole unit suite once: `pnpm test`. It passes.
-- [ ] 10.2 Scoped mutation testing (M6), at most 5 files per run, one run at a time, from `packages/client`:
+- [x] 10.1 Run the whole unit suite once: `pnpm test`. It passes.
+- [x] 10.2 Scoped mutation testing (M6), at most 5 files per run, one run at a time, from `packages/client`:
   1. `npx stryker run --mutate 'src/model/workingTime.ts,src/presenter/dayColours.ts,src/presenter/workingHours.ts,src/preferences/workingHours.ts,src/preferences/preferencesCommands.ts'`;
   2. `npx stryker run --mutate 'src/preferences/parseStoredPreferences.ts,src/adapters/preferencesDocument.ts,src/controller/useWorkingHoursInput.ts,src/presenter/hourStrip.ts,src/views/shared/dayTrackGradient.ts'`.
 
   Read `reports/mutation/mutation-report.json` after each run and add tests until each run scores ≥ 95% (at least 90%).
-- [ ] 10.3 Traceability: from `packages/client`, for each id in `FR1`–`FR15`, `NFR-P1`, `NFR-A1`–`NFR-A4`, `NFR-R1`, `NFR-R2` and `UX1`–`UX5`, run `grep -rln "add-day-colouring-setting" src | xargs grep -l "<id>"` and see at least one file.
+- [x] 10.3 Traceability: from `packages/client`, for each id in `FR1`–`FR15`, `NFR-P1`, `NFR-A1`–`NFR-A4`, `NFR-R1`, `NFR-R2` and `UX1`–`UX5`, run `grep -rln "add-day-colouring-setting" src | xargs grep -l "<id>"` and see at least one file.
 
   Glossary review: `grep -rniE "cell colouring|business hours|office hours|colour scheme" src/locales src/views src/presenter src/app src/test/features` prints nothing, and `grep -rnE "morning, working hours|working hours and evening|9-17 working hours|working hours cell|[0-9] working(,|\"| *\|)" src/test/features --include=*.feature | grep -v "^src/test/features/day_colouring/"` prints nothing (the work period is never called "working hours" or "working"; inside `day_colouring/` the stop name `working` means working time).
-- [ ] 10.4 Run `pnpm run lint`, then `pnpm run typecheck` (it also proves that `PaintBucket`, `SunMoon` and `BriefcaseBusiness` exist in the installed `lucide-react`), then `pnpm run build`, one at a time. All pass.
+- [x] 10.4 Run `pnpm run lint`, then `pnpm run typecheck` (it also proves that `PaintBucket`, `SunMoon` and `BriefcaseBusiness` exist in the installed `lucide-react`), then `pnpm run build`, one at a time. All pass.
 
 ## Human follow-up
 
