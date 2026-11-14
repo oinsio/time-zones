@@ -1460,7 +1460,7 @@ Presenting 50 location rows again at another minute of the same reference day SH
 - **AND** the note is the bottom line of the card that shows it
 
 ### Requirement: City label in the interface language
-A city location's row SHALL show as its city label the name of its zone's city record in the city-name language of the interface language, when the stored label equals that record's name in any city-name language. The city-name language follows the dialect fallback: the interface language, its base language, then English. When the zone has no city record, or the stored label is none of its names, the row MUST show the stored label. Until the zone cities data is loaded, or when loading fails, the row MUST show the stored label, with no error and no retry. Switching the interface language MUST change the city label of every listed city location at once, without a reload and without a loading state. A switch MUST NOT change the stored list, any location ID, the order or the home location, and MUST NOT write the stored location list. Every text that names a row's city MUST use this city label: the location menu name, the time button and field name, and the removal, home and reorder announcements. Inputs: the location list, the interface language, the zone cities data. Output: the city label of each row. Errors: none. <!-- implements FR1, FR2, FR3, UX1, UX2 of show-city-labels-in-interface-language -->
+A city location's row SHALL show as its city label the name of a city record of its zone in the city-name language of the interface language, when the stored label equals that record's name in any city-name language; the record may be the zone city or any other city of the city data in that zone, and when several records of the zone have the stored label as a name, the zone city wins, then the larger population. The city-name language follows the dialect fallback: the interface language, its base language, then English. When no city record of the zone has the stored label as a name, the row MUST show the stored label. Until the zone cities data is loaded, or when loading fails, the row MUST show the stored label, with no error and no retry. Switching the interface language MUST change the city label of every listed city location at once, without a reload and without a loading state. A switch MUST NOT change the stored list, any location ID, the order or the home location, and MUST NOT write the stored location list. Every text that names a row's city MUST use this city label: the location menu name, the time button and field name, and the removal, home and reorder announcements. Inputs: the location list, the interface language, the zone cities data. Output: the city label of each row. Errors: none. <!-- implements FR1, FR2, FR3, UX1, UX2 of show-city-labels-in-interface-language; FR9 of add-geonames-city-source -->
 
 #### Scenario: Added in Russian, shown in English
 - **GIVEN** the interface language is Russian
@@ -1477,6 +1477,19 @@ A city location's row SHALL show as its city label the name of its zone's city r
 - **AND** the user has added Tokyo, shown as "Tokyo"
 - **WHEN** the user switches the interface language to Russian
 - **THEN** the row reads «Токио»
+
+#### Scenario: A city that is not the zone city
+- **GIVEN** the interface language is Russian
+- **AND** the zone cities data is loaded
+- **AND** the user has added Kazan in `Europe/Moscow`, shown as «Казань»
+- **WHEN** the user switches the interface language to English
+- **THEN** the row reads "Kazan"
+- **AND** a Moscow row in the same list still reads "Moscow"
+
+#### Scenario: Namesakes in one zone read the same
+- **GIVEN** the stored list is `America/Chicago` stored as "Springfield"
+- **WHEN** the interface language is Russian and the zone cities data is loaded
+- **THEN** the row reads the Russian name of Springfield, Missouri, the larger of the two namesakes of that zone
 
 #### Scenario: A switch keeps the stored list
 - **GIVEN** the stored list is Tokyo stored as «Токио», as home
