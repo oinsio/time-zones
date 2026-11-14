@@ -1,9 +1,11 @@
 // Verifies NFR-P1 of add-grid-hour-cells-and-hour-frame.
+
 import { bench, describe } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { getReferenceDay, INITIAL_WORLD_CLOCK_STATE } from "@/model";
 import { HourFormat } from "@/preferences";
 import { presentHourStrip } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import {
   HOUR_STRIP_BUDGET_ROW_COUNT,
   HOUR_STRIP_BUDGET_ZONES,
@@ -32,6 +34,7 @@ const presentFiftyStrips = (instant: string) => {
         referenceZoneId: REFERENCE_ZONE,
         language: "en",
         hourFormat: HourFormat.H24,
+        ...TIME_OF_DAY_CONTEXT,
       },
     );
   }

@@ -1,5 +1,6 @@
 // Verifies FR3 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).
+
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
@@ -10,6 +11,7 @@ import {
   INITIAL_WORLD_CLOCK_STATE,
 } from "@/model";
 import { HourFormat } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { formatHourLabel, presentDayTrack } from "./dayTrack";
 
 const INSTANT = Temporal.Instant.from("2026-03-08T07:30:00Z");
@@ -31,6 +33,7 @@ const present = (
     day: DAY,
     language,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     translate: i18n.getFixedT(language),
     localTimeLabel,
     localDateLabel,

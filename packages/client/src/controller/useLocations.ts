@@ -11,6 +11,7 @@ import { type LocationRowsContext, presentLocationRows } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
 import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 import { useCityLabels } from "./useCityLabels";
+import { useDayColouring } from "./useDayColouring";
 import { useExemplarCity } from "./useExemplarCity";
 import { useHourFormat } from "./useHourFormat";
 import { useZoneLabelParts } from "./useZoneLabelParts";
@@ -53,6 +54,7 @@ export function useLocations() {
   const { locations, deviceTimeZoneId, homeLocationId } = state;
   const hourFormat = useHourFormat();
   const zoneLabelParts = useZoneLabelParts();
+  const { dayColouring, workingHours } = useDayColouring();
   const { t } = useTranslation();
   const { code: language } = useActiveInterfaceLanguage();
   const deviceTimeLocation = locations.find(isDeviceTimeLocation);
@@ -68,6 +70,8 @@ export function useLocations() {
     const context: LocationRowsContext = {
       language,
       hourFormat,
+      dayColouring,
+      workingHours,
       zoneLabelParts,
       instant,
       translate: t,
@@ -91,6 +95,8 @@ export function useLocations() {
     cityLabels,
     language,
     hourFormat,
+    dayColouring,
+    workingHours,
     zoneLabelParts,
     t,
     clock,

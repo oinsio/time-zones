@@ -1,4 +1,5 @@
 // Implements FR5, UX1 of replace-wall-clock-row-budgets-with-deterministic-checks (D4).
+
 import i18n from "i18next";
 import { expect } from "vitest";
 import {
@@ -9,6 +10,7 @@ import { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { type HourLabel, presentLocationRows } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 
@@ -30,6 +32,7 @@ export const createTrackLabelsCheck = () => {
     return presentLocationRows(locations, {
       language,
       hourFormat: HourFormat.H24,
+      ...TIME_OF_DAY_CONTEXT,
       zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
       instant,
       translate: i18n.getFixedT(language),

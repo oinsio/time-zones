@@ -15,12 +15,14 @@ import {
   SaveOutcome,
 } from "@/ports";
 import {
+  type DayColouring,
   DEFAULT_PREFERENCES,
   type HourFormat,
   type Preferences,
   PreferencesCommandType,
   reducePreferences,
   type ThemePreference,
+  type WorkingHours,
   type ZoneLabelPart,
 } from "@/preferences";
 import {
@@ -150,6 +152,17 @@ export function PreferencesProvider({
       // Implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
       setViewMode: (viewMode: string) =>
         applyChange({ type: PreferencesCommandType.SET_VIEW_MODE, viewMode }),
+      // Implements FR1, FR3, FR6, FR7 of add-day-colouring-setting (D1).
+      setDayColouring: (dayColouring: DayColouring) =>
+        applyChange({
+          type: PreferencesCommandType.SET_DAY_COLOURING,
+          dayColouring,
+        }),
+      setWorkingHours: (workingHours: WorkingHours) =>
+        applyChange({
+          type: PreferencesCommandType.SET_WORKING_HOURS,
+          workingHours,
+        }),
       resetPreferences: () => {
         discardPendingWrite();
         latestPreferences.current = DEFAULT_PREFERENCES;

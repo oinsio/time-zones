@@ -1,4 +1,5 @@
 // Implements FR1–FR8 of show-clock-change-note-on-location-cards (D1–D5).
+
 import i18n from "i18next";
 import type { MockInstance } from "vitest";
 import { DEVICE_TIME_LOCATION_ID } from "@/constants";
@@ -20,6 +21,7 @@ import {
 } from "@/model";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { type LocationRow, presentLocationRows } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { type StubbedZoneRules, stubZoneRules } from "@/test/stubZoneRules";
 
@@ -132,6 +134,7 @@ export function createClockChangeNoteWorld() {
       return presentLocationRows(state.locations, {
         language,
         hourFormat,
+        ...TIME_OF_DAY_CONTEXT,
         zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
         instant,
         translate: i18n.getFixedT(language),

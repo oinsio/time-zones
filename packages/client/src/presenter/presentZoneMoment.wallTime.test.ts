@@ -1,5 +1,6 @@
 // Verifies FR5, FR6 of show-clock-change-note-on-location-cards (D4, D5).
 // Verifies FR7, NFR-A2 of add-wall-time-input-with-hint (D4).
+
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { DEVICE_TIME_LOCATION_ID } from "@/constants";
@@ -15,6 +16,7 @@ import {
   WallTimeTargetKind,
 } from "@/model";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
 import type { LocationRowsContext } from "./presentZoneMoment";
@@ -42,6 +44,7 @@ const contextOf = (
 ): LocationRowsContext => ({
   language,
   hourFormat: HourFormat.H24,
+  ...TIME_OF_DAY_CONTEXT,
   zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
   instant,
   translate: i18n.getFixedT(language),

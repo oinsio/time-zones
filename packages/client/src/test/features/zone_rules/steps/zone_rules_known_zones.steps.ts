@@ -1,9 +1,11 @@
 // Implements FR5 of add-zone-rules-from-iana: executable scenarios of the known zones.
+
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
 import { expect } from "vitest";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import {
   type FreshModules,
   startOnStaleEngine,
@@ -33,6 +35,7 @@ function presentRow(
   const [row] = presenter.presentLocationRows(outcome.state.locations, {
     language: LANGUAGE,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant: momentInstant,
     translate: i18n.getFixedT(LANGUAGE),

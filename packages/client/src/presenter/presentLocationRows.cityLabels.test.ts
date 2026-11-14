@@ -1,9 +1,11 @@
 // Verifies FR1, FR3 of show-city-labels-in-interface-language (D4).
+
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import { buildDeviceTimeLocation } from "@/model";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
@@ -24,6 +26,7 @@ const present = (
   presentLocationRows(locations, {
     language: "en",
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,

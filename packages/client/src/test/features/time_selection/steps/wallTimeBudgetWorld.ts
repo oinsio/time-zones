@@ -12,6 +12,7 @@ import {
 } from "@/model";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { presentLocationRows } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import {
@@ -59,6 +60,7 @@ export const presentBudgetState = (state: WorldClockState) => {
   return presentLocationRows(state.locations, {
     language: BUDGET_LANGUAGE,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(BUDGET_LANGUAGE),

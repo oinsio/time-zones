@@ -1,8 +1,11 @@
 // Verifies FR3, FR4, FR5, NFR-P1 of add-grid-hour-cells-and-hour-frame.
+
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
-import { DayPeriod, getReferenceDay, INITIAL_WORLD_CLOCK_STATE } from "@/model";
+import { getReferenceDay, INITIAL_WORLD_CLOCK_STATE } from "@/model";
 import { HourFormat } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
+import { DayColour } from "./dayColours";
 import { getDayPeriodMarkers } from "./dayPeriodMarkers";
 import { type HourStripContext, presentHourStrip } from "./hourStrip";
 
@@ -15,6 +18,7 @@ const CONTEXT: HourStripContext = {
   referenceZoneId: "Asia/Almaty",
   language: "en",
   hourFormat: HourFormat.H24,
+  ...TIME_OF_DAY_CONTEXT,
 };
 
 const presentCell = (
@@ -53,6 +57,7 @@ describe("presentHourStrip", () => {
     (column, hour, marker) => {
       const cell = presentCell("Asia/Almaty", column, {
         hourFormat: HourFormat.H12,
+        ...TIME_OF_DAY_CONTEXT,
       });
 
       expect([cell.hourText, cell.dayPeriodMarker]).toEqual([hour, marker]);
@@ -63,6 +68,7 @@ describe("presentHourStrip", () => {
     const cell = presentCell("Asia/Almaty", 21, {
       language: "ru",
       hourFormat: HourFormat.H12,
+      ...TIME_OF_DAY_CONTEXT,
     });
 
     expect(cell.dayPeriodMarker).toBe(getDayPeriodMarkers("ru").pm);
@@ -84,11 +90,11 @@ describe("presentHourStrip", () => {
     expect(presentCell("Europe/Moscow", 3).midnightMarker).toBeUndefined();
   });
 
-  it("should pass the day period and the offset edge through", () => {
+  it("should pass the day colour and the offset edge through", () => {
     const cell = presentCell("America/New_York", 12);
 
-    expect([cell.dayPeriod, cell.hasOffsetEdge]).toEqual([
-      DayPeriod.NIGHT,
+    expect([cell.dayColour, cell.hasOffsetEdge]).toEqual([
+      DayColour.NIGHT,
       true,
     ]);
   });
@@ -108,6 +114,7 @@ describe("presentHourStrip", () => {
       presentHourStrip("Asia/Almaty", {
         ...CONTEXT,
         hourFormat: HourFormat.H12,
+        ...TIME_OF_DAY_CONTEXT,
       }),
     );
   });

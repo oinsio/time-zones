@@ -1,4 +1,5 @@
 // Implements FR1, FR4 of add-zone-rules-from-iana: helpers of the lookup scenarios.
+
 import i18n from "i18next";
 import { Temporal } from "@/lib/temporal";
 import {
@@ -8,6 +9,7 @@ import {
   SECONDS_PER_MINUTE,
 } from "@/lib/zoneRules";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { committedRelease } from "@/test/installZoneRules";
 import type { FreshModules } from "@/test/staleEngineWorld";
 
@@ -57,6 +59,7 @@ export function presentAlmaty(modules: FreshModules, instantText: string) {
   const [row] = presenter.presentLocationRows([almaty], {
     language: LANGUAGE,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(LANGUAGE),
@@ -79,6 +82,7 @@ export function presentAlmaty(modules: FreshModules, instantText: string) {
     referenceZoneId: ALMATY_ZONE_ID,
     language: LANGUAGE,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
   });
   const hourCell = cells.find((cell) => cell.key === instant.toString());
   const dateBar = presenter.presentDateBar({
@@ -91,6 +95,7 @@ export function presentAlmaty(modules: FreshModules, instantText: string) {
     },
     language: LANGUAGE,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     translate: i18n.getFixedT(LANGUAGE),
   });
   return { row, hourCell, dateBar };

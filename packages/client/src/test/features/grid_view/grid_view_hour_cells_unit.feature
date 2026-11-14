@@ -26,4 +26,4 @@ Feature: Hour cells of the Grid view
   Scenario: Day periods of Almaty
     Given the reference zone is "Asia/Almaty" and the reference day is 2026-03-08
     When the hour cells of Almaty are presented
-    Then columns 0-6 and 22-23 are night, 7-8 morning, 9-17 working hours and 18-21 evening
+    Then columns 0-6 and 22-23 are night, 7-8 morning, 9-17 work and 18-21 evening

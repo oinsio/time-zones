@@ -11,7 +11,12 @@ import {
   RowNoteKind,
   type WallClockNote,
 } from "@/model";
-import { type HourFormat, ZoneLabelPart } from "@/preferences";
+import {
+  type DayColouring,
+  type HourFormat,
+  type WorkingHours,
+  ZoneLabelPart,
+} from "@/preferences";
 import { presentClockChangeNote } from "./clockChangeNote";
 import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
 import { formatLocalDate, formatLocalTime } from "./localDateTime";
@@ -23,6 +28,10 @@ import { formatZoneAbbreviation } from "./zoneAbbreviation";
 export type LocationRowsContext = {
   language: InterfaceLanguageCode;
   hourFormat: HourFormat;
+  /** How the day tracks are coloured (FR2 of add-day-colouring-setting). */
+  dayColouring: DayColouring;
+  /** The working hours of the Working hours colouring (FR6 of add-day-colouring-setting). */
+  workingHours: WorkingHours;
   /** The shown zone parts of the zone label (FR13 of show-zone-abbreviations-and-zone-label-setting). */
   zoneLabelParts: readonly ZoneLabelPart[];
   instant: Temporal.Instant;
@@ -82,6 +91,8 @@ export function presentZoneMoment(
   {
     language,
     hourFormat,
+    dayColouring,
+    workingHours,
     zoneLabelParts,
     instant,
     translate,
@@ -142,6 +153,8 @@ export function presentZoneMoment(
           day: referenceDay,
           language,
           hourFormat,
+          dayColouring,
+          workingHours,
           translate,
           localTimeLabel,
           localDateLabel,

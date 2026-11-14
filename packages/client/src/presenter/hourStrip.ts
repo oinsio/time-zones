@@ -6,13 +6,14 @@ import {
 } from "@/constants";
 import type { InterfaceLanguageCode } from "@/locales";
 import {
-  type DayPeriod,
   getHourCells,
+  getHourCellWorkingFlags,
   type HourCell,
   type ReferenceDay,
 } from "@/model";
-import { HourFormat } from "@/preferences";
+import { DayColouring, HourFormat, type WorkingHours } from "@/preferences";
 import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
+import { type DayColour, presentHourCellColour } from "./dayColours";
 import { getDayPeriodMarkers } from "./dayPeriodMarkers";
 
 /**
@@ -30,7 +31,7 @@ export type PresentedHourCell = {
   minuteText: string;
   /** `AM` / `PM` in the 12-hour format, empty in the 24-hour one. */
   dayPeriodMarker: string;
-  dayPeriod: DayPeriod;
+  dayColour: DayColour;
   hasOffsetEdge: boolean;
   midnightMarker?: { monthText: string; dayText: string };
 };
@@ -42,6 +43,8 @@ export type HourStripContext = {
   referenceZoneId: string;
   language: InterfaceLanguageCode;
   hourFormat: HourFormat;
+  dayColouring: DayColouring;
+  workingHours: WorkingHours;
 };
 
 const MONTH_PART_TYPE = "month";
@@ -77,6 +80,7 @@ function presentMidnightMarker(
 
 function presentHourCell(
   cell: HourCell,
+  isWorkingCell: boolean,
   timeZoneId: string,
   context: HourStripContext,
 ): PresentedHourCell {
@@ -98,7 +102,7 @@ function presentHourCell(
         ? markers.am
         : markers.pm
       : NO_TEXT,
-    dayPeriod: cell.dayPeriod,
+    dayColour: presentHourCellColour(cell, isWorkingCell, context.dayColouring),
     hasOffsetEdge: cell.hasOffsetEdge,
     ...(midnightMarker ? { midnightMarker } : {}),
   };
@@ -114,6 +118,9 @@ export function presentHourStrip(
     context.referenceZoneId,
     context.language,
     context.hourFormat,
+    context.dayColouring,
+    context.workingHours.start,
+    context.workingHours.end,
   ].join("|");
   if (stripsKey !== cachedStripsKey) {
     cachedStripsKey = stripsKey;
@@ -121,9 +128,19 @@ export function presentHourStrip(
   }
   const cachedStrip = cachedStripsByZone.get(timeZoneId);
   if (cachedStrip !== undefined) return cachedStrip;
+  const workingFlags =
+    context.dayColouring === DayColouring.WORKING_HOURS
+      ? getHourCellWorkingFlags(timeZoneId, context.day, context.workingHours)
+      : undefined;
   const strip = {
     cells: getHourCells(timeZoneId, context.day, context.referenceZoneId).map(
-      (cell) => presentHourCell(cell, timeZoneId, context),
+      (cell, column) =>
+        presentHourCell(
+          cell,
+          workingFlags?.[column] ?? false,
+          timeZoneId,
+          context,
+        ),
     ),
   };
   cachedStripsByZone.set(timeZoneId, strip);

@@ -1,7 +1,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import { DayPeriod } from "@/model";
+import { DayColour } from "@/presenter";
 import { createHourCellsSteps, parseColumnRange } from "./hourCellsWorld";
 
 const feature = await loadFeature("../grid_view_hour_cells_unit.feature");
@@ -58,18 +58,18 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     When("the hour cells of Almaty are presented", () => {});
     Then(
-      "columns 0-6 and 22-23 are night, 7-8 morning, 9-17 working hours and 18-21 evening",
+      "columns 0-6 and 22-23 are night, 7-8 morning, 9-17 work and 18-21 evening",
       () => {
-        const expectedPeriods: [string, DayPeriod][] = [
-          ["0-6", DayPeriod.NIGHT],
-          ["22-23", DayPeriod.NIGHT],
-          ["7-8", DayPeriod.MORNING],
-          ["9-17", DayPeriod.WORK],
-          ["18-21", DayPeriod.EVENING],
+        const expectedPeriods: [string, DayColour][] = [
+          ["0-6", DayColour.NIGHT],
+          ["22-23", DayColour.NIGHT],
+          ["7-8", DayColour.MORNING],
+          ["9-17", DayColour.WORK],
+          ["18-21", DayColour.EVENING],
         ];
         for (const [range, period] of expectedPeriods) {
           for (const column of parseColumnRange(range)) {
-            expect(stripOf("Almaty").cells[column].dayPeriod).toBe(period);
+            expect(stripOf("Almaty").cells[column].dayColour).toBe(period);
           }
         }
       },

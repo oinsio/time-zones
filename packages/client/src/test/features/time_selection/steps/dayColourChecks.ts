@@ -1,11 +1,7 @@
 import { expect } from "vitest";
 import { NANOSECONDS_PER_MINUTE, TRACK_STEP_MINUTES } from "@/constants";
-import {
-  DAY_PERIOD_SCHEDULE,
-  DayPeriod,
-  type DayPeriodStop,
-  getDayPeriod,
-} from "@/model";
+import { DAY_PERIOD_SCHEDULE, getDayPeriod } from "@/model";
+import { DayColour, type DayColourStop } from "@/presenter";
 import { KNOWN_CITIES } from "@/test/factories/buildLocation";
 import type { createTimeSelectionWorld } from "./timeSelectionWorld";
 
@@ -14,17 +10,17 @@ type TimeSelectionWorld = ReturnType<typeof createTimeSelectionWorld>;
 const PRECISION = 6;
 const STOP_SEPARATOR = ", ";
 const LABEL_SEPARATOR = " ";
-const PERIOD_BY_NAME: Record<string, DayPeriod> = {
-  night: DayPeriod.NIGHT,
-  morning: DayPeriod.MORNING,
-  working: DayPeriod.WORK,
-  evening: DayPeriod.EVENING,
+const COLOUR_BY_NAME: Record<string, DayColour> = {
+  night: DayColour.NIGHT,
+  morning: DayColour.MORNING,
+  work: DayColour.WORK,
+  evening: DayColour.EVENING,
 };
 
-const parseStops = (text: string): DayPeriodStop[] =>
+const parseStops = (text: string): DayColourStop[] =>
   text.split(STOP_SEPARATOR).map((stopText) => {
-    const [fraction, periodName] = stopText.split(LABEL_SEPARATOR);
-    return { fraction: Number(fraction), period: PERIOD_BY_NAME[periodName] };
+    const [fraction, colourName] = stopText.split(LABEL_SEPARATOR);
+    return { fraction: Number(fraction), colour: COLOUR_BY_NAME[colourName] };
   });
 
 /** Asserts the colour stops presented for a city, e.g. "0.27 night, 0.31 morning". */
@@ -38,7 +34,7 @@ export const expectStops = (
   expect(actual).toHaveLength(expected.length);
   expected.forEach((stop, index) => {
     expect(actual[index]?.fraction).toBeCloseTo(stop.fraction, PRECISION);
-    expect(actual[index]?.period).toBe(stop.period);
+    expect(actual[index]?.colour).toBe(stop.colour);
   });
 };
 
@@ -71,14 +67,14 @@ export const expectPeriodColoursOutsideBlends = (
       const isInsideBlend =
         previous !== undefined &&
         next !== undefined &&
-        previous.period !== next.period;
+        previous.colour !== next.colour;
       if (isInsideBlend) continue;
       const localTime = day.start
         .add({ nanoseconds: minute * NANOSECONDS_PER_MINUTE })
         .toZonedDateTimeISO(zone)
         .toPlainTime();
-      expect((previous ?? next)?.period).toBe(
-        getDayPeriod(localTime, DAY_PERIOD_SCHEDULE),
+      expect((previous ?? next)?.colour).toBe(
+        DayColour[getDayPeriod(localTime, DAY_PERIOD_SCHEDULE)],
       );
       checkedPositions += 1;
     }

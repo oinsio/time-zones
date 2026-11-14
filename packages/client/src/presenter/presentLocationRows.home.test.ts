@@ -6,6 +6,7 @@ import { fakeClock } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import { getUtcOffsetMinutes, type Location } from "@/model";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
@@ -32,6 +33,7 @@ const present = (
   return presentLocationRows(locations, {
     language,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(language),
