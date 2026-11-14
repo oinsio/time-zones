@@ -1,0 +1,11 @@
+{"seq":0,"tool":"Bash","start":"2026-11-14T10:35:45.683743Z","durationMillis":650}
+{"seq":1,"tool":"Bash","start":"2026-11-14T10:35:48.809368Z","durationMillis":24}
+{"seq":2,"tool":"Bash","start":"2026-11-14T10:35:51.312382Z","durationMillis":24}
+{"seq":3,"tool":"Bash","start":"2026-11-14T10:36:04.469437Z","durationMillis":120359}
+{"seq":4,"tool":"TaskStop","start":"2026-11-14T10:38:06.822494Z","durationMillis":144}
+{"seq":5,"tool":"Bash","start":"2026-11-14T10:38:07.285668Z","durationMillis":36}
+{"seq":6,"tool":"Bash","start":"2026-11-14T10:38:18.575501Z","durationMillis":15}
+{"seq":7,"tool":"Bash","start":"2026-11-14T10:38:21.682164Z","durationMillis":28}
+{"seq":8,"tool":"Bash","start":"2026-11-14T10:38:24.036048Z","durationMillis":11}
+{"seq":9,"tool":"Bash","start":"2026-11-14T10:38:35.004375Z","durationMillis":61}
+{"seq":10,"tool":"Bash","start":"2026-11-14T10:38:36.393390Z","durationMillis":3215}
