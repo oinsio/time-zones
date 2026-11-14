@@ -12,7 +12,7 @@ Rules for every task:
 
 ## 1. Glossary and architecture docs (FR1, FR4, FR8, FR13, FR14; design D1, D3, D4, D7, D8)
 
-- [ ] 1.1 `docs/glossary/settings.md`: add these terms:
+- [x] 1.1 `docs/glossary/settings.md`: add these terms:
   - **Day colouring**: *RU:* «Раскраска»: «Обычная», «По времени суток», «По рабочему времени»; English "Colouring", "Plain", "Time of day", "Working hours"; *Code:* `DayColouring`, `DAY_COLOURING_ORDER`, `Preferences.dayColouring`, `SET_DAY_COLOURING`, `useDayColouring`, `DayColouringGroup`, `settings.dayColouringLabel`; *Never:* colour scheme.
   - **Working hours**: one start and one end for every location, read in each location's local time, 10:00–18:00 by default; *RU:* «Рабочие часы»; *Code:* `WorkingHours`, `DEFAULT_WORKING_HOURS`, `checkWorkingHours`, `SET_WORKING_HOURS`, `useWorkingHoursInput`, `WorkingHoursGroup`, `settings.workingHoursLabel`; *Not:* the work period 09:00–18:00 of the day periods; *Never:* business hours, office hours.
   - **Time range group**: *RU:* группа диапазона времени; *Code:* `SettingsTimeRangeGroup`.
@@ -33,7 +33,7 @@ Rules for every task:
   In `docs/glossary/views.md`, replace the *(planned)* **Cell colouring** entry with a pointer to **Day colouring**.
 
   Verify: `grep -n "Day colouring\|Working time\|Time range group" docs/glossary/*.md` lists all three files, `grep -n "working hours (09:00" docs/glossary/time-selection.md` prints nothing, `grep -n "Cell colouring" docs/glossary/views.md` prints nothing, and each touched glossary file stays under 200 lines (`wc -l docs/glossary/*.md`).
-- [ ] 1.2 `docs/architecture/domain-model.md`:
+- [x] 1.2 `docs/architecture/domain-model.md`:
   - add `DayColouring dayColouring` and `WorkingHours workingHours` to the `Preferences` class;
   - add `SET_DAY_COLOURING` and `SET_WORKING_HOURS` to the preference commands;
   - extend "Day periods" with the day colouring and the working time rule (Monday to Friday by local date, local time at every instant, half-cell rule).

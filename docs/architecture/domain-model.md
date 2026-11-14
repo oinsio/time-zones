@@ -34,6 +34,8 @@ classDiagram
         string? interfaceLanguage "registered locale code; null = follow the browser"
         ZoneLabelPart[] zoneLabelParts "COUNTRY | ZONE_ABBREVIATION | UTC_OFFSET, each optional"
         string? viewMode       "registered ViewId; null = Cards"
+        DayColouring dayColouring "PLAIN | TIME_OF_DAY | WORKING_HOURS; default TIME_OF_DAY"
+        WorkingHours workingHours "start < end, HH:MM wall times; default 10:00-18:00"
     }
     WorldClockState "1" o-- "*" Location
     WorldClockState "1" *-- "1" ReferenceMoment
@@ -45,7 +47,7 @@ classDiagram
 - `homeLocationId` is optional; the app never assigns it.
 - `deviceTimeZoneId` is environment state: the controller reads it from the `Clock` port and sends `SET_DEVICE_TIME_ZONE`; it is not persisted.
 - `Preferences` is a separate model with its own repository.
-- Commands: `ADD_DEVICE_TIME_LOCATION` (locations), `SET_THEME`, `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE`, `SET_ZONE_LABEL_PART`, `SET_VIEW_MODE` (preferences). `getRows` derives no extra entry.
+- Commands: `ADD_DEVICE_TIME_LOCATION` (locations), `SET_THEME`, `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE`, `SET_ZONE_LABEL_PART`, `SET_VIEW_MODE`, `SET_DAY_COLOURING`, `SET_WORKING_HOURS` (preferences). `getRows` derives no extra entry.
 - `viewMode` is `string | null`: a registered view id or none chosen (Cards); an unregistered id shows Cards ([ADR-0012](../adr/0012-user-chosen-view.md)). `SET_VIEW_MODE` sets it.
 
 ## Invariants
@@ -121,7 +123,9 @@ Selectors take the state and the current instant from the `Clock` and return vie
 |NIGHT|MORN |      WORK       |EVEN |NIGHT|
 ```
 
-Views use four colors: night, morning, working hours, evening. A user-defined schedule (global or per location) can later replace the constants without changing the selector. Weekends are not marked in the MVP.
+Views use four colors: night, morning, work, evening. A user-defined schedule (global or per location) can later replace the constants without changing the selector.
+
+The day colouring (change add-day-colouring-setting) is a second, separate rule: Plain, Time of day (the day periods above) or Working hours. Working time is the user's working hours read in each location's local time on Monday to Friday by the local date, at every instant (the local time after a clock change decides); an hour cell is working when working time covers at least half of it. Owner: `getWorkingTimeSpans` and `isWorkingTime`; non-working is a grey, working and plain are the accent.
 
 Hour cells and day tracks are spans of absolute time starting at the reference zone's local midnight, so 23- and 25-hour days and :30 / :45 offsets stay aligned.
 

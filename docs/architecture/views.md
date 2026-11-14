@@ -33,7 +33,7 @@ All rows sit in one panel with dividers, so a frame can cross every row. Each ro
 - **Row header:** drag handle, home or here icon, city, difference, zone line; on the right the date with the day shift mark, the time and the location menu. On a narrow screen it takes two lines (city and zone line on the left, time and date on the right).
 - **Hour cells:** the hour strip is the Grid view's slider for the keyboard; a tap sets a one-hour meeting range. One absolute hour of the reference day each, labelled with the location's local start hour (`9`, `9:30`), coloured by its day period. Where a location's local midnight falls the cell shows the date (`MAR` over `8`) instead of `0` and is shaded; the row of the reference zone shows a plain `0`, since its day always starts there. A DST offset edge is a dark line on the cell's left side.
 - **Width:** all 24 cells when each is at least 32 px wide (desktop about 58 px, tablet 46 px, phone in landscape 33 px). Otherwise about 9 cells of 36–40 px (phone in portrait) and the strips of all rows scroll horizontally together.
-- **Cell colouring:** by day period. A later setting may offer working hours only or no colouring.
+- **Day colouring:** the setting with three colourings (Plain, Time of day, Working hours) for the hour cells of Grid and the day tracks of Cards alike. Working hours uses the accent for working cells and a non-working grey for the rest.
 
 ### Hour frame and meeting frame
 
@@ -83,7 +83,7 @@ Used by every view, implemented once in `views/shared/`:
 | Location menu | «⋯» button with a hit area of 44 px; opens on click, so it works without Pointer Events; items "Make home" / "Clear home" and "Remove" |
 | Device time location | a location of the list for the device zone; removable, reorderable, can be home; meta line "Device time · UTC+5" ([ADR-0010](../adr/0010-device-time-location.md)) |
 | Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — an active Now button signals a pinned moment |
-| Day-period colors | four pastel bands: night, morning, working hours, evening — from design tokens. Soft gradient transitions: 1 hour around night boundaries, 15 minutes around working hours, so 09:00 and 18:00 stay readable. Colors also differ in lightness, not only in hue |
+| Day-period colors | four pastel bands: night, morning, work, evening — from design tokens (Time of day colouring). Soft gradient transitions: 1 hour around night boundaries, 15 minutes around the work period, so 09:00 and 18:00 stay readable. Colors also differ in lightness, not only in hue |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
 | Now button | returns to `LIVE`; always shown, active when the moment is pinned, inactive and grey while live |
 | Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 does not exist on this day — clocks moved forward. Showing 03:30." / "01:30 occurs twice — showing the first (UTC−4)."; stays until the next change; `role="status"` (polite); text comes from the presenter; hides the clock change note of its row |
@@ -104,9 +104,11 @@ Screens: [docs/design](../design/README.md). Values become design tokens.
 |---|---|---|
 | Night | `#A3AFD3` | `#56679A` |
 | Morning | `#F8CBBE` | `#E0B1A4` |
-| Working hours | `#F8E6A6` | `#EEDBA3` |
+| Work | `#F8E6A6` | `#EEDBA3` |
+| Non-working (Working hours colouring, add-day-colouring-setting) | `#ECECEF` | `#3B4660` |
 | Evening | `#D4C6EE` | `#B9AADB` |
 
+- Hour frame: accent in Time of day, foreground colour on the accent cells of Plain and Working hours.
 - Grid (hour cells take the day-track colours above; in the dark theme digits on morning, working and evening cells use `#0F1729`):
 
 | Element | Light | Dark |
@@ -123,7 +125,7 @@ Screens: [docs/design](../design/README.md). Values become design tokens.
 | Overlay | Content |
 |---|---|
 | Search | full screen on phones, dialog on wide screens; input plus results as "City, Region, Country" (region once a richer source is added, [ADR-0006](../adr/0006-city-data-sources.md)); suggestions are shown before typing (never an empty screen) |
-| Settings | the Gnomish Factory credit above the theme; theme (System, Light, Dark; icons only) and hour format (12 / 24); view (Cards, Grid; names); interface language (collapsible list of the locale registry) |
+| Settings | the Gnomish Factory credit above the theme; theme (System, Light, Dark; icons only) and hour format (12 / 24); view (Cards, Grid; names); colouring (Plain, Time of day, Working hours; icons) and, only in Working hours, the working hours row (two time fields); interface language (collapsible list of the locale registry) |
 
 ## View contract
 
