@@ -13,7 +13,7 @@ Rules for every task:
 ## 1. Glossary and architecture docs (FR1, FR4, FR8, FR13, FR14; design D1, D3, D4, D7, D8)
 
 - [ ] 1.1 `docs/glossary/settings.md`: add these terms:
-  - **Day colouring**: *RU:* «Раскраска»: «Обычная», «По времени суток», «По рабочему времени»; English "Colouring", "Plain", "Time of day", "Working hours"; *Code:* `DayColouring`, `DAY_COLOURING_ORDER`, `Preferences.dayColouring`, `SET_DAY_COLOURING`, `useDayColouring`, `DayColouringGroup`, `settings.dayColouringLabel`; *Never:* colour scheme, cell colouring.
+  - **Day colouring**: *RU:* «Раскраска»: «Обычная», «По времени суток», «По рабочему времени»; English "Colouring", "Plain", "Time of day", "Working hours"; *Code:* `DayColouring`, `DAY_COLOURING_ORDER`, `Preferences.dayColouring`, `SET_DAY_COLOURING`, `useDayColouring`, `DayColouringGroup`, `settings.dayColouringLabel`; *Never:* colour scheme.
   - **Working hours**: one start and one end for every location, read in each location's local time, 10:00–18:00 by default; *RU:* «Рабочие часы»; *Code:* `WorkingHours`, `DEFAULT_WORKING_HOURS`, `checkWorkingHours`, `SET_WORKING_HOURS`, `useWorkingHoursInput`, `WorkingHoursGroup`, `settings.workingHoursLabel`; *Not:* the work day period 09:00–18:00; *Never:* business hours, office hours.
   - **Time range group**: *RU:* группа диапазона времени; *Code:* `SettingsTimeRangeGroup`.
 
