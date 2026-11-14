@@ -173,7 +173,7 @@ Rules for every task:
   Verify: `npx vitest run src/styles/tokens.test.ts` fails, then passes. Then `grep -rn "day-working\|dayWorking\|day\.working" src tailwind.config.ts` prints nothing.
 - [ ] 6.2 RED then GREEN, `src/views/shared/dayTrackGradient.ts`:
   - `DAY_COLOUR_VARIABLES` (plain and working time → `--color-accent`, non-working → `--color-day-non-working`, the periods unchanged);
-  - `DAY_COLOUR_FOREGROUND_CLASS_NAMES`;
+  - `DAY_COLOUR_FOREGROUND_CLASS_NAMES` (D4: night and non-working → `text-foreground`, morning, work and evening → `text-hour-cell-foreground`, plain and working time → `text-accent-foreground`);
   - `buildDayTrackGradient(stops: readonly DayColourStop[])`, where a single stop is written as two stops of its colour at `0%` and `100%` (D4), never one stop and never `none`.
 
   Export from `src/views/shared/index.ts`. Update `dayTrackGradient.test.ts` with these cases, which assert the built string and so do not depend on how jsdom parses CSS: a single plain stop gives exactly `linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) 100%)`; a single non-working stop gives the same with `--color-day-non-working`; every built gradient has at least two colour stops (`it.each` over Plain, a Working hours track with no edge, the Almaty Monday stops and the Time of day stops); a hard working edge gives two stops at one percentage. The real-browser check is the scenario "One-colour tracks are drawn in a real browser" of task 9.2.
@@ -181,7 +181,7 @@ Rules for every task:
   Verify: `npx vitest run src/views/shared/dayTrackGradient.test.ts` passes, then `npx vitest run src/views/shared/DayTrack.test.tsx` passes.
 - [ ] 6.3 RED then GREEN, `src/views/grid/HourCellView.tsx`: the background comes from `DAY_COLOUR_VARIABLES[cell.dayColour]` and the digit class from `DAY_COLOUR_FOREGROUND_CLASS_NAMES`. `src/views/grid/HourFrame.tsx` takes `colour` and `GridView.tsx` passes `hourFrameColour`.
 
-  Tests in `src/views/grid/HourStrip.test.tsx` (a plain cell gets the accent variable and the accent-foreground class) and `src/views/grid/HourFrame.test.tsx` (the foreground border for `FOREGROUND`).
+  Tests in `src/views/grid/HourStrip.test.tsx` (a plain cell gets the accent variable and the `text-accent-foreground` class; a non-working cell gets `--color-day-non-working` and the `text-foreground` class) and `src/views/grid/HourFrame.test.tsx` (the foreground border for `FOREGROUND`).
 
   Verify: `npx vitest run src/views/grid/HourStrip.test.tsx`, then `npx vitest run src/views/grid/HourFrame.test.tsx`, one at a time, pass.
 - [ ] 6.4 Rename the work period in the existing executable specs, so that they say what the modified `time-selection` requirement "Day-period colours" and `grid-view` requirement "Hour cell colour" say, and "working" is left to working time (the `day-colouring` stops `working` / `non-working`). This is a rename with no behaviour change (`.claude/rules/glossary.md`: "Renaming the concept means renaming the code, specs and translations in the same change"):

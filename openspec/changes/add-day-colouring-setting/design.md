@@ -80,7 +80,7 @@ Callers:
 Views map a `DayColour` to tokens only:
 
 - `src/views/shared/dayTrackGradient.ts`: `DAY_PERIOD_COLOR_VARIABLES` becomes `DAY_COLOUR_VARIABLES: Record<DayColour, string>`, and `buildDayTrackGradient` takes `DayColourStop[]`. Two stops at one position already draw a hard edge. A single stop (Plain, or a Working hours track with no edge, such as Moscow on a Saturday) is written as two stops of its colour, at `0%` and `100%`: `linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) 100%)`. Today the builder would emit `linear-gradient(to right, var(--color-accent) 0%)`, and CSS Images Level 3 requires at least two colour stops, so an engine at the ADR-0009 level drops the declaration and the track loses its colour. A plain `background-color` was rejected: `DayTrack` sets `backgroundImage` only, and two code paths would be needed.
-- New `DAY_COLOUR_FOREGROUND_CLASS_NAMES: Record<DayColour, string>` in the same file. `HourCellView` uses it.
+- New `DAY_COLOUR_FOREGROUND_CLASS_NAMES: Record<DayColour, string>` in the same file, one theme-independent class per day colour: `NIGHT` and `NON_WORKING_TIME` → `text-foreground`; `MORNING`, `WORK` and `EVENING` → `text-hour-cell-foreground` (as today); `PLAIN` and `WORKING_TIME` → `text-accent-foreground`. `HourCellView` uses it. The tokens behind each class switch with the theme (D6).
 - `HourFrame` takes a `colour` prop and maps it to `border-accent` or `border-foreground`.
 
 ### D5. Working hours input: the controller parses, the view only types (FR4–FR6, FR14)
@@ -102,8 +102,7 @@ New tokens are declared in all three theme blocks of `tokens.css`:
 - The plain colour and the working-time colour are `var(--color-accent)`, so they follow the theme and FR9 and FR10 need no copy of the accent.
 - Digits use these colours:
   - `--color-accent-foreground` on accent cells: `#ffffff` on `#2f5bd3` is about 5.9:1, and `#0b1220` on `#5ec2e8` about 9.2:1;
-  - `--color-hour-cell-foreground` on light grey cells: `#18181b` on `#ececef` is about 15.0:1;
-  - `--color-foreground` on dark grey cells: `#eef2fa` on `#3b4660` is about 8.4:1.
+  - `--color-foreground` on grey cells in both themes, because one class per day colour cannot switch tokens by theme (D4): `#18181b` on `#ececef` is about 15.0:1 in light (the same value as the light `--color-hour-cell-foreground`), and `#eef2fa` on `#3b4660` about 8.4:1 in dark. The dark `--color-hour-cell-foreground` `#0f1729` would give only about 1.9:1 on the dark grey.
 - The handle (`bg-surface` with a `border-foreground` ring) keeps at least 3:1 through its fill on accent: `#ffffff` against `#2f5bd3` is about 5.9:1, and `#16213a` against `#5ec2e8` about 7.9:1. On grey it keeps 3:1 through its border: about 15.0:1 in light and 8.4:1 in dark.
 - `tokens.test.ts` asserts every pair and both ratios for all seven day colours, so a later token change cannot quietly break FR-level readability (M5).
 - UX4 asks for a grey lighter than any day-period colour in the light theme. Relative luminance (WCAG): `#ececef` is about 0.841, and the light day-period colours are `#f8e6a6` 0.793 (the lightest), `#f8cbbe` 0.664, `#d4c6ee` 0.606 and `#a3afd3` 0.432. The light `--color-muted` `#e4e4e7` (0.778) was rejected because it is darker than `#f8e6a6`. In the dark theme `#3b4660` (0.062) is darker than every dark day-period colour (the darkest, `#56679a`, is 0.140), so it does not glare. `tokens.test.ts` asserts both orders (UX4).
