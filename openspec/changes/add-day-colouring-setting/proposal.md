@@ -30,7 +30,7 @@ Audience: every user of Cards and Grid, especially those planning meetings acros
 
 ## Impact
 
-- `src/preferences/` (the day colouring enum, the working hours and their order rule, two commands, parsing), `src/adapters/preferencesDocument.ts` (schema version 6, migration step 5), `src/constants/preferences.ts` (schema version, option order, the default working hours) and a new `src/constants/workingTime.ts`.
+- `src/preferences/` (the day colouring enum, the working hours and their order rule, two commands, parsing), `src/adapters/preferencesDocument.ts` (schema version 6, migration step 5), `src/constants/preferences.ts` (schema version, option order) and a new `src/constants/workingTime.ts`.
 - `src/model/` (new `workingTime.ts`: working days, working time spans, working-time stops, working hour cells), `src/presenter/` (new `dayColours.ts`: day colours and colour stops for every colouring, the hour frame colour; `dayTrack.ts`, `hourStrip.ts`, `presentZoneMoment.ts`, `presentLocationRows.ts` contexts; new `workingHours.ts` for the field texts).
 - `src/controller/` (`PreferencesProvider`, `preferencesContext`, new `useDayColouring`, new `useWorkingHoursInput`; `useLocations`, `useHourGrid` pass the colouring).
 - `src/views/shared/dayTrackGradient.ts`, `views/grid/HourCellView.tsx`, `views/grid/HourFrame.tsx`, `views/grid/GridView.tsx`; `src/app/settings/` (new `DayColouringGroup`, `WorkingHoursGroup`, `SettingsTimeRangeGroup`; `SettingsPage`); `src/styles/tokens.css`; `src/locales/en.json`, `ru.json`.
@@ -126,7 +126,7 @@ There is no loading state: the preferences are read synchronously before the fir
 ## Behavior
 
 - `packages/client/src/test/features/day_colouring/` (new): `day_colouring_day_tracks.feature`, `day_colouring_hour_cells.feature`, `day_colouring_budget.feature`, `day_colouring_e2e.feature`, `day_colouring_view_contract_e2e.feature`.
-- `packages/client/src/test/features/settings/` (new): `settings_day_colouring_unit.feature`, `settings_working_hours_unit.feature`, `settings_day_colouring_storage_unit.feature`, `settings_day_colouring_e2e.feature`.
+- `packages/client/src/test/features/settings/` (new): `settings_day_colouring_unit.feature`, `settings_working_hours.feature`, `settings_day_colouring_storage.feature`, `settings_day_colouring_e2e.feature`.
 - Every scenario is tagged `@add-day-colouring-setting` with its requirement id. The existing day-period, hour-cell and screenshot scenarios still pass in the default colouring.
 
 ## Visual Reference
@@ -141,7 +141,7 @@ No changes (the project has no `docs/ia/` document for the settings page).
 
 - M1: 3 of 3 day colourings can be chosen, are restored after a reload and are applied in a second tab (unit BDD), and the working hours survive 2 of 2 colouring switches.
 - M2: 0 changed pixels in the existing approved Cards and Grid screenshots, which use the default Time of day colouring.
-- M3: 100% of the hour cells match the half-cell rule in the 6 sample cases of `day_colouring_hour_cells.feature` (09:07, 09:40, Kolkata 10:00 and 10:15, the Saturday in Moscow with Friday in New York, and Cairo's clock change on a Friday).
+- M3: 100% of the hour cells match the half-cell rule in the 7 sample cases of `day_colouring_hour_cells.feature` (09:07, 09:40, Kolkata 10:00 and 10:15, Kathmandu 10:00, the Saturday in Moscow with Friday in New York, and Cairo's clock change on a Friday).
 - M4: 0 axe-core violations in each of 11 runs: 3 on the settings page with the working hours row (light, dark, and light with the hint shown) and 8 on the main page (Cards and Grid × Plain and Working hours × light and dark).
 - M5: 7 day colours × 2 themes = 14 digit pairs at ≥ 4.5:1 and 14 handle checks at ≥ 3:1 in `tokens.test.ts`.
 - M6: Mutation score ≥ 95% (minimum acceptable 90%) on the new and changed production files of `src/model/workingTime.ts`, `src/presenter/dayColours.ts`, `src/presenter/workingHours.ts`, `src/preferences/` and `src/adapters/preferencesDocument.ts`.
