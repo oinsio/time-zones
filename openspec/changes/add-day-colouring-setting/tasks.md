@@ -46,9 +46,15 @@ Rules for every task:
 
   `docs/architecture/open-questions.md`: amend Q3's decision. Time of day keeps the constants, and the Working hours colouring uses the user's working hours, as in this change.
 
-  Rename the day period "working hours" to "work" wherever it names the period 09:00–18:00, not the user's range: `docs/architecture/views.md` ("Day-period colors" row: night, morning, work, evening; the token table row "Working hours" becomes "Work"), `docs/architecture/domain-model.md` ("Day periods": four colors night, morning, work, evening) and `docs/design/README.md` (the day-period colours line).
+  Rename the day period "working hours" to "work" wherever it names the period 09:00–18:00, not the user's range:
+  - `docs/architecture/views.md`: the "Day-period colors" row reads "night, morning, work, evening" and "15 minutes around the work period" (today "15 minutes around working hours"); the token table row "Working hours" becomes "Work";
+  - `docs/architecture/domain-model.md` ("Day periods": four colors night, morning, work, evening);
+  - `docs/architecture/open-questions.md`: Q3's title "Working hours for day-period colors" becomes "Day-period schedule and working hours";
+  - `docs/design/README.md` (the day-period colours line).
 
-  Verify: `grep -n "add-day-colouring-setting\|WORKING_HOURS\|non-working" docs/architecture/domain-model.md docs/architecture/views.md docs/architecture/open-questions.md` prints a line in each file, and `grep -rni "cell colouring" docs/architecture docs/glossary` prints nothing, and `grep -rniE "morning, working hours|Working hours \| .#F8E6A6" docs` (case-insensitive) prints nothing.
+  Line 12 of `views.md` ("see where working hours overlap") names the user's range and stays.
+
+  Verify: `grep -n "add-day-colouring-setting\|WORKING_HOURS\|non-working" docs/architecture/domain-model.md docs/architecture/views.md docs/architecture/open-questions.md` prints a line in each file, and `grep -rni "cell colouring" docs/architecture docs/glossary` prints nothing, and `grep -rniE "morning, working hours|around working hours|working hours for day-period|Working hours \| .#F8E6A6" docs` (case-insensitive) prints nothing.
 
 ## 2. Preferences model and stored document (FR2, FR3, FR6, FR7; design D1, D2)
 
@@ -158,7 +164,7 @@ Rules for every task:
 
   Verify: `npx vitest run src/controller/useLocations.dayTrack.test.tsx`, then `npx vitest run src/controller/useHourGrid.test.tsx`, one at a time, pass.
 
-## 6. Tokens and views (FR9–FR13, NFR-A3, UX4; design D4, D6, D7)
+## 6. Tokens, views and the work period rename (FR2, FR9–FR13, NFR-A3, UX4; design D4, D6, D7)
 
 - [ ] 6.1 RED then GREEN, `src/styles/tokens.css`: `--color-day-non-working` (`#ececef` light, `#3b4660` dark) in all three theme blocks (D6), and its `day.non-working` entry in the `colors` of `tailwind.config.ts`. In the same task rename the work-period token `--color-day-working` to `--color-day-work` (values unchanged) in `tokens.css`, `tailwind.config.ts` (`day.working` → `day.work`), `src/views/shared/dayTrackGradient.ts` and `dayTrackGradient.test.ts`, `src/views/grid/HourStrip.test.tsx`, `src/test/features/main_page/steps/themeTokens.ts` (`dayWorking` → `dayWork`), `src/test/features/grid_view/steps/grid_view_hour_cells_e2e.steps.ts` and `src/test/features/time_selection/steps/time_selection_labels_e2e.steps.ts`.
 
@@ -178,15 +184,21 @@ Rules for every task:
   Tests in `src/views/grid/HourStrip.test.tsx` (a plain cell gets the accent variable and the accent-foreground class) and `src/views/grid/HourFrame.test.tsx` (the foreground border for `FOREGROUND`).
 
   Verify: `npx vitest run src/views/grid/HourStrip.test.tsx`, then `npx vitest run src/views/grid/HourFrame.test.tsx`, one at a time, pass.
+- [ ] 6.4 Rename the work period in the existing executable specs, so that they say what the modified `time-selection` requirement "Day-period colours" and `grid-view` requirement "Hour cell colour" say, and "working" is left to working time (the `day-colouring` stops `working` / `non-working`). This is a rename with no behaviour change (`.claude/rules/glossary.md`: "Renaming the concept means renaming the code, specs and translations in the same change"):
+  - `src/test/features/time_selection/time_selection_day_colours.feature` (lines 15, 16 and 35): every stop named `working` becomes `work`, e.g. `0.380208 work`; in `steps/dayColourChecks.ts` the stop name key `working` becomes `work`;
+  - `src/test/features/grid_view/grid_view_hour_cells_unit.feature:29` and `steps/grid_view_hour_cells_unit.steps.tsx:61`: "9-17 working hours" becomes "9-17 work";
+  - `src/test/features/grid_view/grid_view_hour_cells_e2e.feature:20,23` and `steps/grid_view_hour_cells_e2e.steps.ts:42,95,97`: "night, morning, working hours and evening colours" becomes "night, morning, work and evening colours", "the working hours cell" becomes "the work cell", and the comment on line 95 says "work cells".
+
+  Verify: `grep -nE "working hours|[0-9] working(,|\"| *\|)|working: " src/test/features/time_selection/time_selection_day_colours.feature src/test/features/time_selection/steps/dayColourChecks.ts src/test/features/grid_view/grid_view_hour_cells_unit.feature src/test/features/grid_view/steps/grid_view_hour_cells_unit.steps.tsx src/test/features/grid_view/grid_view_hour_cells_e2e.feature src/test/features/grid_view/steps/grid_view_hour_cells_e2e.steps.ts` prints nothing (it prints eleven lines today); then `npx vitest run src/test/features/time_selection/steps/time_selection_day_colours.steps.tsx`, then `npx vitest run src/test/features/grid_view/steps/grid_view_hour_cells_unit.steps.tsx`, then `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/grid_view/grid_view_hour_cells_e2e.feature`, one at a time, pass.
 
 ## 7. Unit BDD for the colouring rules (FR2, FR8–FR12, NFR-P1, M3)
 
 - [ ] 7.1 New `src/test/features/day_colouring/day_colouring_day_tracks.feature` with `steps/day_colouring_day_tracks.steps.ts`. It holds the `day-colouring` scenarios "Time of day by default", "Changing the colouring keeps the moment", "A plain track", "Each location reads the working hours in its own time", "Weekends are never working time", "Working-time stops on a Monday", "Friday still works where Saturday has not begun" and "Working time after a clock change". The steps use the real presenter and model with `fakeClock`, no mocks.
 
-  Verify: `npx vitest run src/test/features/day_colouring/steps/day_colouring_day_tracks.steps.ts` passes, then `npx vitest run src/test/features/time_selection/steps/time_selection_day_colours.steps.tsx` passes unchanged in its scenarios.
+  Verify: `npx vitest run src/test/features/day_colouring/steps/day_colouring_day_tracks.steps.ts` passes, then `npx vitest run src/test/features/time_selection/steps/time_selection_day_colours.steps.tsx` still passes with the stops renamed in task 6.4.
 - [ ] 7.2 New `src/test/features/day_colouring/day_colouring_hour_cells.feature` with `steps/day_colouring_hour_cells.steps.ts`: "Plain hour cells", "Half of the hour decides" (all five rows), "Weekend cells and Friday cells across the reference day", "Hour cells on a clock change day".
 
-  Verify: `npx vitest run src/test/features/day_colouring/steps/day_colouring_hour_cells.steps.ts` passes, then `npx vitest run src/test/features/grid_view/steps/grid_view_hour_cells_unit.steps.tsx` still passes.
+  Verify: `npx vitest run src/test/features/day_colouring/steps/day_colouring_hour_cells.steps.ts` passes, then `npx vitest run src/test/features/grid_view/steps/grid_view_hour_cells_unit.steps.tsx` still passes with the wording of task 6.4.
 - [ ] 7.3 New `src/test/features/day_colouring/day_colouring_budget.feature` with `steps/day_colouring_budget.steps.ts` (`startWorkCount`, `MAX_TRANSITION_LOOKUPS_PER_ZONE`, `MAX_FORMATTERS_PER_ZONE` and the 10 zones of `hourStripBudgetWorld.ts`): the three scenarios of "Day colouring is fast". Add Working hours cases to `src/test/benchmarks/hourStrip.bench.ts` and `src/test/benchmarks/rowPresenting.bench.ts`.
 
   Verify: `npx vitest run src/test/features/day_colouring/steps/day_colouring_budget.steps.ts` passes, then `pnpm bench` runs without error.
@@ -255,7 +267,7 @@ Rules for every task:
   Read `reports/mutation/mutation-report.json` after each run and add tests until each run scores ≥ 95% (at least 90%).
 - [ ] 10.3 Traceability: from `packages/client`, for each id in `FR1`–`FR15`, `NFR-P1`, `NFR-A1`–`NFR-A4`, `NFR-R1`, `NFR-R2` and `UX1`–`UX5`, run `grep -rln "add-day-colouring-setting" src | xargs grep -l "<id>"` and see at least one file.
 
-  Glossary review: `grep -rniE "cell colouring|business hours|office hours|colour scheme" src/locales src/views src/presenter src/app` prints nothing.
+  Glossary review: `grep -rniE "cell colouring|business hours|office hours|colour scheme" src/locales src/views src/presenter src/app src/test/features` prints nothing, and `grep -rnE "morning, working hours|working hours and evening|9-17 working hours|working hours cell|[0-9] working(,|\"| *\|)" src/test/features --include=*.feature | grep -v "^src/test/features/day_colouring/"` prints nothing (the work period is never called "working hours" or "working"; inside `day_colouring/` the stop name `working` means working time).
 - [ ] 10.4 Run `pnpm run lint`, then `pnpm run typecheck` (it also proves that `PaintBucket`, `SunMoon` and `BriefcaseBusiness` exist in the installed `lucide-react`), then `pnpm run build`, one at a time. All pass.
 
 ## Human follow-up
