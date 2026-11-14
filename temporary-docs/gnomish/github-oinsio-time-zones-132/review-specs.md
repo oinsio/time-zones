@@ -9,7 +9,7 @@
 | Contradictions | 3 |
 | CRITICAL | 0 |
 | WARNING | 2 |
-| SUGGESTION | 3 |
+| SUGGESTION | 2 |
 
 ## Freshness
 
@@ -17,7 +17,7 @@ Paths are relative to `packages/client/` unless they start with `openspec/` or `
 
 - ✅ `DAY_PERIOD_SCHEDULE` / `getDayPeriod` in `src/model/dayPeriods.ts`, `WORK_START_WALL_TIME = "09:00"` in `src/constants/dayPeriods.ts:3` (design.md:9).
 - ✅ `getClockChangesAround` is a private helper in `src/model/dayPeriodStops.ts:62`, and `getClockChanges` is exported, memoized per window, from `src/model/clockChange.ts:81` (design.md:48).
-- ❌ design.md:48 says `getClockChangesAround` "makes no `getTimeZoneTransition` call", and design.md:58 says "The spans add none". On a cache miss, `getClockChanges` → `searchClockChanges` → `findOffsetTransitions` (`src/model/clockChange.ts:68`) → `getTimeZoneTransition("next")` (`src/model/dayPeriodWindows.ts:56`). The call is memoized and is the same lookup Time of day makes today through `getDayPeriodStops`, so the 2-lookup bound still holds (see R5).
+- ❌ design.md:48 says `getClockChangesAround` "makes no `getTimeZoneTransition` call", and design.md:58 says "The spans add none". On a cache miss, `getClockChanges` → `searchClockChanges` → `findOffsetTransitions` (`src/model/clockChange.ts:68`) → `getTimeZoneTransition("next")` (`src/model/dayPeriodWindows.ts:56`). The call is memoized and is the same lookup Time of day makes today through `getDayPeriodStops`, so the 2-lookup bound still holds and nothing goes wrong if implemented as written; the wording is wrong but not raised as a finding.
 - ✅ `getHourCells` makes one `findOffsetTransitions` call per zone and sets `dayPeriod` from `getDayPeriod(localStart.toPlainTime(), DAY_PERIOD_SCHEDULE)` (`src/model/hourCells.ts:42,61`). `getHourCellStart` and `getHourCellCount` exist (`hourCells.ts:72,114`).
 - ✅ The hour strip cache key is day start, day end, reference zone, language and hour format (`src/presenter/hourStrip.ts:111-117`). `DayTrackContext` (`dayTrack.ts:36`), `HourStripContext` (`hourStrip.ts:40`) and `LocationRowsContext` (`presentZoneMoment.ts:23`) exist.
 - ✅ `DAY_PERIOD_COLOR_VARIABLES` and `buildDayTrackGradient` are in `src/views/shared/dayTrackGradient.ts`. A single stop gives `linear-gradient(to right, var(...) 0%)` today, a one-stop gradient (design.md:82).
@@ -124,7 +124,7 @@ Paths are relative to `packages/client/` unless they start with `openspec/` or `
 - Status: open
 
 ### R4 — SUGGESTION — The Working hours frame rows run on a Sunday with no accent cells
-- Location: `openspec/changes/add-day-colouring-setting/specs/grid-view/spec.md:272-283`
+- Location: `openspec/changes/add-day-colouring-setting/specs/grid-view/spec.md:77-88`
 - Rule: —
 - Problem: The scenario "Frame in the foreground colour on accent cells" runs at `2026-03-08T07:30:00Z`. That is Sunday in Almaty, Moscow and Kolkata, and Saturday into Sunday in New York. So in the Working hours rows every cell is the non-working grey, and the frame is never checked on accent cells in that colouring.
 - Impact: The real-browser check of the Working hours rows never covers the case the scenario is named for. A regression that only affects frames over working cells would not be caught.
@@ -132,15 +132,6 @@ Paths are relative to `packages/client/` unless they start with `openspec/` or `
 - Fix risk: none. The steps already take the instant and the column as parameters in the other frame scenarios.
 - Status: open
 
-### R5 — SUGGESTION — D3 says the spans make no transition lookup
-- Location: `openspec/changes/add-day-colouring-setting/design.md:48` and `:58`
-- Rule: —
-- Problem: D3 says `getClockChangesAround` "makes no `getTimeZoneTransition` call" and that "the spans add none". On a cache miss, `getClockChanges` calls `findOffsetTransitions` (`src/model/clockChange.ts:68`), which calls `getTimeZoneTransition` (`src/model/dayPeriodWindows.ts:56`). The bound holds only because the call is memoized and is the same lookup that `getDayPeriodStops` makes in Time of day today.
-- Impact: Someone reading the work bound gets the wrong count. If a later change bypasses `getClockChanges`, they would not expect the budget scenario of task 7.3 to fail.
-- Fix: Reword design.md:48 and :58: "the spans read the memoized `getClockChanges`, the same lookup `getDayPeriodStops` makes in Time of day; with the one `findOffsetTransitions` call of `getHourCells`, a zone stays within `MAX_TRANSITION_LOOKUPS_PER_ZONE` (2)".
-- Fix risk: none.
-- Status: open
-
 ## Verdict
 
-Needs revision. Blocking ids: R1 and R2, both WARNING. R1 leaves the Esc behaviour of the new fields in conflict with the stable "Open the settings page" requirement. R2 leaves the stable "Settings page layout" stale. R3–R5 are optional polish. No CRITICAL finding, and every requirement id has a scenario and an automated task.
+Needs revision. Blocking ids: R1 and R2, both WARNING. R1 leaves the Esc behaviour of the new fields in conflict with the stable "Open the settings page" requirement. R2 leaves the stable "Settings page layout" stale. R3 and R4 are optional polish. No CRITICAL finding, and every requirement id has a scenario and an automated task.
