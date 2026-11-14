@@ -24,7 +24,7 @@ dump it was compiled from.
   zone, which is held once as the zone city and not as a GeoNames city;
 - `zoneCityRegions`: the region of a zone city that is a namesake (1 zone).
 
-Size: 366 993 bytes, 143 948 bytes gzipped (`gzip -9`).
+Size: 430 196 bytes, 148 884 bytes gzipped (`gzip -9`).
 
 Facts of this dump that the specs use: three cities named Springfield in `US`
 (Illinois, Missouri, Massachusetts); Kazan in `Europe/Moscow` with 1 243 500
@@ -49,7 +49,7 @@ with an entry in `NAME_OVERRIDES`.
 
 ## Size and speed
 
-The committed file gzips to 143 948 bytes as one tuple per city. The search data
+The committed file gzips to 148 884 bytes as one tuple per city. The search data
 file the build serves holds the cities as columns (the IDs as differences),
 which gzips better: the whole file, with the zone cities, measures 119.4 KB
 against the 130 KB budget (`CITY_SEARCH_DATA_BUDGET_KB`). The benchmark "search
