@@ -27,6 +27,7 @@ export const KNOWN_CITIES: Record<
   "New York": { timeZoneId: "America/New_York", countryCode: "US" },
   Kyiv: { timeZoneId: "Europe/Kyiv", countryCode: "UA" },
   Tokyo: { timeZoneId: "Asia/Tokyo", countryCode: "JP" },
+  Cairo: { timeZoneId: "Africa/Cairo", countryCode: "EG" },
   Токио: { timeZoneId: "Asia/Tokyo", countryCode: "JP" },
   Edo: { timeZoneId: "Asia/Tokyo", countryCode: "JP" },
   Kathmandu: { timeZoneId: "Asia/Kathmandu", countryCode: "NP" },

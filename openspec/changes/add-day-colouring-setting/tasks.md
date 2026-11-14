@@ -193,13 +193,13 @@ Rules for every task:
 
 ## 7. Unit BDD for the colouring rules (FR2, FR8–FR12, NFR-P1, M3)
 
-- [ ] 7.1 New `src/test/features/day_colouring/day_colouring_day_tracks.feature` with `steps/day_colouring_day_tracks.steps.ts`. It holds the `day-colouring` scenarios "Time of day by default", "Changing the colouring keeps the moment", "A plain track", "Each location reads the working hours in its own time", "Weekends are never working time", "Working-time stops on a Monday", "Friday still works where Saturday has not begun" and "Working time after a clock change". The steps use the real presenter and model with `fakeClock`, no mocks.
+- [x] 7.1 New `src/test/features/day_colouring/day_colouring_day_tracks.feature` with `steps/day_colouring_day_tracks.steps.ts`. It holds the `day-colouring` scenarios "Time of day by default", "Changing the colouring keeps the moment", "A plain track", "Each location reads the working hours in its own time", "Weekends are never working time", "Working-time stops on a Monday", "Friday still works where Saturday has not begun" and "Working time after a clock change". The steps use the real presenter and model with `fakeClock`, no mocks.
 
   Verify: `npx vitest run src/test/features/day_colouring/steps/day_colouring_day_tracks.steps.ts` passes, then `npx vitest run src/test/features/time_selection/steps/time_selection_day_colours.steps.tsx` still passes with the stops renamed in task 6.4.
-- [ ] 7.2 New `src/test/features/day_colouring/day_colouring_hour_cells.feature` with `steps/day_colouring_hour_cells.steps.ts`: "Plain hour cells", "Half of the hour decides" (all five rows), "Weekend cells and Friday cells across the reference day", "Hour cells on a clock change day".
+- [x] 7.2 New `src/test/features/day_colouring/day_colouring_hour_cells.feature` with `steps/day_colouring_hour_cells.steps.ts`: "Plain hour cells", "Half of the hour decides" (all five rows), "Weekend cells and Friday cells across the reference day", "Hour cells on a clock change day".
 
   Verify: `npx vitest run src/test/features/day_colouring/steps/day_colouring_hour_cells.steps.ts` passes, then `npx vitest run src/test/features/grid_view/steps/grid_view_hour_cells_unit.steps.tsx` still passes with the wording of task 6.4.
-- [ ] 7.3 New `src/test/features/day_colouring/day_colouring_budget.feature` with `steps/day_colouring_budget.steps.ts` (`startWorkCount`, `MAX_TRANSITION_LOOKUPS_PER_ZONE`, `MAX_FORMATTERS_PER_ZONE` and the 10 zones of `hourStripBudgetWorld.ts`): the three scenarios of "Day colouring is fast". Add Working hours cases to `src/test/benchmarks/hourStrip.bench.ts` and `src/test/benchmarks/rowPresenting.bench.ts`.
+- [x] 7.3 New `src/test/features/day_colouring/day_colouring_budget.feature` with `steps/day_colouring_budget.steps.ts` (`startWorkCount`, `MAX_TRANSITION_LOOKUPS_PER_ZONE`, `MAX_FORMATTERS_PER_ZONE` and the 10 zones of `hourStripBudgetWorld.ts`): the three scenarios of "Day colouring is fast". Add Working hours cases to `src/test/benchmarks/hourStrip.bench.ts` and `src/test/benchmarks/rowPresenting.bench.ts`.
 
   Verify: `npx vitest run src/test/features/day_colouring/steps/day_colouring_budget.steps.ts` passes, then `pnpm bench` runs without error.
 

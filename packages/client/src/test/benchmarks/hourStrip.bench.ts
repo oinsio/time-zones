@@ -1,9 +1,10 @@
 // Verifies NFR-P1 of add-grid-hour-cells-and-hour-frame.
+// Verifies NFR-P1 of add-day-colouring-setting: the Working hours colouring.
 
 import { bench, describe } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { getReferenceDay, INITIAL_WORLD_CLOCK_STATE } from "@/model";
-import { HourFormat } from "@/preferences";
+import { DayColouring, DEFAULT_WORKING_HOURS, HourFormat } from "@/preferences";
 import { presentHourStrip } from "@/presenter";
 import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import {
@@ -21,7 +22,13 @@ const options = {
 const FIRST_DAY = "2026-03-08T07:30:00Z";
 const SECOND_DAY = "2026-03-20T07:30:00Z";
 
-const presentFiftyStrips = (instant: string) => {
+const presentFiftyStrips = (
+  instant: string,
+  colouringContext: {
+    dayColouring: DayColouring;
+    workingHours: typeof DEFAULT_WORKING_HOURS;
+  } = TIME_OF_DAY_CONTEXT,
+) => {
   const day = getReferenceDay(
     { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: REFERENCE_ZONE },
     Temporal.Instant.from(instant),
@@ -34,7 +41,7 @@ const presentFiftyStrips = (instant: string) => {
         referenceZoneId: REFERENCE_ZONE,
         language: "en",
         hourFormat: HourFormat.H24,
-        ...TIME_OF_DAY_CONTEXT,
+        ...colouringContext,
       },
     );
   }
@@ -48,6 +55,17 @@ describe("hour strip", () => {
     () => {
       isFirstDay = !isFirstDay;
       presentFiftyStrips(isFirstDay ? FIRST_DAY : SECOND_DAY);
+    },
+    options,
+  );
+  bench(
+    "present 50 hour strips in Working hours for a new day",
+    () => {
+      isFirstDay = !isFirstDay;
+      presentFiftyStrips(isFirstDay ? FIRST_DAY : SECOND_DAY, {
+        dayColouring: DayColouring.WORKING_HOURS,
+        workingHours: DEFAULT_WORKING_HOURS,
+      });
     },
     options,
   );

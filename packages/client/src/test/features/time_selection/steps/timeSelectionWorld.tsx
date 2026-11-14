@@ -12,6 +12,7 @@ import {
   PreferencesProvider,
   type TrackMove,
   useLocations,
+  usePreferences,
   useReferenceMoment,
   useTimeSelection,
   useWallTimeInput,
@@ -19,7 +20,12 @@ import {
 import { Temporal } from "@/lib/temporal";
 import { buildDeviceTimeLocation } from "@/model";
 import { LocationsLoadStatus, PreferencesLoadStatus } from "@/ports";
-import { DEFAULT_PREFERENCES, type ZoneLabelPart } from "@/preferences";
+import {
+  type DayColouring,
+  DEFAULT_PREFERENCES,
+  type WorkingHours,
+  type ZoneLabelPart,
+} from "@/preferences";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
@@ -48,6 +54,8 @@ export const createTimeSelectionWorld = () => {
   let homeLocationId: string | null = null;
   let zoneLabelParts: readonly ZoneLabelPart[] =
     DEFAULT_PREFERENCES.zoneLabelParts;
+  let dayColouring = DEFAULT_PREFERENCES.dayColouring;
+  let workingHours = DEFAULT_PREFERENCES.workingHours;
   let tickScheduler = createManualTickScheduler();
   let writeScheduler = createManualWriteScheduler();
   let hooks: {
@@ -57,6 +65,7 @@ export const createTimeSelectionWorld = () => {
         reference: ReturnType<typeof useReferenceMoment>;
         time: ReturnType<typeof useTimeSelection>;
         wallTime: ReturnType<typeof useWallTimeInput>;
+        preferences: ReturnType<typeof usePreferences>;
       };
     };
   };
@@ -118,6 +127,8 @@ export const createTimeSelectionWorld = () => {
       storedLocations = [];
       homeLocationId = null;
       zoneLabelParts = DEFAULT_PREFERENCES.zoneLabelParts;
+      dayColouring = DEFAULT_PREFERENCES.dayColouring;
+      workingHours = DEFAULT_PREFERENCES.workingHours;
       backend = createInMemoryLocationBackend();
       clock = createSwitchableClock(DEFAULT_INSTANT, DEFAULT_DEVICE_ZONE);
       tickScheduler = createManualTickScheduler();
@@ -146,6 +157,14 @@ export const createTimeSelectionWorld = () => {
     setZoneLabelParts: (parts: readonly ZoneLabelPart[]) => {
       zoneLabelParts = parts;
     },
+    /** Implements FR2, FR6 of add-day-colouring-setting: the colouring and hours in force when the app opens. */
+    setDayColouring: (colouring: DayColouring, hours?: WorkingHours) => {
+      dayColouring = colouring;
+      if (hours !== undefined) workingHours = hours;
+    },
+    /** Implements FR2 of add-day-colouring-setting: the user chooses a colouring in the open app. */
+    chooseDayColouring: (colouring: DayColouring) =>
+      act(() => current().preferences.setDayColouring(colouring)),
     setHomeCity: (city: string) => {
       homeLocationId = buildLocation(cityEntry(city)).id;
     },
@@ -166,6 +185,7 @@ export const createTimeSelectionWorld = () => {
           reference: useReferenceMoment(),
           time: useTimeSelection(),
           wallTime: useWallTimeInput(),
+          preferences: usePreferences(),
         }),
         {
           wrapper: ({ children }: { children: ReactNode }) => (
@@ -173,7 +193,12 @@ export const createTimeSelectionWorld = () => {
               repository={createInMemoryPreferencesRepository({
                 initialDocument: {
                   status: PreferencesLoadStatus.LOADED,
-                  preferences: { ...DEFAULT_PREFERENCES, zoneLabelParts },
+                  preferences: {
+                    ...DEFAULT_PREFERENCES,
+                    zoneLabelParts,
+                    dayColouring,
+                    workingHours,
+                  },
                 },
               })}
               writeScheduler={createManualWriteScheduler()}

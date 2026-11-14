@@ -9,8 +9,14 @@ import {
   LocationCommandType,
   reduceLocations,
 } from "@/model";
+import { DayColouring, DEFAULT_WORKING_HOURS } from "@/preferences";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createRowBudgetWorld } from "../features/date_selection/steps/referenceMomentRowsWorld";
+import {
+  BUDGET_ANOTHER_DAY,
+  BUDGET_SAMPLE_INSTANT,
+  presentBudgetRows as presentDayColouringRows,
+} from "../features/day_colouring/steps/dayColouringBudgetWorld";
 import { presentRowsWithDeviceTime } from "../features/locations/steps/deviceTimeEngineWorld";
 import {
   BUDGET_FIRST_MOMENT,
@@ -59,7 +65,22 @@ let isRussianNext = false;
 // Alternating days keep every sample on a day the stop cache does not hold.
 let dateShiftDays = -ONE_DAY;
 
+// Implements NFR-P1 of add-day-colouring-setting: tracks and strips in Working hours.
+let isAnotherDayNext = false;
+
 describe("row presenting", () => {
+  bench(
+    "present 50 rows with tracks and strips in Working hours for a new day",
+    () => {
+      isAnotherDayNext = !isAnotherDayNext;
+      presentDayColouringRows(
+        isAnotherDayNext ? BUDGET_ANOTHER_DAY : BUDGET_SAMPLE_INSTANT,
+        DayColouring.WORKING_HOURS,
+        DEFAULT_WORKING_HOURS,
+      );
+    },
+    options,
+  );
   bench(
     "present 50 rows with time and date",
     () => {
