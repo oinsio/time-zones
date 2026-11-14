@@ -209,10 +209,11 @@ Rules for every task:
 
   Verify: `npx vitest run src/locales/locales.test.ts` passes (its "should have identical key sets in every locale file" check covers the new keys).
 - [ ] 8.2 RED then GREEN, new `src/app/settings/SettingsTimeRangeGroup.tsx` with `SettingsTimeRangeGroup.test.tsx`: the two scenarios of the `settings` requirement "Time range group", plus these cases:
-  - Esc calls `onRestore`;
+  - Esc with edited texts, or with a hint shown, calls `onRestore` and does not bubble;
+  - Esc with the texts it was given and no hint does not call `onRestore` and bubbles (`settings` requirement "Open the settings page", design D8);
   - blur inside the row does not confirm, and blur out of it does;
   - typed digits get the separator;
-  - field keys do not bubble.
+  - Enter and the arrow keys do not bubble.
 
   Verify: `npx vitest run src/app/settings/SettingsTimeRangeGroup.test.tsx` fails, then passes.
 - [ ] 8.3 RED then GREEN, new `src/app/settings/DayColouringGroup.tsx` and `WorkingHoursGroup.tsx`, placed in `SettingsPage.tsx` after `ViewModeGroup` (export from `src/app/settings/index.ts` if the module lists its parts). Tests: `DayColouringGroup.test.tsx` (options in order, Time of day checked by default, a choice calls `setDayColouring`) and `WorkingHoursGroup.test.tsx` (absent unless Working hours, texts in both hour formats, each outcome's hint, Esc restores, a change from outside resets the texts).
@@ -231,7 +232,8 @@ Rules for every task:
 
 - [ ] 9.1 New `src/test/features/settings/settings_day_colouring_e2e.feature` with `steps/settings_day_colouring_e2e.steps.ts`:
   - every scenario of "Accessible colouring group and working hours row": names, checked state, arrow keys, `aria-invalid` and `aria-describedby`, 44 px, focus outlines, and axe-core in the light and the dark theme, each without and with the hint shown (4 runs, M4);
-  - every scenario of "Colouring settings layout": four width × language × hour format rows, no movement, no horizontal scroll.
+  - every scenario of "Colouring settings layout": four width × language × hour format rows, no movement, no horizontal scroll;
+  - the scenario "Esc in a working hours field restores first, then leaves" of the modified requirement "Open the settings page", tagged `@add-day-colouring-setting @FR4 @FR6`, because it needs the real `AppShell` Esc listener.
 
   Verify: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_day_colouring_e2e.feature` passes.
 - [ ] 9.2 New `src/test/features/day_colouring/day_colouring_e2e.feature` with `steps/day_colouring_e2e.steps.ts`:

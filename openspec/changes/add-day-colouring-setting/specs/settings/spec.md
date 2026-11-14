@@ -16,7 +16,7 @@ The settings page SHALL show a colouring group captioned "Colouring" («Раск
 - **AND** no reload happened
 
 ### Requirement: Working hours row
-While the day colouring is Working hours, the settings page SHALL show a working hours row captioned "Working hours" («Рабочие часы») directly under the colouring group, with a start field and an end field. In the other day colourings the row MUST be absent. The fields show the stored working hours, 10:00–18:00 when none are stored, written in the chosen hour format: `10:00` and `18:00` in the 24-hour format, `10:00 AM` and `6:00 PM` in the 12-hour format in English. A change of the hour format MUST rewrite both fields. The fields MUST accept every text the wall-time input accepts (the `time-selection` requirement "Accepted wall-time text"), and MUST insert the separator while digits are typed, as the wall-time input does. Pressing Enter in a field, or leaving the row, confirms both fields; Esc restores the stored texts and removes the hint. A confirmed range is used to the minute, exactly as typed, with no rounding: `9:07` is 09:07. A confirmed field is shown again in the canonical form of the hour format. The range MUST be refused when a text is not a time ("Enter the time as HH:MM", «Введите время в формате ЧЧ:ММ») or when the start is not before the end ("The start must be before the end", «Начало должно быть раньше конца»). A refused range is not applied, its fields keep the typed texts and show the hint, and the stored working hours stay the last valid ones. Inputs: the typed texts, the hour format, the interface language. Output: the working hours in force or the hint. Errors: an unreadable time; a start at or after the end. <!-- implements FR4, FR5, FR6, FR7, UX2, UX3, UX5 of add-day-colouring-setting -->
+While the day colouring is Working hours, the settings page SHALL show a working hours row captioned "Working hours" («Рабочие часы») directly under the colouring group, with a start field and an end field. In the other day colourings the row MUST be absent. The fields show the stored working hours, 10:00–18:00 when none are stored, written in the chosen hour format: `10:00` and `18:00` in the 24-hour format, `10:00 AM` and `6:00 PM` in the 12-hour format in English. A change of the hour format MUST rewrite both fields. The fields MUST accept every text the wall-time input accepts (the `time-selection` requirement "Accepted wall-time text"), and MUST insert the separator while digits are typed, as the wall-time input does. Pressing Enter in a field, or leaving the row, confirms both fields. Esc in a field whose texts differ from the stored texts, or while the hint is shown, restores the stored texts, removes the hint and keeps the settings page open; otherwise Esc is not held by the field and leaves the settings page, as the requirement "Open the settings page" says. A confirmed range is used to the minute, exactly as typed, with no rounding: `9:07` is 09:07. A confirmed field is shown again in the canonical form of the hour format. The range MUST be refused when a text is not a time ("Enter the time as HH:MM", «Введите время в формате ЧЧ:ММ») or when the start is not before the end ("The start must be before the end", «Начало должно быть раньше конца»). A refused range is not applied, its fields keep the typed texts and show the hint, and the stored working hours stay the last valid ones. Inputs: the typed texts, the hour format, the interface language. Output: the working hours in force or the hint. Errors: an unreadable time; a start at or after the end. <!-- implements FR4, FR5, FR6, FR7, UX2, UX3, UX5 of add-day-colouring-setting -->
 
 #### Scenario: The row follows the colouring
 - **GIVEN** the settings page is shown with the colouring "Time of day"
@@ -193,3 +193,38 @@ Every string of the colouring group, its options, the working hours row, its fie
 |---|---|---|---|---|---|---|---|
 | English | Colouring | Plain | Time of day | Working hours | Working hours | Start of working hours | End of working hours |
 | Russian | Раскраска | Обычная | По времени суток | По рабочему времени | Рабочие часы | Начало рабочего дня | Конец рабочего дня |
+
+## MODIFIED Requirements
+
+### Requirement: Open the settings page
+The header's settings button SHALL open the settings page. The settings page MUST show the heading "Settings" («Настройки») as its only page heading, a back button "Back" («Назад»), the theme group, the hour format group, the zone label group and the language group, and MUST NOT show the date bar. The notices region MUST keep working on the settings page. The back button and Esc MUST return to the main page with its locations and reference moment unchanged; while the language list is expanded, Esc first collapses it; while a working hours field holds texts that differ from the stored working hours, or the working hours hint is shown, Esc first restores the stored texts, removes the hint and keeps the settings page open. Opening the settings page MUST move the focus to its heading, and returning MUST move the focus to the settings button. Inputs: the settings button, the back button, Esc. Output: the shown page. Errors: none. <!-- implements FR1, FR3, NFR-A2 of add-settings-page-and-device-time-location; implements FR1, NFR-A2 of add-interface-language-selection; FR12 of show-zone-abbreviations-and-zone-label-setting; FR4, FR6 of add-day-colouring-setting -->
+
+#### Scenario: Open and leave settings
+- **GIVEN** the interface language is English
+- **AND** the moment is pinned to `2026-03-09T07:30:00Z`
+- **WHEN** the user opens the settings
+- **THEN** the page heading is "Settings"
+- **AND** the date bar is not shown
+- **AND** the focus is on the heading
+- **WHEN** the user goes back
+- **THEN** the main page is shown with the moment still pinned to `2026-03-09T07:30:00Z`
+- **AND** the focus is on the settings button
+
+#### Scenario: Esc leaves settings
+- **GIVEN** the settings page is shown
+- **WHEN** the user presses Esc
+- **THEN** the main page is shown
+- **AND** the focus is on the settings button
+
+#### Scenario: Notices on the settings page
+- **GIVEN** a new version of the app is available
+- **WHEN** the settings page is shown
+- **THEN** the update notice is announced in the notices region
+
+#### Scenario: Esc in a working hours field restores first, then leaves
+- **GIVEN** the colouring is "Working hours" and the user typed `18:00` as the start, which was refused
+- **WHEN** the user presses Esc in the field
+- **THEN** the fields show `10:00` and `18:00`, no hint is shown and the settings page is still shown
+- **WHEN** the user presses Esc again in the field
+- **THEN** the main page is shown
+- **AND** the focus is on the settings button

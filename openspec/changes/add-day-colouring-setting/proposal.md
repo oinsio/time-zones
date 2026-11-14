@@ -11,7 +11,7 @@ Audience: every user of Cards and Grid, especially those planning meetings acros
 ## What Changes
 
 - ADDED `day-colouring`: three day colourings (Plain, Time of day, Working hours) that apply to every day track and every hour cell. The capability also defines working time (the user's working hours in each location's local time, on Monday to Friday by the local date), the colours of the Plain and the Working hours colourings, the half-hour rule for an hour cell, and contrast rules for hour cell digits and the handle on every day colour.
-- MODIFIED `settings`: a colouring group «Раскраска» / "Colouring" with three options; a working hours row «Рабочие часы» / "Working hours" with a start field and an end field, shown only for the Working hours colouring; both stored on the device in the preferences document, migrated for existing users, shared between tabs; a reusable time range group that other settings can use later.
+- MODIFIED `settings`: a colouring group «Раскраска» / "Colouring" with three options; a working hours row «Рабочие часы» / "Working hours" with a start field and an end field, shown only for the Working hours colouring, where Esc in a field first restores the stored texts before it leaves the page (MODIFIED "Open the settings page"); both stored on the device in the preferences document, migrated for existing users, shared between tabs; a reusable time range group that other settings can use later.
 - MODIFIED `time-selection`: "Day-period colours" now applies only while the day colouring is Time of day.
 - MODIFIED `grid-view`: "Hour cell colour" follows the day colouring. "Hour frame" is drawn in the foreground colour when the cells are accent-coloured (Plain, Working hours), because an accent frame cannot be seen on accent cells.
 - Glossary, new terms: **Day colouring** (`docs/glossary/settings.md`; it replaces the *(planned)* entry of `docs/glossary/views.md` that covered the Grid only) — *RU:* «Раскраска»: «Обычная», «По времени суток», «По рабочему времени». **Working hours** (`settings.md`) — *RU:* «Рабочие часы». **Time range group** (`settings.md`) — *RU:* группа диапазона времени. **Working day**, **Working time** and **Day colour** (`docs/glossary/time-selection.md`).
@@ -24,7 +24,7 @@ Audience: every user of Cards and Grid, especially those planning meetings acros
 - `day-colouring`: the three day colourings, working days and working time, the colours of each colouring on day tracks and hour cells, readability of digits and the handle, and the work bounds of colouring.
 
 ### Modified Capabilities
-- `settings`: ADDED "Colouring group", "Working hours row", "Time range group", "Day colouring and working hours are kept on the device", "Accessible colouring group and working hours row", "Colouring settings layout", "Colouring strings are localized".
+- `settings`: ADDED "Colouring group", "Working hours row", "Time range group", "Day colouring and working hours are kept on the device", "Accessible colouring group and working hours row", "Colouring settings layout", "Colouring strings are localized"; MODIFIED "Open the settings page" (Esc in a working hours field first restores its texts).
 - `time-selection`: MODIFIED "Day-period colours" (only in the Time of day colouring).
 - `grid-view`: MODIFIED "Hour cell colour", "Hour frame".
 
