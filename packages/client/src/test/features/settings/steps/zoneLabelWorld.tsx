@@ -142,6 +142,8 @@ export const createZoneLabelWorld = () => {
             interfaceLanguage: DEFAULT_PREFERENCES.interfaceLanguage,
             zoneLabelParts: ZONE_LABEL_PART_NAMES[partsName],
             viewMode: null,
+            dayColouring: "TIME_OF_DAY",
+            workingHours: { start: "10:00", end: "18:00" },
           },
         }),
       ),

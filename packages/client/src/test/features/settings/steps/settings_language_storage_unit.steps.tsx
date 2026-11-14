@@ -76,6 +76,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             interfaceLanguage: language,
             zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
             viewMode: null,
+            dayColouring: "TIME_OF_DAY",
+            workingHours: { start: "10:00", end: "18:00" },
           });
         },
       );

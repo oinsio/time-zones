@@ -219,7 +219,7 @@ Rules for every task:
 - [x] 8.3 RED then GREEN, new `src/app/settings/DayColouringGroup.tsx` and `WorkingHoursGroup.tsx`, placed in `SettingsPage.tsx` after `ViewModeGroup` (export from `src/app/settings/index.ts` if the module lists its parts). Tests: `DayColouringGroup.test.tsx` (options in order, Time of day checked by default, a choice calls `setDayColouring`) and `WorkingHoursGroup.test.tsx` (absent unless Working hours, texts in both hour formats, each outcome's hint, Esc restores, a change from outside resets the texts).
 
   Verify: `npx vitest run src/app/settings/DayColouringGroup.test.tsx`, then `npx vitest run src/app/settings/WorkingHoursGroup.test.tsx`, then `npx vitest run src/app/settings/SettingsPage.test.tsx`, one at a time, pass.
-- [ ] 8.4 Unit BDD:
+- [x] 8.4 Unit BDD:
   - `src/test/features/settings/settings_day_colouring_unit.feature` with `steps/settings_day_colouring_unit.steps.tsx`: "Time of day by default" (the colouring group follows the view group), "Choosing a colouring applies at once", "The row follows the colouring", "Both languages of the colouring settings";
   - `settings_working_hours.feature` with `steps/settings_working_hours.steps.tsx`: "A minute-exact start", "The 12-hour format", "Refused ranges keep the last valid hours" (three rows), "Esc restores the stored texts";
   - `settings_day_colouring_storage.feature` with `steps/settings_day_colouring_storage.steps.tsx`: every scenario of "Day colouring and working hours are kept on the device", including the 3-row outline "Each colouring is kept and shared" (M1), using `createLocalStoragePreferencesRepository`, the manual write scheduler and two tabs on one channel, as `zoneLabelWorld.tsx` does.
