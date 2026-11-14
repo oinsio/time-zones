@@ -89,10 +89,10 @@ Rules for every task:
 
 ## 3. Working time in the model (FR8, FR10, FR11, NFR-P1; design D3)
 
-- [ ] 3.1 Characterization first: run `npx vitest run src/model/dayPeriodStops.test.ts` and see it pass. Move `getClockChangesAround` from `src/model/dayPeriodStops.ts` to `src/model/clockChange.ts`, exported, and import it back. The behaviour is unchanged.
+- [x] 3.1 Characterization first: run `npx vitest run src/model/dayPeriodStops.test.ts` and see it pass. Move `getClockChangesAround` from `src/model/dayPeriodStops.ts` to `src/model/clockChange.ts`, exported, and import it back. The behaviour is unchanged.
 
   Verify: `npx vitest run src/model/dayPeriodStops.test.ts` passes again.
-- [ ] 3.2 RED then GREEN, `src/constants/workingTime.ts` (`WORKING_WEEKDAYS`, `WORKING_CELL_MIN_SHARE`) and `src/model/workingTime.ts` with `src/model/workingTime.test.ts`:
+- [x] 3.2 RED then GREEN, `src/constants/workingTime.ts` (`WORKING_WEEKDAYS`, `WORKING_CELL_MIN_SHARE`) and `src/model/workingTime.ts` with `src/model/workingTime.test.ts`:
   - `isWorkingDay` for every weekday;
   - `isWorkingTime`: the table of the `day-colouring` scenario "Each location reads the working hours in its own time", a Saturday, the start included and the end excluded;
   - `getWorkingTimeSpans` and `getWorkingTimeStops`: the scenario tables "Working-time stops on a Monday", "Friday still works where Saturday has not begun" and "Working time after a clock change" (Cairo, `2026-04-24`); a start inside a DST gap (`Africa/Cairo`, working hours `00:30–18:00`, Friday 2026-04-24, whose 00:00–01:00 is skipped): the span starts at the clock change instant `2026-04-23T22:00:00Z`; a property check that every stop's colour equals `isWorkingTime` at a quarter-hour sample on each side;

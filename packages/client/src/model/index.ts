@@ -139,5 +139,15 @@ export {
   type WallClockNote,
   WallClockNotePlacement,
 } from "./wallClockNote";
+// Implements FR8, FR10, FR11 of add-day-colouring-setting.
+export {
+  getHourCellWorkingFlags,
+  getWorkingTimeSpans,
+  getWorkingTimeStops,
+  isWorkingDay,
+  isWorkingTime,
+  type WorkingTimeSpan,
+  type WorkingTimeStop,
+} from "./workingTime";
 // Implements FR1, FR2 of show-zone-abbreviations-and-zone-label-setting.
 export { getZoneAbbreviation, getZoneAbbreviations } from "./zoneAbbreviation";

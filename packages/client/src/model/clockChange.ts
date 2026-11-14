@@ -1,7 +1,7 @@
-import { UTC_ZONE_ID } from "@/constants";
+import { OFFSET_CHANGE_MARGIN_HOURS, UTC_ZONE_ID } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import { findOffsetTransitions } from "./dayPeriodWindows";
-import type { ClockChangeWindow } from "./dayTrack";
+import type { ClockChangeWindow, ReferenceDay } from "./dayTrack";
 import { getUtcOffsetMinutes } from "./utcOffset";
 
 /**
@@ -126,4 +126,26 @@ export function findNearestClockChange(
         ? ClockChangeTense.PAST
         : ClockChangeTense.FUTURE,
   };
+}
+
+/**
+ * The offset changes from just before the day to just after it, taken from the
+ * clock changes of the day's window, so one search serves the note and the
+ * colours.
+ * Implements FR2, NFR-P1 of show-clock-change-note-on-location-cards (D2).
+ */
+export function getClockChangesAround(
+  timeZoneId: string,
+  day: ReferenceDay,
+): Temporal.Instant[] {
+  const margin = { hours: OFFSET_CHANGE_MARGIN_HOURS };
+  const from = day.start.subtract(margin);
+  const until = day.end.add(margin);
+  return getClockChanges(timeZoneId, day.clockChangeWindow)
+    .map((clockChange) => clockChange.instant)
+    .filter(
+      (instant) =>
+        Temporal.Instant.compare(instant, from) >= 0 &&
+        Temporal.Instant.compare(instant, until) < 0,
+    );
 }
