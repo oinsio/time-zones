@@ -19,9 +19,11 @@ executor:
   # Only these four keys are accepted.
   settings:
     # Agent turns per round.
-    maxTurns: 10
+    # Doubled (was 10) when tasks outgrew the previous limit.
+    maxTurns: 20
     # Round is killed after this; counts as infra failure, not an attempt.
-    roundTimeout: 300s
+    # Doubled (was 300s) when tasks outgrew the previous limit.
+    roundTimeout: 600s
     # Cannot widen what .claude/settings.json denies.
     allowedTools:
       - Bash
@@ -61,4 +63,5 @@ verify:
 # auto = go to next stage; manual = wait for a human.
 advancement: auto
 autonomy:
-  attemptLimit: 2
+  # Doubled (was 2) when tasks outgrew the previous limit.
+  attemptLimit: 4

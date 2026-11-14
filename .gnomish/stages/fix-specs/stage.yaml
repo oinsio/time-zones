@@ -18,9 +18,11 @@ executor:
   # Only these four keys are accepted.
   settings:
     # Agent turns per round: the required reading (ADRs, rules) comes first.
-    maxTurns: 60
+    # Doubled (was 60) when tasks outgrew the previous limit.
+    maxTurns: 120
     # Round is killed after this; counts as infra failure, not an attempt.
-    roundTimeout: 1200s
+    # Doubled (was 1200s) when tasks outgrew the previous limit.
+    roundTimeout: 2400s
     # Cannot widen what .claude/settings.json denies.
     allowedTools:
       - Read
@@ -102,7 +104,8 @@ verify:
       # Room to check every criterion, not just the first few findings. The judge is read-only
       # (Read/Grep/Glob only, hard-wired by the factory) and pays a turn per file it opens; the
       # implement judge ran out at 30 on a 187-file change and escalated without a verdict.
-      maxTurns: 60
+      # Doubled (was 60) when tasks outgrew the previous limit.
+      maxTurns: 120
       disallowedTools:
         - Bash
         - Agent

@@ -19,11 +19,13 @@ executor:
   settings:
     # Agent turns per round. Per-item evidence, greps and scoped Stryker runs are turn-hungry;
     # 60 ran out on task #18 just as the report was written.
-    maxTurns: 120
+    # Doubled (was 120) when tasks outgrew the previous limit.
+    maxTurns: 240
     # Round is killed after this; counts as infra failure, not an attempt.
     # pnpm install + scoped Stryker runs on the changed production files; 60 turns took 24
     # minutes on task #18, doubled along with the turns.
-    roundTimeout: 7200s
+    # Doubled (was 7200s) when tasks outgrew the previous limit.
+    roundTimeout: 14400s
     # Cannot widen what .claude/settings.json denies. Bash is for git, grep, pnpm install
     # and scoped Stryker; the scope check below rejects any edit outside review-code.md.
     allowedTools:
@@ -115,7 +117,8 @@ verify:
       # Room to check every criterion, not just the first few findings. The judge is read-only
       # (Read/Grep/Glob only, hard-wired by the factory) and pays a turn per file it opens; the
       # implement judge ran out at 30 on a 187-file change and escalated without a verdict.
-      maxTurns: 80
+      # Doubled (was 80) when tasks outgrew the previous limit.
+      maxTurns: 160
       disallowedTools:
         - Bash
         - Agent
