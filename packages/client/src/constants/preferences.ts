@@ -1,8 +1,13 @@
-import { HourFormat, ThemePreference, ZoneLabelPart } from "@/preferences";
+import {
+  DayColouring,
+  HourFormat,
+  ThemePreference,
+  ZoneLabelPart,
+} from "@/preferences";
 import { KeyboardKey } from "./keyboard";
 
 /** Version of the stored preferences document (ADR-0004 envelope). */
-export const PREFERENCES_SCHEMA_VERSION = 5;
+export const PREFERENCES_SCHEMA_VERSION = 6;
 
 /**
  * The zone of the live example under the zone label group.
@@ -87,3 +92,14 @@ export const SETTINGS_FOOTNOTE_CLASS_NAME = "text-center text-sm text-accent";
 /** Tailwind tokens of the caption of a settings group. */
 export const SETTINGS_GROUP_CAPTION_CLASS_NAME =
   "text-sm font-semibold text-muted-foreground";
+
+/**
+ * The order of the day colouring options on the settings page: Plain, Time of
+ * day, Working hours. The enum order stays the validation list.
+ * Implements FR1 of add-day-colouring-setting (D1).
+ */
+export const DAY_COLOURING_ORDER: readonly DayColouring[] = [
+  DayColouring.PLAIN,
+  DayColouring.TIME_OF_DAY,
+  DayColouring.WORKING_HOURS,
+];

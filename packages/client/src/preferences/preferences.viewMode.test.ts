@@ -1,6 +1,7 @@
 // Verifies FR3, FR4 of add-view-mode-setting-and-grid-skeleton.
 import { describe, expect, it } from "vitest";
 import {
+  DayColouring,
   DEFAULT_PREFERENCES,
   PreferencesCommandType,
   parseStoredPreferences,
@@ -14,6 +15,8 @@ function parseViewMode(viewMode: unknown) {
     interfaceLanguage: null,
     zoneLabelParts: [],
     viewMode,
+    dayColouring: DayColouring.TIME_OF_DAY,
+    workingHours: { start: "10:00", end: "18:00" },
   });
 }
 

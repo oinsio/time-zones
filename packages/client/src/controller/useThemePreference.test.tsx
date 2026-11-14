@@ -4,7 +4,9 @@ import { type ReactNode, useLayoutEffect } from "react";
 import { createInMemoryPreferencesRepository } from "@/adapters";
 import { PreferencesLoadStatus } from "@/ports";
 import {
+  DayColouring,
   DEFAULT_PREFERENCES,
+  DEFAULT_WORKING_HOURS,
   HourFormat,
   ThemePreference,
 } from "@/preferences";
@@ -22,6 +24,8 @@ const storedTheme = (theme: ThemePreference) =>
       interfaceLanguage: null,
       zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
       viewMode: null,
+      dayColouring: DayColouring.TIME_OF_DAY,
+      workingHours: DEFAULT_WORKING_HOURS,
     },
   }) as const;
 

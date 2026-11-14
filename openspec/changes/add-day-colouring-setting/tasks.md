@@ -58,14 +58,14 @@ Rules for every task:
 
 ## 2. Preferences model and stored document (FR2, FR3, FR6, FR7; design D1, D2)
 
-- [ ] 2.1 RED then GREEN, `src/preferences/workingHours.ts` with `src/preferences/workingHours.test.ts`:
+- [x] 2.1 RED then GREEN, `src/preferences/workingHours.ts` with `src/preferences/workingHours.test.ts`:
   - `WorkingHours`, `DEFAULT_WORKING_HOURS`, `WorkingHoursError`, `checkWorkingHours`, `isWorkingHours`;
   - `it.each` over `10:00–18:00` (valid), `09:07–17:30` (valid), `12:00–12:00`, `18:00–10:00`, `25:00–18:00`, `9:00–18:00` (not canonical), and non-strings.
 
   Export the new names from `src/preferences/index.ts`.
 
   Verify: `npx vitest run src/preferences/workingHours.test.ts` fails, then passes.
-- [ ] 2.2 RED then GREEN, `src/preferences/preferences.ts` and `preferencesCommands.ts` with new `src/preferences/preferences.dayColouring.test.ts`:
+- [x] 2.2 RED then GREEN, `src/preferences/preferences.ts` and `preferencesCommands.ts` with new `src/preferences/preferences.dayColouring.test.ts`:
   - `DayColouring`;
   - the default `TIME_OF_DAY` and `DEFAULT_WORKING_HOURS`;
   - `SET_DAY_COLOURING` (an unchanged value returns the same object);
@@ -75,7 +75,7 @@ Rules for every task:
   Add `DAY_COLOURING_ORDER` to `src/constants/preferences.ts` and export it from `src/constants/index.ts`.
 
   Verify: `npx vitest run src/preferences/preferences.dayColouring.test.ts` fails, then passes.
-- [ ] 2.3 RED then GREEN, `parseStoredPreferences.ts` and `src/adapters/preferencesDocument.ts` with new `src/adapters/preferencesDocument.dayColouring.test.ts`:
+- [x] 2.3 RED then GREEN, `parseStoredPreferences.ts` and `src/adapters/preferencesDocument.ts` with new `src/adapters/preferencesDocument.dayColouring.test.ts`:
   - `PREFERENCES_SCHEMA_VERSION = 6`, migration step 5;
   - serialization of both fields;
   - fixture tests:

@@ -73,6 +73,7 @@ export {
 } from "./meeting";
 export { VISIBILITY_CHANGE_EVENT, VISIBLE_STATE } from "./pageVisibility";
 export {
+  DAY_COLOURING_ORDER,
   HOUR_FORMAT_PICTOGRAMS,
   LANGUAGE_BUTTON_CLASS_NAME,
   LANGUAGE_LIST_ARROW_STEP_BY_KEY,

@@ -28,6 +28,8 @@ function parseParts(zoneLabelParts: unknown) {
     hourFormat: "H12",
     interfaceLanguage: null,
     viewMode: null,
+    dayColouring: "TIME_OF_DAY",
+    workingHours: { start: "10:00", end: "18:00" },
     zoneLabelParts,
   });
 }

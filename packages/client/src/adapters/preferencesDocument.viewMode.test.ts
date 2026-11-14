@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
+  DayColouring,
   DEFAULT_PREFERENCES,
   HourFormat,
   ThemePreference,
@@ -39,6 +40,8 @@ describe("the view mode in the preferences document", () => {
         interfaceLanguage: "ru",
         zoneLabelParts: [ZoneLabelPart.UTC_OFFSET, ZoneLabelPart.COUNTRY],
         viewMode: null,
+        dayColouring: DayColouring.TIME_OF_DAY,
+        workingHours: { start: "10:00", end: "18:00" },
       },
     });
   });
@@ -64,6 +67,8 @@ describe("the view mode in the preferences document", () => {
       serializePreferencesDocument({
         ...DEFAULT_PREFERENCES,
         viewMode: "grid",
+        dayColouring: DayColouring.TIME_OF_DAY,
+        workingHours: { start: "10:00", end: "18:00" },
       }),
     );
     expect(written.schemaVersion).toBe(PREFERENCES_SCHEMA_VERSION);

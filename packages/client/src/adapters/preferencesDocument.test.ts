@@ -3,6 +3,7 @@
 import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
+  DayColouring,
   DEFAULT_PREFERENCES,
   HourFormat,
   ThemePreference,
@@ -34,6 +35,8 @@ describe("deserializePreferencesDocument", () => {
         interfaceLanguage: "ru",
         zoneLabelParts: ALL_PARTS,
         viewMode: null,
+        dayColouring: DayColouring.TIME_OF_DAY,
+        workingHours: { start: "10:00", end: "18:00" },
       },
     });
   });
@@ -106,16 +109,20 @@ describe("serializePreferencesDocument", () => {
           interfaceLanguage: "ru",
           zoneLabelParts: ALL_PARTS,
           viewMode: null,
+          dayColouring: DayColouring.TIME_OF_DAY,
+          workingHours: { start: "10:00", end: "18:00" },
         }),
       ),
     ).toEqual({
-      schemaVersion: 5,
+      schemaVersion: 6,
       payload: {
         theme: "DARK",
         hourFormat: "H12",
         interfaceLanguage: "ru",
         zoneLabelParts: ALL_PARTS,
         viewMode: null,
+        dayColouring: DayColouring.TIME_OF_DAY,
+        workingHours: { start: "10:00", end: "18:00" },
       },
     });
   });

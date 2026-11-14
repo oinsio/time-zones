@@ -8,7 +8,9 @@ import {
 import { PREFERENCES_WRITE_DEBOUNCE_MS } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
+  DayColouring,
   DEFAULT_PREFERENCES,
+  DEFAULT_WORKING_HOURS,
   HourFormat,
   ThemePreference,
 } from "@/preferences";
@@ -24,6 +26,8 @@ const storedDarkTwelveHour = {
     interfaceLanguage: null,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     viewMode: null,
+    dayColouring: DayColouring.TIME_OF_DAY,
+    workingHours: DEFAULT_WORKING_HOURS,
   },
 } as const;
 
