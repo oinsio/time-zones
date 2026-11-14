@@ -1,4 +1,5 @@
 // Implements FR6, verifies NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D5).
+// Verifies NFR-P4 of add-geonames-city-source (D6): the median over the full city data, reported, never blocking.
 import { bench, describe } from "vitest";
 import {
   SAMPLE_QUERIES,

@@ -21,10 +21,14 @@ export type SearchPresentationContext = {
 export type PresentedAbbreviation = { text: string; isMatched: boolean };
 
 export type PresentedSearchResult = {
+  /** Unique per city: the list key of the results (FR4 of add-geonames-city-source). */
+  id: string;
   timeZoneId: string;
   cityName: string;
   countryCode: string;
   countryName: string;
+  /** First-level division of a namesake in the interface language (FR7 of add-geonames-city-source). */
+  regionName?: string;
   /** The abbreviation pair of an abbreviation match, `EST / EDT`; absent for other matches. */
   abbreviationPair?: readonly PresentedAbbreviation[];
   /** The list already has this zone under this city, in any language. */
@@ -35,6 +39,7 @@ export type PresentedSearchResult = {
  * Search results in the interface language, each marked when already added.
  * Implements FR5, FR8, UX3 of add-locations-via-search (D9).
  * Implements FR10, FR11, UX3 of show-zone-abbreviations-and-zone-label-setting (D8): the abbreviation pair.
+ * Implements FR4, FR7, FR8 of add-geonames-city-source (D7, D9): the result ID and the region.
  */
 export function presentSearchResults(
   results: readonly CitySearchResult[],
@@ -43,10 +48,12 @@ export function presentSearchResults(
 ): PresentedSearchResult[] {
   const { language, cityNameLanguage, translate } = context;
   return results.map(({ record, matchedAbbreviation }) => ({
+    id: record.id,
     timeZoneId: record.timeZoneId,
     cityName: record.names[cityNameLanguage],
     countryCode: record.countryCode,
     countryName: presentCountryName(record.countryCode, language),
+    regionName: record.region?.[cityNameLanguage],
     abbreviationPair:
       matchedAbbreviation === undefined
         ? undefined

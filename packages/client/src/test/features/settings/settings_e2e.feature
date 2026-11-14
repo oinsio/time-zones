@@ -92,6 +92,7 @@ Feature: Settings page in a real browser
   @show-zone-abbreviations-and-zone-label-setting @NFR-R3 @polish-settings-and-remove-offline-update-notice @NFR-R2
   @compact-settings-controls @NFR-R2 @add-view-mode-setting-and-grid-skeleton @NFR-R2
   @add-remote-zone-rules-updates @NFR-R1 @add-country-to-zone-label @NFR-R1
+  @add-geonames-city-source @NFR-R2
   Scenario Outline: Approved screenshots of the settings at <width> px in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the screen is <width> px wide for the locations

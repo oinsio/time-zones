@@ -8,7 +8,8 @@ See `proposal.md` for the motivation. The current state that shapes the approach
 - The zone cities are extracted from CLDR at build time by `scripts/zoneData/zoneDataPlugin.ts` and emitted as one asset, `city-search-*.json` (43 KB raw, budget 30 KB gzipped). `createFetchCitySearchLoader` fetches and validates it; `cityDataCache` shares one load between the search, the city labels and the exemplar city.
 - The file is requested when the search opens, or once in the background while the list holds a location (city labels, exemplar city).
 - Measured on the GeoNames dump of 2026-11-13: 6 368 cities with a population ≥ 100 000 or capitals, 335 zones, about 118 namesake records; names in English and Russian for all of them gzip to about 116 KB.
-- Glossary owners touched: **City search** (`CitySearch`, `useCitySearch`), **City source** (`CitySource`), **City record** (`CityRecord`), **Zone cities source** (`createZoneCitiesSource`), **Exemplar city** (`getExemplarCity`), **City label** (`getCityLabel`, `isCityNameOfRecord`, `useCityLabels`), **Search result** (`PresentedSearchResult`, `presentSearchResults`), country name (`presentCountryName`), time zone ID (`canonicalizeTimeZoneId`). Each is extended in place; no concept gets a second owner.
+- Glossary owners touched: **City search** (`CitySearch`, `useCitySearch`), **City source** (`CitySource`), **City record** (`CityRecord`), **Zone cities source** (`createZoneCitiesSource`), **Exemplar city** (`getExemplarCity`), **City label** (`getCityLabel`, `isCityNameOfRecord`, `useCityLabels`), **Search result** (`PresentedSearchResult`, `presentSearchResults`), country name (`presentCountryName`), time zone ID (`canonicalizeTimeZoneId`), **Settings page** and **Deploy time** (the attribution now follows the release line). Each is extended in place; no concept gets a second owner. New term: **City data attribution** (`CityDataAttribution`, D10) in `docs/glossary/settings.md`.
+- ADR-0006 (Accepted) says the composite adapter "removes duplicates by canonical `timeZoneId` and name" and "ranks by match quality, then by `rank`". With per-city records, two namesakes in one zone (Springfield, Illinois and Springfield, Missouri, both `America/Chicago`) share zone and name but are different cities. This change does not settle that global rule itself: ADR-0015 records it, and ADR-0006 gets a status note pointing at ADR-0015 (handoff H1, because the implement stage may not write `docs/adr/`). D3 and D7 implement what ADR-0015 records.
 
 ## Goals / Non-Goals
 
@@ -31,7 +32,7 @@ The build emits one asset with the zone cities (from CLDR, as today) and the Geo
 
 ### D2. `CityRecord` identity, population and region (FR1, FR4, FR5, FR7)
 
-`CityRecord` (owner of **City record**) changes:
+`CityRecord` (owner of **City record**, `src/ports/citySearch.ts`) changes:
 
 - `id` — unique per city: the zone ID for a zone city (unchanged), the decimal GeoNames ID for a GeoNames city. The two cannot collide: a zone ID is never all digits.
 - `population: number` — new; `0` when unknown (a zone city with no GeoNames match, `UTC`).
@@ -48,7 +49,7 @@ The compiler needs the CLDR zone data for this; it calls the existing `extractZo
 
 ### D4. Regions are decided at compile time, for namesakes only (FR7, UX2)
 
-The compiler groups all records (zone cities included) by country code and normalized name, in each language; a record in a group of two or more is a namesake and gets its admin1 name in English (`admin1CodesASCII.txt`) and Russian (alternate names of the admin1 feature, English as the fallback). Region names are stored once in a `regions` table and referenced by index. For a zone city that is a namesake the region is stored in a `zoneCityRegions` map.
+The compiler (`markNamesakes`, called by `compileCityData`) groups all records (zone cities included) by country code and name normalized with `normalizeSearchText` (D11), in each language; a record in a group of two or more is a namesake and gets its admin1 name in English (`admin1CodesASCII.txt`) and Russian (alternate names of the admin1 feature, English as the fallback). Region names are stored once in a `regions` table and referenced by index. For a zone city that is a namesake the region is stored in a `zoneCityRegions` map.
 
 The presenter shows the region whenever the record has one — it holds no namesake logic. That keeps the rule in one place (the compiler, checked by `city-data:check`) and the data small (about 118 records carry a region).
 
@@ -77,15 +78,16 @@ The served search data file is `{ "zoneCities": [...as today...], "cityData": <t
 A new `CitySource` in `src/adapters/city-search/geoNamesCitySource.ts`. The name and country matching (`toSearchableText`, `findMatchKind`, `readCountryTexts`) moves from `zoneCitiesSource.ts` into one shared module, `cityTextMatching.ts`, used by both sources — the matching rule keeps one owner.
 
 - Country texts are read through one cache per search: one `Intl.DisplayNames` per city-name language, one lookup per country code (today: one formatter per record and language). This is the "at most one country-name formatter per language" bound of NFR-P2.
-- Searchable texts are built lazily, on the first `match` call, and memoized. Loading the data for city labels or the exemplar city normalizes nothing (NFR-P3).
-- The source skips cities whose zone is not in `getKnownZoneIds()` (FR11), reusing `listKnownZones` of the zone cities source.
+- Searchable texts are built lazily, on the first `match` call, and memoized. Loading the data for city labels or the exemplar city normalizes nothing (NFR-P3). That first `match` is the one-time preparation of NFR-P2: it normalizes every city and country text once and builds the country-name formatters; every later query normalizes only itself. The work-bound scenarios therefore count queries over a prepared search (the shared search in `searchWorld.ts` runs one preparation query when it is built), and a separate scenario counts the formatters of the preparation on a freshly built search.
+- The source skips cities whose zone is not in `getKnownZoneIds()` (FR11), reusing `listKnownZones` of the zone cities source. Its signature is `createGeoNamesCitySource(cityData, listTimeZones: ListTimeZones = listKnownZones)`, the same zone-lister seam the zone cities source has, so its tests fake the installed release the way the zone cities tests do. `listKnownZones` is a module-private `const` of `zoneCitiesSource.ts` today; it moves to `cityTextMatching.ts` and is exported there, so both sources share one owner.
 
 ### D7. Composite adapter: per-city results, order, label lookup (FR4, FR5, FR6, FR8, FR9)
 
 - `keepFirstResultPerZone` becomes `keepFirstResultPerCity`, keyed by `record.id`. Abbreviation results still come first, so a zone city matched by abbreviation keeps that kind.
 - The comparator becomes: match kind → for `COUNTRY` matches, zone cities (`id === timeZoneId`) first → `rank` descending → `population` descending → collator on the name. One collator per query, as today.
+- The signatures become `createCompositeCitySearch(zoneCities, cityData = EMPTY_GEONAMES_CITY_DATA)` and `createZoneCitiesSource(zoneCities, listTimeZones = listKnownZones, cityData = EMPTY_GEONAMES_CITY_DATA)`. `createZoneCitiesSource` keeps its existing second parameter, the zone lister that the tests of FR9 of add-zone-rules-from-iana inject (`zoneCitiesSource.test.ts`, `zoneCitiesSource.matching.test.ts`, `abbreviationSource.test.ts`); `cityData` is appended as the third. The composite adapter calls `createZoneCitiesSource(zoneCities, undefined, cityData)` (the default lister) and `createGeoNamesCitySource(cityData)`. The loader passes the parsed `cityData`, while the tests that are about zone cities alone keep passing the array (and, where they do today, a lister), so the change does not ripple through every test that builds a search.
 - `getExemplarCity` and `suggest` keep reading the zone cities map.
-- `getCityLabel(timeZoneId, storedLabel, language)` reads a `Map<zone ID, CityRecord[]>` built once at load without normalization, ordered zone city first, then by population descending, and returns the first record that satisfies `isCityNameOfRecord` (NFR-P3: one zone's records are scanned, never all).
+- `getCityLabel(timeZoneId, storedLabel, language)` reads a `Map<zone ID, CityRecord[]>` built once at load without normalization, ordered zone city first, then by population descending, and returns the first record that satisfies `isCityNameOfRecord` (one zone's records are scanned, never all — a design choice in support of NFR-P3, not a separately tested requirement).
 - `presentSearchResults` keeps `isAdded` as zone + `isCityNameOfRecord`; with per-city records this gives "namesakes in one zone are one location" (FR8) with no new rule. It adds `id` (the list key in the view, which today is zone + city name) and `regionName?: string` in the interface language.
 
 ### D8. Compile and check pipeline (FR1, FR2, FR11, FR12)
@@ -93,12 +95,14 @@ A new `CitySource` in `src/adapters/city-search/geoNamesCitySource.ts`. The name
 New `scripts/cityData/`, mirroring `scripts/zoneRules/`:
 
 - `download.ts` — fetches `cities15000.zip`, `alternateNamesV2.zip` (205 MB) and `admin1CodesASCII.txt` from `download.geonames.org` into a temporary directory and extracts them with the system `unzip` through the existing `runChildProcess`. No new dependency.
-- `compileCityData.ts` — pure: rows in, dataset out. Filters (population ≥ 100 000 or feature code `PPLC`), picks names (FR2), canonicalizes zones through the alias map of `extractZoneData` and fails on a zone outside the bundled release (FR11), merges exemplar cities (D3), marks namesakes (D4). Alternate names are read as a stream and only rows for the selected IDs and languages `en`, `ru` are kept, so memory stays small.
-- `checkCityData.ts` — pure validation of the committed object against the bundled release and the thresholds of the `city-data` spec; `check.ts` is its command-line entry.
-- Commands: `pnpm city-data:compile` (maintainer, network) and `pnpm city-data:check` (CI, offline), the latter a step of the `ci.yml` check job before `pnpm test`.
-- Thresholds and URLs are constants in `scripts/cityData/constants.ts`; the budget `CITY_SEARCH_DATA_BUDGET_KB = 130` replaces the literal in `check-bundle-size.mjs`.
+- `compileCityData.ts` — pure: rows in, dataset out. Filters (population ≥ 100 000 or feature code `PPLC`), picks names (FR2), canonicalizes zones through the alias map of `extractZoneData` and fails on a zone outside the bundled release (FR11), merges exemplar cities (D3), marks namesakes through `markNamesakes` (D4). Every script imports from `src/` only through an index that plain Node can load (`src/lib/zoneRules/core/index.ts`, `src/lib/searchText/index.ts`, D11), never through `@/` or an extensionless index. Alternate names are read as a stream and only rows for the selected IDs and languages `en`, `ru` are kept, so memory stays small.
+- `compile.ts` and `check.ts` are thin command-line entries shaped like `scripts/zoneRules/compile.ts`: an exported `runCityDataCompile` / `runCityDataCheck` takes its I/O (fetch, process runner, file reads and writes, log) as dependencies and returns the exit code, so `src/test/cityData/compile.test.ts` and `check.test.ts` test them with stubs; only the guarded `import.meta.url` block that binds the real I/O is excluded from mutation (`// Stryker disable all`), as in the zone rules entries.
+- `checkCityData.ts` — pure validation of the committed object against the bundled release and the thresholds of the `city-data` spec; `check.ts` is its command-line entry. "The bundled release" is the zone ID set of `parseZoneRulesRelease(...).zones` read from `ZONE_RULES_RELEASE_FILE` (`app.config.ts`), imported through `src/lib/zoneRules/core/index.ts`; the compiler checks zones against the same set.
+- Commands: `pnpm city-data:compile` (maintainer, network) and `pnpm city-data:check` (CI, offline), the latter a step of the `ci.yml` check job before `pnpm test` (handoff H2).
+- The scripts run under Node's type stripping like `scripts/zoneRules/` (`"zone-rules:compile": "node scripts/zoneRules/compile.ts"`), so they use no `enum` or `namespace`. Vitest collects only `src/**/*.{test,steps}.{ts,tsx}` (`vitest.config.ts`), so their tests live under `src/test/cityData/`, as the tests of `scripts/zoneRules/` live under `src/test/zoneRules/`.
+- Thresholds and URLs are constants in `scripts/cityData/constants.ts`; the budget `CITY_SEARCH_DATA_BUDGET_KB` moves from the script-local constant `30` in `check-bundle-size.mjs` to `app.config.ts` as `130`, next to `ZONE_RULES_ASSET_BUDGET_KB`, which the script already imports from there.
 
-`zoneDataPlugin.ts` reads the committed file and serves the merged object (D5) for the build asset, the dev middleware and `virtual:zone-cities` in test mode.
+`zoneDataPlugin.ts` reads the committed file and serves the merged object (D5) as the build asset and from the dev middleware. In test mode `virtual:zone-cities` keeps its default export (the zone cities array) and adds a named `cityData` export, so its existing importers compile unchanged and only the tests about the whole search import the second section.
 
 ### D9. Region on the result row (FR7, NFR-A1, NFR-R1)
 
@@ -106,7 +110,13 @@ New `scripts/cityData/`, mirroring `scripts/zoneRules/`:
 
 ### D10. Attribution (FR13, UX4, NFR-A2)
 
-A new `CityDataAttribution` component in `src/app/settings/`, modelled on `GnomishFactoryCredit` (link, new tab, `rel="noopener noreferrer"`, 44 px, token colours), rendered after `InterfaceLanguageGroup`. The URL is `GEONAMES_URL` in `src/constants/`; the text is `settings.cityDataAttribution`. `packages/client/city-data/README.md` and the root READMEs carry the credit and licence.
+A new `CityDataAttribution` component in `src/app/settings/`, modelled on `GnomishFactoryCredit` (link, new tab, `rel="noopener noreferrer"`, 44 px, token colours), rendered as the last child of the settings `<main>`, after `ZoneRulesReleaseLine` (UX4: below every settings group and line). The URL is `GEONAMES_URL` in `src/constants/`; the text is `settings.cityDataAttribution`. `packages/client/city-data/README.md` carries the credit and licence; the root READMEs get it through handoff H3.
+
+### D11. Search text normalization moves to a module plain Node can load (FR3, FR7)
+
+The compiler (D3, D4) must normalize names exactly as the search does, so it reuses `normalizeSearchText` rather than writing a second normalizer. Its current home, `src/adapters/city-search/`, cannot be imported by `node scripts/cityData/*.ts`: the module's `index.ts` exports without file extensions (`export { createCompositeCitySearch } from "./createCompositeCitySearch";`) and `createCompositeCitySearch.ts` imports through the `@/` alias, neither of which Node's resolver understands; importing the internal file directly would break "Import only through `index.ts` of a module".
+
+`normalizeSearchText` and `splitIntoWords` therefore move unchanged to `src/lib/searchText/`, whose `index.ts` exports with `.ts` extensions and which imports nothing — the pattern of `src/lib/zoneRules/core/index.ts`, which `scripts/zoneRules/` and `scripts/zoneData/extractZoneData.ts` already import as `../../src/lib/zoneRules/core/index.ts`. The city search adapters import it from `@/lib/searchText`, and `src/adapters/city-search/index.ts` re-exports it, so existing callers (`src/locales/filterLocales.ts` and `src/controller/useCitySearch.ts`, both through `@/adapters`) do not change. The normalizer keeps one owner. A unit test spawns plain `node` to import the module, so a regression that only Vitest's resolver would hide fails the suite.
 
 ## Consequences
 

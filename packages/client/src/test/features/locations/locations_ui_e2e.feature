@@ -71,7 +71,7 @@ Feature: Locations in a real browser
     Given the user opens the locations app
     When the user searches for "IST"
     Then the first results are "Kolkata", "Dublin", "Jerusalem" in that order
-    And the polite announcement reads "4 results"
+    And the polite announcement reads "5 results"
 
   @show-zone-abbreviations-and-zone-label-setting @NFR-A2 @M7
   Scenario Outline: No violations in the IST results in the <theme> theme

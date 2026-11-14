@@ -25,6 +25,24 @@ Feature: City label in the interface language
     When the user switches the interface language to "ru"
     Then the row now reads "Токио"
 
+  @add-geonames-city-source @FR9
+  Scenario: A city that is not the zone city
+    Given the interface language is "ru"
+    And the zone cities data is loaded
+    And the list is "Казань, Moscow"
+    When the user opens the app
+    And the user switches the interface language to "en"
+    Then the row reads "Kazan"
+    And a Moscow row in the same list still reads "Moscow"
+
+  @add-geonames-city-source @FR9
+  Scenario: Namesakes in one zone read the same
+    Given the interface language is "ru"
+    And the zone cities data is loaded
+    And the list is "Springfield"
+    When the user opens the app
+    Then the row reads "Спрингфилд"
+
   @show-city-labels-in-interface-language @FR2
   Scenario: A switch keeps the stored list
     Given the interface language is "en"

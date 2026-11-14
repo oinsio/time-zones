@@ -13,7 +13,7 @@ Audience: every user who adds a location, in English and in Russian.
 - ADDED `city-data`: a compiled dataset of cities from GeoNames (CC BY 4.0) — every city with a population of at least 100 000 and every country capital, about 6 400 cities, each with its IANA zone, country, population and English and Russian names. A maintainer command compiles it; the result is committed, so the app build and CI never contact GeoNames. A check validates the committed dataset.
 - MODIFIED `location-search`: the search offers these cities next to the zone cities. A zone may appear in the results several times, once per city; each city appears at most once. Results are ordered by match kind, popular locations, population, then name. A country query lists the zone cities of the country first, then its other cities. A result whose city has a namesake in the same country shows its region. The search data file grows from at most 30 KB to at most 130 KB gzipped.
 - MODIFIED `locations`: the city label of a city location follows the interface language for any city record of its zone, not only for the zone's exemplar city.
-- MODIFIED `settings`: the settings page shows the GeoNames attribution with a link, as the CC BY 4.0 licence requires.
+- MODIFIED `settings`: the settings page shows the GeoNames attribution with a link, as the CC BY 4.0 licence requires; it becomes the last line, after the zone rules release line.
 - Unchanged: search by abbreviation, the suggestions, the device time option and the exemplar city of the device time location keep using the zone cities only. The stored location list keeps its format.
 - Glossary (`docs/glossary/search.md`), new terms:
   - **GeoNames source** — the city source with the cities of the city data that are not zone cities.
@@ -21,8 +21,10 @@ Audience: every user who adds a location, in English and in Russian.
   - **Population** — the number of inhabitants of a city record; orders results after popularity.
   - **Namesake** — a city record that shares a name, in English or Russian, and a country with another city record.
   - **Region** — the first-level administrative division of a namesake (`Illinois`), shown in its search result. *RU:* shown as a value only, no label.
+- Glossary (`docs/glossary/settings.md`), new term: **City data attribution** — the line at the end of the settings page that credits GeoNames and the CC BY 4.0 licence with a link. *RU:* «Данные о городах: GeoNames, CC BY 4.0».
+- Glossary, changed terms in `docs/glossary/settings.md`: **Settings page** (its contents end with the city data attribution), **Deploy time** (followed by the zone rules release line, then the city data attribution).
 - Glossary, changed terms: **City record** (its ID is unique per city, it carries the population, the region is present for namesakes only), **Zone cities source** (unchanged meaning; its records are the zone cities), **Search result** (may show a region), **City label** in `docs/glossary/locations.md` (any city record of the zone). The abbreviations table gains GeoNames.
-- New ADR-0015 records the long-lived decision: city data comes from GeoNames, is compiled offline and committed. ADR-0006 stays accepted and unchanged; its "later" source is the one this change adds.
+- New ADR-0015 records the long-lived decisions: city data comes from GeoNames, is compiled offline and committed; the composite adapter removes duplicates by city (record ID) instead of by zone and name, and orders by population after popularity. ADR-0006 stays accepted and gets a status note pointing at ADR-0015 for these two refinements of its "Composite adapter" section; its "later" source is the one this change adds. The ADR files, the ADR list in `CLAUDE.md`, the CI step and the root README credit are delivered as handoff patches (`tasks.md`, Human follow-up).
 
 ## Capabilities
 
@@ -34,15 +36,15 @@ Audience: every user who adds a location, in English and in Russian.
 
 - `location-search`: MODIFIED "Search by country", "Result order and content", "Search is fast and lazy"; ADDED "Search finds GeoNames cities", "Region of a namesake", "Cities offered come from the release", "Namesakes in one zone are one location", "Region in results is accessible and fits".
 - `locations`: MODIFIED "City label in the interface language".
-- `settings`: ADDED "City data attribution", "Accessible and responsive attribution".
+- `settings`: ADDED "City data attribution", "Accessible and responsive attribution"; MODIFIED "Deploy time" and "Zone rules release line" (the attribution, not the release line, is now the last line of the page).
 
 ## Impact
 
-- `packages/client/scripts/cityData/` (new: download, compile, check), `packages/client/city-data/` (new: the committed dataset and its README), `packages/client/package.json` scripts, `.github/workflows/ci.yml` (the check).
+- `packages/client/scripts/cityData/` (new: download, compile, check; their tests under `src/test/cityData/`), `packages/client/city-data/` (new: the committed dataset and its README), `packages/client/package.json` scripts, `.github/workflows/ci.yml` (the check, by handoff patch).
 - `scripts/zoneData/zoneDataPlugin.ts` (serves the merged search data file), `scripts/check-bundle-size.mjs` and `app.config.ts` (the new budget).
-- `src/ports/CitySearch.ts` (`CityRecord`), `src/adapters/city-search/` (new GeoNames source, composite adapter, data parsing), `src/presenter/presentSearchResults.ts`, `src/views/shared/LocationSearchResults.tsx`, `src/app/settings/` (attribution), `src/constants/`, `src/locales/en.json` and `ru.json`.
+- `src/ports/citySearch.ts` (`CityRecord`), `src/adapters/city-search/` (new GeoNames source, composite adapter, data parsing), `src/lib/searchText/` (search text normalization, moved from `src/adapters/city-search/` so the scripts can load it), `src/presenter/presentSearchResults.ts`, `src/views/shared/LocationSearchResults.tsx`, `src/app/settings/` (attribution), `src/constants/`, `src/locales/en.json` and `ru.json`.
 - Features under `src/test/features/location_search/`, `locations/`, `settings/`, the search benchmark, approved search and settings screenshots.
-- `docs/adr/0015-*.md`, `docs/glossary/search.md`, `docs/glossary/locations.md`, `docs/glossary/README.md`, `docs/architecture/domain-model.md`, `README.md` and `README.ru.md` (data credit).
+- `docs/glossary/search.md`, `docs/glossary/locations.md`, `docs/glossary/settings.md`, `docs/glossary/README.md`, `docs/architecture/domain-model.md`, `docs/architecture/overview.md`; by handoff patch: `docs/adr/0015-city-data-from-geonames.md`, a status note in `docs/adr/0006-city-data-sources.md`, the ADR list in `CLAUDE.md`, `README.md` and `README.ru.md` (data credit).
 - No new runtime dependency, no new port, no new storage key, no change of the stored location list. The compile command needs the system `unzip` and about 250 MB of temporary disk space; the build does not.
 
 ## Goals
@@ -88,7 +90,7 @@ Audience: every user who adds a location, in English and in Russian.
 - FR9: The city label of a city location SHALL follow the interface language when the stored label is a name of any city record of the location's zone.
 - FR10: Search by abbreviation, the suggestions, the device time option and the exemplar city of a zone SHALL keep using the zone cities only.
 - FR11: Every zone of the city data SHALL be a canonical zone ID of the bundled zone rules release. The search SHALL offer a city only while its zone is in the installed zone rules release.
-- FR12: The city data SHALL be compiled from the GeoNames dumps by one maintainer command into a committed file that records the date of the dump. The app build, the tests and CI SHALL NOT contact GeoNames. A check command, run in CI, SHALL fail when the committed file breaks FR1, FR2, FR11, its format or its size budget.
+- FR12: The city data SHALL be compiled from the GeoNames dumps by one maintainer command into a committed file that records the date of the dump. The app build, the tests and CI SHALL NOT contact GeoNames. A check command, run in CI, SHALL fail when the committed file breaks FR1, FR2, FR11 or its format. The size of the served search data file is NFR-P1, checked by the bundle size check.
 - FR13: The settings page SHALL show the attribution "City data: GeoNames, CC BY 4.0" with a link to GeoNames, in English and Russian; the repository SHALL credit GeoNames and the licence next to the committed dataset and in the README.
 - FR14: The loading, error, retry and offline states of the search data SHALL stay as they are: one data file, one request.
 
@@ -97,8 +99,8 @@ Audience: every user who adds a location, in English and in Russian.
 #### Performance
 
 - NFR-P1: The search data SHALL be one separate file of at most 130 KB gzipped, not part of the initial JavaScript and not preloaded; the initial JavaScript stays at most 150 KB gzipped.
-- NFR-P2: One non-empty query over the full data SHALL normalize exactly one text, the query, build at most one collator and build no country-name formatter. Preparing the data for search SHALL build at most one country-name formatter per city-name language.
-- NFR-P3: Loading the search data for city labels or the exemplar city, without a query, SHALL normalize no text. Asking for one city label SHALL NOT scan every city record.
+- NFR-P2: Preparing the loaded search data for search, once, during the first query over it, SHALL build at most one country-name formatter per city-name language. Every non-empty query over prepared data SHALL normalize exactly one text, the query, build at most one collator and build no country-name formatter.
+- NFR-P3: Loading the search data for city labels or the exemplar city, without a query, SHALL normalize no text.
 - NFR-P4: One query over the full data SHALL take at most 50 ms in the timing benchmark, which is reported and does not block the pull request (ADR-0008).
 
 #### Accessibility
@@ -132,7 +134,7 @@ Audience: every user who adds a location, in English and in Russian.
 
 ## Behavior
 
-- `packages/client/src/test/features/location_search/location_search_by_name.feature`, `location_search_by_country.feature`, `location_search_ranking.feature`, `location_search_performance.feature` and new `location_search_namesakes.feature`, `location_search_namesakes_e2e.feature` — scenarios tagged `@add-geonames-city-source`.
+- `packages/client/src/test/features/location_search/location_search_by_name.feature`, `location_search_by_country.feature`, `location_search_ranking.feature`, `location_search_performance.feature` and new `location_search_namesakes_unit.feature`, `location_search_namesakes_e2e.feature` — scenarios tagged `@add-geonames-city-source`.
 - `packages/client/src/test/features/locations/` city label features — scenarios tagged `@add-geonames-city-source`.
 - `packages/client/src/test/features/settings/` new `settings_city_data_attribution_e2e.feature` — scenarios tagged `@add-geonames-city-source`.
 
@@ -150,7 +152,7 @@ No changes.
 - M2: The built search data file is at most 130 KB gzipped (measured estimate 116 KB) and the initial JavaScript stays at most 150 KB gzipped.
 - M3: 10 of 10 cities that the search does not find today are found in English and in Russian: Kazan, Saint Petersburg, Barcelona, San Francisco, Boston, Munich, Osaka, Mumbai, Rio de Janeiro, Milan.
 - M4: 100% of the cities of the committed city data have a zone of the bundled zone rules release, and at least 95% have a Russian name written in Cyrillic.
-- M5: 0 pairs of results with the same visible city, region and country text among the top 50 results of the 10 sample queries.
+- M5: 0 pairs of results with the same visible city, region and country text among the top 50 results of the 13 sample queries (the 10 of today plus Kazan, Казань and Springfield).
 - M6: 0 axe-core violations in the results with regions and on the settings page, in 2 themes.
 - M7: Mutation score ≥ 95% (minimum acceptable 90%) on the new and changed production files of `src/adapters/city-search/`, `src/presenter/presentSearchResults.ts` and `scripts/cityData/`.
 

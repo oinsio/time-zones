@@ -12,6 +12,18 @@ Feature: Location search by country
     When the user searches for "Казахстан"
     Then "Almaty" is among the results
 
+  @add-geonames-city-source @FR6
+  Scenario: Other cities of the country
+    When the user searches for "Kazakhstan"
+    Then "Astana" and "Shymkent" are among the results
+    And every zone city of "KZ" is listed before them
+
+  @add-geonames-city-source @FR6
+  Scenario: Every zone of a large country stays within the limit
+    When the user searches for "Russia"
+    Then 50 results are shown
+    And every zone of "RU" is among them
+
   @support-legacy-ios-12-safari @FR5
   Scenario: No country names on a legacy engine
     Given the environment has no country names

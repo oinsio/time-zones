@@ -68,7 +68,7 @@ A result whose city record carries a region (see the `city-data` capability) SHA
 - **THEN** the Kazan result's secondary line is "Russia"
 
 #### Scenario: No two results look the same
-- **WHEN** each of the 10 sample queries is run over the full data
+- **WHEN** each of the 13 sample queries is run over the full data
 - **THEN** no two results of one query have the same city, region and country text
 
 ### Requirement: Cities offered come from the release
@@ -218,10 +218,11 @@ Results SHALL be ordered by match kind — abbreviation, city name starting with
 - **THEN** at most 50 results are shown
 
 ### Requirement: Search is fast and lazy
-Computing the results of one query over the full bundled data SHALL take at most 50 ms. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound: one non-empty query MUST normalize exactly one text, the query itself, MUST build at most one collator and MUST build no country-name formatter; an abbreviation query, which is matched against the zone abbreviation table, is no exception. Preparing the search data for the first query MUST build at most one country-name formatter per city-name language. Loading the search data without a query — for city labels or the exemplar city — MUST normalize no text. The search data MUST NOT be part of the initial JavaScript; it MUST be one separate file of at most 130 KB gzipped that holds the zone cities and the other cities of the city data, and the initial JavaScript MUST stay at most 150 KB gzipped. While the list is empty, the page MUST NOT request the search data before the search is first opened. While the list holds at least one location of any kind, the page MAY request it once in the background for the city labels of city locations and the exemplar city of the device time location, and the search MUST reuse that data without a second request. The service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search; FR4, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks; FR8 of show-here-entry-for-device-time; NFR-P2 of add-settings-page-and-device-time-location; FR4 of show-city-labels-in-interface-language; NFR-P3 of show-zone-abbreviations-and-zone-label-setting; FR14, NFR-P1, NFR-P2, NFR-P3, NFR-P4, M2 of add-geonames-city-source -->
+Computing the results of one query over the full bundled data SHALL take at most 50 ms. The 50 ms budget MUST be checked by the timing benchmark, whose result does not fail the pull request check. The blocking check is a work bound with two parts. Preparing loaded search data for search happens once, during the first query over that data, and MUST build at most one country-name formatter per city-name language. Every non-empty query over prepared search data MUST normalize exactly one text, the query itself, MUST build at most one collator and MUST build no country-name formatter; an abbreviation query, which is matched against the zone abbreviation table, is no exception. Loading the search data without a query — for city labels or the exemplar city — MUST normalize no text. The search data MUST NOT be part of the initial JavaScript; it MUST be one separate file of at most 130 KB gzipped that holds the zone cities and the other cities of the city data, and the initial JavaScript MUST stay at most 150 KB gzipped. While the list is empty, the page MUST NOT request the search data before the search is first opened. While the list holds at least one location of any kind, the page MAY request it once in the background for the city labels of city locations and the exemplar city of the device time location, and the search MUST reuse that data without a second request. The service worker MAY download and cache it in the background for offline use. <!-- implements NFR-P1, NFR-P2 of add-locations-via-search; FR4, FR6, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks; FR8 of show-here-entry-for-device-time; NFR-P2 of add-settings-page-and-device-time-location; FR4 of show-city-labels-in-interface-language; NFR-P3 of show-zone-abbreviations-and-zone-label-setting; FR14, NFR-P1, NFR-P2, NFR-P3, NFR-P4, M2 of add-geonames-city-source -->
 
 #### Scenario: Query timing
-- **WHEN** each of 10 sample queries is run over the full data
+- **GIVEN** the full data is prepared for search
+- **WHEN** each of 13 sample queries is run over the full data
 - **THEN** each query normalizes exactly one text
 - **AND** each query builds at most one collator
 - **AND** no query builds a country-name formatter
@@ -253,6 +254,7 @@ Computing the results of one query over the full bundled data SHALL take at most
 - **AND** the initial JavaScript is at most 150 KB gzipped
 
 #### Scenario: Abbreviation query within the work bound
+- **GIVEN** the full data is prepared for search
 - **WHEN** the query `IST` is run over the full data
 - **THEN** it normalizes exactly one text
 - **AND** it builds at most one collator

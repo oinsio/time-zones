@@ -6,6 +6,7 @@ import {
   createInMemoryLocationRepository,
   createInMemoryPreferencesRepository,
 } from "@/adapters";
+import { GEONAMES_URL } from "@/constants";
 import { LocationsProvider, PreferencesProvider } from "@/controller";
 import { fakeClock } from "@/lib/temporal";
 import * as zoneRules from "@/lib/zoneRules";
@@ -54,14 +55,16 @@ describe("ZoneRulesReleaseLine on the settings page", () => {
     );
   });
 
-  it("should be the last element of main, directly after the deploy time", () => {
+  // FR13, UX4 of add-geonames-city-source: the city data attribution follows it.
+  it("should directly follow the deploy time and be followed by the city data attribution", () => {
     const { container } = renderPage();
     const main = container.querySelector("main") as HTMLElement;
     const line = container.querySelector(LINE_SELECTOR);
-    expect(main.lastElementChild).toBe(line);
     expect(line?.previousElementSibling).toBe(
       container.querySelector(DEPLOY_TIME_SELECTOR),
     );
+    expect(line?.nextElementSibling).toBe(main.lastElementChild);
+    expect(main.lastElementChild).toHaveAttribute("href", GEONAMES_URL);
   });
 
   it("should share the class list of the deploy time", () => {

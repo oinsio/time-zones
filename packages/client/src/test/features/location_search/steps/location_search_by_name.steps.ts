@@ -6,6 +6,7 @@ import type {
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { ETC_ZONE_AREA } from "@/lib/zoneRules";
+import { fullCityData } from "@/test/fullCityData";
 import { committedRelease } from "@/test/installZoneRules";
 import { startOnStaleEngine, stopStaleEngine } from "@/test/staleEngineWorld";
 import {
@@ -105,7 +106,10 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           staleZones: {},
           rejectedZones: [zoneId],
         });
-        search = modules.adapters.createCompositeCitySearch(zoneCities);
+        search = modules.adapters.createCompositeCitySearch(
+          zoneCities,
+          fullCityData,
+        );
       });
       When("the user searches for {string}", (_ctx, query: string) => {
         world.citySearch = search;

@@ -9,6 +9,7 @@ const tokyoRecord: CityRecord = {
   countryCode: "JP",
   aliases: [],
   rank: 1,
+  population: 0,
 };
 
 describe("isCityNameOfRecord", () => {

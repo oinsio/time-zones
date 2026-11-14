@@ -8,6 +8,7 @@ export {
   createCompositeCitySearch,
   createFetchCitySearchLoader,
   deriveCityNameFromTimeZoneId,
+  type GeoNamesCityData,
   normalizeSearchText,
   splitIntoWords,
 } from "./city-search";

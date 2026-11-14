@@ -18,3 +18,33 @@ export interface CitySource {
   /** Results for a normalized, non-empty query; order is not significant. */
   match(normalizedQuery: string): readonly CitySearchResult[];
 }
+
+/** A GeoNames city expanded from the committed city data (design D5). */
+export type GeoNamesCityEntry = {
+  /** The GeoNames ID, decimal, as the record ID. */
+  id: string;
+  names: Record<CityNameLanguage, string>;
+  countryCode: string;
+  timeZoneId: string;
+  population: number;
+  region?: Record<CityNameLanguage, string>;
+};
+
+/**
+ * The GeoNames section of the search data: its cities and what it adds to the
+ * zone cities.
+ * Implements FR1, FR7, FR14 of add-geonames-city-source (D3, D4, D5).
+ */
+export type GeoNamesCityData = {
+  cities: readonly GeoNamesCityEntry[];
+  /** Zone ID → population of its exemplar city. */
+  zoneCityPopulations: Readonly<Record<string, number>>;
+  /** Zone ID → region of its exemplar city, for namesakes. */
+  zoneCityRegions: Readonly<Record<string, Record<CityNameLanguage, string>>>;
+};
+
+export const EMPTY_GEONAMES_CITY_DATA: GeoNamesCityData = {
+  cities: [],
+  zoneCityPopulations: {},
+  zoneCityRegions: {},
+};

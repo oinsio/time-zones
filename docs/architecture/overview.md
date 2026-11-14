@@ -80,6 +80,7 @@ src/
   app/                     shell, not a view: AppShell, notices, recovery screen (exists)
     index.ts
   lib/temporal.ts          Temporal re-export, Clock port (exists)
+  lib/searchText/          search text normalization, loadable by plain Node (D11 of add-geonames-city-source)
   lib/zoneRules/           the app's own zone data: release reader, future rule, lookup (core/),
                            the Intl.DateTimeFormat wrapper, getKnownZoneIds, the active release (stored or bundled), loadZoneRules at boot (exists)
   styles/                  design tokens (light/dark) and globals (exists)

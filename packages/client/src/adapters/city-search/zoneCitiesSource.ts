@@ -1,49 +1,20 @@
-import {
-  CITY_NAME_LANGUAGES,
-  POPULAR_TIME_ZONE_IDS,
-  REGION_DISPLAY_FALLBACK,
-  REGION_DISPLAY_TYPE,
-  UTC_ZONE_ID,
-} from "@/constants";
-import { ETC_ZONE_AREA, getKnownZoneIds } from "@/lib/zoneRules";
+import { POPULAR_TIME_ZONE_IDS, UTC_ZONE_ID } from "@/constants";
 import { canonicalizeTimeZoneId, getZoneAbbreviations } from "@/model";
+import type { CityRecord } from "@/ports";
 import {
-  type CityRecord,
-  type CitySearchResult,
-  SearchMatchKind,
-} from "@/ports";
-import type { CitySource, ZoneCityData } from "./citySource";
+  type CitySource,
+  EMPTY_GEONAMES_CITY_DATA,
+  type GeoNamesCityData,
+  type ZoneCityData,
+} from "./citySource";
+import {
+  createCountryTextCache,
+  createRecordMatcher,
+  type ListTimeZones,
+  listKnownZones,
+  type ReadCountryTexts,
+} from "./cityTextMatching";
 import { deriveCityNameFromTimeZoneId } from "./deriveCityNameFromTimeZoneId";
-import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
-
-/** Zones the search may offer, or `undefined` when no zone list is known. */
-export type ListTimeZones = () => readonly string[] | undefined;
-
-const AREA_SEPARATOR = "/";
-
-/**
- * The zones of the installed release that have an area outside `Etc`: no
- * offset-only zone and no area-less id.
- * Implements FR9 of add-zone-rules-from-iana (design D6).
- */
-const listKnownZones: ListTimeZones = () =>
-  getKnownZoneIds()?.filter(
-    (zoneId) =>
-      zoneId.includes(AREA_SEPARATOR) &&
-      !zoneId.startsWith(`${ETC_ZONE_AREA}${AREA_SEPARATOR}`),
-  );
-
-type SearchableText = { normalized: string; words: string[] };
-
-const toSearchableText = (text: string): SearchableText => {
-  const normalized = normalizeSearchText(text);
-  return { normalized, words: splitIntoWords(normalized) };
-};
-
-const startsWithQuery = (text: SearchableText, query: string): boolean =>
-  text.normalized.startsWith(query);
-const hasWordStartingWithQuery = (text: SearchableText, query: string) =>
-  text.words.some((word) => word.startsWith(query));
 
 const calculateRank = (timeZoneId: string): number => {
   const popularIndex = POPULAR_TIME_ZONE_IDS.indexOf(timeZoneId);
@@ -67,9 +38,11 @@ function collectZoneIds(
 function buildRecord(
   timeZoneId: string,
   dataByZoneId: Map<string, ZoneCityData>,
+  cityData: GeoNamesCityData,
 ): CityRecord {
   const data = dataByZoneId.get(timeZoneId);
   const derivedName = deriveCityNameFromTimeZoneId(timeZoneId);
+  const region = cityData.zoneCityRegions[timeZoneId];
   return {
     id: timeZoneId,
     timeZoneId,
@@ -77,19 +50,9 @@ function buildRecord(
     countryCode: data?.countryCode ?? "",
     aliases: getZoneAbbreviations(timeZoneId),
     rank: calculateRank(timeZoneId),
+    population: cityData.zoneCityPopulations[timeZoneId] ?? 0,
+    ...(region === undefined ? {} : { region }),
   };
-}
-
-/** Implements FR5 of support-legacy-ios-12-safari (no texts without Intl.DisplayNames). */
-function readCountryTexts(countryCode: string): SearchableText[] {
-  if (countryCode === "" || typeof Intl.DisplayNames !== "function") return [];
-  return CITY_NAME_LANGUAGES.flatMap((language) => {
-    const countryName = new Intl.DisplayNames(language, {
-      type: REGION_DISPLAY_TYPE,
-      fallback: REGION_DISPLAY_FALLBACK,
-    }).of(countryCode);
-    return countryName === undefined ? [] : [toSearchableText(countryName)];
-  });
 }
 
 /**
@@ -98,10 +61,13 @@ function readCountryTexts(countryCode: string): SearchableText[] {
  * Implements FR2, FR3, FR9 of add-locations-via-search (D7).
  * Implements FR5, FR10 of add-interface-language-selection (D5): names in the language fallback order.
  * Implements FR8 of show-zone-abbreviations-and-zone-label-setting (D8): the aliases are the abbreviation pair.
+ * Implements FR5, FR7 of add-geonames-city-source (D2, D6): population and region from the city data.
  */
 export function createZoneCitiesSource(
   zoneCities: readonly ZoneCityData[],
   listTimeZones: ListTimeZones = listKnownZones,
+  cityData: GeoNamesCityData = EMPTY_GEONAMES_CITY_DATA,
+  readCountryTexts: ReadCountryTexts = createCountryTextCache(),
 ): CitySource {
   const dataByZoneId = new Map<string, ZoneCityData>();
   for (const zone of zoneCities) {
@@ -109,46 +75,7 @@ export function createZoneCitiesSource(
     if (canonicalZoneId !== undefined) dataByZoneId.set(canonicalZoneId, zone);
   }
   const records = collectZoneIds(zoneCities, listTimeZones).map((zoneId) =>
-    buildRecord(zoneId, dataByZoneId),
+    buildRecord(zoneId, dataByZoneId, cityData),
   );
-  const searchableRecords = records.map((record) => ({
-    record,
-    cityTexts: CITY_NAME_LANGUAGES.map((language) =>
-      toSearchableText(record.names[language]),
-    ),
-    countryTexts: readCountryTexts(record.countryCode),
-  }));
-
-  const findMatchKind = (
-    cityTexts: SearchableText[],
-    countryTexts: SearchableText[],
-    query: string,
-  ): SearchMatchKind | undefined => {
-    if (cityTexts.some((text) => startsWithQuery(text, query))) {
-      return SearchMatchKind.CITY_PREFIX;
-    }
-    if (cityTexts.some((text) => hasWordStartingWithQuery(text, query))) {
-      return SearchMatchKind.CITY_WORD_PREFIX;
-    }
-    const isCountryMatch = countryTexts.some(
-      (text) =>
-        startsWithQuery(text, query) || hasWordStartingWithQuery(text, query),
-    );
-    return isCountryMatch ? SearchMatchKind.COUNTRY : undefined;
-  };
-
-  return {
-    records,
-    match: (normalizedQuery) =>
-      searchableRecords.flatMap<CitySearchResult>(
-        ({ record, cityTexts, countryTexts }) => {
-          const matchKind = findMatchKind(
-            cityTexts,
-            countryTexts,
-            normalizedQuery,
-          );
-          return matchKind === undefined ? [] : [{ record, matchKind }];
-        },
-      ),
-  };
+  return { records, match: createRecordMatcher(records, readCountryTexts) };
 }

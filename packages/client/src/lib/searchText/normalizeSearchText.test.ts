@@ -1,6 +1,6 @@
 // FR1 of add-locations-via-search: query normalization (D7).
 import { describe, expect, it } from "vitest";
-import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText";
+import { normalizeSearchText, splitIntoWords } from "./normalizeSearchText.ts";
 
 describe("normalizeSearchText", () => {
   it.each([

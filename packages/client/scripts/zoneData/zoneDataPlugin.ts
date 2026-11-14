@@ -5,7 +5,6 @@
  * Implements FR9 of add-zone-rules-from-iana (D8): abbreviations from the release.
  */
 import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import type { Plugin } from "vite";
 import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
@@ -14,9 +13,11 @@ import {
   type ZoneRulesRelease,
   ZoneRulesReleaseError,
 } from "../../src/lib/zoneRules/core/index.ts";
+import { DATASET_PATH } from "../cityData/constants.ts";
 import { readReleaseZonePeriods } from "../zoneRules/releaseZonePeriods.ts";
 import { extractZoneAbbreviations } from "./extractZoneAbbreviations.ts";
-import { extractZoneData, type ZoneData } from "./extractZoneData.ts";
+import { loadCitySearchData } from "./loadCitySearchData.ts";
+import { loadZoneData } from "./loadZoneData.ts";
 
 const ALIASES_MODULE_ID = "virtual:time-zone-aliases";
 const CITIES_URL_MODULE_ID = "virtual:zone-cities-url";
@@ -27,28 +28,10 @@ const RESOLVED_ID_PREFIX = "\0";
 const TEST_MODE = "test";
 const ZONE_CITIES_ASSET_NAME = "city-search.json";
 const ZONE_CITIES_DEV_FILE_NAME = "city-search.json";
-const BCP47_TIME_ZONE_FILE = "cldr-bcp47/bcp47/timezone.json";
-const ENGLISH_ZONE_NAMES_FILE = "cldr-dates-full/main/en/timeZoneNames.json";
-const RUSSIAN_ZONE_NAMES_FILE = "cldr-dates-full/main/ru/timeZoneNames.json";
 const JSON_CONTENT_TYPE = "application/json";
 const CONTENT_TYPE_HEADER = "Content-Type";
 
-const nodeRequire = createRequire(import.meta.url);
-let cachedZoneData: ZoneData | undefined;
 let cachedZoneAbbreviations: string | undefined;
-
-function readJson(specifier: string): unknown {
-  return JSON.parse(readFileSync(nodeRequire.resolve(specifier), "utf8"));
-}
-
-function loadZoneData(): ZoneData {
-  cachedZoneData ??= extractZoneData({
-    bcp47TimeZones: readJson(BCP47_TIME_ZONE_FILE),
-    englishZoneNames: readJson(ENGLISH_ZONE_NAMES_FILE),
-    russianZoneNames: readJson(RUSSIAN_ZONE_NAMES_FILE),
-  });
-  return cachedZoneData;
-}
 
 function readZoneRulesRelease(releaseFilePath: string): ZoneRulesRelease {
   const release = parseZoneRulesRelease(
@@ -77,6 +60,7 @@ export function zoneDataPlugin(): Plugin {
   let isTestMode = false;
   let base = "/";
   let releaseFilePath = ZONE_RULES_RELEASE_FILE;
+  let datasetFilePath = DATASET_PATH;
   return {
     name: "time-zones-zone-data",
     configResolved(config) {
@@ -84,13 +68,14 @@ export function zoneDataPlugin(): Plugin {
       isTestMode = config.mode === TEST_MODE;
       base = config.base;
       releaseFilePath = resolve(config.root, ZONE_RULES_RELEASE_FILE);
+      datasetFilePath = resolve(config.root, DATASET_PATH);
     },
     configureServer(server) {
       const devPath = `${base}${ZONE_CITIES_DEV_FILE_NAME}`;
       server.middlewares.use((request, response, next) => {
         if (request.url?.split("?")[0] !== devPath) return next();
         response.setHeader(CONTENT_TYPE_HEADER, JSON_CONTENT_TYPE);
-        response.end(JSON.stringify(loadZoneData().zoneCities));
+        response.end(JSON.stringify(loadCitySearchData(datasetFilePath)));
       });
     },
     resolveId(source) {
@@ -109,7 +94,8 @@ export function zoneDataPlugin(): Plugin {
         return `export default ${loadZoneAbbreviations(releaseFilePath)};`;
       }
       if (resolvedId === `${RESOLVED_ID_PREFIX}${CITIES_MODULE_ID}`) {
-        return `export default ${JSON.stringify(loadZoneData().zoneCities)};`;
+        const { zoneCities, cityData } = loadCitySearchData(datasetFilePath);
+        return `export default ${JSON.stringify(zoneCities)};\nexport const cityData = ${JSON.stringify(cityData)};`;
       }
       if (resolvedId === `${RESOLVED_ID_PREFIX}${CITIES_URL_MODULE_ID}`) {
         if (!isBuild) {
@@ -118,7 +104,7 @@ export function zoneDataPlugin(): Plugin {
         const referenceId = this.emitFile({
           type: "asset",
           name: ZONE_CITIES_ASSET_NAME,
-          source: JSON.stringify(loadZoneData().zoneCities),
+          source: JSON.stringify(loadCitySearchData(datasetFilePath)),
         });
         return `export default import.meta.ROLLUP_FILE_URL_${referenceId};`;
       }

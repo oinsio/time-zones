@@ -2,6 +2,7 @@
 import zoneCities from "virtual:zone-cities";
 import { bench, describe } from "vitest";
 import { createCompositeCitySearch } from "@/adapters";
+import { fullCityData } from "@/test/fullCityData";
 import {
   BUDGET_ROW_COUNT,
   buildBudgetLocations,
@@ -14,7 +15,7 @@ const options = {
   iterations: SAMPLE_ITERATIONS,
 };
 
-const search = createCompositeCitySearch(zoneCities);
+const search = createCompositeCitySearch(zoneCities, fullCityData);
 const locations = buildBudgetLocations(BUDGET_ROW_COUNT);
 let isRussianNext = false;
 
