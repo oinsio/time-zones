@@ -109,3 +109,13 @@ describe("selectCityNames", () => {
     expect(names).toEqual({ en: "Munich", ru: "М" });
   });
 });
+
+describe("selectCityNames default overrides", () => {
+  it("should call the Kazan of GeoNames ID 551487 Kazan", () => {
+    const names = selectCityNames(
+      { geonameId: 551487, name: "Kazan’" },
+      [alternate("ru", "Казань", { isPreferred: true })],
+    );
+    expect(names).toEqual({ en: "Kazan", ru: "Казань" });
+  });
+});

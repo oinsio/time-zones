@@ -44,6 +44,13 @@ describe("readSelectedAlternateNames", () => {
     expect(names.get(10)?.map((row) => row.name)).toEqual(["Казань", "Kazan"]);
   });
 
+  it("should skip a line without a language column", async () => {
+    const path = join(directory, "alternateNamesV2.txt");
+    await writeFile(path, `\n${alternateLine(10, "ru", "Казань")}\n`);
+    const names = await readSelectedAlternateNames(path, new Set([0, 10]));
+    expect([...names.keys()]).toEqual([10]);
+  });
+
   it("should throw with the line number for a malformed kept line", async () => {
     const path = join(directory, "alternateNamesV2.txt");
     await writeFile(path, `${alternateLine(10, "ru", "Казань")}\n1\t10\tru\n`);

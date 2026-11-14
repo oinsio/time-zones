@@ -144,3 +144,24 @@ describe("parse errors name the field", () => {
     );
   });
 });
+
+describe("parseAlternateNameRow flags", () => {
+  it("should read a short flag of 0 as not short", () => {
+    const line = ["1", "5", "ru", "Х", "0", "0", "0", "0"].join("\t");
+    expect(parseAlternateNameRow(line, 1)).toMatchObject({
+      isPreferred: false,
+      isShort: false,
+      isColloquial: false,
+      isHistoric: false,
+    });
+  });
+
+  it("should read only the short flag as short", () => {
+    const line = ["1", "5", "ru", "Х", "", "1", "", ""].join("\t");
+    expect(parseAlternateNameRow(line, 1)).toMatchObject({
+      isShort: true,
+      isColloquial: false,
+      isHistoric: false,
+    });
+  });
+});
