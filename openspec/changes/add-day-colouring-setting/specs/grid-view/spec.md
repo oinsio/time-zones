@@ -76,13 +76,13 @@ An hour frame SHALL surround, across all rows of the panel, the column of the ho
 
 #### Scenario: Frame in the foreground colour on accent cells
 - **GIVEN** the view mode is Grid, the stored locations are Almaty, Moscow, Kolkata and New York, the `<theme>` theme is active and the day colouring is `<colouring>`
-- **WHEN** the main page is shown at `2026-03-08T07:30:00Z`
+- **WHEN** the main page is shown at `<instant>`
 - **THEN** one hour frame in the `<theme>` foreground colour reaches from the first row to the last
-- **AND** its left and right edges enclose column 12 of every row
+- **AND** its left and right edges enclose column `<column>` of every row
 
-| theme | colouring |
-|---|---|
-| light | Plain |
-| dark | Plain |
-| light | Working hours |
-| dark | Working hours |
+| theme | colouring | instant | column |
+|---|---|---|---|
+| light | Plain | 2026-03-08T07:30:00Z | 12 |
+| dark | Plain | 2026-03-08T07:30:00Z | 12 |
+| light | Working hours | 2026-03-09T06:00:00Z | 11 |
+| dark | Working hours | 2026-03-09T06:00:00Z | 11 |
