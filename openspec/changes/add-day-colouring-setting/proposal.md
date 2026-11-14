@@ -4,18 +4,18 @@ No other change is active in `openspec/changes/`, so no other change touches the
 
 ## Why
 
-The day tracks of Cards and the hour cells of Grid are coloured by day period (night, morning, working hours, evening) with boundaries fixed in code: the work period is always 09:00–18:00 (`DAY_PERIOD_SCHEDULE`, `src/constants/dayPeriods.ts`). For planning a meeting, the question is when people are at work, and everyone's working hours differ. Some users find the four colours distracting and want one calm colour instead. `docs/architecture/domain-model.md` ("Day periods") and Q3 of `docs/architecture/open-questions.md` already expected a user setting to take the place of the constants. This change is the first step: the user picks how the day is coloured and sets their working hours. Later changes will refine the display.
+The day tracks of Cards and the hour cells of Grid are coloured by day period (night, morning, work, evening) with boundaries fixed in code: the work period is always 09:00–18:00 (`DAY_PERIOD_SCHEDULE`, `src/constants/dayPeriods.ts`). For planning a meeting, the question is when people are at work, and everyone's working hours differ. Some users find the four colours distracting and want one calm colour instead. `docs/architecture/domain-model.md` ("Day periods") and Q3 of `docs/architecture/open-questions.md` already expected a user setting to take the place of the constants. This change is the first step: the user picks how the day is coloured and sets their working hours. Later changes will refine the display.
 
 Audience: every user of Cards and Grid, especially those planning meetings across zones.
 
 ## What Changes
 
-- ADDED `day-colouring`: three day colourings (Plain, Time of day, Working hours) that apply to every day track and every hour cell. The capability also defines working time (the user's working hours in each location's local time, on Monday to Friday by the local date), the plain and the working-hours colours, the half-hour rule for an hour cell, and contrast rules for hour cell digits and the handle on every day colour.
+- ADDED `day-colouring`: three day colourings (Plain, Time of day, Working hours) that apply to every day track and every hour cell. The capability also defines working time (the user's working hours in each location's local time, on Monday to Friday by the local date), the colours of the Plain and the Working hours colourings, the half-hour rule for an hour cell, and contrast rules for hour cell digits and the handle on every day colour.
 - MODIFIED `settings`: a colouring group «Раскраска» / "Colouring" with three options; a working hours row «Рабочие часы» / "Working hours" with a start field and an end field, shown only for the Working hours colouring; both stored on the device in the preferences document, migrated for existing users, shared between tabs; a reusable time range group that other settings can use later.
 - MODIFIED `time-selection`: "Day-period colours" now applies only while the day colouring is Time of day.
 - MODIFIED `grid-view`: "Hour cell colour" follows the day colouring. "Hour frame" is drawn in the foreground colour when the cells are accent-coloured (Plain, Working hours), because an accent frame cannot be seen on accent cells.
 - Glossary, new terms: **Day colouring** (`docs/glossary/settings.md`; it replaces the *(planned)* entry of `docs/glossary/views.md` that covered the Grid only) — *RU:* «Раскраска»: «Обычная», «По времени суток», «По рабочему времени». **Working hours** (`settings.md`) — *RU:* «Рабочие часы». **Time range group** (`settings.md`) — *RU:* группа диапазона времени. **Working day**, **Working time** and **Day colour** (`docs/glossary/time-selection.md`).
-- Glossary, changed terms: **Colour stop** (a position and a day colour, not only a day period), **Hour cell** (coloured by the day colouring), **Day period** (*Not:* the working hours), **Hour frame** (foreground colour on accent cells), **Preferences** and **Settings page** (list the day colouring and the working hours).
+- Glossary, changed terms: **Colour stop** (a position and a day colour, not only a day period), **Hour cell** (coloured by the day colouring), **Day period** (its third period is named "work", not "working hours", so that **Working hours** names only the user's range; *Never:* working hours for the period), the work-period token `--color-day-working` renamed `--color-day-work`, **Hour frame** (foreground colour on accent cells), **Preferences** and **Settings page** (list the day colouring and the working hours).
 - Architecture docs: `docs/architecture/domain-model.md` (Preferences, commands, "Day periods" → day colouring and working time), `docs/architecture/views.md` (Cell colouring, Day-period colors, Visual style tokens, Overlays → Settings), `docs/architecture/open-questions.md` (Q3 resolution amended).
 
 ## Capabilities
@@ -33,7 +33,7 @@ Audience: every user of Cards and Grid, especially those planning meetings acros
 - `src/preferences/` (the day colouring enum, the working hours and their order rule, two commands, parsing), `src/adapters/preferencesDocument.ts` (schema version 6, migration step 5), `src/constants/preferences.ts` (schema version, option order) and a new `src/constants/workingTime.ts`.
 - `src/model/` (new `workingTime.ts`: working days, working time spans, working-time stops, working hour cells), `src/presenter/` (new `dayColours.ts`: day colours and colour stops for every colouring, the hour frame colour; `dayTrack.ts`, `hourStrip.ts`, `presentZoneMoment.ts`, `presentLocationRows.ts` contexts; new `workingHours.ts` for the field texts).
 - `src/controller/` (`PreferencesProvider`, `preferencesContext`, new `useDayColouring`, new `useWorkingHoursInput`; `useLocations`, `useHourGrid` pass the colouring).
-- `src/views/shared/dayTrackGradient.ts`, `views/grid/HourCellView.tsx`, `views/grid/HourFrame.tsx`, `views/grid/GridView.tsx`; `src/app/settings/` (new `DayColouringGroup`, `WorkingHoursGroup`, `SettingsTimeRangeGroup`; `SettingsPage`); `src/styles/tokens.css`; `src/locales/en.json`, `ru.json`.
+- `src/views/shared/dayTrackGradient.ts`, `views/grid/HourCellView.tsx`, `views/grid/HourFrame.tsx`, `views/grid/GridView.tsx`; `src/app/settings/` (new `DayColouringGroup`, `WorkingHoursGroup`, `SettingsTimeRangeGroup`; `SettingsPage`); `src/styles/tokens.css` and `tailwind.config.ts` (the non-working grey; the work-period token `--color-day-working` renamed `--color-day-work` with its readers, same values); `src/locales/en.json`, `ru.json`.
 - Features under `src/test/features/settings/`, `time_selection/`, `grid_view/`, the hour strip and row benchmarks, and the approved settings screenshots, which are re-approved once. The approved Cards and Grid screenshots keep their pixels.
 - No new runtime dependency (the option icons come from the installed `lucide-react`), no new port, no new storage key: the preferences document gains two fields.
 
@@ -131,7 +131,7 @@ There is no loading state: the preferences are read synchronously before the fir
 
 ## Visual Reference
 
-No Figma frame. The theme group (option group with icons) and the meeting range input (two compact time fields) are the visual reference. Design tokens are the source of truth: the accent `#2F5BD3` / `#5EC2E8` (`docs/architecture/views.md`, "Visual style"), and the new non-working greys of design D6.
+No Figma frame. The theme group (option group with icons) and the meeting range input (two compact time fields) are the visual reference. Design tokens are the source of truth: the accent `#2F5BD3` / `#5EC2E8` (`docs/architecture/views.md`, "Visual style"), and the new non-working greys of design D6 (`#ececef` light, `#3b4660` dark).
 
 ## Affected IA
 
@@ -139,10 +139,10 @@ No changes (the project has no `docs/ia/` document for the settings page).
 
 ## Success Metrics
 
-- M1: 3 of 3 day colourings can be chosen, are restored after a reload and are applied in a second tab (unit BDD), and the working hours survive 2 of 2 colouring switches.
+- M1: 3 of 3 day colourings can be chosen, are restored after a reload and are applied in a second tab (the 3-row outline "Each colouring is kept and shared" of `settings_day_colouring_storage.feature`, unit BDD), and the working hours survive 2 of 2 colouring switches ("Working hours are kept across colourings").
 - M2: 0 changed pixels in the existing approved Cards and Grid screenshots, which use the default Time of day colouring.
 - M3: 100% of the hour cells match the half-cell rule in the 7 sample cases of `day_colouring_hour_cells.feature` (09:07, 09:40, Kolkata 10:00 and 10:15, Kathmandu 10:00, the Saturday in Moscow with Friday in New York, and Cairo's clock change on a Friday).
-- M4: 0 axe-core violations in each of 11 runs: 3 on the settings page with the working hours row (light, dark, and light with the hint shown) and 8 on the main page (Cards and Grid × Plain and Working hours × light and dark).
+- M4: 0 axe-core violations in each of 12 runs: 4 on the settings page with the working hours row (light and dark, each without and with the hint shown) and 8 on the main page (Cards and Grid × Plain and Working hours × light and dark).
 - M5: 7 day colours × 2 themes = 14 digit pairs at ≥ 4.5:1 and 14 handle checks at ≥ 3:1 in `tokens.test.ts`.
 - M6: Mutation score ≥ 95% (minimum acceptable 90%) on the new and changed production files of `src/model/workingTime.ts`, `src/presenter/dayColours.ts`, `src/presenter/workingHours.ts`, `src/preferences/` and `src/adapters/preferencesDocument.ts`.
 

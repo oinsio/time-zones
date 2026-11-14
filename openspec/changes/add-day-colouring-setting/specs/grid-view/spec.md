@@ -1,17 +1,17 @@
 ## MODIFIED Requirements
 
 ### Requirement: Hour cell colour
-While the day colouring is Time of day (the default, see the `day-colouring` capability), an hour cell SHALL be coloured by the location's day period at the cell's start (night, morning, working hours, evening, by the day-period schedule) with the day-period colour of the active theme that the day track uses. In the dark theme the digits on morning, working-hours and evening cells MUST be `#0F1729`. In the Plain day colouring every cell is plain, and in the Working hours day colouring each cell is working or non-working, as the `day-colouring` capability defines; the digits then take the colour that the requirement "Day colours are readable" of that capability sets for the cell colour. A change of the day colouring MUST recolour every cell at once. <!-- implements FR4 of add-grid-hour-cells-and-hour-frame; FR2, FR9, FR11, FR12 of add-day-colouring-setting -->
+While the day colouring is Time of day (the default, see the `day-colouring` capability), an hour cell SHALL be coloured by the location's day period at the cell's start (night, morning, work, evening, by the day-period schedule) with the day-period colour of the active theme that the day track uses. In the dark theme the digits on morning, work and evening cells MUST be `#0F1729`. In the Plain day colouring every cell is plain, and in the Working hours day colouring each cell is working or non-working, as the `day-colouring` capability defines; the digits then take the colour that the requirement "Day colours are readable" of that capability sets for the cell colour. A change of the day colouring MUST recolour every cell at once. <!-- implements FR4 of add-grid-hour-cells-and-hour-frame; FR2, FR9, FR11, FR12 of add-day-colouring-setting -->
 
 #### Scenario: Day periods of Almaty
 - **GIVEN** the day colouring is Time of day, the reference zone is `Asia/Almaty` and the reference day is 2026-03-08
 - **WHEN** the hour cells of Almaty are presented
-- **THEN** columns 0–6 and 22–23 are night, 7–8 morning, 9–17 working hours and 18–21 evening
+- **THEN** columns 0–6 and 22–23 are night, 7–8 morning, 9–17 work and 18–21 evening
 
 #### Scenario: Theme colours of the cells
 - **GIVEN** the view mode is Grid, the stored location is Almaty and the `<theme>` theme is active
 - **WHEN** the main page is shown at `2026-03-08T07:30:00Z`
-- **THEN** column 3 has the `<theme>` night colour, column 7 the morning colour, column 9 the working-hours colour and column 18 the evening colour
+- **THEN** column 3 has the `<theme>` night colour, column 7 the morning colour, column 9 the work colour and column 18 the evening colour
 
 | theme |
 |---|

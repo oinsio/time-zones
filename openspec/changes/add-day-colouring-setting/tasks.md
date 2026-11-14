@@ -14,7 +14,7 @@ Rules for every task:
 
 - [ ] 1.1 `docs/glossary/settings.md`: add these terms:
   - **Day colouring**: *RU:* «Раскраска»: «Обычная», «По времени суток», «По рабочему времени»; English "Colouring", "Plain", "Time of day", "Working hours"; *Code:* `DayColouring`, `DAY_COLOURING_ORDER`, `Preferences.dayColouring`, `SET_DAY_COLOURING`, `useDayColouring`, `DayColouringGroup`, `settings.dayColouringLabel`; *Never:* colour scheme.
-  - **Working hours**: one start and one end for every location, read in each location's local time, 10:00–18:00 by default; *RU:* «Рабочие часы»; *Code:* `WorkingHours`, `DEFAULT_WORKING_HOURS`, `checkWorkingHours`, `SET_WORKING_HOURS`, `useWorkingHoursInput`, `WorkingHoursGroup`, `settings.workingHoursLabel`; *Not:* the work day period 09:00–18:00; *Never:* business hours, office hours.
+  - **Working hours**: one start and one end for every location, read in each location's local time, 10:00–18:00 by default; *RU:* «Рабочие часы»; *Code:* `WorkingHours`, `DEFAULT_WORKING_HOURS`, `checkWorkingHours`, `SET_WORKING_HOURS`, `useWorkingHoursInput`, `WorkingHoursGroup`, `settings.workingHoursLabel`; *Not:* the work period 09:00–18:00 of the day periods; *Never:* business hours, office hours.
   - **Time range group**: *RU:* группа диапазона времени; *Code:* `SettingsTimeRangeGroup`.
 
   Then extend **Preferences** and **Settings page** with both settings.
@@ -27,12 +27,12 @@ Rules for every task:
   Change these entries:
   - **Colour stop**: a position and a day colour;
   - **Hour cell**: coloured by the day colouring;
-  - **Day period**: *Not:* the working hours;
+  - **Day period**: the third period is named "work" (09:00–18:00), not "working hours", so the entry reads "night (22:00–07:00), morning (07:00–09:00), work (09:00–18:00), evening (18:00–22:00)"; add *Not:* the working hours (the user's range) and "working hours" to its *Never:* list; its *Code:* gains the token `--color-day-work`;
   - **Hour frame**: foreground colour on accent cells, `getHourFrameColour`.
 
   In `docs/glossary/views.md`, replace the *(planned)* **Cell colouring** entry with a pointer to **Day colouring**.
 
-  Verify: `grep -n "Day colouring\|Working time\|Time range group" docs/glossary/*.md` lists all three files, `grep -n "Cell colouring" docs/glossary/views.md` prints nothing, and each touched glossary file stays under 200 lines (`wc -l docs/glossary/*.md`).
+  Verify: `grep -n "Day colouring\|Working time\|Time range group" docs/glossary/*.md` lists all three files, `grep -n "working hours (09:00" docs/glossary/time-selection.md` prints nothing, `grep -n "Cell colouring" docs/glossary/views.md` prints nothing, and each touched glossary file stays under 200 lines (`wc -l docs/glossary/*.md`).
 - [ ] 1.2 `docs/architecture/domain-model.md`:
   - add `DayColouring dayColouring` and `WorkingHours workingHours` to the `Preferences` class;
   - add `SET_DAY_COLOURING` and `SET_WORKING_HOURS` to the preference commands;
@@ -46,7 +46,9 @@ Rules for every task:
 
   `docs/architecture/open-questions.md`: amend Q3's decision. Time of day keeps the constants, and the Working hours colouring uses the user's working hours, as in this change.
 
-  Verify: `grep -n "add-day-colouring-setting\|WORKING_HOURS\|non-working" docs/architecture/domain-model.md docs/architecture/views.md docs/architecture/open-questions.md` prints a line in each file, and `grep -rni "cell colouring" docs/architecture docs/glossary` prints nothing.
+  Rename the day period "working hours" to "work" wherever it names the period 09:00–18:00, not the user's range: `docs/architecture/views.md` ("Day-period colors" row: night, morning, work, evening; the token table row "Working hours" becomes "Work"), `docs/architecture/domain-model.md` ("Day periods": four colors night, morning, work, evening) and `docs/design/README.md` (the day-period colours line).
+
+  Verify: `grep -n "add-day-colouring-setting\|WORKING_HOURS\|non-working" docs/architecture/domain-model.md docs/architecture/views.md docs/architecture/open-questions.md` prints a line in each file, and `grep -rni "cell colouring" docs/architecture docs/glossary` prints nothing, and `grep -rniE "morning, working hours|Working hours \| .#F8E6A6" docs` (case-insensitive) prints nothing.
 
 ## 2. Preferences model and stored document (FR2, FR3, FR6, FR7; design D1, D2)
 
@@ -158,17 +160,17 @@ Rules for every task:
 
 ## 6. Tokens and views (FR9–FR13, NFR-A3, UX4; design D4, D6, D7)
 
-- [ ] 6.1 RED then GREEN, `src/styles/tokens.css`: `--color-day-non-working` in all three theme blocks (D6), and its `day.non-working` entry next to `day.working` in the `colors` of `tailwind.config.ts`.
+- [ ] 6.1 RED then GREEN, `src/styles/tokens.css`: `--color-day-non-working` (`#ececef` light, `#3b4660` dark) in all three theme blocks (D6), and its `day.non-working` entry in the `colors` of `tailwind.config.ts`. In the same task rename the work-period token `--color-day-working` to `--color-day-work` (values unchanged) in `tokens.css`, `tailwind.config.ts` (`day.working` → `day.work`), `src/views/shared/dayTrackGradient.ts` and `dayTrackGradient.test.ts`, `src/views/grid/HourStrip.test.tsx`, `src/test/features/main_page/steps/themeTokens.ts` (`dayWorking` → `dayWork`), `src/test/features/grid_view/steps/grid_view_hour_cells_e2e.steps.ts` and `src/test/features/time_selection/steps/time_selection_labels_e2e.steps.ts`.
 
-  `src/styles/tokens.test.ts`, for both themes: for each of the seven day colours, the digit colour of D6 against the cell colour is ≥ 4.5:1, and the handle's surface fill or foreground border against the cell colour is ≥ 3:1 (NFR-A3, M5). The non-working grey differs from the accent. The existing "same values in both dark blocks" check covers the new token.
+  `src/styles/tokens.test.ts`, for both themes: for each of the seven day colours, the digit colour of D6 against the cell colour is ≥ 4.5:1, and the handle's surface fill or foreground border against the cell colour is ≥ 3:1 (NFR-A3, M5). The non-working grey differs from the accent. UX4: in the light theme the non-working grey has a higher relative luminance than each of `--color-day-night`, `--color-day-morning`, `--color-day-work` and `--color-day-evening`, and in the dark theme a lower one than each of them (the `day-colouring` scenario "Digit contrast on every cell colour"). The existing "same values in both dark blocks" check covers the new token.
 
-  Verify: `npx vitest run src/styles/tokens.test.ts` fails, then passes.
+  Verify: `npx vitest run src/styles/tokens.test.ts` fails, then passes. Then `grep -rn "day-working\|dayWorking\|day\.working" src tailwind.config.ts` prints nothing.
 - [ ] 6.2 RED then GREEN, `src/views/shared/dayTrackGradient.ts`:
   - `DAY_COLOUR_VARIABLES` (plain and working time → `--color-accent`, non-working → `--color-day-non-working`, the periods unchanged);
   - `DAY_COLOUR_FOREGROUND_CLASS_NAMES`;
-  - `buildDayTrackGradient(stops: readonly DayColourStop[])`, where one stop gives a single-colour gradient, not `none`.
+  - `buildDayTrackGradient(stops: readonly DayColourStop[])`, where a single stop is written as two stops of its colour at `0%` and `100%` (D4), never one stop and never `none`.
 
-  Export from `src/views/shared/index.ts`. Update `dayTrackGradient.test.ts` with a single plain stop and a hard working edge.
+  Export from `src/views/shared/index.ts`. Update `dayTrackGradient.test.ts` with these cases, which assert the built string and so do not depend on how jsdom parses CSS: a single plain stop gives exactly `linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) 100%)`; a single non-working stop gives the same with `--color-day-non-working`; every built gradient has at least two colour stops (`it.each` over Plain, a Working hours track with no edge, the Almaty Monday stops and the Time of day stops); a hard working edge gives two stops at one percentage. The real-browser check is the scenario "One-colour tracks are drawn in a real browser" of task 9.2.
 
   Verify: `npx vitest run src/views/shared/dayTrackGradient.test.ts` passes, then `npx vitest run src/views/shared/DayTrack.test.tsx` passes.
 - [ ] 6.3 RED then GREEN, `src/views/grid/HourCellView.tsx`: the background comes from `DAY_COLOUR_VARIABLES[cell.dayColour]` and the digit class from `DAY_COLOUR_FOREGROUND_CLASS_NAMES`. `src/views/grid/HourFrame.tsx` takes `colour` and `GridView.tsx` passes `hourFrameColour`.
@@ -207,7 +209,7 @@ Rules for every task:
 - [ ] 8.4 Unit BDD:
   - `src/test/features/settings/settings_day_colouring_unit.feature` with `steps/settings_day_colouring_unit.steps.tsx`: "Time of day by default" (the colouring group follows the view group), "Choosing a colouring applies at once", "The row follows the colouring", "Both languages of the colouring settings";
   - `settings_working_hours.feature` with `steps/settings_working_hours.steps.tsx`: "A minute-exact start", "The 12-hour format", "Refused ranges keep the last valid hours" (three rows), "Esc restores the stored texts";
-  - `settings_day_colouring_storage.feature` with `steps/settings_day_colouring_storage.steps.tsx`: every scenario of "Day colouring and working hours are kept on the device", using `createLocalStoragePreferencesRepository`, the manual write scheduler and two tabs on one channel, as `zoneLabelWorld.tsx` does.
+  - `settings_day_colouring_storage.feature` with `steps/settings_day_colouring_storage.steps.tsx`: every scenario of "Day colouring and working hours are kept on the device", including the 3-row outline "Each colouring is kept and shared" (M1), using `createLocalStoragePreferencesRepository`, the manual write scheduler and two tabs on one channel, as `zoneLabelWorld.tsx` does.
 
   These scenarios assert values, texts and stored documents only. Names, ARIA state, focus and layout are in group 9.
 
@@ -216,13 +218,14 @@ Rules for every task:
 ## 9. BDD E2E, accessibility and screenshots (FR12, FR13, NFR-A1–NFR-A4, NFR-R1, NFR-R2, M2, M4)
 
 - [ ] 9.1 New `src/test/features/settings/settings_day_colouring_e2e.feature` with `steps/settings_day_colouring_e2e.steps.ts`:
-  - every scenario of "Accessible colouring group and working hours row": names, checked state, arrow keys, `aria-invalid` and `aria-describedby`, 44 px, focus outlines, axe-core light, dark and with the hint;
+  - every scenario of "Accessible colouring group and working hours row": names, checked state, arrow keys, `aria-invalid` and `aria-describedby`, 44 px, focus outlines, and axe-core in the light and the dark theme, each without and with the hint shown (4 runs, M4);
   - every scenario of "Colouring settings layout": four width × language × hour format rows, no movement, no horizontal scroll.
 
   Verify: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_day_colouring_e2e.feature` passes.
 - [ ] 9.2 New `src/test/features/day_colouring/day_colouring_e2e.feature` with `steps/day_colouring_e2e.steps.ts`:
   - "Accent and grey in a real browser" (computed background of the cells);
-  - "No violations in every colouring" (eight rows);
+  - "One-colour tracks are drawn in a real browser" (four rows: the computed `background-image` of the Moscow track is not `none` and holds the theme's accent or non-working grey, resolved to `rgb(...)` by the browser, at `0%` and at `100%`);
+  - "No violations in every colouring" (eight rows, M4);
   - "Screenshots of the colourings" (eight rows).
 
   In `src/test/features/grid_view/grid_view_hour_frame_e2e.feature`, add the `grid-view` scenarios "Frame in the foreground colour on accent cells" and "The frame stays visible on accent cells", and keep the existing outline "Frame crosses every row in the <theme> theme" (the spec's "Frame crosses every row in the accent colour") in the default Time of day colouring.

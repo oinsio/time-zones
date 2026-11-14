@@ -40,13 +40,26 @@ An instant SHALL be working time for a location when the location's local date a
 - **THEN** it is not working time
 
 ### Requirement: Plain day colouring
-While the day colouring is Plain, every day track and every hour cell SHALL be filled with the accent colour of the active theme, the light accent in the light theme and the dark accent in the dark theme, over the whole reference day. No day period, working time, blend or offset edge colour is shown. A track MUST present a single colour stop at position 0, plain. The midnight shade and the offset edge line of hour cells stay as they are. Inputs: the location's IANA identifier, the reference day. Output: one plain colour stop; every hour cell plain. <!-- implements FR9 of add-day-colouring-setting -->
+While the day colouring is Plain, every day track and every hour cell SHALL be filled with the accent colour of the active theme, the light accent in the light theme and the dark accent in the dark theme, over the whole reference day. No day period, working time, blend or offset edge colour is shown. A track MUST present a single colour stop at position 0, plain. A track with a single colour stop, here or in the Working hours colouring, MUST be drawn in that colour from its left end to its right end in every supported engine (ADR-0009), never left without a background. The midnight shade and the offset edge line of hour cells stay as they are. Inputs: the location's IANA identifier, the reference day. Output: one plain colour stop; every hour cell plain. <!-- implements FR9, FR10 of add-day-colouring-setting -->
 
 #### Scenario: A plain track
 - **GIVEN** the day colouring is Plain and the device time zone is `Asia/Almaty`
 - **AND** the current instant is `2026-03-08T07:30:00Z`
 - **WHEN** the tracks of Almaty and New York are presented
 - **THEN** each has exactly one colour stop, `0` plain
+
+#### Scenario: One-colour tracks are drawn in a real browser
+- **GIVEN** the device time zone is `Europe/Moscow`, the view mode is Cards, the stored location is Moscow, the `<theme>` theme is active and the day colouring is `<colouring>` with the working hours 10:00–18:00
+- **WHEN** the main page is shown at `2026-03-14T09:00:00Z`, a Saturday in Moscow
+- **THEN** the computed background of the Moscow track is a gradient, not `none`
+- **AND** the track has the `<theme>` `<colour>` at its left end and at its right end
+
+| theme | colouring | colour |
+|---|---|---|
+| light | Plain | accent colour |
+| dark | Plain | accent colour |
+| light | Working hours | non-working grey |
+| dark | Working hours | non-working grey |
 
 #### Scenario: Plain hour cells
 - **GIVEN** the day colouring is Plain, the reference zone is `Asia/Almaty` and the reference day is 2026-03-08
@@ -115,17 +128,18 @@ While the day colouring is Working hours, an hour cell SHALL be working when wor
 - **THEN** exactly the columns 12–19 are working
 
 ### Requirement: Day colours are readable
-In every day colouring and in both themes, the digits and texts of an hour cell SHALL have a contrast of at least 4.5:1 against the cell's colour: the four day-period colours, the accent colour and the non-working grey. The handle of a day track MUST keep its fill or its border at a contrast of at least 3:1 against every track colour under it. The non-working grey MUST be a light grey in the light theme and a muted grey of its own in the dark theme, and MUST differ from the accent colour. axe-core MUST report no violations on the main page in Cards and in Grid in the Plain and the Working hours colourings, in the light and the dark theme. <!-- implements NFR-A3, NFR-A4, UX4 of add-day-colouring-setting -->
+In every day colouring and in both themes, the digits and texts of an hour cell SHALL have a contrast of at least 4.5:1 against the cell's colour: the four day-period colours, the accent colour and the non-working grey. The handle of a day track MUST keep its fill or its border at a contrast of at least 3:1 against every track colour under it. The non-working grey MUST differ from the accent colour. In the light theme it MUST be a light grey with a higher relative luminance than each of the four light day-period colours. In the dark theme it MUST be a muted grey of its own with a lower relative luminance than each of the four dark day-period colours, so it does not glare on the dark background. axe-core MUST report no violations on the main page in Cards and in Grid in the Plain and the Working hours colourings, in the light and the dark theme. <!-- implements NFR-A3, NFR-A4, UX4 of add-day-colouring-setting -->
 
 #### Scenario: Digit contrast on every cell colour
 - **WHEN** the design tokens of the `<theme>` theme are read
 - **THEN** the hour cell digit colour of each day colour has at least 4.5:1 against that colour
 - **AND** the handle's fill or border has at least 3:1 against each track colour
+- **AND** the non-working grey is `<lightness>` than each of the four day-period colours of that theme
 
-| theme |
-|---|
-| light |
-| dark |
+| theme | lightness |
+|---|---|
+| light | lighter (higher relative luminance) |
+| dark | darker (lower relative luminance) |
 
 #### Scenario: Accent and grey in a real browser
 - **GIVEN** the view mode is Grid, the stored location is Almaty, the `<theme>` theme is active and the day colouring is Working hours with 10:00–18:00

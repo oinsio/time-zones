@@ -77,6 +77,18 @@ The day colouring and the working hours SHALL be saved in the versioned preferen
 - **THEN** the colouring "Working hours" is checked and the fields show `09:07` and `17:30`
 - **AND** the main page shows the Working hours colouring from its first render
 
+#### Scenario: Each colouring is kept and shared
+- **GIVEN** the app is open in two tabs with the colouring "<other>"
+- **WHEN** the user chooses "<colouring>" in the first tab
+- **THEN** the second tab has "<colouring>" in force without a reload
+- **AND** when the app is opened again, "<colouring>" is checked and in force from the first render
+
+| colouring | other |
+|---|---|
+| Plain | Time of day |
+| Time of day | Working hours |
+| Working hours | Plain |
+
 #### Scenario: Working hours are kept across colourings
 - **GIVEN** the user confirmed 09:07–17:30 in the colouring "Working hours"
 - **WHEN** the user chooses "Time of day" and then "Working hours" again
@@ -129,7 +141,9 @@ The colouring group SHALL be a radio group named by its visible caption "Colouri
 - **WHEN** the settings page is shown
 - **THEN** every colouring option is at least 44 × 44 px and both working hours fields are at least 44 px high
 - **AND** a keyboard-focused option and a keyboard-focused field show a focus outline
-- **AND** axe-core reports no violations, also with the hint shown
+- **AND** axe-core reports no violations
+- **WHEN** the user confirms `18:00` – `10:00` and the hint is shown
+- **THEN** axe-core again reports no violations
 
 | theme |
 |---|
