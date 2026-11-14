@@ -1,0 +1,170 @@
+// Verifies FR9, FR11, FR12, NFR-A3, NFR-R2 of add-day-colouring-setting.
+import { expect } from "@playwright/test";
+import { createBdd } from "playwright-bdd";
+import {
+  cellOf,
+  frameColumnOf,
+  frameOf,
+  requireBox,
+  rowsOf,
+} from "../../grid_view/steps/hourGridE2eHelpers";
+import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
+import { listRow } from "../../locations/steps/locationsE2eHelpers";
+import {
+  readThemeColours,
+  type Theme,
+} from "../../main_page/steps/themeTokens";
+import { dayTrackBarOf, readRowDayColours } from "./dayColouringE2eHelpers";
+
+const { Given, Then } = createBdd(test);
+
+const EDGE_TOLERANCE_PX = 2;
+const ROW_INSET_TOLERANCE_PX = 8;
+const NON_WORKING_GREY = "non-working grey";
+
+const colourOf = (theme: Theme, colourName: string) => {
+  const colours = readThemeColours(theme);
+  return colourName === NON_WORKING_GREY
+    ? colours.dayNonWorking
+    : colours.accent;
+};
+
+// Implements the default Cards view: no stored view mode.
+Given("the view mode is Cards", () => undefined);
+
+Then(
+  /^the cell of "([^"]+)" in column (\d+) has the (light|dark) accent colour and the cell in column (\d+) the (?:light|dark) non-working grey$/,
+  async (
+    { locationsWorld },
+    city: string,
+    accentColumn: string,
+    theme: Theme,
+    greyColumn: string,
+  ) => {
+    const colours = readThemeColours(theme);
+    await expect(
+      cellOf(locationsWorld.page, city, Number(accentColumn)),
+    ).toHaveCSS("background-color", colours.accent);
+    await expect(
+      cellOf(locationsWorld.page, city, Number(greyColumn)),
+    ).toHaveCSS("background-color", colours.dayNonWorking);
+  },
+);
+
+Then(
+  /^the track of "([^"]+)" is a gradient with the (light|dark) (accent colour|non-working grey) at its left end and at its right end$/,
+  async (
+    { locationsWorld },
+    city: string,
+    theme: Theme,
+    colourName: string,
+  ) => {
+    const backgroundImage = await dayTrackBarOf(
+      locationsWorld.page,
+      city,
+    ).evaluate((element) => getComputedStyle(element).backgroundImage);
+    const colour = colourOf(theme, colourName);
+    expect(backgroundImage).toContain("linear-gradient");
+    expect(backgroundImage).toContain(`${colour} 0%`);
+    expect(backgroundImage).toContain(`${colour} 100%`);
+  },
+);
+
+Then(
+  /^one hour frame in the (light|dark) foreground colour reaches from the first row to the last$/,
+  async ({ locationsWorld }, theme: Theme) => {
+    const { page } = locationsWorld;
+    await expect(frameOf(page)).toHaveCount(1);
+    await expect(frameOf(page)).toHaveCSS(
+      "border-top-color",
+      readThemeColours(theme).foreground,
+    );
+    const frameBox = await requireBox(frameOf(page));
+    const firstBox = await requireBox(rowsOf(page).first());
+    const lastBox = await requireBox(rowsOf(page).last());
+    expect(Math.abs(frameBox.y - firstBox.y)).toBeLessThanOrEqual(
+      ROW_INSET_TOLERANCE_PX,
+    );
+    expect(
+      Math.abs(frameBox.y + frameBox.height - (lastBox.y + lastBox.height)),
+    ).toBeLessThanOrEqual(ROW_INSET_TOLERANCE_PX);
+  },
+);
+
+Then(
+  "the frame encloses column {int} of every row",
+  async ({ locationsWorld }, column: number) => {
+    const { page } = locationsWorld;
+    const frameBox = await requireBox(frameOf(page));
+    for (const city of ["Almaty", "Moscow", "Kolkata", "New York"]) {
+      const cellBox = await requireBox(cellOf(page, city, column));
+      expect(frameBox.x).toBeLessThanOrEqual(cellBox.x + EDGE_TOLERANCE_PX);
+      expect(frameBox.x + frameBox.width).toBeGreaterThanOrEqual(
+        cellBox.x + cellBox.width - EDGE_TOLERANCE_PX,
+      );
+    }
+  },
+);
+
+Then(
+  /^the hour frame is on column (\d+) in the (light|dark) foreground colour$/,
+  async ({ locationsWorld }, column: string, theme: Theme) => {
+    expect(await frameColumnOf(locationsWorld.page)).toBe(Number(column));
+    await expect(frameOf(locationsWorld.page)).toHaveCSS(
+      "border-top-color",
+      readThemeColours(theme).foreground,
+    );
+  },
+);
+
+Then(
+  "the texts of column {int} are bold in the {string} row",
+  async ({ locationsWorld }, column: number, city: string) => {
+    await expect(
+      cellOf(locationsWorld.page, city, column).locator("span").first(),
+    ).toHaveCSS("font-weight", "700");
+  },
+);
+
+// Verifies FR12 of add-day-colouring-setting: the view contract reads the colours the view draws.
+Then(
+  /^every day colour of the "([^"]+)" row is the accent colour$/,
+  async ({ locationsWorld }, city: string) => {
+    const { page } = locationsWorld;
+    const accent = await page.evaluate(() =>
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--color-accent")
+        .trim(),
+    );
+    const colours = await readRowDayColours(listRow(page, city));
+    expect(colours.length).toBeGreaterThan(0);
+    for (const colour of colours) expect(toRgb(accent)).toBe(colour);
+  },
+);
+
+Then(
+  /^the "([^"]+)" row shows the accent colour at 12:00 and the non-working grey at 20:00 of Almaty$/,
+  async ({ locationsWorld }, city: string) => {
+    const { page } = locationsWorld;
+    const tokens = await page.evaluate(() => {
+      const styles = getComputedStyle(document.documentElement);
+      return {
+        accent: styles.getPropertyValue("--color-accent").trim(),
+        grey: styles.getPropertyValue("--color-day-non-working").trim(),
+      };
+    });
+    const atTwelve = await readRowDayColours(listRow(page, city), 12);
+    const atTwenty = await readRowDayColours(listRow(page, city), 20);
+    expect(atTwelve).toEqual([toRgb(tokens.accent)]);
+    expect(atTwenty).toEqual([toRgb(tokens.grey)]);
+  },
+);
+
+const HEX_RADIX = 16;
+const HEX_CHANNEL_DIGITS = 2;
+const toRgb = (hex: string): string => {
+  const [red, green, blue] = [1, 3, 5].map((start) =>
+    Number.parseInt(hex.slice(start, start + HEX_CHANNEL_DIGITS), HEX_RADIX),
+  );
+  return `rgb(${red}, ${green}, ${blue})`;
+};

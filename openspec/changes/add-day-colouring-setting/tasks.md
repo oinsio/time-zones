@@ -230,13 +230,13 @@ Rules for every task:
 
 ## 9. BDD E2E, accessibility and screenshots (FR12, FR13, NFR-A1–NFR-A4, NFR-R1, NFR-R2, M2, M4)
 
-- [ ] 9.1 New `src/test/features/settings/settings_day_colouring_e2e.feature` with `steps/settings_day_colouring_e2e.steps.ts`:
+- [x] 9.1 New `src/test/features/settings/settings_day_colouring_e2e.feature` with `steps/settings_day_colouring_e2e.steps.ts`:
   - every scenario of "Accessible colouring group and working hours row": names, checked state, arrow keys, `aria-invalid` and `aria-describedby`, 44 px, focus outlines, and axe-core in the light and the dark theme, each without and with the hint shown (4 runs, M4);
   - every scenario of "Colouring settings layout": four width × language × hour format rows, no movement, no horizontal scroll;
   - the scenario "Esc in a working hours field restores first, then leaves" of the modified requirement "Open the settings page", tagged `@add-day-colouring-setting @FR4 @FR6`, because it needs the real `AppShell` Esc listener.
 
   Verify: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_day_colouring_e2e.feature` passes.
-- [ ] 9.2 New `src/test/features/day_colouring/day_colouring_e2e.feature` with `steps/day_colouring_e2e.steps.ts`:
+- [x] 9.2 New `src/test/features/day_colouring/day_colouring_e2e.feature` with `steps/day_colouring_e2e.steps.ts`:
   - "Accent and grey in a real browser" (computed background of the cells);
   - "One-colour tracks are drawn in a real browser" (four rows: the computed `background-image` of the Moscow track is not `none` and holds the theme's accent or non-working grey, resolved to `rgb(...)` by the browser, at `0%` and at `100%`);
   - "No violations in every colouring" (eight rows, M4);
@@ -252,10 +252,10 @@ Rules for every task:
   Then run again without the flag.
 
   Verify: `npx playwright test -c playwright.bdd.config.ts src/test/features/day_colouring/day_colouring_e2e.feature`, then the same for `src/test/features/grid_view/grid_view_hour_frame_e2e.feature`, one at a time, pass.
-- [ ] 9.3 New `src/test/features/day_colouring/day_colouring_view_contract_e2e.feature`, tagged `@view-contract`, with `Background: Given the view under contract is shown` and the two scenarios of "Day colouring in every view". Its steps go in `steps/day_colouring_view_contract_e2e.steps.ts`. They read the day track's background gradient in Cards and the cells' computed background in Grid, through a per-view helper in the existing view contract fixtures (`src/test/features/view_contract/steps/`).
+- [x] 9.3 New `src/test/features/day_colouring/day_colouring_view_contract_e2e.feature`, tagged `@view-contract`, with `Background: Given the view under contract is shown` and the two scenarios of "Day colouring in every view". Its steps go in `steps/day_colouring_view_contract_e2e.steps.ts`. They read the day track's background gradient in Cards and the cells' computed background in Grid, through a per-view helper in the existing view contract fixtures (`src/test/features/view_contract/steps/`).
 
   Verify: `npx playwright test -c playwright.bdd.config.ts src/test/features/day_colouring/day_colouring_view_contract_e2e.feature` passes for Cards and Grid.
-- [ ] 9.4 Re-approve the settings screenshots once (NFR-R2, the modified `settings` requirement "Settings page layout"): add `@add-day-colouring-setting @NFR-R2` to "Approved screenshots of the settings at <width> px in the <theme> theme" in `settings_e2e.feature`, and run it with `--update-snapshots`. Read the 375 px PNGs and confirm that the colouring group follows the view group with "Time of day" checked, and that there is no working hours row. Run it again without the flag. Then run `npx playwright test -c playwright.bdd.config.ts --grep "Approved|Screenshot of the|screenshot"` once without `--update-snapshots`: every other approved Cards, Grid, search and settings screenshot matches unchanged (M2).
+- [x] 9.4 Re-approve the settings screenshots once (NFR-R2, the modified `settings` requirement "Settings page layout"): add `@add-day-colouring-setting @NFR-R2` to "Approved screenshots of the settings at <width> px in the <theme> theme" in `settings_e2e.feature`, and run it with `--update-snapshots`. Read the 375 px PNGs and confirm that the colouring group follows the view group with "Time of day" checked, and that there is no working hours row. Run it again without the flag. Then run `npx playwright test -c playwright.bdd.config.ts --grep "Approved|Screenshot of the|screenshot"` once without `--update-snapshots`: every other approved Cards, Grid, search and settings screenshot matches unchanged (M2).
 
   Verify: both runs pass.
 
