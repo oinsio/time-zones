@@ -24,7 +24,7 @@ Audience: every user of Cards and Grid, especially those planning meetings acros
 - `day-colouring`: the three day colourings, working days and working time, the colours of each colouring on day tracks and hour cells, readability of digits and the handle, and the work bounds of colouring.
 
 ### Modified Capabilities
-- `settings`: ADDED "Colouring group", "Working hours row", "Time range group", "Day colouring and working hours are kept on the device", "Accessible colouring group and working hours row", "Colouring settings layout", "Colouring strings are localized"; MODIFIED "Open the settings page" (Esc in a working hours field first restores its texts).
+- `settings`: ADDED "Colouring group", "Working hours row", "Time range group", "Day colouring and working hours are kept on the device", "Accessible colouring group and working hours row", "Colouring settings layout", "Colouring strings are localized"; MODIFIED "Open the settings page" (Esc in a working hours field first restores its texts) and "Settings page layout" (the approved screenshots show the colouring group).
 - `time-selection`: MODIFIED "Day-period colours" (only in the Time of day colouring).
 - `grid-view`: MODIFIED "Hour cell colour", "Hour frame".
 

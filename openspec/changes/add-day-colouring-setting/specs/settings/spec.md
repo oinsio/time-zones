@@ -151,7 +151,7 @@ The colouring group SHALL be a radio group named by its visible caption "Colouri
 | dark |
 
 ### Requirement: Colouring settings layout
-The colouring group and the working hours row SHALL each take one row at most 56 px high at 375, 1024 and 2560 px wide, in English and Russian, in the 24-hour and the 12-hour format, without the hint. Showing or hiding the working hours row MUST NOT move the groups above it. The settings page MUST NOT scroll horizontally at 320 and 2560 px with the working hours row shown. The approved screenshots of the requirement "Settings page layout" (375 and 1024 px, both themes) are re-approved once with the colouring group shown and "Time of day" checked. <!-- implements NFR-R1, NFR-R2, UX2 of add-day-colouring-setting -->
+The colouring group and the working hours row SHALL each take one row at most 56 px high at 375, 1024 and 2560 px wide, in English and Russian, in the 24-hour and the 12-hour format, without the hint. Showing or hiding the working hours row MUST NOT move the groups above it. The settings page MUST NOT scroll horizontally at 320 and 2560 px with the working hours row shown. <!-- implements NFR-R1, UX2 of add-day-colouring-setting -->
 
 #### Scenario: Compact colouring rows
 - **GIVEN** the colouring is "Working hours" and the hour format is `<hour format>`
@@ -228,3 +228,35 @@ The header's settings button SHALL open the settings page. The settings page MUS
 - **WHEN** the user presses Esc again in the field
 - **THEN** the main page is shown
 - **AND** the focus is on the settings button
+
+### Requirement: Settings page layout
+The settings page SHALL use the app's design tokens: the page background, the groups on surface cards with the theme border, the Manrope font and the accent colour for the checked option and the deploy time. Its text MUST be at least 4.5:1 against its background in both themes. The theme group, the hour format group and the view group MUST each take one row at 320, 375, 1024 and 2560 px in English and Russian. The page MUST NOT scroll horizontally at 320 px and 2560 px. The approved screenshots of the settings page at 375 px and 1024 px in both themes MUST match. They show the theme group as three icons in the order System, Light, Dark with System checked, the hour format group as `12` and `24` with 24 checked, the view group as "Cards" and "Grid" with Cards checked, the colouring group as three icons in the order Plain, Time of day, Working hours with Time of day checked and no working hours row, the zone label group with both toggles on, "Abbreviation" first, and its Russia example, and the language group collapsed, with the 🇺🇸 flag for English. The deploy time keeps its place in them but its text is hidden, because it changes with every build. They are re-approved once for this change. <!-- implements NFR-A3, NFR-R1, NFR-R3, UX2 of add-settings-page-and-device-time-location; implements NFR-R2 of add-interface-language-selection; NFR-R3 of show-zone-abbreviations-and-zone-label-setting; NFR-R2 of polish-settings-and-remove-offline-update-notice; NFR-R1, NFR-R2 of compact-settings-controls; NFR-R1, NFR-R2 of add-view-mode-setting-and-grid-skeleton; NFR-R2 of add-day-colouring-setting -->
+
+#### Scenario: Narrow and wide screens
+- **WHEN** the settings page is `<width>` px wide
+- **THEN** the page does not scroll horizontally
+
+| width |
+|---|
+| 320 |
+| 2560 |
+
+#### Scenario: Compact groups
+- **WHEN** the settings page is shown 375 px wide in `<language>`
+- **THEN** the theme group, the hour format group and the view group are each at most 56 px high
+
+| language |
+|---|
+| English |
+| Russian |
+
+#### Scenario: Approved screenshots
+- **WHEN** the settings page is rendered at `<width>` px in the `<theme>` theme
+- **THEN** it matches the approved screenshot
+
+| width | theme |
+|---|---|
+| 375 | light |
+| 375 | dark |
+| 1024 | light |
+| 1024 | dark |
