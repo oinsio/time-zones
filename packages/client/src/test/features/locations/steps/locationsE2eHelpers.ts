@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { expect, type Page } from "@playwright/test";
 import { englishLocale } from "../../main_page/steps/englishTexts";
 import {
@@ -5,6 +7,17 @@ import {
   type StoredEntry,
   type StoredLocation,
 } from "./locations_ui_e2e.fixtures";
+
+const RUSSIAN_LOCALE_FILE = join(process.cwd(), "src", "locales", "ru.json");
+const russianLocations = (
+  JSON.parse(readFileSync(RUSSIAN_LOCALE_FILE, "utf8")) as {
+    locations: Record<string, string>;
+  }
+).locations;
+
+/** Either interface language, so scenarios in English and Russian find the control. */
+const eitherLanguage = (englishText: string, russianText: string) =>
+  new RegExp(`^(${englishText}|${russianText})$`);
 
 export const ADD_LOCATION_NAME = englishLocale.locations.addLocation;
 export const SEARCH_LABEL = englishLocale.locations.searchLabel;
@@ -100,10 +113,14 @@ export function parseCityNames(quotedNames: string): string[] {
 }
 
 export const addLocationButton = (page: Page) =>
-  page.getByRole("button", { name: ADD_LOCATION_NAME });
+  page.getByRole("button", {
+    name: eitherLanguage(ADD_LOCATION_NAME, russianLocations.addLocation),
+  });
 
 export const queryField = (page: Page) =>
-  page.getByRole("combobox", { name: SEARCH_LABEL });
+  page.getByRole("combobox", {
+    name: eitherLanguage(SEARCH_LABEL, russianLocations.searchLabel),
+  });
 
 export async function openSearch(page: Page) {
   await addLocationButton(page).click();
