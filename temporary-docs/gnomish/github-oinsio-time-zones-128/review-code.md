@@ -4,9 +4,9 @@
 
 | Item | Value |
 |---|---|
-| Tasks verified | 40/41 |
+| Tasks verified | 39/41 |
 | Requirements traced | 119/124 |
-| CRITICAL | 1 |
+| CRITICAL | 2 |
 | WARNING | 4 |
 | SUGGESTION | 0 |
 
@@ -20,10 +20,10 @@
 - ✅ 2.4 `scripts/cityData/selectCityNames.ts` with `it.each` cases in `src/test/cityData/selectCityNames.test.ts` (preferred, non-historic, fallback, override).
 - ✅ 2.5 `scripts/cityData/markNamesakes.ts` with `src/test/cityData/markNamesakes.test.ts`; imports `normalizeSearchText` from `../../src/lib/searchText/index.ts`.
 - ✅ 2.6 `scripts/cityData/compileCityData.ts` with `src/test/cityData/compileCityData.test.ts` (99 999 dropped l. 11, `Asia/Calcutta` l. 84, `Mars/Olympus` l. 112, exemplar merge l. 124-136, identical runs l. 70).
-- ✅ 2.7 `scripts/cityData/download.ts`, `scripts/cityData/compile.ts` (`runCityDataCompile`, guarded block under `// Stryker disable all`), `package.json:15` `city-data:compile`; `src/test/cityData/download.test.ts`, `src/test/cityData/compile.test.ts` (success, failed download, failing unzip, zone outside the release). See R2 for the dump date.
-- ✅ 2.8 `packages/client/city-data/geonames-cities.json` (6 102 cities, 3 × "Springfield", `dumpDate` 2026-11-14, recompiled in commit c71c8d5 "Recompile the GeoNames city data with city-data:compile") and `city-data/README.md` (source, licence, dump date, counts, refresh, gzipped size). See R3: the committed file is a reformatted version of the command's output.
+- ✅ 2.7 `scripts/cityData/download.ts`, `scripts/cityData/compile.ts` (`runCityDataCompile`, guarded block under `// Stryker disable all`), `package.json:15` `city-data:compile`; `src/test/cityData/download.test.ts`, `src/test/cityData/compile.test.ts` (success, failed download, failing unzip, zone outside the release). See R3 for the dump date.
+- ✅ 2.8 `packages/client/city-data/geonames-cities.json` (6 102 cities, 3 × "Springfield", `dumpDate` 2026-11-14, recompiled in commit c71c8d5 "Recompile the GeoNames city data with city-data:compile") and `city-data/README.md` (source, licence, dump date, counts, refresh, gzipped size). See R4: the committed file is a reformatted version of the command's output.
 - ✅ 3.1 `scripts/cityData/checkCityData.ts` with `src/test/cityData/checkCityData.test.ts` and `checkCityData.format.test.ts`; entry `scripts/cityData/check.ts` (`runCityDataCheck`) with `src/test/cityData/check.test.ts`; `package.json:16` `city-data:check`.
-- ✅ 3.2 `scripts/zoneData/zoneDataPlugin.ts` serves `loadCitySearchData(datasetFilePath)` from the dev middleware, the build asset and `virtual:zone-cities` (named export `cityData`); `src/vite-env.d.ts` declares it; `src/test/zoneData/zoneDataPlugin.test.ts`. The served `cityData` is the columnar form of `scripts/cityData/toServedCityData.ts`, not the committed object without `source` (see R4).
+- ✅ 3.2 `scripts/zoneData/zoneDataPlugin.ts` serves `loadCitySearchData(datasetFilePath)` from the dev middleware, the build asset and `virtual:zone-cities` (named export `cityData`); `src/vite-env.d.ts` declares it; `src/test/zoneData/zoneDataPlugin.test.ts`. The served `cityData` is the columnar form of `scripts/cityData/toServedCityData.ts`, not the committed object without `source` (see R5).
 - ✅ 3.3 `app.config.ts` `CITY_SEARCH_DATA_BUDGET_KB = 130`, imported by `scripts/check-bundle-size.mjs` (script-local `30` removed, header updated).
 - ✅ 4.1 `src/ports/citySearch.ts` `population`, `region?`, `id` documented as unique per city; `GeoNamesCityData` and `EMPTY_GEONAMES_CITY_DATA` in `src/adapters/city-search/citySource.ts`; contract `citySource.contract.ts` checks unique IDs.
 - ✅ 4.2 `parseCitySearchData` in `src/adapters/city-search/fetchCitySearch.ts` (with `parseGeoNamesCityData.ts`), re-exported from the adapter index; `fetchCitySearch.test.ts` and `src/test/stubZoneCitiesFetch.ts` answer `{ zoneCities, cityData }`.
@@ -47,7 +47,7 @@
 - ❌ 8.3 Not done: `src/test/features/settings/settings_e2e.feature` and `settings_language_e2e.feature` carry no `@add-geonames-city-source` tag and no `Approved-screenshots-of-the-settings-*` PNG changed on the branch, so the approved settings screenshots do not show the attribution (R1). The IST results screenshots were re-approved (1024 px light, two projects) and `locations_ui_e2e.feature` tagged.
 - ✅ 8.4 No change to the loading/error/retry/offline code paths (`createFetchCitySearchLoader` still one `fetch`, same errors); `locations_ui_e2e.feature` and its helpers adjusted for the new payload (`locationsE2eHelpers.ts`).
 - ✅ 9.1 Unit suite: CI is green for the branch; scenarios were adjusted by expectations (e.g. ranking steps).
-- ✅ 9.2 Survivors killed in 9aaacf9 "Kill surviving mutants of the city data scripts …". Re-measured here: every measured file is ≥ 90 % (the minimum), four script files are below the 95 % target, and five adapter files could not be re-measured (see Mutation, R5).
+- ❌ 9.2 Not done (R2): survivors remain in four script files, three of them below the 95 % target (`compileCityData.ts` 90.29 %, `download.ts` 90.91 %, `selectCityNames.ts` 93.55 %, `parseGeoNamesRows.ts` 95.24 % with 1 survived and 1 no coverage), and `createCompositeCitySearch.ts` and `parseGeoNamesCityData.ts`, both named by the task, have no measured score (see Mutation). Survivors were killed only partly in 9aaacf9.
 - ✅ 9.3 Every FR1–FR14, NFR-P1–P4, NFR-A1/A2, NFR-R1/R2, UX1–UX4 id is found in at least one file of `src`/`scripts` that names the change (grep run during this review).
 - ✅ 9.4 Lint, typecheck, build and bundle size are part of the green CI; the README records 119.4 KB against the 130 KB budget.
 - ✅ 10.1 `temporary-docs/gnomish/github-oinsio-time-zones-128/handoff/H1-adr-0015-city-data.patch` and its README section.
@@ -67,7 +67,7 @@
 - ✅ FR9 — `getCityLabel` over `groupRecordsByZone`; `createCompositeCitySearch.cityLabel.test.ts`, `locations_city_label_language_unit.feature`.
 - ✅ FR10 — abbreviation source and `suggest` read zone records only; "An abbreviation still finds zone cities only", "Suggestions are unchanged", `createCompositeCitySearch.exemplarCity.test.ts`.
 - ✅ FR11 — `resolveZone` throws in the compiler; `geoNamesCitySource.ts` skips unknown zones; `checkCityData.ts` zone check; "A city of a zone the installed release lacks" / "… the engine rejects".
-- ⚠️ FR12 — compile/check commands, committed file and offline build exist and are tested, the CI step is pending handoff H2; but the command records the run date as the dump date, so the same dumps compiled on two days differ (R2), and its output is not the committed (biome-formatted) file (R3).
+- ⚠️ FR12 — compile/check commands, committed file and offline build exist and are tested, the CI step is pending handoff H2; but the command records the run date as the dump date, so the same dumps compiled on two days differ (R3), and its output is not the committed (biome-formatted) file (R4).
 - ✅ FR13 — `CityDataAttribution.tsx`, `GEONAMES_URL`, both locales; `city-data/README.md` credits GeoNames; root READMEs via handoff H3.
 - ✅ FR14 — one file, one `fetch`, same errors in `fetchCitySearch.ts`; invalid payload throws `INVALID_RECORDS` (`fetchCitySearch.test.ts`).
 - ✅ NFR-P1 — `CITY_SEARCH_DATA_BUDGET_KB = 130` in `app.config.ts` checked by `check-bundle-size.mjs`; README measures 119.4 KB.
@@ -88,7 +88,7 @@
 - ✅ M4 — all zones checked against the release and the Cyrillic share (measured 99.6 % on the committed file) by `checkCityData.ts`.
 - ✅ M5 — "No two results look the same" over 13 `SAMPLE_QUERIES` in `location_search_namesakes_unit.feature`.
 - ✅ M6 — axe scenarios with regions (`location_search_namesakes_e2e.feature`) and on the settings page (`settings_city_data_attribution_e2e.feature`), two themes each.
-- ⚠️ M7 — measured here: every script file and four `src` files are ≥ 90 %, but `compileCityData.ts` (90.29 %), `download.ts` (90.91 %), `selectCityNames.ts` (93.55 %) are below the 95 % target, and five adapter files could not be measured in this environment (see Mutation; R5).
+- ⚠️ M7 — measured here: every measured file is ≥ 90 %, but `compileCityData.ts` (90.29 %), `download.ts` (90.91 %) and `selectCityNames.ts` (93.55 %) are below the 95 % target, and `createCompositeCitySearch.ts` and `parseGeoNamesCityData.ts` could not be measured in this environment (see Mutation; R6, R2).
 - ✅ Scenario: A large city that is not a zone city — compiler keep rule in `compileCityData.test.ts`; committed file holds `[551487, "Kazan", "Казань", "RU", 226, 1243500]`.
 - ✅ Scenario: A capital below the population threshold — `compileCityData.test.ts:23` (`PPLC` with population 500 kept).
 - ✅ Scenario: A city below the threshold — `compileCityData.test.ts:11` drops 99 999.
@@ -101,8 +101,8 @@
 - ✅ Scenario: Namesakes carry regions — `compileCityData.test.ts:167-174`, `markNamesakes.test.ts`, `location_search_namesakes_unit.feature` over the committed file.
 - ✅ Scenario: The same name in different countries — `compileCityData.test.ts:225-229` (Victoria).
 - ✅ Scenario: A unique name — Kazan has no region index in the committed file; "No region without a namesake".
-- ⚠️ Scenario: Deterministic output — `compileCityData.test.ts:70` proves it for the pure compiler only; the command injects today's date, so the same dumps compiled on two days differ (R2).
-- ⚠️ Scenario: The file records its source — the licence is recorded, but the "dump date" is the compile run's date (`readDumpDate` in `compile.ts`), not the dump's (R2).
+- ⚠️ Scenario: Deterministic output — `compileCityData.test.ts:70` proves it for the pure compiler only; the command injects today's date, so the same dumps compiled on two days differ (R3).
+- ⚠️ Scenario: The file records its source — the licence is recorded, but the "dump date" is the compile run's date (`readDumpDate` in `compile.ts`), not the dump's (R3).
 - ✅ Scenario: A failed download — `compile.test.ts` "should return non-zero, log the dump and write nothing when a download fails"; `download.test.ts`.
 - ✅ Scenario: The build is offline — `zoneDataPlugin.ts` reads the committed file; `src/test/zoneData/zoneDataPlugin.test.ts`.
 - ✅ Scenario: The committed file passes — `checkCityData.test.ts` passing case; `check.test.ts`.
@@ -187,6 +187,7 @@ Measured with `cd packages/client && npx stryker run --mutate '<files>'`, one ru
 
 | File | Score | Survivors / no coverage |
 |---|---|---|
+| `src/adapters/city-search/cityTextMatching.ts` | 100.00 % | — (73 killed, 1 timeout) |
 | `src/adapters/city-search/geoNamesCitySource.ts` | 100.00 % | — |
 | `src/presenter/presentSearchResults.ts` | 100.00 % | — |
 | `src/views/shared/LocationSearchResults.tsx` | 100.00 % | — |
@@ -195,16 +196,18 @@ Measured with `cd packages/client && npx stryker run --mutate '<files>'`, one ru
 | `scripts/cityData/toServedCityData.ts` | 100.00 % | — |
 | `scripts/cityData/serializeCityDataset.ts` | 100.00 % | — |
 | `scripts/cityData/checkCityData.ts` | 99.08 % | 2 survived |
+| `src/adapters/city-search/fetchCitySearch.ts` | 98.15 % | 1 survived |
+| `src/adapters/city-search/zoneCitiesSource.ts` | 97.30 % | 1 survived (l. 75 `if (canonicalZoneId !== undefined)` → `true`) |
 | `scripts/cityData/markNamesakes.ts` | 97.14 % | 1 survived |
 | `scripts/cityData/compile.ts` | 96.00 % | 1 survived (`recursive: true` of the temp-dir cleanup, l. 100) |
-| `scripts/cityData/parseGeoNamesRows.ts` | 95.24 % | 1 survived, 1 no coverage |
-| `scripts/cityData/selectCityNames.ts` | 93.55 % | 2 survived |
-| `scripts/cityData/download.ts` | 90.91 % | 2 survived (l. 121 stream options), 1 no coverage (l. 128) |
-| `scripts/cityData/compileCityData.ts` | 90.29 % | 10 survived: l. 61 and 67 (`collectWantedIds` admin1 IDs — R5), l. 107, 138, 159, 171, 188 |
+| `scripts/cityData/parseGeoNamesRows.ts` | 95.24 % | 1 survived (l. 98 `isShort` → `true`), 1 no coverage (l. 37 `readColumn` fallback) |
+| `scripts/cityData/selectCityNames.ts` | 93.55 % | 2 survived (l. 11, 13: the `NAME_OVERRIDES` data entry → `{}`) |
+| `scripts/cityData/download.ts` | 90.91 % | 2 survived (l. 121 `{ encoding: "utf8" }` → `{}` / `""`), 1 no coverage (l. 128 error text) |
+| `scripts/cityData/compileCityData.ts` | 90.29 % | 10 survived: l. 61 and 67 (`collectWantedIds` admin1 IDs — R6), l. 107, 138 (`?? []` fallbacks), 159, 171 (×2), 188 |
 
-No file measured is below the 90 % minimum. Four script files are below the 95 % target. The `compileCityData.ts` survivors at l. 61/67 expose an untested FR7 path (R5); the other survivors guard fallbacks with no user-visible effect.
+No measured file is below the 90 % minimum. Survivors remain in four script files: three are below the 95 % target, and `parseGeoNamesRows.ts` is just above it (R2). The `compileCityData.ts` survivors at l. 61/67 expose an untested FR7 path (R6).
 
-Not measured: `src/adapters/city-search/cityTextMatching.ts`, `parseGeoNamesCityData.ts`, `createCompositeCitySearch.ts`, `fetchCitySearch.ts` and `zoneCitiesSource.ts`. Their related tests load the full city data. A first five-file run was stopped by the tool's 20-minute limit before writing a report. Single-file runs of `parseGeoNamesCityData.ts` and of `cityTextMatching.ts` + `parseGeoNamesCityData.ts` ended with `Terminated` (exit 124) at the 585 s foreground limit; the initial test run alone takes 2 min 7 s for 5 029 tests. These scores must come from a full Stryker run by the user (CLAUDE.md forbids running one here). `scripts/zoneData/loadCitySearchData.ts` and `zoneDataPlugin.ts` were not run either.
+Not measured: `src/adapters/city-search/createCompositeCitySearch.ts` and `parseGeoNamesCityData.ts`. Their related tests load the full city data (the initial test run alone takes about 2 min for 5 029 tests, and each mutant runs about 930 tests). In this round a single-file run of `createCompositeCitySearch.ts` ended with `Terminated` (exit 124) at the 590 s foreground limit, with no report written. In the previous round a single-file run of `parseGeoNamesCityData.ts` ended the same way. These two scores must come from a full Stryker run by the user (CLAUDE.md forbids running one here). `scripts/zoneData/loadCitySearchData.ts` and `zoneDataPlugin.ts` were not run either.
 
 ## Findings
 
@@ -217,25 +220,34 @@ Not measured: `src/adapters/city-search/cityTextMatching.ts`, `parseGeoNamesCity
 - Fix risk: The re-approved PNGs also take in any other drift under tolerance since the last approval, so check each image by eye. At 375 px the attribution may sit below the 800 px viewport or behind the offline notice, so those PNGs may not change. That is acceptable, because the 1024 px ones show it.
 - Status: open
 
-### R2 — WARNING — Compile command records the run date as the dump date
+### R2 — CRITICAL — Task 9.2 ticked, but survivors remain and two named files have no score
+- Location: `openspec/changes/add-geonames-city-source/tasks.md:66`
+- Rule: `.claude/rules/tdd-workflow.md` ("Write additional tests to kill survived mutants … Target mutation score: >=95%. Minimum acceptable: >=90%."); M7 of the proposal
+- Problem: Task 9.2 is `[x]`, but it requires "kill survivors and re-run" and "Score ≥ 95% (minimum 90%)" for the files it lists. This review measured `compileCityData.ts` 90.29 % (10 survived), `download.ts` 90.91 % (2 survived, 1 no coverage), `selectCityNames.ts` 93.55 % (2 survived) and `parseGeoNamesRows.ts` 95.24 % (1 survived at l. 98, `isShort` → `true`; 1 no coverage at l. 37, the `?? ""` of `readColumn`). `createCompositeCitySearch.ts` and `parseGeoNamesCityData.ts` have no measured score: scoped runs end at the foreground limit (see Mutation).
+- Impact: A ticked task claims a mutation bar that has not been shown. The `compileCityData.ts` l. 61/67 survivors hide a real FR7 regression (R6). The `parseGeoNamesRows.ts` l. 98 survivor lets a parser that marks every alternate name as short pass the suite. The two unmeasured adapter files hold the FR4/FR5/FR6 ranking and the payload parse of FR14.
+- Fix: Kill the survivors with tests in `src/test/cityData/`. For `compileCityData.ts` l. 61/67, see R6. For l. 107/138/159/171/188, add one case per branch: an admin1 row and a city without alternate names (l. 107, 138), two cities that match the same zone city where the first one is kept (l. 159), a zone city with an empty country code that is skipped (l. 171), and a zone city without a region that gets no `zoneCityRegions` entry (l. 188). For `parseGeoNamesRows.ts`, add an alternate-name row whose short flag is `0` and assert that `isShort` is `false`, plus a row with fewer columns than the format, which reads the missing column as `""` (l. 37). For `selectCityNames.ts` l. 11/13, assert that the Kazan override gives `"Kazan"`. Then re-run the scoped Stryker command of task 9.2 for these four files. The `download.ts` l. 121 mutants are equivalent (readline decodes UTF-8 by default), so record that in the task note. Until the user's full Stryker run gives scores for `createCompositeCitySearch.ts` and `parseGeoNamesCityData.ts`, untick 9.2 in `tasks.md` and add a note that names those two files and the measured scores.
+- Fix risk: Tests only, plus a `tasks.md` checkbox. The new tests reuse the fixtures of `compileCityData.fixtures.ts` and `parseGeoNamesRows.test.ts`. An unticked 9.2 blocks archiving until the full run is shared, which is the intended effect.
+- Status: open
+
+### R3 — WARNING — Compile command records the run date as the dump date
 - Location: `packages/client/scripts/cityData/compile.ts:50`
 - Rule: `city-data` spec "Compiled once, committed, no network at build time" (scenarios "Deterministic output", "The file records its source"); FR12
 - Problem: `readDumpDate()` returns `Temporal.Now.plainDateISO("UTC")`, the day the command runs, and `runCityDataCompile` writes it as `source.dumpDate`. The spec requires the file to record "the date of the dump" and "Compiling the same dumps twice MUST give byte-identical files". `compileCityData.test.ts:70` checks determinism only for the pure compiler with a fixed `dumpDate`. `compile.test.ts:17` only checks the date's shape.
 - Impact: The same dumps compiled on two days give two files that differ in `dumpDate`. A dump fetched late on one UTC day and compiled after midnight is dated wrongly. The README and the in-file record can then name a dump date that never existed, which is a CC BY provenance record.
-- Fix: Derive the date from the dump, not the clock. Add a dependency `readModifiedInstant: (path: string) => Promise<Temporal.Instant>` to `CityDataCompileDependencies`. Bind it in the guarded block to `stat(path).mtimeMs` through `Temporal.Instant.fromEpochMilliseconds`, since `unzip` restores the entry's modification time. Take the UTC date of `paths.citiesPath`. In `compile.test.ts`, stub it with a fixed instant and assert that `dumpDate` equals that date.
-- Fix risk: `unzip` interprets the DOS timestamp in the local zone, so near midnight the date can be off by one day unless the bound function and the conversion use UTC consistently. The new dependency must also be added to the fakes in `src/test/cityData/compileWorld.ts`.
+- Fix: Derive the date from the dump, not the clock, through the dependencies task 2.7 already fixes (`{ runProcess, fetchDump, readFile, writeFile, log }`), so that no dependency is added. In `download.ts`, after the cities archive is fetched, run `runProcess(UNZIP_COMMAND, ["-Z", "-T", citiesArchivePath, "cities15000.txt"])` (Info-ZIP zipinfo mode; `-T` prints the entry time as `yyyymmdd.hhmmss`). Parse the date part into a `Temporal.PlainDate`, return it with the paths, and pass it as `dumpDate` in `runCityDataCompile` instead of `readDumpDate()`. Fail with the dump name on a non-zero exit or an unparsable listing. Put the flags and the entry name in `scripts/cityData/constants.ts`. In `download.test.ts` / `compile.test.ts`, stub the listing and assert that `dumpDate` equals its date. Also add a failing-listing case that writes nothing.
+- Fix risk: The zip entry time has no zone, so it is the GeoNames server's local date. Take only the date part and do not convert it. Every `runProcess` fake in `src/test/cityData/compileWorld.ts` and in `compile.test.ts` must answer the extra listing call, or the existing success cases fail. The committed file keeps `2026-11-14` until the next `city-data:compile` run (see R4).
 - Status: open
 
-### R3 — WARNING — `city-data:compile` output is not the committed file; refresh fails lint
-- Location: `packages/client/scripts/cityData/serializeCityDataset.ts:8`
-- Rule: G5 of the proposal ("Refreshing the city data is one maintainer command and one reviewable commit"); design D5 ("one city per line so diffs are reviewable"); FR12
-- Problem: `serializeCityDataset` writes compact lines (`"formatVersion":1,`, one-line `zones`). Biome (`biome check .`, the `lint` script) rejects that format, so commit 5d4b6b7 "Format the compiled city data for the linter" reformatted the committed `city-data/geonames-cities.json` by hand. Checked during this review: the command's output from commit c71c8d5, piped through `biome format`, is byte-identical to the committed file, while the raw output differs from line 2.
-- Impact: The next maintainer who runs `city-data:compile` gets a whole-file rewrite of about 13 600 changed lines (formatting only) instead of a reviewable data diff, and `pnpm run lint` fails until they find the undocumented manual format step. `city-data/README.md` "Refresh" lists only compile and check.
-- Fix: Make the compile command produce the committed form. After `writeFile(DATASET_PATH, …)` in `runCityDataCompile`, run `runProcess("biome", ["format", "--write", DATASET_PATH])` through the injected runner, and fail with a logged cause on a non-zero exit. Extend `compile.test.ts` so that a successful run calls the formatter on `DATASET_PATH` and a failing formatter returns non-zero. Add the step to the README's "Refresh" section.
-- Fix risk: The command now needs the workspace's `@biomejs/biome` binary on `PATH`, which pnpm scripts provide. If the formatter fails, the unformatted file is already written, so log that `pnpm lint:fix` repairs it. The `runCompile` fakes in `compileWorld.ts` must answer the extra process call.
+### R4 — WARNING — Committed city data is biome-formatted, not the one-city-per-line output of `city-data:compile`
+- Location: `packages/client/city-data/geonames-cities.json:429`
+- Rule: design D5 ("Committed file `packages/client/city-data/geonames-cities.json` (compact, one city per line so diffs are reviewable)"); G5 of the proposal ("one maintainer command and one reviewable commit"); FR12
+- Problem: `serializeCityDataset` (`scripts/cityData/serializeCityDataset.ts:8-21`) writes the D5 form: compact header lines and one city per line. Biome (`biome check .`, the `lint` script) rejects that form. Commit 5d4b6b7 "Format the compiled city data for the linter" therefore ran the formatter over the committed file, which is now 7 509 lines: every zone is on its own line, and 109 city tuples that exceed 80 columns are split over several lines (for example l. 429-436 for ID 99071; `grep -cE '^\s+\[\s*$'` prints 109). Checked in this round: the output of commit c71c8d5 (6 112 lines, one city per line) parses to the same JSON as the committed file, and piped through `biome format` it is byte-identical to it. `packages/client/biome.json` already excludes the other generated data file: `"includes": ["**", "!zone-rules/release.json"]`.
+- Impact: The committed file breaks D5. A city whose line length crosses 80 columns after a refresh turns from one line into eight, so the data diff is not reviewable per city. The next maintainer who runs `city-data:compile` gets a whole-file rewrite back to the D5 form, and `pnpm run lint` then fails. The README "Refresh" section mentions no format step.
+- Fix: Follow the `zone-rules/release.json` precedent. Change `packages/client/biome.json` to `"includes": ["**", "!zone-rules/release.json", "!city-data/geonames-cities.json"]`. Restore the command's own output with `git checkout c71c8d5 -- packages/client/city-data/geonames-cities.json`; it holds the same data as the committed file, only unformatted. If R3 is fixed in the same round, run `pnpm --filter @time-zones/client city-data:compile` once instead, as task 2.8 says, so that the file also records the dump's date. Re-measure the gzipped size and update `city-data/README.md`. Then `pnpm run lint` and `pnpm --filter @time-zones/client city-data:check` must pass. `serializeCityDataset` and the compile command do not change.
+- Fix risk: Biome no longer checks the file, but `city-data:check` still validates its JSON and content, and `check.test.ts` / `checkCityData.test.ts` still read it. A fresh `city-data:compile` run needs the network and may yield a newer dump: per task 2.8, recheck the README counts and the Springfield, Kazan, Astana and Shymkent facts the scenarios use. The restored file has the same data, so the README counts stay valid, but its byte size changes.
 - Status: open
 
-### R4 — WARNING — Served city data format contradicts design D5 and task 3.2
+### R5 — WARNING — Served city data format contradicts design D5 and task 3.2
 - Location: `packages/client/scripts/cityData/toServedCityData.ts:23`
 - Rule: `.claude/rules/design-decisions.md` (decisions in `design.md` describe what is built); `.claude/rules/process-invariants.md` (archived changes are immutable)
 - Problem: Design D5 says "The served search data file is `{ "zoneCities": [...], "cityData": <the committed object without "source"> }`", and task 3.2 repeats it. The implementation (commit b3695ee) serves a different shape: `toServedCityData` turns the tuples into `columns` (`idDifferences`, `englishNames`, …, `regionIndexes` with `-1` for none), and `parseGeoNamesCityData.ts` reads that form. `design.md` was not updated: it has no mention of columns, and its "about 116 KB" estimate refers to the tuple form, which the README measures at 148 884 bytes gzipped for the committed file alone, over the 130 KB budget.
@@ -244,7 +256,7 @@ Not measured: `src/adapters/city-search/cityTextMatching.ts`, `parseGeoNamesCity
 - Fix risk: none — documentation only; no code or test changes.
 - Status: open
 
-### R5 — WARNING — `collectWantedIds` is untested, so losing the Russian region names goes unnoticed
+### R6 — WARNING — `collectWantedIds` is untested, so losing the Russian region names goes unnoticed
 - Location: `packages/client/scripts/cityData/compileCityData.ts:56`
 - Rule: `.claude/rules/tdd-workflow.md` ("Analyze survived mutants — each survivor indicates a missed scenario"); FR7 of the proposal
 - Problem: No test calls `collectWantedIds` (`grep -rn collectWantedIds src/test` finds nothing), and `compile.test.ts` never gives a city an admin1 division. Stryker confirms it: the mutants `admin1Rows.map(...)` → `[]` (l. 61) and `if (admin1Id !== undefined)` → `true` / `false` / `===` (l. 67) all survive. `runCityDataCompile` uses this set to decide which alternate-name rows to keep, and `readRegionNames` reads the Russian region name from those rows.
@@ -255,4 +267,4 @@ Not measured: `src/adapters/city-search/cityTextMatching.ts`, `parseGeoNamesCity
 
 ## Verdict
 
-Not ready: R1 (CRITICAL) blocks. Fix the warnings R2, R3, R4 and R5 in the same round.
+Not ready: R1 and R2 (CRITICAL) block. Fix the warnings R3, R4, R5 and R6 in the same round.
