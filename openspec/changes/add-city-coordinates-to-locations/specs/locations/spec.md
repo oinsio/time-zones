@@ -138,6 +138,11 @@ Giving stored locations their coordinates SHALL look up one city record per city
 - **WHEN** a minute passes
 - **THEN** no coordinate lookup was made
 
+#### Scenario: Presenting the list does the same work
+- **GIVEN** the list holds Kazan and Moscow with coordinates
+- **WHEN** the list is presented
+- **THEN** as many formatters, collators and transition lookups were built as for the same list without coordinates
+
 ## MODIFIED Requirements
 
 ### Requirement: List is kept on the device
