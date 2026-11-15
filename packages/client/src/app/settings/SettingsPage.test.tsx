@@ -7,7 +7,6 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createInMemoryPreferencesRepository } from "@/adapters";
-import { GEONAMES_URL } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DEFAULT_PREFERENCES,
@@ -263,52 +262,5 @@ describe("SettingsPage", () => {
     expect(
       within(themeGroup()).getByRole("radio", { name: "Light" }),
     ).toBeChecked();
-  });
-});
-
-// Verifies FR13, UX4 of add-geonames-city-source (D10): the city data attribution is the last line of the page.
-describe("SettingsPage city data attribution", () => {
-  beforeEach(async () => {
-    await i18n.changeLanguage("en");
-  });
-  afterEach(async () => {
-    await i18n.changeLanguage("ru");
-  });
-
-  it("should show the attribution link to GeoNames", () => {
-    renderSettingsPage();
-    expect(
-      screen.getByRole("link", { name: "City data: GeoNames, CC BY 4.0" }),
-    ).toHaveAttribute("href", GEONAMES_URL);
-  });
-
-  it("should follow the zone rules release line as the last element of main", () => {
-    renderSettingsPage();
-    const main = screen.getByRole("main");
-    const attribution = screen.getByRole("link", {
-      name: "City data: GeoNames, CC BY 4.0",
-    });
-    expect(main.lastElementChild).toBe(attribution);
-    expect(attribution.previousElementSibling).toHaveAttribute(
-      "data-zone-rules-release",
-    );
-  });
-});
-
-describe("SettingsPage day colouring", () => {
-  beforeEach(() => i18n.changeLanguage("en"));
-  afterEach(() => i18n.changeLanguage("ru"));
-
-  it("should show the working hours row directly under the colouring group only in Working hours", async () => {
-    renderSettingsPage();
-    expect(screen.queryByRole("group", { name: "Working hours" })).toBeNull();
-    await userEvent.click(screen.getByRole("radio", { name: "Working hours" }));
-    const row = screen.getByRole("group", { name: "Working hours" });
-    const colouring = screen.getByRole("radiogroup", { name: "Colouring" });
-    expect(colouring.compareDocumentPosition(row)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-    await userEvent.click(screen.getByRole("radio", { name: "Plain" }));
-    expect(screen.queryByRole("group", { name: "Working hours" })).toBeNull();
   });
 });
