@@ -26,6 +26,10 @@ export type GeoNamesCityRow = {
   featureCode: string;
   population: number;
   timeZoneId: string;
+  /** Decimal degrees, north positive. */
+  latitude: number;
+  /** Decimal degrees, east positive. */
+  longitude: number;
 };
 
 export type AlternateNameRow = {

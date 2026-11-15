@@ -56,6 +56,16 @@ describe("runCityDataCompile", () => {
     expect(run.log.join("\n")).toContain("line 2");
   });
 
+  it("should return non-zero, log the line and write nothing for a city line with latitude 91", async () => {
+    // @add-city-coordinates-to-locations @FR4
+    const run = await runCompile({
+      cityLines: [KAZAN, cityLine(2, "Tver", "Europe/Moscow", 500_000, { latitude: "91" })],
+    });
+    expect(run.exitCode).not.toBe(0);
+    expect(run.log.join("\n")).toContain("line 2");
+    expect(run.writes.size).toBe(0);
+  });
+
   it.each([
     ["succeeds", { cityLines: [KAZAN] }],
     ["fails", { cityLines: [KAZAN], unzipExitCode: 9 }],

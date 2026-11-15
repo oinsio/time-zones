@@ -1,4 +1,5 @@
 // Verifies FR1, FR2 of add-geonames-city-source (D8): pure row parsers.
+// Verifies FR1, FR4 of add-city-coordinates-to-locations (D2).
 import { describe, expect, it } from "vitest";
 import {
   parseAdmin1Row,
@@ -38,6 +39,31 @@ describe("parseCityRow", () => {
       featureCode: "PPLA",
       population: 1243500,
       timeZoneId: "Europe/Moscow",
+      latitude: 55.78874,
+      longitude: 49.12214,
+    });
+  });
+
+  it.each([
+    ["an empty latitude", CITY_LINE.replace("55.78874", ""), /latitude/],
+    ["a non-numeric longitude", CITY_LINE.replace("49.12214", "abc"), /longitude/],
+    ["latitude 91", CITY_LINE.replace("55.78874", "91"), /latitude/],
+    ["latitude -91", CITY_LINE.replace("55.78874", "-91"), /latitude/],
+    ["longitude 181", CITY_LINE.replace("49.12214", "181"), /longitude/],
+    ["longitude -181", CITY_LINE.replace("49.12214", "-181"), /longitude/],
+  ])("should throw naming the line and the field for %s", (_, line, field) => {
+    expect(() => parseCityRow(line, 7)).toThrow(/line 7/);
+    expect(() => parseCityRow(line, 7)).toThrow(field);
+  });
+
+  it.each([
+    ["90", "180"],
+    ["-90", "-180"],
+  ])("should accept the limits %s and %s", (latitude, longitude) => {
+    const line = CITY_LINE.replace("55.78874", latitude).replace("49.12214", longitude);
+    expect(parseCityRow(line, 1)).toMatchObject({
+      latitude: Number(latitude),
+      longitude: Number(longitude),
     });
   });
 
