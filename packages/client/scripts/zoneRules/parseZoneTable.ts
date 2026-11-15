@@ -29,11 +29,9 @@ function toTenths(
     Number(degrees) +
     Number(minutes) / MINUTES_PER_DEGREE +
     Number(seconds ?? 0) / SECONDS_PER_DEGREE;
-  const signedTenths = Math.round(
-    absoluteDegrees * COORDINATE_TENTHS_PER_DEGREE,
-  );
+  const signedDegrees = sign === "-" ? -absoluteDegrees : absoluteDegrees;
   // `+ 0` turns -0 into 0, so the file never holds "-0".
-  return (sign === "-" ? -signedTenths : signedTenths) + 0;
+  return Math.round(signedDegrees * COORDINATE_TENTHS_PER_DEGREE) + 0;
 }
 
 function parseCoordinates(text: string, lineNumber: number): ZoneTenths {

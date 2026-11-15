@@ -5,22 +5,28 @@
  * compares each zone with the committed release. Prints `0 differences` or the
  * first difference, and exits non-zero on a difference.
  * Implements FR8 of add-zone-rules-from-iana (design D7).
+ * Implements FR4 of add-city-coordinates-to-locations (D4): also checks the zone coordinates.
  */
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
+import {
+  ZONE_COORDINATES_FILE,
+  ZONE_RULES_RELEASE_FILE,
+} from "../../app.config.ts";
 import {
   parseZoneRulesRelease,
   type ZoneRulesRelease,
   ZoneRulesReleaseError,
 } from "../../src/lib/zoneRules/core/index.ts";
+import { loadZoneData } from "../zoneData/loadZoneData.ts";
 import {
   compareWithRelease,
   parseZdumpLines,
   type ZdumpDifference,
 } from "./checkAgainstZdump.ts";
+import { checkZoneCoordinates } from "./checkZoneCoordinates.ts";
 import { compileArchive, listCompiledZoneIds } from "./compileWithZic.ts";
 import { downloadRelease, fetchBytes } from "./downloadRelease.ts";
 import type { FetchRelease, RunProcess } from "./processTypes.ts";
@@ -149,6 +155,15 @@ export async function runZoneRulesCheck(
   const workDirectory = await mkdtemp(join(tmpdir(), WORK_DIRECTORY_PREFIX));
   try {
     const release = await readCommittedRelease(dependencies);
+    const coordinatesErrors = checkZoneCoordinates(
+      await dependencies.readFile(ZONE_COORDINATES_FILE),
+      release.release,
+      loadZoneData().zoneCities,
+    );
+    if (coordinatesErrors.length > 0) {
+      for (const error of coordinatesErrors) log(error);
+      return 1;
+    }
     const compiledDirectory =
       compiledOptionIndex >= 0
         ? resolve(argv[compiledOptionIndex + 1] ?? "")

@@ -4,6 +4,11 @@ The app's compiled time zone data: one IANA release, committed as `release.json`
 and compiled by `scripts/zoneRules/compile.ts`. Implements FR2, FR7 of
 add-zone-rules-from-iana.
 
+Beside it the compiler writes `zone-coordinates.json`: the coordinates, in
+tenths of a degree, of the principal place of every zone of the release's zone
+table (`zone.tab`), naming the release it was read from. A release bump commits
+both files. Implements FR2, FR3 of add-city-coordinates-to-locations.
+
 ## Size
 
 Spike of task 1.1 (release `2026f`, `zic -b slim` of `africa antarctica asia

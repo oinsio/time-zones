@@ -20,6 +20,11 @@ describe("parseZoneTable", () => {
     ["degrees and minutes", "+2232+08822", [225, 884]],
     ["southern and eastern signs", "-3352+15113", [-339, 1512]],
     ["western sign", "+4042-07400", [407, -740]],
+    [
+      "a western half tenth rounded as the city data rounds it",
+      "+6409-02151",
+      [642, -218],
+    ],
     ["both signs negative", "-2332-04637", [-235, -466]],
   ])("should read %s", (_, coordinates, expected) => {
     const table = parseZoneTable(row(coordinates, "Zone/Id"));

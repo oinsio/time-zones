@@ -12,6 +12,7 @@ import {
 import { FIXTURE_RELEASE_DOCUMENT } from "./fixtureReleaseDocument";
 
 export const RELEASE_FILE = "zone-rules/release.json";
+export const COORDINATES_FILE = "zone-rules/zone-coordinates.json";
 export const COMPILED_ZONE_IDS = [
   "America/New_York",
   "Asia/Kolkata",
@@ -91,6 +92,7 @@ export async function check(
   argv: string[],
   releaseText = buildReleaseText(),
   zdumpFailure = false,
+  coordinatesText = readFileSync(COORDINATES_FILE, "utf8"),
 ) {
   const zdumpCalls: string[][] = [];
   const logLines: string[] = [];
@@ -110,7 +112,7 @@ export async function check(
     fetchRelease: downloads.fetchRelease,
     readFile: async (path) => {
       readPaths.push(path);
-      return releaseText;
+      return path === COORDINATES_FILE ? coordinatesText : releaseText;
     },
     log: (line) => logLines.push(line),
   });

@@ -1,5 +1,5 @@
 // @add-zone-rules-from-iana @FR8: the zone rules check against zdump
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -7,6 +7,7 @@ import { runZoneRulesCheck } from "../../../scripts/zoneRules/check.ts";
 import {
   buildReleaseText,
   COMPILED_ZONE_IDS,
+  COORDINATES_FILE,
   check,
   createCompiledDirectory,
   FIXTURE_KOLKATA,
@@ -14,6 +15,21 @@ import {
   RELEASE_FILE,
 } from "./checkWorld";
 import { createFakeFetch, createFakeProcessRunner } from "./compileFakes";
+
+// Verifies FR4 of add-city-coordinates-to-locations: the zone coordinates check of the zone rules check.
+describe("runZoneRulesCheck with broken zone coordinates", () => {
+  it("exits 1 and prints the error of the zone coordinates check", async () => {
+    const run = await check(
+      ["--compiled", createCompiledDirectory()],
+      undefined,
+      false,
+      JSON.stringify({ release: "2026e", zones: {} }),
+    );
+    expect(run.exitCode).toBe(1);
+    expect(run.logLines.join("\n")).toContain("2026e");
+    expect(run.logLines).not.toContain("0 differences");
+  });
+});
 
 describe("runZoneRulesCheck with a compiled directory", () => {
   it("prints 0 differences and exits 0 when the release matches zdump", async () => {
@@ -25,7 +41,7 @@ describe("runZoneRulesCheck with a compiled directory", () => {
 
   it("reads the committed release file and downloads nothing", async () => {
     const run = await check(["--compiled", createCompiledDirectory()]);
-    expect(run.readPaths).toEqual([RELEASE_FILE]);
+    expect(run.readPaths).toEqual([RELEASE_FILE, COORDINATES_FILE]);
     expect(run.urls).toEqual([]);
     expect(run.calls).toEqual([]);
   });
@@ -174,7 +190,10 @@ describe("runZoneRulesCheck by default", () => {
         archiveVersion: "2026f",
       }).runProcess,
       fetchRelease: createFakeFetch().fetchRelease,
-      readFile: async () => buildReleaseText(),
+      readFile: async (path) =>
+        path === COORDINATES_FILE
+          ? readFileSync(COORDINATES_FILE, "utf8")
+          : buildReleaseText(),
       log: (line) => logLines.push(line),
     });
     expect(exitCode).toBe(1);
