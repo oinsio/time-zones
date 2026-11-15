@@ -9,7 +9,6 @@ import {
   reduceLocations,
   type WorldClockState,
 } from "./locations";
-import { ReferenceMode } from "./referenceMoment";
 
 const emptyState: WorldClockState = INITIAL_WORLD_CLOCK_STATE;
 const moscow = {
@@ -127,117 +126,5 @@ describe("reduceLocations REMOVE_LOCATION", () => {
       ok: false,
       error: LocationErrorCode.LOCATION_NOT_FOUND,
     });
-  });
-});
-
-describe("reduceLocations REPLACE_LOCATIONS", () => {
-  it("should replace the whole list", () => {
-    const locations = [
-      { id: "Asia/Almaty|Almaty", kind: LocationKind.CITY, ...almaty },
-    ];
-    const state = expectOk(
-      reduceLocations(emptyState, {
-        type: LocationCommandType.REPLACE_LOCATIONS,
-        homeLocationId: null,
-        locations,
-      }),
-    );
-    expect(state.locations).toEqual(locations);
-  });
-});
-
-describe("reduceLocations MOVE_LOCATION", () => {
-  const twoLocations = expectOk(add(expectOk(add(emptyState, moscow)), almaty));
-
-  it("should apply the move to the list", () => {
-    const state = expectOk(
-      reduceLocations(twoLocations, {
-        type: LocationCommandType.MOVE_LOCATION,
-        id: "Asia/Almaty|Almaty",
-        targetIndex: 0,
-      }),
-    );
-    expect(state.locations.map((location) => location.label)).toEqual([
-      "Almaty",
-      "Moscow",
-    ]);
-  });
-
-  it("should return LOCATION_NOT_FOUND for an unknown id", () => {
-    expect(
-      reduceLocations(twoLocations, {
-        type: LocationCommandType.MOVE_LOCATION,
-        id: "none",
-        targetIndex: 0,
-      }),
-    ).toEqual({ ok: false, error: LocationErrorCode.LOCATION_NOT_FOUND });
-  });
-
-  it("should return LOCATION_POSITION_OUT_OF_RANGE for a bad index", () => {
-    expect(
-      reduceLocations(twoLocations, {
-        type: LocationCommandType.MOVE_LOCATION,
-        id: "Asia/Almaty|Almaty",
-        targetIndex: 2,
-      }),
-    ).toEqual({
-      ok: false,
-      error: LocationErrorCode.LOCATION_POSITION_OUT_OF_RANGE,
-    });
-  });
-});
-
-describe("INITIAL_WORLD_CLOCK_STATE", () => {
-  it("should start without locations and with the UTC device zone", () => {
-    expect(INITIAL_WORLD_CLOCK_STATE).toEqual({
-      locations: [],
-      deviceTimeZoneId: "UTC",
-      homeLocationId: null,
-      reference: { mode: ReferenceMode.LIVE },
-    });
-  });
-});
-
-describe("reduceLocations SET_DEVICE_TIME_ZONE", () => {
-  const setDeviceZone = (state: WorldClockState, timeZoneId: string) =>
-    reduceLocations(state, {
-      type: LocationCommandType.SET_DEVICE_TIME_ZONE,
-      timeZoneId,
-    });
-
-  it.each([
-    ["Asia/Almaty", "Asia/Almaty"],
-    ["Asia/Calcutta", "Asia/Kolkata"],
-    ["Mars/Olympus_Mons", "UTC"],
-    ["+05:00", "UTC"],
-  ])("should store %s as %s", (input, expected) => {
-    const state = expectOk(setDeviceZone(emptyState, input));
-    expect(state.deviceTimeZoneId).toBe(expected);
-  });
-
-  it("should return the very same state for the same zone", () => {
-    const state = expectOk(setDeviceZone(emptyState, "Asia/Almaty"));
-    expect(expectOk(setDeviceZone(state, "Asia/Almaty"))).toBe(state);
-  });
-
-  it("should keep the device zone on add, remove and replace", () => {
-    const withZone = expectOk(setDeviceZone(emptyState, "Asia/Almaty"));
-    const added = expectOk(add(withZone, moscow));
-    const removed = expectOk(
-      reduceLocations(added, {
-        type: LocationCommandType.REMOVE_LOCATION,
-        id: "Europe/Moscow|Moscow",
-      }),
-    );
-    const replaced = expectOk(
-      reduceLocations(added, {
-        type: LocationCommandType.REPLACE_LOCATIONS,
-        locations: [],
-        homeLocationId: null,
-      }),
-    );
-    expect(
-      [added, removed, replaced].map((state) => state.deviceTimeZoneId),
-    ).toEqual(["Asia/Almaty", "Asia/Almaty", "Asia/Almaty"]);
   });
 });

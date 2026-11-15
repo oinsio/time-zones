@@ -9,7 +9,7 @@
  */
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, relative, resolve, sep } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   ZONE_COORDINATES_FILE,
@@ -32,11 +32,11 @@ import { downloadRelease, fetchBytes } from "./downloadRelease.ts";
 import type { FetchRelease, RunProcess } from "./processTypes.ts";
 import { runChildProcess } from "./runChildProcess.ts";
 import { verifySignature } from "./verifySignature.ts";
+import { findMissingZone, groupZdumpLinesByZone } from "./zdumpZoneLookup.ts";
 
 const COMPILED_OPTION = "--compiled";
 const ZDUMP_ARGUMENTS = ["-v", "-c", "2000,2041"];
 const WORK_DIRECTORY_PREFIX = "zone-rules-check-";
-const ZONE_ID_SEPARATOR = "/";
 const FIRST_ARGUMENT_INDEX = 2;
 const NO_DIFFERENCES = "0 differences";
 
@@ -76,47 +76,6 @@ async function compileNamedRelease(
     dependencies.runProcess,
   );
   return outputDirectory;
-}
-
-function groupZdumpLinesByZone(
-  stdout: string,
-  compiledDirectory: string,
-): Map<string, string> {
-  const linesByZone = new Map<string, string[]>();
-  for (const line of stdout.split("\n")) {
-    const [path] = line.split(/\s+/);
-    if (!path) continue;
-    const zoneId = relative(compiledDirectory, path)
-      .split(sep)
-      .join(ZONE_ID_SEPARATOR);
-    linesByZone.set(zoneId, [...(linesByZone.get(zoneId) ?? []), line]);
-  }
-  return new Map(
-    [...linesByZone].map(([zoneId, lines]) => [zoneId, lines.join("\n")]),
-  );
-}
-
-function findMissingZone(
-  release: ZoneRulesRelease,
-  compiledZoneIds: string[],
-): ZdumpDifference | undefined {
-  const compiledIds = new Set(compiledZoneIds);
-  const onlyCompiled = compiledZoneIds.find(
-    (zoneId) => !release.zones.has(zoneId),
-  );
-  const onlyRelease = [...release.zones.keys()].find(
-    (zoneId) => !compiledIds.has(zoneId),
-  );
-  const zoneId = onlyCompiled ?? onlyRelease;
-  if (zoneId === undefined) return undefined;
-  return {
-    zoneId,
-    instant: "-",
-    expected: onlyCompiled ? "a zone of the release" : "a compiled zone file",
-    actual: onlyCompiled
-      ? "no such zone in the release"
-      : "no such compiled file",
-  };
 }
 
 async function findFirstDifference(

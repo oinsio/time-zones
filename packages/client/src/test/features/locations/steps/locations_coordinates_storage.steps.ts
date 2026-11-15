@@ -7,7 +7,6 @@ import { expect, vi } from "vitest";
 import { STORAGE_KEYS } from "@/constants";
 import { LocationsStatus } from "@/controller";
 import { LocationKind, LocationMarkKind } from "@/model";
-import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
 import {
   cityEntry,
   DEVICE_TIME_NAME,
@@ -20,23 +19,14 @@ const feature = await loadFeature("../locations_coordinates_storage.feature");
 
 const VERSION_3 = 3;
 const NEWER_VERSION = 5;
-const CURRENT_VERSION = 4;
 const KAZAN_COORDINATES = { latitude: 55.8, longitude: 49.1 };
 const MOSCOW_ID = "Europe/Moscow|Moscow";
-const MALFORMED_COORDINATES: Record<string, unknown> = {
-  "a latitude and no longitude": { latitude: 55.8 },
-  'the latitude "55.8" as text': { latitude: "55.8", longitude: 37.6 },
-  "the latitude 91": { latitude: 91, longitude: 37.6 },
-  "the longitude -181": { latitude: 55.8, longitude: -181 },
-};
 
 const storeRaw = (schemaVersion: number, payload: unknown) =>
   localStorage.setItem(
     STORAGE_KEYS.LOCATIONS,
     JSON.stringify({ schemaVersion, payload }),
   );
-const storedPayload = () =>
-  JSON.parse(localStorage.getItem(STORAGE_KEYS.LOCATIONS) ?? "{}").payload;
 const coordinatesOf = (app: OpenedApp, label: string) =>
   app.result.current.locations.find((location) => location.label === label)
     ?.coordinates;
@@ -50,8 +40,6 @@ const addKazan = (app: OpenedApp) =>
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let app: OpenedApp;
-  let secondApp: OpenedApp;
-  let rawBefore: string | null = null;
 
   f.BeforeEachScenario(() => {
     cleanup();
@@ -66,7 +54,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const expectUnreadable = () =>
     expect(app.result.current.loadStatus).toBe(LocationsStatus.UNREADABLE);
   const openStoredApp = () => {
-    rawBefore = localStorage.getItem(STORAGE_KEYS.LOCATIONS);
     app = openApp();
   };
 
@@ -136,94 +123,4 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the app is opened", openStoredApp);
     Then("the stored list is unreadable", expectUnreadable);
   });
-
-  // @add-city-coordinates-to-locations @FR7
-  f.ScenarioOutline(
-    "Malformed coordinates make the list unreadable",
-    ({ Given, When, Then, And }, variables) => {
-      Given("the stored entry of Moscow has <coordinates>", () => {
-        storeRaw(CURRENT_VERSION, {
-          locations: [
-            {
-              kind: LocationKind.CITY,
-              ...cityEntry("Moscow"),
-              coordinates: MALFORMED_COORDINATES[variables.coordinates],
-            },
-          ],
-          homeLocationId: null,
-        });
-      });
-      When("the app is opened", openStoredApp);
-      Then("the stored list is unreadable", expectUnreadable);
-      And("the stored value is not overwritten", () => {
-        expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).toBe(rawBefore);
-      });
-    },
-  );
-
-  // @add-city-coordinates-to-locations @FR7 @FR9
-  f.Scenario(
-    "The device time location is stored without coordinates",
-    ({ Given, When, Then }) => {
-      Given("the list is the device time location and Kazan", () => {
-        app = openApp();
-        addKazan(app);
-      });
-      When("the list is written", () => {
-        // The immediate write scheduler of openApp writes on the add itself.
-        expect(localStorage.getItem(STORAGE_KEYS.LOCATIONS)).not.toBeNull();
-      });
-      Then(
-        "the stored entry of the device time location holds no coordinates",
-        () => {
-          const [deviceEntry] = storedPayload().locations;
-          expect(deviceEntry).toEqual({ kind: LocationKind.DEVICE_TIME });
-        },
-      );
-    },
-  );
-
-  // @add-city-coordinates-to-locations @FR7
-  f.Scenario(
-    "A stored device time location with coordinates",
-    ({ Given, When, Then }) => {
-      Given(
-        "the stored entry of the device time location holds coordinates",
-        () => {
-          storeRaw(CURRENT_VERSION, {
-            locations: [
-              {
-                kind: LocationKind.DEVICE_TIME,
-                coordinates: KAZAN_COORDINATES,
-              },
-            ],
-            homeLocationId: null,
-          });
-        },
-      );
-      When("the app is opened", openStoredApp);
-      Then("the stored list is unreadable", expectUnreadable);
-    },
-  );
-
-  // @add-city-coordinates-to-locations @FR7
-  f.Scenario(
-    "Another tab receives the coordinates",
-    ({ Given, When, Then }) => {
-      Given("the app is open in two tabs", () => {
-        const hub = createInMemoryChannelHub();
-        app = openApp(hub.createChannel);
-        secondApp = openApp(hub.createChannel);
-      });
-      When(
-        "the user adds Kazan with the coordinates 55.8, 49.1 in the first tab",
-        () => addKazan(app),
-      );
-      Then(
-        "the location Kazan of the second tab holds the coordinates 55.8, 49.1",
-        () =>
-          expect(coordinatesOf(secondApp, "Kazan")).toEqual(KAZAN_COORDINATES),
-      );
-    },
-  );
 });

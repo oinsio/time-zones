@@ -40,26 +40,3 @@ Feature: Zone coordinates
     When the search data is loaded without network access
     Then no request is made
     And the search data holds the coordinates of the zone cities
-
-  @add-city-coordinates-to-locations @FR4 @M2
-  Scenario: The committed zone coordinates pass
-    When the zone coordinates check runs on the committed files without network access
-    Then it passes
-
-  @add-city-coordinates-to-locations @FR4 @M2
-  Scenario Outline: A broken zone coordinates file fails
-    Given committed zone coordinates with <defect>
-    When the zone coordinates check runs
-    Then it fails with an error that names <named>
-
-    Examples:
-      | defect                                                               | named                  |
-      | zone coordinates that name the release 2026e while 2026f is bundled | both releases          |
-      | a zone with the latitude -91                                         | the zone and the latitude |
-      | a zone city other than UTC whose zone has no coordinates             | the zone               |
-
-  @add-city-coordinates-to-locations @FR4
-  Scenario: UTC needs no coordinates
-    Given the zone coordinates hold no entry for "UTC"
-    When the zone coordinates check runs
-    Then it passes

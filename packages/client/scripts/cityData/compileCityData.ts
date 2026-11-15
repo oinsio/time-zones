@@ -5,7 +5,6 @@
  * Implements FR1, FR2, FR7, FR11, FR12 of add-geonames-city-source (D3, D4, D5, D8).
  * Implements FR1 of add-city-coordinates-to-locations (D2).
  */
-import { COORDINATE_TENTHS_PER_DEGREE } from "../../src/constants/coordinates.ts";
 import { normalizeSearchText } from "../../src/lib/searchText/index.ts";
 import type { ZoneCityRecord } from "../zoneData/extractZoneData.ts";
 import type {
@@ -13,7 +12,6 @@ import type {
   AlternateNamesByCity,
   CityDataset,
   CityNames,
-  CityTuple,
   GeoNamesCityRow,
 } from "./cityDataTypes.ts";
 import {
@@ -23,10 +21,10 @@ import {
   GEONAMES_LICENCE,
   GEONAMES_SOURCE_NAME,
   MIN_POPULATION,
-  NO_RUSSIAN_NAME_MARKER,
 } from "./constants.ts";
 import { markNamesakes, type NamesakeCandidate } from "./markNamesakes.ts";
 import { selectCityNames } from "./selectCityNames.ts";
+import { type CompiledCity, toTuple } from "./toCityTuple.ts";
 import { ZONE_OVERRIDES } from "./zoneOverrides.ts";
 
 export type CityDataInput = {
@@ -37,12 +35,6 @@ export type CityDataInput = {
   timeZoneAliases: Record<string, string>;
   releaseZones: ReadonlySet<string>;
   dumpDate: string;
-};
-
-type CompiledCity = {
-  row: GeoNamesCityRow;
-  names: CityNames;
-  zoneId: string;
 };
 
 /** The cities the data holds: large ones and capitals. */
@@ -109,31 +101,6 @@ function readRegionNames(
   const alternates = input.alternateNames.get(admin1.geonameId) ?? [];
   const names = selectCityNames(admin1, alternates, {});
   return { en: admin1.name, ru: names.ru };
-}
-
-function toTenths(degrees: number): number {
-  // `+ 0` turns -0 into 0, so the file never holds "-0".
-  return Math.round(degrees * COORDINATE_TENTHS_PER_DEGREE) + 0;
-}
-
-function toTuple(
-  city: CompiledCity,
-  zoneIndex: number,
-  regionIndex: number | undefined,
-): CityTuple {
-  const russian =
-    city.names.ru === city.names.en ? NO_RUSSIAN_NAME_MARKER : city.names.ru;
-  const base = [
-    city.row.geonameId,
-    city.names.en,
-    russian,
-    city.row.countryCode,
-    zoneIndex,
-    city.row.population,
-    toTenths(city.row.latitude),
-    toTenths(city.row.longitude),
-  ] as const;
-  return regionIndex === undefined ? [...base] : [...base, regionIndex];
 }
 
 export function compileCityData(input: CityDataInput): CityDataset {

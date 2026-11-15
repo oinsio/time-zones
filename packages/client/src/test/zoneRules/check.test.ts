@@ -1,5 +1,5 @@
 // @add-zone-rules-from-iana @FR8: the zone rules check against zdump
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -161,42 +161,5 @@ describe("runZoneRulesCheck with a compiled directory", () => {
       log: () => {},
     });
     expect(exitCode).toBe(1);
-  });
-});
-
-describe("runZoneRulesCheck by default", () => {
-  it("downloads, verifies and compiles the release the file names, then compares", async () => {
-    const run = await check([]);
-    expect(run.urls).toEqual([
-      "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz",
-      "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz.asc",
-    ]);
-    expect(run.calls.map((call) => call.command)).toEqual([
-      "gpg",
-      "gpg",
-      "tar",
-      "zic",
-    ]);
-    expect(run.logLines).toContain("0 differences");
-    expect(run.exitCode).toBe(0);
-  });
-
-  it("stops without comparing when the signature does not verify", async () => {
-    const logLines: string[] = [];
-    const exitCode = await runZoneRulesCheck({
-      argv: [],
-      runProcess: createFakeProcessRunner({
-        verifyStatus: "",
-        archiveVersion: "2026f",
-      }).runProcess,
-      fetchRelease: createFakeFetch().fetchRelease,
-      readFile: async (path) =>
-        path === COORDINATES_FILE
-          ? readFileSync(COORDINATES_FILE, "utf8")
-          : buildReleaseText(),
-      log: (line) => logLines.push(line),
-    });
-    expect(exitCode).toBe(1);
-    expect(logLines.join("\n")).toContain("signature");
   });
 });

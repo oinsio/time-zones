@@ -1,5 +1,5 @@
 import { DEVICE_TIME_ZONE_FALLBACK_ID } from "@/constants";
-import { type Coordinates, parseCoordinates } from "./coordinates";
+import type { Coordinates } from "./coordinates";
 import {
   reduceAddDeviceTimeLocation,
   withDeviceTimeZone,
@@ -10,10 +10,10 @@ import {
   LocationCommandType,
   LocationErrorCode,
 } from "./locationCommands";
-import { buildLocationId } from "./locationId";
-import { LocationKind } from "./locationKind";
+import type { LocationKind } from "./locationKind";
 import type { MeetingRange } from "./meetingRange";
 import { moveLocationInList } from "./moveLocation";
+import { reduceAddLocation } from "./reduceAddLocation";
 import { reduceHomeLocation } from "./reduceHomeLocation";
 import { reduceLocationCoordinates } from "./reduceLocationCoordinates";
 import {
@@ -114,29 +114,8 @@ function reduceCommand(
   command: LocationCommand,
 ): LocationsReduceResult {
   switch (command.type) {
-    case LocationCommandType.ADD_LOCATION: {
-      const timeZoneId = canonicalizeTimeZoneId(command.timeZoneId);
-      if (timeZoneId === undefined) {
-        return failWith(LocationErrorCode.UNKNOWN_TIME_ZONE);
-      }
-      const id = buildLocationId(timeZoneId, command.label);
-      if (state.locations.some((location) => location.id === id)) {
-        return failWith(LocationErrorCode.DUPLICATE_LOCATION);
-      }
-      const coordinates = parseCoordinates(command.coordinates);
-      const added: Location = {
-        id,
-        kind: LocationKind.CITY,
-        timeZoneId,
-        label: command.label,
-        countryCode: command.countryCode,
-        coordinates,
-      };
-      return {
-        ok: true,
-        state: { ...state, locations: [...state.locations, added] },
-      };
-    }
+    case LocationCommandType.ADD_LOCATION:
+      return reduceAddLocation(state, command);
     case LocationCommandType.REMOVE_LOCATION: {
       if (!state.locations.some((location) => location.id === command.id)) {
         return failWith(LocationErrorCode.LOCATION_NOT_FOUND);

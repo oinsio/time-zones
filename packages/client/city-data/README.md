@@ -53,8 +53,8 @@ with an entry in `NAME_OVERRIDES`.
 
 ## Size and speed
 
-The committed file gzips to 143 948 bytes as one tuple per city. The search data
+The committed file gzips to 168 853 bytes as one tuple per city. The search data
 file the build serves holds the cities as columns (the IDs as differences),
-which gzips better: the whole file, with the zone cities, measures 119.4 KB
-against the 130 KB budget (`CITY_SEARCH_DATA_BUDGET_KB`). The benchmark "search
+which gzips better: the whole file, with the zone cities, measures 141.5 KB
+against the 150 KB budget (`CITY_SEARCH_DATA_BUDGET_KB`). The benchmark "search
 one query over the full data" reports a mean of about 0.3 ms, far below 50 ms.

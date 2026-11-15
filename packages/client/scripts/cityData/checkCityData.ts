@@ -4,12 +4,9 @@
  * Implements FR12, M1, M4 of add-geonames-city-source (D8).
  * Implements FR1, FR4 of add-city-coordinates-to-locations (D2, D4).
  */
-import {
-  COORDINATE_TENTHS_PER_DEGREE,
-  MAX_LATITUDE_DEGREES,
-  MAX_LONGITUDE_DEGREES,
-} from "../../src/constants/coordinates.ts";
 import type { ZoneCityRecord } from "../zoneData/extractZoneData.ts";
+import { checkCoordinates } from "./checkCityCoordinates.ts";
+import { checkRegions } from "./checkCityRegions.ts";
 import type { CityDataset } from "./cityDataTypes.ts";
 import {
   COUNTRY_CODE_PATTERN,
@@ -20,13 +17,10 @@ import {
   NO_RUSSIAN_NAME_MARKER,
   PERCENT_FACTOR,
 } from "./constants.ts";
-import { findNamesakes, type NamesakeCandidate } from "./markNamesakes.ts";
+import { describeCity } from "./describeCity.ts";
 
 const MIN_CITY_TUPLE_LENGTH = 6;
 const MAX_CITY_TUPLE_LENGTH = 9;
-const MAX_LATITUDE_TENTHS = MAX_LATITUDE_DEGREES * COORDINATE_TENTHS_PER_DEGREE;
-const MAX_LONGITUDE_TENTHS =
-  MAX_LONGITUDE_DEGREES * COORDINATE_TENTHS_PER_DEGREE;
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -67,36 +61,6 @@ function checkFormat(value: unknown): string | undefined {
   return hasShape
     ? undefined
     : "The city data does not have the format of design D5";
-}
-
-function isTenthsWithin(value: unknown, limit: number): boolean {
-  return Number.isInteger(value) && Math.abs(value as number) <= limit;
-}
-
-function checkCoordinates(
-  tuple: unknown[],
-  latitude: unknown,
-  longitude: unknown,
-) {
-  const errors: string[] = [];
-  if (latitude === undefined || longitude === undefined) {
-    return [`The city ${describeCity(tuple)} has no coordinates`];
-  }
-  if (!isTenthsWithin(latitude, MAX_LATITUDE_TENTHS)) {
-    errors.push(
-      `The city ${describeCity(tuple)} has the latitude ${String(latitude)}`,
-    );
-  }
-  if (!isTenthsWithin(longitude, MAX_LONGITUDE_TENTHS)) {
-    errors.push(
-      `The city ${describeCity(tuple)} has the longitude ${String(longitude)}`,
-    );
-  }
-  return errors;
-}
-
-function describeCity(tuple: unknown[]): string {
-  return `${String(tuple[1])} (${String(tuple[0])})`;
 }
 
 function checkCity(
@@ -170,59 +134,6 @@ function checkRepeatedIds(cities: unknown[][]): string[] {
     if (seen.has(id))
       errors.push(`The GeoNames ID ${String(id)} appears twice`);
     seen.add(id);
-  }
-  return errors;
-}
-
-function checkRegions(
-  dataset: CityDataset,
-  zoneCities: ZoneCityRecord[],
-): string[] {
-  const candidates: NamesakeCandidate[] = dataset.cities.map((city) => ({
-    id: String(city[0]),
-    countryCode: city[3],
-    names: {
-      en: city[1],
-      ru: city[2] === NO_RUSSIAN_NAME_MARKER ? city[1] : city[2],
-    },
-    region: undefined,
-  }));
-  for (const zoneCity of zoneCities) {
-    if (zoneCity.countryCode === "") continue;
-    candidates.push({
-      id: zoneCity.timeZoneId,
-      countryCode: zoneCity.countryCode,
-      names: zoneCity.names,
-      region: undefined,
-    });
-  }
-  const namesakeIds = new Set(
-    findNamesakes(candidates).map((candidate) => candidate.id),
-  );
-  const errors: string[] = [];
-  for (const city of dataset.cities) {
-    const isNamesake = namesakeIds.has(String(city[0]));
-    const hasRegion = city[8] !== undefined;
-    if (isNamesake && !hasRegion)
-      errors.push(
-        `The city ${describeCity(city)} is a namesake without a region`,
-      );
-    if (!isNamesake && hasRegion)
-      errors.push(
-        `The city ${describeCity(city)} has a region but is not a namesake`,
-      );
-  }
-  for (const zoneCity of zoneCities) {
-    const isNamesake = namesakeIds.has(zoneCity.timeZoneId);
-    const hasRegion = zoneCity.timeZoneId in dataset.zoneCityRegions;
-    if (isNamesake && !hasRegion)
-      errors.push(
-        `The zone city ${zoneCity.timeZoneId} is a namesake without a region`,
-      );
-  }
-  for (const zoneId of Object.keys(dataset.zoneCityRegions)) {
-    if (!namesakeIds.has(zoneId))
-      errors.push(`The zone city ${zoneId} has a region but is not a namesake`);
   }
   return errors;
 }
