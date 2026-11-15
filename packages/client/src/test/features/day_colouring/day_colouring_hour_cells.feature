@@ -8,7 +8,7 @@ Feature: Day colouring of the hour cells
     When the hour cells of Almaty, Moscow, Kolkata and New York are presented
     Then every cell of every row is plain
 
-  @add-day-colouring-setting @FR8 @FR11 @FR14
+  @add-day-colouring-setting @FR8 @FR11
   Scenario Outline: Half of the hour decides
     Given the day colouring is Working hours and the reference zone is "Asia/Almaty"
     And the reference day is 2026-03-09
@@ -24,7 +24,7 @@ Feature: Day colouring of the hour cells
       | 10:15-18:00 | Kolkata   | 10-17   |
       | 10:00-18:00 | Kathmandu | 9-16    |
 
-  @add-day-colouring-setting @FR8 @FR15
+  @add-day-colouring-setting @FR8 @FR11
   Scenario: Weekend cells and Friday cells across the reference day
     Given the day colouring is Working hours with 10:00-18:00 and the reference zone is "Europe/Moscow"
     And the reference day is 2026-03-14
@@ -32,7 +32,7 @@ Feature: Day colouring of the hour cells
     Then no Moscow cell is working
     And only column 0 of New York is working
 
-  @add-day-colouring-setting @FR8 @FR16
+  @add-day-colouring-setting @FR8 @FR11
   Scenario: Hour cells on a clock change day
     Given the day colouring is Working hours with 10:00-18:00 and the reference zone is "Asia/Almaty"
     And the reference day is 2026-04-24

@@ -1,4 +1,4 @@
-// Verifies FR2, FR3, FR8, FR9, FR10, FR13, FR15, FR16 of add-day-colouring-setting.
+// Verifies FR2, FR3, FR8, FR9, FR10 of add-day-colouring-setting.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
@@ -126,7 +126,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
-  // @add-day-colouring-setting @FR8 @FR13
+  // @add-day-colouring-setting @FR8 @FR10
   f.ScenarioOutline(
     "Working-time stops on a Monday",
     ({ Given, And, When, Then }, variables) => {
@@ -146,7 +146,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @add-day-colouring-setting @FR8 @FR15
+  // @add-day-colouring-setting @FR8 @FR10
   f.Scenario(
     "Friday still works where Saturday has not begun",
     ({ Given, And, When, Then }) => {
@@ -165,7 +165,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @add-day-colouring-setting @FR8 @FR16
+  // @add-day-colouring-setting @FR8 @FR10
   f.Scenario(
     "Working time after a clock change",
     ({ Given, And, When, Then }) => {

@@ -21,6 +21,7 @@ import { getDayPeriodMarkers } from "./dayPeriodMarkers";
  * minutes, 12-hour marker, midnight month over day). Cached per day, language
  * and hour format so a minute tick re-presents nothing.
  * Implements FR3, FR4, FR5, NFR-P1 of add-grid-hour-cells-and-hour-frame (D2).
+ * Implements FR11, FR12, NFR-P1 of add-day-colouring-setting (D4).
  */
 
 export type PresentedHourCell = {

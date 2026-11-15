@@ -51,7 +51,7 @@ Feature: Day colouring of the day tracks
     When working time is read for Moscow at 2026-03-14T09:00:00Z
     Then it is not working time
 
-  @add-day-colouring-setting @FR8 @FR13
+  @add-day-colouring-setting @FR8 @FR10
   Scenario Outline: Working-time stops on a Monday
     Given the day colouring is Working hours with <hours>
     And the device time zone is "Asia/Almaty"
@@ -67,7 +67,7 @@ Feature: Day colouring of the day tracks
       | 10:00-18:00 | "Moscow"   | 0.5 non-working, 0.5 working, 0.833333 working, 0.833333 non-working              |
       | 10:00-18:00 | "New York" | 0.791667 non-working, 0.791667 working                                             |
 
-  @add-day-colouring-setting @FR8 @FR15
+  @add-day-colouring-setting @FR8 @FR10
   Scenario: Friday still works where Saturday has not begun
     Given the day colouring is Working hours with 10:00-18:00
     And the device time zone is "Europe/Moscow"
@@ -77,7 +77,7 @@ Feature: Day colouring of the day tracks
     Then the colour stops of "Moscow" are "0 non-working"
     And the colour stops of "New York" are "0.041667 working, 0.041667 non-working"
 
-  @add-day-colouring-setting @FR8 @FR16
+  @add-day-colouring-setting @FR8 @FR10
   Scenario: Working time after a clock change
     Given the day colouring is Working hours with 10:00-18:00
     And the device time zone is "Asia/Almaty"

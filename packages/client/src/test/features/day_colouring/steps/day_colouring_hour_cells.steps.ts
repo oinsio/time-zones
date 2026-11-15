@@ -1,4 +1,4 @@
-// Verifies FR8, FR9, FR11, FR14, FR15, FR16 of add-day-colouring-setting.
+// Verifies FR8, FR9, FR11 of add-day-colouring-setting.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
@@ -79,7 +79,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
-  // @add-day-colouring-setting @FR8 @FR11 @FR14
+  // @add-day-colouring-setting @FR8 @FR11
   f.ScenarioOutline(
     "Half of the hour decides",
     ({ Given, And, When, Then }, variables) => {
@@ -108,7 +108,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @add-day-colouring-setting @FR8 @FR15
+  // @add-day-colouring-setting @FR8 @FR11
   f.Scenario(
     "Weekend cells and Friday cells across the reference day",
     ({ Given, And, When, Then }) => {
@@ -136,7 +136,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @add-day-colouring-setting @FR8 @FR16
+  // @add-day-colouring-setting @FR8 @FR11
   f.Scenario(
     "Hour cells on a clock change day",
     ({ Given, And, When, Then }) => {

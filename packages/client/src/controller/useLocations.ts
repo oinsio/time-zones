@@ -45,6 +45,7 @@ const MISSING_PROVIDER_MESSAGE =
  * Passes the city labels in the interface language: Implements FR1, FR2, FR4,
  * NFR-P1 of show-city-labels-in-interface-language (D3).
  * Passes the zone label: Implements FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
+ * Passes the day colouring and working hours: Implements FR3, FR12 of add-day-colouring-setting (D4).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);

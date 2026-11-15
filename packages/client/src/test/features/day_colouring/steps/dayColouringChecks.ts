@@ -1,4 +1,4 @@
-// Implements FR8, FR9, FR13 of add-day-colouring-setting: shared checks of the day colouring steps.
+// Implements FR8, FR9, FR10, FR11 of add-day-colouring-setting: shared checks of the day colouring steps.
 import { expect } from "vitest";
 import { DayColour, type DayColourStop } from "@/presenter";
 import type { createTimeSelectionWorld } from "../../time_selection/steps/timeSelectionWorld";
