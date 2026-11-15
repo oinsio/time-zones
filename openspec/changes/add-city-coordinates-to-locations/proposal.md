@@ -18,6 +18,7 @@ Audience: every user of the "Time of day" day colouring, after the follow-up cha
 - Unchanged: day periods, day colouring, colours, the settings page, the interface texts.
 - Glossary (`docs/glossary/locations.md`), new term: **Coordinates** — the latitude and longitude of a place in decimal degrees, north and east positive, rounded to 0.1°; carried by a city record and by a city location. *Never:* position (a list position), geolocation (the browser feature), lat/lng in names.
 - Glossary (`docs/glossary/search.md`), new term: **Zone coordinates** — the committed table of the coordinates of each zone's principal place, compiled from the IANA zone table; the coordinates of zone cities.
+- Glossary (`docs/glossary/zone-rules.md`), new term: **Zone table** — the `zone.tab` file of the IANA release archive that lists each zone's country code and the coordinates of its principal place; *Code:* `ZONE_TABLE_FILE`, `parseZoneTable`. *Never:* zone abbreviation table (that table maps abbreviations).
 - Glossary, changed terms: **City record** (carries coordinates, absent for UTC), **City data** (GeoNames cities carry coordinates), **Location** (a city location may carry coordinates; they are not part of its identity), **Location list** (schema version 4).
 - ADR-0006 gets a status note (the record format gains optional coordinates) and ADR-0010 one (the document schema version becomes 4); both are delivered as a handoff patch, because `docs/adr/` is outside what the implement stage writes.
 
