@@ -178,7 +178,8 @@ A combined run of `hourStrip.ts`, `dayTrackGradient.ts` and `dayTrack.ts` hit th
 - Impact: A ticked task is not done and a spec requirement is not met. The 1024 px baselines record a page without the new group, so a regression that drops or breaks the colouring group at 1024 px stays within tolerance and is not caught. NFR-R2 is only half delivered.
 - Fix: From `packages/client`, run `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts src/test/features/settings/settings_e2e.feature --grep "Approved screenshots of the settings" --update-snapshots=all` once. Read the four new 1024 px PNGs and confirm the Colouring row with Time of day checked follows View and no working hours row is shown. Then run the same command again without the flag.
 - Fix risk: `--update-snapshots=all` also rewrites the 375 px baselines of that scenario. They should come out pixel-identical, but read them to make sure. The scope stays limited to that one outline, so no other baseline changes.
-- Status: open
+- Status: fixed
+- Resolution: re-approved the four 1024 px settings baselines (chromium and mobile-chrome, light and dark) with --update-snapshots=all scoped to that outline; only those four PNGs changed, the Colouring row with Time of day checked follows View, and the scenario passes again without the flag (8 passed).
 
 ### R2 — WARNING — Confirming the working hours with Enter drops keyboard focus to the page body
 - Location: `packages/client/src/app/settings/WorkingHoursGroup.tsx:42`
@@ -187,7 +188,8 @@ A combined run of `hourStrip.ts`, `dayTrackGradient.ts` and `dayTrack.ts` hit th
 - Impact: After every successful Enter, a keyboard or screen-reader user loses their place. The next Tab starts from the top of the page instead of moving to the end field, and the screen reader announces nothing about where focus went. No test catches it: `WorkingHoursGroup.test.tsx` and `settings_day_colouring_e2e.feature` never check focus after a saved Enter.
 - Fix: Reset the typed texts without remounting. In `SettingsTimeRangeGroup`, keep the last given `startText`/`endText` in state and reset `typedStart`/`typedEnd` during render when the given texts change (React's "adjusting state when a prop changes" pattern). Let `onConfirm` return whether the pair was accepted, and reset the typed texts to the given ones when it was, so an equivalent entry such as `9:00` → `09:00` with an unchanged store still shows canonical text (UX5). In `WorkingHoursGroup`, drop `savedCount` and the inner `key`. Replace the outer `key` with a reset of `refusal` when the stored range or hour format changes. Add a `WorkingHoursGroup.test.tsx` case asserting that the start field still has focus after `9:07{Enter}`. Add a step "the field "Start of working hours" keeps the focus" to the existing Enter scenario in `settings_day_colouring_e2e.feature`, where `bdd-unit.md` puts focus management.
 - Fix risk: The current remount also covers "a change from another tab or a new hour format resets the texts" (`WorkingHoursGroup.test.tsx`, "Another tab changes the working hours"), so the prop-change reset must keep that behaviour and also clear the hint. `SettingsTimeRangeGroup`'s `onConfirm` signature changes, but it has no other caller yet. The Esc and blur paths are unchanged.
-- Status: open
+- Status: fixed
+- Resolution: removed the savedCount and stored-range keys; SettingsTimeRangeGroup resets typed texts when the given texts change and onConfirm now returns whether the pair was accepted, WorkingHoursGroup clears the hint when the stored range or hour format changes. Covered by WorkingHoursGroup.test.tsx 'keep the focus ... after a saved Enter' and 'canonical text again', and the e2e scenario 'A saved range keeps the focus in the field'.
 
 ### R3 — WARNING — `formatWorkingHoursTime` re-implements `formatWallClockTime`
 - Location: `packages/client/src/presenter/workingHours.ts:19`
@@ -196,7 +198,8 @@ A combined run of `hourStrip.ts`, `dayTrackGradient.ts` and `dayTrack.ts` hit th
 - Impact: The project now has two formatters for a wall-clock time in the hour format. A future change to how wall times are written, such as a marker or a separator, would reach the hint, the date bar and the clock-change note but not the working hours fields. The fields could then show a text the wall-time hint writes differently, breaking FR5's "same texts as the wall-time input".
 - Fix: Keep the design-named `formatWorkingHoursTime` (D5), but make its body `return formatWallClockTime(Temporal.PlainTime.from(wallTime), language, hourFormat);`. Drop the `EPOCH_DATE` constant and the direct `getDateTimeFormatter` import. The existing `workingHours.test.ts` cases, including "build no formatter on a repeated call", stay as they are.
 - Fix risk: None found. Both paths use the same cached UTC `LOCAL_TIME` formatter on the same milliseconds since midnight, so the output texts are identical. `formatWallClockTime` drops seconds, which canonical `HH:MM` never has.
-- Status: open
+- Status: fixed
+- Resolution: formatWorkingHoursTime now calls formatWallClockTime; EPOCH_DATE and the direct formatter import are gone; presenter/workingHours.test.ts still passes, mutation 100%.
 
 ### R4 — WARNING — New `workingTime.ts` and its test exceed the 200-line file limit
 - Location: `packages/client/src/model/workingTime.ts:1`
@@ -205,7 +208,8 @@ A combined run of `hourStrip.ts`, `dayTrackGradient.ts` and `dayTrack.ts` hit th
 - Impact: This breaks a `CLAUDE.md` rule on the central new model file. The test is 6 lines from the hard cap, so the next case added for this owner (for example the full-day-span mutant noted under Mutation) would break the cap.
 - Fix: Move the span computation into a new `src/model/workingTimeSpans.ts`, exporting `computeWorkingTimeSpans(timeZoneId, day, workingHours, clockChanges)`, and have `workingTime.ts` import it within the same module. `src/model/index.ts` keeps exporting only from `./workingTime`. Split `workingTime.test.ts` the same way into `workingTime.spans.test.ts` (spans and stops) and `workingTime.test.ts` (days, `isWorkingTime`, flags, memoization).
 - Fix risk: This is a pure move with no behaviour change. The memo stays in `workingTime.ts`, so the identity tests are unaffected. Imports between files inside `src/model/` are allowed, since the rule restricts imports from sibling modules, not from files within one module. Re-run `npx vitest run src/model/workingTime.test.ts` and the new test file one at a time.
-- Status: open
+- Status: fixed
+- Resolution: moved isWorkingDay/isWorkingTime to model/workingDay.ts and the span computation to model/workingTimeSpans.ts (computeWorkingTimeSpans); workingTime.ts (134 lines) keeps the memo and re-exports, the test is split into workingTime.test.ts (146) and workingTime.spans.test.ts (182). Mutation: workingDay 100%, workingTimeSpans 100%, workingTime 98.6% (the known survivor). I left the three over-200 e2e step/world files named in the Problem as they are under the 300 hard cap.
 
 ### R5 — SUGGESTION — Traceability comments in `views/shared/index.ts` now label the wrong exports
 - Location: `packages/client/src/views/shared/index.ts:19`
@@ -214,7 +218,8 @@ A combined run of `hourStrip.ts`, `dayTrackGradient.ts` and `dayTrack.ts` hit th
 - Impact: The traceability grep from task 10.3 attributes `getTypedTimeFieldText` to two unrelated changes and finds no link on the day colour exports in this index.
 - Fix: Put `// Implements FR9, FR10, NFR-A3 of add-day-colouring-setting (D4).` above the `DAY_COLOUR_*` export, and delete the two misplaced comments above `getTypedTimeFieldText`, leaving its own `add-day-colouring-setting` line.
 - Fix risk: none
-- Status: open
+- Status: fixed
+- Resolution: put the add-day-colouring-setting traceability comment above the DAY_COLOUR_* export and removed the two misplaced comments above getTypedTimeFieldText.
 
 ## Verdict
 
