@@ -12,12 +12,12 @@ Audience: every user of the "Time of day" day colouring, after the follow-up cha
 
 ## What Changes
 
-- MODIFIED `city-data`: every GeoNames city of the committed city data carries its coordinates, rounded to 0.1°. A second committed file, the zone coordinates, holds the coordinates of the principal place of every IANA zone, read from the zone tables (`zone.tab`, `zone1970.tab`) of the signed release archive that the zone rules compiler already downloads. Both files are checked without network access.
+- MODIFIED `city-data`: every GeoNames city of the committed city data carries its coordinates, rounded to 0.1°. A second committed file, the zone coordinates, holds the coordinates of the principal place of every IANA zone, read from the zone table (`zone.tab`) of the signed release archive that the zone rules compiler already downloads. Both files are checked without network access.
 - MODIFIED `location-search`: a city record carries coordinates — from GeoNames for a GeoNames city, from the zone coordinates for a zone city. The UTC record has none. The search data file grows from at most 130 KB to at most 150 KB gzipped. Search results look and order exactly as today.
 - MODIFIED `locations`: a city location added from the search keeps the coordinates of its city record, and they are stored with the list. A city location stored before this change gains its coordinates once the city data is loaded. The device time location and UTC have no coordinates. Location identity, order and every visible row stay as they are.
 - Unchanged: day periods, day colouring, colours, the settings page, the stored document version, the interface texts.
 - Glossary (`docs/glossary/locations.md`), new term: **Coordinates** — the latitude and longitude of a place in decimal degrees, north and east positive, rounded to 0.1°; carried by a city record and by a city location. *Never:* position (a list position), geolocation (the browser feature), lat/lng in names.
-- Glossary (`docs/glossary/search.md`), new term: **Zone coordinates** — the committed table of the coordinates of each zone's principal place, compiled from the IANA zone tables; the coordinates of zone cities.
+- Glossary (`docs/glossary/search.md`), new term: **Zone coordinates** — the committed table of the coordinates of each zone's principal place, compiled from the IANA zone table; the coordinates of zone cities.
 - Glossary, changed terms: **City record** (carries coordinates, absent for UTC), **City data** (GeoNames cities carry coordinates), **Location** (a city location may carry coordinates; they are not part of its identity).
 - ADR-0006 gets a status note: the record format gains optional coordinates.
 
@@ -61,8 +61,8 @@ None.
 ### Functional
 
 - FR1: Every GeoNames city of the committed city data SHALL carry the latitude and longitude that GeoNames gives it, rounded to 0.1°: latitude from −90 to 90, longitude from −180 to 180, north and east positive.
-- FR2: A committed zone coordinates file SHALL hold, for every zone listed in the zone tables of the IANA release archive, the coordinates of its principal place rounded to 0.1°, and SHALL name the release it was read from. The zone rules compile command SHALL write it from the archive whose signature it verified; building, testing and CI SHALL NOT use the network for it.
-- FR3: Every zone city of the search data except UTC SHALL have coordinates. A zone city whose zone the zone tables do not list SHALL take the coordinates of a named override; without one the check fails.
+- FR2: A committed zone coordinates file SHALL hold, for every zone listed in the zone table (`zone.tab`) of the IANA release archive, the coordinates of its principal place rounded to 0.1°, and SHALL name the release it was read from. The zone rules compile command SHALL write it from the archive whose signature it verified; building, testing and CI SHALL NOT use the network for it.
+- FR3: Every zone city of the search data except UTC SHALL have coordinates. A zone city whose zone the zone table does not list SHALL take the coordinates of a named override; without one the check fails.
 - FR4: The city data check SHALL fail, naming the city, when a GeoNames city has no coordinates or coordinates out of range. The zone rules check SHALL fail, naming the zone, when the zone coordinates file is malformed, names another release than the bundled one, holds coordinates out of range, or leaves a zone city other than UTC without coordinates.
 - FR5: A city record SHALL carry coordinates: those of the city data for a GeoNames city, those of the zone coordinates for a zone city. The UTC record SHALL carry none. A result matched by a zone abbreviation is a zone city and carries the zone's coordinates.
 - FR6: Adding a location from a search result or a suggestion SHALL give the location the coordinates of that city record. Coordinates SHALL NOT be part of the location identity: adding a namesake of the same zone stays a duplicate.
@@ -119,7 +119,7 @@ No changes.
 ## Success Metrics
 
 - M1: 100% of the GeoNames cities of the committed city data have coordinates in range (6 102 of 6 102 in the dump of 2026-11-14).
-- M2: 100% of the zone cities of the search data except UTC have coordinates.
+- M2: 100% of the zone cities of the search data except UTC have coordinates (418 of 418 with the release 2026f, whose `zone.tab` lists exactly the zone cities).
 - M3: 10 of 10 sample cities are within 0.1° of their published coordinates: Moscow 55.8, 37.6; Kazan 55.8, 49.1; Almaty 43.3, 76.9; New York 40.7, −74.0; Sydney −33.9, 151.2; Quito −0.2, −78.5; Reykjavik 64.1, −21.9; Murmansk 69.0, 33.1; Auckland −36.8, 174.8; Honolulu 21.3, −157.9.
 - M4: The built search data file is at most 150 KB gzipped and the initial JavaScript at most 150 KB gzipped.
 - M5: 0 approved screenshots change; 0 axe-core violations in the existing scenarios.
@@ -127,4 +127,4 @@ No changes.
 
 ## Open Questions
 
-- Q1: Is 150 KB gzipped an acceptable budget for the search data? The estimate for 0.1° coordinates of 6 102 cities is about 20 KB gzipped on top of 119.4 KB. The design names the fallback if the measured size is higher (a coarser step for the GeoNames cities), which needs no spec change as long as M3 holds.
+None. Decided by the owner: the search data budget becomes 150 KB gzipped. The design names the fallback if the measured size is higher.
