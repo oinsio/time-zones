@@ -1,4 +1,5 @@
 // Verifies FR15, FR16, NFR-P2 of add-locations-via-search (D8); FR14 of add-geonames-city-source (D5).
+// Verifies FR5 of add-city-coordinates-to-locations (D2, D5): coordinates are decoded from tenths.
 import zoneCities, { cityData } from "virtual:zone-cities";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -122,12 +123,14 @@ describe("parse city search data", () => {
       countryCodes: tuples.map((tuple) => tuple[3]),
       zoneIndexes: tuples.map((tuple) => tuple[4]),
       populations: tuples.map((tuple) => tuple[5]),
-      regionIndexes: tuples.map((tuple) => tuple[6] ?? -1),
+      latitudeTenths: tuples.map((tuple) => tuple[6]),
+      longitudeTenths: tuples.map((tuple) => tuple[7]),
+      regionIndexes: tuples.map((tuple) => tuple[8] ?? -1),
     };
   };
   const validTuples: Tuple[] = [
-    [551487, "Kazan", "Казань", "RU", 0, 1243500],
-    [4250542, "Springfield", 0, "US", 0, 114394, 0],
+    [551487, "Kazan", "Казань", "RU", 0, 1243500, 558, 491],
+    [4250542, "Springfield", 0, "US", 0, 114394, -2, -785, 0],
   ];
   const validCityData = {
     zones: ["Europe/Moscow"],
@@ -153,7 +156,7 @@ describe("parse city search data", () => {
     });
 
   it("should accept valid zone cities and city data", () => {
-    expect(parse().zoneCities).toEqual([validRecord]);
+    expect(parse().zoneCities).toEqual([{ ...validRecord }]);
   });
 
   it("should expand a city tuple with names, zone and no region", () => {
@@ -163,7 +166,49 @@ describe("parse city search data", () => {
       countryCode: "RU",
       timeZoneId: "Europe/Moscow",
       population: 1243500,
+      coordinates: { latitude: 55.8, longitude: 49.1 },
     });
+  });
+
+  // @add-city-coordinates-to-locations @FR5
+  it("should decode negative tenths of a southern and western city", () => {
+    expect(parse().cityData.cities[1]?.coordinates).toEqual({
+      latitude: -0.2,
+      longitude: -78.5,
+    });
+  });
+
+  it.each([
+    [
+      "tenths",
+      { latitudeTenths: 558, longitudeTenths: 376 },
+      { latitude: 55.8, longitude: 37.6 },
+    ],
+    ["no tenths", {}, undefined],
+  ])(
+    "should decode the zone city coordinates from %s",
+    (_label, tenths, coordinates) => {
+      const parsed = parseCitySearchData({
+        zoneCities: [{ ...validRecord, ...tenths }],
+        cityData: validCityData,
+      });
+      expect(parsed.zoneCities[0]?.coordinates).toEqual(coordinates);
+      expect(parsed.zoneCities[0]).not.toHaveProperty("latitudeTenths");
+    },
+  );
+
+  it.each([
+    ["a latitude without a longitude", { latitudeTenths: 1 }],
+    ["a longitude without a latitude", { longitudeTenths: 1 }],
+    ["a latitude of 91 degrees", { latitudeTenths: 910, longitudeTenths: 0 }],
+    ["text tenths", { latitudeTenths: "1", longitudeTenths: 0 }],
+  ])("should reject a zone city with %s", (_label, tenths) => {
+    expect(() =>
+      parseCitySearchData({
+        zoneCities: [{ ...validRecord, ...tenths }],
+        cityData: validCityData,
+      }),
+    ).toThrow(INVALID_RECORDS_MESSAGE);
   });
 
   it("should expand a Russian name of 0 to the English name and a region index to its names", () => {
@@ -205,11 +250,30 @@ describe("parse city search data", () => {
       "a non-numeric ID difference",
       { columns: { ...validCityData.columns, idDifferences: ["x", 1] } },
     ],
-    ["a bad tuple", { cities: [[1, 5, "А", "RU", 0, 1]] }],
-    ["a bad Russian name", { cities: [[1, "A", 5, "RU", 0, 1]] }],
-    ["a zone index out of range", { cities: [[1, "A", "А", "RU", 9, 1]] }],
-    ["a region index out of range", { cities: [[1, "A", "А", "RU", 0, 1, 9]] }],
-    ["a non-numeric population", { cities: [[1, "A", "А", "RU", 0, "1"]] }],
+    ["a bad tuple", { cities: [[1, 5, "А", "RU", 0, 1, 1, 1]] }],
+    ["a bad Russian name", { cities: [[1, "A", 5, "RU", 0, 1, 1, 1]] }],
+    [
+      "a zone index out of range",
+      { cities: [[1, "A", "А", "RU", 9, 1, 1, 1]] },
+    ],
+    [
+      "a region index out of range",
+      { cities: [[1, "A", "А", "RU", 0, 1, 1, 1, 9]] },
+    ],
+    [
+      "a non-numeric population",
+      { cities: [[1, "A", "А", "RU", 0, "1", 1, 1]] },
+    ],
+    [
+      "a latitude of 91 degrees",
+      { cities: [[1, "A", "А", "RU", 0, 1, 910, 0]] },
+    ],
+    [
+      "a longitude of -181 degrees",
+      { cities: [[1, "A", "А", "RU", 0, 1, 0, -1810]] },
+    ],
+    ["a non-numeric latitude", { cities: [[1, "A", "А", "RU", 0, 1, "1", 0]] }],
+    ["a missing longitude", { cities: [[1, "A", "А", "RU", 0, 1, 1]] }],
     ["a bad zones list", { zones: [1] }],
     ["a bad region", { regions: [["Illinois"]] }],
     ["a non-array regions list", { regions: {} }],

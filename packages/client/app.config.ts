@@ -63,7 +63,7 @@ export const ZONE_RULES_ASSET_BUDGET_KB = 22;
  * city data), in KB, measured by `check-bundle-size.mjs`.
  * Implements NFR-P1, M2 of add-geonames-city-source (D1).
  */
-export const CITY_SEARCH_DATA_BUDGET_KB = 130;
+export const CITY_SEARCH_DATA_BUDGET_KB = 150;
 
 /**
  * The committed zone rules release, relative to the package root; read by the

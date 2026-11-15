@@ -77,11 +77,9 @@ export function checkZoneCoordinates(
     );
   }
   errors.push(...checkRanges(document.zones));
+  const coordinatedZoneIds = new Set(Object.keys(document.zones));
   for (const { timeZoneId } of zoneCities) {
-    if (
-      timeZoneId !== UTC_ZONE_ID &&
-      !Object.hasOwn(document.zones, timeZoneId)
-    ) {
+    if (timeZoneId !== UTC_ZONE_ID && !coordinatedZoneIds.has(timeZoneId)) {
       errors.push(`The zone city ${timeZoneId} has no zone coordinates`);
     }
   }

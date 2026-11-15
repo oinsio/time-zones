@@ -11,6 +11,7 @@ const KAZAN: GeoNamesCityEntry = {
   countryCode: "RU",
   timeZoneId: "Europe/Moscow",
   population: 1_243_500,
+  coordinates: { latitude: 1, longitude: 2 },
 };
 const SPRINGFIELD: GeoNamesCityEntry = {
   id: "4250542",
@@ -18,6 +19,7 @@ const SPRINGFIELD: GeoNamesCityEntry = {
   countryCode: "US",
   timeZoneId: "America/Chicago",
   population: 114_394,
+  coordinates: { latitude: 1, longitude: 2 },
   region: { en: "Illinois", ru: "Иллинойс" },
 };
 const MARS: GeoNamesCityEntry = {
@@ -26,6 +28,7 @@ const MARS: GeoNamesCityEntry = {
   countryCode: "RU",
   timeZoneId: "Mars/Olympus",
   population: 5,
+  coordinates: { latitude: 1, longitude: 2 },
 };
 const cityData: GeoNamesCityData = {
   cities: [KAZAN, SPRINGFIELD, MARS],

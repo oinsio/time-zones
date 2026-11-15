@@ -1,4 +1,5 @@
 import type { CityNameLanguage } from "@/constants";
+import type { Coordinates } from "@/model";
 import type { CityRecord, CitySearchResult } from "@/ports";
 
 /** A zone-city record as extracted from CLDR at build time (D6). */
@@ -6,6 +7,8 @@ export type ZoneCityData = {
   timeZoneId: string;
   names: Record<CityNameLanguage, string>;
   countryCode: string;
+  /** Absent for UTC and for a zone the zone coordinates lack. Implements FR5 of add-city-coordinates-to-locations. */
+  coordinates?: Coordinates;
 };
 
 /**
@@ -27,6 +30,8 @@ export type GeoNamesCityEntry = {
   countryCode: string;
   timeZoneId: string;
   population: number;
+  /** Implements FR5 of add-city-coordinates-to-locations (D2). */
+  coordinates: Coordinates;
   region?: Record<CityNameLanguage, string>;
 };
 

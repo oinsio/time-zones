@@ -32,10 +32,9 @@ function joinZoneCoordinates(zoneCities: ZoneCityRecord[]): ServedZoneCity[] {
   const { zones } = JSON.parse(
     readFileSync(ZONE_COORDINATES_FILE, "utf8"),
   ) as ZoneCoordinatesDocument;
+  const tenthsByZoneId = new Map(Object.entries(zones));
   return zoneCities.map((zoneCity) => {
-    const tenths = Object.hasOwn(zones, zoneCity.timeZoneId)
-      ? zones[zoneCity.timeZoneId]
-      : undefined;
+    const tenths = tenthsByZoneId.get(zoneCity.timeZoneId);
     if (tenths === undefined) return zoneCity;
     return {
       ...zoneCity,

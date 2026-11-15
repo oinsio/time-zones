@@ -5,13 +5,12 @@ import {
   ZONE_COORDINATES_FILE,
   ZONE_RULES_RELEASE_FILE,
 } from "../../../app.config";
-import { checkZoneCoordinates } from "../../../scripts/zoneRules/checkZoneCoordinates.ts";
 import { loadZoneData } from "../../../scripts/zoneData/loadZoneData.ts";
+import { checkZoneCoordinates } from "../../../scripts/zoneRules/checkZoneCoordinates.ts";
 
 const coordinatesText = readFileSync(ZONE_COORDINATES_FILE, "utf8");
-const bundledRelease = JSON.parse(
-  readFileSync(ZONE_RULES_RELEASE_FILE, "utf8"),
-).release as string;
+const bundledRelease = JSON.parse(readFileSync(ZONE_RULES_RELEASE_FILE, "utf8"))
+  .release as string;
 
 describe("the committed zone coordinates", () => {
   it("should pass the check against the bundled release and the zone cities", () => {

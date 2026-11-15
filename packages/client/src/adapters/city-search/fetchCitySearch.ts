@@ -2,7 +2,10 @@ import zoneCitiesUrl from "virtual:zone-cities-url";
 import type { CitySearch, LoadCitySearch } from "@/ports";
 import type { GeoNamesCityData, ZoneCityData } from "./citySource";
 import { createCompositeCitySearch } from "./createCompositeCitySearch";
-import { parseGeoNamesCityData } from "./parseGeoNamesCityData";
+import {
+  parseGeoNamesCityData,
+  parseTenthsCoordinates,
+} from "./parseGeoNamesCityData";
 
 /**
  * Loads the zone-cities data file with `fetch` and builds the search from it.
@@ -18,14 +21,35 @@ const SEARCH_DATA_ERROR = {
 const isRecordObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-function isZoneCityData(value: unknown): value is ZoneCityData {
-  if (!isRecordObject(value) || !isRecordObject(value.names)) return false;
-  return (
+/**
+ * A served zone city as a `ZoneCityData`, or `undefined` when it is invalid;
+ * its optional tenths of a degree become coordinates (FR5 of
+ * add-city-coordinates-to-locations).
+ */
+function parseZoneCity(value: unknown): ZoneCityData | undefined {
+  if (!isRecordObject(value) || !isRecordObject(value.names)) return undefined;
+  const isValid =
     typeof value.timeZoneId === "string" &&
     typeof value.names.en === "string" &&
     typeof value.names.ru === "string" &&
-    typeof value.countryCode === "string"
+    typeof value.countryCode === "string";
+  if (!isValid) return undefined;
+  const record = {
+    timeZoneId: value.timeZoneId as string,
+    names: { en: value.names.en as string, ru: value.names.ru as string },
+    countryCode: value.countryCode as string,
+  };
+  if (
+    value.latitudeTenths === undefined &&
+    value.longitudeTenths === undefined
+  ) {
+    return record;
+  }
+  const coordinates = parseTenthsCoordinates(
+    value.latitudeTenths,
+    value.longitudeTenths,
   );
+  return coordinates === undefined ? undefined : { ...record, coordinates };
 }
 
 export type CitySearchData = {
@@ -39,18 +63,23 @@ export type CitySearchData = {
  * Implements FR14 of add-geonames-city-source (D5).
  */
 export function parseCitySearchData(payload: unknown): CitySearchData {
-  const zoneCities = isRecordObject(payload) ? payload.zoneCities : undefined;
+  const servedZoneCities = isRecordObject(payload)
+    ? payload.zoneCities
+    : undefined;
+  const zoneCities = Array.isArray(servedZoneCities)
+    ? servedZoneCities.map(parseZoneCity)
+    : undefined;
   const cityData = isRecordObject(payload)
     ? parseGeoNamesCityData(payload.cityData)
     : undefined;
   if (
-    !Array.isArray(zoneCities) ||
-    !zoneCities.every(isZoneCityData) ||
+    zoneCities === undefined ||
+    zoneCities.some((zoneCity) => zoneCity === undefined) ||
     cityData === undefined
   ) {
     throw new Error(SEARCH_DATA_ERROR.INVALID_RECORDS);
   }
-  return { zoneCities, cityData };
+  return { zoneCities: zoneCities as ZoneCityData[], cityData };
 }
 
 type FetchCitySearchOptions = {

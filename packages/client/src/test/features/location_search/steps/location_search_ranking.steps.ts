@@ -162,6 +162,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             countryCode: "US",
             timeZoneId: "America/Chicago",
             population: EQUAL_POPULATION,
+            coordinates: { latitude: 1, longitude: 2 },
           });
           // Listed in reverse alphabetical order: only the name rule can put them right.
           world.citySearch = createCompositeCitySearch([], {
