@@ -111,7 +111,7 @@ All scenarios are unit BDD (vitest-cucumber; no `_e2e` pair, so no `_unit` suffi
 
 - `packages/client/src/test/features/city_data/city_data_coordinates.feature` (new folder) — FR1, FR4.
 - `packages/client/src/test/features/zone_rules/zone_rules_coordinates.feature` — FR2, FR3, FR4.
-- `packages/client/src/test/features/location_search/location_search_coordinates.feature` — FR5; the bundle budget and the new work-bound scenario of `location_search_performance.feature` — NFR-P1, NFR-P2.
+- `packages/client/src/test/features/location_search/location_search_coordinates.feature` — FR5; the new work-bound scenario of `location_search_performance.feature` — NFR-P2. The search data budget (NFR-P1) is checked by `check:bundle-size` (`scripts/check-bundle-size.mjs`).
 - `packages/client/src/test/features/locations/locations_coordinates.feature` (FR6, FR9, UX1), `locations_coordinates_storage.feature` (FR7, FR9), `locations_coordinates_fill.feature` (FR8, UX2), `locations_coordinates_budget.feature` (NFR-P2, NFR-P3).
 
 The existing E2E, axe-core and screenshot scenarios cover NFR-A1 and NFR-R1 unchanged.
