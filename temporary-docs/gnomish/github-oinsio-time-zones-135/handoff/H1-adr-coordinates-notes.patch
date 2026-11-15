@@ -1,0 +1,26 @@
+diff --git a/docs/adr/0006-city-data-sources.md b/docs/adr/0006-city-data-sources.md
+index 60dd297..ac98f49 100644
+--- a/docs/adr/0006-city-data-sources.md
++++ b/docs/adr/0006-city-data-sources.md
+@@ -3,6 +3,8 @@
+ ## Status
+ Accepted (2026-09-28)
+ 
++The record format gains optional `coordinates` (`add-city-coordinates-to-locations`).
++
+ ## Context
+ 
+ Users add locations by searching for a city, a country or a time zone abbreviation. IANA provides about 400 time zone identifiers but no city database. A full city database (e.g. GeoNames with 15-25k cities, regions and localized names) weighs hundreds of kilobytes and needs a data pipeline and license review.
+diff --git a/docs/adr/0010-device-time-location.md b/docs/adr/0010-device-time-location.md
+index ff08921..fdd92f0 100644
+--- a/docs/adr/0010-device-time-location.md
++++ b/docs/adr/0010-device-time-location.md
+@@ -3,6 +3,8 @@
+ ## Status
+ Accepted (2026-10-30)
+ 
++The document schema version is 4 since `add-city-coordinates-to-locations` (optional coordinates of city locations; version 3 is migrated).
++
+ Partly supersedes [ADR-0007](0007-reference-zone-and-device-time.md): the derived Here entry and First launch sections.
+ 
+ ## Context
