@@ -92,7 +92,8 @@
 - Impact: Once archived, the stable specs require both "never write before a user change" and "write once after the city data loads", and still list only versions 1 and 2 as migrated. The implementer has no single rule to test against. Existing scenarios that assert no write while city locations lack coordinates and the city data is loaded may also break without any task naming them. For example, "A switch keeps the stored list" in `src/test/features/locations/locations_city_label_language_unit.feature:47-60` loads the full city data through `deviceTimeWorld` and asserts "the stored location list was not written".
 - Fix: In `specs/locations/spec.md`, add a `## MODIFIED Requirements` section that restates "List is kept on the device" in full, with every stable scenario and its traceability comment. Change two sentences: "A document of version 1, 2 or 3 MUST be migrated on load; a version 3 document holds no coordinates" and "Nothing MUST be written for the list until the user first changes it or the home location, or until city locations gain their coordinates (see 'Stored locations gain coordinates')". Add `specs/home-location/spec.md` with a MODIFIED "Home is kept on the device" that carries the same exception. In `proposal.md`, list both MODIFIED requirements under Capabilities and What Changes. In task 8.4, add `npx vitest run src/test/features/locations/steps/locations_city_label_language_unit.steps.tsx` and `npx vitest run src/test/features/home_location/steps/home_location_storage_unit.steps.tsx` to Verify. Where a fixture's city location now gains coordinates and gets written, give the fixture coordinates so the scenario keeps testing what it was written for.
 - Fix risk: A MODIFIED requirement replaces the whole stable text at archive, so a scenario left out of the restatement is lost. Copy the stable requirement verbatim and change only the two sentences. No other active change modifies either requirement (checked by grep over `openspec/changes/`).
-- Status: open
+- Status: fixed
+- Resolution: added `## MODIFIED Requirements` to specs/locations/spec.md restating "List is kept on the device" verbatim with every stable scenario, changing only the migration sentence (versions 1, 2 or 3; a version 3 document holds no coordinates) and the no-write sentence (exception for city locations gaining coordinates), plus FR7, FR8 in its traceability comment; added specs/home-location/spec.md with MODIFIED "Home is kept on the device" carrying the same exception (and naming version 1 as the home-less version, which the stable scenario already uses); proposal.md lists both under What Changes and Capabilities; task 8.4 now re-runs the city-label, home storage and migration steps and gives fixtures coordinates where needed.
 
 ### R2 — WARNING — NFR-P3 has no scenario
 - Location: `openspec/changes/add-city-coordinates-to-locations/specs/locations/spec.md:124-139`
@@ -101,7 +102,8 @@
 - Impact: Task 8.5 says to write "the scenarios of 'Coordinates cost no extra work'". An implementer following the spec writes the three lookup scenarios, so the NFR-P3 check survives only as a side clause. After archive, the stable spec holds an untested MUST that no scenario names, and traceability task 9.4 can match NFR-P3 from a tag without a test behind it.
 - Fix: Add to `specs/locations/spec.md` under "Coordinates cost no extra work": `#### Scenario: Presenting the list does the same work` — **GIVEN** the list holds Kazan and Moscow with coordinates — **WHEN** the list is presented — **THEN** as many formatters, collators and transition lookups were built as for the same list without coordinates.
 - Fix risk: none. Task 8.5 already plans exactly this comparison with `startWorkCount()`, a unit work bound as ADR-0008 requires.
-- Status: open
+- Status: fixed
+- Resolution: added scenario "Presenting the list does the same work" (Kazan and Moscow with coordinates, same formatters, collators and transition lookups as without) under "Coordinates cost no extra work" in specs/locations/spec.md; task 8.5 names it for NFR-P3.
 
 ### R3 — WARNING — The bundle-budget scenario the tasks edit does not exist in the named feature
 - Location: `openspec/changes/add-city-coordinates-to-locations/tasks.md:60`; `openspec/changes/add-city-coordinates-to-locations/proposal.md:113`
@@ -110,7 +112,8 @@
 - Impact: The implementer either cannot complete 8.6 as written, or adds a new unit BDD scenario with step definitions that would have to run a production build inside `vitest`. That second budget check duplicates `check:bundle-size` and is slow.
 - Fix: In task 8.6, delete "bundle budget scenario at 150 KB, and" and keep only the new scenario "Coordinates of stored locations do no search work" (NFR-P2). In `proposal.md:113`, write "the new work-bound scenario of `location_search_performance.feature` — NFR-P2; the search data budget (NFR-P1) is checked by `check:bundle-size` (tasks 5.3, 9.1)". Leave the delta spec's "Bundle budget" scenario as it is: it is the stable scenario, verified by the script.
 - Fix risk: none. The stable "Bundle budget" scenario was already verified only by `check-bundle-size.mjs`.
-- Status: open
+- Status: fixed
+- Resolution: task 8.6 now adds only "Coordinates of stored locations do no search work" (NFR-P2) and states that the stable "Bundle budget" scenario (NFR-P1) is verified by `check:bundle-size` (tasks 5.3, 9.1); proposal.md Behavior says the same. The delta spec scenario is left as the stable text.
 
 ### R4 — WARNING — The scoped mutation runs leave changed production files out of M6
 - Location: `openspec/changes/add-city-coordinates-to-locations/tasks.md:66`; `openspec/changes/add-city-coordinates-to-locations/proposal.md:133`
@@ -119,7 +122,8 @@
 - Impact: M6 cannot be shown to hold. Surviving mutants in the served-column decoding, the `zone.tab` read, the both-or-neither write of the compile, or the passing of coordinates to `addLocation` go unnoticed.
 - Fix: Add two runs to task 9.3: `scripts/cityData/serializeCityDataset.ts,scripts/zoneRules/compileWithZic.ts,scripts/zoneRules/compile.ts,scripts/zoneRules/check.ts` and `src/adapters/city-search/parseGeoNamesCityData.ts,src/adapters/city-search/geoNamesCitySource.ts,src/adapters/city-search/zoneCitiesSource.ts,src/controller/createLocationsActions.ts,src/controller/useLocations.ts`. Each run stays at five files or fewer, one at a time.
 - Fix risk: Two more Stryker runs add implement time. Stryker mutates whole files, so survivors from earlier changes in those files count too, and the implement stage may need extra tests to reach the threshold.
-- Status: open
+- Status: fixed
+- Resolution: task 9.3 gains the two runs `scripts/cityData/serializeCityDataset.ts,scripts/zoneRules/compileWithZic.ts,scripts/zoneRules/compile.ts,scripts/zoneRules/check.ts` and `src/adapters/city-search/parseGeoNamesCityData.ts,…/geoNamesCitySource.ts,…/zoneCitiesSource.ts,src/controller/createLocationsActions.ts,src/controller/useLocations.ts`, each at most five files, with a note that pre-existing survivors count too.
 
 ### R5 — SUGGESTION — Overrides are applied both when writing and when checking the zone coordinates
 - Location: `openspec/changes/add-city-coordinates-to-locations/design.md:69`; `openspec/changes/add-city-coordinates-to-locations/tasks.md:29`
@@ -128,7 +132,8 @@
 - Impact: If a maintainer adds an override without recompiling (recompiling needs the network, `gpg` and `zic`), the committed check passes while the served zone city has no coordinates. That breaks FR3 without any test failing. Today the overrides are empty, so nothing breaks yet.
 - Fix: In D4 and task 4.4, drop the `overrides` parameter: `checkZoneCoordinates(zoneCoordinatesText, release, zoneCities)` checks coverage on the committed file alone. Move the case "overrides fill a zone the table lacks" to `writeZoneCoordinates.test.ts` (task 4.2). The spec sentence "without one the check fails" still holds, because without an override the file lacks the zone.
 - Fix risk: none. The spec text and the other check rows stay the same.
-- Status: open
+- Status: fixed
+- Resolution: design.md D4 now defines `checkZoneCoordinates(zoneCoordinatesText, release, zoneCities)` on the committed file alone and D3 says the compile writes overrides into the file; task 4.4 drops the overrides case and task 4.2 tests that an override lands in the written file. FR3 and the city-data spec sentence still hold.
 
 ### R6 — SUGGESTION — G2 promises coordinates for every city location, including UTC
 - Location: `openspec/changes/add-city-coordinates-to-locations/proposal.md:38`
@@ -137,7 +142,8 @@
 - Impact: A test written from G2 would fail on any list that holds UTC, or the implementer might give UTC coordinates and break FR9.
 - Fix: G2 → "100% of the city locations in a user's list have coordinates after the city data was loaded once, including locations stored before this change, except a location in UTC (FR9) and one whose zone the zone coordinates lack (NG6)."
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md G2 now excepts a location in UTC (FR9) and one whose zone the zone coordinates lack (NG6).
 
 ### R7 — SUGGESTION — "Zone table" is a new concept with no glossary entry
 - Location: `openspec/changes/add-city-coordinates-to-locations/tasks.md:7`; `openspec/changes/add-city-coordinates-to-locations/proposal.md:19-21`
@@ -146,7 +152,8 @@
 - Impact: The two "zone … table" concepts have no recorded distinction, and the glossary review checklist of the implement stage flags `parseZoneTable` and `ZONE_TABLE_FILE` as names without a term.
 - Fix: In task 1.1 and in the proposal's glossary bullets, add a term to `docs/glossary/zone-rules.md`: **Zone table** — the `zone.tab` file of the IANA release archive that lists each zone's country code and the coordinates of its principal place; *Code:* `ZONE_TABLE_FILE`, `parseZoneTable`; *Never:* zone abbreviation table (that table maps abbreviations). Extend the task 1.1 verification with `grep -n "Zone table" docs/glossary/zone-rules.md`.
 - Fix risk: none. `docs/glossary/` is inside the implement stage's limits.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md glossary bullets and task 1.1 add **Zone table** to docs/glossary/zone-rules.md (Code: `ZONE_TABLE_FILE`, `parseZoneTable`; Never: zone abbreviation table), with `grep -n "Zone table" docs/glossary/zone-rules.md` in its Verify.
 
 ## Verdict
 
