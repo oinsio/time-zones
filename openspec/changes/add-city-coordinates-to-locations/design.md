@@ -45,6 +45,8 @@ Files store `Math.round(degrees * 10)` as integers (`558`, `491`); the app divid
 - `CityTuple` becomes `[geonameId, en, ru | 0, countryCode, zoneIndex, population, latitudeTenths, longitudeTenths, regionIndex?]`; the optional region index stays last. `DATASET_FORMAT_VERSION` becomes 2.
 - `ServedCityData.columns` gains `latitudeTenths` and `longitudeTenths`.
 
+`parseCityRow` rejects a row whose latitude or longitude is empty, not a number or outside ±`MAX_LATITUDE_DEGREES` / ±`MAX_LONGITUDE_DEGREES` (constants imported by relative path, as D1 describes), throwing with the line number. `compile.ts` parses every city line before `compileCityData` and `writeFile` run, and already turns a parser throw into a non-zero exit (`compile.test.ts`: "should return non-zero naming the line for a malformed city line"), so an out-of-range row writes nothing. `checkCityData` repeats the range check on the committed file (D4).
+
 0.1° is at most 24 s of solar time in longitude and about 11 km; the follow-up change blends day-period colours over tens of minutes.
 
 ### D3. Zone coordinates come from `zone.tab`, in their own committed file (FR2, FR3)

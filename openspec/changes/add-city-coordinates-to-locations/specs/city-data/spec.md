@@ -31,6 +31,17 @@ Every GeoNames city of the committed city data SHALL carry coordinates: the lati
 - **THEN** it fails and names the line
 - **AND** the committed city data is not changed
 
+#### Scenario: A row out of range stops the compile
+- **GIVEN** a dump in which one city row has `<value>`
+- **WHEN** the compile command runs
+- **THEN** it fails and names the line
+- **AND** the committed city data is not changed
+
+| value |
+|---|
+| the latitude 91 |
+| the longitude −181 |
+
 ### Requirement: Zone coordinates
 A committed zone coordinates file SHALL hold the coordinates of the principal place of every zone that the zone table (`zone.tab`) of the IANA release archive lists, in decimal degrees, north and east positive, rounded to 0.1°, and MUST name the release it was read from. The zone rules compile command SHALL write it together with the release file, from the archive whose signature it verified, and MUST write neither file when any step fails. Building the app, running the tests and running CI MUST NOT request anything from IANA for it. A zone that only a zone rules update received at run time knows has no coordinates until the next app deploy. <!-- implements FR2, FR3 of add-city-coordinates-to-locations -->
 

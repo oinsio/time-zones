@@ -61,7 +61,7 @@ None.
 
 ### Functional
 
-- FR1: Every GeoNames city of the committed city data SHALL carry the latitude and longitude that GeoNames gives it, rounded to 0.1°: latitude from −90 to 90, longitude from −180 to 180, north and east positive.
+- FR1: Every GeoNames city of the committed city data SHALL carry the latitude and longitude that GeoNames gives it, rounded to 0.1°: latitude from −90 to 90, longitude from −180 to 180, north and east positive. The city data compile command SHALL stop, naming the line, and write nothing when a city row has no latitude or longitude or one out of range.
 - FR2: A committed zone coordinates file SHALL hold, for every zone listed in the zone table (`zone.tab`) of the IANA release archive, the coordinates of its principal place rounded to 0.1°, and SHALL name the release it was read from. The zone rules compile command SHALL write it from the archive whose signature it verified; building, testing and CI SHALL NOT use the network for it.
 - FR3: Every zone city of the search data except UTC SHALL have coordinates. A zone city whose zone the zone table does not list SHALL take the coordinates of a named override; without one the check fails.
 - FR4: The city data check SHALL fail, naming the city, when a GeoNames city has no coordinates or coordinates out of range. The zone coordinates check SHALL fail, naming the zone, when the zone coordinates file is malformed, names another release than the bundled one, holds coordinates out of range, or leaves a zone city other than UTC without coordinates. Both checks SHALL run on the committed files in the unit tests, without network access.
