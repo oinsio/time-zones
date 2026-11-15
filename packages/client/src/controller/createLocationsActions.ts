@@ -26,6 +26,7 @@ type LocationsActions = Pick<
   | "moveLocation"
   | "setHomeLocation"
   | "resetLocations"
+  | "fillLocationCoordinates"
 > & { flushPendingWrite: () => void };
 
 /**
@@ -37,6 +38,7 @@ type LocationsActions = Pick<
  * reorder-locations-by-drag-and-drop, D2).
  * Implements FR3, FR10 of set-home-location-and-show-differences (D1, D6).
  * Implements FR11, FR12 of add-settings-page-and-device-time-location (D3, D12).
+ * Implements FR8 of add-city-coordinates-to-locations (D7): a fill writes only when a location gained coordinates.
  */
 export function createLocationsActions({
   repository,
@@ -78,6 +80,12 @@ export function createLocationsActions({
     },
     addLocation: (input) =>
       dispatchAndSchedule({ type: LocationCommandType.ADD_LOCATION, ...input }),
+    fillLocationCoordinates: (coordinatesByLocationId) => {
+      dispatchAndSchedule({
+        type: LocationCommandType.FILL_LOCATION_COORDINATES,
+        coordinatesByLocationId,
+      });
+    },
     addDeviceTimeLocation: () =>
       dispatchAndSchedule({
         type: LocationCommandType.ADD_DEVICE_TIME_LOCATION,

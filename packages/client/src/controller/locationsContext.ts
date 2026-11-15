@@ -48,6 +48,10 @@ export type LocationsContextValue = {
   /** `null` clears home. Implements FR3 of set-home-location-and-show-differences. */
   setHomeLocation: (id: string | null) => LocationsReduceResult;
   resetLocations: () => void;
+  /** Gives city locations without coordinates the given ones and schedules one write. Implements FR8 of add-city-coordinates-to-locations (D7). */
+  fillLocationCoordinates: (
+    coordinatesByLocationId: Record<string, Coordinates>,
+  ) => void;
 };
 
 export const LocationsContext = createContext<LocationsContextValue | null>(

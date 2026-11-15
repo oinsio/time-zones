@@ -163,6 +163,7 @@ export function LocationsProvider({
       moveLocation: actions.moveLocation,
       setHomeLocation: actions.setHomeLocation,
       resetLocations: actions.resetLocations,
+      fillLocationCoordinates: actions.fillLocationCoordinates,
     }),
     [
       store,

@@ -14,6 +14,7 @@ import { useCityLabels } from "./useCityLabels";
 import { useDayColouring } from "./useDayColouring";
 import { useExemplarCity } from "./useExemplarCity";
 import { useHourFormat } from "./useHourFormat";
+import { useLocationCoordinatesFill } from "./useLocationCoordinatesFill";
 import { useZoneLabelParts } from "./useZoneLabelParts";
 
 export { LocationsStatus } from "./locationsContext";
@@ -46,11 +47,13 @@ const MISSING_PROVIDER_MESSAGE =
  * NFR-P1 of show-city-labels-in-interface-language (D3).
  * Passes the zone label: Implements FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
  * Passes the day colouring and working hours: Implements FR3, FR12 of add-day-colouring-setting (D4).
+ * Gives stored city locations their coordinates: Implements FR8, NFR-P2 of add-city-coordinates-to-locations (D7).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
-  const { store, clock, minuteTick, ...rest } = context;
+  const { store, clock, minuteTick, fillLocationCoordinates, ...rest } =
+    context;
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const { locations, deviceTimeZoneId, homeLocationId } = state;
   const hourFormat = useHourFormat();
@@ -64,6 +67,11 @@ export function useLocations() {
     rest.loadCitySearch,
   );
   const cityLabels = useCityLabels(locations, rest.loadCitySearch);
+  useLocationCoordinatesFill(
+    locations,
+    rest.loadCitySearch,
+    fillLocationCoordinates,
+  );
   // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick re-presents the rows at each minute
   const { rows, rowsContext } = useMemo(() => {
     const now = clock.instant();
