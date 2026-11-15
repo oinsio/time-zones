@@ -55,7 +55,7 @@ Files store `Math.round(degrees * 10)` as integers (`558`, `491`); the app divid
 
 `zone.tab` coordinates are ISO 6709 strings, `±DDMM±DDDMM` or `±DDMMSS±DDDMMSS`; degrees = D + M/60 + S/3600, then rounded to tenths. A row that does not match either form stops the compile and names the line.
 
-At build time `scripts/zoneData/loadCitySearchData.ts` joins the file to the zone cities by zone ID, so a served zone city carries `latitudeTenths` and `longitudeTenths`. The file is not served on its own and is not part of the remote update. Overrides for a zone city that `zone.tab` does not list live in `scripts/zoneRules/zoneCoordinateOverrides.ts` (empty today).
+At build time `scripts/zoneData/loadCitySearchData.ts` joins the file to the zone cities by zone ID, so a served zone city carries `latitudeTenths` and `longitudeTenths`. The file is not served on its own and is not part of the remote update. Overrides for a zone city that `zone.tab` does not list live in `scripts/zoneRules/zoneCoordinateOverrides.ts` (empty today); the compile writes them into `zone-rules/zone-coordinates.json`, so the file alone holds every zone city's coordinates.
 
 Alternatives rejected:
 
@@ -66,7 +66,7 @@ Alternatives rejected:
 
 ### D4. Pure checks, run on the committed files by the unit tests (FR4)
 
-`checkCityData` (`scripts/cityData/checkCityData.ts`) validates the two new tuple fields; `src/test/cityData/check.test.ts` already runs `runCityDataCheck` on the committed `city-data/geonames-cities.json` inside `pnpm test`, so the city data check reaches every pull request without a new step. The new pure `checkZoneCoordinates(zoneCoordinatesText, release, zoneCities, overrides)` (`scripts/zoneRules/checkZoneCoordinates.ts`) checks the format, the release against `release.json`, the ranges, and the coverage of every zone city of `loadZoneData()` except UTC after overrides. A new `src/test/zoneRules/zoneCoordinates.committed.test.ts` runs it on the committed files inside `pnpm test`. `zone-rules:check` also calls it and prints its errors, but that command downloads the release and needs `zdump`, so it is not what guards a pull request. No new command and no new CI step.
+`checkCityData` (`scripts/cityData/checkCityData.ts`) validates the two new tuple fields; `src/test/cityData/check.test.ts` already runs `runCityDataCheck` on the committed `city-data/geonames-cities.json` inside `pnpm test`, so the city data check reaches every pull request without a new step. The new pure `checkZoneCoordinates(zoneCoordinatesText, release, zoneCities)` (`scripts/zoneRules/checkZoneCoordinates.ts`) checks the format, the release against `release.json`, the ranges, and the coverage of every zone city of `loadZoneData()` except UTC, on the committed file alone. Overrides are applied once, when the compile writes the file (D3); the check does not apply them again, because the build join of `loadCitySearchData` reads only the file, so an override added without recompiling must fail the check. A new `src/test/zoneRules/zoneCoordinates.committed.test.ts` runs it on the committed files inside `pnpm test`. `zone-rules:check` also calls it and prints its errors, but that command downloads the release and needs `zdump`, so it is not what guards a pull request. No new command and no new CI step.
 
 ### D5. City records get coordinates from their source (FR5)
 
