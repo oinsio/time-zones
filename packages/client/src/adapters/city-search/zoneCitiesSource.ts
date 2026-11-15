@@ -51,6 +51,9 @@ function buildRecord(
     aliases: getZoneAbbreviations(timeZoneId),
     rank: calculateRank(timeZoneId),
     population: cityData.zoneCityPopulations[timeZoneId] ?? 0,
+    ...(data?.coordinates === undefined
+      ? {}
+      : { coordinates: data.coordinates }),
     ...(region === undefined ? {} : { region }),
   };
 }
@@ -62,6 +65,7 @@ function buildRecord(
  * Implements FR5, FR10 of add-interface-language-selection (D5): names in the language fallback order.
  * Implements FR8 of show-zone-abbreviations-and-zone-label-setting (D8): the aliases are the abbreviation pair.
  * Implements FR5, FR7 of add-geonames-city-source (D2, D6): population and region from the city data.
+ * Implements FR5 of add-city-coordinates-to-locations (D5): coordinates of the zone city.
  */
 export function createZoneCitiesSource(
   zoneCities: readonly ZoneCityData[],

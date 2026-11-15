@@ -153,3 +153,31 @@ describe("zone cities source with city data", () => {
     expect(recordOf("Asia/Almaty")).not.toHaveProperty("region");
   });
 });
+
+// Verifies FR5 of add-city-coordinates-to-locations (D5): zone city records carry coordinates.
+describe("zone cities source coordinates", () => {
+  const moscowCoordinates = { latitude: 55.8, longitude: 37.6 };
+
+  it("should carry the coordinates of the zone city", () => {
+    const source = createZoneCitiesSource(
+      [{ ...moscow, coordinates: moscowCoordinates }],
+      () => ["Europe/Moscow"],
+    );
+    expect(source.records[0]?.coordinates).toEqual(moscowCoordinates);
+  });
+
+  it("should give UTC and a zone the data lacks no coordinates", () => {
+    const source = createZoneCitiesSource(
+      [{ ...moscow, coordinates: moscowCoordinates }, utc],
+      () => ["Europe/Moscow", "Asia/Almaty"],
+    );
+    const coordinatesByZone = Object.fromEntries(
+      source.records.map((record) => [record.timeZoneId, record.coordinates]),
+    );
+    expect(coordinatesByZone).toEqual({
+      "Europe/Moscow": moscowCoordinates,
+      "Asia/Almaty": undefined,
+      UTC: undefined,
+    });
+  });
+});

@@ -15,6 +15,7 @@ import {
  * the installed release does not hold are skipped. Searchable texts are built
  * on the first match, so loading normalizes nothing.
  * Implements FR3, FR11 of add-geonames-city-source (D6).
+ * Implements FR5 of add-city-coordinates-to-locations (D5): records carry coordinates.
  */
 export function createGeoNamesCitySource(
   cityData: GeoNamesCityData,
@@ -39,6 +40,7 @@ export function createGeoNamesCitySource(
         aliases: [],
         rank: 0,
         population: city.population,
+        coordinates: city.coordinates,
         ...(city.region === undefined ? {} : { region: city.region }),
       }),
     );

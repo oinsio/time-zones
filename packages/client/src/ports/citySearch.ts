@@ -1,4 +1,5 @@
 import type { CityNameLanguage } from "@/constants";
+import type { Coordinates } from "@/model";
 
 /** Why a result matched, best kind first (ranking follows this order). */
 export enum SearchMatchKind {
@@ -32,6 +33,11 @@ export type CityRecord = {
    * Implements FR7 of add-geonames-city-source (D2, D4).
    */
   region?: Record<CityNameLanguage, string>;
+  /**
+   * Where the place is; absent for UTC and for a zone the zone coordinates lack.
+   * Implements FR5 of add-city-coordinates-to-locations (D5).
+   */
+  coordinates?: Coordinates;
 };
 
 /**
@@ -77,6 +83,16 @@ export interface CitySearch {
     storedLabel: string,
     language: CityNameLanguage,
   ): string;
+  /**
+   * The coordinates of a stored location: those of the record `getCityLabel`
+   * resolves, otherwise those of the zone's zone city; `undefined` when the
+   * data has none. Compares exact names and normalizes no text.
+   * Implements FR8 of add-city-coordinates-to-locations (D7).
+   */
+  getCoordinates(
+    timeZoneId: string,
+    storedLabel: string,
+  ): Coordinates | undefined;
   /** Popular locations, shown for an empty query. */
   suggest(): readonly CitySearchResult[];
 }

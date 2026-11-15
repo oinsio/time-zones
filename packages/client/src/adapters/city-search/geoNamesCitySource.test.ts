@@ -117,3 +117,23 @@ describe("GeoNames city source matching", () => {
     }
   });
 });
+
+// Verifies FR5 of add-city-coordinates-to-locations (D5): records carry coordinates.
+describe("GeoNames city source coordinates", () => {
+  it("should carry the coordinates of the city", () => {
+    const source = createGeoNamesCitySource(
+      {
+        cities: [
+          { ...KAZAN, coordinates: { latitude: 55.8, longitude: 49.1 } },
+        ],
+        zoneCityPopulations: {},
+        zoneCityRegions: {},
+      },
+      () => undefined,
+    );
+    expect(source.records[0]?.coordinates).toEqual({
+      latitude: 55.8,
+      longitude: 49.1,
+    });
+  });
+});
