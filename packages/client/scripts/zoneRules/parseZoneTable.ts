@@ -34,7 +34,10 @@ function toTenths(
   return Math.round(signedDegrees * COORDINATE_TENTHS_PER_DEGREE) + 0;
 }
 
-function parseCoordinates(text: string, lineNumber: number): ZoneTenths {
+function parseZoneTableCoordinates(
+  text: string,
+  lineNumber: number,
+): ZoneTenths {
   const match = COORDINATES_PATTERN.exec(text);
   if (match === null) {
     throw new Error(
@@ -61,7 +64,7 @@ export function parseZoneTable(text: string): Map<string, ZoneTenths> {
     }
     zones.set(
       zoneId,
-      parseCoordinates(columns[COORDINATES_COLUMN] ?? "", lineNumber),
+      parseZoneTableCoordinates(columns[COORDINATES_COLUMN] ?? "", lineNumber),
     );
   });
   return zones;
