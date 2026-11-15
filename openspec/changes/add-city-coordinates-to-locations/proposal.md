@@ -14,7 +14,7 @@ Audience: every user of the "Time of day" day colouring, after the follow-up cha
 
 - MODIFIED `city-data`: every GeoNames city of the committed city data carries its coordinates, rounded to 0.1°. A second committed file, the zone coordinates, holds the coordinates of the principal place of every IANA zone, read from the zone table (`zone.tab`) of the signed release archive that the zone rules compiler already downloads. The coordinates of both committed files are checked by the unit tests, without network access, on every pull request.
 - MODIFIED `location-search`: a city record carries coordinates — from GeoNames for a GeoNames city, from the zone coordinates for a zone city. The UTC record has none. The search data file grows from at most 130 KB to at most 150 KB gzipped. Search results look and order exactly as today.
-- MODIFIED `locations`: a city location added from the search keeps the coordinates of its city record, and they are stored with the list. The stored document version becomes 4; a version 3 list is migrated on load, without a write. A city location stored before this change gains its coordinates once the city data is loaded. The device time location and UTC have no coordinates. Location identity, order and every visible row stay as they are.
+- MODIFIED `locations`: a city location added from the search keeps the coordinates of its city record, and they are stored with the list. The stored document version becomes 4; a version 3 list is migrated on load, without a write. A city location stored before this change gains its coordinates once the city data is loaded. This is the one write without a user change, so the no-write rules of "List is kept on the device" (`locations`) and "Home is kept on the device" (`home-location`) gain this exception. The device time location and UTC have no coordinates. Location identity, order and every visible row stay as they are.
 - Unchanged: day periods, day colouring, colours, the settings page, the interface texts.
 - Glossary (`docs/glossary/locations.md`), new term: **Coordinates** — the latitude and longitude of a place in decimal degrees, north and east positive, rounded to 0.1°; carried by a city record and by a city location. *Never:* position (a list position), geolocation (the browser feature), lat/lng in names.
 - Glossary (`docs/glossary/search.md`), new term: **Zone coordinates** — the committed table of the coordinates of each zone's principal place, compiled from the IANA zone table; the coordinates of zone cities.
@@ -31,7 +31,8 @@ None.
 
 - `city-data`: ADDED "Coordinates of the GeoNames cities", "Zone coordinates", "Coordinates are checked". No existing `city-data` requirement is modified.
 - `location-search`: ADDED "City records carry coordinates"; MODIFIED "Search is fast and lazy" (the search data budget becomes 150 KB gzipped).
-- `locations`: ADDED "Coordinates of a city location", "Coordinates are kept on the device", "Stored locations gain coordinates", "Coordinates cost no extra work".
+- `locations`: ADDED "Coordinates of a city location", "Coordinates are kept on the device", "Stored locations gain coordinates", "Coordinates cost no extra work"; MODIFIED "List is kept on the device" (a version 3 document is migrated; the list is also written when city locations gain their coordinates).
+- `home-location`: MODIFIED "Home is kept on the device" (the same exception to "nothing is written until the user changes the list or home").
 
 ## Goals
 

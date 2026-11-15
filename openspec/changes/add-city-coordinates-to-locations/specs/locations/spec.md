@@ -137,3 +137,47 @@ Giving stored locations their coordinates SHALL look up one city record per city
 - **GIVEN** the city data is loaded and the list holds Kazan
 - **WHEN** a minute passes
 - **THEN** no coordinate lookup was made
+
+## MODIFIED Requirements
+
+### Requirement: List is kept on the device
+The list SHALL be saved on the device as a versioned document, together with the home location, and restored in the same order when the app is opened again, also offline. The device time location is stored as an entry of its kind without a zone, so the device time zone itself is never stored. When no locations document is stored, the list MUST be the first-launch list (see "First-launch list"). A stored empty list MUST be restored as an empty list. A document of version 1, 2 or 3 MUST be migrated on load: the device time location is put first, the other locations keep their order, a version 2 or 3 home is kept, a version 1 document has no home and a version 3 document holds no coordinates. Nothing MUST be written for the list until the user first changes it or the home location, or until city locations gain their coordinates (see "Stored locations gain coordinates"). A stored identifier that is a known legacy alias MUST be canonicalized on load. <!-- implements FR9, FR11, FR16, UX4 of add-locations-via-search ; FR8 of set-home-location-and-show-differences; FR12, FR13, FR14 of add-settings-page-and-device-time-location ; FR7, FR8 of add-city-coordinates-to-locations -->
+
+#### Scenario: List survives a reload
+- **GIVEN** the user added Almaty, then Moscow
+- **WHEN** the app is opened again
+- **THEN** the list is the device time location, Almaty, Moscow in that order
+
+#### Scenario: First launch writes nothing
+- **WHEN** the user opens the app for the first time and adds nothing
+- **THEN** no list document is stored
+
+#### Scenario: Legacy identifier is canonicalized on load
+- **GIVEN** the stored list holds Kolkata in `Asia/Calcutta`
+- **WHEN** the app is opened
+- **THEN** the list holds Kolkata in `Asia/Kolkata`
+
+#### Scenario: Offline reopen
+- **GIVEN** the user added Almaty on an earlier visit
+- **WHEN** the app is opened without a network connection
+- **THEN** Almaty is shown
+
+#### Scenario: Previous document version is migrated
+- **GIVEN** the stored list is a version 1 document with Almaty, Moscow and Kolkata
+- **WHEN** the app is opened
+- **THEN** the list is the device time location, Almaty, Moscow, Kolkata in that order
+- **AND** no location is home
+- **AND** the stored list was not written
+
+#### Scenario: Version 2 document is migrated
+- **GIVEN** the stored list is a version 2 document with Moscow and New York and Moscow as home
+- **WHEN** the app is opened
+- **THEN** the list is the device time location, Moscow, New York in that order
+- **AND** Moscow is home
+- **AND** the stored list was not written
+
+#### Scenario: The device time zone is not stored
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list is the device time location
+- **WHEN** the user adds Moscow and the list is written
+- **THEN** the stored document holds no `Asia/Almaty`
