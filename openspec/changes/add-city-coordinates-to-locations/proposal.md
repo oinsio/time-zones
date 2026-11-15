@@ -37,7 +37,7 @@ None.
 ## Goals
 
 - G1: 100% of the GeoNames cities of the city data and 100% of the zone cities except UTC have coordinates.
-- G2: 100% of the city locations in a user's list have coordinates after the city data was loaded once, including locations stored before this change.
+- G2: 100% of the city locations in a user's list have coordinates after the city data was loaded once, including locations stored before this change, except a location in UTC (FR9) and one whose zone the zone coordinates lack (NG6).
 - G3: The user sees no change: 0 changed screenshots, 0 changed interface texts.
 
 ## Non-Goals
