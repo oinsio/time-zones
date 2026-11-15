@@ -9,7 +9,7 @@ Current state, read from the code:
 - `scripts/cityData/parseGeoNamesRows.ts` reads columns 0, 1, 7, 8, 10, 14, 17 of `cities15000.txt`; latitude and longitude are columns 4 and 5 of the same line.
 - The committed city data is one tuple per city (`CityTuple`, `DATASET_FORMAT_VERSION = 1`); the served form is columns (`toServedCityData.ts`), parsed in the app by `parseCitySearchData`.
 - Zone cities come from CLDR at build time (`scripts/zoneData/loadZoneData.ts`): names and a country code, no coordinates. GeoNames matches only 289 of the 419 zone cities (measured on `cities15000` of 2026-11-14).
-- `scripts/zoneRules/compileWithZic.ts` unpacks only the nine source files and `version` from the signed tzdata archive. The archive of 2026f also holds `zone.tab` with 418 rows — exactly the zone cities except UTC (measured). `zone1970.tab` lacks 107 of them and is not used.
+- `compileArchive` in `scripts/zoneRules/compileWithZic.ts` unpacks the whole signed tzdata archive into `sourceDirectory` (`tar -xzf`), checks `version` and passes only the nine `TZDATA_SOURCE_FILES` to `zic`; `zone.tab` is already unpacked there, but nothing reads it today. The archive of 2026f also holds `zone.tab` with 418 rows — exactly the zone cities except UTC (measured). `zone1970.tab` lacks 107 of them and is not used.
 - `CityRecord` (`src/ports/citySearch.ts`) and `Location` (`src/model/locations.ts`) have no coordinates. A location's identity is zone plus label; it stores no record ID.
 - The stored list is a version 3 document (`LOCATIONS_SCHEMA_VERSION` in `src/constants/locations.ts`) migrated step by step by `LOCATION_MIGRATIONS` (`src/adapters/locationsDocument.ts`) without a write on load; `parseStoredLocations` rejects the whole document on an invalid entry and ignores unknown fields of a city entry. `localStorageLocationRepository.migration.test.ts` loads a version 4 document as unreadable today.
 - `useCityLabels` already loads the city data once in the background while the list holds a city location, and `CitySearch.getCityLabel(timeZoneId, storedLabel, language)` already resolves a stored location to a city record.
@@ -51,7 +51,7 @@ Files store `Math.round(degrees * 10)` as integers (`558`, `491`); the app divid
 
 ### D3. Zone coordinates come from `zone.tab`, in their own committed file (FR2, FR3)
 
-`zone-rules:compile` also unpacks `zone.tab`, parses it (`scripts/zoneRules/parseZoneTable.ts`) and writes `zone-rules/zone-coordinates.json`: `{"release":"2026f","zones":{"Africa/Abidjan":[53,-40],…}}`, one zone per line in alphabetical order, so a release bump reads as a diff. Both files are written only after every step succeeded.
+`compileWithZic` also reads the already unpacked `zone.tab` from `sourceDirectory` (the `tar` call is unchanged), `zone-rules:compile` parses it (`scripts/zoneRules/parseZoneTable.ts`) and writes `zone-rules/zone-coordinates.json`: `{"release":"2026f","zones":{"Africa/Abidjan":[53,-40],…}}`, one zone per line in alphabetical order, so a release bump reads as a diff. Both files are written only after every step succeeded.
 
 `zone.tab` coordinates are ISO 6709 strings, `±DDMM±DDDMM` or `±DDMMSS±DDDMMSS`; degrees = D + M/60 + S/3600, then rounded to tenths. A row that does not match either form stops the compile and names the line.
 
