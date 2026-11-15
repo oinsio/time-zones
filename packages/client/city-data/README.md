@@ -2,7 +2,8 @@
 
 The cities behind the location search that are not zone cities: one committed
 file, `geonames-cities.json`, compiled by `scripts/cityData/compile.ts`.
-Implements FR1, FR12, FR13 of add-geonames-city-source.
+Implements FR1, FR12, FR13 of add-geonames-city-source and FR1 of
+add-city-coordinates-to-locations.
 
 ## Source and licence
 
@@ -11,20 +12,21 @@ City data: [GeoNames](https://www.geonames.org/), licensed under
 GeoNames on its settings page. The file records the licence and the date of the
 dump it was compiled from.
 
-- Dump date: **2026-11-14** (`cities15000.zip`, `alternateNamesV2.zip`,
+- Dump date: **2026-11-15** (`cities15000.zip`, `alternateNamesV2.zip`,
   `admin1CodesASCII.txt` from `download.geonames.org/export/dump/`).
 
 ## Contents
 
 - 6 102 cities with a population of at least 100 000 or a country capital, each
   with its GeoNames ID, English and Russian names, country code, canonical IANA
-  zone and population;
+  zone, population and coordinates (latitude and longitude in integer tenths
+  of a degree, format version 2);
 - 271 zones, 90 regions (first-level divisions) for 160 namesake cities;
 - `zoneCityPopulations` for 265 zones: the population of the exemplar city of a
   zone, which is held once as the zone city and not as a GeoNames city;
 - `zoneCityRegions`: the region of a zone city that is a namesake (1 zone).
 
-Size: 366 993 bytes, 143 948 bytes gzipped (`gzip -9`).
+Size: 418 768 bytes, 168 853 bytes gzipped (`gzip -9`).
 
 Facts of this dump that the specs use: three cities named Springfield in `US`
 (Illinois, Missouri, Massachusetts); Kazan in `Europe/Moscow` with 1 243 500
