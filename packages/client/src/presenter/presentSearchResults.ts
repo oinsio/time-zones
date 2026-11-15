@@ -1,7 +1,7 @@
 import type { TFunction } from "i18next";
 import type { CityNameLanguage } from "@/constants";
 import type { InterfaceLanguageCode } from "@/locales";
-import { getZoneAbbreviations, type Location } from "@/model";
+import { type Coordinates, getZoneAbbreviations, type Location } from "@/model";
 import { type CitySearchResult, isCityNameOfRecord } from "@/ports";
 import { presentCountryName } from "./countryName";
 import { formatZoneAbbreviation } from "./zoneAbbreviation";
@@ -29,6 +29,8 @@ export type PresentedSearchResult = {
   countryName: string;
   /** First-level division of a namesake in the interface language (FR7 of add-geonames-city-source). */
   regionName?: string;
+  /** The record's coordinates, handed to the added location; never shown (FR6 of add-city-coordinates-to-locations). */
+  coordinates?: Coordinates;
   /** The abbreviation pair of an abbreviation match, `EST / EDT`; absent for other matches. */
   abbreviationPair?: readonly PresentedAbbreviation[];
   /** The list already has this zone under this city, in any language. */
@@ -40,6 +42,7 @@ export type PresentedSearchResult = {
  * Implements FR5, FR8, UX3 of add-locations-via-search (D9).
  * Implements FR10, FR11, UX3 of show-zone-abbreviations-and-zone-label-setting (D8): the abbreviation pair.
  * Implements FR4, FR7, FR8 of add-geonames-city-source (D7, D9): the result ID and the region.
+ * Implements FR6 of add-city-coordinates-to-locations (D6): the coordinates of the record.
  */
 export function presentSearchResults(
   results: readonly CitySearchResult[],
@@ -54,6 +57,7 @@ export function presentSearchResults(
     countryCode: record.countryCode,
     countryName: presentCountryName(record.countryCode, language),
     regionName: record.region?.[cityNameLanguage],
+    coordinates: record.coordinates,
     abbreviationPair:
       matchedAbbreviation === undefined
         ? undefined

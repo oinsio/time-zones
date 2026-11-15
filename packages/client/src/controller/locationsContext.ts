@@ -1,6 +1,7 @@
 import { createContext } from "react";
 import type { Clock } from "@/lib/temporal";
 import type {
+  Coordinates,
   LocationCommand,
   LocationErrorCode,
   LocationsReduceResult,
@@ -19,6 +20,8 @@ export type AddLocationInput = {
   timeZoneId: string;
   label: string;
   countryCode: string;
+  /** Implements FR6 of add-city-coordinates-to-locations (D6). */
+  coordinates?: Coordinates;
 };
 
 export type WorldClockStore = Store<

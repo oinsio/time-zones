@@ -10,9 +10,21 @@ import {
 } from "@/adapters";
 import { LocationsProvider, useLocations } from "@/controller";
 import type { CitySearch, LoadCitySearch } from "@/ports";
+import { fullCityData, fullZoneCities } from "@/test/fullCityData";
 import { storedEmptyList } from "@/test/renderLocations";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationSearch } from "./LocationSearch";
+
+function LocationCoordinates() {
+  const { locations } = useLocations();
+  return (
+    <p data-testid="coordinates">
+      {JSON.stringify(
+        locations.map((location) => location.coordinates ?? null),
+      )}
+    </p>
+  );
+}
 
 function LocationNames() {
   const { rows } = useLocations();
@@ -33,6 +45,7 @@ const renderSearch = (
     >
       <LocationSearch loadCitySearch={loadCitySearch} />
       <LocationNames />
+      <LocationCoordinates />
     </LocationsProvider>,
   );
   return loadCitySearch;
@@ -84,6 +97,22 @@ describe("LocationSearch", () => {
     await userEvent.click(screen.getByRole("option", { name: /Moscow/ }));
     expect(screen.getByTestId("names")).toHaveTextContent("Moscow");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  // Verifies FR6 of add-city-coordinates-to-locations (D6).
+  it("should add the chosen city with the coordinates of its record", async () => {
+    renderSearch(
+      vi.fn(async () =>
+        createCompositeCitySearch(fullZoneCities, fullCityData),
+      ),
+    );
+    await openSearch();
+    await screen.findByText("Popular locations");
+    await userEvent.type(screen.getByRole("combobox"), "Kazan");
+    await userEvent.click(screen.getByRole("option", { name: /Kazan/ }));
+    expect(screen.getByTestId("coordinates")).toHaveTextContent(
+      JSON.stringify([null, { latitude: 55.8, longitude: 49.1 }]),
+    );
   });
 
   it("should announce the added city politely", async () => {

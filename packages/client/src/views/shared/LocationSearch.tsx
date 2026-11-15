@@ -41,6 +41,7 @@ function OpenLocationSearch({
       timeZoneId: result.timeZoneId,
       label: result.cityName,
       countryCode: result.countryCode,
+      coordinates: result.coordinates,
     });
     onAdded(t("locations.addedAnnouncement", { city: result.cityName }));
     onClose();
