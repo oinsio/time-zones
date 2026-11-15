@@ -20,8 +20,8 @@ type SettingsTimeRangeGroupProps = {
   /** Shown under the fields in a polite live region and read as their description. */
   hint?: string;
   invalidFields?: TimeRangeInvalidFields;
-  /** Enter, or leaving the row with changed texts: the pair the user confirms. */
-  onConfirm: (startText: string, endText: string) => void;
+  /** Enter, or leaving the row with changed texts: the pair the user confirms. Returns whether it was accepted; the fields then show the given texts again. */
+  onConfirm: (startText: string, endText: string) => boolean;
   /** Esc with edited texts or a shown hint: the group shows the given texts again. */
   onRestore: () => void;
 };
@@ -53,8 +53,21 @@ export function SettingsTimeRangeGroup({
   const hintId = useId();
   const [typedStart, setTypedStart] = useState(startText);
   const [typedEnd, setTypedEnd] = useState(endText);
+  const [shownTexts, setShownTexts] = useState({ startText, endText });
+  if (shownTexts.startText !== startText || shownTexts.endText !== endText) {
+    setShownTexts({ startText, endText });
+    setTypedStart(startText);
+    setTypedEnd(endText);
+  }
   const hasHint = hint !== undefined && hint !== "";
   const isEdited = typedStart !== startText || typedEnd !== endText;
+
+  const confirm = () => {
+    if (onConfirm(typedStart, typedEnd)) {
+      setTypedStart(startText);
+      setTypedEnd(endText);
+    }
+  };
 
   const restore = () => {
     setTypedStart(startText);
@@ -71,7 +84,7 @@ export function SettingsTimeRangeGroup({
     }
     if (event.key === KeyboardKey.ENTER) {
       event.preventDefault();
-      onConfirm(typedStart, typedEnd);
+      confirm();
     } else if (isEscapeToHold) {
       restore();
     }
@@ -79,7 +92,7 @@ export function SettingsTimeRangeGroup({
 
   const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
     if (event.currentTarget.contains(event.relatedTarget)) return;
-    if (isEdited) onConfirm(typedStart, typedEnd);
+    if (isEdited) confirm();
   };
 
   const fieldProps = (isInvalid: boolean) => ({

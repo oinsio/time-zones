@@ -29,31 +29,36 @@ const INVALID_FIELDS_BY_OUTCOME: Partial<
 /**
  * The working hours row of the settings: shown only in the Working hours
  * colouring, directly under the colouring group. The controller parses and
- * checks the typed texts; this component maps the outcome to a hint. It is
- * keyed by the stored range and the hour format, so a change from another tab
- * or a new hour format resets the texts, and a saved range shows its canonical
- * texts again.
+ * checks the typed texts; this component maps the outcome to a hint. The fields
+ * are never remounted, so the focus stays; a change of the stored range or the
+ * hour format (from another tab, say) clears the hint and the fields show the
+ * new texts.
  * Implements FR4, FR5, FR6, FR7, FR14, UX2, UX3, UX5 of add-day-colouring-setting (D8).
  */
 export function WorkingHoursGroup() {
   const { preferences } = usePreferences();
   if (preferences.dayColouring !== DayColouring.WORKING_HOURS) return null;
-  const { start, end } = preferences.workingHours;
-  return <WorkingHoursRow key={`${start}|${end}|${preferences.hourFormat}`} />;
+  return <WorkingHoursRow />;
 }
 
 function WorkingHoursRow() {
   const { t } = useTranslation();
+  const { preferences } = usePreferences();
   const { startText, endText, confirmWorkingHoursInput } =
     useWorkingHoursInput();
   const [refusal, setRefusal] = useState<
     WorkingHoursInputOutcome | undefined
   >();
-  const [savedCount, setSavedCount] = useState(0);
+  const { workingHours } = preferences;
+  const storedKey = `${workingHours.start}|${workingHours.end}|${preferences.hourFormat}`;
+  const [seenStoredKey, setSeenStoredKey] = useState(storedKey);
+  if (seenStoredKey !== storedKey) {
+    setSeenStoredKey(storedKey);
+    setRefusal(undefined);
+  }
   const hintKey = refusal === undefined ? undefined : HINT_KEYS[refusal];
   return (
     <SettingsTimeRangeGroup
-      key={savedCount}
       caption={t("settings.workingHoursLabel")}
       startLabel={t("settings.workingHoursStartLabel")}
       endLabel={t("settings.workingHoursEndLabel")}
@@ -66,9 +71,7 @@ function WorkingHoursRow() {
       onConfirm={(typedStart, typedEnd) => {
         const outcome = confirmWorkingHoursInput(typedStart, typedEnd);
         setRefusal(outcome);
-        if (outcome === WorkingHoursInputOutcome.SAVED) {
-          setSavedCount((count) => count + 1);
-        }
+        return outcome === WorkingHoursInputOutcome.SAVED;
       }}
       onRestore={() => setRefusal(undefined)}
     />

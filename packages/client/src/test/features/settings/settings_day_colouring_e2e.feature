@@ -27,6 +27,14 @@ Feature: Colouring settings in a real browser
     Then the fields "Start of working hours" and "End of working hours" are marked invalid
     And both fields are described by "The start must be before the end"
 
+  @add-day-colouring-setting @NFR-A2
+  Scenario: A saved range keeps the focus in the field
+    Given the locations interface language is English
+    And the day colouring is "Working hours"
+    And the user opens the settings
+    When the user types "9:07" into the field "Start of working hours" and presses Enter
+    Then the field "Start of working hours" keeps the focus
+
   @add-day-colouring-setting @NFR-A1 @NFR-A2 @NFR-A4
   Scenario Outline: Size, focus and no violations in the <theme> theme
     Given the locations interface language is English

@@ -270,3 +270,11 @@ Then("the main page is shown", async ({ locationsWorld }) => {
   await expect(settingsButton(locationsWorld.page)).toBeVisible();
   await expect(workingHoursRow(locationsWorld.page)).toHaveCount(0);
 });
+
+// Verifies NFR-A2 of add-day-colouring-setting: a saved Enter does not move the focus.
+Then(
+  "the field {string} keeps the focus",
+  async ({ locationsWorld }, name: string) => {
+    await expect(fieldOf(locationsWorld.page, name)).toBeFocused();
+  },
+);

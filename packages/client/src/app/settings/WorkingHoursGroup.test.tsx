@@ -83,6 +83,22 @@ describe("WorkingHoursGroup", () => {
     });
   });
 
+  // Verifies NFR-A2 of add-day-colouring-setting.
+  it("should keep the focus in the field after a saved Enter", async () => {
+    renderGroup();
+    await typeInto(startField(), "907");
+    await userEvent.type(startField(), "{Enter}");
+    expect(startField()).toHaveFocus();
+  });
+
+  it("should show the canonical text again after an equivalent entry", async () => {
+    renderGroup();
+    await typeInto(startField(), "1000");
+    await userEvent.type(startField(), "{Enter}");
+    expect(startField()).toHaveValue("10:00");
+    expect(startField()).toHaveFocus();
+  });
+
   it("should accept 5:30 pm as the end in the 12-hour format", async () => {
     const repository = renderGroup({ hourFormat: HourFormat.H12 });
     await typeInto(endField(), "5:30 pm{Enter}");
