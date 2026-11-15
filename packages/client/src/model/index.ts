@@ -151,3 +151,5 @@ export {
 } from "./workingTime";
 // Implements FR1, FR2 of show-zone-abbreviations-and-zone-label-setting.
 export { getZoneAbbreviation, getZoneAbbreviations } from "./zoneAbbreviation";
+// Implements FR5, FR6, FR7 of add-city-coordinates-to-locations.
+export { type Coordinates, parseCoordinates } from "./coordinates";

@@ -9,8 +9,8 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `temp
 
 ## 2. Coordinates in the model (FR5, FR6, FR7; design D1)
 
-- [ ] 2.1 `src/constants/coordinates.ts` (`MAX_LATITUDE_DEGREES = 90`, `MAX_LONGITUDE_DEGREES = 180`, `COORDINATE_TENTHS_PER_DEGREE = 10`; no imports) exported from `src/constants/index.ts`. Verify: `pnpm --filter @time-zones/client typecheck`.
-- [ ] 2.2 `src/model/coordinates.ts` with `src/model/coordinates.test.ts`: `Coordinates` and `parseCoordinates` (accepts two finite numbers in range, ±90 and ±180 included; rejects a missing field, text, `NaN`, 91, −91, 181, −181, an array; `it.each`). Export from `src/model/index.ts`. Verify: `npx vitest run src/model/coordinates.test.ts`.
+- [x] 2.1 `src/constants/coordinates.ts` (`MAX_LATITUDE_DEGREES = 90`, `MAX_LONGITUDE_DEGREES = 180`, `COORDINATE_TENTHS_PER_DEGREE = 10`; no imports) exported from `src/constants/index.ts`. Verify: `pnpm --filter @time-zones/client typecheck`.
+- [x] 2.2 `src/model/coordinates.ts` with `src/model/coordinates.test.ts`: `Coordinates` and `parseCoordinates` (accepts two finite numbers in range, ±90 and ±180 included; rejects a missing field, text, `NaN`, 91, −91, 181, −181, an array; `it.each`). Export from `src/model/index.ts`. Verify: `npx vitest run src/model/coordinates.test.ts`.
 
 ## 3. City data compiler (FR1, FR4; design D2, D4)
 
