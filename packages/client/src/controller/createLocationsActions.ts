@@ -80,11 +80,16 @@ export function createLocationsActions({
     },
     addLocation: (input) =>
       dispatchAndSchedule({ type: LocationCommandType.ADD_LOCATION, ...input }),
-    fillLocationCoordinates: (coordinatesByLocationId) =>
-      void dispatchAndSchedule({
+    // Written at once, not debounced: another tab that edits meanwhile must
+    // not meet a write of the older list.
+    fillLocationCoordinates: (coordinatesByLocationId) => {
+      const snapshotBefore = store.getSnapshot();
+      store.dispatch({
         type: LocationCommandType.FILL_LOCATION_COORDINATES,
         coordinatesByLocationId,
-      }),
+      });
+      if (store.getSnapshot() !== snapshotBefore) flushWrite();
+    },
     addDeviceTimeLocation: () =>
       dispatchAndSchedule({
         type: LocationCommandType.ADD_DEVICE_TIME_LOCATION,

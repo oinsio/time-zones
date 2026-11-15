@@ -124,6 +124,10 @@ export function LocationsProvider({
 
   useEffect(() => {
     const unsubscribe = repository.subscribe((result) => {
+      // The other tab's list is the newer truth: a write pending here (a
+      // coordinates fill, say) would bring the older list back (FR8 of add-city-coordinates-to-locations).
+      cancelPendingWrite.current?.();
+      cancelPendingWrite.current = undefined;
       store.dispatch({
         type: LocationCommandType.REPLACE_LOCATIONS,
         ...storedOf(result, store.getSnapshot().deviceTimeZoneId),
