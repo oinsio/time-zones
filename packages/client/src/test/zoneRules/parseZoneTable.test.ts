@@ -48,3 +48,35 @@ describe("parseZoneTable", () => {
     expect(() => parseZoneTable(table)).toThrow(/line 3/);
   });
 });
+
+describe("parseZoneTable strictness", () => {
+  it.each([
+    ["text before the coordinates", "x+554521+0373704"],
+    ["text after the coordinates", "+554521+0373704x"],
+    ["a space inside the coordinates", "+554521 +0373704"],
+  ])("should throw for %s", (_, coordinates) => {
+    expect(() => parseZoneTable(row(coordinates, "Zone/Id"))).toThrow(/line 1/);
+  });
+
+  it("should skip a line of spaces", () => {
+    expect([...parseZoneTable("   \n").keys()]).toEqual([]);
+  });
+
+  it("should throw naming the line for an empty zone ID", () => {
+    expect(() => parseZoneTable("RU\t+2232+08822\t\n")).toThrow(/no zone ID/);
+  });
+
+  it("should write a zero for a place on the equator and the meridian, never a negative zero", () => {
+    const [latitudeTenths, longitudeTenths] = parseZoneTable(
+      row("-0000-00000", "Zone/Id"),
+    ).get("Zone/Id") as [number, number];
+    expect(Object.is(latitudeTenths, 0)).toBe(true);
+    expect(Object.is(longitudeTenths, 0)).toBe(true);
+  });
+
+  it("should round half a tenth towards positive infinity as the city data does", () => {
+    expect(
+      parseZoneTable(row("+0003-00003", "Zone/Id")).get("Zone/Id"),
+    ).toEqual([1, 0]);
+  });
+});
