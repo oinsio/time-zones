@@ -29,6 +29,9 @@ export const RETRY_NAME = englishLocale.locations.retry;
 export const SCREEN_HEIGHT_PX = 800;
 export const UNREADABLE_DOCUMENT_TEXT = "{not json";
 
+/** Any valid place: a stored entry that holds coordinates is never filled, so never rewritten. */
+const SEEDED_COORDINATES = { latitude: 0, longitude: 0 };
+
 const KNOWN_CITIES: Record<string, StoredLocation> = {
   Almaty: { timeZoneId: "Asia/Almaty", label: "Almaty", countryCode: "KZ" },
   Moscow: { timeZoneId: "Europe/Moscow", label: "Moscow", countryCode: "RU" },
@@ -103,7 +106,7 @@ export function buildStoredLocations(cityNames: string[]): StoredEntry[] {
     if (cityName === DEVICE_TIME_LIST_PHRASE) return DEVICE_TIME_ENTRY;
     const knownCity = KNOWN_CITIES[cityName];
     if (!knownCity) throw new Error(`Unknown city in a scenario: ${cityName}`);
-    return knownCity;
+    return { ...knownCity, coordinates: SEEDED_COORDINATES };
   });
 }
 
