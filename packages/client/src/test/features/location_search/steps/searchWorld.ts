@@ -89,6 +89,17 @@ export const countLoadingWork = (timeZoneId: string, storedLabel: string) => {
   return workCount.normalizations();
 };
 
+/** Counts the normalizations of loading a fresh search and asking the coordinates of one stored location (FR8, NFR-P2 of add-city-coordinates-to-locations). */
+export const countCoordinatesLoadingWork = (
+  timeZoneId: string,
+  storedLabel: string,
+) => {
+  const workCount = startWorkCount();
+  buildCitySearch().getCoordinates(timeZoneId, storedLabel);
+  workCount.stop();
+  return workCount.normalizations();
+};
+
 export const cityNamesOf = (world: SearchWorld): string[] =>
   world.results.map((result) => result.record.names[world.language]);
 

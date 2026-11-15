@@ -20,6 +20,12 @@ Feature: Location search performance
     When the search data finishes loading and the Kazan row shows its city label
     Then no text was normalized
 
+  @add-city-coordinates-to-locations @NFR-P2
+  Scenario: Coordinates of stored locations do no search work
+    Given the list holds Kazan without coordinates and the search was not opened
+    When the search data finishes loading and Kazan gains its coordinates
+    Then no text was normalized
+
   @show-zone-abbreviations-and-zone-label-setting @NFR-P3
   Scenario: Abbreviation query within the work bound
     Given the full data is prepared for search

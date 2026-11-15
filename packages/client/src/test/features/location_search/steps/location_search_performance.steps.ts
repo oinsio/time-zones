@@ -1,4 +1,5 @@
 // Verifies NFR-P3 of show-zone-abbreviations-and-zone-label-setting (abbreviation query work bound).
+// Verifies NFR-P2 of add-city-coordinates-to-locations: loading for coordinates normalizes no text.
 // Verifies NFR-P2, NFR-P3 of add-geonames-city-source (D6): work bounds over the prepared full data.
 // The shared search of searchWorld.ts runs one preparation query when it is built.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
@@ -10,6 +11,7 @@ import {
   NORMALIZATIONS_PER_QUERY,
 } from "@/test/workCounters";
 import {
+  countCoordinatesLoadingWork,
   countLoadingWork,
   countPreparationWork,
   countSearchWork,
@@ -81,6 +83,32 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "the search data finishes loading and the Kazan row shows its city label",
         () => {
           normalizationCount = countLoadingWork("Europe/Moscow", "Kazan");
+        },
+      );
+      Then("no text was normalized", () => {
+        expect(normalizationCount).toBe(0);
+      });
+    },
+  );
+
+  // @add-city-coordinates-to-locations @NFR-P2
+  f.Scenario(
+    "Coordinates of stored locations do no search work",
+    ({ Given, When, Then }) => {
+      let normalizationCount = Number.POSITIVE_INFINITY;
+      Given(
+        "the list holds Kazan without coordinates and the search was not opened",
+        () => {
+          // A stored location is a zone and a label: nothing to set up.
+        },
+      );
+      When(
+        "the search data finishes loading and Kazan gains its coordinates",
+        () => {
+          normalizationCount = countCoordinatesLoadingWork(
+            "Europe/Moscow",
+            "Kazan",
+          );
         },
       );
       Then("no text was normalized", () => {
