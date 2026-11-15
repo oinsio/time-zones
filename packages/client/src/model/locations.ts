@@ -1,4 +1,5 @@
 import { DEVICE_TIME_ZONE_FALLBACK_ID } from "@/constants";
+import { type Coordinates, parseCoordinates } from "./coordinates";
 import {
   reduceAddDeviceTimeLocation,
   withDeviceTimeZone,
@@ -14,6 +15,7 @@ import { LocationKind } from "./locationKind";
 import type { MeetingRange } from "./meetingRange";
 import { moveLocationInList } from "./moveLocation";
 import { reduceHomeLocation } from "./reduceHomeLocation";
+import { reduceLocationCoordinates } from "./reduceLocationCoordinates";
 import {
   followMeetingRange,
   reduceClearMeetingRange,
@@ -43,6 +45,7 @@ export { LocationKind } from "./locationKind";
  * Implements FR3, FR8 of add-time-sliders-to-location-cards (D1): SELECT_INSTANT.
  * Implements FR1, FR2, FR3, FR10 of set-home-location-and-show-differences (D1).
  * Implements FR1-FR4 of add-grid-meeting-range-and-share (D1): the meeting range.
+ * Implements FR6, FR8, FR9 of add-city-coordinates-to-locations (D6, D7): coordinates of city locations.
  */
 
 export type Location = {
@@ -53,6 +56,11 @@ export type Location = {
   label: string;
   /** ISO 3166-1 alpha-2 code; empty for zones without a country. */
   countryCode: string;
+  /**
+   * Where a city location is; not part of its identity, never shown, never on
+   * the device time location.
+   */
+  coordinates?: Coordinates;
 };
 
 export type WorldClockState = {
@@ -115,12 +123,14 @@ function reduceCommand(
       if (state.locations.some((location) => location.id === id)) {
         return failWith(LocationErrorCode.DUPLICATE_LOCATION);
       }
+      const coordinates = parseCoordinates(command.coordinates);
       const added: Location = {
         id,
         kind: LocationKind.CITY,
         timeZoneId,
         label: command.label,
         countryCode: command.countryCode,
+        ...(coordinates === undefined ? {} : { coordinates }),
       };
       return {
         ok: true,
@@ -161,6 +171,8 @@ function reduceCommand(
     }
     case LocationCommandType.SET_HOME_LOCATION:
       return reduceHomeLocation(state, command);
+    case LocationCommandType.FILL_LOCATION_COORDINATES:
+      return reduceLocationCoordinates(state, command);
     case LocationCommandType.SET_DEVICE_TIME_ZONE: {
       const deviceTimeZoneId =
         canonicalizeTimeZoneId(command.timeZoneId) ??
