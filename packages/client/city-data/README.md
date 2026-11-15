@@ -26,7 +26,9 @@ dump it was compiled from.
   zone, which is held once as the zone city and not as a GeoNames city;
 - `zoneCityRegions`: the region of a zone city that is a namesake (1 zone).
 
-Size: 418 768 bytes, 168 853 bytes gzipped (`gzip -9`).
+Size: 418 768 bytes, 168 853 bytes gzipped (`gzip -9`). The served search data file (zone cities and
+the city data) measures 141.5 KB gzipped against the budget of 150 KB
+(`CITY_SEARCH_DATA_BUDGET_KB`).
 
 Facts of this dump that the specs use: three cities named Springfield in `US`
 (Illinois, Missouri, Massachusetts); Kazan in `Europe/Moscow` with 1 243 500
