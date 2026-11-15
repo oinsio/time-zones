@@ -1,19 +1,15 @@
-import { UTC_ZONE_ID } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import type { HourFormat, WorkingHours } from "@/preferences";
-import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
+import { formatWallClockTime } from "./localDateTime";
 
 /**
  * The texts of the working hours fields: a wall time written the way the app
- * writes local times everywhere, in the chosen hour format. The wall time is
- * placed on the epoch date, as `getDayPeriodMarkers` reads its markers.
+ * writes local times everywhere, in the chosen hour format.
  * Implements FR5 of add-day-colouring-setting (D5).
  */
 
 export type WorkingHoursTexts = { startText: string; endText: string };
-
-const EPOCH_DATE = Temporal.PlainDate.from("1970-01-01");
 
 /** `10:00` or `10:00 AM`, `09:07` or `9:07 AM`. */
 export function formatWorkingHoursTime(
@@ -21,16 +17,11 @@ export function formatWorkingHoursTime(
   language: InterfaceLanguageCode,
   hourFormat: HourFormat,
 ): string {
-  const instant = EPOCH_DATE.toZonedDateTime({
-    timeZone: UTC_ZONE_ID,
-    plainTime: wallTime,
-  });
-  return getDateTimeFormatter(
+  return formatWallClockTime(
+    Temporal.PlainTime.from(wallTime),
     language,
-    UTC_ZONE_ID,
-    DateTimeLabelKind.LOCAL_TIME,
     hourFormat,
-  ).format(instant.epochMilliseconds);
+  );
 }
 
 export function presentWorkingHoursTexts(
