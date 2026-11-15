@@ -7,6 +7,7 @@ import { getUtcOffsetMinutes, type Location } from "@/model";
 import type { HourFormat } from "@/preferences";
 import { DEFAULT_PREFERENCES } from "@/preferences";
 import { presentLocationRows } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
@@ -36,6 +37,7 @@ const presentIn = (
   presentLocationRows(locations, {
     language,
     hourFormat,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(language),

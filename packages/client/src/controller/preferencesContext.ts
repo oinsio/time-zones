@@ -1,8 +1,10 @@
 import { createContext } from "react";
 import type {
+  DayColouring,
   HourFormat,
   Preferences,
   ThemePreference,
+  WorkingHours,
   ZoneLabelPart,
 } from "@/preferences";
 
@@ -24,6 +26,10 @@ export type PreferencesContextValue = {
   setZoneLabelPart: (part: ZoneLabelPart, isShown: boolean) => void;
   /** Implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1). */
   setViewMode: (viewMode: string) => void;
+  /** Implements FR1, FR3 of add-day-colouring-setting (D1). */
+  setDayColouring: (dayColouring: DayColouring) => void;
+  /** Implements FR6, FR7 of add-day-colouring-setting (D1). */
+  setWorkingHours: (workingHours: WorkingHours) => void;
   /** Clears the stored document and returns to the defaults. */
   resetPreferences: () => void;
 };

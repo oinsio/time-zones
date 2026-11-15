@@ -6,9 +6,14 @@ import {
   getReferenceDay,
   getReferenceZone,
 } from "@/model";
-import { type PresentedHourStrip, presentHourStrip } from "@/presenter";
+import {
+  getHourFrameColour,
+  type PresentedHourStrip,
+  presentHourStrip,
+} from "@/presenter";
 import { LocationsContext } from "./locationsContext";
 import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
+import { useDayColouring } from "./useDayColouring";
 import { useHourFormat } from "./useHourFormat";
 
 const MISSING_PROVIDER_MESSAGE =
@@ -21,6 +26,7 @@ const MISSING_PROVIDER_MESSAGE =
  * and hour format stay.
  * Implements FR8, FR9, NFR-P1 of add-grid-hour-cells-and-hour-frame (D3).
  * Implements FR7 of add-grid-meeting-range-and-share (D5): `hasMeetingRange` ends the hour frame.
+ * Implements FR12, FR13 of add-day-colouring-setting (D4): the day colouring and the hour frame colour.
  */
 export function useHourGrid() {
   const context = useContext(LocationsContext);
@@ -28,6 +34,7 @@ export function useHourGrid() {
   const { store, clock, minuteTick } = context;
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const hourFormat = useHourFormat();
+  const { dayColouring, workingHours } = useDayColouring();
   const { code: language } = useActiveInterfaceLanguage();
   // biome-ignore lint/correctness/useExhaustiveDependencies: minuteTick moves the live frame at each minute
   return useMemo(() => {
@@ -44,6 +51,8 @@ export function useHourGrid() {
             referenceZoneId,
             language,
             hourFormat,
+            dayColouring,
+            workingHours,
           }),
         );
       } catch (error) {
@@ -55,6 +64,15 @@ export function useHourGrid() {
       hourFrameIndex: getHourFrameIndex(day, getEffectiveInstant(state, now)),
       cellCount: getHourCellCount(day),
       hasMeetingRange: state.meeting !== undefined,
+      hourFrameColour: getHourFrameColour(dayColouring),
     };
-  }, [state, language, hourFormat, clock, minuteTick]);
+  }, [
+    state,
+    language,
+    hourFormat,
+    dayColouring,
+    workingHours,
+    clock,
+    minuteTick,
+  ]);
 }

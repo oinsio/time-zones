@@ -24,6 +24,8 @@ const darkTwelveHour: Preferences = {
   interfaceLanguage: null,
   zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
   viewMode: null,
+  dayColouring: DEFAULT_PREFERENCES.dayColouring,
+  workingHours: DEFAULT_PREFERENCES.workingHours,
 };
 
 /**

@@ -108,6 +108,8 @@ export async function seedTwelveHourState(world: LocationsWorld) {
         interfaceLanguage: world.seededInterfaceLanguage,
         zoneLabelParts: ALL_ZONE_LABEL_PARTS,
         viewMode: null,
+        dayColouring: "TIME_OF_DAY",
+        workingHours: { start: "10:00", end: "18:00" },
       },
     }),
   );

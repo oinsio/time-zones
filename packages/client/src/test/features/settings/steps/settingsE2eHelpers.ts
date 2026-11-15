@@ -51,6 +51,54 @@ export const seedPreferences = async (page: Page, documentText: string) =>
     { key: STORAGE_KEYS.PREFERENCES, text: documentText },
   );
 
+/** The stored payload a scenario starts from when it names no other preferences. */
+const SEEDED_DEFAULT_PAYLOAD = {
+  theme: "SYSTEM",
+  hourFormat: "H24",
+  zoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION", "COUNTRY"],
+  viewMode: null,
+  dayColouring: "TIME_OF_DAY",
+  workingHours: { start: "10:00", end: "18:00" },
+};
+
+/**
+ * Merges fields into the stored preferences document before the app reads it,
+ * once per page (a marker keeps a reload from undoing what the user chose).
+ * A scenario that also seeds the view mode seeds it first.
+ * Implements FR2, FR6 of add-day-colouring-setting.
+ */
+export const seedPreferenceFields = (
+  page: Page,
+  fields: Record<string, unknown>,
+  interfaceLanguage: string | null,
+) =>
+  page.addInitScript(
+    ({ key, version, defaults, seededFields, language }) => {
+      const markerKey = `${key}-seeded-${JSON.stringify(seededFields)}`;
+      if (window.localStorage.getItem(markerKey) !== null) return;
+      window.localStorage.setItem(markerKey, "1");
+      const rawDocument = window.localStorage.getItem(key);
+      const payload =
+        rawDocument === null
+          ? { ...defaults, interfaceLanguage: language }
+          : JSON.parse(rawDocument).payload;
+      window.localStorage.setItem(
+        key,
+        JSON.stringify({
+          schemaVersion: version,
+          payload: { ...payload, ...seededFields },
+        }),
+      );
+    },
+    {
+      key: STORAGE_KEYS.PREFERENCES,
+      version: PREFERENCES_SCHEMA_VERSION,
+      defaults: SEEDED_DEFAULT_PAYLOAD,
+      seededFields: fields,
+      language: interfaceLanguage,
+    },
+  );
+
 export const ZONE_LABEL_GROUP_ROLE = "group";
 /** Implements FR1, FR3 of add-country-to-zone-label (D6). */
 export const ZONE_LABEL_PART_VALUES: Record<string, string[]> = {
@@ -98,6 +146,8 @@ export const seedZoneLabelParts = (
         interfaceLanguage,
         zoneLabelParts: ZONE_LABEL_PART_VALUES[partsName],
         viewMode: null,
+        dayColouring: "TIME_OF_DAY",
+        workingHours: { start: "10:00", end: "18:00" },
       },
     }),
   );

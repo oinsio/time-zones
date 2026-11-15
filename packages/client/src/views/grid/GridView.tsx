@@ -24,9 +24,16 @@ import { useVisibleStripRows } from "./useVisibleStripRows";
  * Implements FR1, FR2, UX1 of fix-grid-meeting-range-lock-and-layering (D1): the rows lock while a meeting range is set.
  * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D4): binds the meeting range input.
  * Implements FR7, NFR-P1 of refine-meeting-range-entry-and-handles (D5): the handles stand on the visible rows.
+ * Implements FR13 of add-day-colouring-setting (D7): colours the hour frame.
  */
 export default function GridView() {
-  const { strips, hourFrameIndex, cellCount, hasMeetingRange } = useHourGrid();
+  const {
+    strips,
+    hourFrameIndex,
+    cellCount,
+    hasMeetingRange,
+    hourFrameColour,
+  } = useHourGrid();
   const { moveTrack } = useTimeSelection();
   const {
     meeting,
@@ -87,7 +94,7 @@ export default function GridView() {
         <MeetingHandleSlider presented={meeting.handles.end} {...handleProps} />
       </>
     ) : (
-      <HourFrame hourFrameIndex={hourFrameIndex} />
+      <HourFrame hourFrameIndex={hourFrameIndex} colour={hourFrameColour} />
     ),
     meetingRangeOf: (row) => meeting?.rowRanges.get(row.id),
     panelRef,

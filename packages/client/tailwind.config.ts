@@ -55,8 +55,9 @@ const config: Config = {
         day: {
           night: "var(--color-day-night)",
           morning: "var(--color-day-morning)",
-          working: "var(--color-day-working)",
+          work: "var(--color-day-work)",
           evening: "var(--color-day-evening)",
+          "non-working": "var(--color-day-non-working)",
         },
       },
       // Fallback for engines without the dvh unit (iOS Safari before 15.4): both

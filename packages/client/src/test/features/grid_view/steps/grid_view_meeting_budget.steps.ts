@@ -1,4 +1,5 @@
 // Verifies NFR-P1 of add-grid-meeting-range-and-share.
+
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
@@ -18,6 +19,7 @@ import {
   presentHourStrip,
   presentLocationMeetingRange,
 } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import {
   HOUR_STRIP_BUDGET_ROW_COUNT,
@@ -44,6 +46,7 @@ const presentRows = (meeting: MeetingRange): PresentedHourStrip[] =>
     presentLocationMeetingRange(zone, meeting, REFERENCE_ZONE, {
       language: "en",
       hourFormat: HourFormat.H24,
+      ...TIME_OF_DAY_CONTEXT,
       translate: i18n.getFixedT("en"),
     });
     return presentHourStrip(zone, {
@@ -51,6 +54,7 @@ const presentRows = (meeting: MeetingRange): PresentedHourStrip[] =>
       referenceZoneId: REFERENCE_ZONE,
       language: "en",
       hourFormat: HourFormat.H24,
+      ...TIME_OF_DAY_CONTEXT,
     });
   });
 

@@ -9,6 +9,7 @@ import { Temporal } from "@/lib/temporal";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import type { PresentedSearchResult } from "@/presenter";
 import { presentLocationRows, presentSearchResults } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import {
@@ -81,6 +82,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       rows = presentLocationRows(locations, {
         language: LANGUAGE,
         hourFormat: HourFormat.H24,
+        ...TIME_OF_DAY_CONTEXT,
         zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
         instant,
         translate: i18n.t,

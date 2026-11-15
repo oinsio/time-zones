@@ -1,11 +1,13 @@
 // Verifies FR2, FR3, FR5, FR6, FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
 // Verifies FR3, FR4 of add-country-to-zone-label.
+
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { fakeClock } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import { buildDeviceTimeLocation } from "@/model";
 import { HourFormat, ZoneLabelPart } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { presentLocationRows } from "./presentLocationRows";
@@ -40,6 +42,7 @@ function present(
   return presentLocationRows(locations, {
     language,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     instant,
     deviceTimeZoneId,
     homeLocationId: null,

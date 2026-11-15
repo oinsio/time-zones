@@ -1,6 +1,8 @@
 import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { type PreferencesLoadResult, PreferencesLoadStatus } from "@/ports";
 import {
+  DayColouring,
+  DEFAULT_WORKING_HOURS,
   type Preferences,
   parseStoredPreferences,
   ZoneLabelPart,
@@ -18,6 +20,8 @@ import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
  * Version 3 had no view mode: the step leaves none chosen (Cards).
  * Implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
  * The country step implements FR6 of add-country-to-zone-label (D2).
+ * Version 5 had no day colouring: step 5 adds Time of day and the default
+ * working hours. Implements FR2, FR7 of add-day-colouring-setting (D2).
  */
 export const createPreferencesMigrations = (
   legacyInterfaceLanguage: string | null,
@@ -41,6 +45,11 @@ export const createPreferencesMigrations = (
         }
       : payload;
   },
+  5: (payload) => ({
+    ...(payload as object),
+    dayColouring: DayColouring.TIME_OF_DAY,
+    workingHours: DEFAULT_WORKING_HOURS,
+  }),
 });
 
 export const serializePreferencesDocument = (
@@ -54,6 +63,8 @@ export const serializePreferencesDocument = (
       interfaceLanguage: preferences.interfaceLanguage,
       zoneLabelParts: preferences.zoneLabelParts,
       viewMode: preferences.viewMode,
+      dayColouring: preferences.dayColouring,
+      workingHours: preferences.workingHours,
     },
   });
 

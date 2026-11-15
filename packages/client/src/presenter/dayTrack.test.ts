@@ -1,5 +1,7 @@
+// Verifies FR2, FR9, FR10 of add-day-colouring-setting.
 // Verifies FR3 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).
+
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
@@ -9,8 +11,14 @@ import {
   getReferenceDay,
   INITIAL_WORLD_CLOCK_STATE,
 } from "@/model";
-import { HourFormat } from "@/preferences";
-import { formatHourLabel, presentDayTrack } from "./dayTrack";
+import { DayColouring, DEFAULT_WORKING_HOURS, HourFormat } from "@/preferences";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
+import { DayColour, presentDayColourStops } from "./dayColours";
+import {
+  type DayTrackContext,
+  formatHourLabel,
+  presentDayTrack,
+} from "./dayTrack";
 
 const INSTANT = Temporal.Instant.from("2026-03-08T07:30:00Z");
 const PRECISION = 6;
@@ -19,21 +27,33 @@ const DAY = getReferenceDay(
   INSTANT,
 );
 
+const contextFor = (
+  timeZoneId: string,
+  language: InterfaceLanguageCode = "en",
+  localTimeLabel = "12:30",
+  localDateLabel = "Sun, Mar 8",
+) => ({
+  timeZoneId,
+  instant: INSTANT,
+  day: DAY,
+  language,
+  hourFormat: HourFormat.H24,
+  ...TIME_OF_DAY_CONTEXT,
+  translate: i18n.getFixedT(language),
+  localTimeLabel,
+  localDateLabel,
+});
+
 const present = (
   timeZoneId: string,
   language: InterfaceLanguageCode = "en",
   localTimeLabel = "12:30",
   localDateLabel = "Sun, Mar 8",
+  overrides: Partial<DayTrackContext> = {},
 ) =>
   presentDayTrack({
-    timeZoneId,
-    instant: INSTANT,
-    day: DAY,
-    language,
-    hourFormat: HourFormat.H24,
-    translate: i18n.getFixedT(language),
-    localTimeLabel,
-    localDateLabel,
+    ...contextFor(timeZoneId, language, localTimeLabel, localDateLabel),
+    ...overrides,
   });
 
 const labelsOf = (timeZoneId: string) =>
@@ -73,10 +93,46 @@ describe("presentDayTrack", () => {
     expect(track.maxMinutes).toBe(1439);
   });
 
-  it("should reuse the stops of the model", () => {
+  it("should present the day-period stops of the model as day colours in Time of day", () => {
     expect(present("Asia/Almaty").stops).toBe(
-      getDayPeriodStops("Asia/Almaty", DAY),
+      presentDayColourStops(
+        "Asia/Almaty",
+        DAY,
+        DayColouring.TIME_OF_DAY,
+        DEFAULT_WORKING_HOURS,
+      ),
     );
+    expect(present("Asia/Almaty").stops[0]).toEqual({
+      fraction: getDayPeriodStops("Asia/Almaty", DAY)[0].fraction,
+      colour: DayColour.NIGHT,
+    });
+  });
+
+  it("should give Plain one plain stop", () => {
+    expect(
+      present("Asia/Almaty", "en", "12:30", "Sun, Mar 8", {
+        dayColouring: DayColouring.PLAIN,
+      }).stops,
+    ).toEqual([{ fraction: 0, colour: DayColour.PLAIN }]);
+  });
+
+  it("should give Working hours the Almaty Monday stops", () => {
+    const monday = getReferenceDay(
+      { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "Asia/Almaty" },
+      Temporal.Instant.from("2026-03-09T06:00:00Z"),
+    );
+    const { stops } = presentDayTrack({
+      ...contextFor("Asia/Almaty"),
+      day: monday,
+      dayColouring: DayColouring.WORKING_HOURS,
+    });
+    expect(stops.map((stop) => stop.colour)).toEqual([
+      DayColour.NON_WORKING_TIME,
+      DayColour.WORKING_TIME,
+      DayColour.WORKING_TIME,
+      DayColour.NON_WORKING_TIME,
+    ]);
+    expect(stops[0].fraction).toBeCloseTo(0.416667, PRECISION);
   });
 
   it("should reuse the labels within one day and language", () => {

@@ -17,10 +17,10 @@ Feature: Hour cells of the Grid view in a real browser
     And the stored locations are "Almaty", "Moscow", "Kolkata", "New York"
     And the locations screen uses the <theme> theme
     When the user opens the locations app
-    Then the cells of "Almaty" in columns 3, 7, 9 and 18 have the <theme> night, morning, working hours and evening colours
+    Then the cells of "Almaty" in columns 3, 7, 9 and 18 have the <theme> night, morning, work and evening colours
     And the midnight cell of "Moscow" in column 2 has the <theme> midnight shade
     And the offset edge of "New York" in column 12 is a line in the <theme> foreground colour
-    And the digits of the working hours cell of "Almaty" in column 9 have the <theme> cell digit colour
+    And the digits of the work cell of "Almaty" in column 9 have the <theme> cell digit colour
 
     Examples:
       | theme |

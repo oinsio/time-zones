@@ -6,6 +6,7 @@ import {
 } from "@/constants";
 import { PreferencesLoadStatus, SaveOutcome } from "@/ports";
 import {
+  DayColouring,
   DEFAULT_PREFERENCES,
   HourFormat,
   ThemePreference,
@@ -91,6 +92,8 @@ describe("localStorage preferences repository", () => {
         interfaceLanguage: null,
         zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
         viewMode: null,
+        dayColouring: DayColouring.TIME_OF_DAY,
+        workingHours: { start: "10:00", end: "18:00" },
       }),
     ).toBe(SaveOutcome.FAILED);
   });
@@ -112,16 +115,20 @@ describe("localStorage preferences repository", () => {
       interfaceLanguage: "ru",
       zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
       viewMode: null,
+      dayColouring: DayColouring.TIME_OF_DAY,
+      workingHours: { start: "10:00", end: "18:00" },
     });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
-        schemaVersion: 5,
+        schemaVersion: 6,
         payload: {
           theme: "DARK",
           hourFormat: "H12",
           interfaceLanguage: "ru",
           zoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION", "COUNTRY"],
           viewMode: null,
+          dayColouring: DayColouring.TIME_OF_DAY,
+          workingHours: { start: "10:00", end: "18:00" },
         },
       },
     );
@@ -189,6 +196,8 @@ describe("in-memory preferences repository", () => {
       interfaceLanguage: null,
       zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
       viewMode: null,
+      dayColouring: DayColouring.TIME_OF_DAY,
+      workingHours: { start: "10:00", end: "18:00" },
     });
     expect(outcome).toBe(SaveOutcome.FAILED);
     expect(repository.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });

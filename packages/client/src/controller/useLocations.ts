@@ -11,6 +11,7 @@ import { type LocationRowsContext, presentLocationRows } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
 import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
 import { useCityLabels } from "./useCityLabels";
+import { useDayColouring } from "./useDayColouring";
 import { useExemplarCity } from "./useExemplarCity";
 import { useHourFormat } from "./useHourFormat";
 import { useZoneLabelParts } from "./useZoneLabelParts";
@@ -44,6 +45,7 @@ const MISSING_PROVIDER_MESSAGE =
  * Passes the city labels in the interface language: Implements FR1, FR2, FR4,
  * NFR-P1 of show-city-labels-in-interface-language (D3).
  * Passes the zone label: Implements FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
+ * Passes the day colouring and working hours: Implements FR3, FR12 of add-day-colouring-setting (D4).
  */
 export function useLocations() {
   const context = useContext(LocationsContext);
@@ -53,6 +55,7 @@ export function useLocations() {
   const { locations, deviceTimeZoneId, homeLocationId } = state;
   const hourFormat = useHourFormat();
   const zoneLabelParts = useZoneLabelParts();
+  const { dayColouring, workingHours } = useDayColouring();
   const { t } = useTranslation();
   const { code: language } = useActiveInterfaceLanguage();
   const deviceTimeLocation = locations.find(isDeviceTimeLocation);
@@ -68,6 +71,8 @@ export function useLocations() {
     const context: LocationRowsContext = {
       language,
       hourFormat,
+      dayColouring,
+      workingHours,
       zoneLabelParts,
       instant,
       translate: t,
@@ -91,6 +96,8 @@ export function useLocations() {
     cityLabels,
     language,
     hourFormat,
+    dayColouring,
+    workingHours,
     zoneLabelParts,
     t,
     clock,

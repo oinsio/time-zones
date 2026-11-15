@@ -39,13 +39,13 @@ Then(
 
 // Verifies FR4, UX1 of add-grid-hour-cells-and-hour-frame: the day-period colours of the theme.
 Then(
-  /^the cells of "([^"]+)" in columns 3, 7, 9 and 18 have the (light|dark) night, morning, working hours and evening colours$/,
+  /^the cells of "([^"]+)" in columns 3, 7, 9 and 18 have the (light|dark) night, morning, work and evening colours$/,
   async ({ locationsWorld }, city: string, theme: Theme) => {
     const colours = readThemeColours(theme);
     const expectedByColumn = [
       [NIGHT_COLUMN, colours.dayNight],
       [MORNING_COLUMN, colours.dayMorning],
-      [WORKING_COLUMN, colours.dayWorking],
+      [WORKING_COLUMN, colours.dayWork],
       [EVENING_COLUMN, colours.dayEvening],
     ] as const;
     for (const [column, colour] of expectedByColumn) {
@@ -92,9 +92,9 @@ Then(
   },
 );
 
-// Verifies FR4 of add-grid-hour-cells-and-hour-frame: digits on working hours cells.
+// Verifies FR4 of add-grid-hour-cells-and-hour-frame: digits on work cells.
 Then(
-  /^the digits of the working hours cell of "([^"]+)" in column 9 have the (light|dark) cell digit colour$/,
+  /^the digits of the work cell of "([^"]+)" in column 9 have the (light|dark) cell digit colour$/,
   async ({ locationsWorld }, city: string, theme: Theme) => {
     await expect(cellOf(locationsWorld.page, city, WORKING_COLUMN)).toHaveCSS(
       "color",

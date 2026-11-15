@@ -1,9 +1,11 @@
 import {
+  DayColouring,
   HourFormat,
   type Preferences,
   ThemePreference,
   ZoneLabelPart,
 } from "./preferences";
+import { isWorkingHours } from "./workingHours";
 
 export type ParseStoredPreferencesResult =
   | { ok: true; preferences: Preferences }
@@ -11,6 +13,8 @@ export type ParseStoredPreferencesResult =
 
 const THEME_VALUES: readonly unknown[] = Object.values(ThemePreference);
 const HOUR_FORMAT_VALUES: readonly unknown[] = Object.values(HourFormat);
+
+const DAY_COLOURING_VALUES: readonly unknown[] = Object.values(DayColouring);
 
 const ZONE_LABEL_PART_VALUES: readonly unknown[] = Object.values(ZoneLabelPart);
 
@@ -28,20 +32,30 @@ const isNullOrNonEmptyString = (value: unknown): value is string | null =>
  * Implements FR7 of add-settings-page-and-device-time-location (D5);
  * the interface language implements FR7 of add-interface-language-selection (D1);
  * the zone label implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4);
- * the view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
+ * the view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1);
+ * the day colouring and working hours implement FR3, FR7 of add-day-colouring-setting (D1, D2).
  */
 export function parseStoredPreferences(
   payload: unknown,
 ): ParseStoredPreferencesResult {
   if (typeof payload !== "object" || payload === null) return { ok: false };
-  const { theme, hourFormat, interfaceLanguage, zoneLabelParts, viewMode } =
-    payload as Record<string, unknown>;
+  const {
+    theme,
+    hourFormat,
+    interfaceLanguage,
+    zoneLabelParts,
+    viewMode,
+    dayColouring,
+    workingHours,
+  } = payload as Record<string, unknown>;
   if (
     !THEME_VALUES.includes(theme) ||
     !HOUR_FORMAT_VALUES.includes(hourFormat) ||
     !isNullOrNonEmptyString(interfaceLanguage) ||
     !isZoneLabelParts(zoneLabelParts) ||
-    !isNullOrNonEmptyString(viewMode)
+    !isNullOrNonEmptyString(viewMode) ||
+    !DAY_COLOURING_VALUES.includes(dayColouring) ||
+    !isWorkingHours(workingHours)
   ) {
     return { ok: false };
   }
@@ -52,6 +66,8 @@ export function parseStoredPreferences(
       hourFormat: hourFormat as HourFormat,
       interfaceLanguage,
       viewMode,
+      dayColouring: dayColouring as DayColouring,
+      workingHours: { start: workingHours.start, end: workingHours.end },
       zoneLabelParts: Object.values(ZoneLabelPart).filter((part) =>
         zoneLabelParts.includes(part),
       ),

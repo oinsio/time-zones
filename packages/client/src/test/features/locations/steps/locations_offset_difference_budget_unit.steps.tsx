@@ -1,4 +1,5 @@
 // Verifies NFR-P1 of set-home-location-and-show-differences.
+
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
@@ -7,6 +8,7 @@ import { fakeClock } from "@/lib/temporal";
 import { getReferenceOffsetMinutes, INITIAL_WORLD_CLOCK_STATE } from "@/model";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { presentLocationRows } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
@@ -63,6 +65,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       presentLocationRows(locations, {
         language: WORK_LANGUAGE,
         hourFormat: HourFormat.H24,
+        ...TIME_OF_DAY_CONTEXT,
         zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
         instant,
         translate: i18n.getFixedT(WORK_LANGUAGE),

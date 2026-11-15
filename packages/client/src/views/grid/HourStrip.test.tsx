@@ -1,11 +1,17 @@
+// Verifies FR12, NFR-A3 of add-day-colouring-setting.
 // Verifies FR1, FR3, FR5, FR6, FR8, FR11, FR12, NFR-A1, NFR-A2 of add-grid-hour-cells-and-hour-frame.
 import { fireEvent, render } from "@testing-library/react";
 import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TrackMove } from "@/controller";
+import { DayColour, type PresentedHourStrip } from "@/presenter";
 import { ALMATY_TRACK } from "../shared/dayTrackFixture";
 import { HourStrip } from "./HourStrip";
 import { cellOf, PITCH_PX, renderStrip, STRIP } from "./hourStripFixture";
+
+const stripOf = (dayColour: DayColour): PresentedHourStrip => ({
+  cells: STRIP.cells.map((cell) => ({ ...cell, dayColour })),
+});
 
 describe("HourStrip", () => {
   beforeEach(() => i18n.changeLanguage("en"));
@@ -115,11 +121,27 @@ describe("HourStrip", () => {
     expect(cellOf(6)).toHaveTextContent("6AM");
   });
 
+  it("should colour a plain cell with the accent and its digits with the accent foreground", () => {
+    renderStrip({ strip: stripOf(DayColour.PLAIN) });
+
+    expect(cellOf(3).style.backgroundColor).toBe("var(--color-accent)");
+    expect(cellOf(3)).toHaveClass("text-accent-foreground");
+  });
+
+  it("should colour a non-working cell grey with foreground digits", () => {
+    renderStrip({ strip: stripOf(DayColour.NON_WORKING_TIME) });
+
+    expect(cellOf(3).style.backgroundColor).toBe(
+      "var(--color-day-non-working)",
+    );
+    expect(cellOf(3)).toHaveClass("text-foreground");
+  });
+
   it("should colour a cell by its day period", () => {
     renderStrip();
 
     expect(cellOf(3).style.backgroundColor).toBe("var(--color-day-night)");
-    expect(cellOf(10).style.backgroundColor).toBe("var(--color-day-working)");
+    expect(cellOf(10).style.backgroundColor).toBe("var(--color-day-work)");
     expect(cellOf(3)).toHaveClass("text-foreground");
     expect(cellOf(10)).toHaveClass("text-hour-cell-foreground");
   });

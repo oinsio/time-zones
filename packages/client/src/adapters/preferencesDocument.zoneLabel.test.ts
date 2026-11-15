@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
+  DayColouring,
   HourFormat,
   type Preferences,
   ThemePreference,
@@ -31,6 +32,8 @@ describe("the zone label in the preferences document", () => {
         interfaceLanguage: "ru",
         zoneLabelParts: ALL_PARTS,
         viewMode: null,
+        dayColouring: DayColouring.TIME_OF_DAY,
+        workingHours: { start: "10:00", end: "18:00" },
       },
     });
   });
@@ -52,6 +55,8 @@ describe("the zone label in the preferences document", () => {
       interfaceLanguage: null,
       zoneLabelParts: [UTC_OFFSET],
       viewMode: null,
+      dayColouring: DayColouring.TIME_OF_DAY,
+      workingHours: { start: "10:00", end: "18:00" },
     };
     expect(
       deserializePreferencesDocument(
@@ -71,8 +76,8 @@ describe("the zone label in the preferences document", () => {
     });
   });
 
-  it("should be at schema version 5", () => {
-    expect(PREFERENCES_SCHEMA_VERSION).toBe(5);
+  it("should be at schema version 6", () => {
+    expect(PREFERENCES_SCHEMA_VERSION).toBe(6);
   });
 
   it.each([
@@ -90,6 +95,8 @@ describe("the zone label in the preferences document", () => {
           interfaceLanguage: "ru",
           zoneLabelParts: storedParts,
           viewMode: "grid",
+          dayColouring: DayColouring.TIME_OF_DAY,
+          workingHours: { start: "10:00", end: "18:00" },
         },
       });
       expect(deserializePreferencesDocument(rawDocument, null)).toEqual({
@@ -100,6 +107,8 @@ describe("the zone label in the preferences document", () => {
           interfaceLanguage: "ru",
           zoneLabelParts: expectedParts,
           viewMode: "grid",
+          dayColouring: DayColouring.TIME_OF_DAY,
+          workingHours: { start: "10:00", end: "18:00" },
         },
       });
     },
@@ -132,6 +141,8 @@ describe("the zone label in the preferences document", () => {
       interfaceLanguage: null,
       zoneLabelParts: [UTC_OFFSET, ZONE_ABBREVIATION],
       viewMode: null,
+      dayColouring: DayColouring.TIME_OF_DAY,
+      workingHours: { start: "10:00", end: "18:00" },
     };
     expect(
       deserializePreferencesDocument(
@@ -156,6 +167,8 @@ describe("the zone label in the preferences document", () => {
         interfaceLanguage: null,
         zoneLabelParts,
         viewMode: null,
+        dayColouring: DayColouring.TIME_OF_DAY,
+        workingHours: { start: "10:00", end: "18:00" },
       },
     });
     expect(deserializePreferencesDocument(rawDocument, null)).toEqual({

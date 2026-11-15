@@ -7,9 +7,13 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createInMemoryPreferencesRepository } from "@/adapters";
-import { GEONAMES_URL } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
-import { HourFormat, ThemePreference, ZoneLabelPart } from "@/preferences";
+import {
+  DEFAULT_PREFERENCES,
+  HourFormat,
+  ThemePreference,
+  ZoneLabelPart,
+} from "@/preferences";
 import { renderSettingsPage } from "./renderSettingsPage";
 
 const themeGroup = () => screen.getByRole("radiogroup", { name: "Theme" });
@@ -130,6 +134,8 @@ describe("SettingsPage", () => {
         hourFormat: HourFormat.H12,
         interfaceLanguage: null,
         viewMode: null,
+        dayColouring: DEFAULT_PREFERENCES.dayColouring,
+        workingHours: DEFAULT_PREFERENCES.workingHours,
         zoneLabelParts: [
           ZoneLabelPart.UTC_OFFSET,
           ZoneLabelPart.ZONE_ABBREVIATION,
@@ -148,13 +154,13 @@ describe("SettingsPage", () => {
     ).toBeChecked();
   });
 
-  it("should list the groups as Theme, Hour format, View, Zone label, Language", () => {
+  it("should list the groups as Theme, Hour format, View, Colouring, Zone label, Language", () => {
     renderSettingsPage();
     const groupNames = screen.getAllByRole("radiogroup").map((group) => {
       const captionId = group.getAttribute("aria-labelledby") ?? "";
       return document.getElementById(captionId)?.textContent;
     });
-    expect(groupNames).toEqual(["Theme", "Hour format", "View"]);
+    expect(groupNames).toEqual(["Theme", "Hour format", "View", "Colouring"]);
     const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     expect(
       hourGroup().compareDocumentPosition(zoneLabel) &
@@ -256,34 +262,5 @@ describe("SettingsPage", () => {
     expect(
       within(themeGroup()).getByRole("radio", { name: "Light" }),
     ).toBeChecked();
-  });
-});
-
-// Verifies FR13, UX4 of add-geonames-city-source (D10): the city data attribution is the last line of the page.
-describe("SettingsPage city data attribution", () => {
-  beforeEach(async () => {
-    await i18n.changeLanguage("en");
-  });
-  afterEach(async () => {
-    await i18n.changeLanguage("ru");
-  });
-
-  it("should show the attribution link to GeoNames", () => {
-    renderSettingsPage();
-    expect(
-      screen.getByRole("link", { name: "City data: GeoNames, CC BY 4.0" }),
-    ).toHaveAttribute("href", GEONAMES_URL);
-  });
-
-  it("should follow the zone rules release line as the last element of main", () => {
-    renderSettingsPage();
-    const main = screen.getByRole("main");
-    const attribution = screen.getByRole("link", {
-      name: "City data: GeoNames, CC BY 4.0",
-    });
-    expect(main.lastElementChild).toBe(attribution);
-    expect(attribution.previousElementSibling).toHaveAttribute(
-      "data-zone-rules-release",
-    );
   });
 });

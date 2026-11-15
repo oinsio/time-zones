@@ -1,4 +1,5 @@
 // Implements FR1-FR6 of add-grid-hour-cells-and-hour-frame: shared state of the hour cell unit steps.
+
 import { Temporal } from "@/lib/temporal";
 import {
   getReferenceDay,
@@ -11,6 +12,7 @@ import {
   type PresentedHourStrip,
   presentHourStrip,
 } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 
 const SAMPLE_INSTANT = "2026-03-08T07:30:00Z";
 
@@ -39,6 +41,7 @@ export const createHourCellsSteps = (scenarios?: {
     day: undefined as unknown as ReferenceDay,
     language: "en",
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
   };
   const stripOf = (city: string): PresentedHourStrip =>
     presentHourStrip(ZONE_BY_CITY[city], world);

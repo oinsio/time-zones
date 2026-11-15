@@ -4,8 +4,11 @@ import {
   MIDNIGHT_SHADE_SPREAD_PX,
   OFFSET_EDGE_WIDTH_PX,
 } from "@/constants";
-import { DayPeriod, type PresentedHourCell } from "@/presenter";
-import { DAY_PERIOD_COLOR_VARIABLES } from "@/views/shared";
+import type { PresentedHourCell } from "@/presenter";
+import {
+  DAY_COLOUR_FOREGROUND_CLASS_NAMES,
+  DAY_COLOUR_VARIABLES,
+} from "@/views/shared";
 
 const MIDNIGHT_SHADE_SHADOW = `inset 0 0 0 ${MIDNIGHT_SHADE_SPREAD_PX}px var(--color-midnight-shade)`;
 const OFFSET_EDGE_SHADOW = `inset ${OFFSET_EDGE_WIDTH_PX}px 0 0 var(--color-foreground)`;
@@ -28,11 +31,12 @@ type HourCellViewProps = {
 };
 
 /**
- * One hour cell of a strip: its hour text, day period colour, midnight shade
+ * One hour cell of a strip: its hour text, day colour, midnight shade
  * and offset edge. A click selects the cell's hour; a cell outside the meeting
  * range is dimmed.
  * Implements FR3, FR5, FR6 of add-grid-hour-cells-and-hour-frame (D6), moved from `HourStrip`.
  * Implements FR5, FR7 of add-grid-meeting-range-and-share (D6): click and dimming.
+ * Implements FR12, NFR-A3 of add-day-colouring-setting (D4): the day colour and its digit class.
  */
 export function HourCellView({
   cell,
@@ -51,12 +55,10 @@ export function HourCellView({
       data-hour-cell
       onClick={onClick}
       className={`flex h-11 flex-col items-center justify-center gap-px rounded tabular-nums md:h-[38px] lg:h-12 xl:h-[52px] ${
-        cell.dayPeriod === DayPeriod.NIGHT
-          ? "text-foreground"
-          : "text-hour-cell-foreground"
+        DAY_COLOUR_FOREGROUND_CLASS_NAMES[cell.dayColour]
       }${dimmedClassName}`}
       style={{
-        backgroundColor: `var(${DAY_PERIOD_COLOR_VARIABLES[cell.dayPeriod]})`,
+        backgroundColor: `var(${DAY_COLOUR_VARIABLES[cell.dayColour]})`,
         boxShadow: getCellShadow(cell),
         marginInline: `calc(var(${HourGridCssVariable.CELL_GAP}) / 2)`,
       }}

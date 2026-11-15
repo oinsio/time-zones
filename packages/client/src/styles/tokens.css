@@ -19,8 +19,9 @@
   --color-notice-foreground: #5c4300;
   --color-day-night: #a3afd3;
   --color-day-morning: #f8cbbe;
-  --color-day-working: #f8e6a6;
+  --color-day-work: #f8e6a6;
   --color-day-evening: #d4c6ee;
+  --color-day-non-working: #ececef;
   --color-midnight-shade: rgba(24, 24, 27, 0.1);
   --color-hour-cell-foreground: #18181b;
   --color-surface: #ffffff;
@@ -45,8 +46,9 @@
   --color-notice-foreground: #f4d27a;
   --color-day-night: #56679a;
   --color-day-morning: #e0b1a4;
-  --color-day-working: #eedba3;
+  --color-day-work: #eedba3;
   --color-day-evening: #b9aadb;
+  --color-day-non-working: #3b4660;
   --color-midnight-shade: rgba(15, 23, 41, 0.22);
   --color-hour-cell-foreground: #0f1729;
   --color-surface: #16213a;
@@ -71,8 +73,9 @@
     --color-notice-foreground: #f4d27a;
     --color-day-night: #56679a;
     --color-day-morning: #e0b1a4;
-    --color-day-working: #eedba3;
+    --color-day-work: #eedba3;
     --color-day-evening: #b9aadb;
+    --color-day-non-working: #3b4660;
     --color-midnight-shade: rgba(15, 23, 41, 0.22);
     --color-hour-cell-foreground: #0f1729;
     --color-surface: #16213a;

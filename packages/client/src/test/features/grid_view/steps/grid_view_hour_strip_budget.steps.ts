@@ -1,4 +1,5 @@
 // Verifies NFR-P1 of add-grid-hour-cells-and-hour-frame.
+
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect, vi } from "vitest";
@@ -6,6 +7,7 @@ import { Temporal } from "@/lib/temporal";
 import { getReferenceDay, INITIAL_WORLD_CLOCK_STATE } from "@/model";
 import { HourFormat } from "@/preferences";
 import { type PresentedHourStrip, presentHourStrip } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import {
   MAX_FORMATTERS_PER_ZONE,
   MAX_TRANSITION_LOOKUPS_PER_ZONE,
@@ -37,6 +39,7 @@ const presentRows = (instant: string): PresentedHourStrip[] => {
         referenceZoneId: REFERENCE_ZONE,
         language: "en",
         hourFormat: HourFormat.H24,
+        ...TIME_OF_DAY_CONTEXT,
       },
     ),
   );

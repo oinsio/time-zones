@@ -6,6 +6,7 @@ export {
   parseStoredPreferences,
 } from "./parseStoredPreferences";
 export {
+  DayColouring,
   DEFAULT_PREFERENCES,
   HourFormat,
   type Preferences,
@@ -17,3 +18,11 @@ export {
   PreferencesCommandType,
   reducePreferences,
 } from "./preferencesCommands";
+// Implements FR6, FR7 of add-day-colouring-setting.
+export {
+  checkWorkingHours,
+  DEFAULT_WORKING_HOURS,
+  isWorkingHours,
+  type WorkingHours,
+  WorkingHoursError,
+} from "./workingHours";

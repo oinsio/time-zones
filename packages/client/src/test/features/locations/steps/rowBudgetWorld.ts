@@ -1,4 +1,5 @@
 // Implements FR1, FR2, NFR-P1 of replace-wall-clock-row-budgets-with-deterministic-checks (D4).
+
 import i18n from "i18next";
 import { expect } from "vitest";
 import { fakeClock } from "@/lib/temporal";
@@ -6,6 +7,7 @@ import type { InterfaceLanguageCode } from "@/locales";
 import { getUtcOffsetMinutes, type Location } from "@/model";
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { type LocationRow, presentLocationRows } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { buildReferenceDay } from "@/test/referenceDay";
@@ -47,6 +49,7 @@ export function presentBudgetRows(
   return presentLocationRows(locations, {
     language,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(language),

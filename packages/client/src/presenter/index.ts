@@ -17,6 +17,15 @@ export {
   type PresentedDateBar,
   presentDateBar,
 } from "./dateBar";
+// Implements FR2, FR9–FR13 of add-day-colouring-setting.
+export {
+  DayColour,
+  type DayColourStop,
+  getHourFrameColour,
+  HourFrameColour,
+  presentDayColourStops,
+  presentHourCellColour,
+} from "./dayColours";
 // Implements FR2 of add-wall-time-input-with-hint.
 export { type DayPeriodMarkers, getDayPeriodMarkers } from "./dayPeriodMarkers";
 // Implements FR1, FR2, FR7, FR9 of add-time-sliders-to-location-cards.
@@ -78,6 +87,12 @@ export {
 export type { LocationRowsContext } from "./presentZoneMoment";
 // Implements FR3 of show-utc-offset-on-location-rows.
 export { formatUtcOffset } from "./utcOffset";
+// Implements FR5 of add-day-colouring-setting.
+export {
+  formatWorkingHoursTime,
+  presentWorkingHoursTexts,
+  type WorkingHoursTexts,
+} from "./workingHours";
 // Implements FR3, FR5, FR13, FR14 of show-zone-abbreviations-and-zone-label-setting.
 export { formatZoneAbbreviation } from "./zoneAbbreviation";
 export {

@@ -12,6 +12,7 @@ import {
 import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import type { LocationRowsContext } from "@/presenter";
 import { presentLocationRows } from "@/presenter";
+import { TIME_OF_DAY_CONTEXT } from "@/test/dayColouringContext";
 import { buildReferenceDay } from "@/test/referenceDay";
 import {
   MAX_TRANSITION_LOOKUPS_PER_ZONE,
@@ -55,6 +56,7 @@ export async function presentDeviceTimeOnEngine(
   const [presented] = presenter.presentLocationRows([deviceTimeLocation], {
     language: LANGUAGE,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(LANGUAGE),
@@ -75,6 +77,7 @@ const contextAt = (timestamp: string): LocationRowsContext => {
   return {
     language: LANGUAGE,
     hourFormat: HourFormat.H24,
+    ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
     translate: i18n.getFixedT(LANGUAGE),

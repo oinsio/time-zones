@@ -32,6 +32,8 @@ Given("the view mode is Grid", async ({ locationsWorld }) => {
         interfaceLanguage: locationsWorld.seededInterfaceLanguage,
         zoneLabelParts: ALL_ZONE_LABEL_PARTS,
         viewMode: GRID_VIEW_ID,
+        dayColouring: "TIME_OF_DAY",
+        workingHours: { start: "10:00", end: "18:00" },
       },
     }),
   );

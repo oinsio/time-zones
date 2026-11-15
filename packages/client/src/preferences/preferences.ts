@@ -3,7 +3,9 @@
  * Implements FR4, FR5, FR7 of add-settings-page-and-device-time-location (D5).
  * The zone label implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4).
  * The view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
+ * The day colouring implements FR1, FR2 of add-day-colouring-setting (D1).
  */
+import { DEFAULT_WORKING_HOURS, type WorkingHours } from "./workingHours";
 
 /** Which colour theme the app uses; SYSTEM follows the system preference. */
 export enum ThemePreference {
@@ -25,6 +27,13 @@ export enum ZoneLabelPart {
   COUNTRY = "COUNTRY",
 }
 
+/** How the day tracks and hour cells are coloured; declaration order is the stored order, the display order is `DAY_COLOURING_ORDER`. */
+export enum DayColouring {
+  PLAIN = "PLAIN",
+  TIME_OF_DAY = "TIME_OF_DAY",
+  WORKING_HOURS = "WORKING_HOURS",
+}
+
 export type Preferences = {
   theme: ThemePreference;
   hourFormat: HourFormat;
@@ -34,6 +43,10 @@ export type Preferences = {
   zoneLabelParts: readonly ZoneLabelPart[];
   /** Id of the chosen registered view; `null` = none chosen, Cards. Resolved against the view registry by `resolveActiveView`. */
   viewMode: string | null;
+  /** How day tracks and hour cells are coloured. Implements FR1, FR2 of add-day-colouring-setting (D1). */
+  dayColouring: DayColouring;
+  /** The user's working hours, read in each location's local time. Implements FR6 of add-day-colouring-setting (D1). */
+  workingHours: WorkingHours;
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -42,4 +55,6 @@ export const DEFAULT_PREFERENCES: Preferences = {
   interfaceLanguage: null,
   zoneLabelParts: Object.values(ZoneLabelPart),
   viewMode: null,
+  dayColouring: DayColouring.TIME_OF_DAY,
+  workingHours: DEFAULT_WORKING_HOURS,
 };

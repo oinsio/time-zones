@@ -12,8 +12,8 @@ Feature: Day-period colours and labels of a day track
 
     Examples:
       | city       | stops                                                                                                                                          |
-      | Almaty   | 0.270833 night, 0.3125 morning, 0.369792 morning, 0.380208 working, 0.744792 working, 0.755208 evening, 0.895833 evening, 0.9375 night         |
-      | New York | 0.161458 working, 0.171875 evening, 0.3125 evening, 0.354167 night, 0.645833 night, 0.6875 morning, 0.744792 morning, 0.755208 working         |
+      | Almaty   | 0.270833 night, 0.3125 morning, 0.369792 morning, 0.380208 work, 0.744792 work, 0.755208 evening, 0.895833 evening, 0.9375 night         |
+      | New York | 0.161458 work, 0.171875 evening, 0.3125 evening, 0.354167 night, 0.645833 night, 0.6875 morning, 0.744792 morning, 0.755208 work         |
 
   @add-time-sliders-to-location-cards @FR6 @M5
   Scenario: Colours follow the local period outside blend windows
@@ -32,7 +32,7 @@ Feature: Day-period colours and labels of a day track
     And the app is open
     And the moment is pinned at its current position
     When the track of Apia is presented
-    Then the colour stops of "Apia" are "0.161458 working, 0.171875 evening, 0.3125 evening, 0.354167 night, 0.6875 night, 0.729167 morning, 0.786458 morning, 0.796875 working"
+    Then the colour stops of "Apia" are "0.161458 work, 0.171875 evening, 0.3125 evening, 0.354167 night, 0.6875 night, 0.729167 morning, 0.786458 morning, 0.796875 work"
 
   @add-time-sliders-to-location-cards @FR6
   Scenario: A period change across an offset change is a hard edge

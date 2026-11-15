@@ -3,20 +3,20 @@ import { HOUR_LABEL_INTERVAL_HOURS } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import {
-  type DayPeriodStop,
-  getDayPeriodStops,
   getTrackEndMinutes,
   getTrackFraction,
   getTrackValueMinutes,
   type ReferenceDay,
 } from "@/model";
-import type { HourFormat } from "@/preferences";
+import type { DayColouring, HourFormat, WorkingHours } from "@/preferences";
 import { DateTimeLabelKind, getDateTimeFormatter } from "./dateTimeFormatters";
+import { type DayColourStop, presentDayColourStops } from "./dayColours";
 
 /**
  * Track data of one location row: handle position, slider values, colour
  * stops and local hour labels.
  * Implements FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).
+ * The stops are day colours: implements FR2, FR9–FR12 of add-day-colouring-setting (D4).
  */
 
 export type HourLabel = { fraction: number; label: string };
@@ -29,7 +29,7 @@ export type PresentedDayTrack = {
   maxMinutes: number;
   /** `aria-valuetext`: local time and date of the card. */
   valueText: string;
-  stops: readonly DayPeriodStop[];
+  stops: readonly DayColourStop[];
   hourLabels: readonly HourLabel[];
 };
 
@@ -39,6 +39,8 @@ export type DayTrackContext = {
   day: ReferenceDay;
   language: InterfaceLanguageCode;
   hourFormat: HourFormat;
+  dayColouring: DayColouring;
+  workingHours: WorkingHours;
   translate: TFunction;
   localTimeLabel: string;
   localDateLabel: string;
@@ -104,6 +106,8 @@ export function presentDayTrack({
   day,
   language,
   hourFormat,
+  dayColouring,
+  workingHours,
   translate,
   localTimeLabel,
   localDateLabel,
@@ -116,7 +120,7 @@ export function presentDayTrack({
       time: localTimeLabel,
       date: localDateLabel,
     }),
-    stops: getDayPeriodStops(timeZoneId, day),
+    stops: presentDayColourStops(timeZoneId, day, dayColouring, workingHours),
     hourLabels: getHourLabels(timeZoneId, day, language, hourFormat),
   };
 }

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-import { DayPeriod, type PresentedHourStrip } from "@/presenter";
+import { DayColour, type PresentedHourStrip } from "@/presenter";
 import { ALMATY_TRACK } from "../shared/dayTrackFixture";
 import { HourStrip } from "./HourStrip";
 
@@ -9,7 +9,7 @@ const cells = Array.from({ length: 24 }, (_, column) => ({
   hourText: String(column),
   minuteText: column === 5 ? ":30" : "",
   dayPeriodMarker: column === 6 ? "AM" : "",
-  dayPeriod: column < 9 ? DayPeriod.NIGHT : DayPeriod.WORK,
+  dayColour: column < 9 ? DayColour.NIGHT : DayColour.WORK,
   hasOffsetEdge: column === 12,
   ...(column === 2
     ? { midnightMarker: { monthText: "MAR", dayText: "8" } }
@@ -20,6 +20,7 @@ export const STRIP: PresentedHourStrip = { cells };
 export const PITCH_PX = 40;
 
 type StripOverrides = {
+  strip?: PresentedHourStrip;
   onMoveTrack?: () => void;
   isScrollable?: boolean;
   meetingColumns?: { first: number; last: number };
@@ -34,7 +35,7 @@ export function renderStrip(overrides: StripOverrides = {}) {
     <HourStrip
       city="Almaty"
       track={ALMATY_TRACK}
-      strip={STRIP}
+      strip={overrides.strip ?? STRIP}
       hourFrameIndex={
         "hourFrameIndex" in overrides ? overrides.hourFrameIndex : 12
       }
