@@ -1,5 +1,6 @@
 export { AddLocationButton } from "./AddLocationButton";
 export { DateBar } from "./DateBar";
+// Implements FR9, FR10, NFR-A3 of add-day-colouring-setting (D4).
 export {
   DAY_COLOUR_FOREGROUND_CLASS_NAMES,
   DAY_COLOUR_VARIABLES,
@@ -16,8 +17,6 @@ export {
 } from "./locationRowVariant";
 // Implements FR13 of add-grid-meeting-range-and-share (D7).
 export { MeetingBar } from "./MeetingBar";
-// Implements FR2 of show-here-entry-for-device-time.
-// Implements FR1, FR4, FR12 of add-grid-hour-cells-and-hour-frame (D4, D5).
 // Implements FR5, FR14 of add-day-colouring-setting: the typed time field helpers.
 export { getTypedTimeFieldText } from "./typedTimeFieldText";
 // Implements FR7 of add-view-mode-setting-and-grid-skeleton (D4).
