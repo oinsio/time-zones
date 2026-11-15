@@ -11,12 +11,16 @@ import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
  * The stored locations document: `{ schemaVersion, payload }` (ADR-0004).
  * Implements FR9, FR11, FR12 of add-locations-via-search (D4).
  * Implements FR8, FR9 of set-home-location-and-show-differences (D6).
+ * Implements FR7, FR9 of add-city-coordinates-to-locations (D6): version 4 holds optional coordinates.
  */
 
 /**
  * Version 1 had no home location: the migration adds "no home" (FR8). Version 2
  * showed the device time as a derived row outside the list: the migration
  * lists the device time location first (FR14 of add-settings-page-and-device-time-location, D2).
+ * Version 3 held no coordinates: the step to version 4 keeps the payload, an
+ * entry without coordinates reads as a location without (FR7 of
+ * add-city-coordinates-to-locations, D6).
  */
 export const LOCATION_MIGRATIONS: PayloadMigrations = {
   1: (payload) => ({ ...(payload as object), homeLocationId: null }),
@@ -28,6 +32,7 @@ export const LOCATION_MIGRATIONS: PayloadMigrations = {
       locations: [{ kind: LocationKind.DEVICE_TIME }, ...stored.locations],
     };
   },
+  3: (payload) => payload,
 };
 
 const UNREADABLE: LocationsLoadResult = {
@@ -49,6 +54,9 @@ export function serializeLocationsDocument(
               timeZoneId: location.timeZoneId,
               label: location.label,
               countryCode: location.countryCode,
+              ...(location.coordinates === undefined
+                ? {}
+                : { coordinates: location.coordinates }),
             },
       ),
       homeLocationId,

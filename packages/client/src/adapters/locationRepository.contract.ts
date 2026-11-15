@@ -22,12 +22,32 @@ const moscow = buildLocation();
  * Contract every `LocationRepository` adapter must satisfy.
  * Verifies FR11, FR13, FR14 of add-locations-via-search (D4).
  * Verifies FR8, FR10 of set-home-location-and-show-differences (D6): home.
+ * Verifies FR7, FR9 of add-city-coordinates-to-locations (D6): coordinates round-trip.
  */
 export const describeLocationRepositoryContract = (
   adapterName: string,
   scenario: LocationRepositoryScenario,
 ) => {
   describe(`LocationRepository contract: ${adapterName}`, () => {
+    // FR7: coordinates are kept with the list.
+    it("should load the coordinates that were saved and tell another instance", () => {
+      const { first, second } = scenario.createPair();
+      const kazan = buildLocation({
+        label: "Kazan",
+        coordinates: { latitude: 55.8, longitude: 49.1 },
+      });
+      const received: LocationsLoadResult[] = [];
+      second.subscribe((result) => received.push(result));
+      first.save({ locations: [kazan, moscow], homeLocationId: null });
+      const expected = {
+        status: LocationsLoadStatus.LOADED,
+        locations: [kazan, moscow],
+        homeLocationId: null,
+      };
+      expect(first.load()).toEqual(expected);
+      expect(received).toEqual([expected]);
+    });
+
     it("should load an empty result before anything is saved", () => {
       expect(scenario.createPair().first.load()).toEqual({
         status: LocationsLoadStatus.EMPTY,

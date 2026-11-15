@@ -2,6 +2,7 @@ import {
   DEVICE_TIME_LOCATION_ID,
   DEVICE_TIME_ZONE_FALLBACK_ID,
 } from "@/constants";
+import { parseCoordinates } from "./coordinates";
 import { buildDeviceTimeLocation } from "./deviceTimeLocation";
 import { LocationKind } from "./locationKind";
 import {
@@ -16,6 +17,7 @@ import { canonicalizeTimeZoneId } from "./timeZoneId";
  * Implements FR9, FR12 of add-locations-via-search (D4).
  * Implements FR8, FR9 of set-home-location-and-show-differences (D6).
  * Implements FR13, FR14 of add-settings-page-and-device-time-location (D2).
+ * Implements FR7 of add-city-coordinates-to-locations (D6): optional coordinates of city entries.
  */
 export type ParseStoredLocationsResult =
   | {
@@ -46,7 +48,10 @@ export function parseStoredLocations(
   for (const entry of payload.locations) {
     if (isRecord(entry) && entry.kind === LocationKind.DEVICE_TIME) {
       const hasZoneFields =
-        "timeZoneId" in entry || "label" in entry || "countryCode" in entry;
+        "timeZoneId" in entry ||
+        "label" in entry ||
+        "countryCode" in entry ||
+        "coordinates" in entry;
       if (hasZoneFields || isDeviceTimeListed) return REJECTED;
       isDeviceTimeListed = true;
       locations.push(buildDeviceTimeLocation(DEVICE_TIME_ZONE_FALLBACK_ID));
@@ -65,6 +70,10 @@ export function parseStoredLocations(
     }
     const timeZoneId = canonicalizeTimeZoneId(entry.timeZoneId);
     if (timeZoneId === undefined) return REJECTED;
+    const coordinates = parseCoordinates(entry.coordinates);
+    if (entry.coordinates !== undefined && coordinates === undefined) {
+      return REJECTED;
+    }
     const id = buildLocationId(timeZoneId, entry.label);
     if (knownIds.has(id)) continue;
     knownIds.add(id);
@@ -74,6 +83,7 @@ export function parseStoredLocations(
       timeZoneId,
       label: entry.label,
       countryCode: entry.countryCode,
+      ...(coordinates === undefined ? {} : { coordinates }),
     });
   }
   const homeLocationId = parseHomeLocationId(payload.homeLocationId, knownIds);
