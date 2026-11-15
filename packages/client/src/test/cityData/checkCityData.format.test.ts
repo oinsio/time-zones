@@ -1,4 +1,5 @@
 // Verifies FR12, M1 of add-geonames-city-source: the format and tuple rows of "A broken file fails" name their offender.
+// Verifies FR1, FR4 of add-city-coordinates-to-locations (D2, D4).
 import { describe, expect, it } from "vitest";
 import { checkCityData } from "../../../scripts/cityData/checkCityData.ts";
 import type { CityTuple } from "../../../scripts/cityData/cityDataTypes.ts";
@@ -22,8 +23,8 @@ describe("checkCityData format", () => {
   });
 
   it("should name the wrong format version", () => {
-    expect(check({ formatVersion: 2 })).toEqual([
-      "The city data has the format version 2, expected 1",
+    expect(check({ formatVersion: 3 })).toEqual([
+      "The city data has the format version 3, expected 2",
     ]);
   });
 
@@ -66,7 +67,7 @@ describe("checkCityData city tuples", () => {
     dataset.cities.push(tuple as CityTuple);
     return { dataset, position };
   };
-  const base = [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5];
+  const base = [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5, 558, 491];
 
   it("should name the position of a tuple of the wrong length", () => {
     const { dataset, position } = withTuple([FRESH_ID, "Alpha"]);
@@ -92,47 +93,47 @@ describe("checkCityData city tuples", () => {
   it.each([
     [
       "a fractional ID",
-      [1.5, "Alpha", "Альфа", "DE", 0, 5],
+      [1.5, "Alpha", "Альфа", "DE", 0, 5, 558, 491],
       "The city at position 6000 has no GeoNames ID",
     ],
     [
       "a negative ID",
-      [-1, "Alpha", "Альфа", "DE", 0, 5],
+      [-1, "Alpha", "Альфа", "DE", 0, 5, 558, 491],
       "The city at position 6000 has no GeoNames ID",
     ],
     [
       "an empty Russian name",
-      [FRESH_ID, "Alpha", "", "DE", 0, 5],
+      [FRESH_ID, "Alpha", "", "DE", 0, 5, 558, 491],
       `The city Alpha (${FRESH_ID}) has an empty Russian name`,
     ],
     [
       "a blank English name",
-      [FRESH_ID, " ", "Альфа", "DE", 0, 5],
+      [FRESH_ID, " ", "Альфа", "DE", 0, 5, 558, 491],
       `The city ${FRESH_ID} has an empty English name`,
     ],
     [
       "a lower-case country code",
-      [FRESH_ID, "Alpha", "Альфа", "de", 0, 5],
+      [FRESH_ID, "Alpha", "Альфа", "de", 0, 5, 558, 491],
       `The city Alpha (${FRESH_ID}) has the country code de`,
     ],
     [
       "a negative population",
-      [FRESH_ID, "Alpha", "Альфа", "DE", 0, -5],
+      [FRESH_ID, "Alpha", "Альфа", "DE", 0, -5, 558, 491],
       `The city Alpha (${FRESH_ID}) has the population -5`,
     ],
     [
       "a fractional population",
-      [FRESH_ID, "Alpha", "Альфа", "DE", 0, 1.5],
+      [FRESH_ID, "Alpha", "Альфа", "DE", 0, 1.5, 558, 491],
       `The city Alpha (${FRESH_ID}) has the population 1.5`,
     ],
     [
       "an unknown zone index",
-      [FRESH_ID, "Alpha", "Альфа", "DE", 9, 5],
+      [FRESH_ID, "Alpha", "Альфа", "DE", 9, 5, 558, 491],
       `The city Alpha (${FRESH_ID}) has the unknown zone index 9`,
     ],
     [
       "an unknown region index",
-      [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5, 9],
+      [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5, 558, 491, 9],
       `The city Alpha (${FRESH_ID}) has the unknown region index 9`,
     ],
   ])("should name the offender for %s", (_, tuple, message) => {
@@ -141,7 +142,7 @@ describe("checkCityData city tuples", () => {
   });
 
   it("should accept a population of 0 and the marker for no Russian name", () => {
-    const { dataset } = withTuple([FRESH_ID, "Alpha", 0, "DE", 0, 0]);
+    const { dataset } = withTuple([FRESH_ID, "Alpha", 0, "DE", 0, 0, 558, 491]);
     expect(check(dataset)).toEqual([]);
   });
 });
@@ -183,5 +184,69 @@ describe("checkCityData thresholds and zone cities", () => {
     expect(
       checkCityData(buildDataset(), RELEASE_ZONES, [zoneCity, other]),
     ).toEqual([]);
+  });
+});
+
+describe("checkCityData coordinates", () => {
+  // @add-city-coordinates-to-locations @FR4
+  const base = [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5];
+  const checkTuple = (tuple: unknown[]) => {
+    const dataset = buildDataset();
+    dataset.cities.push(tuple as CityTuple);
+    return check(dataset);
+  };
+
+  it.each([
+    [
+      "a missing latitude and longitude",
+      base,
+      `The city Alpha (${FRESH_ID}) has no coordinates`,
+    ],
+    [
+      "a text latitude",
+      [...base, "55", 491],
+      `The city Alpha (${FRESH_ID}) has the latitude 55`,
+    ],
+    [
+      "a fractional latitude",
+      [...base, 55.5, 491],
+      `The city Alpha (${FRESH_ID}) has the latitude 55.5`,
+    ],
+    [
+      "latitude 901 tenths",
+      [...base, 901, 0],
+      `The city Alpha (${FRESH_ID}) has the latitude 901`,
+    ],
+    [
+      "latitude -901 tenths",
+      [...base, -901, 0],
+      `The city Alpha (${FRESH_ID}) has the latitude -901`,
+    ],
+    [
+      "longitude 1801 tenths",
+      [...base, 0, 1801],
+      `The city Alpha (${FRESH_ID}) has the longitude 1801`,
+    ],
+    [
+      "longitude -1801 tenths",
+      [...base, 0, -1801],
+      `The city Alpha (${FRESH_ID}) has the longitude -1801`,
+    ],
+  ])("should name the city for %s", (_, tuple, message) => {
+    expect(checkTuple(tuple)).toEqual([message]);
+  });
+
+  it.each([
+    [900, 1800],
+    [-900, -1800],
+    [0, 0],
+  ])("should accept the tenths %s and %s", (latitude, longitude) => {
+    expect(checkTuple([...base, latitude, longitude])).toEqual([]);
+  });
+
+  it("should name the format version 1 of the previous build", () => {
+    expect(check({ ...buildDataset(), formatVersion: 1 })).toEqual([
+      "The city data has the format version 1, expected 2",
+    ]);
   });
 });

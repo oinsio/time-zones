@@ -3,7 +3,9 @@
  * and capitals, picks names, canonicalizes zones, merges exemplar cities and
  * marks namesakes.
  * Implements FR1, FR2, FR7, FR11, FR12 of add-geonames-city-source (D3, D4, D5, D8).
+ * Implements FR1 of add-city-coordinates-to-locations (D2).
  */
+import { COORDINATE_TENTHS_PER_DEGREE } from "../../src/constants/coordinates.ts";
 import { normalizeSearchText } from "../../src/lib/searchText/index.ts";
 import type { ZoneCityRecord } from "../zoneData/extractZoneData.ts";
 import type {
@@ -109,6 +111,11 @@ function readRegionNames(
   return { en: admin1.name, ru: names.ru };
 }
 
+function toTenths(degrees: number): number {
+  // `+ 0` turns -0 into 0, so the file never holds "-0".
+  return Math.round(degrees * COORDINATE_TENTHS_PER_DEGREE) + 0;
+}
+
 function toTuple(
   city: CompiledCity,
   zoneIndex: number,
@@ -123,6 +130,8 @@ function toTuple(
     city.row.countryCode,
     zoneIndex,
     city.row.population,
+    toTenths(city.row.latitude),
+    toTenths(city.row.longitude),
   ] as const;
   return regionIndex === undefined ? [...base] : [...base, regionIndex];
 }

@@ -17,6 +17,8 @@ export function buildCity(
     "DE",
     0,
     100_000 + index,
+    558,
+    491,
   ];
 }
 
@@ -25,7 +27,7 @@ export function buildDataset(cities: CityTuple[] = []): CityDataset {
     buildCity(index + 1),
   );
   return {
-    formatVersion: 1,
+    formatVersion: 2,
     source: { name: "GeoNames", licence: "CC BY 4.0", dumpDate: "2026-11-13" },
     zones: ["Europe/Berlin"],
     regions: [["Illinois", "Иллинойс"]],

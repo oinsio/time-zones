@@ -71,7 +71,11 @@ function readDegrees(
   lineNumber: number,
 ): number {
   const value = Number(text);
-  if (text.trim() === "" || !Number.isFinite(value) || Math.abs(value) > limit) {
+  if (
+    text.trim() === "" ||
+    !Number.isFinite(value) ||
+    Math.abs(value) > limit
+  ) {
     throw new Error(
       `Malformed GeoNames line ${lineNumber}: ${field} "${text}" is not a number within ±${limit}`,
     );

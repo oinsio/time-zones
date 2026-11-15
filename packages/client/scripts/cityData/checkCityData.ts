@@ -2,7 +2,13 @@
  * Pure validation of the committed city data against the bundled zone rules
  * release and the thresholds of the `city-data` spec; every error names its offender.
  * Implements FR12, M1, M4 of add-geonames-city-source (D8).
+ * Implements FR1, FR4 of add-city-coordinates-to-locations (D2, D4).
  */
+import {
+  COORDINATE_TENTHS_PER_DEGREE,
+  MAX_LATITUDE_DEGREES,
+  MAX_LONGITUDE_DEGREES,
+} from "../../src/constants/coordinates.ts";
 import type { ZoneCityRecord } from "../zoneData/extractZoneData.ts";
 import type { CityDataset } from "./cityDataTypes.ts";
 import {
@@ -16,8 +22,11 @@ import {
 } from "./constants.ts";
 import { findNamesakes, type NamesakeCandidate } from "./markNamesakes.ts";
 
-const CITY_TUPLE_LENGTH_WITHOUT_REGION = 6;
-const CITY_TUPLE_LENGTH_WITH_REGION = 7;
+const MIN_CITY_TUPLE_LENGTH = 6;
+const MAX_CITY_TUPLE_LENGTH = 9;
+const MAX_LATITUDE_TENTHS = MAX_LATITUDE_DEGREES * COORDINATE_TENTHS_PER_DEGREE;
+const MAX_LONGITUDE_TENTHS =
+  MAX_LONGITUDE_DEGREES * COORDINATE_TENTHS_PER_DEGREE;
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -60,6 +69,32 @@ function checkFormat(value: unknown): string | undefined {
     : "The city data does not have the format of design D5";
 }
 
+function isTenthsWithin(value: unknown, limit: number): boolean {
+  return Number.isInteger(value) && Math.abs(value as number) <= limit;
+}
+
+function checkCoordinates(
+  tuple: unknown[],
+  latitude: unknown,
+  longitude: unknown,
+) {
+  const errors: string[] = [];
+  if (latitude === undefined || longitude === undefined) {
+    return [`The city ${describeCity(tuple)} has no coordinates`];
+  }
+  if (!isTenthsWithin(latitude, MAX_LATITUDE_TENTHS)) {
+    errors.push(
+      `The city ${describeCity(tuple)} has the latitude ${String(latitude)}`,
+    );
+  }
+  if (!isTenthsWithin(longitude, MAX_LONGITUDE_TENTHS)) {
+    errors.push(
+      `The city ${describeCity(tuple)} has the longitude ${String(longitude)}`,
+    );
+  }
+  return errors;
+}
+
 function describeCity(tuple: unknown[]): string {
   return `${String(tuple[1])} (${String(tuple[0])})`;
 }
@@ -72,8 +107,8 @@ function checkCity(
 ): string[] {
   if (
     !Array.isArray(tuple) ||
-    (tuple.length !== CITY_TUPLE_LENGTH_WITHOUT_REGION &&
-      tuple.length !== CITY_TUPLE_LENGTH_WITH_REGION)
+    tuple.length < MIN_CITY_TUPLE_LENGTH ||
+    tuple.length > MAX_CITY_TUPLE_LENGTH
   ) {
     return [`The city at position ${index} is not a city tuple`];
   }
@@ -84,6 +119,8 @@ function checkCity(
     countryCode,
     zoneIndex,
     population,
+    latitudeTenths,
+    longitudeTenths,
     regionIndex,
   ] = tuple;
   const errors: string[] = [];
@@ -104,6 +141,7 @@ function checkCity(
       `The city ${describeCity(tuple)} has the population ${String(population)}`,
     );
   }
+  errors.push(...checkCoordinates(tuple, latitudeTenths, longitudeTenths));
   const zone = dataset.zones[zoneIndex as number];
   if (zone === undefined) {
     errors.push(
@@ -164,7 +202,7 @@ function checkRegions(
   const errors: string[] = [];
   for (const city of dataset.cities) {
     const isNamesake = namesakeIds.has(String(city[0]));
-    const hasRegion = city[6] !== undefined;
+    const hasRegion = city[8] !== undefined;
     if (isNamesake && !hasRegion)
       errors.push(
         `The city ${describeCity(city)} is a namesake without a region`,

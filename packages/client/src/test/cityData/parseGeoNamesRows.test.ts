@@ -46,7 +46,11 @@ describe("parseCityRow", () => {
 
   it.each([
     ["an empty latitude", CITY_LINE.replace("55.78874", ""), /latitude/],
-    ["a non-numeric longitude", CITY_LINE.replace("49.12214", "abc"), /longitude/],
+    [
+      "a non-numeric longitude",
+      CITY_LINE.replace("49.12214", "abc"),
+      /longitude/,
+    ],
     ["latitude 91", CITY_LINE.replace("55.78874", "91"), /latitude/],
     ["latitude -91", CITY_LINE.replace("55.78874", "-91"), /latitude/],
     ["longitude 181", CITY_LINE.replace("49.12214", "181"), /longitude/],
@@ -60,7 +64,10 @@ describe("parseCityRow", () => {
     ["90", "180"],
     ["-90", "-180"],
   ])("should accept the limits %s and %s", (latitude, longitude) => {
-    const line = CITY_LINE.replace("55.78874", latitude).replace("49.12214", longitude);
+    const line = CITY_LINE.replace("55.78874", latitude).replace(
+      "49.12214",
+      longitude,
+    );
     expect(parseCityRow(line, 1)).toMatchObject({
       latitude: Number(latitude),
       longitude: Number(longitude),

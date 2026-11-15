@@ -1,4 +1,5 @@
 // Verifies FR1, FR11, FR12 of add-geonames-city-source (D3, D8).
+// Verifies FR1 of add-city-coordinates-to-locations (D2).
 import { describe, expect, it } from "vitest";
 import { compileCityData } from "../../../scripts/cityData/compileCityData.ts";
 import {
@@ -64,7 +65,7 @@ describe("compileCityData selection", () => {
       licence: "CC BY 4.0",
       dumpDate: "2026-11-13",
     });
-    expect(dataset.formatVersion).toBe(1);
+    expect(dataset.formatVersion).toBe(2);
   });
 
   it("should give identical output for two runs", () => {
@@ -184,7 +185,7 @@ describe("compileCityData namesakes", () => {
       ["Illinois", "Иллинойс"],
       ["Missouri", "Missouri"],
     ]);
-    expect(dataset.cities.map((city) => city[6])).toEqual([0, 1]);
+    expect(dataset.cities.map((city) => city[8])).toEqual([0, 1]);
   });
 
   it("should give a zone city that is a namesake its region", () => {
@@ -213,7 +214,7 @@ describe("compileCityData namesakes", () => {
       }),
     );
     expect(dataset.zoneCityRegions).toEqual({ "Europe/Moscow": 0 });
-    expect(dataset.cities[0][6]).toBe(0);
+    expect(dataset.cities[0][8]).toBe(0);
   });
 
   it("should leave cities of different countries without a region", () => {
@@ -231,7 +232,41 @@ describe("compileCityData namesakes", () => {
         timeZoneAliases: {},
       }),
     );
-    expect(dataset.cities.every((city) => city.length === 6)).toBe(true);
+    expect(dataset.cities.every((city) => city.length === 8)).toBe(true);
     expect(dataset.regions).toEqual([]);
+  });
+});
+
+describe("compileCityData coordinates", () => {
+  // @add-city-coordinates-to-locations @FR1
+  it.each([
+    ["Kazan", 55.78874, 49.12214, 558, 491],
+    ["Quito", -0.22985, -78.52495, -2, -785],
+    ["Null Island", -0.04, 0.04, 0, 0],
+  ])(
+    "should round %s to tenths of a degree",
+    (name, latitude, longitude, latitudeTenths, longitudeTenths) => {
+      const dataset = compileCityData(
+        buildInput({
+          cityRows: [cityRow({ geonameId: 7, name, latitude, longitude })],
+        }),
+      );
+      expect(dataset.cities[0].slice(6, 8)).toEqual([
+        latitudeTenths,
+        longitudeTenths,
+      ]);
+    },
+  );
+
+  it("should write a zero, never a negative zero", () => {
+    const dataset = compileCityData(
+      buildInput({
+        cityRows: [
+          cityRow({ geonameId: 7, latitude: -0.04, longitude: -0.04 }),
+        ],
+      }),
+    );
+    expect(Object.is(dataset.cities[0][6], 0)).toBe(true);
+    expect(Object.is(dataset.cities[0][7], 0)).toBe(true);
   });
 });

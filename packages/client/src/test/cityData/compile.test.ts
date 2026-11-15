@@ -12,7 +12,7 @@ describe("runCityDataCompile", () => {
     expect([...run.writes.keys()]).toEqual(["city-data/geonames-cities.json"]);
     const dataset = JSON.parse([...run.writes.values()][0]);
     expect(dataset.cities).toEqual([
-      [551487, "Kazan", "Казань", "RU", 0, 500000],
+      [551487, "Kazan", "Казань", "RU", 0, 500000, 558, 491],
     ]);
     expect(dataset.source.dumpDate).toBe(DUMP_DATE);
   });
@@ -59,7 +59,10 @@ describe("runCityDataCompile", () => {
   it("should return non-zero, log the line and write nothing for a city line with latitude 91", async () => {
     // @add-city-coordinates-to-locations @FR4
     const run = await runCompile({
-      cityLines: [KAZAN, cityLine(2, "Tver", "Europe/Moscow", 500_000, { latitude: "91" })],
+      cityLines: [
+        KAZAN,
+        cityLine(2, "Tver", "Europe/Moscow", 500_000, { latitude: "91" }),
+      ],
     });
     expect(run.exitCode).not.toBe(0);
     expect(run.log.join("\n")).toContain("line 2");

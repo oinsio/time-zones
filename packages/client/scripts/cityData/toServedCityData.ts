@@ -3,6 +3,7 @@
  * GeoNames IDs as differences. Columns gzip far better than one tuple per
  * city, which keeps the search data file within its budget.
  * Implements NFR-P1, M2 of add-geonames-city-source (D1, D5).
+ * Implements FR1 of add-city-coordinates-to-locations (D2).
  */
 import type { CityDataset } from "./cityDataTypes.ts";
 
@@ -16,6 +17,8 @@ export type ServedCityData = Omit<CityDataset, "source" | "cities"> & {
     countryCodes: string[];
     zoneIndexes: number[];
     populations: number[];
+    latitudeTenths: number[];
+    longitudeTenths: number[];
     regionIndexes: number[];
   };
 };
@@ -37,7 +40,9 @@ export function toServedCityData(dataset: CityDataset): ServedCityData {
       countryCodes: cities.map((city) => city[3]),
       zoneIndexes: cities.map((city) => city[4]),
       populations: cities.map((city) => city[5]),
-      regionIndexes: cities.map((city) => city[6] ?? NO_REGION_INDEX),
+      latitudeTenths: cities.map((city) => city[6]),
+      longitudeTenths: cities.map((city) => city[7]),
+      regionIndexes: cities.map((city) => city[8] ?? NO_REGION_INDEX),
     },
   };
 }
