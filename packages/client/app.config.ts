@@ -71,3 +71,10 @@ export const CITY_SEARCH_DATA_BUDGET_KB = 130;
  * Implements FR2 of add-zone-rules-from-iana (D1).
  */
 export const ZONE_RULES_RELEASE_FILE = "zone-rules/release.json";
+
+/**
+ * The committed zone coordinates, written by the compiler together with the
+ * release file; read by the check and the search data build.
+ * Implements FR2, FR3 of add-city-coordinates-to-locations (D3).
+ */
+export const ZONE_COORDINATES_FILE = "zone-rules/zone-coordinates.json";

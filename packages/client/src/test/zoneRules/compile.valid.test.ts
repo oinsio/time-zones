@@ -4,13 +4,34 @@ import { describe, expect, it } from "vitest";
 import { TZDATA_SOURCE_FILES } from "../../../scripts/zoneRules/compileWithZic.ts";
 import { compile, RELEASE, VALID_SCENARIO } from "./compileWorld";
 
+// Verifies FR2, FR3 of add-city-coordinates-to-locations: the zone coordinates file.
 describe("compiling a valid archive", () => {
+  it("writes the zone coordinates of the zone table with the release", async () => {
+    const run = await compile(VALID_SCENARIO);
+    expect(
+      JSON.parse(
+        run.writtenFiles.get("zone-rules/zone-coordinates.json") as string,
+      ),
+    ).toEqual({
+      release: RELEASE,
+      zones: { "Asia/Kolkata": [225, 884], "Europe/Moscow": [558, 376] },
+    });
+  });
+
+  it("writes exactly the release file and the zone coordinates file", async () => {
+    const run = await compile(VALID_SCENARIO);
+    expect([...run.writtenFiles.keys()].sort()).toEqual([
+      "zone-rules/release.json",
+      "zone-rules/zone-coordinates.json",
+    ]);
+  });
+
   it("writes a release named after the request with the zones of the archive", async () => {
     const run = await compile(VALID_SCENARIO);
     expect(run.exitCode).toBe(0);
-    const [[path, text]] = [...run.writtenFiles];
-    expect(path).toBe("zone-rules/release.json");
-    const document = JSON.parse(text as string);
+    const document = JSON.parse(
+      run.writtenFiles.get("zone-rules/release.json") as string,
+    );
     expect(document.release).toBe(RELEASE);
     expect(Object.keys(document.zones)).toEqual([
       "America/New_York",

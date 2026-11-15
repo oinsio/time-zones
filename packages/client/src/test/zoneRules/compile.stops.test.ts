@@ -79,7 +79,7 @@ describe("a compile that must stop", () => {
   it("logs which release it wrote", async () => {
     const run = await compile(VALID_SCENARIO);
     expect(run.logLines).toEqual([
-      "Wrote zone-rules/release.json for the release 2026f",
+      "Wrote zone-rules/release.json and zone-rules/zone-coordinates.json for the release 2026f",
     ]);
   });
 
@@ -98,6 +98,24 @@ describe("a compile that must stop", () => {
     const run = await compile({ ...VALID_SCENARIO, ...failure });
     expect(run.exitCode).not.toBe(0);
     expect(run.logLines.join("\n")).toContain(message);
+    expect(run.writtenFiles.size).toBe(0);
+  });
+
+  // Verifies FR2, FR3 of add-city-coordinates-to-locations.
+  it("stops and writes neither file when the archive has no zone table", async () => {
+    const run = await compile({ ...VALID_SCENARIO, isZoneTableMissing: true });
+    expect(run.exitCode).not.toBe(0);
+    expect(run.logLines.join("\n")).toContain("zone.tab");
+    expect(run.writtenFiles.size).toBe(0);
+  });
+
+  it("stops and writes neither file when a zone table row is malformed", async () => {
+    const run = await compile({
+      ...VALID_SCENARIO,
+      zoneTable: "RU\tbroken\tEurope/Moscow\n",
+    });
+    expect(run.exitCode).not.toBe(0);
+    expect(run.logLines.join("\n")).toContain("line 1");
     expect(run.writtenFiles.size).toBe(0);
   });
 

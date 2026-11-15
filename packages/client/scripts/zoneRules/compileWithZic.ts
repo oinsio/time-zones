@@ -3,6 +3,7 @@
  * release, compiles the source files with the system `zic -b slim`, reads
  * every TZif file and truncates it to the cutoff.
  * Implements FR7 of add-zone-rules-from-iana (design D7).
+ * Implements FR2 of add-city-coordinates-to-locations (D3): also returns the zone table.
  */
 import { mkdir, readdir, readFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
@@ -23,6 +24,8 @@ export const TZDATA_SOURCE_FILES = [
 ];
 
 const VERSION_FILE = "version";
+/** The zone table of the archive, already unpacked by `compileArchive`. */
+export const ZONE_TABLE_FILE = "zone.tab";
 const LINK_LINE = /^Link\s+(\S+)\s+(\S+)/;
 const ZONE_ID_SEPARATOR = "/";
 
@@ -30,6 +33,8 @@ export type CompiledZones = {
   zones: Map<string, ReleaseZone>;
   /** Link name to target name, from the `Link` lines of the source files. */
   links: Map<string, string>;
+  /** The text of the archive's zone table (`zone.tab`). */
+  zoneTable: string;
 };
 
 async function runChecked(
@@ -123,6 +128,14 @@ export async function compileArchive(
   return { sourceDirectory, outputDirectory };
 }
 
+async function readZoneTable(sourceDirectory: string): Promise<string> {
+  try {
+    return await readFile(join(sourceDirectory, ZONE_TABLE_FILE), "utf8");
+  } catch {
+    throw new Error(`The archive has no ${ZONE_TABLE_FILE}`);
+  }
+}
+
 export async function compileWithZic(
   archivePath: string,
   release: string,
@@ -136,5 +149,10 @@ export async function compileWithZic(
     runProcess,
   );
   const links = await readLinks(sourceDirectory);
-  return { zones: await readCompiledZones(outputDirectory, links), links };
+  const zoneTable = await readZoneTable(sourceDirectory);
+  return {
+    zones: await readCompiledZones(outputDirectory, links),
+    links,
+    zoneTable,
+  };
 }

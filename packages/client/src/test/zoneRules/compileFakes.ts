@@ -5,7 +5,10 @@
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { TZDATA_SOURCE_FILES } from "../../../scripts/zoneRules/compileWithZic.ts";
+import {
+  TZDATA_SOURCE_FILES,
+  ZONE_TABLE_FILE,
+} from "../../../scripts/zoneRules/compileWithZic.ts";
 import type {
   FetchRelease,
   ProcessResult,
@@ -30,7 +33,19 @@ export type FakeScenario = {
   tarFailure?: { exitCode: number; stderr: string };
   /** The exit code of `zic`, with its error text; nothing is compiled. */
   zicFailure?: { exitCode: number; stderr: string };
+  /** The archive holds no `zone.tab`. Implements FR2 of add-city-coordinates-to-locations. */
+  isZoneTableMissing?: boolean;
+  /** Replaces the fake zone table text. */
+  zoneTable?: string;
 };
+
+/** The `zone.tab` the fake `tar` unpacks (FR2 of add-city-coordinates-to-locations). */
+export const FAKE_ZONE_TABLE = [
+  "# tzdb timezone descriptions",
+  "RU\t+554521+0373704\tEurope/Moscow\tMoscow area",
+  "IN\t+2232+08822\tAsia/Kolkata",
+  "",
+].join("\n");
 
 export const VALID_VERIFY_STATUS_FILE = join(
   __dirname,
@@ -66,6 +81,12 @@ function playTar(args: string[], scenario: FakeScenario) {
   writeFileSync(join(directory, "version"), `${scenario.archiveVersion}\n`);
   for (const fileName of TZDATA_SOURCE_FILES) {
     writeFileSync(join(directory, fileName), "# no zones here\n");
+  }
+  if (!scenario.isZoneTableMissing) {
+    writeFileSync(
+      join(directory, ZONE_TABLE_FILE),
+      scenario.zoneTable ?? FAKE_ZONE_TABLE,
+    );
   }
   writeFileSync(join(directory, "asia"), "Zone Asia/Kolkata 5:30 - IST\n");
   writeFileSync(

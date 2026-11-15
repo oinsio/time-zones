@@ -3,19 +3,25 @@
  * 2026f` downloads the release from IANA, verifies its signature against the
  * pinned key, compiles it with `zic -b slim` and writes the release file.
  * Implements FR7 of add-zone-rules-from-iana (design D7), FR5 of add-remote-zone-rules-updates.
+ * Implements FR2, FR3 of add-city-coordinates-to-locations (D3): also writes the zone coordinates.
  */
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
+import {
+  ZONE_COORDINATES_FILE,
+  ZONE_RULES_RELEASE_FILE,
+} from "../../app.config.ts";
 import { parseReleaseName } from "../../src/lib/zoneRules/core/index.ts";
 import { compileWithZic } from "./compileWithZic.ts";
 import { downloadRelease, fetchBytes } from "./downloadRelease.ts";
+import { parseZoneTable } from "./parseZoneTable.ts";
 import type { FetchRelease, RunProcess } from "./processTypes.ts";
 import { runChildProcess } from "./runChildProcess.ts";
 import { verifySignature } from "./verifySignature.ts";
 import { writeRelease } from "./writeRelease.ts";
+import { writeZoneCoordinates } from "./writeZoneCoordinates.ts";
 
 const USAGE =
   "Usage: node scripts/zoneRules/compile.ts <release>  (a release name such as 2026f)";
@@ -47,18 +53,24 @@ export async function runZoneRulesCompile(
       workDirectory,
     );
     await verifySignature(archivePath, signaturePath, dependencies.runProcess);
-    const { zones, links } = await compileWithZic(
+    const { zones, links, zoneTable } = await compileWithZic(
       archivePath,
       release,
       workDirectory,
       dependencies.runProcess,
     );
+    // Every step that can fail ran above: both files are written together.
+    const zoneCoordinatesText = writeZoneCoordinates({
+      release,
+      zones: parseZoneTable(zoneTable),
+    });
     await dependencies.writeFile(
       ZONE_RULES_RELEASE_FILE,
       writeRelease({ release, zones, links }),
     );
+    await dependencies.writeFile(ZONE_COORDINATES_FILE, zoneCoordinatesText);
     dependencies.log(
-      `Wrote ${ZONE_RULES_RELEASE_FILE} for the release ${release}`,
+      `Wrote ${ZONE_RULES_RELEASE_FILE} and ${ZONE_COORDINATES_FILE} for the release ${release}`,
     );
     return 0;
   } catch (error) {
