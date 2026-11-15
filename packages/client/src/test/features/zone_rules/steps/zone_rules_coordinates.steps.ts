@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { expect, vi } from "vitest";
+import { expect, type MockInstance, vi } from "vitest";
 import { COORDINATE_TENTHS_PER_DEGREE } from "@/constants";
 import {
   type CompileRun,
@@ -158,7 +158,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @add-city-coordinates-to-locations @FR3
   f.Scenario("No network at build time", ({ When, Then, And }) => {
-    let fetchSpy: ReturnType<typeof vi.spyOn>;
+    let fetchSpy: MockInstance<typeof fetch>;
     let zoneCities: ReturnType<typeof loadCitySearchData>["zoneCities"] = [];
     When("the search data is loaded without network access", () => {
       fetchSpy = vi.spyOn(globalThis, "fetch");
