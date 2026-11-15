@@ -55,10 +55,10 @@ A committed zone coordinates file SHALL hold the coordinates of the principal pl
 - **THEN** both succeed and the search data holds the coordinates of the zone cities
 
 ### Requirement: Coordinates are checked
-The city data check SHALL fail, naming the city, when a GeoNames city of the committed city data has no coordinates or coordinates out of range. The zone rules check SHALL fail, naming the offender, when the committed zone coordinates file is malformed, names another release than the bundled zone rules release, holds coordinates out of range, or leaves a zone city of the search data other than UTC without coordinates. A zone city whose zone the zone table does not list MUST take its coordinates from a named override kept with the compiler; without one the check fails. Both checks MUST run without network access and in CI on every pull request. <!-- implements FR3, FR4, M1, M2 of add-city-coordinates-to-locations -->
+The city data check SHALL fail, naming the city, when a GeoNames city of the committed city data has no coordinates or coordinates out of range. The zone coordinates check SHALL fail, naming the offender, when the committed zone coordinates file is malformed, names another release than the bundled zone rules release, holds coordinates out of range, or leaves a zone city of the search data other than UTC without coordinates. A zone city whose zone the zone table does not list MUST take its coordinates from a named override kept with the compiler; without one the check fails. Both checks MUST run on the committed files without network access, as part of the unit tests that every pull request runs. <!-- implements FR3, FR4, M1, M2 of add-city-coordinates-to-locations -->
 
 #### Scenario: The committed files pass
-- **WHEN** the city data check and the zone rules check run on the committed files
+- **WHEN** the city data check and the zone coordinates check run on the committed files without network access
 - **THEN** both pass
 
 #### Scenario: A broken file fails
@@ -77,5 +77,5 @@ The city data check SHALL fail, naming the city, when a GeoNames city of the com
 
 #### Scenario: UTC needs no coordinates
 - **GIVEN** the zone coordinates hold no entry for `UTC`
-- **WHEN** the zone rules check runs
+- **WHEN** the zone coordinates check runs
 - **THEN** it passes

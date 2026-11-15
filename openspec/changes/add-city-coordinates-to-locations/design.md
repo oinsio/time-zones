@@ -11,7 +11,7 @@ Current state, read from the code:
 - Zone cities come from CLDR at build time (`scripts/zoneData/loadZoneData.ts`): names and a country code, no coordinates. GeoNames matches only 289 of the 419 zone cities (measured on `cities15000` of 2026-11-14).
 - `scripts/zoneRules/compileWithZic.ts` unpacks only the nine source files and `version` from the signed tzdata archive. The archive of 2026f also holds `zone.tab` with 418 rows — exactly the zone cities except UTC (measured). `zone1970.tab` lacks 107 of them and is not used.
 - `CityRecord` (`src/ports/citySearch.ts`) and `Location` (`src/model/locations.ts`) have no coordinates. A location's identity is zone plus label; it stores no record ID.
-- The stored list is a version 3 document; `parseStoredLocations` rejects the whole document on an invalid entry and ignores unknown fields of a city entry.
+- The stored list is a version 3 document (`LOCATIONS_SCHEMA_VERSION` in `src/constants/locations.ts`) migrated step by step by `LOCATION_MIGRATIONS` (`src/adapters/locationsDocument.ts`) without a write on load; `parseStoredLocations` rejects the whole document on an invalid entry and ignores unknown fields of a city entry. `localStorageLocationRepository.migration.test.ts` loads a version 4 document as unreadable today.
 - `useCityLabels` already loads the city data once in the background while the list holds a city location, and `CitySearch.getCityLabel(timeZoneId, storedLabel, language)` already resolves a stored location to a city record.
 - Remote zone rules updates deliver only the release file (`zone-rules/<release>.json`).
 
@@ -21,7 +21,7 @@ Current state, read from the code:
 
 - One owner of the concept "coordinates" in the model, reused by the port, the adapters and the stored document.
 - Zone coordinates that need no name matching and no second download.
-- A stored list that stays readable by the previous app build during a rollout.
+- A stored list that is migrated, not rewritten, on its first load by the new build.
 
 **Non-Goals:**
 
@@ -34,7 +34,7 @@ Current state, read from the code:
 
 `src/model/coordinates.ts` owns `Coordinates = { latitude: number; longitude: number }` (decimal degrees, north and east positive) and `parseCoordinates(value: unknown): Coordinates | undefined`, which accepts only two finite numbers in range. Limits live in `src/constants/coordinates.ts`: `MAX_LATITUDE_DEGREES = 90`, `MAX_LONGITUDE_DEGREES = 180`, `COORDINATE_TENTHS_PER_DEGREE = 10`. The port, the adapters and `parseStoredLocations` all call `parseCoordinates`; no second range check exists in the app.
 
-The constants file imports nothing, so the Node scripts import it by relative path, as `scripts/zoneRules/` already imports `src/lib/zoneRules/core`.
+The constants file imports nothing, so the Node scripts import it by relative path, as `scripts/zoneRules/precacheExclusion.ts` and `scripts/check-bundle-size.mjs` already import `src/constants/zoneRules.ts`.
 
 Alternative rejected: a tuple `[latitude, longitude]` — unreadable at call sites and easy to swap.
 
@@ -62,9 +62,9 @@ Alternatives rejected:
 - `zone1970.tab`: lacks 107 zone cities.
 - Preferring GeoNames where both exist: 3 of 289 compared zones differ by more than 0.25° (largest: `Asia/Aqtau`, 0.9°). Two sources for one table is not worth a few minutes of solar time.
 
-### D4. Checks extend the two existing commands (FR4)
+### D4. Pure checks, run on the committed files by the unit tests (FR4)
 
-`city-data:check` (`checkCityData.ts`) validates the two new tuple fields. `zone-rules:check` gains `checkZoneCoordinates.ts`: format, release equal to `release.json`, ranges, and coverage of every zone city of `loadZoneData()` except UTC, after overrides. No new command and no new CI step.
+`checkCityData` (`scripts/cityData/checkCityData.ts`) validates the two new tuple fields; `src/test/cityData/check.test.ts` already runs `runCityDataCheck` on the committed `city-data/geonames-cities.json` inside `pnpm test`, so the city data check reaches every pull request without a new step. The new pure `checkZoneCoordinates(zoneCoordinatesText, release, zoneCities, overrides)` (`scripts/zoneRules/checkZoneCoordinates.ts`) checks the format, the release against `release.json`, the ranges, and the coverage of every zone city of `loadZoneData()` except UTC after overrides. A new `src/test/zoneRules/zoneCoordinates.committed.test.ts` runs it on the committed files inside `pnpm test`. `zone-rules:check` also calls it and prints its errors, but that command downloads the release and needs `zdump`, so it is not what guards a pull request. No new command and no new CI step.
 
 ### D5. City records get coordinates from their source (FR5)
 
@@ -74,9 +74,9 @@ Alternatives rejected:
 
 `Location.coordinates?: Coordinates`. `ADD_LOCATION` gains optional `coordinates`; the reducer passes them through `parseCoordinates` and builds the ID from zone and label as today. `LocationSearch.tsx` passes `record.coordinates` with the other fields of the chosen record.
 
-The stored entry gains `coordinates: { latitude, longitude }`. `LOCATIONS_SCHEMA_VERSION` stays 3: `parseStoredLocations` reads the field with `parseCoordinates` and drops a malformed value instead of rejecting the document. The previous build ignores the unknown field, so a tab still running it reads the list; if it rewrites the list without coordinates, D7 gives them back.
+The stored entry gains `coordinates: { latitude, longitude }`. `LOCATIONS_SCHEMA_VERSION` becomes 4, as `.claude/rules/architecture.md` requires ("a schema change requires a migration and fixture tests") and as the preferences document did for each added field (`PREFERENCES_SCHEMA_VERSION = 6`). `LOCATION_MIGRATIONS` in `src/adapters/locationsDocument.ts` gains the step 3 → 4, which returns the payload unchanged: a version 3 entry has no coordinates, which version 4 reads as "none". As for the earlier steps, the load writes nothing. `parseStoredLocations` reads the field with `parseCoordinates`: absent → no coordinates; present but rejected by `parseCoordinates` → the whole document is rejected, as for any invalid entry (ADR-0004: "a value of the wrong type stays unreadable"); a device time entry with `coordinates` is rejected like one with zone fields.
 
-Alternative rejected: version 4 with a migration — a migration that only adds an optional field buys nothing and makes the previous build reject the document.
+Alternative rejected: keep version 3 and drop malformed coordinates silently — the previous build would read the new documents, but it contradicts the migration rule of `.claude/rules/architecture.md` and the load normalization of ADR-0004, which clears only dangling references silently.
 
 ### D7. One command and one hook give stored locations their coordinates (FR8, NFR-P2)
 
@@ -84,7 +84,7 @@ Alternative rejected: version 4 with a migration — a migration that only adds 
 - Model: `FILL_LOCATION_COORDINATES { coordinatesByLocationId }` sets coordinates on city locations that have none and returns the same state object when nothing changed, so the controller schedules no write.
 - Controller: `useLocationCoordinatesFill` (one hook, the only side-effect owner) waits for `loadCitySearchOnce`, calls `getCoordinates` once per city location without coordinates, and dispatches one command when at least one lookup returned coordinates. It reuses the load that `useCityLabels` starts; it starts none itself when every city location has coordinates.
 
-A lookup counter in `src/test/workCounters.ts` backs the work-bound scenarios (ADR-0008).
+The work-bound scenarios count coordinate lookups with a counting wrapper around the `CitySearch` that the test hands to the controller through its `LoadCitySearch` (it counts calls of `getCoordinates`), and count normalizations with `startWorkCount()` of `src/test/workCounters.ts` (ADR-0008). Production code never imports from `src/test/`.
 
 Alternative rejected: deriving coordinates at render time from the city data instead of storing them — the follow-up colouring would then wait for a 120 KB lazy file on every start and have no data offline on a first visit.
 
@@ -97,7 +97,7 @@ Estimate: two columns of 6 102 integers add about 20 KB gzipped to 119.4 KB. `CI
 - [`zone.tab` places are approximate, up to 0.9° from the city] → accepted; a few minutes of solar time for the zone city only.
 - [A future tzdata release drops `zone.tab`, which IANA calls a backward-compatibility table] → the compile fails loudly; switch to `zone1970.tab` plus overrides then.
 - [A zone that only a remote zone rules update knows has no coordinates] → the location has none until the next deploy; consumers must treat missing coordinates as a normal case (the follow-up change does).
-- [A tab on the previous build rewrites the list without coordinates] → the fill gives them back at the next load of the city data.
+- [A tab still on the previous build receives a version 4 list from another tab, or the previous build is restored by a rollback] → it reads the document as newer and shows the load error with Reset, which ADR-0004 prescribes for a newer version; the new-version notice of that tab offers the reload. A rollback is therefore done as a forward fix that keeps reading version 4.
 - [The search data grows past 150 KB] → fallback of D8.
 - [The zone rules publication workflow commits only `release.json`] → `refresh-data-through-scheduled-pull-requests` commits both files; until then a manual release bump commits both.
 
@@ -105,7 +105,7 @@ Estimate: two columns of 6 102 integers add about 20 KB gzipped to 119.4 KB. `CI
 
 1. Land the compilers and both regenerated committed files in one pull request, so checks never see a half-updated pair.
 2. Deploy. Existing lists are read unchanged; they gain coordinates after the first load of the city data.
-3. Rollback: revert the pull request. Stored lists with coordinates stay readable by the previous build, which ignores the field.
+3. Rollback: not by reverting alone — a build without the version 4 reader shows the load error for every list written since the deploy. Roll forward with a fix that keeps `LOCATIONS_SCHEMA_VERSION = 4` and its migration.
 
 ## Open Questions
 
