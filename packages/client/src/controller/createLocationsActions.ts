@@ -80,12 +80,11 @@ export function createLocationsActions({
     },
     addLocation: (input) =>
       dispatchAndSchedule({ type: LocationCommandType.ADD_LOCATION, ...input }),
-    fillLocationCoordinates: (coordinatesByLocationId) => {
-      dispatchAndSchedule({
+    fillLocationCoordinates: (coordinatesByLocationId) =>
+      void dispatchAndSchedule({
         type: LocationCommandType.FILL_LOCATION_COORDINATES,
         coordinatesByLocationId,
-      });
-    },
+      }),
     addDeviceTimeLocation: () =>
       dispatchAndSchedule({
         type: LocationCommandType.ADD_DEVICE_TIME_LOCATION,

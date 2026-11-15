@@ -244,9 +244,7 @@ describe("parseStoredLocations coordinates", () => {
 
   it("should read an entry without coordinates as a location without", () => {
     const outcome = parseStoredLocations({ locations: [moscow] });
-    expect(outcome.ok && outcome.locations[0]).not.toHaveProperty(
-      "coordinates",
-    );
+    expect(outcome.ok && outcome.locations[0]?.coordinates).toBeUndefined();
   });
 
   it.each([

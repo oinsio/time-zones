@@ -59,21 +59,16 @@ function readRegions(value: unknown): Names[] | undefined {
 }
 
 /** Coordinates from two tenths-of-a-degree numbers, `undefined` when either is not a number or out of range. */
-export function parseTenthsCoordinates(
+export const parseTenthsCoordinates = (
   latitudeTenths: unknown,
   longitudeTenths: unknown,
-): Coordinates | undefined {
-  if (
-    typeof latitudeTenths !== "number" ||
-    typeof longitudeTenths !== "number"
-  ) {
-    return undefined;
-  }
-  return parseCoordinates({
-    latitude: latitudeTenths / COORDINATE_TENTHS_PER_DEGREE,
-    longitude: longitudeTenths / COORDINATE_TENTHS_PER_DEGREE,
-  });
-}
+): Coordinates | undefined =>
+  typeof latitudeTenths === "number" && typeof longitudeTenths === "number"
+    ? parseCoordinates({
+        latitude: latitudeTenths / COORDINATE_TENTHS_PER_DEGREE,
+        longitude: longitudeTenths / COORDINATE_TENTHS_PER_DEGREE,
+      })
+    : undefined;
 
 function readCity(
   tuple: unknown,
@@ -149,27 +144,10 @@ function readCityTuples(columns: unknown): unknown[][] | undefined {
   let id = 0;
   return Array.from({ length: cityCount }, (_, index) => {
     id += Number(idDifferences?.[index]);
-    const [
-      english,
-      russian,
-      countryCode,
-      zoneIndex,
-      population,
-      latitudeTenths,
-      longitudeTenths,
-      regionIndex,
-    ] = otherColumns.map((column) => column[index]);
-    const base = [
-      id,
-      english,
-      russian,
-      countryCode,
-      zoneIndex,
-      population,
-      latitudeTenths,
-      longitudeTenths,
-    ];
-    return regionIndex === NO_REGION_INDEX ? base : [...base, regionIndex];
+    const tuple = [id, ...otherColumns.map((column) => column[index])];
+    return tuple[tuple.length - 1] === NO_REGION_INDEX
+      ? tuple.slice(0, -1)
+      : tuple;
   });
 }
 

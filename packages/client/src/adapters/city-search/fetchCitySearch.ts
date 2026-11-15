@@ -1,7 +1,6 @@
 import zoneCitiesUrl from "virtual:zone-cities-url";
 import type { CitySearch, LoadCitySearch } from "@/ports";
 import type { GeoNamesCityData, ZoneCityData } from "./citySource";
-import { createCompositeCitySearch } from "./createCompositeCitySearch";
 import {
   parseGeoNamesCityData,
   parseTenthsCoordinates,
@@ -11,6 +10,7 @@ import {
  * Loads the zone-cities data file with `fetch` and builds the search from it.
  * A `fetch` keeps no memory of an earlier failure, so a retry is a new request.
  * Implements FR15, FR16, NFR-P2 of add-locations-via-search (D8).
+ * Implements FR5 of add-city-coordinates-to-locations (D5): zone cities get coordinates from their tenths of a degree.
  */
 
 const SEARCH_DATA_ERROR = {
@@ -21,36 +21,21 @@ const SEARCH_DATA_ERROR = {
 const isRecordObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-/**
- * A served zone city as a `ZoneCityData`, or `undefined` when it is invalid;
- * its optional tenths of a degree become coordinates (FR5 of
- * add-city-coordinates-to-locations).
- */
-function parseZoneCity(value: unknown): ZoneCityData | undefined {
-  if (!isRecordObject(value) || !isRecordObject(value.names)) return undefined;
-  const isValid =
+function isZoneCityData(value: unknown): value is ServedZoneCityData {
+  if (!isRecordObject(value) || !isRecordObject(value.names)) return false;
+  return (
     typeof value.timeZoneId === "string" &&
     typeof value.names.en === "string" &&
     typeof value.names.ru === "string" &&
-    typeof value.countryCode === "string";
-  if (!isValid) return undefined;
-  const record = {
-    timeZoneId: value.timeZoneId as string,
-    names: { en: value.names.en as string, ru: value.names.ru as string },
-    countryCode: value.countryCode as string,
-  };
-  if (
-    value.latitudeTenths === undefined &&
-    value.longitudeTenths === undefined
-  ) {
-    return record;
-  }
-  const coordinates = parseTenthsCoordinates(
-    value.latitudeTenths,
-    value.longitudeTenths,
+    typeof value.countryCode === "string"
   );
-  return coordinates === undefined ? undefined : { ...record, coordinates };
 }
+
+/** A zone city as served: the tenths of a degree of its coordinates are optional. */
+type ServedZoneCityData = ZoneCityData & {
+  latitudeTenths?: unknown;
+  longitudeTenths?: unknown;
+};
 
 export type CitySearchData = {
   zoneCities: ZoneCityData[];
@@ -63,23 +48,27 @@ export type CitySearchData = {
  * Implements FR14 of add-geonames-city-source (D5).
  */
 export function parseCitySearchData(payload: unknown): CitySearchData {
-  const servedZoneCities = isRecordObject(payload)
-    ? payload.zoneCities
-    : undefined;
-  const zoneCities = Array.isArray(servedZoneCities)
-    ? servedZoneCities.map(parseZoneCity)
-    : undefined;
+  const zoneCities = isRecordObject(payload) ? payload.zoneCities : undefined;
   const cityData = isRecordObject(payload)
     ? parseGeoNamesCityData(payload.cityData)
     : undefined;
   if (
-    zoneCities === undefined ||
-    zoneCities.some((zoneCity) => zoneCity === undefined) ||
+    !Array.isArray(zoneCities) ||
+    !zoneCities.every(isZoneCityData) ||
     cityData === undefined
   ) {
     throw new Error(SEARCH_DATA_ERROR.INVALID_RECORDS);
   }
-  return { zoneCities: zoneCities as ZoneCityData[], cityData };
+  return {
+    zoneCities: zoneCities.map((zoneCity) => ({
+      ...zoneCity,
+      coordinates: parseTenthsCoordinates(
+        zoneCity.latitudeTenths,
+        zoneCity.longitudeTenths,
+      ),
+    })),
+    cityData,
+  };
 }
 
 type FetchCitySearchOptions = {
@@ -95,6 +84,10 @@ export function createFetchCitySearchLoader({
     const response = await fetchResource(dataUrl);
     if (!response.ok) throw new Error(SEARCH_DATA_ERROR.REQUEST_FAILED);
     const { zoneCities, cityData } = parseCitySearchData(await response.json());
+    // A chunk of its own: the search code stays out of the initial JavaScript (NFR-P1 of add-city-coordinates-to-locations).
+    const { createCompositeCitySearch } = await import(
+      "./createCompositeCitySearch"
+    );
     return createCompositeCitySearch(zoneCities, cityData);
   };
 }

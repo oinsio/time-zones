@@ -83,7 +83,7 @@ export function parseStoredLocations(
       timeZoneId,
       label: entry.label,
       countryCode: entry.countryCode,
-      ...(coordinates === undefined ? {} : { coordinates }),
+      coordinates,
     });
   }
   const homeLocationId = parseHomeLocationId(payload.homeLocationId, knownIds);

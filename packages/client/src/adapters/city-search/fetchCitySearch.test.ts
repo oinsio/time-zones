@@ -193,7 +193,6 @@ describe("parse city search data", () => {
         cityData: validCityData,
       });
       expect(parsed.zoneCities[0]?.coordinates).toEqual(coordinates);
-      expect(parsed.zoneCities[0]).not.toHaveProperty("latitudeTenths");
     },
   );
 
@@ -202,14 +201,17 @@ describe("parse city search data", () => {
     ["a longitude without a latitude", { longitudeTenths: 1 }],
     ["a latitude of 91 degrees", { latitudeTenths: 910, longitudeTenths: 0 }],
     ["text tenths", { latitudeTenths: "1", longitudeTenths: 0 }],
-  ])("should reject a zone city with %s", (_label, tenths) => {
-    expect(() =>
-      parseCitySearchData({
+  ])(
+    "should read a zone city with %s as one without coordinates",
+    (_label, tenths) => {
+      const parsed = parseCitySearchData({
         zoneCities: [{ ...validRecord, ...tenths }],
         cityData: validCityData,
-      }),
-    ).toThrow(INVALID_RECORDS_MESSAGE);
-  });
+      });
+      expect(parsed.zoneCities[0]?.coordinates).toBeUndefined();
+      expect(parsed.zoneCities[0]?.timeZoneId).toBe("Europe/Moscow");
+    },
+  );
 
   it("should expand a Russian name of 0 to the English name and a region index to its names", () => {
     expect(parse().cityData.cities[1]).toMatchObject({

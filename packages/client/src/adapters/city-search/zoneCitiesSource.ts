@@ -51,9 +51,7 @@ function buildRecord(
     aliases: getZoneAbbreviations(timeZoneId),
     rank: calculateRank(timeZoneId),
     population: cityData.zoneCityPopulations[timeZoneId] ?? 0,
-    ...(data?.coordinates === undefined
-      ? {}
-      : { coordinates: data.coordinates }),
+    coordinates: data?.coordinates,
     ...(region === undefined ? {} : { region }),
   };
 }

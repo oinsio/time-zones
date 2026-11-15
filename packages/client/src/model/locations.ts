@@ -130,7 +130,7 @@ function reduceCommand(
         timeZoneId,
         label: command.label,
         countryCode: command.countryCode,
-        ...(coordinates === undefined ? {} : { coordinates }),
+        coordinates,
       };
       return {
         ok: true,

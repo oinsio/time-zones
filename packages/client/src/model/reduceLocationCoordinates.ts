@@ -1,11 +1,7 @@
 import { parseCoordinates } from "./coordinates";
+import type { LocationCommand, LocationCommandType } from "./locationCommands";
 import { LocationKind } from "./locationKind";
-import type {
-  LocationCommand,
-  LocationCommandType,
-  LocationsReduceResult,
-  WorldClockState,
-} from "./locations";
+import type { LocationsReduceResult, WorldClockState } from "./locations";
 
 type FillLocationCoordinatesCommand = Extract<
   LocationCommand,
@@ -23,20 +19,15 @@ export function reduceLocationCoordinates(
   state: WorldClockState,
   command: FillLocationCoordinatesCommand,
 ): LocationsReduceResult {
-  let hasChanged = false;
   const locations = state.locations.map((location) => {
-    if (
-      location.kind !== LocationKind.CITY ||
-      location.coordinates !== undefined
-    ) {
-      return location;
-    }
-    const coordinates = parseCoordinates(
-      command.coordinatesByLocationId[location.id],
-    );
-    if (coordinates === undefined) return location;
-    hasChanged = true;
-    return { ...location, coordinates };
+    const coordinates =
+      location.kind === LocationKind.CITY &&
+      location.coordinates === undefined &&
+      parseCoordinates(command.coordinatesByLocationId[location.id]);
+    return coordinates ? { ...location, coordinates } : location;
   });
+  const hasChanged = locations.some(
+    (location, index) => location !== state.locations[index],
+  );
   return { ok: true, state: hasChanged ? { ...state, locations } : state };
 }

@@ -1,7 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { type Coordinates, type Location, LocationKind } from "@/model";
 import type { LoadCitySearch } from "@/ports";
 import { loadCitySearchOnce } from "./cityDataCache";
+
+const lookedUpIdsByLoader = new WeakMap<LoadCitySearch, Set<string>>();
 
 const isCityLocationWithoutCoordinates = (location: Location): boolean =>
   location.kind === LocationKind.CITY && location.coordinates === undefined;
@@ -18,50 +20,28 @@ export function useLocationCoordinatesFill(
   locations: readonly Location[],
   load: LoadCitySearch,
   fillLocationCoordinates: (
-    coordinatesByLocationId: Record<string, Coordinates>,
+    coordinatesByLocationId: Record<string, Coordinates | undefined>,
   ) => void,
 ): void {
-  const latestLocations = useRef(locations);
-  latestLocations.current = locations;
-  const lookedUp = useRef({ load, ids: new Set<string>() });
-  if (lookedUp.current.load !== load)
-    lookedUp.current = { load, ids: new Set() };
-  const missingKey = JSON.stringify(
-    locations.filter(isCityLocationWithoutCoordinates).map(({ id }) => id),
-  );
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: missingKey stands for the locations that lack coordinates
   useEffect(() => {
-    const { ids } = lookedUp.current;
-    const findPending = () =>
-      latestLocations.current.filter(
-        (location) =>
-          isCityLocationWithoutCoordinates(location) && !ids.has(location.id),
-      );
-    if (findPending().length === 0) return;
-    let isCancelled = false;
+    const missing = locations.filter(isCityLocationWithoutCoordinates);
+    if (missing.length === 0) return;
+    const lookedUpIds = lookedUpIdsByLoader.get(load) ?? new Set<string>();
+    lookedUpIdsByLoader.set(load, lookedUpIds);
     loadCitySearchOnce(load).then(
-      (search) => {
-        if (isCancelled) return;
-        const coordinatesByLocationId: Record<string, Coordinates> = {};
-        for (const location of findPending()) {
-          ids.add(location.id);
-          const coordinates = search.getCoordinates(
-            location.timeZoneId,
-            location.label,
-          );
-          if (coordinates !== undefined) {
-            coordinatesByLocationId[location.id] = coordinates;
-          }
-        }
-        if (Object.keys(coordinatesByLocationId).length > 0) {
-          fillLocationCoordinates(coordinatesByLocationId);
-        }
-      },
+      (search) =>
+        // A command that gives nothing leaves the state as it is: no write.
+        fillLocationCoordinates(
+          Object.fromEntries(
+            missing
+              .filter(({ id }) => !lookedUpIds.has(id))
+              .map(({ id, timeZoneId, label }) => {
+                lookedUpIds.add(id);
+                return [id, search.getCoordinates(timeZoneId, label)];
+              }),
+          ),
+        ),
       () => undefined,
     );
-    return () => {
-      isCancelled = true;
-    };
-  }, [missingKey, load, fillLocationCoordinates]);
+  }, [locations, load, fillLocationCoordinates]);
 }

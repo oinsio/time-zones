@@ -54,9 +54,7 @@ export function serializeLocationsDocument(
               timeZoneId: location.timeZoneId,
               label: location.label,
               countryCode: location.countryCode,
-              ...(location.coordinates === undefined
-                ? {}
-                : { coordinates: location.coordinates }),
+              coordinates: location.coordinates,
             },
       ),
       homeLocationId,

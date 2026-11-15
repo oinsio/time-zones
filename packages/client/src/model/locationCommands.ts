@@ -58,7 +58,9 @@ export type LocationCommand =
   | {
       type: LocationCommandType.FILL_LOCATION_COORDINATES;
       /** Location id → the coordinates it gains; only city locations without coordinates take them. */
-      coordinatesByLocationId: Readonly<Record<string, Coordinates>>;
+      coordinatesByLocationId: Readonly<
+        Record<string, Coordinates | undefined>
+      >;
     }
   | { type: LocationCommandType.REMOVE_LOCATION; id: string }
   | {

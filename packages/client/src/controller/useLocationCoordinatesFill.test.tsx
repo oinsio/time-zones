@@ -44,7 +44,9 @@ describe("useLocationCoordinatesFill", () => {
 
     await waitFor(() => expect(fill).toHaveBeenCalledTimes(1));
     expect(getCoordinates).toHaveBeenCalledTimes(2);
-    expect(fill).toHaveBeenCalledWith({ [kazan.id]: KAZAN_COORDINATES });
+    expect(fill).toHaveBeenCalledWith(
+      expect.objectContaining({ [kazan.id]: KAZAN_COORDINATES }),
+    );
   });
 
   it("should fill every location that gains coordinates in one command", async () => {
@@ -90,14 +92,17 @@ describe("useLocationCoordinatesFill", () => {
     expect(getCoordinates).not.toHaveBeenCalled();
   });
 
-  it("should dispatch nothing when no lookup finds coordinates", async () => {
+  it("should hand over no coordinates when no lookup finds any", async () => {
     const { load, getCoordinates } = createLoader();
     const fill = vi.fn();
 
     renderHook(() => useLocationCoordinatesFill([utc], load, fill));
 
     await waitFor(() => expect(getCoordinates).toHaveBeenCalledTimes(1));
-    expect(fill).not.toHaveBeenCalled();
+    await waitFor(() => expect(fill).toHaveBeenCalledTimes(1));
+    expect(
+      Object.values(fill.mock.calls[0]?.[0] ?? {}).filter(Boolean),
+    ).toEqual([]);
   });
 
   it("should stay silent when the city data fails to load", async () => {

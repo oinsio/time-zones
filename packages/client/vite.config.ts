@@ -26,6 +26,8 @@ const DEPLOY_INSTANT = resolveDeployInstant();
 const ZONE_RULES_PRECACHE_IGNORE_PATTERN = `${ZONE_RULES_RELEASE_DIRECTORY}**`;
 
 const SHARED_VIEWS_PATH = "/src/views/shared/";
+/** The city search adapters have no import-time effects either: the composite search loads as its own chunk. */
+const CITY_SEARCH_ADAPTERS_PATH = "/src/adapters/city-search/";
 
 export default defineConfig({
   base: APP_BASE_PATH,
@@ -36,9 +38,12 @@ export default defineConfig({
     cssTarget: BUILD_TARGETS,
     rollupOptions: {
       // The shared view blocks have no import-time effects: unused ones stay
-      // out of the initial JavaScript, which keeps it under the NFR-P1 budget.
+      // out of the initial JavaScript, which keeps it under the NFR-P1 budget
+      // (NFR-P1 of add-city-coordinates-to-locations: the coordinates grew it).
       treeshake: {
-        moduleSideEffects: (moduleId) => !moduleId.includes(SHARED_VIEWS_PATH),
+        moduleSideEffects: (moduleId) =>
+          !moduleId.includes(SHARED_VIEWS_PATH) &&
+          !moduleId.includes(CITY_SEARCH_ADAPTERS_PATH),
       },
     },
   },

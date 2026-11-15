@@ -45,7 +45,7 @@ describe("reduceLocations ADD_LOCATION coordinates", () => {
 
   it("should add a location without coordinates", () => {
     const state = expectOk(add(INITIAL_WORLD_CLOCK_STATE, kazan));
-    expect(state.locations[0]).not.toHaveProperty("coordinates");
+    expect(state.locations[0]?.coordinates).toBeUndefined();
   });
 
   it.each([
@@ -53,7 +53,7 @@ describe("reduceLocations ADD_LOCATION coordinates", () => {
     ["text", { latitude: "1", longitude: 0 }],
   ])("should add the location without coordinates for %s", (_, coordinates) => {
     const state = expectOk(add(INITIAL_WORLD_CLOCK_STATE, kazan, coordinates));
-    expect(state.locations[0]).not.toHaveProperty("coordinates");
+    expect(state.locations[0]?.coordinates).toBeUndefined();
   });
 
   it("should keep the id from zone and label whatever the coordinates", () => {

@@ -50,7 +50,7 @@ export type LocationsContextValue = {
   resetLocations: () => void;
   /** Gives city locations without coordinates the given ones and schedules one write. Implements FR8 of add-city-coordinates-to-locations (D7). */
   fillLocationCoordinates: (
-    coordinatesByLocationId: Record<string, Coordinates>,
+    coordinatesByLocationId: Record<string, Coordinates | undefined>,
   ) => void;
 };
 

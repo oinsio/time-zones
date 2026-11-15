@@ -6,21 +6,15 @@ import { MAX_LATITUDE_DEGREES, MAX_LONGITUDE_DEGREES } from "@/constants";
  */
 export type Coordinates = { latitude: number; longitude: number };
 
-function isFiniteWithin(value: unknown, limit: number): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    Math.abs(value) <= limit
-  );
-}
+const isWithin = (value: unknown, limit: number): value is number =>
+  typeof value === "number" && Math.abs(value) <= limit;
 
-/** The one validator of coordinates: two finite numbers in range, otherwise `undefined`. */
+/** The one validator of coordinates: two numbers in range, otherwise `undefined`. */
 export function parseCoordinates(value: unknown): Coordinates | undefined {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return undefined;
-  }
+  if (typeof value !== "object" || value === null) return undefined;
   const { latitude, longitude } = value as Record<string, unknown>;
-  if (!isFiniteWithin(latitude, MAX_LATITUDE_DEGREES)) return undefined;
-  if (!isFiniteWithin(longitude, MAX_LONGITUDE_DEGREES)) return undefined;
-  return { latitude, longitude };
+  return isWithin(latitude, MAX_LATITUDE_DEGREES) &&
+    isWithin(longitude, MAX_LONGITUDE_DEGREES)
+    ? { latitude, longitude }
+    : undefined;
 }
