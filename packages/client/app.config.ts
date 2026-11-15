@@ -62,6 +62,7 @@ export const ZONE_RULES_ASSET_BUDGET_KB = 22;
  * Gzipped size ceiling of the search data file (the zone cities and the GeoNames
  * city data), in KB, measured by `check-bundle-size.mjs`.
  * Implements NFR-P1, M2 of add-geonames-city-source (D1).
+ * Implements NFR-P1 of add-city-coordinates-to-locations (D8): 150 KB with the coordinates of every city.
  */
 export const CITY_SEARCH_DATA_BUDGET_KB = 150;
 

@@ -6,6 +6,7 @@
     "includes": [
       "**",
       "!zone-rules/release.json",
+      "!zone-rules/zone-coordinates.json",
       "!city-data/geonames-cities.json"
     ]
   }
