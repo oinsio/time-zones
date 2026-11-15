@@ -160,9 +160,9 @@ Rules for every task:
   - pass `dayColouring` and `workingHours` from `useDayColouring` to the presenter and add them to the memo dependencies;
   - `useHourGrid` returns `hourFrameColour`.
 
-  Add cases to `src/controller/useLocations.dayTrack.test.tsx` and `src/controller/useHourGrid.test.tsx`: a colouring change re-presents the rows, and a minute tick in Working hours returns the same stops and strip.
+  Add cases to `src/controller/useDayColouring.presenting.test.tsx`: a colouring change re-presents the rows, and a minute tick in Working hours returns the same stops and strip.
 
-  Verify: `npx vitest run src/controller/useLocations.dayTrack.test.tsx`, then `npx vitest run src/controller/useHourGrid.test.tsx`, one at a time, pass.
+  Verify: `npx vitest run src/controller/useDayColouring.presenting.test.tsx` passes.
 
 ## 6. Tokens, views and the work period rename (FR2, FR9–FR13, NFR-A3, UX4; design D4, D6, D7)
 
