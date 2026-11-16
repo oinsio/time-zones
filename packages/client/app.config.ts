@@ -79,3 +79,12 @@ export const ZONE_RULES_RELEASE_FILE = "zone-rules/release.json";
  * Implements FR2, FR3 of add-city-coordinates-to-locations (D3).
  */
 export const ZONE_COORDINATES_FILE = "zone-rules/zone-coordinates.json";
+
+/**
+ * Gzipped size ceiling of the `sunSupport` chunk (the sun calculation and the
+ * zone coordinates), in KB, measured by `check-bundle-size.mjs`. The first
+ * render waits for this chunk although it is outside the initial JavaScript
+ * figure: it measures 6.6 KB gzipped; the ceiling leaves room for growth.
+ * Implements NFR-P2, M3 of bind-day-periods-to-sun.
+ */
+export const SUN_SUPPORT_CHUNK_BUDGET_KB = 8;
