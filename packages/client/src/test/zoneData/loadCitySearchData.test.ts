@@ -8,6 +8,12 @@ const findZoneCity = (timeZoneId: string) =>
   zoneCities.find((record) => record.timeZoneId === timeZoneId);
 
 describe("loadCitySearchData zone coordinates", () => {
+  it("should read the search data once and return the same data on every call", () => {
+    expect(loadCitySearchData(DATASET_PATH)).toBe(
+      loadCitySearchData(DATASET_PATH),
+    );
+  });
+
   it("should give Moscow its zone coordinates in tenths", () => {
     expect(findZoneCity("Europe/Moscow")).toMatchObject({
       latitudeTenths: 558,

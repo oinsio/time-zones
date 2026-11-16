@@ -30,6 +30,8 @@ describe("checkZoneCoordinates", () => {
   it.each([
     ["not JSON", "{"],
     ["not an object", "5"],
+    ["that is null", "null"],
+    ["with zones null", JSON.stringify({ release: "2026f", zones: null })],
     ["without a release", JSON.stringify({ zones: {} })],
     ["without zones", JSON.stringify({ release: "2026f" })],
     ["with zones as an array", JSON.stringify({ release: "2026f", zones: [] })],

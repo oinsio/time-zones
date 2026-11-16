@@ -146,6 +146,7 @@ describe("useLocationCoordinatesFill", () => {
     await waitFor(() => expect(fill).toHaveBeenCalledTimes(1));
 
     rerender();
+    await waitFor(() => expect(fill).toHaveBeenCalledTimes(2));
 
     expect(getCoordinates).toHaveBeenCalledTimes(2);
   });

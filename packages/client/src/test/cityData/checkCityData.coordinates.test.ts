@@ -68,6 +68,16 @@ describe("checkCityData coordinates", () => {
       `The city Alpha (${FRESH_ID}) has no coordinates`,
     ],
     [
+      "a missing longitude",
+      [...base, 558],
+      `The city Alpha (${FRESH_ID}) has no coordinates`,
+    ],
+    [
+      "a missing latitude",
+      [...base, undefined, 491],
+      `The city Alpha (${FRESH_ID}) has no coordinates`,
+    ],
+    [
       "a text latitude",
       [...base, "55", 491],
       `The city Alpha (${FRESH_ID}) has the latitude 55`,

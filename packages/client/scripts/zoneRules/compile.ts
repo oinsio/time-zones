@@ -41,6 +41,7 @@ export async function runZoneRulesCompile(
   dependencies: ZoneRulesCompileDependencies,
 ): Promise<number> {
   const [release] = dependencies.argv;
+  // Stryker disable next-line ConditionalExpression: equivalent — parseReleaseName(undefined) tests the text "undefined" and returns undefined
   if (release === undefined || parseReleaseName(release) === undefined) {
     dependencies.log(USAGE);
     return 1;
@@ -79,6 +80,7 @@ export async function runZoneRulesCompile(
     );
     return 1;
   } finally {
+    // Stryker disable next-line BooleanLiteral: equivalent — mkdtemp created the work directory and no step removes it, so force never applies
     await rm(workDirectory, { recursive: true, force: true });
   }
 }
