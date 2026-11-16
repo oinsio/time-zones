@@ -28,7 +28,7 @@ _None._
 ## Goals
 
 - G1: A location without day periods reads as a deliberate accent row, not a disabled grey row, in both themes and both views.
-- G2: The concept keeps one owner: the colour of a location without day periods is still decided once (`DayColour.NO_DAY_PERIOD`) and mapped to a token once (`DAY_COLOUR_VARIABLES`).
+- G2: The colour of a location without day periods stays one concept with one owner: it is decided once and mapped to a design token once, in no new place.
 
 ## Non-Goals
 
@@ -99,7 +99,7 @@ No changes.
 - M1: 2 of 2 themes (light, dark): in a real browser, 100% of UTC hour cells in Grid have the computed background of `--color-accent` of that theme, and 0 cells have the non-working grey.
 - M2: 2 of 2 themes: the UTC day track in Cards is a gradient whose left and right ends are the accent colour of that theme.
 - M3: Digit contrast on the UTC cells ≥ 4.5:1 in both themes, and 0 axe-core violations in both themes.
-- M4: 0 production references map `DayColour.NO_DAY_PERIOD` to `--color-day-non-working`, and the scoped Stryker score of `src/views/shared/dayTrackGradient.ts` is ≥ 95% (minimum 90%).
+- M4: 0 places in production code map the colour of a location without day periods to the non-working grey token, and the scoped mutation score of the changed token mapping is ≥ 95% (minimum acceptable 90%).
 
 ## Open Questions
 
