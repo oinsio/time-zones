@@ -3,13 +3,11 @@
  * the failed step and linking the run, and the comment that closes it.
  * Implements FR8, UX1 of refresh-data-through-scheduled-pull-requests (D5, D8).
  */
-import { REFRESH_SOURCES, type RefreshSource } from "./refreshConstants.ts";
-
-const SOURCE_NAMES = {
-  [REFRESH_SOURCES.ZONE_RULES]: "zone rules",
-  [REFRESH_SOURCES.CITY_DATA]: "city data",
-  [REFRESH_SOURCES.CLDR]: "CLDR",
-} as const;
+import {
+  REFRESH_SOURCE_NAMES,
+  REFRESH_SOURCES,
+  type RefreshSource,
+} from "./refreshConstants.ts";
 
 export type RefreshFailureIssue = { title: string; body: string };
 
@@ -23,7 +21,7 @@ export function buildRefreshFailureIssue(
   const failureLabel = isCldr ? "Failed check" : "Failed step";
   const linkLabel = isCldr ? "Pull request" : "Run";
   return {
-    title: `Data refresh failed: ${SOURCE_NAMES[source]}`,
+    title: `Data refresh failed: ${REFRESH_SOURCE_NAMES[source]}`,
     body: `${failureLabel}: ${failedStep}\n${linkLabel}: ${url}`,
   };
 }

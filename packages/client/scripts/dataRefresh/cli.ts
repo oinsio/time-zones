@@ -18,7 +18,7 @@ import {
   runVerdict,
   USAGE,
 } from "./cliCommands.ts";
-import { CLIENT_MANIFEST_PATH } from "./refreshConstants.ts";
+import { CLIENT_MANIFEST_PATH, REFRESH_COMMANDS } from "./refreshConstants.ts";
 
 export async function runDataRefreshCli(
   argumentsList: string[],
@@ -27,14 +27,14 @@ export async function runDataRefreshCli(
   // Stryker disable next-line StringLiteral: an absent argument fails the validation of its command either way
   const [command, first = "", second = "", third = ""] = argumentsList;
   try {
-    if (command === "verdict") {
+    if (command === REFRESH_COMMANDS.VERDICT) {
       return await runVerdict(first, dependencies);
     }
-    if (command === "check-paths") {
+    if (command === REFRESH_COMMANDS.CHECK_PATHS) {
       return await runCheckPaths(first, second, third, dependencies);
     }
     // Stryker disable next-line ConditionalExpression: the fall-through to the usage gives the same exit code and line
-    if (command === "issue") {
+    if (command === REFRESH_COMMANDS.ISSUE) {
       return await runIssue(first, second, third, dependencies);
     }
   } catch (error) {

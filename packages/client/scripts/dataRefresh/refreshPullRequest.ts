@@ -7,6 +7,7 @@ import {
   DATA_ONLY_TRAILER,
   NEEDS_REVIEW_LABEL,
   REFRESH_BRANCHES,
+  REFRESH_SOURCE_NAMES,
   REFRESH_SOURCES,
   REFRESH_VERDICTS,
 } from "./refreshConstants.ts";
@@ -51,8 +52,7 @@ function buildDescription(
   source: PullRequestSource,
   decision: RefreshDecision,
 ): string {
-  const sourceLabel =
-    source === REFRESH_SOURCES.ZONE_RULES ? "zone rules" : "city data";
+  const sourceLabel = REFRESH_SOURCE_NAMES[source];
   const lines = [
     `Data refresh of the ${sourceLabel}, compiled by the scheduled workflow.`,
   ];

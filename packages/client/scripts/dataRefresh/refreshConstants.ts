@@ -16,6 +16,29 @@ export const REFRESH_SOURCES = {
 export type RefreshSource =
   (typeof REFRESH_SOURCES)[keyof typeof REFRESH_SOURCES];
 
+/** The readable name of each source, as the pull requests and issues say it. */
+export const REFRESH_SOURCE_NAMES = {
+  [REFRESH_SOURCES.ZONE_RULES]: "zone rules",
+  [REFRESH_SOURCES.CITY_DATA]: "city data",
+  [REFRESH_SOURCES.CLDR]: "CLDR",
+} as const;
+
+/** The commands of the data refresh command line. */
+export const REFRESH_COMMANDS = {
+  VERDICT: "verdict",
+  CHECK_PATHS: "check-paths",
+  ISSUE: "issue",
+} as const;
+
+/** The keys the commands write to `$GITHUB_OUTPUT`; the workflows read them. */
+export const REFRESH_OUTPUT_KEYS = {
+  VERDICT: "verdict",
+  TITLE: "title",
+  BODY_FILE: "body-file",
+  MERGE_BODY_FILE: "merge-body-file",
+  RECOVERY_FILE: "recovery-file",
+} as const;
+
 export const REFRESH_BRANCHES = {
   [REFRESH_SOURCES.ZONE_RULES]: "data-refresh/zone-rules",
   [REFRESH_SOURCES.CITY_DATA]: "data-refresh/city-data",

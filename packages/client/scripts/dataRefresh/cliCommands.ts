@@ -16,6 +16,8 @@ import { compareCityData } from "./compareCityData.ts";
 import { compareZoneRules } from "./compareZoneRules.ts";
 import {
   CLIENT_MANIFEST_PATH,
+  REFRESH_COMMANDS,
+  REFRESH_OUTPUT_KEYS,
   REFRESH_SOURCES,
   REFRESH_VERDICTS,
   type RefreshSource,
@@ -34,11 +36,10 @@ import {
   type RefreshDecision,
 } from "./refreshVerdict.ts";
 
+const AUTO_SOURCE = "auto";
 export const EXIT_CODE_OK = 0;
 export const EXIT_CODE_FAILED = 1;
-export const USAGE =
-  "Usage: cli.ts verdict <zone-rules|city-data> | check-paths <source|auto> <base> <head> | issue <source> <step> <url>";
-const AUTO_SOURCE = "auto";
+export const USAGE = `Usage: cli.ts ${REFRESH_COMMANDS.VERDICT} <${REFRESH_SOURCES.ZONE_RULES}|${REFRESH_SOURCES.CITY_DATA}> | ${REFRESH_COMMANDS.CHECK_PATHS} <source|${AUTO_SOURCE}> <base> <head> | ${REFRESH_COMMANDS.ISSUE} <source> <step> <url>`;
 
 export type DataRefreshDependencies = {
   /** A file of `HEAD`, by path relative to the client package; `undefined` when it does not exist. */
@@ -118,15 +119,18 @@ export async function runVerdict(
   for (const reason of decision.reasons) {
     dependencies.log(`- ${reason}`);
   }
-  await dependencies.writeOutput("verdict", decision.verdict);
+  await dependencies.writeOutput(REFRESH_OUTPUT_KEYS.VERDICT, decision.verdict);
   if (decision.verdict !== REFRESH_VERDICTS.UNCHANGED) {
-    await dependencies.writeOutput("title", pullRequest.title);
     await dependencies.writeOutput(
-      "body-file",
+      REFRESH_OUTPUT_KEYS.TITLE,
+      pullRequest.title,
+    );
+    await dependencies.writeOutput(
+      REFRESH_OUTPUT_KEYS.BODY_FILE,
       await dependencies.writeTextFile("body.md", pullRequest.body),
     );
     await dependencies.writeOutput(
-      "merge-body-file",
+      REFRESH_OUTPUT_KEYS.MERGE_BODY_FILE,
       await dependencies.writeTextFile("merge-body.md", pullRequest.mergeBody),
     );
   }
@@ -182,13 +186,13 @@ export async function runIssue(
     return EXIT_CODE_FAILED;
   }
   const issue = buildRefreshFailureIssue(source, failedStep, url);
-  await dependencies.writeOutput("title", issue.title);
+  await dependencies.writeOutput(REFRESH_OUTPUT_KEYS.TITLE, issue.title);
   await dependencies.writeOutput(
-    "body-file",
+    REFRESH_OUTPUT_KEYS.BODY_FILE,
     await dependencies.writeTextFile("issue.md", issue.body),
   );
   await dependencies.writeOutput(
-    "recovery-file",
+    REFRESH_OUTPUT_KEYS.RECOVERY_FILE,
     await dependencies.writeTextFile(
       "recovery.md",
       buildRefreshRecoveryComment(url),
