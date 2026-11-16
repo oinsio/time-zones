@@ -111,7 +111,7 @@ describe.each(["light", "dark"] as const)(
 const DAY_COLOUR_TOKENS = [
   ["night", "day-night", "foreground"],
   ["morning", "day-morning", "hour-cell-foreground"],
-  ["work", "day-daylight", "hour-cell-foreground"],
+  ["day", "day-daylight", "hour-cell-foreground"],
   ["evening", "day-evening", "hour-cell-foreground"],
   ["plain", "accent", "accent-foreground"],
   ["working time", "accent", "accent-foreground"],
