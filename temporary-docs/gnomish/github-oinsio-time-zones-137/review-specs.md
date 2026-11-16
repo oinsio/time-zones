@@ -123,7 +123,8 @@ Q1 and Q2 are not defined as requirement lines; proposal.md:144 records both as 
 - Impact: After archive, the stable `app-delivery` spec does not hold the security constraint. A later change could widen the App's permissions or move issue handling to the App token without contradicting any spec. The traceability rule's "for every FR/NFR … at least one implementing entity" holds only through a test that the factory itself cannot run.
 - Fix: Add to the ADDED requirements of `specs/app-delivery/spec.md` a requirement "Data refresh credentials" (`<!-- implements NFR-S1 of refresh-data-through-scheduled-pull-requests -->`) restating NFR-S1. Give it one scenario: "WHEN a data refresh workflow runs THEN the data refresh bot's token can write only contents and pull requests, issues and workflow enabling use the run's own token, and no step prints a secret". Its verification stays the H1 workflow test, which task 6.1 already describes.
 - Fix risk: none. This is spec text only, and the test that verifies it is already planned in H1.
-- Status: open
+- Status: fixed
+- Resolution: added the ADDED requirement "Data refresh credentials" (implements NFR-S1) with the scenario "A data refresh workflow runs" to specs/app-delivery/spec.md, listed it in proposal.md "What Changes" and "Capabilities", and made tasks.md 6.1 name the H1 workflow test assertions that verify it (App token permissions, `GITHUB_TOKEN` for issues and enabling, no printed secret, no secrets for fork pull requests).
 
 ## Verdict
 

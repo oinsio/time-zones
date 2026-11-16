@@ -13,7 +13,7 @@ Audience: every user, who should see correct times and current city names withou
 ## What Changes
 
 - MODIFIED `app-delivery` "Zone rules publication": the daily workflow no longer commits to `main`. For a newer IANA release it compiles, checks and tests it, then opens a data refresh pull request, which merges by itself when every check passes. The deploy is the ordinary deploy of `main`.
-- ADDED `app-delivery`: a monthly city data refresh with the same pull request path; one pull request per data source, updated instead of duplicated; the `Data-Only: true` trailer on every data refresh commit on `main`; a refresh guard that leaves a suspicious refresh to a human; an issue for a failed refresh; CLDR package updates by a dependency bot on the same path; schedules that stay enabled in an idle repository; a repository switch that keeps every data refresh off until the maintainer turns it on.
+- ADDED `app-delivery`: a monthly city data refresh with the same pull request path; one pull request per data source, updated instead of duplicated; the `Data-Only: true` trailer on every data refresh commit on `main`; a refresh guard that leaves a suspicious refresh to a human; an issue for a failed refresh; CLDR package updates by a dependency bot on the same path; schedules that stay enabled in an idle repository; a repository switch that keeps every data refresh off until the maintainer turns it on; the credentials of the data refresh bot and their limits.
 - MODIFIED `city-data` "Compiled once, committed, no network at build time": the compile command is also run by the city data refresh; pull request checks, the build and the deploy still never contact GeoNames; a refresh that changes nothing but the dump date publishes nothing.
 - Unchanged: the data sources (IANA, GeoNames, CLDR — no new one), the compilers, the checks, the files the site serves, everything the app does on the device.
 - Glossary (`docs/glossary/zone-rules.md`), changed term: **Zone rules publication** — now "opens a data refresh pull request" instead of "commits it and deploys it".
@@ -34,7 +34,7 @@ None.
 
 ### Modified Capabilities
 
-- `app-delivery`: MODIFIED "Zone rules publication"; ADDED "City data refresh", "Data refresh pull requests", "Data-only commits", "Refresh guard", "Failed refresh is reported", "CLDR updates", "Schedules stay enabled", "Data refresh switch".
+- `app-delivery`: MODIFIED "Zone rules publication"; ADDED "City data refresh", "Data refresh pull requests", "Data-only commits", "Refresh guard", "Failed refresh is reported", "CLDR updates", "Schedules stay enabled", "Data refresh switch", "Data refresh credentials".
 - `city-data`: MODIFIED "Compiled once, committed, no network at build time".
 
 ## Goals

@@ -238,3 +238,12 @@ The repository SHALL hold one switch for the data refresh, off until the maintai
 - **GIVEN** the data refresh was switched off
 - **WHEN** the maintainer switches it on in the repository settings
 - **THEN** the next run of each workflow refreshes its data as the other requirements define
+
+### Requirement: Data refresh credentials
+The data refresh bot SHALL hold only the repository permissions to write contents and pull requests. Opening, commenting and closing the issue of a failed refresh and enabling the scheduled workflows MUST use the run's own short-lived token, limited to writing issues and actions. The bot's credentials MUST be repository secrets, MUST never be printed by a step and MUST NOT be available to pull requests from forks. The zone rules publication MUST keep verifying the IANA archive's signature against the pinned key. <!-- implements NFR-S1 of refresh-data-through-scheduled-pull-requests -->
+
+#### Scenario: A data refresh workflow runs
+- **WHEN** a data refresh workflow runs
+- **THEN** the data refresh bot's token can write only contents and pull requests
+- **AND** issues and the enabling of workflows use the run's own token, limited to writing issues and actions
+- **AND** no step prints a secret, and no workflow triggered by a pull request from a fork receives the bot's credentials
