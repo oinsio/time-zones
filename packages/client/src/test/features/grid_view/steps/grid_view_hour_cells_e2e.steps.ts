@@ -45,7 +45,7 @@ Then(
     const expectedByColumn = [
       [NIGHT_COLUMN, colours.dayNight],
       [MORNING_COLUMN, colours.dayMorning],
-      [WORKING_COLUMN, colours.dayWork],
+      [WORKING_COLUMN, colours.dayDaylight],
       [EVENING_COLUMN, colours.dayEvening],
     ] as const;
     for (const [column, colour] of expectedByColumn) {

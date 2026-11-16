@@ -3,6 +3,7 @@ import { HOUR_LABEL_INTERVAL_HOURS } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import {
+  type Coordinates,
   getTrackEndMinutes,
   getTrackFraction,
   getTrackValueMinutes,
@@ -17,6 +18,7 @@ import { type DayColourStop, presentDayColourStops } from "./dayColours";
  * stops and local hour labels.
  * Implements FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).
  * The stops are day colours: implements FR2, FR9–FR12 of add-day-colouring-setting (D4).
+ * Implements FR5, FR7 of bind-day-periods-to-sun (D5): the context carries the coordinates.
  */
 
 export type HourLabel = { fraction: number; label: string };
@@ -35,6 +37,8 @@ export type PresentedDayTrack = {
 
 export type DayTrackContext = {
   timeZoneId: string;
+  /** The coordinates of the location's sun; `undefined` for a location without day periods. */
+  coordinates: Coordinates | undefined;
   instant: Temporal.Instant;
   day: ReferenceDay;
   language: InterfaceLanguageCode;
@@ -102,6 +106,7 @@ function getHourLabels(
 
 export function presentDayTrack({
   timeZoneId,
+  coordinates,
   instant,
   day,
   language,
@@ -120,7 +125,13 @@ export function presentDayTrack({
       time: localTimeLabel,
       date: localDateLabel,
     }),
-    stops: presentDayColourStops(timeZoneId, day, dayColouring, workingHours),
+    stops: presentDayColourStops(
+      timeZoneId,
+      coordinates,
+      day,
+      dayColouring,
+      workingHours,
+    ),
     hourLabels: getHourLabels(timeZoneId, day, language, hourFormat),
   };
 }

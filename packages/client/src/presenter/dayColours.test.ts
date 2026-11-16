@@ -50,7 +50,7 @@ describe("presentDayColourStops", () => {
     expect([
       DayColour.NIGHT,
       DayColour.MORNING,
-      DayColour.WORK,
+      DayColour.DAY,
       DayColour.EVENING,
     ]).toEqual(Object.values(DayPeriod));
   });

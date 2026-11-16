@@ -51,6 +51,12 @@ declare module "virtual:zone-abbreviations" {
   export default zoneAbbreviations;
 }
 
+declare module "virtual:zone-coordinates" {
+  /** Zone ID → the coordinates of its principal place as integer tenths of a degree: latitude, longitude. */
+  const zoneCoordinates: Readonly<Record<string, readonly [number, number]>>;
+  export default zoneCoordinates;
+}
+
 declare module "virtual:zone-rules-url" {
   /** URL of the emitted zone rules release (`zone-rules/release.json`). */
   const zoneRulesUrl: string;

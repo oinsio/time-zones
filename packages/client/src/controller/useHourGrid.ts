@@ -5,6 +5,7 @@ import {
   getHourFrameIndex,
   getReferenceDay,
   getReferenceZone,
+  getSunCoordinates,
 } from "@/model";
 import {
   getHourFrameColour,
@@ -48,6 +49,7 @@ export function useHourGrid() {
           location.id,
           presentHourStrip(location.timeZoneId, {
             day,
+            coordinates: getSunCoordinates(location),
             referenceZoneId,
             language,
             hourFormat,

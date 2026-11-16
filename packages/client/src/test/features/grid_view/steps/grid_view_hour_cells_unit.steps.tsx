@@ -64,7 +64,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           ["0-6", DayColour.NIGHT],
           ["22-23", DayColour.NIGHT],
           ["7-8", DayColour.MORNING],
-          ["9-17", DayColour.WORK],
+          ["9-17", DayColour.DAY],
           ["18-21", DayColour.EVENING],
         ];
         for (const [range, period] of expectedPeriods) {

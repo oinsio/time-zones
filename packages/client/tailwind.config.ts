@@ -55,7 +55,7 @@ const config: Config = {
         day: {
           night: "var(--color-day-night)",
           morning: "var(--color-day-morning)",
-          work: "var(--color-day-work)",
+          daylight: "var(--color-day-daylight)",
           evening: "var(--color-day-evening)",
           "non-working": "var(--color-day-non-working)",
         },

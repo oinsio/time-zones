@@ -6,6 +6,8 @@ import {
 } from "@/constants";
 import type { InterfaceLanguageCode } from "@/locales";
 import {
+  type Coordinates,
+  getCoordinatesKey,
   getHourCells,
   getHourCellWorkingFlags,
   type HourCell,
@@ -22,6 +24,7 @@ import { getDayPeriodMarkers } from "./dayPeriodMarkers";
  * and hour format so a minute tick re-presents nothing.
  * Implements FR3, FR4, FR5, NFR-P1 of add-grid-hour-cells-and-hour-frame (D2).
  * Implements FR11, FR12, NFR-P1 of add-day-colouring-setting (D4).
+ * Implements FR6, FR7, NFR-P1 of bind-day-periods-to-sun (D5): cached per zone and coordinates.
  */
 
 export type PresentedHourCell = {
@@ -41,6 +44,8 @@ export type PresentedHourStrip = { cells: readonly PresentedHourCell[] };
 
 export type HourStripContext = {
   day: ReferenceDay;
+  /** The coordinates of the location's sun; `undefined` for a location without day periods. */
+  coordinates: Coordinates | undefined;
   referenceZoneId: string;
   language: InterfaceLanguageCode;
   hourFormat: HourFormat;
@@ -127,23 +132,28 @@ export function presentHourStrip(
     cachedStripsKey = stripsKey;
     cachedStripsByZone = new Map();
   }
-  const cachedStrip = cachedStripsByZone.get(timeZoneId);
+  const stripKey = `${timeZoneId}|${getCoordinatesKey(context.coordinates)}`;
+  const cachedStrip = cachedStripsByZone.get(stripKey);
   if (cachedStrip !== undefined) return cachedStrip;
   const workingFlags =
     context.dayColouring === DayColouring.WORKING_HOURS
       ? getHourCellWorkingFlags(timeZoneId, context.day, context.workingHours)
       : undefined;
   const strip = {
-    cells: getHourCells(timeZoneId, context.day, context.referenceZoneId).map(
-      (cell, column) =>
-        presentHourCell(
-          cell,
-          workingFlags?.[column] ?? false,
-          timeZoneId,
-          context,
-        ),
+    cells: getHourCells(
+      timeZoneId,
+      context.day,
+      context.referenceZoneId,
+      context.coordinates,
+    ).map((cell, column) =>
+      presentHourCell(
+        cell,
+        workingFlags?.[column] ?? false,
+        timeZoneId,
+        context,
+      ),
     ),
   };
-  cachedStripsByZone.set(timeZoneId, strip);
+  cachedStripsByZone.set(stripKey, strip);
   return strip;
 }
