@@ -1,0 +1,173 @@
+# Review: add-city-coordinates-to-locations
+
+## Summary
+
+| Item | Value |
+|---|---|
+| Tasks verified | 38/38 |
+| Requirements traced | 79/80 |
+| CRITICAL | 0 |
+| WARNING | 1 |
+| SUGGESTION | 0 |
+
+## Tasks
+
+Paths are relative to `packages/client/` unless they start with `docs/` or `temporary-docs/`.
+
+- ✅ 1.1 — `docs/glossary/locations.md:7` (**Coordinates**, *Code:* `Coordinates`, `parseCoordinates`, *Never:* position, geolocation, lat/lng), `:11` (schema version 4); `docs/glossary/search.md:17` (**Zone coordinates**); `docs/glossary/zone-rules.md:20` (**Zone table**, `ZONE_TABLE_FILE`, `parseZoneTable`); the three files are 21, 20 and 20 lines.
+- ✅ 1.2 — `docs/architecture/domain-model.md:22` (`Coordinates? coordinates` on `Location`) and `:138` (city record "coordinates when known").
+- ✅ 2.1 — `src/constants/coordinates.ts:6-9` (three constants, no imports), re-exported in `src/constants/index.ts`.
+- ✅ 2.2 — `src/model/coordinates.ts:7-20` (`Coordinates`, `parseCoordinates`), exported from `src/model/index.ts`; `src/model/coordinates.test.ts` (`it.each` over limits and rejects); Stryker 100%.
+- ✅ 3.1 — `scripts/cityData/parseGeoNamesRows.ts:67-84,107-118` (columns 4/5, empty/non-numeric/out of range throws with the line); `src/test/cityData/parseGeoNamesRows.test.ts`; `src/test/cityData/compile.test.ts:59` (latitude 91 → non-zero, nothing written).
+- ✅ 3.2 — `scripts/cityData/toCityTuple.ts:16-38` (tenths via `COORDINATE_TENTHS_PER_DEGREE`, before the region index), `cityDataTypes.ts` (9-field tuple), `constants.ts:10` (`DATASET_FORMAT_VERSION = 2`); Kazan 558/491 in `src/test/cityData/compile.test.ts:15` and `compileCityData.test.ts`.
+- ✅ 3.3 — `scripts/cityData/toServedCityData.ts:43-45` (`latitudeTenths`, `longitudeTenths`, region index moved to column 8); `src/test/cityData/toServedCityData.test.ts`.
+- ✅ 3.4 — `scripts/cityData/checkCityData.ts:39-40,108` and `checkCityCoordinates.ts:20-40` (no coordinates, ±900/±1800 tenths, format version); `src/test/cityData/checkCityData.coordinates.test.ts:68`, `checkCityData.format.test.ts`.
+- ✅ 3.5 — `city-data/geonames-cities.json` regenerated (format version 2, 6 102 cities); `city-data/README.md` updated (dump 2026-11-15, 141.5 KB served); `src/test/cityData/check.test.ts` runs the check on it.
+- ✅ 3.6 — `src/test/features/city_data/city_data_coordinates.feature` + `city_data_coordinates_check.feature` with steps `steps/city_data_coordinates.steps.ts`, `steps/city_data_coordinates_check.steps.ts` (compile cases, Kazan/Quito/Murmansk outline, missing and out-of-range rows, broken file rows, committed file passes).
+- ✅ 4.1 — `scripts/zoneRules/parseZoneTable.ts:13-71` (ISO 6709 both forms, `#` lines skipped, malformed row throws with line); `src/test/zoneRules/parseZoneTable.test.ts`; Stryker 96.92%.
+- ✅ 4.2 — `scripts/zoneRules/compileWithZic.ts:28,131-157` (`ZONE_TABLE_FILE`, `CompiledZones.zoneTable`, `tar` call unchanged); `src/test/zoneRules/compileFakes.ts:43,87` (fake `zone.tab`); `scripts/zoneRules/writeZoneCoordinates.ts`, `zoneCoordinateOverrides.ts` (empty); `src/test/zoneRules/writeZoneCoordinates.test.ts` (override case).
+- ✅ 4.3 — `scripts/zoneRules/compile.ts:63-71` (both files written after every step), `app.config.ts:81` (`ZONE_COORDINATES_FILE`); `src/test/zoneRules/compile.valid.test.ts:9`, `compile.stops.test.ts:105,112` (no `zone.tab`, malformed row → neither file).
+- ✅ 4.4 — `scripts/zoneRules/checkZoneCoordinates.ts:66-87` (format, release, ranges, coverage, UTC exempt, no overrides); `scripts/zoneRules/check.ts:117-125`; `src/test/zoneRules/checkZoneCoordinates.test.ts`, `src/test/zoneRules/check.test.ts:20-33`.
+- ✅ 4.5 — `zone-rules/zone-coordinates.json` (release `2026f`, 418 zones); `release.json` not in the diff; `zone-rules/README.md` updated.
+- ✅ 4.6 — `src/test/zoneRules/zoneCoordinates.committed.test.ts:16` (check passes on committed files), `:26` (`it.each` of the seven M3 zone cities), `:38` (no UTC).
+- ✅ 4.7 — `src/test/features/zone_rules/zone_rules_coordinates.feature` + `zone_rules_coordinates_check.feature` with steps (Moscow, Kolkata, the seven samples, failed compile, no network at build time, broken file rows, UTC).
+- ✅ 5.1 — `scripts/zoneData/loadCitySearchData.ts:30-45` (join by zone ID, UTC none); `src/test/zoneData/loadCitySearchData.test.ts:11,18,25`.
+- ✅ 5.2 — `src/adapters/city-search/parseGeoNamesCityData.ts` (`parseTenthsCoordinates` → `parseCoordinates`), `fetchCitySearch.ts` (`parseCitySearchData` maps zone city tenths); `fetchCitySearch.parse.test.ts`, `fetchCitySearch.parse.more.test.ts`.
+- ✅ 5.3 — `app.config.ts:67` (`CITY_SEARCH_DATA_BUDGET_KB = 150`); measured in this review: `pnpm run build` ok, `check:bundle-size` reports search data 141.5 KB, initial JS 148.9 KB, matching `city-data/README.md`.
+- ✅ 6.1 — `src/ports/citySearch.ts` (`CityRecord.coordinates?`, `getCoordinates`); `geoNamesCitySource.ts:43`, `zoneCitiesSource.ts:54`; tests in `geoNamesCitySource.test.ts`, `zoneCitiesSource.test.ts`, `abbreviationSource.test.ts`.
+- ✅ 6.2 — `src/adapters/city-search/createCompositeCitySearch.ts:137-144,162-169` (`findRecordOfLocation` shared with `getCityLabel`, zone city fallback); `createCompositeCitySearch.coordinates.test.ts:39,65` (Kazan, Moscow, "Old Town", UTC; 0 normalizations).
+- ✅ 6.3 — `src/test/features/location_search/location_search_coordinates.feature` with `steps/location_search_coordinates.steps.ts` (GeoNames, zone, abbreviation, suggestion, UTC, 13 queries unchanged).
+- ✅ 7.1 — `src/model/locations.ts` (`Location.coordinates?`), `locationCommands.ts` (`ADD_LOCATION.coordinates?`), `src/model/reduceAddLocation.ts:32-43` (identity from zone and label, coordinates through `parseCoordinates`); `src/model/locations.coordinates.test.ts`, `locations.lists.test.ts`.
+- ✅ 7.2 — `src/model/reduceLocationCoordinates.ts:18-33` (city locations without coordinates only, same state when unchanged), wired at `src/model/locations.ts:153`; `src/model/locations.coordinates.test.ts`.
+- ✅ 7.3 — `src/constants/locations.ts:2` (version 4), `src/adapters/locationsDocument.ts:35,57` (step 3 → 4, writer stores coordinates of city entries only), `src/model/parseStoredLocations.ts:50-55,73-76`; `localStorageLocationRepository.migration.test.ts:75` (version 5 unreadable), `migration.coordinates.test.ts:38`, `locationRepository.contract.ts:33` (round-trip).
+- ✅ 7.4 — `src/test/features/locations/locations_coordinates_storage.feature` + `locations_coordinates_storage_more.feature` with steps (reload offline, version 3, version 5, malformed outline, device time entry, two tabs).
+- ✅ 8.1 — `src/views/shared/LocationSearch.tsx:44`, `src/presenter/presentSearchResults.ts` (`coordinates` of the record), `src/controller/locationsContext.ts` (`AddLocationInput.coordinates?`); `LocationSearch.test.tsx`.
+- ✅ 8.2 — `src/controller/useLocationCoordinatesFill.ts:19-47`, exported in `src/controller/index.ts`, called at `src/controller/useLocations.ts:70`; `useLocationCoordinatesFill.test.tsx` (one test is weak, see R1).
+- ✅ 8.3 — `src/test/features/locations/locations_coordinates.feature` + `locations_coordinates_rows.feature` with `steps/locations_coordinates.steps.tsx:57-100` (search, `IST`, UTC through `searchAndChoose`) and `steps/locations_coordinates_rows.steps.tsx` (device time, namesake duplicate, rows outline).
+- ✅ 8.4 — `src/test/features/locations/locations_coordinates_fill.feature` + `locations_coordinates_fill_more.feature` with steps (write counts through the in-memory repository); the existing no-write scenarios (`locations_city_label_language_unit`, `home_location_storage_unit`, `locations_migration_unit`) pass unchanged in CI, so no fixture needed coordinates.
+- ✅ 8.5 — `src/test/features/locations/locations_coordinates_budget.feature` with `steps/locations_coordinates_budget.steps.ts:54-132` (lookup counter wrapper, `startWorkCount()`, formatters/collators/transition lookups equal).
+- ✅ 8.6 — `src/test/features/location_search/location_search_performance.feature:24` ("Coordinates of stored locations do no search work") with its step in `steps/location_search_performance.steps.ts`.
+- ✅ 9.1 — `pnpm run build` passes and `check:bundle-size` passes (148.9 KB / 141.5 KB), run in this review.
+- ✅ 9.2 — no file under `src/test/features/__screenshots__` in the branch diff; CI (E2E, axe-core, screenshots) is green.
+- ✅ 9.3 — scores measured in this review are all ≥ 90% (see Mutation); none below the minimum.
+- ✅ 9.4 — `grep -rn "add-city-coordinates-to-locations" src scripts | grep -oE …` lists FR1–FR9, NFR-P1–NFR-P3, UX1, UX2.
+- ✅ 10.1 — `temporary-docs/gnomish/github-oinsio-time-zones-135/handoff/H1-adr-coordinates-notes.patch` passes `git apply --check`; `handoff/README.md` holds the H1 section; `docs/adr` untouched.
+
+## Requirements
+
+- ✅ FR1 — `scripts/cityData/parseGeoNamesRows.ts:67-118`, `toCityTuple.ts:16-38`; `city_data_coordinates.feature`, `parseGeoNamesRows.test.ts`, `compile.test.ts:59`.
+- ✅ FR2 — `scripts/zoneRules/parseZoneTable.ts`, `writeZoneCoordinates.ts`, `compile.ts:63-71`; `zone_rules_coordinates.feature`, `compile.valid.test.ts:9`, `compile.stops.test.ts:105,112`.
+- ✅ FR3 — `zoneCoordinateOverrides.ts`, `writeZoneCoordinates.ts:22-24`, `checkZoneCoordinates.ts:80-85`; `writeZoneCoordinates.test.ts` (override), `checkZoneCoordinates.test.ts`.
+- ✅ FR4 — `scripts/cityData/checkCityCoordinates.ts`, `scripts/zoneRules/checkZoneCoordinates.ts`; on the committed files in `src/test/cityData/check.test.ts` and `src/test/zoneRules/zoneCoordinates.committed.test.ts:16`.
+- ✅ FR5 — `geoNamesCitySource.ts:43`, `zoneCitiesSource.ts:54`, `loadCitySearchData.ts:30-45`; `location_search_coordinates.feature`.
+- ✅ FR6 — `LocationSearch.tsx:44`, `reduceAddLocation.ts:32-43`; `locations_coordinates.feature`, `locations_coordinates_rows.feature` (namesake duplicate).
+- ✅ FR7 — `locationsDocument.ts:35,57`, `parseStoredLocations.ts:73-76`; `locations_coordinates_storage*.feature`, `migration.coordinates.test.ts`, `locationRepository.contract.ts:33`.
+- ✅ FR8 — `useLocationCoordinatesFill.ts`, `createLocationsActions.ts` (`fillLocationCoordinates`, one immediate write only on change), `createCompositeCitySearch.ts:165-169`; `locations_coordinates_fill*.feature`.
+- ✅ FR9 — `parseStoredLocations.ts:50-55` (device entry with coordinates rejected), `reduceLocationCoordinates.ts:23-27` (city locations only); `locations_coordinates_rows.feature` (device time), `locations_coordinates_storage*.feature`.
+- ✅ NFR-P1 — `app.config.ts:67`; `check:bundle-size` measured 141.5 KB search data, 148.9 KB initial JS.
+- ⚠️ NFR-P2 — counted lookups and 0 normalizations are tested (`locations_coordinates_budget.feature`, `location_search_performance.feature:24`), but the "once per load" guard of `useLocationCoordinatesFill.ts:37` is not caught by any test (R1).
+- ✅ NFR-P3 — `steps/locations_coordinates_budget.steps.ts:129-132` (formatters, collators, transition lookups equal with and without coordinates).
+- ✅ NFR-A1 — no element, role or text changed; existing axe-core E2E scenarios green in CI.
+- ✅ NFR-R1 — no layout change; no screenshot file changed in the diff.
+- ✅ UX1 — "Results are unchanged" (`location_search_coordinates.feature`) and "Rows are unchanged" (`locations_coordinates_rows.feature`).
+- ✅ UX2 — `locations_coordinates_fill_more.feature` ("Order and home are kept", failed load shows no error).
+- ✅ M1 — `src/test/cityData/check.test.ts` and "The committed city data passes" (`city_data_coordinates_check.feature`) on 6 102 cities.
+- ✅ M2 — `zoneCoordinates.committed.test.ts:16` (every zone city but UTC covered, 418 zones).
+- ✅ M3 — three GeoNames samples in `city_data_coordinates.feature` outline, seven zone samples in `zoneCoordinates.committed.test.ts:26` and `zone_rules_coordinates.feature`.
+- ✅ M4 — measured in this review: 141.5 KB and 148.9 KB, both ≤ 150 KB.
+- ✅ M5 — 0 screenshot files changed; axe-core scenarios green in CI.
+- ✅ M6 — every file measured here is ≥ 90% (minimum acceptable); two are below the 95% target (see Mutation).
+- ✅ Scenario: A city carries its coordinates — `city_data_coordinates.feature:5`.
+- ✅ Scenario: Southern and western coordinates are negative — `city_data_coordinates.feature:10`.
+- ✅ Scenario: Sample cities of the committed city data — `city_data_coordinates.feature:15` (outline).
+- ✅ Scenario: A row without coordinates stops the compile — `city_data_coordinates.feature:26`.
+- ✅ Scenario: A row out of range stops the compile — `city_data_coordinates_check.feature:5` (outline).
+- ✅ Scenario: A zone carries the coordinates of its principal place — `zone_rules_coordinates.feature:5`.
+- ✅ Scenario: Coordinates written in degrees and minutes — `zone_rules_coordinates.feature:12`.
+- ✅ Scenario: Sample zone cities of the committed zone coordinates — `zone_rules_coordinates.feature:18` (outline).
+- ✅ Scenario: A failed compile writes nothing — `zone_rules_coordinates.feature:33`.
+- ✅ Scenario: No network at build time — `zone_rules_coordinates.feature:39`.
+- ✅ Scenario: The committed files pass — `city_data_coordinates_check.feature:17`, `zone_rules_coordinates_check.feature:5`.
+- ✅ Scenario: A broken file fails — `city_data_coordinates_check.feature:22`, `zone_rules_coordinates_check.feature:10` (outlines).
+- ✅ Scenario: UTC needs no coordinates — `zone_rules_coordinates_check.feature:22`.
+- ✅ Scenario: Home survives a reload — `home_location/home_location_storage_unit.feature:6` (unchanged).
+- ✅ Scenario: A list from the previous version — `home_location/home_location_storage_unit.feature:14` (unchanged, "nothing is written").
+- ✅ Scenario: A GeoNames city result — `location_search_coordinates.feature:5`.
+- ✅ Scenario: A zone city result — `location_search_coordinates.feature:10`.
+- ✅ Scenario: An abbreviation result — `location_search_coordinates.feature:15`.
+- ✅ Scenario: UTC has no coordinates — `location_search_coordinates.feature:25`.
+- ✅ Scenario: Results are unchanged — `location_search_coordinates.feature:30`.
+- ✅ Scenario: Query timing — `location_search_performance.feature:5` (unchanged).
+- ✅ Scenario: Preparing the data for search — `location_search_performance.feature:13` (unchanged).
+- ✅ Scenario: Loading without a query does no search work — `location_search_performance.feature:18` (unchanged).
+- ✅ Scenario: Data loads only when the search opens — `locations/locations_ui_e2e.feature:34` (unchanged).
+- ✅ Scenario: The Here entry's request is the only one — `locations/locations_ui_e2e.feature:43` ("The device time location's request is the only one", unchanged).
+- ✅ Scenario: Bundle budget — no step definitions by design (task 8.6); `check:bundle-size` passes at 141.5 / 148.9 KB.
+- ✅ Scenario: Abbreviation query within the work bound — `location_search_performance.feature:30` (unchanged).
+- ✅ Scenario: Coordinates of stored locations do no search work — `location_search_performance.feature:24`.
+- ✅ Scenario: A city added from the search — `locations_coordinates.feature:5`.
+- ✅ Scenario: A city added by its zone abbreviation — `locations_coordinates.feature:10`.
+- ✅ Scenario: UTC — `locations_coordinates.feature:15`.
+- ✅ Scenario: The device time location — `locations_coordinates_rows.feature:5`.
+- ✅ Scenario: A namesake of the same zone is still a duplicate — `locations_coordinates_rows.feature:11`.
+- ✅ Scenario: Rows are unchanged — `locations_coordinates_rows.feature:18` (outline over both views).
+- ✅ Scenario: Coordinates survive a reload — `locations_coordinates_storage.feature:5`.
+- ✅ Scenario: A list stored before coordinates — `locations_coordinates_storage.feature:11`.
+- ✅ Scenario: A document newer than the app — `locations_coordinates_storage.feature:19`.
+- ✅ Scenario: Malformed coordinates make the list unreadable — `locations_coordinates_storage_more.feature:5` (outline, four rows).
+- ✅ Scenario: The device time location is stored without coordinates — `locations_coordinates_storage_more.feature:19`.
+- ✅ Scenario: A stored device time location with coordinates — `locations_coordinates_storage_more.feature:25`.
+- ✅ Scenario: Another tab receives the coordinates — `locations_coordinates_storage_more.feature:31`.
+- ✅ Scenario: An older list gains coordinates — `locations_coordinates_fill.feature:5`.
+- ✅ Scenario: A label no record bears — `locations_coordinates_fill.feature:13`.
+- ✅ Scenario: UTC stays without coordinates — `locations_coordinates_fill.feature:19`.
+- ✅ Scenario: Nothing to give — `locations_coordinates_fill.feature:26`.
+- ✅ Scenario: Order and home are kept — `locations_coordinates_fill_more.feature:5`.
+- ✅ Scenario: The city data fails to load — `locations_coordinates_fill_more.feature:12`.
+- ✅ Scenario: One lookup per location that lacks coordinates — `locations_coordinates_budget.feature:5`.
+- ✅ Scenario: No lookup when nothing is missing — `locations_coordinates_budget.feature:12`.
+- ✅ Scenario: A minute tick looks up nothing — `locations_coordinates_budget.feature:18` (as specified, with Kazan; see R1 for the uncovered guard).
+- ✅ Scenario: Presenting the list does the same work — `locations_coordinates_budget.feature:24`.
+- ✅ Scenario: List survives a reload — `locations/locations_persistence.feature:6` (unchanged).
+- ✅ Scenario: First launch writes nothing — `locations/locations_persistence.feature:12` (unchanged).
+- ✅ Scenario: Legacy identifier is canonicalized on load — `locations/locations_persistence.feature:17` (unchanged).
+- ✅ Scenario: Offline reopen — `locations/locations_sync_offline_e2e.feature:20` (unchanged).
+- ✅ Scenario: Previous document version is migrated — `locations/locations_migration_unit.feature:6` (unchanged).
+- ✅ Scenario: Version 2 document is migrated — `locations/locations_device_time_storage_unit.feature:23` (unchanged); version 3 by `locations_coordinates_storage.feature:11`.
+- ✅ Scenario: The device time zone is not stored — `locations/locations_device_time_storage_unit.feature:31` (unchanged).
+
+## Mutation
+
+Run in this review, one at a time, `cd packages/client && npx stryker run --mutate '<files>'`. Each run ends at the 10-minute foreground limit. The initial test run alone takes about 2.5 minutes, so runs over model or adapter files often hit that limit.
+
+| File | Score | Notes |
+|---|---|---|
+| `src/model/coordinates.ts` | 100.00% | 21 killed, 2 timeout |
+| `src/controller/useLocationCoordinatesFill.ts` | 95.45% | 1 survivor reported at line 36 (the filter is at line 37): the `.filter(({ id }) => !lookedUpIds.has(id))` can be removed with no test failing (R1) |
+| `src/model/parseStoredLocations.ts` | 99.15% | 1 survivor at line 109 (home id guard, older code) |
+| `scripts/zoneRules/parseZoneTable.ts` | 96.92% | 1 survivor (`zoneId === undefined` half of the guard), 1 no-coverage |
+| `scripts/zoneRules/checkZoneCoordinates.ts` | 93.67% | 5 survivors in the `parseDocument` guards (catch body, `document === null`, `zones === null`). Most of them only change *how* a malformed file is rejected. The minimum is met; the 95% target is not |
+| `scripts/zoneRules/writeZoneCoordinates.ts` | 100.00% | |
+| `scripts/cityData/parseGeoNamesRows.ts` | 96.67% | 1 survivor (`text.trim()` → `text`), 1 no-coverage |
+| `scripts/cityData/toCityTuple.ts` | 100.00% | |
+| `scripts/cityData/checkCityCoordinates.ts` | 90.32% | 3 survivors on `latitude === undefined \|\| longitude === undefined`. Only a tuple missing *both* fields is tested; with one field missing, the mutants still report the city, under the latitude/longitude message. The minimum is met; the 95% target is not |
+
+Not measured:
+- `src/model/reduceLocationCoordinates.ts`: the run was stopped at the time limit with 19 of 20 mutants tested (14 killed, 5 timeout, 0 survived), so it has no final score.
+- `src/adapters/city-search/parseGeoNamesCityData.ts` and `fetchCitySearch.ts`: the run was stopped at 80 of 236 mutants (2 survived, 8 timeout), so they have no score.
+- `reduceAddLocation.ts`, `locationsDocument.ts`, `createCompositeCitySearch.ts`, `geoNamesCitySource.ts`, `zoneCitiesSource.ts`, `createLocationsActions.ts`, `loadCitySearchData.ts`, `compile.ts`, `compileWithZic.ts`, `check.ts`, `checkCityData.ts` and `toServedCityData.ts` were not run: each run takes 6–10 minutes.
+
+## Findings
+
+### R1 — WARNING — The "look each location up once per load" guard is untested
+- Location: `packages/client/src/controller/useLocationCoordinatesFill.test.tsx:137`
+- Rule: `.claude/rules/tdd-workflow.md` ("Analyze survived mutants — each survivor indicates a missed scenario or a weak assertion"); NFR-P2 of add-city-coordinates-to-locations ("once per load of the city data")
+- Problem: `useLocationCoordinatesFill.ts:37` skips locations already looked up (`.filter(({ id }) => !lookedUpIds.has(id))`). This guard keeps a location that never gains coordinates from being looked up again on every list change: UTC, or a zone the zone coordinates lack. The test meant to cover it, "should not look UTC up a second time after the others gained coordinates" (`:137-150`), calls `rerender()` and then asserts `getCoordinates` was called twice *synchronously*. The second lookup only happens in the `.then` of `loadCitySearchOnce`, after the assertion has already run, so the assertion holds with or without the guard. The test at `:119-134` rerenders with the same `locations` array, so the effect never re-runs at all. The BDD scenario "A minute tick looks up nothing" (`steps/locations_coordinates_budget.steps.ts:91-99`) uses Kazan, which has its coordinates before the tick, so the hook returns early there too. Stryker confirms this: the mutant that removes the filter survives.
+- Impact: if the guard is removed or broken, every list change (add, remove, reorder, home) looks UTC and any uncovered zone up again. That breaks NFR-P2's "once per load of the city data", and no test fails.
+- Fix: in the test at `useLocationCoordinatesFill.test.tsx:137-150`, after `rerender()` add `await waitFor(() => expect(fill).toHaveBeenCalledTimes(2));`, then keep `expect(getCoordinates).toHaveBeenCalledTimes(2);`. With the guard, the second effect run still calls `fill` (with an empty map, because UTC is still missing), and `getCoordinates` stays at 2. Without the guard it reaches 3. Then re-run `npx stryker run --mutate 'src/controller/useLocationCoordinatesFill.ts'` and check that the mutant at lines 36–37 is killed.
+- Fix risk: none for production code; only a test changes. The `fill` mock assigns a new `locations` array again on its second call. That is harmless: `renderHook` reads `locations` only on a rerender, and the test triggers no further rerender. The test stays a hook unit test in its current file, where `.claude/rules/bdd-unit.md` puts no requirement.
+- Status: open
+
+## Verdict
+
+Ready. No CRITICAL finding. R1 (WARNING) is a test-strength gap with no wrong behaviour today; it should be fixed but does not block. All 38 tasks have evidence. Every requirement is implemented and traced, and NFR-P2 is only partly guarded by tests (R1). The build and the bundle budgets pass, and every mutation score measured is at least 90%.
