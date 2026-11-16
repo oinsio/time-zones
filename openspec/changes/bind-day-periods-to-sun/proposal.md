@@ -19,14 +19,16 @@ Audience: every user of the default day colouring, in the Cards view and in the 
 - REMOVED: the day-period schedule by the clock (07:00, 09:00, 18:00, 22:00) and the work period.
 - Glossary (`docs/glossary/time-selection.md`), changed terms:
   - **Day period** — night, morning, day, evening, decided by the sun's elevation at the location. *RU:* ночь, утро, день, вечер. *Code:* `DayPeriod.NIGHT | MORNING | DAY | EVENING`. The member `WORK` becomes `DAY`; the token `--color-day-work` becomes `--color-day-daylight`. *Never:* work, working hours, business hours (for this period).
-  - **Blend window** — the span around a day-period boundary where two colours blend: 30 minutes, shortened so it never passes the midpoint to the next boundary.
+  - **Blend window** — the span around a day-period boundary where two colours blend: 30 minutes, shortened so it never passes the midpoint to the next boundary. *Code:* `BlendWindow`, `collectBlendWindows`, `DAY_PERIOD_BLEND_MINUTES`.
+  - **Day colour** — gains `DayColour.NO_DAY_PERIOD`, the neutral colour (the non-working grey) of a location without day periods; `DayColour.WORK` becomes `DayColour.DAY`.
   - **Offset edge** — only the line in the hour strip at a clock change; no longer a colour edge of a day track.
   - **Colour stop** — unchanged meaning; a location without day periods has one neutral stop.
 - Glossary, new terms: **Sun elevation** — the angle of the sun's centre above the horizon at given coordinates and instant, in degrees; **Day-period boundary** — an instant at which a location's day period changes; **Solar day** — the span from one solar midnight to the next at given coordinates, with its solar noon (the sun highest) and solar midnight (the sun lowest); **Zone coordinates of the device** is not a term: the device time location uses the zone coordinates.
 - Glossary, removed term: **Day-period schedule**.
 - Glossary (`docs/glossary/search.md`): **Zone coordinates** gains the code owner `getZoneCoordinates` (`src/model/sunCoordinates.ts`), which reads them in the app.
+- Glossary (`docs/glossary/locations.md`): **Coordinates** gains the code owner `getSunCoordinates` (`src/model/sunCoordinates.ts`), which decides which coordinates a location's sun uses: its own, else the zone coordinates of its zone.
 - Glossary (`docs/glossary/settings.md`): **Working hours** drops "*Not:* the work period 09:00–18:00 of the day periods"; **Day colouring** says that Time of day follows the sun.
-- A new ADR, ADR-0016, records the long-lived decision: day periods follow the sun's elevation, computed on the device with the NOAA solar equations, no library and no network. It is delivered as the handoff patch H1, because the implementing stage may not write `docs/adr/` or `CLAUDE.md`. `docs/architecture/open-questions.md` Q3 is closed with a pointer to it.
+- A new ADR, ADR-0016, records the long-lived decision: day periods follow the sun's elevation, computed on the device with the NOAA solar equations, no library and no network. It is delivered as the handoff patch H1, because the implementing stage may not write `docs/adr/` or `CLAUDE.md`. `docs/architecture/open-questions.md` Q3 is closed with a pointer to it, and its title is rewritten to "Day periods and working hours".
 
 ## Capabilities
 

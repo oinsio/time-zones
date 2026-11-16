@@ -53,7 +53,7 @@ When the sun does not cross a threshold during a day, the day periods SHALL foll
 | Longyearbyen | 78.2, 15.6 | 2026-12-21 | night only |
 | Longyearbyen | 78.2, 15.6 | 2026-06-21 | day only |
 | Murmansk | 69.0, 33.1 | 2026-12-21 | night, morning from about 10:22, evening from solar noon at about 12:45, night from about 15:08 (`Europe/Moscow`, within 10 minutes) |
-| Murmansk | 69.0, 33.1 | 2026-06-21 | morning until about 03:12, day, evening from about 22:26, morning again from solar midnight (within 10 minutes), no night |
+| Murmansk | 69.0, 33.1 | 2026-06-21 | evening until solar midnight at about 00:49, morning until about 03:12, day, evening from about 22:26 (`Europe/Moscow`, within 10 minutes), no night |
 
 #### Scenario: A night that barely gets dark
 - **GIVEN** Saint Petersburg at 59.9, 30.3 on 21 June 2026
