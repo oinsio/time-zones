@@ -43,3 +43,9 @@ Feature: Data-only commits
   Scenario: An ordinary pull request
     When a pull request on the branch "feature/search-by-region" is merged
     Then the automation added no "Data-Only" trailer to its commit
+
+  @refresh-data-through-scheduled-pull-requests @FR3
+  Scenario: Sources do not share a pull request
+    Given the pull request of the zone rules is open
+    When the city data refresh finds changed cities
+    Then a separate pull request of the city data is opened

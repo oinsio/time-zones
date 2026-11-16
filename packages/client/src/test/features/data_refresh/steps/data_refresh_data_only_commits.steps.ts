@@ -171,4 +171,30 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
   });
+
+  // @refresh-data-through-scheduled-pull-requests @FR3
+  f.Scenario("Sources do not share a pull request", ({ Given, When, Then }) => {
+    let zoneRulesBranch = "";
+    let cityDataBranch = "";
+    Given("the pull request of the zone rules is open", () => {
+      zoneRulesBranch = buildRefreshPullRequest(
+        REFRESH_SOURCES.ZONE_RULES,
+        "2026g",
+        MERGE_DECISION,
+      ).branch;
+    });
+    When("the city data refresh finds changed cities", () => {
+      cityDataBranch = buildRefreshPullRequest(
+        REFRESH_SOURCES.CITY_DATA,
+        "2026-12-02",
+        MERGE_DECISION,
+      ).branch;
+    });
+    Then("a separate pull request of the city data is opened", () => {
+      expect(cityDataBranch).not.toBe(zoneRulesBranch);
+      expect(findSourceOfBranch(cityDataBranch)).toBe(
+        REFRESH_SOURCES.CITY_DATA,
+      );
+    });
+  });
 });

@@ -24,10 +24,14 @@ import {
   buildRefreshFailureIssue,
   buildRefreshRecoveryComment,
 } from "./refreshFailureIssue.ts";
-import { buildRefreshPullRequest } from "./refreshPullRequest.ts";
+import {
+  buildRefreshPullRequest,
+  type RefreshPullRequest,
+} from "./refreshPullRequest.ts";
 import {
   decideCityDataRefresh,
   decideZoneRulesRefresh,
+  type RefreshDecision,
 } from "./refreshVerdict.ts";
 
 export const EXIT_CODE_OK = 0;
@@ -84,8 +88,8 @@ export async function runVerdict(
   dependencies: DataRefreshDependencies,
 ): Promise<number> {
   const { readCommittedFile, readRefreshedFile } = dependencies;
-  let decision;
-  let pullRequest;
+  let decision: RefreshDecision;
+  let pullRequest: RefreshPullRequest;
   if (source === REFRESH_SOURCES.ZONE_RULES) {
     const refreshed = await readZoneRulesInputs(readRefreshedFile);
     decision = decideZoneRulesRefresh(

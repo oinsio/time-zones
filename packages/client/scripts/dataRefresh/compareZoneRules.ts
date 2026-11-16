@@ -20,7 +20,8 @@ function listMissingKeys(
   refreshed: Record<string, unknown>,
 ): string[] {
   return Object.keys(committed).filter(
-    (identifier) => !Object.hasOwn(refreshed, identifier),
+    (identifier) =>
+      !Object.prototype.hasOwnProperty.call(refreshed, identifier),
   );
 }
 
@@ -28,18 +29,19 @@ export function compareZoneRules(
   committed: { release: ZoneRulesFile; coordinates?: ZoneCoordinatesFile },
   refreshed: { release: ZoneRulesFile; coordinates?: ZoneCoordinatesFile },
 ): ZoneRulesComparison {
-  const hasBothCoordinates =
-    committed.coordinates !== undefined && refreshed.coordinates !== undefined;
+  const committedCoordinates = committed.coordinates;
+  const refreshedCoordinates = refreshed.coordinates;
   return {
     removedZoneIds: listMissingKeys(
       committed.release.zones,
       refreshed.release.zones,
     ),
-    zonesWithoutCoordinates: hasBothCoordinates
-      ? listMissingKeys(
-          committed.coordinates.zones,
-          refreshed.coordinates.zones,
-        )
-      : [],
+    zonesWithoutCoordinates:
+      committedCoordinates !== undefined && refreshedCoordinates !== undefined
+        ? listMissingKeys(
+            committedCoordinates.zones,
+            refreshedCoordinates.zones,
+          )
+        : [],
   };
 }
