@@ -1,0 +1,114 @@
+# The CLDR pull request of the dependency bot merges by itself once every
+# required check passed; a failed check is reported in the issue of CLDR.
+# Implements FR5, FR6, FR8, FR9, FR11, NG5, NFR-S1 of refresh-data-through-scheduled-pull-requests (D4, D10, D11).
+name: CLDR update
+
+on:
+  pull_request:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  enable-auto-merge:
+    name: Enable auto-merge of the CLDR pull request
+    if: >-
+      github.event_name == 'pull_request'
+      && github.actor == 'dependabot[bot]'
+      && startsWith(github.head_ref, 'dependabot/npm_and_yarn/cldr')
+      && vars.DATA_REFRESH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Create the data refresh bot token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DATA_REFRESH_APP_ID }}
+          private-key: ${{ secrets.DATA_REFRESH_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Enable auto-merge as a data-only commit
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+          PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          gh pr merge "$PULL_REQUEST_NUMBER" --auto --squash \
+            --subject "$PULL_REQUEST_TITLE (#$PULL_REQUEST_NUMBER)" \
+            --body "$(printf 'Data refresh of CLDR.\n\nData-Only: true')"
+
+  report-checks:
+    name: Report the checks of the CLDR pull request
+    if: >-
+      github.event_name == 'workflow_run'
+      && github.event.workflow_run.event == 'pull_request'
+      && startsWith(github.event.workflow_run.head_branch, 'dependabot/npm_and_yarn/cldr')
+      && vars.DATA_REFRESH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+      actions: read
+    env:
+      GH_REPO: ${{ github.repository }}
+      PULL_REQUEST_URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.workflow_run.pull_requests[0].number }}
+    steps:
+      - name: Create the data refresh bot token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DATA_REFRESH_APP_ID }}
+          private-key: ${{ secrets.DATA_REFRESH_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Describe the failed check
+        id: issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FAILED_CHECK=$(gh run view "${{ github.event.workflow_run.id }}" --json jobs --jq '[.jobs[] | select(.conclusion == "failure") | .name][0] // "none"')
+          pnpm --filter @time-zones/client data-refresh:issue cldr "$FAILED_CHECK" "$PULL_REQUEST_URL"
+
+      - name: Label the pull request and report the failed check
+        if: github.event.workflow_run.conclusion != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_BODY_FILE: ${{ steps.issue.outputs.body-file }}
+          PULL_REQUEST_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          GH_TOKEN="$APP_TOKEN" gh pr edit "$PULL_REQUEST_NUMBER" --add-label needs-review
+          NUMBER=$(gh issue list --label data-refresh-failure --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$NUMBER" ]; then
+            gh issue comment "$NUMBER" --body-file "$ISSUE_BODY_FILE"
+          else
+            gh issue create --title "$ISSUE_TITLE" --label data-refresh-failure --body-file "$ISSUE_BODY_FILE"
+          fi
+
+      - name: Close the issue of CLDR
+        if: github.event.workflow_run.conclusion == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          RECOVERY_FILE: ${{ steps.issue.outputs.recovery-file }}
+        run: |
+          NUMBER=$(gh issue list --label data-refresh-failure --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$NUMBER" ]; then
+            gh issue close "$NUMBER" --comment "$(cat "$RECOVERY_FILE")"
+          fi

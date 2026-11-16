@@ -36,6 +36,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # implements FR6 of refresh-data-through-scheduled-pull-requests
+      - name: Check data-only paths
+        run: |
+          git fetch --no-tags --depth=1 origin main
+          pnpm --filter @time-zones/client data-refresh:check-paths auto origin/main HEAD
+
       - run: pnpm lint
 
       - run: pnpm typecheck

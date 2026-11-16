@@ -1,0 +1,157 @@
+# Monthly and manual: compile the city data from the GeoNames dumps and propose it as
+# the data refresh pull request of the city data. Never pushes to main.
+# Implements FR2, FR3, FR4, FR5, FR7, FR8, FR10, FR11, NFR-P1, NFR-S1 of refresh-data-through-scheduled-pull-requests (D1–D4, D7, D8, D11).
+name: City data refresh
+
+on:
+  schedule:
+    - cron: "43 5 2 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: data-refresh-city-data
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Refresh city data
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+      actions: write
+    env:
+      GH_REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Report the data refresh switch
+        if: vars.DATA_REFRESH_ENABLED != 'true'
+        run: echo "data refresh is off" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/checkout@v5
+        if: vars.DATA_REFRESH_ENABLED == 'true'
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+        if: vars.DATA_REFRESH_ENABLED == 'true'
+
+      - uses: actions/setup-node@v5
+        if: vars.DATA_REFRESH_ENABLED == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        if: vars.DATA_REFRESH_ENABLED == 'true'
+
+      - name: Install unzip
+        if: vars.DATA_REFRESH_ENABLED == 'true'
+        run: sudo apt-get install -y --no-install-recommends unzip
+
+      - name: Compile the city data
+        if: vars.DATA_REFRESH_ENABLED == 'true'
+        run: pnpm --filter @time-zones/client city-data:compile
+
+      - name: Compare the city data with the committed one
+        id: verdict
+        if: vars.DATA_REFRESH_ENABLED == 'true'
+        run: pnpm --filter @time-zones/client data-refresh:verdict city-data
+
+      - name: Check the city data
+        if: vars.DATA_REFRESH_ENABLED == 'true' && steps.verdict.outputs.verdict != 'UNCHANGED'
+        run: pnpm --filter @time-zones/client city-data:check
+
+      - name: Run the unit tests
+        if: vars.DATA_REFRESH_ENABLED == 'true' && steps.verdict.outputs.verdict != 'UNCHANGED'
+        run: pnpm test
+
+      - name: Create the data refresh bot token
+        id: app-token
+        if: vars.DATA_REFRESH_ENABLED == 'true'
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DATA_REFRESH_APP_ID }}
+          private-key: ${{ secrets.DATA_REFRESH_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Open or update the data refresh pull request
+        if: vars.DATA_REFRESH_ENABLED == 'true' && steps.verdict.outputs.verdict != 'UNCHANGED'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: data-refresh/city-data
+          TITLE: ${{ steps.verdict.outputs.title }}
+          VERDICT: ${{ steps.verdict.outputs.verdict }}
+          BODY_FILE: ${{ steps.verdict.outputs.body-file }}
+          MERGE_BODY_FILE: ${{ steps.verdict.outputs.merge-body-file }}
+        run: |
+          git config user.name "time-zones data refresh"
+          git config user.email "data-refresh@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git add packages/client/city-data
+          git commit -m "$TITLE"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git"
+          git push --force origin "$BRANCH"
+          NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$NUMBER" ]; then
+            gh pr edit "$NUMBER" --title "$TITLE" --body-file "$BODY_FILE"
+          else
+            NUMBER=$(gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file "$BODY_FILE" | sed 's|.*/||')
+          fi
+          if [ "$VERDICT" = "NEEDS_REVIEW" ]; then
+            gh pr edit "$NUMBER" --add-label needs-review
+            gh pr merge "$NUMBER" --disable-auto || true
+          else
+            gh pr edit "$NUMBER" --remove-label needs-review || true
+            gh pr merge "$NUMBER" --auto --squash --subject "$TITLE (#$NUMBER)" --body-file "$MERGE_BODY_FILE"
+          fi
+
+      - name: Describe the failed refresh
+        id: issue
+        if: failure() && vars.DATA_REFRESH_ENABLED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FAILED_STEP=$(gh run view "${{ github.run_id }}" --json jobs --jq '[.jobs[].steps[] | select(.conclusion == "failure") | .name][0] // "unknown step"')
+          pnpm --filter @time-zones/client data-refresh:issue city-data "$FAILED_STEP" "$RUN_URL"
+
+      - name: Report the failed refresh
+        if: failure() && vars.DATA_REFRESH_ENABLED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
+          ISSUE_BODY_FILE: ${{ steps.issue.outputs.body-file }}
+        run: |
+          if [ -z "$ISSUE_TITLE" ]; then
+            echo "The failed refresh could not be described: setup did not finish"
+            exit 1
+          fi
+          NUMBER=$(gh issue list --label data-refresh-failure --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$NUMBER" ]; then
+            gh issue comment "$NUMBER" --body-file "$ISSUE_BODY_FILE"
+          else
+            gh issue create --title "$ISSUE_TITLE" --label data-refresh-failure --body-file "$ISSUE_BODY_FILE"
+          fi
+
+      - name: Describe the recovery
+        id: recovery
+        if: success() && vars.DATA_REFRESH_ENABLED == 'true'
+        run: pnpm --filter @time-zones/client data-refresh:issue city-data recovered "$RUN_URL"
+
+      - name: Close the issue of a failed refresh
+        if: success() && vars.DATA_REFRESH_ENABLED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_TITLE: ${{ steps.recovery.outputs.title }}
+          RECOVERY_FILE: ${{ steps.recovery.outputs.recovery-file }}
+        run: |
+          NUMBER=$(gh issue list --label data-refresh-failure --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$NUMBER" ]; then
+            gh issue close "$NUMBER" --comment "$(cat "$RECOVERY_FILE")"
+          fi
