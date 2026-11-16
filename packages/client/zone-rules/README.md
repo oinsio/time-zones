@@ -76,17 +76,34 @@ listing, never a `-latest` archive, with `pnpm zone-rules:latest`, which prints
 `already current` when the committed release is not older than the newest
 `tzdata` release by the release order (`2026z` precedes `2026aa`). For a newer
 release it compiles it (`zone-rules:compile`), runs `zone-rules:check` and
-`pnpm test`, commits `Update zone rules to <release>` to `main` and deploys that
-commit. The deploy publishes `zone-rules/version.json` and
-`zone-rules/<release>.json`; running apps find them at their next check and
-offer a Reload.
+`pnpm test`, compares it with the committed release (the refresh guard) and
+opens or updates the data refresh pull request `Update zone rules to <release>`
+on the branch `data-refresh/zone-rules`. It never pushes to `main`. The pull
+request merges by itself once every required check passes, with the trailer
+`Data-Only: true`; the ordinary deploy of `main` then publishes
+`zone-rules/version.json` and `zone-rules/<release>.json`, and running apps find
+them at their next check and offer a Reload.
+
+- **Needs review:** when the guard finds a loss (a zone identifier or zone
+  coordinates missing), the pull request carries the label `needs-review`, lists
+  the reasons and does not merge by itself.
+- **Switch:** every step is conditioned on the repository variable
+  `DATA_REFRESH_ENABLED` being `true`; while it is not, a run says "data
+  refresh is off" and changes nothing.
+- **Failure issue:** a failed run opens the issue "Data refresh failed: zone
+  rules" naming the step; later failures comment on it, and the next successful
+  run closes it.
 
 - **Dispatch by hand:** Actions → "Zone rules publication" → Run workflow on
   `main`. It runs the same steps as a scheduled run.
 - **A schedule GitHub disabled:** GitHub stops scheduled workflows of a
   repository without activity for 60 days. Open the same Actions page and
-  enable the workflow again; dispatch it once to confirm.
-- **A failed run:** nothing was committed or deployed. Read the log of the step
+  enable the workflow again (`gh workflow enable "Zone rules publication"`);
+  dispatch it once to confirm. GitHub shows the banner "This scheduled workflow
+  is disabled because there hasn't been activity in this repository for at least
+  60 days" on the workflow's Actions page. Every daily run re-enables the
+  scheduled data refresh workflows.
+- **A failed run:** nothing was proposed or deployed. Read the log of the step
   that failed (download or signature, compile, check, test). The app keeps
   serving its current release.
 

@@ -18,3 +18,9 @@ Layers, the data flow between them, and the test stand-ins. Decisions: ADR-0002 
 - **Work bound** — a deterministic count (formatters built, lookups, passes) that a performance requirement is checked by in unit tests, instead of measured time (ADR-0008). *Code:* `test/workCounters.ts`. *Never:* wall-clock budget in a unit test.
 - **Fake clock** — the clock tests use, fixed at an instant and a zone. *Code:* `fakeClock`, `createSwitchableClock`. *Never:* `vi.setSystemTime`, `vi.useFakeTimers`.
 - **Tick scheduler / write scheduler** — the injectable timers of the minute tick and the storage write, replaced by manual ones in tests. *Code:* `TickScheduler`, `WriteScheduler`, `createManualTickScheduler`, `createManualWriteScheduler`.
+- **Data refresh** — a scheduled or manual run that recompiles committed data from its source (zone rules publication, city data refresh, CLDR update) and proposes the result as a data refresh pull request. *Code:* `scripts/dataRefresh/`. *Never:* auto-update, sync.
+- **Data refresh bot** — the GitHub App that opens, updates and merges data refresh pull requests; its pull requests start their checks without approval. *Never:* service account.
+- **City data refresh** — the monthly or manual data refresh of the city data from GeoNames. *Code:* `.github/workflows/city-data-refresh.yml`.
+- **Data refresh pull request** — the one pull request of a data source that carries its newest refresh, opened by the data refresh bot and merged automatically when every check and the refresh guard pass. *Code:* `buildRefreshPullRequest`.
+- **Data-only commit** — a commit on `main` that changes only committed data and carries the trailer `Data-Only: true`. *Code:* `DATA_ONLY_TRAILER`, `findPathsOutsideData`.
+- **Refresh guard** — the comparison of the refreshed data with the committed data that decides whether the pull request may merge by itself. *Code:* `decideCityDataRefresh`, `decideZoneRulesRefresh`.
