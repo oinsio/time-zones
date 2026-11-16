@@ -149,7 +149,7 @@ A row that is home and whose zone is the device time zone SHALL show the home ma
 - **AND** the Moscow row shows the Here mark and the caption "here"
 
 ### Requirement: Home is kept on the device
-The home location SHALL be saved on the device together with the list and restored on the next open, also offline. Nothing MUST be written until the user changes the list or home. A list stored by the previous document version MUST open with the same locations, in the same order, without home. <!-- implements FR8 of set-home-location-and-show-differences -->
+The home location SHALL be saved on the device together with the list and restored on the next open, also offline. Nothing MUST be written until the user changes the list or home, or until city locations gain their coordinates (see the `locations` requirement "Stored locations gain coordinates"). A list stored by a document version without home (version 1) MUST open with the same locations, in the same order, without home. <!-- implements FR8 of set-home-location-and-show-differences ; FR8 of add-city-coordinates-to-locations -->
 
 #### Scenario: Home survives a reload
 - **GIVEN** the user added Almaty and Moscow and made Moscow home
