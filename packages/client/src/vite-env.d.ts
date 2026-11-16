@@ -19,6 +19,9 @@ declare module "virtual:zone-cities" {
     timeZoneId: string;
     names: { en: string; ru: string };
     countryCode: string;
+    /** Tenths of a degree; absent for UTC (add-city-coordinates-to-locations). */
+    latitudeTenths?: number;
+    longitudeTenths?: number;
   }[];
   export default zoneCities;
   /** The committed GeoNames city data without its source record, the cities as columns (design D5). */
@@ -33,6 +36,8 @@ declare module "virtual:zone-cities" {
       countryCodes: string[];
       zoneIndexes: number[];
       populations: number[];
+      latitudeTenths: number[];
+      longitudeTenths: number[];
       regionIndexes: number[];
     };
     zoneCityPopulations: Record<string, number>;

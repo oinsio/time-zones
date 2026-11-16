@@ -1,12 +1,9 @@
 // Verifies FR12, M1 of add-geonames-city-source: the format and tuple rows of "A broken file fails" name their offender.
+// Verifies FR1, FR4 of add-city-coordinates-to-locations (D2, D4).
 import { describe, expect, it } from "vitest";
 import { checkCityData } from "../../../scripts/cityData/checkCityData.ts";
 import type { CityTuple } from "../../../scripts/cityData/cityDataTypes.ts";
-import {
-  buildCity,
-  buildDataset,
-  RELEASE_ZONES,
-} from "./checkCityData.fixtures.ts";
+import { buildDataset, RELEASE_ZONES } from "./checkCityData.fixtures.ts";
 
 const FORMAT_ERROR = "The city data does not have the format of design D5";
 const FRESH_ID = 90_000;
@@ -22,8 +19,8 @@ describe("checkCityData format", () => {
   });
 
   it("should name the wrong format version", () => {
-    expect(check({ formatVersion: 2 })).toEqual([
-      "The city data has the format version 2, expected 1",
+    expect(check({ formatVersion: 3 })).toEqual([
+      "The city data has the format version 3, expected 2",
     ]);
   });
 
@@ -66,7 +63,7 @@ describe("checkCityData city tuples", () => {
     dataset.cities.push(tuple as CityTuple);
     return { dataset, position };
   };
-  const base = [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5];
+  const base = [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5, 558, 491];
 
   it("should name the position of a tuple of the wrong length", () => {
     const { dataset, position } = withTuple([FRESH_ID, "Alpha"]);
@@ -92,47 +89,47 @@ describe("checkCityData city tuples", () => {
   it.each([
     [
       "a fractional ID",
-      [1.5, "Alpha", "Альфа", "DE", 0, 5],
+      [1.5, "Alpha", "Альфа", "DE", 0, 5, 558, 491],
       "The city at position 6000 has no GeoNames ID",
     ],
     [
       "a negative ID",
-      [-1, "Alpha", "Альфа", "DE", 0, 5],
+      [-1, "Alpha", "Альфа", "DE", 0, 5, 558, 491],
       "The city at position 6000 has no GeoNames ID",
     ],
     [
       "an empty Russian name",
-      [FRESH_ID, "Alpha", "", "DE", 0, 5],
+      [FRESH_ID, "Alpha", "", "DE", 0, 5, 558, 491],
       `The city Alpha (${FRESH_ID}) has an empty Russian name`,
     ],
     [
       "a blank English name",
-      [FRESH_ID, " ", "Альфа", "DE", 0, 5],
+      [FRESH_ID, " ", "Альфа", "DE", 0, 5, 558, 491],
       `The city ${FRESH_ID} has an empty English name`,
     ],
     [
       "a lower-case country code",
-      [FRESH_ID, "Alpha", "Альфа", "de", 0, 5],
+      [FRESH_ID, "Alpha", "Альфа", "de", 0, 5, 558, 491],
       `The city Alpha (${FRESH_ID}) has the country code de`,
     ],
     [
       "a negative population",
-      [FRESH_ID, "Alpha", "Альфа", "DE", 0, -5],
+      [FRESH_ID, "Alpha", "Альфа", "DE", 0, -5, 558, 491],
       `The city Alpha (${FRESH_ID}) has the population -5`,
     ],
     [
       "a fractional population",
-      [FRESH_ID, "Alpha", "Альфа", "DE", 0, 1.5],
+      [FRESH_ID, "Alpha", "Альфа", "DE", 0, 1.5, 558, 491],
       `The city Alpha (${FRESH_ID}) has the population 1.5`,
     ],
     [
       "an unknown zone index",
-      [FRESH_ID, "Alpha", "Альфа", "DE", 9, 5],
+      [FRESH_ID, "Alpha", "Альфа", "DE", 9, 5, 558, 491],
       `The city Alpha (${FRESH_ID}) has the unknown zone index 9`,
     ],
     [
       "an unknown region index",
-      [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5, 9],
+      [FRESH_ID, "Alpha", "Альфа", "DE", 0, 5, 558, 491, 9],
       `The city Alpha (${FRESH_ID}) has the unknown region index 9`,
     ],
   ])("should name the offender for %s", (_, tuple, message) => {
@@ -141,47 +138,7 @@ describe("checkCityData city tuples", () => {
   });
 
   it("should accept a population of 0 and the marker for no Russian name", () => {
-    const { dataset } = withTuple([FRESH_ID, "Alpha", 0, "DE", 0, 0]);
+    const { dataset } = withTuple([FRESH_ID, "Alpha", 0, "DE", 0, 0, 558, 491]);
     expect(check(dataset)).toEqual([]);
-  });
-});
-
-describe("checkCityData thresholds and zone cities", () => {
-  it("should accept exactly 95% Cyrillic Russian names", () => {
-    const dataset = buildDataset();
-    for (let index = 0; index < 300; index += 1)
-      dataset.cities[index] = buildCity(index + 1, { russian: 0 });
-    expect(check(dataset)).toEqual([]);
-  });
-
-  it("should count a Latin Russian name as not Cyrillic", () => {
-    const dataset = buildDataset();
-    for (let index = 0; index < 360; index += 1)
-      dataset.cities[index] = buildCity(index + 1, {
-        russian: `Latin${index}`,
-      });
-    expect(check(dataset)).toEqual([
-      "94% of the Russian names are in Cyrillic; the minimum is 95%",
-    ]);
-  });
-
-  it("should report 0% Cyrillic for no cities", () => {
-    const dataset = { ...buildDataset(), cities: [] };
-    expect(check(dataset)).toEqual([
-      "The city data holds 0 cities; the minimum is 6000",
-      "0% of the Russian names are in Cyrillic; the minimum is 95%",
-    ]);
-  });
-
-  it("should ignore zone cities without a country code", () => {
-    const zoneCity = {
-      timeZoneId: "Etc/GMT",
-      names: { en: "Same", ru: "Тот же" },
-      countryCode: "",
-    };
-    const other = { ...zoneCity, timeZoneId: "Etc/UTC" };
-    expect(
-      checkCityData(buildDataset(), RELEASE_ZONES, [zoneCity, other]),
-    ).toEqual([]);
   });
 });

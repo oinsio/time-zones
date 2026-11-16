@@ -43,3 +43,14 @@ Feature: Zone rules lookup
     Given the engine's own data places "Asia/Almaty" at UTC plus 6
     When the wall-clock time "2026-07-15T13:00" in "Asia/Almaty" is resolved
     Then it resolves to "2026-07-15T08:00:00Z" with the status "UNIQUE"
+
+  @build-zic-from-tzcode @FR6 @M2 @UX1
+  Scenario Outline: Ojinaga in November 2022
+    Given the committed release
+    When the local time type of "America/Ojinaga" is looked up at <instant>
+    Then it is UTC minus 6 "CST", standard time
+
+    Examples:
+      | instant              |
+      | 2022-10-30T08:00:00Z |
+      | 2022-11-03T12:00:00Z |

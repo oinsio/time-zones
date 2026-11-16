@@ -1,5 +1,6 @@
 // Verifies FR5, FR8, UX3 of add-locations-via-search (D9).
 // Verifies FR10, FR11, UX3 of show-zone-abbreviations-and-zone-label-setting (D8).
+// Verifies FR6 of add-city-coordinates-to-locations (D6): coordinates of the record.
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import {
@@ -163,5 +164,26 @@ describe("present search results", () => {
     expect(
       presentSearchResults([resultFor(moscowRecord)], [], IN_EN)[0]?.isAdded,
     ).toBe(false);
+  });
+});
+
+describe("presentSearchResults coordinates", () => {
+  it("should hand over the coordinates of the record", () => {
+    const coordinates = { latitude: 55.8, longitude: 37.6 };
+    const [presented] = presentSearchResults(
+      [resultFor({ ...moscowRecord, coordinates })],
+      [],
+      IN_EN,
+    );
+    expect(presented?.coordinates).toEqual(coordinates);
+  });
+
+  it("should leave a record without coordinates without", () => {
+    const [presented] = presentSearchResults(
+      [resultFor(moscowRecord)],
+      [],
+      IN_EN,
+    );
+    expect(presented?.coordinates).toBeUndefined();
   });
 });

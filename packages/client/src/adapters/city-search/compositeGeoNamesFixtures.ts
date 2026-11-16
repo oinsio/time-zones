@@ -18,6 +18,7 @@ export const geoNamesCity = (
   countryCode,
   timeZoneId,
   population,
+  coordinates: { latitude: 1, longitude: 2 },
   ...(region === undefined ? {} : { region }),
 });
 

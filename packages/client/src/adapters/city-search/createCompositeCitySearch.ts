@@ -106,6 +106,7 @@ function groupRecordsByZone(
  * Implements FR1 of show-city-labels-in-interface-language (D2): getCityLabel.
  * Implements FR11, NFR-P3 of show-zone-abbreviations-and-zone-label-setting (D8): abbreviation results rank like the other kinds.
  * Implements FR3–FR6, FR8, FR9 of add-geonames-city-source (D7).
+ * Implements FR8, NFR-P2 of add-city-coordinates-to-locations (D7): getCoordinates.
  */
 export function createCompositeCitySearch(
   zoneCityRecords: readonly ZoneCityData[],
@@ -132,6 +133,15 @@ export function createCompositeCitySearch(
     zoneSource.records.map((record) => [record.id, record]),
   );
 
+  /** The record of a stored location: the one of its zone that names the stored label. */
+  const findRecordOfLocation = (
+    timeZoneId: string,
+    storedLabel: string,
+  ): CityRecord | undefined =>
+    recordsByZone
+      .get(timeZoneId)
+      ?.find((record) => isCityNameOfRecord(record, storedLabel));
+
   return {
     search(query: string, language: CityNameLanguage) {
       const normalizedQuery = normalizeSearchText(query);
@@ -150,11 +160,13 @@ export function createCompositeCitySearch(
       recordsById.get(timeZoneId)?.names[language] ??
       deriveCityNameFromTimeZoneId(timeZoneId),
     getCityLabel: (timeZoneId, storedLabel, language) =>
-      recordsByZone
-        .get(timeZoneId)
-        ?.find((record) => isCityNameOfRecord(record, storedLabel))?.names[
-        language
-      ] ?? storedLabel,
+      findRecordOfLocation(timeZoneId, storedLabel)?.names[language] ??
+      storedLabel,
+    getCoordinates: (timeZoneId, storedLabel) =>
+      (
+        findRecordOfLocation(timeZoneId, storedLabel) ??
+        recordsById.get(timeZoneId)
+      )?.coordinates,
     suggest: () =>
       POPULAR_TIME_ZONE_IDS.flatMap((zoneId) => {
         const record = recordsById.get(zoneId);

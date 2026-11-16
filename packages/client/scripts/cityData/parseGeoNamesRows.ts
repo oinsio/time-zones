@@ -2,8 +2,13 @@
  * Pure parsers for one line of the GeoNames dumps; a malformed line throws
  * with its line number.
  * Implements FR1, FR2 of add-geonames-city-source (D8).
+ * Implements FR1, FR4 of add-city-coordinates-to-locations (D2).
  */
 
+import {
+  MAX_LATITUDE_DEGREES,
+  MAX_LONGITUDE_DEGREES,
+} from "../../src/constants/coordinates.ts";
 import type {
   Admin1Row,
   AlternateNameRow,
@@ -16,6 +21,8 @@ const CITY_COLUMNS = {
   name: 1,
   featureCode: 7,
   countryCode: 8,
+  latitude: 4,
+  longitude: 5,
   admin1Code: 10,
   population: 14,
   timeZoneId: 17,
@@ -57,6 +64,25 @@ function readNumber(text: string, field: string, lineNumber: number): number {
   return value;
 }
 
+function readDegrees(
+  text: string,
+  field: string,
+  limit: number,
+  lineNumber: number,
+): number {
+  const value = Number(text);
+  if (
+    text.trim() === "" ||
+    !Number.isFinite(value) ||
+    Math.abs(value) > limit
+  ) {
+    throw new Error(
+      `Malformed GeoNames line ${lineNumber}: ${field} "${text}" is not a number within ±${limit}`,
+    );
+  }
+  return value;
+}
+
 export function parseCityRow(
   line: string,
   lineNumber: number,
@@ -78,6 +104,18 @@ export function parseCityRow(
       lineNumber,
     ),
     timeZoneId: readColumn(columns, CITY_COLUMNS.timeZoneId),
+    latitude: readDegrees(
+      readColumn(columns, CITY_COLUMNS.latitude),
+      "latitude",
+      MAX_LATITUDE_DEGREES,
+      lineNumber,
+    ),
+    longitude: readDegrees(
+      readColumn(columns, CITY_COLUMNS.longitude),
+      "longitude",
+      MAX_LONGITUDE_DEGREES,
+      lineNumber,
+    ),
   };
 }
 

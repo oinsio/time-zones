@@ -1,5 +1,5 @@
 /** Version of the stored locations document (ADR-0004 envelope). */
-export const LOCATIONS_SCHEMA_VERSION = 3;
+export const LOCATIONS_SCHEMA_VERSION = 4;
 
 /**
  * Id of the device time location; has no `|`, so it never equals a city id.

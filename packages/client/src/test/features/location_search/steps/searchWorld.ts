@@ -1,8 +1,7 @@
-import zoneCities from "virtual:zone-cities";
 import { createCompositeCitySearch } from "@/adapters/city-search";
 import type { CityNameLanguage } from "@/constants";
 import type { CitySearchResult } from "@/ports";
-import { fullCityData } from "@/test/fullCityData";
+import { fullCityData, fullZoneCities } from "@/test/fullCityData";
 import { startWorkCount } from "@/test/workCounters";
 
 /** The query that prepares a search for querying: it normalizes every text once (D6). */
@@ -12,12 +11,12 @@ export const PREPARATION_QUERY = "a";
  * The real search over the real extracted data, built once per test file and
  * prepared for search by one query, so the work counts below are per query.
  */
-const citySearch = createCompositeCitySearch(zoneCities, fullCityData);
+const citySearch = createCompositeCitySearch(fullZoneCities, fullCityData);
 citySearch.search(PREPARATION_QUERY, "en");
 
 /** A search built now: it reads country names at construction, so build it after changing `Intl`. */
 export const buildCitySearch = () =>
-  createCompositeCitySearch(zoneCities, fullCityData);
+  createCompositeCitySearch(fullZoneCities, fullCityData);
 
 export type SearchWorld = {
   language: CityNameLanguage;
@@ -86,6 +85,17 @@ export const countPreparationWork = () => {
 export const countLoadingWork = (timeZoneId: string, storedLabel: string) => {
   const workCount = startWorkCount();
   buildCitySearch().getCityLabel(timeZoneId, storedLabel, "en");
+  workCount.stop();
+  return workCount.normalizations();
+};
+
+/** Counts the normalizations of loading a fresh search and asking the coordinates of one stored location (FR8, NFR-P2 of add-city-coordinates-to-locations). */
+export const countCoordinatesLoadingWork = (
+  timeZoneId: string,
+  storedLabel: string,
+) => {
+  const workCount = startWorkCount();
+  buildCitySearch().getCoordinates(timeZoneId, storedLabel);
   workCount.stop();
   return workCount.normalizations();
 };

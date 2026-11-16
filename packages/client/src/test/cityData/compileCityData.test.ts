@@ -1,4 +1,5 @@
 // Verifies FR1, FR11, FR12 of add-geonames-city-source (D3, D8).
+// Verifies FR1 of add-city-coordinates-to-locations (D2).
 import { describe, expect, it } from "vitest";
 import { compileCityData } from "../../../scripts/cityData/compileCityData.ts";
 import {
@@ -64,7 +65,7 @@ describe("compileCityData selection", () => {
       licence: "CC BY 4.0",
       dumpDate: "2026-11-13",
     });
-    expect(dataset.formatVersion).toBe(1);
+    expect(dataset.formatVersion).toBe(2);
   });
 
   it("should give identical output for two runs", () => {
@@ -154,84 +155,5 @@ describe("compileCityData exemplar cities", () => {
     );
     expect(dataset.cities).toHaveLength(1);
     expect(dataset.zoneCityPopulations).toEqual({});
-  });
-});
-
-describe("compileCityData namesakes", () => {
-  it("should give three namesakes their regions", () => {
-    const dataset = compileCityData(
-      buildInput({
-        cityRows: [
-          cityRow({
-            geonameId: 1,
-            name: "Springfield",
-            countryCode: "US",
-            admin1Code: "IL",
-            timeZoneId: "America/Chicago",
-          }),
-          cityRow({
-            geonameId: 2,
-            name: "Springfield",
-            countryCode: "US",
-            admin1Code: "MO",
-            timeZoneId: "America/Chicago",
-          }),
-        ],
-        alternateNames: new Map([[9002, [russianName(9002, "Иллинойс")]]]),
-      }),
-    );
-    expect(dataset.regions).toEqual([
-      ["Illinois", "Иллинойс"],
-      ["Missouri", "Missouri"],
-    ]);
-    expect(dataset.cities.map((city) => city[6])).toEqual([0, 1]);
-  });
-
-  it("should give a zone city that is a namesake its region", () => {
-    const dataset = compileCityData(
-      buildInput({
-        cityRows: [
-          cityRow({
-            geonameId: 524901,
-            name: "Moscow",
-            featureCode: "PPLC",
-            population: 10_000_000,
-            admin1Code: "01",
-          }),
-          cityRow({
-            geonameId: 99,
-            name: "Moscow",
-            countryCode: "RU",
-            admin1Code: "01",
-            timeZoneId: "Europe/Berlin",
-          }),
-        ],
-        alternateNames: new Map([
-          [524901, [russianName(524901, "Москва")]],
-          [99, [russianName(99, "Москва")]],
-        ]),
-      }),
-    );
-    expect(dataset.zoneCityRegions).toEqual({ "Europe/Moscow": 0 });
-    expect(dataset.cities[0][6]).toBe(0);
-  });
-
-  it("should leave cities of different countries without a region", () => {
-    const dataset = compileCityData(
-      buildInput({
-        cityRows: [
-          cityRow({
-            geonameId: 1,
-            name: "Victoria",
-            countryCode: "US",
-            admin1Code: "IL",
-          }),
-          cityRow({ geonameId: 2, name: "Victoria", countryCode: "RU" }),
-        ],
-        timeZoneAliases: {},
-      }),
-    );
-    expect(dataset.cities.every((city) => city.length === 6)).toBe(true);
-    expect(dataset.regions).toEqual([]);
   });
 });

@@ -3,6 +3,8 @@
 ## Status
 Accepted (2026-10-30)
 
+The document schema version is 4 since `add-city-coordinates-to-locations` (optional coordinates of city locations; version 3 is migrated).
+
 Partly supersedes [ADR-0007](0007-reference-zone-and-device-time.md): the derived Here entry and First launch sections.
 
 ## Context
@@ -14,7 +16,7 @@ ADR-0007 showed the device time as a derived **Here entry**: not stored, not rem
 - The device time is a **location kind** of the list (`LocationKind.DEVICE_TIME`). It is stored as a kind without a zone, so the device time zone is never stored.
 - It is removable, reorderable, can be home and is offered in the search while it is not listed (`ADD_DEVICE_TIME_LOCATION`, `isDeviceTimeOptionShown`).
 - The first-launch list holds it (`buildFirstLaunchLocations`). After that the stored list is the truth: removing everything leaves an empty list across reloads.
-- The document schema version is 3; a version 2 document is migrated.
+- The document schema version is 3; a version 2 document is migrated. Since `add-city-coordinates-to-locations` it is 4: a city location may carry optional coordinates, and a version 3 document is migrated.
 - Kept from ADR-0007: the reference zone rule, the Here mark and "the device time zone is never stored".
 
 ## Consequences

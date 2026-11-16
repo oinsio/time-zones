@@ -1,21 +1,30 @@
 /**
  * The zone rules compiler: `pnpm --filter @time-zones/client zone-rules:compile
  * 2026f` downloads the release from IANA, verifies its signature against the
- * pinned key, compiles it with `zic -b slim` and writes the release file.
+ * pinned key, builds the zone tools from the release's code archive, compiles
+ * it with their `zic -b slim` and writes the release file.
  * Implements FR7 of add-zone-rules-from-iana (design D7), FR5 of add-remote-zone-rules-updates.
+ * Implements FR2, FR3 of add-city-coordinates-to-locations (D3): also writes the zone coordinates.
+ * Implements FR1, FR3 of build-zic-from-tzcode (D2): the zone tools of the release.
  */
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
+import {
+  ZONE_COORDINATES_FILE,
+  ZONE_RULES_RELEASE_FILE,
+} from "../../app.config.ts";
 import { parseReleaseName } from "../../src/lib/zoneRules/core/index.ts";
+import { buildZoneTools } from "./buildZoneTools.ts";
 import { compileWithZic } from "./compileWithZic.ts";
-import { downloadRelease, fetchBytes } from "./downloadRelease.ts";
+import { ArchiveKind, downloadRelease, fetchBytes } from "./downloadRelease.ts";
+import { parseZoneTable } from "./parseZoneTable.ts";
 import type { FetchRelease, RunProcess } from "./processTypes.ts";
 import { runChildProcess } from "./runChildProcess.ts";
 import { verifySignature } from "./verifySignature.ts";
 import { writeRelease } from "./writeRelease.ts";
+import { writeZoneCoordinates } from "./writeZoneCoordinates.ts";
 
 const USAGE =
   "Usage: node scripts/zoneRules/compile.ts <release>  (a release name such as 2026f)";
@@ -35,6 +44,7 @@ export async function runZoneRulesCompile(
   dependencies: ZoneRulesCompileDependencies,
 ): Promise<number> {
   const [release] = dependencies.argv;
+  // Stryker disable next-line ConditionalExpression: equivalent — parseReleaseName(undefined) tests the text "undefined" and returns undefined
   if (release === undefined || parseReleaseName(release) === undefined) {
     dependencies.log(USAGE);
     return 1;
@@ -43,22 +53,36 @@ export async function runZoneRulesCompile(
   try {
     const { archivePath, signaturePath } = await downloadRelease(
       release,
+      ArchiveKind.DATA,
       dependencies.fetchRelease,
       workDirectory,
     );
     await verifySignature(archivePath, signaturePath, dependencies.runProcess);
-    const { zones, links } = await compileWithZic(
+    const { zicPath } = await buildZoneTools(
+      release,
+      archivePath,
+      workDirectory,
+      dependencies,
+    );
+    const { zones, links, zoneTable } = await compileWithZic(
       archivePath,
       release,
       workDirectory,
       dependencies.runProcess,
+      zicPath,
     );
+    // Every step that can fail ran above: both files are written together.
+    const zoneCoordinatesText = writeZoneCoordinates({
+      release,
+      zones: parseZoneTable(zoneTable),
+    });
     await dependencies.writeFile(
       ZONE_RULES_RELEASE_FILE,
       writeRelease({ release, zones, links }),
     );
+    await dependencies.writeFile(ZONE_COORDINATES_FILE, zoneCoordinatesText);
     dependencies.log(
-      `Wrote ${ZONE_RULES_RELEASE_FILE} for the release ${release}`,
+      `Wrote ${ZONE_RULES_RELEASE_FILE} and ${ZONE_COORDINATES_FILE} for the release ${release}`,
     );
     return 0;
   } catch (error) {
@@ -67,6 +91,7 @@ export async function runZoneRulesCompile(
     );
     return 1;
   } finally {
+    // Stryker disable next-line BooleanLiteral: equivalent — mkdtemp created the work directory and no step removes it, so force never applies
     await rm(workDirectory, { recursive: true, force: true });
   }
 }

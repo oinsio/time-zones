@@ -18,6 +18,8 @@ export {
   getClockChanges,
   type NearestClockChange,
 } from "./clockChange";
+// Implements FR5, FR6, FR7 of add-city-coordinates-to-locations.
+export { type Coordinates, parseCoordinates } from "./coordinates";
 export {
   assembleDayPeriodStops,
   type DayPeriodStop,

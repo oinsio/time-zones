@@ -62,8 +62,9 @@ export const ZONE_RULES_ASSET_BUDGET_KB = 22;
  * Gzipped size ceiling of the search data file (the zone cities and the GeoNames
  * city data), in KB, measured by `check-bundle-size.mjs`.
  * Implements NFR-P1, M2 of add-geonames-city-source (D1).
+ * Implements NFR-P1 of add-city-coordinates-to-locations (D8): 150 KB with the coordinates of every city.
  */
-export const CITY_SEARCH_DATA_BUDGET_KB = 130;
+export const CITY_SEARCH_DATA_BUDGET_KB = 150;
 
 /**
  * The committed zone rules release, relative to the package root; read by the
@@ -71,3 +72,10 @@ export const CITY_SEARCH_DATA_BUDGET_KB = 130;
  * Implements FR2 of add-zone-rules-from-iana (D1).
  */
 export const ZONE_RULES_RELEASE_FILE = "zone-rules/release.json";
+
+/**
+ * The committed zone coordinates, written by the compiler together with the
+ * release file; read by the check and the search data build.
+ * Implements FR2, FR3 of add-city-coordinates-to-locations (D3).
+ */
+export const ZONE_COORDINATES_FILE = "zone-rules/zone-coordinates.json";

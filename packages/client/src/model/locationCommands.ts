@@ -1,3 +1,4 @@
+import type { Coordinates } from "./coordinates";
 import type { Location } from "./locations";
 import type { WallTimeTarget } from "./referenceMoment";
 
@@ -9,6 +10,7 @@ import type { WallTimeTarget } from "./referenceMoment";
  * Implements FR1, FR2, FR3, FR10 of set-home-location-and-show-differences (D1).
  * Implements FR2 of add-grid-meeting-range-and-share (D1): the meeting range commands.
  * Implements FR2 of refine-meeting-range-entry-and-handles (D2): MEETING_START_EQUALS_END, MEETING_END_BEFORE_START.
+ * Implements FR6, FR8 of add-city-coordinates-to-locations (D6, D7): ADD_LOCATION coordinates, FILL_LOCATION_COORDINATES.
  */
 
 export enum LocationCommandType {
@@ -18,6 +20,7 @@ export enum LocationCommandType {
   MOVE_LOCATION = "MOVE_LOCATION",
   SET_DEVICE_TIME_ZONE = "SET_DEVICE_TIME_ZONE",
   ADD_DEVICE_TIME_LOCATION = "ADD_DEVICE_TIME_LOCATION",
+  FILL_LOCATION_COORDINATES = "FILL_LOCATION_COORDINATES",
   SET_DATE = "SET_DATE",
   SHIFT_DATE = "SHIFT_DATE",
   RESET_TO_NOW = "RESET_TO_NOW",
@@ -49,6 +52,15 @@ export type LocationCommand =
       timeZoneId: string;
       label: string;
       countryCode: string;
+      /** The coordinates of the chosen city record, when it has any. */
+      coordinates?: Coordinates;
+    }
+  | {
+      type: LocationCommandType.FILL_LOCATION_COORDINATES;
+      /** Location id → the coordinates it gains; only city locations without coordinates take them. */
+      coordinatesByLocationId: Readonly<
+        Record<string, Coordinates | undefined>
+      >;
     }
   | { type: LocationCommandType.REMOVE_LOCATION; id: string }
   | {

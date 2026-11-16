@@ -3,6 +3,12 @@
 ## Status
 Accepted (2026-09-28)
 
+The zone list of ZoneCitiesSource comes from the zone rules release, not from `Intl.supportedValuesOf` ([ADR-0014](0014-zone-rules-from-iana.md), `add-zone-rules-from-iana`).
+
+GeoNamesSource is added by `add-geonames-city-source`; duplicates are removed per city and population orders after `rank` ([ADR-0015](0015-city-data-from-geonames.md)).
+
+The record format gains optional `coordinates` (`add-city-coordinates-to-locations`).
+
 ## Context
 
 Users add locations by searching for a city, a country or a time zone abbreviation. IANA provides about 400 time zone identifiers but no city database. A full city database (e.g. GeoNames with 15-25k cities, regions and localized names) weighs hundreds of kilobytes and needs a data pipeline and license review.
@@ -32,6 +38,7 @@ CityRecord
   countryCode   "KZ"                    country name comes from Intl.DisplayNames
   aliases       ["ALMT"]                abbreviations and alternative spellings
   rank          number                  capitals and large cities first
+  coordinates?  { latitude, longitude }  decimal degrees, rounded to 0.1°, when the source knows them
 ```
 
 ### Sources in the first release

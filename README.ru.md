@@ -288,3 +288,5 @@ Java 25 и релиз фабрики остаются на хосте: сама 
 ## Лицензия
 
 [Apache License 2.0](LICENSE)
+
+Данные о городах: [GeoNames](https://www.geonames.org/), CC BY 4.0 ([подробнее](packages/client/city-data/README.md))

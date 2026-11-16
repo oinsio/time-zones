@@ -17,10 +17,13 @@ export function cityLine(
   name: string,
   zone: string,
   population = 500_000,
+  coordinates: { latitude?: string; longitude?: string } = {},
 ): string {
   const columns = Array.from({ length: CITY_COLUMNS }, () => "");
   columns[0] = String(id);
   columns[1] = name;
+  columns[4] = coordinates.latitude ?? "55.78874";
+  columns[5] = coordinates.longitude ?? "49.12214";
   columns[7] = "PPL";
   columns[8] = "RU";
   columns[10] = "01";

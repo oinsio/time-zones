@@ -288,3 +288,5 @@ Full reference: the factory's [operator guides](https://github.com/oinsio/gnomis
 ## License
 
 [Apache License 2.0](LICENSE)
+
+City data: [GeoNames](https://www.geonames.org/), CC BY 4.0 ([details](packages/client/city-data/README.md))

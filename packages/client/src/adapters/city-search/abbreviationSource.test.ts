@@ -92,3 +92,16 @@ describe("abbreviation source", () => {
     expect(match("constructor")).toEqual([]);
   });
 });
+
+// Verifies FR5 of add-city-coordinates-to-locations (D5): the zone city records it returns keep their coordinates.
+describe("abbreviation source coordinates", () => {
+  it("should return the zone city record with its coordinates", () => {
+    const coordinates = { latitude: 40.7, longitude: -74 };
+    const records = createZoneCitiesSource(
+      [{ ...zone("America/New_York", "New York"), coordinates }],
+      () => ["America/New_York"],
+    ).records;
+    const [result] = createAbbreviationSource(records).match("EST");
+    expect(result?.record.coordinates).toEqual(coordinates);
+  });
+});

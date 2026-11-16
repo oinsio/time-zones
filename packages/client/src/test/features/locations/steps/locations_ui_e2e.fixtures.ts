@@ -15,6 +15,8 @@ export type StoredLocation = {
   timeZoneId: string;
   label: string;
   countryCode: string;
+  /** Seeded entries hold coordinates, so loading the city data writes nothing (FR8 of add-city-coordinates-to-locations). */
+  coordinates?: { latitude: number; longitude: number };
 };
 
 /** The stored entry of the device time location: a kind without a zone (the value of `LocationKind.DEVICE_TIME`). */

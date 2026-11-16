@@ -1,16 +1,17 @@
 // Verifies NFR-P1, M2 of add-geonames-city-source (D1, D5): the served column form.
+// Verifies FR1 of add-city-coordinates-to-locations (D2).
 import { describe, expect, it } from "vitest";
 import type { CityDataset } from "../../../scripts/cityData/cityDataTypes.ts";
 import { toServedCityData } from "../../../scripts/cityData/toServedCityData.ts";
 
 const DATASET: CityDataset = {
-  formatVersion: 1,
+  formatVersion: 2,
   source: { name: "GeoNames", licence: "CC BY 4.0", dumpDate: "2026-11-13" },
   zones: ["Europe/Moscow"],
   regions: [["Illinois", "Иллинойс"]],
   cities: [
-    [10, "A", 0, "RU", 0, 100],
-    [15, "B", "Б", "US", 0, 200, 0],
+    [10, "A", 0, "RU", 0, 100, 558, 491],
+    [15, "B", "Б", "US", 0, 200, -2, -785, 0],
   ],
   zoneCityPopulations: { "Europe/Moscow": 5 },
   zoneCityRegions: {},
@@ -41,6 +42,8 @@ describe("toServedCityData", () => {
       countryCodes: ["RU", "US"],
       zoneIndexes: [0, 0],
       populations: [100, 200],
+      latitudeTenths: [558, -2],
+      longitudeTenths: [491, -785],
       regionIndexes: [-1, 0],
     });
   });

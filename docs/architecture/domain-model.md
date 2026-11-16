@@ -19,6 +19,7 @@ classDiagram
         string label       "city name, stored as added; the presenter shows it in the interface language"
         string countryCode "ISO 3166-1 alpha-2"
         LocationKind kind  "CITY | DEVICE_TIME"
+        Coordinates? coordinates "city locations only; not part of the identity"
     }
     class ReferenceMoment {
         ReferenceMode mode  "LIVE | PINNED"
@@ -134,4 +135,4 @@ Hour cells and day tracks are spans of absolute time starting at the reference z
 - Formatting and localized strings — presenter.
 - Timers, persistence, cross-tab sync — controller via ports.
 - Scroll position, open panels, focus — views.
-- City search data — `CitySearch` port and its adapter. A city record has an ID unique per city (the zone ID for a zone city, the GeoNames ID otherwise), its zone, country, English and Russian names, rank, population and a region present for namesakes only; the zone cities source and the GeoNames source serve it, and the model holds none of it.
+- City search data — `CitySearch` port and its adapter. A city record has an ID unique per city (the zone ID for a zone city, the GeoNames ID otherwise), its zone, country, English and Russian names, coordinates when known, rank, population and a region present for namesakes only; the zone cities source and the GeoNames source serve it, and the model holds none of it.

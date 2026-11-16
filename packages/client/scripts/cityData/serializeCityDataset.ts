@@ -2,6 +2,7 @@
  * Serializes the city data set compactly, one city per line, so that diffs are
  * reviewable and equal sets give byte-identical files.
  * Implements FR12 of add-geonames-city-source (D5).
+ * Implements FR1 of add-city-coordinates-to-locations (D2).
  */
 import type { CityDataset } from "./cityDataTypes.ts";
 

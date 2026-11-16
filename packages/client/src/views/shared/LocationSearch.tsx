@@ -41,6 +41,7 @@ function OpenLocationSearch({
       timeZoneId: result.timeZoneId,
       label: result.cityName,
       countryCode: result.countryCode,
+      coordinates: result.coordinates,
     });
     onAdded(t("locations.addedAnnouncement", { city: result.cityName }));
     onClose();
@@ -87,6 +88,8 @@ function OpenLocationSearch({
  * (D10), and FR1 of open-location-search-with-slash-shortcut (D3).
  * Implements FR8 of show-here-entry-for-device-time (D4): the search loads
  * through the loader of the provider, shared with the device time location.
+ * Implements FR6 of add-city-coordinates-to-locations (D6): the added city
+ * location carries the coordinates of its search result.
  * Implements FR2, FR11 of add-settings-page-and-device-time-location (D11,
  * D12): lives in the header and owns the "added" announcement.
  */

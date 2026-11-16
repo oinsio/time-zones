@@ -1,11 +1,15 @@
 /**
  * Fakes for the zone rules compiler tests: a process runner that records its
- * calls and plays `gpg`, `tar` and `zic`, and a download that records URLs.
+ * calls and plays `gpg`, `tar`, `make` and `zic`, and a download that records URLs.
  * Implements FR7 of add-zone-rules-from-iana.
+ * Verifies FR1, FR2, FR3, FR5 of build-zic-from-tzcode: the code archive and `make` (D4).
  */
 import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { TZDATA_SOURCE_FILES } from "../../../scripts/zoneRules/compileWithZic.ts";
+import { basename, dirname, join } from "node:path";
+import {
+  TZDATA_SOURCE_FILES,
+  ZONE_TABLE_FILE,
+} from "../../../scripts/zoneRules/compileWithZic.ts";
 import type {
   FetchRelease,
   ProcessResult,
@@ -30,13 +34,35 @@ export type FakeScenario = {
   tarFailure?: { exitCode: number; stderr: string };
   /** The exit code of `zic`, with its error text; nothing is compiled. */
   zicFailure?: { exitCode: number; stderr: string };
+  /** The `--status-fd` output of `gpg --verify` for the code archive; defaults to `verifyStatus`. */
+  codeVerifyStatus?: string;
+  /** The content of the code archive's `version` file; defaults to `FAKE_RELEASE`. */
+  codeArchiveVersion?: string;
+  /** The exit code of `make`, with its error text; no zone tools are built. */
+  makeFailure?: { exitCode: number; stderr: string };
+  /** The archive holds no `zone.tab`. Implements FR2 of add-city-coordinates-to-locations. */
+  isZoneTableMissing?: boolean;
+  /** Replaces the fake zone table text. */
+  zoneTable?: string;
 };
+
+/** The `zone.tab` the fake `tar` unpacks (FR2 of add-city-coordinates-to-locations). */
+export const FAKE_ZONE_TABLE = [
+  "# tzdb timezone descriptions",
+  "RU\t+554521+0373704\tEurope/Moscow\tMoscow area",
+  "IN\t+2232+08822\tAsia/Kolkata",
+  "",
+].join("\n");
 
 export const VALID_VERIFY_STATUS_FILE = join(
   __dirname,
   "fixtures",
   "gpg-verify-valid.status.txt",
 );
+
+/** The release the fake code archive names unless a scenario says otherwise. */
+export const FAKE_RELEASE = "2026f";
+const CODE_ARCHIVE_MARK = "tzcode";
 
 const SUCCESS: ProcessResult = { exitCode: 0, stdout: "", stderr: "" };
 const EST = {
@@ -61,11 +87,29 @@ function writeTzif(outputDirectory: string, zoneId: string, file: Uint8Array) {
   writeFileSync(path, file);
 }
 
+function isCodeArchive(path: string | undefined): boolean {
+  return basename(path ?? "").startsWith(CODE_ARCHIVE_MARK);
+}
+
 function playTar(args: string[], scenario: FakeScenario) {
   const directory = args[args.indexOf("-C") + 1] as string;
+  if (isCodeArchive(args[args.indexOf("-xzf") + 1])) {
+    writeFileSync(
+      join(directory, "version"),
+      `${scenario.codeArchiveVersion ?? FAKE_RELEASE}\n`,
+    );
+    writeFileSync(join(directory, "Makefile"), "# the fake tzcode Makefile\n");
+    return;
+  }
   writeFileSync(join(directory, "version"), `${scenario.archiveVersion}\n`);
   for (const fileName of TZDATA_SOURCE_FILES) {
     writeFileSync(join(directory, fileName), "# no zones here\n");
+  }
+  if (!scenario.isZoneTableMissing) {
+    writeFileSync(
+      join(directory, ZONE_TABLE_FILE),
+      scenario.zoneTable ?? FAKE_ZONE_TABLE,
+    );
   }
   writeFileSync(join(directory, "asia"), "Zone Asia/Kolkata 5:30 - IST\n");
   writeFileSync(
@@ -104,16 +148,23 @@ export function createFakeProcessRunner(scenario: FakeScenario): {
       return { ...SUCCESS, exitCode: scenario.importExitCode ?? 0 };
     }
     if (command === "gpg" && args.includes("--verify")) {
-      return { ...SUCCESS, stdout: scenario.verifyStatus };
+      const status = isCodeArchive(args.at(-1))
+        ? (scenario.codeVerifyStatus ?? scenario.verifyStatus)
+        : scenario.verifyStatus;
+      return { ...SUCCESS, stdout: status };
     }
     if (command === "tar" && scenario.tarFailure) {
       return { ...scenario.tarFailure, stdout: "" };
     }
-    if (command === "zic" && scenario.zicFailure) {
+    if (command === "make" && scenario.makeFailure) {
+      return { ...scenario.makeFailure, stdout: "" };
+    }
+    const isZic = basename(command) === "zic";
+    if (isZic && scenario.zicFailure) {
       return { ...scenario.zicFailure, stdout: "" };
     }
     if (command === "tar") playTar(args, scenario);
-    if (command === "zic") playZic(args);
+    if (isZic) playZic(args);
     return SUCCESS;
   };
   return { runProcess, calls };

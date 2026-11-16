@@ -63,7 +63,7 @@ describe("checkCityData", () => {
 
   it("should name a region without a namesake", () => {
     const dataset = buildDataset();
-    dataset.cities[0] = [1, "Town1", "Город1", "DE", 0, 100_001, 0];
+    dataset.cities[0] = [1, "Town1", "Город1", "DE", 0, 100_001, 558, 491, 0];
     expect(check(dataset)).toEqual([
       "The city Town1 (1) has a region but is not a namesake",
     ]);
@@ -100,7 +100,7 @@ describe("checkCityData", () => {
 
   it("should accept a zone city namesake with a region entry", () => {
     const dataset: CityDataset = buildDataset();
-    dataset.cities[0] = [1, "Town1", "Город1", "DE", 0, 100_001, 0];
+    dataset.cities[0] = [1, "Town1", "Город1", "DE", 0, 100_001, 558, 491, 0];
     dataset.zoneCityRegions = { "Europe/Berlin": 0 };
     const zoneCity = {
       timeZoneId: "Europe/Berlin",
@@ -120,10 +120,10 @@ describe("checkCityData", () => {
 
   it.each([
     ["a non-object", 5],
-    ["a wrong format version", { formatVersion: 2 }],
+    ["a wrong format version", { formatVersion: 3 }],
     [
       "a missing section",
-      { formatVersion: 1, source: { name: "a", licence: "b", dumpDate: "c" } },
+      { formatVersion: 2, source: { name: "a", licence: "b", dumpDate: "c" } },
     ],
   ])("should fail for %s", (_, value) => {
     expect(check(value)).toHaveLength(1);
@@ -131,10 +131,10 @@ describe("checkCityData", () => {
 
   it.each([
     ["a bad tuple", [1, "A"]],
-    ["a bad country code", [1, "A", "А", "de", 0, 5]],
-    ["a bad population", [1, "A", "А", "DE", 0, -5]],
-    ["an unknown zone index", [1, "A", "А", "DE", 9, 5]],
-    ["an unknown region index", [1, "A", "А", "DE", 0, 5, 9]],
+    ["a bad country code", [1, "A", "А", "de", 0, 5, 558, 491]],
+    ["a bad population", [1, "A", "А", "DE", 0, -5, 558, 491]],
+    ["an unknown zone index", [1, "A", "А", "DE", 9, 5, 558, 491]],
+    ["an unknown region index", [1, "A", "А", "DE", 0, 5, 558, 491, 9]],
   ])("should fail for %s", (_, tuple) => {
     const dataset = buildDataset();
     dataset.cities.push(tuple as never);

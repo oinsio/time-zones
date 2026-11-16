@@ -1,4 +1,8 @@
-import type { CityNameLanguage } from "@/constants";
+import {
+  type CityNameLanguage,
+  COORDINATE_TENTHS_PER_DEGREE,
+} from "@/constants";
+import { type Coordinates, parseCoordinates } from "@/model";
 import type { GeoNamesCityData, GeoNamesCityEntry } from "./citySource";
 
 /**
@@ -6,11 +10,13 @@ import type { GeoNamesCityData, GeoNamesCityEntry } from "./citySource";
  * rebuilds the city tuples from its columns (the IDs are differences, a region index of -1 is none) and expands them: a Russian name of `0` becomes the English name, region
  * and zone indexes become their names. Returns `undefined` when it is invalid.
  * Implements FR14 of add-geonames-city-source (D5).
+ * Implements FR5 of add-city-coordinates-to-locations (D2): the tenths of a degree
+ * become coordinates through `parseCoordinates`.
  */
 
 const NO_RUSSIAN_NAME_MARKER = 0;
-const TUPLE_LENGTH_WITHOUT_REGION = 6;
-const TUPLE_LENGTH_WITH_REGION = 7;
+const TUPLE_LENGTH_WITHOUT_REGION = 8;
+const TUPLE_LENGTH_WITH_REGION = 9;
 const REGION_NAME_COUNT = 2;
 const NO_REGION_INDEX = -1;
 const COLUMN_NAMES = [
@@ -20,6 +26,8 @@ const COLUMN_NAMES = [
   "countryCodes",
   "zoneIndexes",
   "populations",
+  "latitudeTenths",
+  "longitudeTenths",
   "regionIndexes",
 ] as const;
 
@@ -50,6 +58,18 @@ function readRegions(value: unknown): Names[] | undefined {
   return regions;
 }
 
+/** Coordinates from two tenths-of-a-degree numbers, `undefined` when either is not a number or out of range. */
+export const parseTenthsCoordinates = (
+  latitudeTenths: unknown,
+  longitudeTenths: unknown,
+): Coordinates | undefined =>
+  typeof latitudeTenths === "number" && typeof longitudeTenths === "number"
+    ? parseCoordinates({
+        latitude: latitudeTenths / COORDINATE_TENTHS_PER_DEGREE,
+        longitude: longitudeTenths / COORDINATE_TENTHS_PER_DEGREE,
+      })
+    : undefined;
+
 function readCity(
   tuple: unknown,
   zones: readonly string[],
@@ -69,8 +89,11 @@ function readCity(
     countryCode,
     zoneIndex,
     population,
+    latitudeTenths,
+    longitudeTenths,
     regionIndex,
   ] = tuple;
+  const coordinates = parseTenthsCoordinates(latitudeTenths, longitudeTenths);
   const isValid =
     Number.isInteger(id) &&
     isString(english) &&
@@ -78,6 +101,7 @@ function readCity(
     isString(countryCode) &&
     isIndexInto(zoneIndex, zones) &&
     Number.isInteger(population) &&
+    coordinates !== undefined &&
     (regionIndex === undefined || isIndexInto(regionIndex, regions));
   if (!isValid) return undefined;
   return {
@@ -89,6 +113,7 @@ function readCity(
     countryCode,
     timeZoneId: zones[zoneIndex] as string,
     population,
+    coordinates,
     ...(regionIndex === undefined ? {} : { region: regions[regionIndex] }),
   };
 }
@@ -119,11 +144,10 @@ function readCityTuples(columns: unknown): unknown[][] | undefined {
   let id = 0;
   return Array.from({ length: cityCount }, (_, index) => {
     id += Number(idDifferences?.[index]);
-    const [english, russian, countryCode, zoneIndex, population, regionIndex] =
-      otherColumns.map((column) => column[index]);
-    return regionIndex === NO_REGION_INDEX
-      ? [id, english, russian, countryCode, zoneIndex, population]
-      : [id, english, russian, countryCode, zoneIndex, population, regionIndex];
+    const tuple = [id, ...otherColumns.map((column) => column[index])];
+    return tuple[tuple.length - 1] === NO_REGION_INDEX
+      ? tuple.slice(0, -1)
+      : tuple;
   });
 }
 

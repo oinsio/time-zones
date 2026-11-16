@@ -1,6 +1,7 @@
 import { createContext } from "react";
 import type { Clock } from "@/lib/temporal";
 import type {
+  Coordinates,
   LocationCommand,
   LocationErrorCode,
   LocationsReduceResult,
@@ -19,6 +20,8 @@ export type AddLocationInput = {
   timeZoneId: string;
   label: string;
   countryCode: string;
+  /** Implements FR6 of add-city-coordinates-to-locations (D6). */
+  coordinates?: Coordinates;
 };
 
 export type WorldClockStore = Store<
@@ -45,6 +48,10 @@ export type LocationsContextValue = {
   /** `null` clears home. Implements FR3 of set-home-location-and-show-differences. */
   setHomeLocation: (id: string | null) => LocationsReduceResult;
   resetLocations: () => void;
+  /** Gives city locations without coordinates the given ones and schedules one write. Implements FR8 of add-city-coordinates-to-locations (D7). */
+  fillLocationCoordinates: (
+    coordinatesByLocationId: Record<string, Coordinates | undefined>,
+  ) => void;
 };
 
 export const LocationsContext = createContext<LocationsContextValue | null>(

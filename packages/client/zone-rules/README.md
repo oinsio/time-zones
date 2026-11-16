@@ -4,6 +4,11 @@ The app's compiled time zone data: one IANA release, committed as `release.json`
 and compiled by `scripts/zoneRules/compile.ts`. Implements FR2, FR7 of
 add-zone-rules-from-iana.
 
+Beside it the compiler writes `zone-coordinates.json`: the coordinates, in
+tenths of a degree, of the principal place of every zone of the release's zone
+table (`zone.tab`), naming the release it was read from. A release bump commits
+both files. Implements FR2, FR3 of add-city-coordinates-to-locations.
+
 ## Size
 
 Spike of task 1.1 (release `2026f`, `zic -b slim` of `africa antarctica asia
@@ -39,15 +44,21 @@ time.
 
 ## Commands
 
-Run from `packages/client/`. Both need `zic`, `zdump` and `gpg`, and reach
-`data.iana.org` (never a `-latest` link).
+Run from `packages/client/`. Both need `cc`, `make` and `gpg`, and reach
+`data.iana.org` (never a `-latest` link). Both download `tzdata<release>.tar.gz`
+and `tzcode<release>.tar.gz` with their `.asc`, verify both signatures against
+the pinned key (every `gpg` call runs with a temporary `GNUPGHOME`) and build
+the zone tools: `make zic zdump` over both archives unpacked into one
+directory. They never use the `zic` or `zdump` of the operating system: glibc's
+`zic` (Ubuntu 24.04, Debian 12) miscompiles `America/Ojinaga` in 2022 and
+`Asia/Gaza` after 2073. Implements FR1–FR5, FR8 of build-zic-from-tzcode.
 
-- `pnpm zone-rules:compile 2026f`: downloads `tzdata2026f.tar.gz` and its
-  `.asc`, verifies the signature against the pinned key (every `gpg` call runs
-  with a temporary `GNUPGHOME`), compiles with `zic -b slim`, truncates to the
-  cutoff `2000-01-01T00:00:00Z` and writes `zone-rules/release.json`.
-- `pnpm zone-rules:check`: compiles the release the committed file names (or
-  takes `--compiled <dir>` of an already compiled release), runs
+- `pnpm zone-rules:compile 2026f`: compiles with the zone tools' `zic -b slim`,
+  truncates to the cutoff `2000-01-01T00:00:00Z` and writes
+  `zone-rules/release.json`.
+- `pnpm zone-rules:check`: compiles the release the committed file names with
+  the zone tools' `zic` (or takes `--compiled <dir>` of an already compiled
+  release; the zone tools are built either way), runs their
   `zdump -v -c 2000,2041` on every compiled file and compares it with the
   committed file. It prints `0 differences` or the first difference and exits
   non-zero.

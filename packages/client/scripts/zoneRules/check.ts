@@ -1,36 +1,45 @@
 /**
  * The zone rules check: `pnpm --filter @time-zones/client zone-rules:check`
- * compiles the release the committed file names (or takes `--compiled <dir>`),
- * runs `zdump -v -c 2000,2041` on the absolute path of every compiled file and
+ * builds the zone tools of the release the committed file names, compiles it
+ * with their `zic` (or takes `--compiled <dir>`), runs their
+ * `zdump -v -c 2000,2041` on the absolute path of every compiled file and
  * compares each zone with the committed release. Prints `0 differences` or the
  * first difference, and exits non-zero on a difference.
  * Implements FR8 of add-zone-rules-from-iana (design D7).
+ * Implements FR4 of add-city-coordinates-to-locations (D4): also checks the zone coordinates.
+ * Implements FR4 of build-zic-from-tzcode (D2): the zone tools, never the system `zic` or `zdump`.
  */
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, relative, resolve, sep } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
+import {
+  ZONE_COORDINATES_FILE,
+  ZONE_RULES_RELEASE_FILE,
+} from "../../app.config.ts";
 import {
   parseZoneRulesRelease,
   type ZoneRulesRelease,
   ZoneRulesReleaseError,
 } from "../../src/lib/zoneRules/core/index.ts";
+import { loadZoneData } from "../zoneData/loadZoneData.ts";
+import { buildZoneTools, type ZoneTools } from "./buildZoneTools.ts";
 import {
   compareWithRelease,
   parseZdumpLines,
   type ZdumpDifference,
 } from "./checkAgainstZdump.ts";
+import { checkZoneCoordinates } from "./checkZoneCoordinates.ts";
 import { compileArchive, listCompiledZoneIds } from "./compileWithZic.ts";
-import { downloadRelease, fetchBytes } from "./downloadRelease.ts";
+import { ArchiveKind, downloadRelease, fetchBytes } from "./downloadRelease.ts";
 import type { FetchRelease, RunProcess } from "./processTypes.ts";
 import { runChildProcess } from "./runChildProcess.ts";
 import { verifySignature } from "./verifySignature.ts";
+import { findMissingZone, groupZdumpLinesByZone } from "./zdumpZoneLookup.ts";
 
 const COMPILED_OPTION = "--compiled";
 const ZDUMP_ARGUMENTS = ["-v", "-c", "2000,2041"];
 const WORK_DIRECTORY_PREFIX = "zone-rules-check-";
-const ZONE_ID_SEPARATOR = "/";
 const FIRST_ARGUMENT_INDEX = 2;
 const NO_DIFFERENCES = "0 differences";
 
@@ -52,76 +61,38 @@ async function readCommittedRelease(
   return release;
 }
 
-async function compileNamedRelease(
+/** Downloads and verifies the data archive, then builds the zone tools over it. */
+async function prepareRelease(
   release: string,
   workDirectory: string,
   dependencies: ZoneRulesCheckDependencies,
-): Promise<string> {
+): Promise<{ archivePath: string; tools: ZoneTools }> {
   const { archivePath, signaturePath } = await downloadRelease(
     release,
+    ArchiveKind.DATA,
     dependencies.fetchRelease,
     workDirectory,
   );
   await verifySignature(archivePath, signaturePath, dependencies.runProcess);
-  const { outputDirectory } = await compileArchive(
-    archivePath,
+  const tools = await buildZoneTools(
     release,
+    archivePath,
     workDirectory,
-    dependencies.runProcess,
+    dependencies,
   );
-  return outputDirectory;
-}
-
-function groupZdumpLinesByZone(
-  stdout: string,
-  compiledDirectory: string,
-): Map<string, string> {
-  const linesByZone = new Map<string, string[]>();
-  for (const line of stdout.split("\n")) {
-    const [path] = line.split(/\s+/);
-    if (!path) continue;
-    const zoneId = relative(compiledDirectory, path)
-      .split(sep)
-      .join(ZONE_ID_SEPARATOR);
-    linesByZone.set(zoneId, [...(linesByZone.get(zoneId) ?? []), line]);
-  }
-  return new Map(
-    [...linesByZone].map(([zoneId, lines]) => [zoneId, lines.join("\n")]),
-  );
-}
-
-function findMissingZone(
-  release: ZoneRulesRelease,
-  compiledZoneIds: string[],
-): ZdumpDifference | undefined {
-  const compiledIds = new Set(compiledZoneIds);
-  const onlyCompiled = compiledZoneIds.find(
-    (zoneId) => !release.zones.has(zoneId),
-  );
-  const onlyRelease = [...release.zones.keys()].find(
-    (zoneId) => !compiledIds.has(zoneId),
-  );
-  const zoneId = onlyCompiled ?? onlyRelease;
-  if (zoneId === undefined) return undefined;
-  return {
-    zoneId,
-    instant: "-",
-    expected: onlyCompiled ? "a zone of the release" : "a compiled zone file",
-    actual: onlyCompiled
-      ? "no such zone in the release"
-      : "no such compiled file",
-  };
+  return { archivePath, tools };
 }
 
 async function findFirstDifference(
   release: ZoneRulesRelease,
   compiledDirectory: string,
   runProcess: RunProcess,
+  zdumpPath: string,
 ): Promise<ZdumpDifference | undefined> {
   const compiledZoneIds = await listCompiledZoneIds(compiledDirectory);
   const missingZone = findMissingZone(release, compiledZoneIds);
   if (missingZone) return missingZone;
-  const result = await runProcess("zdump", [
+  const result = await runProcess(zdumpPath, [
     ...ZDUMP_ARGUMENTS,
     ...compiledZoneIds.map((zoneId) => join(compiledDirectory, zoneId)),
   ]);
@@ -149,18 +120,37 @@ export async function runZoneRulesCheck(
   const workDirectory = await mkdtemp(join(tmpdir(), WORK_DIRECTORY_PREFIX));
   try {
     const release = await readCommittedRelease(dependencies);
+    const coordinatesErrors = checkZoneCoordinates(
+      await dependencies.readFile(ZONE_COORDINATES_FILE),
+      release.release,
+      loadZoneData().zoneCities,
+    );
+    if (coordinatesErrors.length > 0) {
+      for (const error of coordinatesErrors) log(error);
+      return 1;
+    }
+    const { archivePath, tools } = await prepareRelease(
+      release.release,
+      workDirectory,
+      dependencies,
+    );
     const compiledDirectory =
       compiledOptionIndex >= 0
         ? resolve(argv[compiledOptionIndex + 1] ?? "")
-        : await compileNamedRelease(
-            release.release,
-            workDirectory,
-            dependencies,
-          );
+        : (
+            await compileArchive(
+              archivePath,
+              release.release,
+              workDirectory,
+              dependencies.runProcess,
+              tools.zicPath,
+            )
+          ).outputDirectory;
     const difference = await findFirstDifference(
       release,
       compiledDirectory,
       dependencies.runProcess,
+      tools.zdumpPath,
     );
     if (difference) {
       log(

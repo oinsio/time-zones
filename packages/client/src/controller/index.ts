@@ -17,6 +17,8 @@ export { useDocumentLanguage } from "./useDocumentLanguage";
 export { useHourFormat } from "./useHourFormat";
 export { useHourGrid } from "./useHourGrid";
 export { useInterfaceLanguage } from "./useInterfaceLanguage";
+// Implements FR8 of add-city-coordinates-to-locations.
+export { useLocationCoordinatesFill } from "./useLocationCoordinatesFill";
 // Implements FR2, FR6, FR8 of show-here-entry-for-device-time.
 export { LocationsStatus, useLocations } from "./useLocations";
 // Implements FR2, FR5, FR10, FR13, FR15 of add-grid-meeting-range-and-share.

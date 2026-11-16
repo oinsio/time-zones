@@ -11,6 +11,7 @@ const KAZAN: GeoNamesCityEntry = {
   countryCode: "RU",
   timeZoneId: "Europe/Moscow",
   population: 1_243_500,
+  coordinates: { latitude: 1, longitude: 2 },
 };
 const SPRINGFIELD: GeoNamesCityEntry = {
   id: "4250542",
@@ -18,6 +19,7 @@ const SPRINGFIELD: GeoNamesCityEntry = {
   countryCode: "US",
   timeZoneId: "America/Chicago",
   population: 114_394,
+  coordinates: { latitude: 1, longitude: 2 },
   region: { en: "Illinois", ru: "Иллинойс" },
 };
 const MARS: GeoNamesCityEntry = {
@@ -26,6 +28,7 @@ const MARS: GeoNamesCityEntry = {
   countryCode: "RU",
   timeZoneId: "Mars/Olympus",
   population: 5,
+  coordinates: { latitude: 1, longitude: 2 },
 };
 const cityData: GeoNamesCityData = {
   cities: [KAZAN, SPRINGFIELD, MARS],
@@ -112,5 +115,25 @@ describe("GeoNames city source matching", () => {
     } finally {
       workCount.stop();
     }
+  });
+});
+
+// Verifies FR5 of add-city-coordinates-to-locations (D5): records carry coordinates.
+describe("GeoNames city source coordinates", () => {
+  it("should carry the coordinates of the city", () => {
+    const source = createGeoNamesCitySource(
+      {
+        cities: [
+          { ...KAZAN, coordinates: { latitude: 55.8, longitude: 49.1 } },
+        ],
+        zoneCityPopulations: {},
+        zoneCityRegions: {},
+      },
+      () => undefined,
+    );
+    expect(source.records[0]?.coordinates).toEqual({
+      latitude: 55.8,
+      longitude: 49.1,
+    });
   });
 });

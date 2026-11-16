@@ -114,7 +114,7 @@ function getSpansAcrossOffsetChanges(
     if (!isWorkingTime(segmentStart, timeZoneId, workingHours)) return;
     const segmentEnd = edges[index + 1];
     const previous = spans[spans.length - 1];
-    if (previous !== undefined && previous.end.equals(segmentStart)) {
+    if (previous?.end.equals(segmentStart)) {
       previous.end = segmentEnd;
     } else {
       spans.push({ start: segmentStart, end: segmentEnd });

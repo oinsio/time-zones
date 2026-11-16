@@ -1,4 +1,5 @@
 // Implements FR7 of add-zone-rules-from-iana: executable scenarios of the release compiler.
+// Verifies FR1 of build-zic-from-tzcode: both archives and their signatures.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
@@ -33,7 +34,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   // @add-zone-rules-from-iana @FR7
   f.Scenario("A valid archive compiles", ({ Given, When, Then }) => {
     Given(
-      "a tzdata archive and a signature that verifies against the pinned fingerprint",
+      "a tzdata archive, a tzcode archive and signatures that verify against the pinned fingerprint",
       () => undefined,
     );
     When("the release {string} is compiled", compileRelease);
@@ -56,9 +57,14 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     ({ When, Then, And }) => {
       When("the release {string} is compiled", compileRelease);
       Then(
-        "the compiler downloads {string} and {string}",
-        (_ctx, archiveUrl: string, signatureUrl: string) => {
-          expect(run.urls).toEqual([archiveUrl, signatureUrl]);
+        "the compiler downloads {string} and {string} with the {string} of each",
+        (_ctx, dataUrl: string, codeUrl: string, suffix: string) => {
+          expect(run.urls).toEqual([
+            dataUrl,
+            `${dataUrl}${suffix}`,
+            codeUrl,
+            `${codeUrl}${suffix}`,
+          ]);
         },
       );
       And("no address it requests contains {string}", (_ctx, text: string) => {

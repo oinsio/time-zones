@@ -1,4 +1,5 @@
 // Implements FR1, FR4 of add-zone-rules-from-iana: executable scenarios of the lookup.
+// Verifies FR6, M2, UX1 of build-zic-from-tzcode: Ojinaga in November 2022.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
@@ -141,6 +142,29 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
             Temporal.Instant.from(instant).toString(),
           );
           expect(resolved.status).toBe(status);
+        },
+      );
+    },
+  );
+  // @build-zic-from-tzcode @FR6 @M2 @UX1
+  f.ScenarioOutline(
+    "Ojinaga in November 2022",
+    ({ Given, When, Then }, variables: Record<string, string>) => {
+      Given("the committed release", () => undefined);
+      When(
+        "the local time type of {string} is looked up at <instant>",
+        (_ctx, zoneId: string) => {
+          localTimeType = readLocalTimeType(zoneId, variables.instant);
+        },
+      );
+      Then(
+        "it is UTC minus {int} {string}, standard time",
+        (_ctx, offsetHours: number, designation: string) => {
+          expect(localTimeType).toEqual({
+            utcOffsetSeconds: -offsetHours * SECONDS_PER_HOUR,
+            designation,
+            isDaylightSavingTime: false,
+          });
         },
       );
     },

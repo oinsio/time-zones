@@ -14,6 +14,8 @@ export function cityRow(overrides: Partial<GeoNamesCityRow>): GeoNamesCityRow {
     featureCode: "PPL",
     population: 200_000,
     timeZoneId: "Europe/Moscow",
+    latitude: 55.78874,
+    longitude: 49.12214,
     ...overrides,
   };
 }
