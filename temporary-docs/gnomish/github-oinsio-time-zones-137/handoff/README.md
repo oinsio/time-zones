@@ -5,8 +5,8 @@ Apply the patches on the pull request branch before it merges: `git apply tempor
 ## H1: Data refresh workflows
 
 - **Serves:** FR1–FR6, FR8–FR11, NFR-P1, NFR-S1
-- **Files:** `.github/workflows/zone-rules-publication.yml`, `.github/workflows/city-data-refresh.yml`, `.github/workflows/cldr-update.yml`, `.github/dependabot.yml`, `.github/workflows/ci.yml` (step "Check data-only paths"), `packages/client/src/test/dataRefresh/dataRefreshWorkflows.test.ts`
-- **Verify:** `git apply --check H1-data-refresh-workflows.patch`; after applying, `pnpm --filter @time-zones/client exec vitest run src/test/dataRefresh/dataRefreshWorkflows.test.ts`
+- **Files:** `.github/workflows/zone-rules-publication.yml`, `.github/workflows/city-data-refresh.yml`, `.github/workflows/cldr-update.yml`, `.github/dependabot.yml`, `.github/workflows/ci.yml` (step "Check data-only paths"), `packages/client/src/test/dataRefresh/dataRefreshWorkflows.test.ts`, `dataRefreshOtherWorkflows.test.ts`, `workflowFiles.ts`
+- **Verify:** `git apply --check H1-data-refresh-workflows.patch`; after applying, `pnpm --filter @time-zones/client exec vitest run src/test/dataRefresh`
 - **Why manual:** the factory may not edit `.github/`.
 - **Automated part:** every decision the workflows take is a tested script (groups 2–4); the workflow test in the patch runs in `pnpm test` once applied.
 

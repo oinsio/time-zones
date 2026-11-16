@@ -40,10 +40,10 @@ index 3b9ff4f..638c640 100644
        - run: pnpm typecheck
 diff --git a/.github/workflows/city-data-refresh.yml b/.github/workflows/city-data-refresh.yml
 new file mode 100644
-index 0000000..69c35a3
+index 0000000..96f8034
 --- /dev/null
 +++ b/.github/workflows/city-data-refresh.yml
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,157 @@
 +# Monthly and manual: compile the city data from the GeoNames dumps and propose it as
 +# the data refresh pull request of the city data. Never pushes to main.
 +# Implements FR2, FR3, FR4, FR5, FR7, FR8, FR10, FR11, NFR-P1, NFR-S1 of refresh-data-through-scheduled-pull-requests (D1–D4, D7, D8, D11).
@@ -79,20 +79,10 @@ index 0000000..69c35a3
 +        if: vars.DATA_REFRESH_ENABLED != 'true'
 +        run: echo "data refresh is off" | tee -a "$GITHUB_STEP_SUMMARY"
 +
-+      - name: Create the data refresh bot token
-+        id: app-token
-+        if: vars.DATA_REFRESH_ENABLED == 'true'
-+        uses: actions/create-github-app-token@v2
-+        with:
-+          app-id: ${{ secrets.DATA_REFRESH_APP_ID }}
-+          private-key: ${{ secrets.DATA_REFRESH_APP_PRIVATE_KEY }}
-+          permission-contents: write
-+          permission-pull-requests: write
-+
 +      - uses: actions/checkout@v5
 +        if: vars.DATA_REFRESH_ENABLED == 'true'
 +        with:
-+          token: ${{ steps.app-token.outputs.token }}
++          persist-credentials: false
 +
 +      - uses: pnpm/action-setup@v4
 +        if: vars.DATA_REFRESH_ENABLED == 'true'
@@ -127,6 +117,16 @@ index 0000000..69c35a3
 +        if: vars.DATA_REFRESH_ENABLED == 'true' && steps.verdict.outputs.verdict != 'UNCHANGED'
 +        run: pnpm test
 +
++      - name: Create the data refresh bot token
++        id: app-token
++        if: vars.DATA_REFRESH_ENABLED == 'true'
++        uses: actions/create-github-app-token@v2
++        with:
++          app-id: ${{ secrets.DATA_REFRESH_APP_ID }}
++          private-key: ${{ secrets.DATA_REFRESH_APP_PRIVATE_KEY }}
++          permission-contents: write
++          permission-pull-requests: write
++
 +      - name: Open or update the data refresh pull request
 +        if: vars.DATA_REFRESH_ENABLED == 'true' && steps.verdict.outputs.verdict != 'UNCHANGED'
 +        env:
@@ -142,6 +142,7 @@ index 0000000..69c35a3
 +          git switch -C "$BRANCH"
 +          git add packages/client/city-data
 +          git commit -m "$TITLE"
++          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git"
 +          git push --force origin "$BRANCH"
 +          NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
 +          if [ -n "$NUMBER" ]; then
@@ -173,6 +174,10 @@ index 0000000..69c35a3
 +          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
 +          ISSUE_BODY_FILE: ${{ steps.issue.outputs.body-file }}
 +        run: |
++          if [ -z "$ISSUE_TITLE" ]; then
++            echo "The failed refresh could not be described: setup did not finish"
++            exit 1
++          fi
 +          NUMBER=$(gh issue list --label data-refresh-failure --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')
 +          if [ -n "$NUMBER" ]; then
 +            gh issue comment "$NUMBER" --body-file "$ISSUE_BODY_FILE"
@@ -318,10 +323,10 @@ index 0000000..9342ba7
 +          fi
 diff --git a/.github/workflows/zone-rules-publication.yml b/.github/workflows/zone-rules-publication.yml
 new file mode 100644
-index 0000000..75b9c1f
+index 0000000..45011e2
 --- /dev/null
 +++ b/.github/workflows/zone-rules-publication.yml
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,174 @@
 +# Daily and manual: compile a newer IANA release and propose it as the data
 +# refresh pull request of the zone rules. Never pushes to main.
 +# Implements FR1, FR3, FR4, FR5, FR7, FR8, FR10, FR11, NFR-P1, NFR-S1 of refresh-data-through-scheduled-pull-requests (D1–D4, D7–D9, D11).
@@ -357,20 +362,10 @@ index 0000000..75b9c1f
 +        if: vars.DATA_REFRESH_ENABLED != 'true'
 +        run: echo "data refresh is off" | tee -a "$GITHUB_STEP_SUMMARY"
 +
-+      - name: Create the data refresh bot token
-+        id: app-token
-+        if: vars.DATA_REFRESH_ENABLED == 'true'
-+        uses: actions/create-github-app-token@v2
-+        with:
-+          app-id: ${{ secrets.DATA_REFRESH_APP_ID }}
-+          private-key: ${{ secrets.DATA_REFRESH_APP_PRIVATE_KEY }}
-+          permission-contents: write
-+          permission-pull-requests: write
-+
 +      - uses: actions/checkout@v5
 +        if: vars.DATA_REFRESH_ENABLED == 'true'
 +        with:
-+          token: ${{ steps.app-token.outputs.token }}
++          persist-credentials: false
 +
 +      - uses: pnpm/action-setup@v4
 +        if: vars.DATA_REFRESH_ENABLED == 'true'
@@ -416,6 +411,16 @@ index 0000000..75b9c1f
 +        if: vars.DATA_REFRESH_ENABLED == 'true' && steps.latest.outputs.release != ''
 +        run: pnpm --filter @time-zones/client data-refresh:verdict zone-rules
 +
++      - name: Create the data refresh bot token
++        id: app-token
++        if: vars.DATA_REFRESH_ENABLED == 'true'
++        uses: actions/create-github-app-token@v2
++        with:
++          app-id: ${{ secrets.DATA_REFRESH_APP_ID }}
++          private-key: ${{ secrets.DATA_REFRESH_APP_PRIVATE_KEY }}
++          permission-contents: write
++          permission-pull-requests: write
++
 +      - name: Open or update the data refresh pull request
 +        if: vars.DATA_REFRESH_ENABLED == 'true' && steps.latest.outputs.release != ''
 +        env:
@@ -431,6 +436,7 @@ index 0000000..75b9c1f
 +          git switch -C "$BRANCH"
 +          git add packages/client/zone-rules
 +          git commit -m "$TITLE"
++          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git"
 +          git push --force origin "$BRANCH"
 +          NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
 +          if [ -n "$NUMBER" ]; then
@@ -468,6 +474,10 @@ index 0000000..75b9c1f
 +          ISSUE_TITLE: ${{ steps.issue.outputs.title }}
 +          ISSUE_BODY_FILE: ${{ steps.issue.outputs.body-file }}
 +        run: |
++          if [ -z "$ISSUE_TITLE" ]; then
++            echo "The failed refresh could not be described: setup did not finish"
++            exit 1
++          fi
 +          NUMBER=$(gh issue list --label data-refresh-failure --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')
 +          if [ -n "$NUMBER" ]; then
 +            gh issue comment "$NUMBER" --body-file "$ISSUE_BODY_FILE"
@@ -491,149 +501,31 @@ index 0000000..75b9c1f
 +          if [ -n "$NUMBER" ]; then
 +            gh issue close "$NUMBER" --comment "$(cat "$RECOVERY_FILE")"
 +          fi
-diff --git a/packages/client/src/test/dataRefresh/dataRefreshWorkflows.test.ts b/packages/client/src/test/dataRefresh/dataRefreshWorkflows.test.ts
+diff --git a/packages/client/src/test/dataRefresh/dataRefreshOtherWorkflows.test.ts b/packages/client/src/test/dataRefresh/dataRefreshOtherWorkflows.test.ts
 new file mode 100644
-index 0000000..d16db3e
+index 0000000..f5648d3
 --- /dev/null
-+++ b/packages/client/src/test/dataRefresh/dataRefreshWorkflows.test.ts
-@@ -0,0 +1,246 @@
-+// Verifies FR1, FR2, FR4, FR5, FR6, FR9, FR10, FR11, NFR-P1, NFR-S1, NG5 of refresh-data-through-scheduled-pull-requests.
++++ b/packages/client/src/test/dataRefresh/dataRefreshOtherWorkflows.test.ts
+@@ -0,0 +1,125 @@
++// Verifies FR5, FR9, FR10, FR11, NFR-S1, NG5 of refresh-data-through-scheduled-pull-requests.
 +import { readdirSync, readFileSync } from "node:fs";
 +import { join } from "node:path";
 +import { describe, expect, it } from "vitest";
 +import { CLDR_BRANCH_PREFIX } from "../../../scripts/dataRefresh/refreshConstants.ts";
 +import { readCiJobBlocks } from "../ciWorkflow.ts";
++import {
++  GITHUB_DIRECTORY,
++  permissionLines,
++  readWorkflow,
++  SWITCH_CONDITION,
++  stepNamed,
++  WORKFLOWS_DIRECTORY,
++} from "./workflowFiles.ts";
 +
-+const GITHUB_DIRECTORY = join(import.meta.dirname, "../../../../../.github");
-+const WORKFLOWS_DIRECTORY = join(GITHUB_DIRECTORY, "workflows");
-+const readWorkflow = (fileName: string) =>
-+  readFileSync(join(WORKFLOWS_DIRECTORY, fileName), "utf8");
-+
-+const SWITCH_CONDITION = "vars.DATA_REFRESH_ENABLED == 'true'";
-+const SWITCH_REPORT_STEP = "Report the data refresh switch";
-+const STEP_SEPARATOR = /\n {6}- /;
-+const REFRESH_WORKFLOWS = [
-+  ["zone-rules-publication.yml", '"17 4 * * *"'],
-+  ["city-data-refresh.yml", '"43 5 2 * *"'],
-+] as const;
-+
-+const splitSteps = (workflowText: string) =>
-+  workflowText.split(STEP_SEPARATOR).slice(1);
-+const stepNamed = (workflowText: string, name: string) => {
-+  const step = splitSteps(workflowText).find((text) =>
-+    text.startsWith(`name: ${name}`),
-+  );
-+  if (step === undefined) throw new Error(`no step named ${name}`);
-+  return step;
-+};
-+const permissionLines = (text: string) =>
-+  text.split("\n").filter((line) => /^\s+permission-[\w-]+:/.test(line));
-+
-+describe.each(REFRESH_WORKFLOWS)("%s", (fileName, cron) => {
-+  const workflow = readWorkflow(fileName);
-+
-+  it("runs on its schedule and on manual dispatch", () => {
-+    expect(workflow).toContain(`- cron: ${cron}`);
-+    expect(workflow).toContain("workflow_dispatch:");
-+  });
-+
-+  it("acts only on main, within 20 minutes", () => {
-+    expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
-+    expect(workflow).toContain("timeout-minutes: 20");
-+  });
-+
-+  it("conditions every step but the report on the switch", () => {
-+    const unconditioned = splitSteps(workflow).filter(
-+      (step) =>
-+        !step.startsWith(`name: ${SWITCH_REPORT_STEP}`) &&
-+        !step.includes(SWITCH_CONDITION),
-+    );
-+    expect(unconditioned).toEqual([]);
-+  });
-+
-+  it("reports the switch being off", () => {
-+    expect(stepNamed(workflow, SWITCH_REPORT_STEP)).toContain(
-+      "vars.DATA_REFRESH_ENABLED != 'true'",
-+    );
-+  });
-+
-+  it("never pushes to main", () => {
-+    expect(workflow).not.toMatch(/git push[^\n]*\bmain\b/);
-+    expect(workflow).toContain('git push --force origin "$BRANCH"');
-+  });
-+
-+  it("holds read access at the top and only issues and actions writes in the job", () => {
-+    expect(workflow).toMatch(/^permissions:\n {2}contents: read\n/m);
-+    expect(workflow).toMatch(
-+      / {4}permissions:\n {6}contents: read\n {6}issues: write\n {6}actions: write\n/,
-+    );
-+  });
-+
-+  it("asks the bot token for contents and pull requests only", () => {
-+    expect(
-+      permissionLines(
-+        stepNamed(workflow, "Create the data refresh bot token"),
-+      ).map((line) => line.trim()),
-+    ).toEqual([
-+      "permission-contents: write",
-+      "permission-pull-requests: write",
-+    ]);
-+  });
-+
-+  it("serialises runs of its source without cancelling", () => {
-+    expect(workflow).toContain("cancel-in-progress: false");
-+  });
-+
-+  it("uses the run's own token for the failure issue", () => {
-+    for (const name of [
-+      "Describe the failed refresh",
-+      "Report the failed refresh",
-+      "Close the issue of a failed refresh",
-+    ]) {
-+      expect(stepNamed(workflow, name)).toContain(
-+        "GH_TOKEN: ${{ github.token }}",
-+      );
-+    }
-+  });
-+
-+  it("opens the pull request with the bot token and enables auto-merge only for a merge verdict", () => {
-+    const step = stepNamed(
-+      workflow,
-+      "Open or update the data refresh pull request",
-+    );
-+    expect(step).toContain("GH_TOKEN: ${{ steps.app-token.outputs.token }}");
-+    expect(step).toContain(
-+      'gh pr merge "$NUMBER" --auto --squash --subject "$TITLE (#$NUMBER)" --body-file "$MERGE_BODY_FILE"',
-+    );
-+    expect(step).toContain('if [ "$VERDICT" = "NEEDS_REVIEW" ]');
-+  });
-+});
-+
-+describe("zone-rules-publication.yml", () => {
-+  const workflow = readWorkflow("zone-rules-publication.yml");
-+
-+  it("enables both scheduled workflows with the run's own token", () => {
-+    const step = stepNamed(workflow, "Keep the scheduled workflows enabled");
-+    expect(step).toContain("gh workflow enable zone-rules-publication.yml");
-+    expect(step).toContain("gh workflow enable city-data-refresh.yml");
-+    expect(step).toContain("GH_TOKEN: ${{ github.token }}");
-+  });
-+
-+  it("looks for a newer release even when renewing failed, then fails the run", () => {
-+    expect(
-+      stepNamed(workflow, "Keep the scheduled workflows enabled"),
-+    ).toContain("continue-on-error: true");
-+    expect(
-+      stepNamed(workflow, "Fail the run when renewing the schedules failed"),
-+    ).toContain("steps.renew.outcome == 'failure'");
-+  });
-+
-+  it("opens no pull request when the release is current", () => {
-+    expect(stepNamed(workflow, "Compile the release")).toContain(
-+      "steps.latest.outputs.release != ''",
-+    );
-+  });
-+});
++const REFRESH_WORKFLOW_FILES = [
++  "zone-rules-publication.yml",
++  "city-data-refresh.yml",
++];
 +
 +describe("cldr-update.yml", () => {
 +  const workflow = readWorkflow("cldr-update.yml");
@@ -699,10 +591,7 @@ index 0000000..d16db3e
 +    fileName.endsWith(".yml"),
 +  );
 +
-+  const dataRefreshFiles = [
-+    ...REFRESH_WORKFLOWS.map(([fileName]) => fileName),
-+    "cldr-update.yml",
-+  ];
++  const dataRefreshFiles = [...REFRESH_WORKFLOW_FILES, "cldr-update.yml"];
 +
 +  it.each(dataRefreshFiles)("%s prints no secret", (fileName) => {
 +    const workflow = readWorkflow(fileName);
@@ -743,3 +632,215 @@ index 0000000..d16db3e
 +    expect(block).toContain("data-refresh:check-paths auto origin/main HEAD");
 +  });
 +});
+diff --git a/packages/client/src/test/dataRefresh/dataRefreshWorkflows.test.ts b/packages/client/src/test/dataRefresh/dataRefreshWorkflows.test.ts
+new file mode 100644
+index 0000000..eceb9c1
+--- /dev/null
++++ b/packages/client/src/test/dataRefresh/dataRefreshWorkflows.test.ts
+@@ -0,0 +1,174 @@
++// Verifies FR1, FR3, FR4, FR6, FR8, FR10, FR11, NFR-P1, NFR-S1 of refresh-data-through-scheduled-pull-requests.
++import { describe, expect, it } from "vitest";
++import {
++  NEEDS_REVIEW_LABEL,
++  REFRESH_BRANCHES,
++  REFRESH_FAILURE_LABEL,
++  REFRESH_SOURCES,
++} from "../../../scripts/dataRefresh/refreshConstants.ts";
++import {
++  permissionLines,
++  readWorkflow,
++  SWITCH_CONDITION,
++  splitSteps,
++  stepNamed,
++} from "./workflowFiles.ts";
++
++const SWITCH_REPORT_STEP = "Report the data refresh switch";
++const PULL_REQUEST_STEP = "Open or update the data refresh pull request";
++const TOKEN_STEP = "Create the data refresh bot token";
++const REFRESH_WORKFLOWS = [
++  ["zone-rules-publication.yml", '"17 4 * * *"', REFRESH_SOURCES.ZONE_RULES],
++  ["city-data-refresh.yml", '"43 5 2 * *"', REFRESH_SOURCES.CITY_DATA],
++] as const;
++
++describe.each(REFRESH_WORKFLOWS)("%s", (fileName, cron, source) => {
++  const workflow = readWorkflow(fileName);
++
++  it("runs on its schedule and on manual dispatch", () => {
++    expect(workflow).toContain(`- cron: ${cron}`);
++    expect(workflow).toContain("workflow_dispatch:");
++  });
++
++  it("acts only on main, within 20 minutes", () => {
++    expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
++    expect(workflow).toContain("timeout-minutes: 20");
++  });
++
++  it("conditions every step but the report on the switch", () => {
++    const unconditioned = splitSteps(workflow).filter(
++      (step) =>
++        !step.startsWith(`name: ${SWITCH_REPORT_STEP}`) &&
++        !step.includes(SWITCH_CONDITION),
++    );
++    expect(unconditioned).toEqual([]);
++  });
++
++  it("reports the switch being off", () => {
++    expect(stepNamed(workflow, SWITCH_REPORT_STEP)).toContain(
++      "vars.DATA_REFRESH_ENABLED != 'true'",
++    );
++  });
++
++  it("never pushes to main", () => {
++    expect(workflow).not.toMatch(/git push[^\n]*\bmain\b/);
++    expect(workflow).toContain('git push --force origin "$BRANCH"');
++  });
++
++  it("holds read access at the top and only issues and actions writes in the job", () => {
++    expect(workflow).toMatch(/^permissions:\n {2}contents: read\n/m);
++    expect(workflow).toMatch(
++      / {4}permissions:\n {6}contents: read\n {6}issues: write\n {6}actions: write\n/,
++    );
++  });
++
++  it("asks the bot token for contents and pull requests only", () => {
++    expect(
++      permissionLines(stepNamed(workflow, TOKEN_STEP)).map((line) =>
++        line.trim(),
++      ),
++    ).toEqual([
++      "permission-contents: write",
++      "permission-pull-requests: write",
++    ]);
++  });
++
++  it("sets up the checkout before the bot token, which a broken App must not block", () => {
++    const stepNames = splitSteps(workflow).map((step) => step.split("\n")[0]);
++    const checkoutIndex = stepNames.findIndex((line) =>
++      line.includes("actions/checkout"),
++    );
++    const installIndex = stepNames.findIndex((line) =>
++      line.includes("pnpm install"),
++    );
++    const tokenIndex = stepNames.indexOf(`name: ${TOKEN_STEP}`);
++    expect(checkoutIndex).toBeGreaterThan(-1);
++    expect(installIndex).toBeGreaterThan(checkoutIndex);
++    expect(tokenIndex).toBeGreaterThan(installIndex);
++    expect(splitSteps(workflow)[checkoutIndex]).toContain(
++      "persist-credentials: false",
++    );
++  });
++
++  it("pushes the refresh branch with the bot token", () => {
++    expect(stepNamed(workflow, PULL_REQUEST_STEP)).toContain(
++      'git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git"',
++    );
++  });
++
++  it("refuses to report a failed refresh it could not describe", () => {
++    expect(stepNamed(workflow, "Report the failed refresh")).toContain(
++      'if [ -z "$ISSUE_TITLE" ]',
++    );
++  });
++
++  it("names its branch and labels as the constants do", () => {
++    expect(stepNamed(workflow, PULL_REQUEST_STEP)).toContain(
++      `BRANCH: ${REFRESH_BRANCHES[source]}`,
++    );
++    const labelValues = [
++      ...workflow.matchAll(/--(?:add|remove)-label ([\w-]+)/g),
++    ].map((match) => match[1]);
++    expect(labelValues.length).toBeGreaterThan(0);
++    expect(new Set(labelValues)).toEqual(new Set([NEEDS_REVIEW_LABEL]));
++    const issueLabels = [...workflow.matchAll(/--label ([\w-]+)/g)].map(
++      (match) => match[1],
++    );
++    expect(issueLabels.length).toBeGreaterThan(0);
++    expect(new Set(issueLabels)).toEqual(new Set([REFRESH_FAILURE_LABEL]));
++  });
++
++  it("serialises runs of its source without cancelling", () => {
++    expect(workflow).toContain("cancel-in-progress: false");
++  });
++
++  it("uses the run's own token for the failure issue", () => {
++    for (const name of [
++      "Describe the failed refresh",
++      "Report the failed refresh",
++      "Close the issue of a failed refresh",
++    ]) {
++      expect(stepNamed(workflow, name)).toContain(
++        "GH_TOKEN: ${{ github.token }}",
++      );
++    }
++  });
++
++  it("opens the pull request with the bot token and enables auto-merge only for a merge verdict", () => {
++    const step = stepNamed(
++      workflow,
++      "Open or update the data refresh pull request",
++    );
++    expect(step).toContain("GH_TOKEN: ${{ steps.app-token.outputs.token }}");
++    expect(step).toContain(
++      'gh pr merge "$NUMBER" --auto --squash --subject "$TITLE (#$NUMBER)" --body-file "$MERGE_BODY_FILE"',
++    );
++    expect(step).toContain('if [ "$VERDICT" = "NEEDS_REVIEW" ]');
++  });
++});
++
++describe("zone-rules-publication.yml", () => {
++  const workflow = readWorkflow("zone-rules-publication.yml");
++
++  it("enables both scheduled workflows with the run's own token", () => {
++    const step = stepNamed(workflow, "Keep the scheduled workflows enabled");
++    expect(step).toContain("gh workflow enable zone-rules-publication.yml");
++    expect(step).toContain("gh workflow enable city-data-refresh.yml");
++    expect(step).toContain("GH_TOKEN: ${{ github.token }}");
++  });
++
++  it("looks for a newer release even when renewing failed, then fails the run", () => {
++    expect(
++      stepNamed(workflow, "Keep the scheduled workflows enabled"),
++    ).toContain("continue-on-error: true");
++    expect(
++      stepNamed(workflow, "Fail the run when renewing the schedules failed"),
++    ).toContain("steps.renew.outcome == 'failure'");
++  });
++
++  it("opens no pull request when the release is current", () => {
++    expect(stepNamed(workflow, "Compile the release")).toContain(
++      "steps.latest.outputs.release != ''",
++    );
++  });
++});
+diff --git a/packages/client/src/test/dataRefresh/workflowFiles.ts b/packages/client/src/test/dataRefresh/workflowFiles.ts
+new file mode 100644
+index 0000000..35627c0
+--- /dev/null
++++ b/packages/client/src/test/dataRefresh/workflowFiles.ts
+@@ -0,0 +1,26 @@
++// Shared readers of the workflow files; implements FR10, FR11 of refresh-data-through-scheduled-pull-requests.
++import { readFileSync } from "node:fs";
++import { join } from "node:path";
++
++export const GITHUB_DIRECTORY = join(
++  import.meta.dirname,
++  "../../../../../.github",
++);
++export const WORKFLOWS_DIRECTORY = join(GITHUB_DIRECTORY, "workflows");
++export const readWorkflow = (fileName: string) =>
++  readFileSync(join(WORKFLOWS_DIRECTORY, fileName), "utf8");
++
++export const SWITCH_CONDITION = "vars.DATA_REFRESH_ENABLED == 'true'";
++const STEP_SEPARATOR = /\n {6}- /;
++
++export const splitSteps = (workflowText: string) =>
++  workflowText.split(STEP_SEPARATOR).slice(1);
++export const stepNamed = (workflowText: string, name: string) => {
++  const step = splitSteps(workflowText).find((text) =>
++    text.startsWith(`name: ${name}`),
++  );
++  if (step === undefined) throw new Error(`no step named ${name}`);
++  return step;
++};
++export const permissionLines = (text: string) =>
++  text.split("\n").filter((line) => /^\s+permission-[\w-]+:/.test(line));
