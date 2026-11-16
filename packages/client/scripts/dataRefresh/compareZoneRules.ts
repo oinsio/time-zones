@@ -20,8 +20,7 @@ function listMissingKeys(
   refreshed: Record<string, unknown>,
 ): string[] {
   return Object.keys(committed).filter(
-    (identifier) =>
-      !Object.prototype.hasOwnProperty.call(refreshed, identifier),
+    (identifier) => !(identifier in refreshed),
   );
 }
 
