@@ -40,7 +40,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`, `opensp
 - [x] 7.1 Scoped mutation testing, at most five files per run, each run finished before the next (`cd packages/client && npx stryker run --mutate '<files>'`, then read `reports/mutation/mutation-report.json`, kill survivors, re-run): `scripts/zoneRules/buildZoneTools.ts,scripts/zoneRules/downloadRelease.ts,scripts/zoneRules/compileWithZic.ts,scripts/zoneRules/compile.ts,scripts/zoneRules/check.ts`. Target ≥ 95 %, minimum 90 % (M4).
 - [x] 7.2 `pnpm --filter @time-zones/client lint` and `pnpm --filter @time-zones/client typecheck` pass; `pnpm run build` passes.
 - [x] 7.3 Traceability: `grep -rn "build-zic-from-tzcode" packages/client/src packages/client/scripts | grep -oE "FR[0-9]+" | sort -u` lists FR1–FR6; FR7 and FR8 are traced in the Dockerfile comment, the glossary, the README and ADR-0014.
-- [ ] 7.4 After push: the CI step "Check zone rules" of the pull request reports `0 differences` (M1) and its duration is noted against NFR-P1 (at most 60 s more than before).
+- [x] 7.4 (done: CI run of `f0278ba1`, job "Lint, test, build, E2E" succeeded; "Check zone rules" succeeded in 14 s, against 62 s of the failing run of `66c0d559` with the system tools.) After push: the CI step "Check zone rules" of the pull request reports `0 differences` (M1) and its duration is noted against NFR-P1 (at most 60 s more than before).
 
 ## Human follow-up
 
