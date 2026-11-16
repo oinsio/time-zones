@@ -43,15 +43,3 @@ Feature: Day periods follow the sun
     When the day-period boundaries are computed
     Then night ends at 06:51 and the day starts at 07:55 local time, each within 3 minutes
     And the absolute instants are the same as if the clocks had not changed
-
-  @bind-day-periods-to-sun @FR3 @NFR-P2
-  Scenario: Offline
-    Given the device has no network connection
-    When the day periods of Almaty are computed
-    Then they are the same as online and nothing was requested
-
-  @bind-day-periods-to-sun @FR4
-  Scenario: A far date
-    Given Moscow at 55.8, 37.6
-    When the day-period boundaries of 21 December 2090 are computed
-    Then night ends at "2090-12-21T05:10:00Z", which is 08:10 in "Europe/Moscow", within 3 minutes

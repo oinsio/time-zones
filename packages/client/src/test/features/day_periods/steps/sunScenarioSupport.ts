@@ -88,3 +88,37 @@ export const PERIOD_BY_WORD: Record<string, DayPeriod> = {
   day: DayPeriod.DAY,
   evening: DayPeriod.EVENING,
 };
+
+/** Minutes between a computed day-period boundary and its expected local time ("HH:mm"). */
+export const getBoundaryDeviationMinutes = (
+  coordinates: Coordinates,
+  timeZoneId: string,
+  date: string,
+  [from, to]: [DayPeriod, DayPeriod],
+  expectedTime: string,
+): number =>
+  minutesBetween(
+    findBoundaryMilliseconds(
+      getBoundariesOf(coordinates, timeZoneId, date),
+      from,
+      to,
+    ) as number,
+    toMilliseconds(date, expectedTime, timeZoneId),
+  );
+
+/** The day periods of a location at midnight, 06:00, noon and 18:00 local time. */
+export const readDayPeriodsThroughDay = (
+  coordinates: Coordinates,
+  date: string,
+  timeZoneId: string,
+  getDayPeriod: (
+    coordinates: Coordinates,
+    epochMilliseconds: number,
+  ) => DayPeriod,
+): DayPeriod[] =>
+  [0, 6, 12, 18].map((hour) =>
+    getDayPeriod(
+      coordinates,
+      toMilliseconds(date, `${String(hour).padStart(2, "0")}:00`, timeZoneId),
+    ),
+  );

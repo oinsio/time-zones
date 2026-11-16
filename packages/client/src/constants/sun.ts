@@ -6,7 +6,6 @@
 export const NIGHT_SUN_ELEVATION_DEGREES = -6;
 export const DAY_SUN_ELEVATION_DEGREES = 6;
 
-export const MILLISECONDS_PER_DAY = 86_400_000;
 export const UNIX_EPOCH_JULIAN_DAY = 2_440_587.5;
 export const J2000_JULIAN_DAY = 2_451_545;
 export const DAYS_PER_JULIAN_CENTURY = 36_525;
@@ -48,3 +47,12 @@ export const APPARENT_LONGITUDE_OMEGA_DEGREES = 0.00478;
 export const EQUATION_OF_TIME_ECCENTRICITY_FACTOR = 4;
 export const EQUATION_OF_TIME_HALF_FACTOR = 0.5;
 export const EQUATION_OF_TIME_QUARTER_FACTOR = 1.25;
+
+/** Harmonics of the mean anomaly and longitude in the equations of the sun. */
+export const SECOND_HARMONIC = 2;
+export const THIRD_HARMONIC = 3;
+export const FOURTH_HARMONIC = 4;
+/** Halves an angle (the tangent of half the obliquity). */
+export const HALF_ANGLE_DIVISOR = 2;
+/** The solar midnight is midway between two consecutive solar noons. */
+export const TWO_NOONS_MIDPOINT_DIVISOR = 2;

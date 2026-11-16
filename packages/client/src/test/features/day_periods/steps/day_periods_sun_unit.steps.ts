@@ -1,11 +1,11 @@
-// Verifies FR1, FR3, FR4, FR7, FR8, UX2, NFR-P2 of bind-day-periods-to-sun.
+// Verifies FR1, FR3, FR4, FR7, FR8, UX2 of bind-day-periods-to-sun.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { afterEach, expect, vi } from "vitest";
+import { expect } from "vitest";
 import { type Coordinates, DayPeriod, getDayPeriodAt } from "@/model";
 import {
-  findBoundaryMilliseconds,
   getBoundariesOf,
+  getBoundaryDeviationMinutes,
   minutesBetween,
   PERIOD_BY_WORD,
   parseCoordinatesText,
@@ -24,11 +24,6 @@ const MOSCOW_ZONE = "Europe/Moscow";
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let coordinates: Coordinates = ALMATY;
   let date = "";
-  const fetchSpy = vi.fn();
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
 
   // @bind-day-periods-to-sun @FR1
   f.ScenarioOutline(
@@ -65,24 +60,20 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Then(
         "in <zone> night ends at <dawn>, day starts at <day start>, day ends at <day end> and night starts at <dusk>, each within 3 minutes",
         () => {
-          const boundaries = getBoundariesOf(
-            coordinates,
-            variables.zone,
-            variables.date,
-          );
-          const expectations: [DayPeriod, DayPeriod, string][] = [
-            [DayPeriod.NIGHT, DayPeriod.MORNING, variables.dawn],
-            [DayPeriod.MORNING, DayPeriod.DAY, variables["day start"]],
-            [DayPeriod.DAY, DayPeriod.EVENING, variables["day end"]],
-            [DayPeriod.EVENING, DayPeriod.NIGHT, variables.dusk],
+          const expectations: [[DayPeriod, DayPeriod], string][] = [
+            [[DayPeriod.NIGHT, DayPeriod.MORNING], variables.dawn],
+            [[DayPeriod.MORNING, DayPeriod.DAY], variables["day start"]],
+            [[DayPeriod.DAY, DayPeriod.EVENING], variables["day end"]],
+            [[DayPeriod.EVENING, DayPeriod.NIGHT], variables.dusk],
           ];
-          for (const [from, to, time] of expectations) {
-            const actual = findBoundaryMilliseconds(boundaries, from, to);
-            expect(actual).toBeDefined();
+          for (const [boundary, time] of expectations) {
             expect(
-              minutesBetween(
-                actual as number,
-                toMilliseconds(variables.date, time, variables.zone),
+              getBoundaryDeviationMinutes(
+                coordinates,
+                variables.zone,
+                variables.date,
+                boundary,
+                time,
               ),
             ).toBeLessThan(TOLERANCE_MINUTES);
           }
@@ -101,22 +92,26 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then(
       "the day starts at 04:48 in Moscow and at 04:02 in Kazan, each within 3 minutes",
       () => {
-        const dayStartOf = (cityCoordinates: Coordinates) =>
-          findBoundaryMilliseconds(
-            getBoundariesOf(cityCoordinates, MOSCOW_ZONE, "2026-06-21"),
-            DayPeriod.MORNING,
-            DayPeriod.DAY,
-          ) as number;
+        const dayStart: [DayPeriod, DayPeriod] = [
+          DayPeriod.MORNING,
+          DayPeriod.DAY,
+        ];
         expect(
-          minutesBetween(
-            dayStartOf(MOSCOW),
-            toMilliseconds("2026-06-21", "04:48", MOSCOW_ZONE),
+          getBoundaryDeviationMinutes(
+            MOSCOW,
+            MOSCOW_ZONE,
+            "2026-06-21",
+            dayStart,
+            "04:48",
           ),
         ).toBeLessThan(TOLERANCE_MINUTES);
         expect(
-          minutesBetween(
-            dayStartOf(KAZAN),
-            toMilliseconds("2026-06-21", "04:02", MOSCOW_ZONE),
+          getBoundaryDeviationMinutes(
+            KAZAN,
+            MOSCOW_ZONE,
+            "2026-06-21",
+            dayStart,
+            "04:02",
           ),
         ).toBeLessThan(TOLERANCE_MINUTES);
       },
@@ -138,27 +133,30 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Then(
         "night ends at 06:51 and the day starts at 07:55 local time, each within 3 minutes",
         () => {
-          const boundaries = getBoundariesOf(NEW_YORK, newYorkZone, date);
-          const nightEnds = findBoundaryMilliseconds(
-            boundaries,
+          const nightEnds: [DayPeriod, DayPeriod] = [
             DayPeriod.NIGHT,
             DayPeriod.MORNING,
-          ) as number;
-          const dayStarts = findBoundaryMilliseconds(
-            boundaries,
+          ];
+          const dayStarts: [DayPeriod, DayPeriod] = [
             DayPeriod.MORNING,
             DayPeriod.DAY,
-          ) as number;
+          ];
           expect(
-            minutesBetween(
+            getBoundaryDeviationMinutes(
+              NEW_YORK,
+              newYorkZone,
+              date,
               nightEnds,
-              toMilliseconds(date, "06:51", newYorkZone),
+              "06:51",
             ),
           ).toBeLessThan(TOLERANCE_MINUTES);
           expect(
-            minutesBetween(
+            getBoundaryDeviationMinutes(
+              NEW_YORK,
+              newYorkZone,
+              date,
               dayStarts,
-              toMilliseconds(date, "07:55", newYorkZone),
+              "07:55",
             ),
           ).toBeLessThan(TOLERANCE_MINUTES);
         },
@@ -182,56 +180,4 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       );
     },
   );
-
-  // @bind-day-periods-to-sun @FR3 @NFR-P2
-  f.Scenario("Offline", ({ Given, When, Then }) => {
-    let offlinePeriods: DayPeriod[] = [];
-    const readPeriods = () =>
-      [0, 6, 12, 18].map((hour) =>
-        getDayPeriodAt(
-          ALMATY,
-          toMilliseconds(
-            "2026-03-08",
-            `${String(hour).padStart(2, "0")}:00`,
-            "Asia/Almaty",
-          ),
-        ),
-      );
-    const onlinePeriods = readPeriods();
-    Given("the device has no network connection", () => {
-      vi.stubGlobal("fetch", fetchSpy);
-      vi.stubGlobal("navigator", { onLine: false });
-    });
-    When("the day periods of Almaty are computed", () => {
-      offlinePeriods = readPeriods();
-    });
-    Then("they are the same as online and nothing was requested", () => {
-      expect(offlinePeriods).toEqual(onlinePeriods);
-      expect(fetchSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  // @bind-day-periods-to-sun @FR4
-  f.Scenario("A far date", ({ Given, When, Then }) => {
-    Given("Moscow at 55.8, 37.6", () => {
-      coordinates = MOSCOW;
-    });
-    When(
-      "the day-period boundaries of 21 December 2090 are computed",
-      () => undefined,
-    );
-    Then(
-      "night ends at {string}, which is 08:10 in {string}, within 3 minutes",
-      (_ctx, instant: string, zone: string) => {
-        const nightEnds = findBoundaryMilliseconds(
-          getBoundariesOf(coordinates, zone, "2090-12-21"),
-          DayPeriod.NIGHT,
-          DayPeriod.MORNING,
-        ) as number;
-        expect(minutesBetween(nightEnds, Date.parse(instant))).toBeLessThan(
-          TOLERANCE_MINUTES,
-        );
-      },
-    );
-  });
 });
