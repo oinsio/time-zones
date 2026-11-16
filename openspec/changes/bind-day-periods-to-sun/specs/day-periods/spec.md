@@ -77,7 +77,7 @@ The sun's elevation SHALL be computed from the coordinates and the instant alone
 #### Scenario: A far date
 - **GIVEN** Moscow at 55.8, 37.6
 - **WHEN** the day-period boundaries of 21 December 2090 are computed
-- **THEN** night ends within 3 minutes of the published civil dawn of that date
+- **THEN** night ends at `2090-12-21T05:10:00Z` (08:10 in `Europe/Moscow`), within 3 minutes
 
 ### Requirement: Coordinates of a location for the sun
 A city location SHALL use its own coordinates. A city location that has none MUST use the zone coordinates of its zone. The device time location MUST use the zone coordinates of the device time zone and MUST NOT request the device's coordinates. A location for which no coordinates are known — a location in UTC, or in a zone without zone coordinates — has no day periods. <!-- implements FR7, FR8 of bind-day-periods-to-sun -->
