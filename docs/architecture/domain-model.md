@@ -107,24 +107,20 @@ Selectors take the state and the current instant from the `Clock` and return vie
 | `getReferenceZone(state)` | home location's zone, otherwise `deviceTimeZoneId` | all |
 | `getRows(state)` | display rows: `locations` only, in list order | all views |
 | `getLocationSnapshot(row)` | `ZonedDateTime`, UTC offset, offset difference and day shift (`-1 / 0 / +1`) from the reference zone, day period, is-home and is-here flags | all views |
-| `getHourCells(timeZoneId, referenceDay, referenceZoneId)` | cells of the reference day: start instant, local start time, day period, offset edge, midnight date (never set in the reference zone's row) | grid |
+| `getHourCells(timeZoneId, referenceDay, referenceZoneId, coordinates)` | cells of the reference day: start instant, local start time, day period, offset edge, midnight date (never set in the reference zone's row) | grid |
 | `getHourFrameIndex(referenceDay, instant)` | the hour frame's column: the cell that contains the instant | grid |
 | `getMeetingSpan(referenceDay, meeting)` | the range's minutes from the day's start and the first and last hour-cell column it overlaps | grid |
 | `getLocationMeetingRange(timeZoneId, meeting, referenceZoneId)` | local start and end `ZonedDateTime` of the meeting range and the day shift of the start | grid |
 | `getDayShift(timeZoneId, instant, referenceZoneId)` | `EARLIER / SAME / LATER`: the location's local date against the reference zone's at the instant | grid |
 | `getDayTrack(row)` | position of the reference moment within the reference day (0..1, equal for all rows) and the row's day-period segments over that day, including offset jumps | cards |
-| `getDayPeriod(zonedDateTime)` | `NIGHT / MORNING / WORK / EVENING` | colors in all views |
+| `getDayPeriodAt(coordinates, instant)` | `NIGHT / MORNING / DAY / EVENING` | colors in all views |
+| `getDayPeriodBoundaries(coordinates, referenceDay)` | the instants the day period changes in the day | tracks and cells |
 
 ### Day periods
 
-`getDayPeriod` receives a day-period schedule as a parameter instead of reading it internally. In the MVP the schedule is a set of constants (local time of each location):
+A day period is decided by the sun's elevation at the location's coordinates (`getSunElevation`, NOAA equations on the device): night below −6°, day from +6°, between them morning from solar midnight to solar noon and evening after it. Polar cases need no branch. A location's coordinates are its own, else the zone coordinates of its zone (`getSunCoordinates`); a location without coordinates (UTC) has no day periods and is coloured grey.
 
-```
-00    07    09                18    22    24
-|NIGHT|MORN |      WORK       |EVEN |NIGHT|
-```
-
-Views use four colors: night, morning, work, evening. A user-defined schedule (global or per location) can later replace the constants without changing the selector.
+Views use four colors: night, morning, day, evening.
 
 The day colouring (change add-day-colouring-setting) is a second, separate rule: Plain, Time of day (the day periods above) or Working hours. Working time is the user's working hours read in each location's local time on Monday to Friday by the local date, at every instant (the local time after a clock change decides); an hour cell is working when working time covers at least half of it. Owner: `getWorkingTimeSpans` and `isWorkingTime`; non-working is a grey, working and plain are the accent.
 

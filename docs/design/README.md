@@ -32,7 +32,7 @@ This one moment covers a :30 offset, a DST jump inside the reference day and the
 ## What to read from the tracks
 
 - Every track spans 00–24 of the reference zone, so all handles stand at the same position.
-- Colors are the location's own day periods: night, morning, work, evening, with soft transitions.
+- Colors are the location's own day periods: night, morning, day, evening by the sun, with soft transitions.
 - New York's track changes color abruptly at 12:00 Almaty time — the DST jump from EST to EDT.
 
 ## Grid
