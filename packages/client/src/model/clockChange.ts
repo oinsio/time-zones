@@ -1,6 +1,5 @@
 import { OFFSET_CHANGE_MARGIN_HOURS, UTC_ZONE_ID } from "@/constants";
 import { Temporal } from "@/lib/temporal";
-import { findOffsetTransitions } from "./dayPeriodWindows";
 import type { ClockChangeWindow, ReferenceDay } from "./dayTrack";
 import { getUtcOffsetMinutes } from "./utcOffset";
 
@@ -11,6 +10,34 @@ import { getUtcOffsetMinutes } from "./utcOffset";
  * per clock change window and shared with the day track colours.
  * Implements FR2, FR3, FR4, FR5, NFR-P1 of show-clock-change-note-on-location-cards (D2, D3).
  */
+
+/**
+ * Offset changes `marginHours` before the span start (included) to `marginHours`
+ * after its end (excluded), in order.
+ * Implements FR2 of show-clock-change-note-on-location-cards (D2).
+ */
+export function findOffsetTransitions(
+  timeZoneId: string,
+  span: ClockChangeWindow,
+  marginHours: number = OFFSET_CHANGE_MARGIN_HOURS,
+): Temporal.Instant[] {
+  const margin = { hours: marginHours };
+  const limit = span.end.add(margin);
+  const transitions: Temporal.Instant[] = [];
+  let transition = span.start
+    .subtract(margin)
+    .subtract({ nanoseconds: 1 })
+    .toZonedDateTimeISO(timeZoneId)
+    .getTimeZoneTransition("next");
+  while (
+    transition !== null &&
+    Temporal.Instant.compare(transition.toInstant(), limit) < 0
+  ) {
+    transitions.push(transition.toInstant());
+    transition = transition.getTimeZoneTransition("next");
+  }
+  return transitions;
+}
 
 export enum ClockChangeDirection {
   FORWARD = "FORWARD",

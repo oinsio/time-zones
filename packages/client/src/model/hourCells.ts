@@ -4,19 +4,19 @@ import {
   MINUTES_PER_HOUR,
 } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
-import {
-  DAY_PERIOD_SCHEDULE,
-  type DayPeriod,
-  getDayPeriod,
-} from "./dayPeriods";
-import { findOffsetTransitions } from "./dayPeriodWindows";
+import { findOffsetTransitions } from "./clockChange";
+import { type Coordinates, getCoordinatesKey } from "./coordinates";
+import { getDayPeriodBoundaries } from "./dayPeriodBoundaries";
+import { type DayPeriod, getDayPeriodAt } from "./dayPeriods";
 import type { ReferenceDay } from "./dayTrack";
+import { getLargestSharePeriod } from "./hourCellPeriod";
 
 /**
  * Hour cells of a location over the reference day: the absolute hours from the
  * reference zone's midnight, each with the location's local start, day period,
  * offset edge and midnight date. Pure; arithmetic on instants only.
- * Implements FR1, FR2, FR5, FR6, FR8, NFR-P1 of add-grid-hour-cells-and-hour-frame (D1).
+ * Implements FR1, FR2, FR5, FR6, FR8, NFR-P1 of add-grid-hour-cells-and-hour-frame (D1),
+ * FR6, FR8, NFR-P1 of bind-day-periods-to-sun (D5).
  */
 
 export type HourCell = {
@@ -24,7 +24,8 @@ export type HourCell = {
   start: Temporal.Instant;
   /** The start in the location's zone. */
   localStart: Temporal.ZonedDateTime;
-  dayPeriod: DayPeriod;
+  /** The period that holds most of the cell; `undefined` for a location without coordinates. */
+  dayPeriod: DayPeriod | undefined;
   /** The location's clocks change inside the day, right before this cell. */
   hasOffsetEdge: boolean;
   /** Set on the midnight cell only: the new local date. */
@@ -38,7 +39,14 @@ function buildHourCells(
   timeZoneId: string,
   day: ReferenceDay,
   referenceZoneId: string,
+  coordinates: Coordinates | undefined,
 ): readonly HourCell[] {
+  const boundaries =
+    coordinates === undefined ? [] : getDayPeriodBoundaries(coordinates, day);
+  const periodWithoutBoundaries =
+    coordinates !== undefined && boundaries.length === 0
+      ? getDayPeriodAt(coordinates, day.start.epochMilliseconds)
+      : undefined;
   const offsetChanges = findOffsetTransitions(timeZoneId, day, 0).filter(
     (change) => change.epochMilliseconds > day.start.epochMilliseconds,
   );
@@ -57,7 +65,18 @@ function buildHourCells(
     return {
       start,
       localStart,
-      dayPeriod: getDayPeriod(localStart.toPlainTime(), DAY_PERIOD_SCHEDULE),
+      dayPeriod:
+        coordinates === undefined
+          ? undefined
+          : getLargestSharePeriod(
+              boundaries,
+              periodWithoutBoundaries as DayPeriod,
+              start.epochMilliseconds,
+              Math.min(
+                start.add(HOUR_CELL_DURATION).epochMilliseconds,
+                day.end.epochMilliseconds,
+              ),
+            ),
       hasOffsetEdge: offsetChanges.some(
         (change) =>
           change.epochMilliseconds <= start.epochMilliseconds &&
@@ -78,16 +97,18 @@ export function getHourCells(
   timeZoneId: string,
   day: ReferenceDay,
   referenceZoneId: string,
+  coordinates: Coordinates | undefined,
 ): readonly HourCell[] {
   const cellsKey = `${day.start.epochMilliseconds}|${day.end.epochMilliseconds}|${referenceZoneId}`;
   if (cellsKey !== cachedCellsKey) {
     cachedCellsKey = cellsKey;
     cachedCellsByZone = new Map();
   }
-  const cachedCells = cachedCellsByZone.get(timeZoneId);
+  const cellsByZoneKey = `${timeZoneId}|${getCoordinatesKey(coordinates)}`;
+  const cachedCells = cachedCellsByZone.get(cellsByZoneKey);
   if (cachedCells !== undefined) return cachedCells;
-  const cells = buildHourCells(timeZoneId, day, referenceZoneId);
-  cachedCellsByZone.set(timeZoneId, cells);
+  const cells = buildHourCells(timeZoneId, day, referenceZoneId, coordinates);
+  cachedCellsByZone.set(cellsByZoneKey, cells);
   return cells;
 }
 

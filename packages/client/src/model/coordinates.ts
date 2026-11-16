@@ -18,3 +18,18 @@ export function parseCoordinates(value: unknown): Coordinates | undefined {
     ? { latitude, longitude }
     : undefined;
 }
+
+/** The cache key of a location without coordinates. */
+const NO_COORDINATES_KEY = "none";
+
+/**
+ * The one cache key of coordinates: `"latitude,longitude"`. Caches of the sun,
+ * the day-period stops, the hour cells and the hour strips key on it.
+ * Implements FR7, NFR-P1 of bind-day-periods-to-sun (D2, D5).
+ */
+export const getCoordinatesKey = (
+  coordinates: Coordinates | undefined,
+): string =>
+  coordinates === undefined
+    ? NO_COORDINATES_KEY
+    : `${coordinates.latitude},${coordinates.longitude}`;

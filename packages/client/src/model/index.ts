@@ -19,25 +19,25 @@ export {
   type NearestClockChange,
 } from "./clockChange";
 // Implements FR5, FR6, FR7 of add-city-coordinates-to-locations.
-export { type Coordinates, parseCoordinates } from "./coordinates";
+export {
+  type Coordinates,
+  getCoordinatesKey,
+  parseCoordinates,
+} from "./coordinates";
+// Implements FR1-FR6 of add-time-sliders-to-location-cards.
+// Implements FR1, FR2, FR5, FR9 of bind-day-periods-to-sun.
+export { getDayPeriodBoundaries } from "./dayPeriodBoundaries";
 export {
   assembleDayPeriodStops,
   type DayPeriodStop,
   getDayPeriodStops,
 } from "./dayPeriodStops";
-// Implements FR1-FR6 of add-time-sliders-to-location-cards.
 export {
-  DAY_PERIOD_SCHEDULE,
   DayPeriod,
   type DayPeriodBoundary,
-  getDayPeriod,
+  getDayPeriodAt,
 } from "./dayPeriods";
-export {
-  type BlendWindow,
-  collectBlendWindows,
-  collectOffsetEdges,
-  type OffsetEdge,
-} from "./dayPeriodWindows";
+export { type BlendWindow, collectBlendWindows } from "./dayPeriodWindows";
 // Implements FR1-FR12 of add-grid-meeting-range-and-share.
 export { DayShift, getDayShift } from "./dayShift";
 export {

@@ -1,24 +1,16 @@
 import { MILLISECONDS_PER_MINUTE } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
-import { getClockChangesAround } from "./clockChange";
-import {
-  DAY_PERIOD_SCHEDULE,
-  type DayPeriod,
-  type DayPeriodBoundary,
-} from "./dayPeriods";
-import {
-  type BlendWindow,
-  collectBlendWindows,
-  collectOffsetEdges,
-  type OffsetEdge,
-} from "./dayPeriodWindows";
+import { type Coordinates, getCoordinatesKey } from "./coordinates";
+import { getDayPeriodBoundaries } from "./dayPeriodBoundaries";
+import { type DayPeriod, getDayPeriodAt } from "./dayPeriods";
+import { type BlendWindow, collectBlendWindows } from "./dayPeriodWindows";
 import type { ReferenceDay } from "./dayTrack";
 
 /**
- * Colour stops of a day track: two per blend window (soft boundaries) and
- * two at one position per offset edge (hard edges). Assembly is pure on
- * plain data; the stops of one reference day are memoized.
- * Implements FR6, NFR-P2 of add-time-sliders-to-location-cards (D4),
+ * Colour stops of a day track: two per blend window. A day without a
+ * boundary has one stop; a location without coordinates has none. Assembly
+ * is pure on plain data; the stops of one reference day are memoized.
+ * Implements FR5, FR8, NFR-P1 of bind-day-periods-to-sun (D3, D5),
  * FR3 of support-legacy-ios-12-safari (milliseconds, no BigInt).
  */
 
@@ -28,53 +20,46 @@ const getFractionOf = (day: ReferenceDay, instant: Temporal.Instant) =>
   (instant.epochMilliseconds - day.start.epochMilliseconds) /
   (day.lengthMinutes * MILLISECONDS_PER_MINUTE);
 
-/** Sorted stops: two per blend window, two at the same position per hard edge. */
+/** Sorted stops: two per blend window. */
 export function assembleDayPeriodStops(
   windows: readonly BlendWindow[],
-  edges: readonly OffsetEdge[],
   day: ReferenceDay,
 ): DayPeriodStop[] {
-  const stops: DayPeriodStop[] = [
-    ...windows.flatMap((window) => [
+  return windows
+    .flatMap((window) => [
       { fraction: getFractionOf(day, window.start), period: window.from },
       { fraction: getFractionOf(day, window.end), period: window.to },
-    ]),
-    ...edges.flatMap((edge) => {
-      const fraction = getFractionOf(day, edge.instant);
-      return [
-        { fraction, period: edge.before },
-        { fraction, period: edge.after },
-      ];
-    }),
-  ];
-  return stops.sort((first, second) => first.fraction - second.fraction);
+    ])
+    .sort((first, second) => first.fraction - second.fraction);
 }
 
 let cachedDayKey: string | undefined;
-let cachedStopsByZone = new Map<string, readonly DayPeriodStop[]>();
+let cachedStopsByCoordinates = new Map<string, readonly DayPeriodStop[]>();
 
-/** Memoized for one reference day and the default schedule; custom schedules are computed afresh. */
+/** Memoized per reference day and coordinates; `undefined` without coordinates. */
 export function getDayPeriodStops(
-  timeZoneId: string,
+  coordinates: Coordinates | undefined,
   day: ReferenceDay,
-  schedule: readonly DayPeriodBoundary[] = DAY_PERIOD_SCHEDULE,
-): readonly DayPeriodStop[] {
-  const isDefaultSchedule = schedule === DAY_PERIOD_SCHEDULE;
-  const dayKey = `${day.start.toString()}|${day.end.toString()}`;
+): readonly DayPeriodStop[] | undefined {
+  if (coordinates === undefined) return undefined;
+  const dayKey = `${day.start.epochMilliseconds}|${day.end.epochMilliseconds}`;
   if (dayKey !== cachedDayKey) {
     cachedDayKey = dayKey;
-    cachedStopsByZone = new Map();
+    cachedStopsByCoordinates = new Map();
   }
-  const cached = isDefaultSchedule
-    ? cachedStopsByZone.get(timeZoneId)
-    : undefined;
+  const coordinatesKey = getCoordinatesKey(coordinates);
+  const cached = cachedStopsByCoordinates.get(coordinatesKey);
   if (cached !== undefined) return cached;
-  const transitions = getClockChangesAround(timeZoneId, day);
-  const stops = assembleDayPeriodStops(
-    collectBlendWindows(timeZoneId, day, schedule, transitions),
-    collectOffsetEdges(timeZoneId, day, schedule, transitions),
-    day,
-  );
-  if (isDefaultSchedule) cachedStopsByZone.set(timeZoneId, stops);
+  const boundaries = getDayPeriodBoundaries(coordinates, day);
+  const stops =
+    boundaries.length === 0
+      ? [
+          {
+            fraction: 0,
+            period: getDayPeriodAt(coordinates, day.start.epochMilliseconds),
+          },
+        ]
+      : assembleDayPeriodStops(collectBlendWindows(boundaries, day), day);
+  cachedStopsByCoordinates.set(coordinatesKey, stops);
   return stops;
 }
