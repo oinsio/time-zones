@@ -88,7 +88,8 @@
 - Impact: if the change is implemented as written, the first location presented in a zone fixes the hour cells for every other location of that zone in the Grid view. Kazan's row shows Moscow's sun. A city location with coordinates and the device time location in the same zone also share their cells. So does a location with coordinates and one without, which should be grey. This breaks FR7 and UX2 in Grid (U4), while the Cards view is right, and no planned test fails.
 - Fix: in design D5, add a bullet: "`presentHourStrip` keys its strip cache on the zone ID and the coordinates (`timeZoneId` plus `latitude,longitude`, or a fixed marker for `undefined`)". In task 6.2, add to the `hourStrip.ts` item: "re-key `cachedStripsByZone` on the zone ID and the coordinates. Test in `src/presenter/hourStrip.test.ts`: Moscow at 55.8, 37.6 and Kazan at 55.8, 49.1, both in `Europe/Moscow`, presented in one call sequence on 2026-06-21 in the Time of day colouring, get different cells at the column of 04:00 local time, and a second presentation returns the same strip objects."
 - Fix risk: low. The stable `grid-view` "Hour strips are fast" bounds formatters and transition lookups per zone. Those are cached in `dateTimeFormatters.ts` and `clockChange.ts`, so more strip entries per zone build no extra formatter. The new cache branch must be killed by mutation (ADR-0008), and task 9.2 should then add `src/presenter/hourStrip.ts` to its second Stryker run, which leaves that run at 4 files, within the 5-file limit.
-- Status: open
+- Status: fixed
+- Resolution: design.md D5 gains a bullet: `presentHourStrip` keys `cachedStripsByZone` on the zone ID plus `"latitude,longitude"` (a fixed marker for `undefined`); the day track's zone-keyed cache holds only hour labels and its stops come from the model keyed by coordinates, so it stays. tasks.md 6.2 re-keys the cache and adds a `src/presenter/hourStrip.test.ts` case (Moscow vs Kazan in `Europe/Moscow` on 2026-06-21, reference zone Moscow, differ at the 04:00 cell; with vs without coordinates differ; repeat returns the same object); task 9.2 adds `src/presenter/hourStrip.ts` to the second Stryker run (4 files).
 
 ### R2 — WARNING — The 3-solar-days-per-coordinates bound cannot hold with two separate boundary computations
 - Location: `openspec/changes/bind-day-periods-to-sun/design.md:72-78` (D5); `openspec/changes/bind-day-periods-to-sun/specs/day-colouring/spec.md:36-41` (the scenario "First presentation of 50 rows"); `openspec/changes/bind-day-periods-to-sun/tasks.md:21,43` (tasks 3.2, 7.2)
@@ -97,7 +98,8 @@
 - Impact: if the design is implemented as written, a first presentation computes 4–6 solar days per coordinates, 40–60 for the scenario's 10 coordinates. The blocking budget scenario of task 7.2 then fails, and the implementer has to invent a shared cache that no design decision or test describes.
 - Fix: in design D2/D5, add: "`getDayPeriodBoundaries` is memoized per reference day and coordinates key (`latitude,longitude`), and both `getDayPeriodStops` and `getHourCells` read their boundaries from it". In task 3.2, add a test that declares the `vi.mock` line of task 2.5: a second call of `getDayPeriodBoundaries` for the same coordinates and day gives `solarDays()` 0.
 - Fix risk: one more module-level cache, whose cache-hit mutants must be killed (ADR-0008), in `dayPeriods.ts`, which is already in the first Stryker run of task 9.2. The memo must reset when the reference day changes, as `getDayPeriodStops` does today, so NFR-P3 and the minute-tick scenario keep holding.
-- Status: open
+- Status: fixed
+- Resolution: design.md D2 now makes `getDayPeriodBoundaries(coordinates, day)` cover the reference day widened by half a blend window, memoized per reference day keyed by `"latitude,longitude"`, and the only reader of `getSolarDay` for `getDayPeriodStops` and `getHourCells` (D5 bullet says so; hour cells lie inside the reference day, checked in `hourCells.ts`). tasks.md 3.2 adds a memo test with `startSolarDayCount()` (first call ≤ 3 solar days, repeat 0, other coordinates and next day recompute) and 5.1 a sharing test (`getHourCells` after `getDayPeriodStops` for the same coordinates gives `solarDays()` 0).
 
 ### R3 — WARNING — The far-date scenario names no expected time, so FR4's 2000–2100 range is untested
 - Location: `openspec/changes/bind-day-periods-to-sun/specs/day-periods/spec.md:77-80`; `openspec/changes/bind-day-periods-to-sun/tasks.md:14` (task 2.3, "the far date 2090-12-21")
@@ -106,7 +108,8 @@
 - Impact: the implementer must either invent a reference value or compare the code's output with itself. In either case FR4's "for dates from 2000 to 2100" has no independent check, and a drift in the Julian century terms of D1 would pass.
 - Fix: rewrite the THEN as "night ends at `2090-12-21T05:10:00Z` (08:10 in `Europe/Moscow`), within 3 minutes". The instant comes from the same NOAA hour-angle calculation that reproduces the 2026 row "Moscow 2026-12-21 … dawn 08:10" of "Boundaries of the day", because the sun's position on 21 December changes by well under a minute between those years. In task 2.3, name that instant as the expected value.
 - Fix risk: low. The value is stated in UTC, so it does not depend on Moscow's future zone rules. If an independent ephemeris differs from it by more than a minute, the implementer has to cite that source instead.
-- Status: open
+- Status: fixed
+- Resolution: the "A far date" scenario in specs/day-periods/spec.md now expects night to end at `2090-12-21T05:10:00Z` (08:10 in `Europe/Moscow`) within 3 minutes; I recomputed it with the NOAA equations (05:10–05:11Z, the same as the 2026 row). tasks.md 2.3 names that instant as the expected value.
 
 ### R4 — SUGGESTION — The spec uses "position", a Never word for coordinates
 - Location: `openspec/changes/bind-day-periods-to-sun/specs/day-periods/spec.md:83,99`
@@ -115,7 +118,8 @@
 - Impact: when the spec is synced to `openspec/specs/`, the Never word goes with it, and the Gherkin steps that task 7.1 copies from the scenario carry it into the test code. The glossary review check (`grep` for the Never words) then flags it.
 - Fix: replace "the device's position" with "the device's coordinates" in both lines ("MUST NOT request the device's coordinates"; "the device's coordinates were not requested").
 - Fix risk: none. Proposal NG3 names the browser API ("geolocation"), which is a different, external term and can stay.
-- Status: open
+- Status: fixed
+- Resolution: specs/day-periods/spec.md "Coordinates of a location for the sun" now says "MUST NOT request the device's coordinates" and its scenario "the device's coordinates were not requested"; the other "position" uses in the change mean a place on the track, not coordinates.
 
 ## Verdict
 
