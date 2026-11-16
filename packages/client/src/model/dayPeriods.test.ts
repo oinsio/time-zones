@@ -1,45 +1,117 @@
-// Verifies FR6 of add-time-sliders-to-location-cards (D3).
+// Verifies FR1, FR2 of bind-day-periods-to-sun.
 import { describe, expect, it } from "vitest";
-import { Temporal } from "@/lib/temporal";
-import {
-  DAY_PERIOD_SCHEDULE,
-  DayPeriod,
-  type DayPeriodBoundary,
-  getDayPeriod,
-} from "./dayPeriods";
+import { toEpochMilliseconds } from "@/test/sunFixtures";
+import { DayPeriod, getDayPeriodAt } from "./dayPeriods";
 
-describe("getDayPeriod", () => {
+const ALMATY = { latitude: 43.3, longitude: 76.9 };
+const MURMANSK = { latitude: 69.0, longitude: 33.1 };
+const LONGYEARBYEN = { latitude: 78.2, longitude: 15.6 };
+const MOSCOW_ZONE = "Europe/Moscow";
+
+describe("getDayPeriodAt", () => {
   it.each([
-    ["06:59", DayPeriod.NIGHT],
-    ["07:00", DayPeriod.MORNING],
-    ["08:59", DayPeriod.MORNING],
-    ["09:00", DayPeriod.WORK],
-    ["17:59", DayPeriod.WORK],
-    ["18:00", DayPeriod.EVENING],
-    ["21:59", DayPeriod.EVENING],
-    ["22:00", DayPeriod.NIGHT],
-    ["00:00", DayPeriod.NIGHT],
-  ])("should put %s in %s", (wallTime, expected) => {
-    expect(
-      getDayPeriod(Temporal.PlainTime.from(wallTime), DAY_PERIOD_SCHEDULE),
-    ).toBe(expected);
-  });
+    ["03:00", DayPeriod.NIGHT],
+    ["06:20", DayPeriod.MORNING],
+    ["12:00", DayPeriod.DAY],
+    ["17:45", DayPeriod.EVENING],
+    ["21:00", DayPeriod.NIGHT],
+  ])(
+    "should give Almaty at %s on 8 March 2026 the period %s",
+    (time, period) => {
+      expect(
+        getDayPeriodAt(
+          ALMATY,
+          toEpochMilliseconds("2026-03-08", time, "Asia/Almaty"),
+        ),
+      ).toBe(period);
+    },
+  );
 
-  it("should read the schedule from the parameter", () => {
-    const customSchedule: readonly DayPeriodBoundary[] = [
-      {
-        wallTime: "12:00",
-        from: DayPeriod.EVENING,
-        to: DayPeriod.WORK,
-        blendMinutes: 0,
-      },
-    ];
-
-    expect(getDayPeriod(Temporal.PlainTime.from("06:00"), customSchedule)).toBe(
+  it.each([
+    [
+      "Longyearbyen",
+      LONGYEARBYEN,
+      "Europe/Oslo",
+      "2026-12-21",
+      "00:00",
+      DayPeriod.NIGHT,
+    ],
+    [
+      "Longyearbyen",
+      LONGYEARBYEN,
+      "Europe/Oslo",
+      "2026-12-21",
+      "12:00",
+      DayPeriod.NIGHT,
+    ],
+    [
+      "Longyearbyen",
+      LONGYEARBYEN,
+      "Europe/Oslo",
+      "2026-06-21",
+      "00:00",
+      DayPeriod.DAY,
+    ],
+    [
+      "Longyearbyen",
+      LONGYEARBYEN,
+      "Europe/Oslo",
+      "2026-06-21",
+      "18:00",
+      DayPeriod.DAY,
+    ],
+    ["Murmansk", MURMANSK, MOSCOW_ZONE, "2026-12-21", "09:00", DayPeriod.NIGHT],
+    [
+      "Murmansk",
+      MURMANSK,
+      MOSCOW_ZONE,
+      "2026-12-21",
+      "11:30",
+      DayPeriod.MORNING,
+    ],
+    [
+      "Murmansk",
+      MURMANSK,
+      MOSCOW_ZONE,
+      "2026-12-21",
+      "14:00",
       DayPeriod.EVENING,
-    );
-    expect(getDayPeriod(Temporal.PlainTime.from("13:00"), customSchedule)).toBe(
-      DayPeriod.WORK,
-    );
-  });
+    ],
+    ["Murmansk", MURMANSK, MOSCOW_ZONE, "2026-12-21", "17:00", DayPeriod.NIGHT],
+    [
+      "Murmansk",
+      MURMANSK,
+      MOSCOW_ZONE,
+      "2026-06-21",
+      "00:30",
+      DayPeriod.EVENING,
+    ],
+    [
+      "Murmansk",
+      MURMANSK,
+      MOSCOW_ZONE,
+      "2026-06-21",
+      "02:00",
+      DayPeriod.MORNING,
+    ],
+    ["Murmansk", MURMANSK, MOSCOW_ZONE, "2026-06-21", "12:00", DayPeriod.DAY],
+    [
+      "Murmansk",
+      MURMANSK,
+      MOSCOW_ZONE,
+      "2026-06-21",
+      "23:30",
+      DayPeriod.EVENING,
+    ],
+  ])(
+    "should give %s on %s at %s the period %s",
+    (_city, coordinates, timeZoneId, date, time, period) => {
+      expect(
+        getDayPeriodAt(
+          coordinates,
+          toEpochMilliseconds(date, time, timeZoneId),
+        ),
+      ).toBe(period);
+    },
+  );
 });

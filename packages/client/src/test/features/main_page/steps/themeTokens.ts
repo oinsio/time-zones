@@ -15,7 +15,7 @@ export interface ThemeColours {
   accent: string;
   dayNight: string;
   dayMorning: string;
-  dayWork: string;
+  dayDaylight: string;
   dayEvening: string;
   dayNonWorking: string;
   hourCellForeground: string;
@@ -74,7 +74,7 @@ export function readThemeColours(theme: Theme): ThemeColours {
     accent: toComputedRgb(readTokenHex(themeBlock, "accent")),
     dayNight: toComputedRgb(readTokenHex(themeBlock, "day-night")),
     dayMorning: toComputedRgb(readTokenHex(themeBlock, "day-morning")),
-    dayWork: toComputedRgb(readTokenHex(themeBlock, "day-work")),
+    dayDaylight: toComputedRgb(readTokenHex(themeBlock, "day-daylight")),
     dayEvening: toComputedRgb(readTokenHex(themeBlock, "day-evening")),
     dayNonWorking: toComputedRgb(readTokenHex(themeBlock, "day-non-working")),
     hourCellForeground: toComputedRgb(

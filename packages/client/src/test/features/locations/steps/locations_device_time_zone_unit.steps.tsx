@@ -184,6 +184,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
     And("no row has been presented yet", async () => {
       vi.resetModules();
+      await (await import("@/model")).loadSunSupport();
       ({ presentLocationRows } = await import("@/presenter"));
     });
     When("their rows are presented", () => {

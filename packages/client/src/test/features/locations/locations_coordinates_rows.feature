@@ -18,7 +18,7 @@ Feature: Coordinates of a city location (duplicates and rows)
   Scenario Outline: Rows are unchanged
     Given the list holds "Kazan" with coordinates
     When the list is shown for the <view>
-    Then every row shows the same content as for "Kazan" without coordinates
+    Then every row shows the same content as for "Kazan" without coordinates, apart from the colours of its day track
 
     Examples:
       | view                                |

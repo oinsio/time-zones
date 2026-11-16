@@ -53,7 +53,7 @@ When the sun does not cross a threshold during a day, the day periods SHALL foll
 | Longyearbyen | 78.2, 15.6 | 2026-12-21 | night only |
 | Longyearbyen | 78.2, 15.6 | 2026-06-21 | day only |
 | Murmansk | 69.0, 33.1 | 2026-12-21 | night, morning from about 10:22, evening from solar noon at about 12:45, night from about 15:08 (`Europe/Moscow`, within 10 minutes) |
-| Murmansk | 69.0, 33.1 | 2026-06-21 | morning until about 03:12, day, evening from about 22:26, morning again from solar midnight (within 10 minutes), no night |
+| Murmansk | 69.0, 33.1 | 2026-06-21 | evening until solar midnight at about 00:49, morning until about 03:12, day, evening from about 22:26 (`Europe/Moscow`, within 10 minutes), no night |
 
 #### Scenario: A night that barely gets dark
 - **GIVEN** Saint Petersburg at 59.9, 30.3 on 21 June 2026
@@ -77,10 +77,10 @@ The sun's elevation SHALL be computed from the coordinates and the instant alone
 #### Scenario: A far date
 - **GIVEN** Moscow at 55.8, 37.6
 - **WHEN** the day-period boundaries of 21 December 2090 are computed
-- **THEN** night ends within 3 minutes of the published civil dawn of that date
+- **THEN** night ends at `2090-12-21T05:10:00Z` (08:10 in `Europe/Moscow`), within 3 minutes
 
 ### Requirement: Coordinates of a location for the sun
-A city location SHALL use its own coordinates. A city location that has none MUST use the zone coordinates of its zone. The device time location MUST use the zone coordinates of the device time zone and MUST NOT ask for the device's position. A location for which no coordinates are known — a location in UTC, or in a zone without zone coordinates — has no day periods. <!-- implements FR7, FR8 of bind-day-periods-to-sun -->
+A city location SHALL use its own coordinates. A city location that has none MUST use the zone coordinates of its zone. The device time location MUST use the zone coordinates of the device time zone and MUST NOT request the device's coordinates. A location for which no coordinates are known — a location in UTC, or in a zone without zone coordinates — has no day periods. <!-- implements FR7, FR8 of bind-day-periods-to-sun -->
 
 #### Scenario: A city with its own coordinates
 - **GIVEN** the location Kazan holds the coordinates 55.8, 49.1
@@ -96,7 +96,7 @@ A city location SHALL use its own coordinates. A city location that has none MUS
 - **GIVEN** the device time zone is `Europe/Minsk`
 - **WHEN** the day periods of the device time location are computed
 - **THEN** they are those of the zone coordinates of `Europe/Minsk`
-- **AND** the device's position was not requested
+- **AND** the device's coordinates were not requested
 
 #### Scenario: No coordinates
 - **GIVEN** `<location>`

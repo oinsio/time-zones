@@ -9,7 +9,7 @@ const cells = Array.from({ length: 24 }, (_, column) => ({
   hourText: String(column),
   minuteText: column === 5 ? ":30" : "",
   dayPeriodMarker: column === 6 ? "AM" : "",
-  dayColour: column < 9 ? DayColour.NIGHT : DayColour.WORK,
+  dayColour: column < 9 ? DayColour.NIGHT : DayColour.DAY,
   hasOffsetEdge: column === 12,
   ...(column === 2
     ? { midnightMarker: { monthText: "MAR", dayText: "8" } }

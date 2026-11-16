@@ -1,12 +1,14 @@
 // Verifies FR1, FR2, FR5, FR6, FR8, NFR-P1 of add-grid-hour-cells-and-hour-frame.
+// Verifies FR6, FR7, FR8 of bind-day-periods-to-sun.
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { DayPeriod } from "./dayPeriods";
 import { getReferenceDay } from "./dayTrack";
-import { getHourCells, getHourFrameIndex } from "./hourCells";
+import { getHourCells } from "./hourCells";
 import { INITIAL_WORLD_CLOCK_STATE } from "./locations";
 
 const ALMATY = "Asia/Almaty";
+const ALMATY_COORDINATES = { latitude: 43.3, longitude: 76.9 };
 const NEW_YORK = "America/New_York";
 const SAMPLE_INSTANT = Temporal.Instant.from("2026-03-08T07:30:00Z");
 
@@ -23,7 +25,7 @@ const ALMATY_DAY = getReferenceDay(
 );
 
 function cellsOf(timeZoneId: string) {
-  return getHourCells(timeZoneId, ALMATY_DAY, ALMATY);
+  return getHourCells(timeZoneId, ALMATY_DAY, ALMATY, ALMATY_COORDINATES);
 }
 
 describe("getHourCells", () => {
@@ -36,14 +38,16 @@ describe("getHourCells", () => {
   ])("should give %s a day of %s %i cells", (zone, instant, count) => {
     const day = getDayIn(zone, instant);
 
-    expect(getHourCells(zone, day, zone)).toHaveLength(count);
+    expect(getHourCells(zone, day, zone, ALMATY_COORDINATES)).toHaveLength(
+      count,
+    );
   });
 
   it("should end a day of a fractional length with a shorter cell", () => {
     const zone = "Australia/Lord_Howe";
     const day = getDayIn(zone, "2026-04-04T20:00:00Z");
 
-    const cells = getHourCells(zone, day, zone);
+    const cells = getHourCells(zone, day, zone, ALMATY_COORDINATES);
 
     const lastCell = cells[cells.length - 1];
     expect(day.end.since(lastCell.start).total({ unit: "minute" })).toBe(30);
@@ -73,17 +77,50 @@ describe("getHourCells", () => {
 
   it.each([
     [0, DayPeriod.NIGHT],
-    [6, DayPeriod.NIGHT],
-    [7, DayPeriod.MORNING],
-    [8, DayPeriod.MORNING],
-    [9, DayPeriod.WORK],
-    [17, DayPeriod.WORK],
-    [18, DayPeriod.EVENING],
-    [21, DayPeriod.EVENING],
-    [22, DayPeriod.NIGHT],
+    [5, DayPeriod.NIGHT],
+    [6, DayPeriod.MORNING],
+    [7, DayPeriod.DAY],
+    [16, DayPeriod.DAY],
+    [17, DayPeriod.EVENING],
+    [18, DayPeriod.NIGHT],
     [23, DayPeriod.NIGHT],
   ])("should colour Almaty column %i as %s", (column, period) => {
     expect(cellsOf(ALMATY)[column].dayPeriod).toBe(period);
+  });
+
+  it("should give a cell no day period without coordinates", () => {
+    const cells = getHourCells(ALMATY, ALMATY_DAY, ALMATY, undefined);
+    expect(cells.every((cell) => cell.dayPeriod === undefined)).toBe(true);
+  });
+
+  it("should give a city of the same zone cells of its own coordinates", () => {
+    const kazan = { latitude: 55.8, longitude: 49.1 };
+    const moscow = { latitude: 55.8, longitude: 37.6 };
+    const day = getDayIn("Europe/Moscow", "2026-06-21T09:00:00Z");
+    const kazanCells = getHourCells(
+      "Europe/Moscow",
+      day,
+      "Europe/Moscow",
+      kazan,
+    );
+    const moscowCells = getHourCells(
+      "Europe/Moscow",
+      day,
+      "Europe/Moscow",
+      moscow,
+    );
+    expect(kazanCells).not.toBe(moscowCells);
+    expect(kazanCells[4].dayPeriod).toBe(DayPeriod.DAY);
+    expect(moscowCells[4].dayPeriod).toBe(DayPeriod.MORNING);
+  });
+
+  it("should hold the whole day for a polar night", () => {
+    const longyearbyen = { latitude: 78.2, longitude: 15.6 };
+    const day = getDayIn("UTC", "2026-12-21T12:00:00Z");
+    const periods = getHourCells("UTC", day, "UTC", longyearbyen).map(
+      (cell) => cell.dayPeriod,
+    );
+    expect(new Set(periods)).toEqual(new Set([DayPeriod.NIGHT]));
   });
 
   it.each([
@@ -124,40 +161,14 @@ describe("getHourCells", () => {
   });
 
   it("should not reuse the cells of another reference zone", () => {
-    const fromMoscow = getHourCells(ALMATY, ALMATY_DAY, "Europe/Moscow");
+    const fromMoscow = getHourCells(
+      ALMATY,
+      ALMATY_DAY,
+      "Europe/Moscow",
+      ALMATY_COORDINATES,
+    );
 
     expect(fromMoscow).not.toBe(cellsOf(ALMATY));
     expect(fromMoscow.some((cell) => cell.midnightDate)).toBe(true);
-  });
-});
-
-describe("getHourFrameIndex", () => {
-  it.each([
-    ["2026-03-08T07:30:00Z", 12],
-    ["2026-03-08T08:00:00Z", 13],
-    ["2026-03-07T19:00:00Z", 0],
-    ["2026-03-08T18:59:00Z", 23],
-  ])("should put %s in column %i", (instant, column) => {
-    expect(getHourFrameIndex(ALMATY_DAY, Temporal.Instant.from(instant))).toBe(
-      column,
-    );
-  });
-
-  it("should clamp an instant before the day to column 0", () => {
-    expect(
-      getHourFrameIndex(
-        ALMATY_DAY,
-        Temporal.Instant.from("2026-03-07T10:00:00Z"),
-      ),
-    ).toBe(0);
-  });
-
-  it("should clamp an instant after the day to the last column", () => {
-    expect(
-      getHourFrameIndex(
-        ALMATY_DAY,
-        Temporal.Instant.from("2026-03-10T10:00:00Z"),
-      ),
-    ).toBe(23);
   });
 });

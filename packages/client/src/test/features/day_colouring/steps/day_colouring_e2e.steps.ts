@@ -1,8 +1,10 @@
 // Verifies FR9, FR11, FR12, NFR-A3, NFR-R2 of add-day-colouring-setting.
+// Verifies FR8, UX4, NFR-A1 of bind-day-periods-to-sun.
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import {
   cellOf,
+  cellsOf,
   frameColumnOf,
   frameOf,
   requireBox,
@@ -13,6 +15,7 @@ import {
   readThemeColours,
   type Theme,
 } from "../../main_page/steps/themeTokens";
+import { getContrastRatio } from "./colourContrast";
 import { dayTrackBarOf } from "./dayColouringE2eHelpers";
 
 const { Given, Then } = createBdd(test);
@@ -20,6 +23,7 @@ const { Given, Then } = createBdd(test);
 const EDGE_TOLERANCE_PX = 2;
 const ROW_INSET_TOLERANCE_PX = 8;
 const NON_WORKING_GREY = "non-working grey";
+const MIN_DIGIT_CONTRAST = 4.5;
 
 const colourOf = (theme: Theme, colourName: string) => {
   const colours = readThemeColours(theme);
@@ -66,6 +70,30 @@ Then(
     expect(backgroundImage).toContain("linear-gradient");
     expect(backgroundImage).toContain(`${colour} 0%`);
     expect(backgroundImage).toContain(`${colour} 100%`);
+  },
+);
+
+Then(
+  /^every cell of "([^"]+)" is the (light|dark) non-working grey with digits of a contrast of at least 4\.5:1$/,
+  async ({ locationsWorld }, city: string, theme: Theme) => {
+    const cells = cellsOf(locationsWorld.page, city);
+    await expect(cells.first()).toBeVisible();
+    const cellCount = await cells.count();
+    expect(cellCount).toBeGreaterThan(0);
+    for (let column = 0; column < cellCount; column += 1) {
+      const cell = cells.nth(column);
+      await expect(cell).toHaveCSS(
+        "background-color",
+        readThemeColours(theme).dayNonWorking,
+      );
+      const [background, digits] = await cell.evaluate((element) => [
+        getComputedStyle(element).backgroundColor,
+        getComputedStyle(element).color,
+      ]);
+      expect(getContrastRatio(background, digits)).toBeGreaterThanOrEqual(
+        MIN_DIGIT_CONTRAST,
+      );
+    }
   },
 );
 

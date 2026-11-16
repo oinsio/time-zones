@@ -2,7 +2,7 @@
 
 ## Context
 
-See `proposal.md` for the motivation. Driven by FR1–FR10 and NFR-P1–NFR-P3 of the proposal. This change builds on `add-city-coordinates-to-locations` (`Coordinates`, `Location.coordinates`, `zone-rules/zone-coordinates.json`).
+See `proposal.md` for the motivation. Driven by FR1–FR10 and NFR-P1–NFR-P3 of the proposal. This change builds on `add-city-coordinates-to-locations`, which has landed (`Coordinates`, `Location.coordinates`, `zone-rules/zone-coordinates.json`).
 
 Current state, read from the code:
 
@@ -12,7 +12,8 @@ Current state, read from the code:
 - `src/presenter/dayColours.ts` is the one place that turns a day colouring into colours: `presentDayColourStops(timeZoneId, day, dayColouring, workingHours)` and `presentHourCellColour(cell, isWorkingCell, dayColouring)`; `DayColour.WORK` mirrors `DayPeriod.WORK` by string value; `views/shared/dayTrackGradient.ts` maps colours to tokens (`--color-day-work`).
 - Callers pass only a zone ID: `presentDayTrack` (from `presentZoneMoment.ts`) and `presentHourStrip` (from `useHourGrid.ts`).
 - The Working hours colouring has its own model (`workingTime.ts`, `workingTimeSpans.ts`) and is not touched.
-- `src/model/timeZoneId.ts` already reads build-time data through a virtual module (`virtual:time-zone-aliases`).
+- `src/model/timeZoneId.ts` and `src/model/zoneAbbreviation.ts` already read build-time data through virtual modules (`virtual:time-zone-aliases`, `virtual:zone-abbreviations`) served by `scripts/zoneData/zoneDataPlugin.ts`; `vitest.config.ts` loads the same plugin, so tests read the real data.
+- `presentZoneMoment(subject, context)` takes `subject: { id, timeZoneId, cityLabel }`; `presentLocationRows` passes `{ ...location, cityLabel }`, so the location's `kind` and `coordinates` are at hand. The device time location carries the device time zone as its `timeZoneId` in state (ADR-0010).
 
 ## Goals / Non-Goals
 
@@ -44,11 +45,13 @@ Alternatives rejected:
 - A lookup table per city: data to ship and refresh for something that is a formula.
 - Sunrise and sunset (−0.833°) as boundaries: morning and evening would be the 30–40 minutes of twilight, about 2% of a track (UX1).
 
-### D2. The day period is a function of elevation and half-day (FR1, FR2)
+### D2. The day period is a function of elevation and half-day (FR1, FR2, NFR-P1)
 
 `getDayPeriodAt(coordinates, epochMilliseconds): DayPeriod` in `src/model/dayPeriods.ts`: night below −6°, day at +6° or more, otherwise morning when the instant lies between solar midnight and solar noon, evening otherwise. This is the definition; the polar cases need no branch.
 
-`getDayPeriodBoundaries(coordinates, span): DayPeriodBoundary[]` lists the boundaries inside a span from the solar days that overlap it: the four crossings where they exist; solar noon as morning→evening when the sun does not reach +6°; solar midnight as evening→morning when it does not go below −6°. A property test ties the two together: between two neighbouring boundaries `getDayPeriodAt` is constant and equals the earlier boundary's `to`.
+`getDayPeriodBoundaries(coordinates, day): DayPeriodBoundary[]` lists the boundaries inside the reference day, widened by half a blend window (`DAY_PERIOD_BLEND_MINUTES` / 2) at each end, from the solar days that overlap it: the four crossings where they exist; solar noon as morning→evening when the sun does not reach +6°; solar midnight as evening→morning when it does not go below −6°. A property test ties the two together: between two neighbouring boundaries `getDayPeriodAt` is constant and equals the earlier boundary's `to`.
+
+`getDayPeriodBoundaries` is memoized per reference day in a map keyed by the coordinates (`"latitude,longitude"`), reset when the reference day changes, as `getDayPeriodStops` is today. `getDayPeriodStops` and `getHourCells` both read their boundaries from it and never call `getSolarDay` themselves, so a location's track and cells share one computation: the widened day overlaps at most 3 solar days, which is the bound of NFR-P1.
 
 `DayPeriodBoundary` becomes `{ instant, from, to }`; `wallTime` and `blendMinutes` go away with `DAY_PERIOD_SCHEDULE` and `getDayPeriod(wallTime, schedule)`.
 
@@ -56,22 +59,26 @@ Alternatives rejected:
 
 `collectBlendWindows(boundaries, day)` centres a window of `DAY_PERIOD_BLEND_MINUTES = 30` on each boundary and clips each side at the midpoint to the neighbouring boundary. `assembleDayPeriodStops` stays. `collectOffsetEdges` and the type `OffsetEdge` are deleted: boundaries are instants, so a clock change cannot move them. `findOffsetTransitions` stays where `hourCells.ts` and the clock change note use it; if nothing else imports it from `dayPeriodWindows.ts`, it moves to `clockChange.ts`.
 
-When a span holds no boundary, `getDayPeriodStops` returns one stop with `getDayPeriodAt` of the span start.
+When the reference day holds no boundary, `getDayPeriodStops` returns one stop with `getDayPeriodAt` of the day start.
 
 ### D4. Coordinates for the sun are resolved once, in the model (FR7, FR8)
 
 `getSunCoordinates(location): Coordinates | undefined` in `src/model/sunCoordinates.ts`: `location.coordinates` for a city location that has them, else `getZoneCoordinates(location.timeZoneId)`; for the device time location always the latter.
 
-`getZoneCoordinates` reads a new virtual module `virtual:zone-coordinates`, built by the zone data plugin from `zone-rules/zone-coordinates.json` (418 zones, two integers each, about 3 KB gzipped — to be measured against the 150 KB initial budget). It is eager, so the device time card and lists stored before coordinates are coloured on the first paint with no wait for the lazy search data.
+The model never reads the device time zone itself: the device time location already holds it as `timeZoneId` (`architecture.md`: "it arrives as state via `SET_DEVICE_TIME_ZONE`"). `presentZoneMoment`'s `subject` type widens to carry `kind` and `coordinates`.
+
+`getZoneCoordinates` reads a new virtual module `virtual:zone-coordinates`, built by the zone data plugin from `zone-rules/zone-coordinates.json` (418 zones as integer tenths of a degree, `COORDINATE_TENTHS_PER_DEGREE`; the file is about 5 KB gzipped, less once served as a module — to be measured against the 150 KB initial budget). It is eager, so the device time card and lists stored before coordinates are coloured on the first paint with no wait for the lazy search data.
 
 Alternative rejected: reading zone coordinates from the lazy search data — the device time card would be grey on every start until 140 KB load.
 
 ### D5. Callers pass the location's coordinates; caches key on them (FR5, FR6, NFR-P1)
 
-- `getDayPeriodStops(coordinates | undefined, day)` returns `undefined` without coordinates. Its per-day cache keys on `"latitude,longitude"`.
+- `getDayPeriodStops(coordinates | undefined, day)` returns `undefined` without coordinates. Its per-day cache keys on `"latitude,longitude"`. It and `getHourCells` take their boundaries from the memoized `getDayPeriodBoundaries` (D2), so the track and the cells of one coordinates compute the sun once per reference day.
 - `getHourCells(timeZoneId, day, referenceZoneId, coordinates | undefined)`: `HourCell.dayPeriod` becomes `DayPeriod | undefined`, decided by the largest share of the cell among the periods the boundaries cut it into (ties: earlier). The cache key gains the coordinates.
 - `presentDayColourStops` and `presentHourStrip` take the coordinates beside the zone ID; `presentZoneMoment` and `useHourGrid` pass `getSunCoordinates(location)`.
-- A counter of computed solar days in `src/test/workCounters.ts` backs the work-bound scenarios; a `*.bench.ts` reports timings (ADR-0008).
+- `presentHourStrip(timeZoneId, context)`: the context object gains a required `coordinates: Coordinates | undefined` key, so typecheck finds every caller; `presentDayTrack`'s `DayTrackContext` gains the same key.
+- `presentHourStrip` keys its strip cache (`cachedStripsByZone`, today keyed by zone ID alone) on the zone ID and the coordinates: `timeZoneId` plus `"latitude,longitude"`, or a fixed marker for `undefined`. Two locations of one zone with different coordinates (Moscow and Kazan, a city location and the device time location, a location with coordinates and one without) get their own strips (FR7, UX2). `presentDayTrack`'s zone-keyed cache holds only hour labels, which do not depend on the sun, and stays as it is; its colour stops come from the model, keyed by coordinates.
+- The work-bound scenarios count sun computations with a new test helper, `src/test/solarDayCounter.ts`, in the style of `src/test/zoneLookupCounter.ts`. `WorkCount` in `src/test/workCounters.ts` counts only `Intl` constructors and Temporal methods, and the sun module uses neither, so the helper cannot spy on a platform API. It wraps the module instead: a test file declares `vi.mock("@/model/sun", async (importOriginal) => (await import("@/test/solarDayCounter")).countSunCalls(await importOriginal()))`. `countSunCalls` returns the module with `getSolarDay` and `getSunElevation` wrapped to add to module-level counts. `startSolarDayCount()` returns `{ solarDays(), elevations(), stop() }` and counts the calls made from other modules between start and stop. It throws when the calling test file has not wrapped the module, so "nothing was computed for the sun" can never pass because a mock is missing. This needs no counting hook in production code. It works because `dayPeriods.ts` and `hourCells.ts` call the sun only through the exports of `sun.ts`. A `*.bench.ts` reports the timings (ADR-0008).
 
 ### D6. No day periods → one neutral colour, decided in the presenter (FR8)
 
@@ -79,7 +86,7 @@ Alternative rejected: reading zone coordinates from the lazy search data — the
 
 ### D7. Renames (FR9)
 
-`DayPeriod.WORK` → `DayPeriod.DAY`; `DayColour.WORK` → `DayColour.DAY` (the string values must stay equal, `periodColour` relies on it); token `--color-day-work` → `--color-day-daylight` in the three theme blocks of `styles/tokens.css` and in `tailwind.config.ts` if it names it; `src/constants/dayPeriods.ts` loses the four wall-time constants and the two blend constants and gains `DAY_PERIOD_BLEND_MINUTES`. Russian and English interface texts do not name the periods, so no locale key changes. Nothing stored names a day period.
+`DayPeriod.WORK` → `DayPeriod.DAY`; `DayColour.WORK` → `DayColour.DAY` (the string values must stay equal, `periodColour` relies on it); token `--color-day-work` → `--color-day-daylight` in the three theme blocks of `src/styles/tokens.css` (`:root`, `:root[data-theme="dark"]`, the `prefers-color-scheme: dark` block), and the Tailwind colour `day.work` → `day.daylight` in `tailwind.config.ts`; `src/constants/dayPeriods.ts` loses the four wall-time constants and the two blend constants and gains `DAY_PERIOD_BLEND_MINUTES`. Russian and English interface texts do not name the periods, so no locale key changes. Nothing stored names a day period.
 
 ## Risks / Trade-offs
 
@@ -92,8 +99,8 @@ Alternative rejected: reading zone coordinates from the lazy search data — the
 
 ## Migration Plan
 
-1. Land after `add-city-coordinates-to-locations` is deployed, so lists already hold coordinates.
-2. One pull request: model, presenter, renames, specs, glossary and re-approved screenshots together; the glossary never names a concept the code lacks.
+1. `add-city-coordinates-to-locations` has landed, so lists gain coordinates; a location stored before it uses its zone coordinates (D4).
+2. One pull request: model, presenter, renames, specs, glossary and re-approved screenshots together; the glossary never names a concept the code lacks. The ADR (ADR-0016) and its `CLAUDE.md` line come as the handoff patch H1, applied on the branch before merging; recording a long-lived decision is a global ADR, not settled here.
 3. Rollback: revert the pull request; no stored data depends on it.
 
 ## Open Questions

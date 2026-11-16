@@ -2,11 +2,14 @@ import type { TFunction } from "i18next";
 import type { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import {
+  type Coordinates,
   getLocalDateTime,
   getOffsetDifferenceMinutes,
   getRowNote,
+  getSunCoordinates,
   getUtcOffsetMinutes,
   getZoneAbbreviation,
+  type LocationKind,
   type ReferenceDay,
   RowNoteKind,
   type WallClockNote,
@@ -85,9 +88,16 @@ export type PresentedZoneMoment = {
  * Implements FR2, FR6 of show-clock-change-note-on-location-cards (D4, D5): the clock change note
  * and the one row note.
  * Implements FR2, FR3, FR7 of show-zone-abbreviations-and-zone-label-setting (D5): the zone abbreviation label.
+ * Implements FR7, FR8 of bind-day-periods-to-sun (D4): the day track follows the sun at the subject's coordinates.
  */
 export function presentZoneMoment(
-  subject: { id: string; timeZoneId: string; cityLabel: string },
+  subject: {
+    id: string;
+    kind: LocationKind;
+    timeZoneId: string;
+    cityLabel: string;
+    coordinates?: Coordinates;
+  },
   {
     language,
     hourFormat,
@@ -149,6 +159,7 @@ export function presentZoneMoment(
     dayTrack: localDateTime
       ? presentDayTrack({
           timeZoneId: subject.timeZoneId,
+          coordinates: getSunCoordinates(subject),
           instant,
           day: referenceDay,
           language,

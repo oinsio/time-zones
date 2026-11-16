@@ -13,9 +13,9 @@ const { Then } = createBdd(test);
 const CITIES_OF_COLUMNS = ["Almaty", "Moscow", "Kolkata", "New York"];
 const OFFSET_EDGE_WIDTH_PX = 3;
 const NIGHT_COLUMN = 3;
-const MORNING_COLUMN = 7;
-const WORKING_COLUMN = 9;
-const EVENING_COLUMN = 18;
+const MORNING_COLUMN = 6;
+const DAY_COLUMN = 9;
+const EVENING_COLUMN = 17;
 const MIDNIGHT_COLUMN_OF_MOSCOW = 2;
 const OFFSET_EDGE_COLUMN_OF_NEW_YORK = 12;
 const POSITION_TOLERANCE_PX = 0.5;
@@ -37,15 +37,15 @@ Then(
   },
 );
 
-// Verifies FR4, UX1 of add-grid-hour-cells-and-hour-frame: the day-period colours of the theme.
+// Verifies FR4, UX1 of add-grid-hour-cells-and-hour-frame, FR6, UX5 of bind-day-periods-to-sun: the day-period colours of the theme.
 Then(
-  /^the cells of "([^"]+)" in columns 3, 7, 9 and 18 have the (light|dark) night, morning, work and evening colours$/,
+  /^the cells of "([^"]+)" in columns 3, 6, 9 and 17 have the (light|dark) night, morning, daylight and evening colours$/,
   async ({ locationsWorld }, city: string, theme: Theme) => {
     const colours = readThemeColours(theme);
     const expectedByColumn = [
       [NIGHT_COLUMN, colours.dayNight],
       [MORNING_COLUMN, colours.dayMorning],
-      [WORKING_COLUMN, colours.dayWork],
+      [DAY_COLUMN, colours.dayDaylight],
       [EVENING_COLUMN, colours.dayEvening],
     ] as const;
     for (const [column, colour] of expectedByColumn) {
@@ -92,11 +92,11 @@ Then(
   },
 );
 
-// Verifies FR4 of add-grid-hour-cells-and-hour-frame: digits on work cells.
+// Verifies FR4 of add-grid-hour-cells-and-hour-frame, FR6 of bind-day-periods-to-sun: digits on day cells.
 Then(
-  /^the digits of the work cell of "([^"]+)" in column 9 have the (light|dark) cell digit colour$/,
+  /^the digits of the day cell of "([^"]+)" in column 9 have the (light|dark) cell digit colour$/,
   async ({ locationsWorld }, city: string, theme: Theme) => {
-    await expect(cellOf(locationsWorld.page, city, WORKING_COLUMN)).toHaveCSS(
+    await expect(cellOf(locationsWorld.page, city, DAY_COLUMN)).toHaveCSS(
       "color",
       readThemeColours(theme).hourCellForeground,
     );

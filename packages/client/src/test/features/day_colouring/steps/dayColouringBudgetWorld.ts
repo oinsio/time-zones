@@ -1,7 +1,11 @@
 // Implements NFR-P1 of add-day-colouring-setting: the rows of the day colouring budget.
 import i18n from "i18next";
 import { Temporal } from "@/lib/temporal";
-import { getReferenceDay, INITIAL_WORLD_CLOCK_STATE } from "@/model";
+import {
+  getReferenceDay,
+  getSunCoordinates,
+  INITIAL_WORLD_CLOCK_STATE,
+} from "@/model";
 import {
   type DayColouring,
   DEFAULT_PREFERENCES,
@@ -68,6 +72,7 @@ export const presentBudgetRows = (
   const strips = locations.map((location) =>
     presentHourStrip(location.timeZoneId, {
       day: referenceDay,
+      coordinates: getSunCoordinates(location),
       referenceZoneId: REFERENCE_ZONE,
       language: LANGUAGE,
       hourFormat: HourFormat.H24,

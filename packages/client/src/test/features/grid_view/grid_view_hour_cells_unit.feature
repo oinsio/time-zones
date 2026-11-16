@@ -1,5 +1,5 @@
 Feature: Hour cells of the Grid view
-  Implements change add-grid-hour-cells-and-hour-frame.
+  Implements change add-grid-hour-cells-and-hour-frame and bind-day-periods-to-sun.
   As a user I read the local hour, the day period and the date change of every location from its hour strip.
 
   @add-grid-hour-cells-and-hour-frame @FR1
@@ -22,8 +22,21 @@ Feature: Hour cells of the Grid view
       | 2026-11-01 | 25    |
       | 2026-06-01 | 24    |
 
-  @add-grid-hour-cells-and-hour-frame @FR4
+  @bind-day-periods-to-sun @FR6
   Scenario: Day periods of Almaty
-    Given the reference zone is "Asia/Almaty" and the reference day is 2026-03-08
-    When the hour cells of Almaty are presented
-    Then columns 0-6 and 22-23 are night, 7-8 morning, 9-17 work and 18-21 evening
+    Given the day colouring is Time of day, the reference zone is "Asia/Almaty" and the reference day is 2026-03-08
+    When the hour cells of Almaty at 43.3, 76.9 are presented
+    Then columns 0-5 and 18-23 are night, column 6 is morning, columns 7-16 are day and column 17 is evening
+
+  @bind-day-periods-to-sun @FR6
+  Scenario: The larger part decides
+    Given a location whose night ends at 06:05 and whose day starts at 06:55 local time
+    When its hour cells are presented in the Time of day colouring
+    Then the cell that starts at 06:00 is morning
+    And the cell that starts at 07:00 is day
+
+  @bind-day-periods-to-sun @FR6
+  Scenario: A tie takes the earlier period
+    Given a location whose night ends at 06:30 local time and whose day starts after 07:00
+    When its hour cells are presented in the Time of day colouring
+    Then the cell that starts at 06:00 is night

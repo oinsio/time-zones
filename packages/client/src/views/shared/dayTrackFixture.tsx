@@ -13,7 +13,7 @@ export const ALMATY_TRACK: PresentedDayTrack = {
   stops: [
     { fraction: 0.270833, colour: DayColour.NIGHT },
     { fraction: 0.3125, colour: DayColour.MORNING },
-    { fraction: 0.380208, colour: DayColour.WORK },
+    { fraction: 0.380208, colour: DayColour.DAY },
   ],
   hourLabels: ALMATY_LABELS.map((label, labelIndex) => ({
     fraction: labelIndex / (ALMATY_LABELS.length - 1),

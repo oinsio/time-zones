@@ -21,6 +21,7 @@ export const importModules = async () => {
     import("@/presenter"),
     import("@/lib/temporal"),
   ]);
+  await model.loadSunSupport();
   return { adapters, model, presenter, temporal };
 };
 

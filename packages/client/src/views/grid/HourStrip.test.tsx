@@ -141,7 +141,7 @@ describe("HourStrip", () => {
     renderStrip();
 
     expect(cellOf(3).style.backgroundColor).toBe("var(--color-day-night)");
-    expect(cellOf(10).style.backgroundColor).toBe("var(--color-day-work)");
+    expect(cellOf(10).style.backgroundColor).toBe("var(--color-day-daylight)");
     expect(cellOf(3)).toHaveClass("text-foreground");
     expect(cellOf(10)).toHaveClass("text-hour-cell-foreground");
   });

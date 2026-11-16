@@ -1,6 +1,6 @@
 // Verifies FR5, FR6, FR7 of add-city-coordinates-to-locations.
 import { describe, expect, it } from "vitest";
-import { parseCoordinates } from "./coordinates";
+import { getCoordinatesKey, parseCoordinates } from "./coordinates";
 
 describe("parseCoordinates", () => {
   it.each([
@@ -33,5 +33,29 @@ describe("parseCoordinates", () => {
     expect(
       parseCoordinates({ latitude: 1, longitude: 2, extra: true }),
     ).toStrictEqual({ latitude: 1, longitude: 2 });
+  });
+});
+
+describe("getCoordinatesKey", () => {
+  it("should join latitude and longitude", () => {
+    expect(getCoordinatesKey({ latitude: 55.8, longitude: 49.1 })).toBe(
+      "55.8,49.1",
+    );
+  });
+
+  it("should differ for coordinates that differ in the longitude only", () => {
+    expect(getCoordinatesKey({ latitude: 55.8, longitude: 37.6 })).not.toBe(
+      getCoordinatesKey({ latitude: 55.8, longitude: 49.1 }),
+    );
+  });
+
+  it("should give one fixed key without coordinates", () => {
+    expect(getCoordinatesKey(undefined)).toBe(getCoordinatesKey(undefined));
+  });
+
+  it("should not confuse no coordinates with any coordinates", () => {
+    expect(getCoordinatesKey(undefined)).not.toBe(
+      getCoordinatesKey({ latitude: 0, longitude: 0 }),
+    );
   });
 });

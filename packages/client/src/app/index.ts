@@ -1,6 +1,7 @@
 export { AppErrorBoundary } from "./AppErrorBoundary";
 export { AppShell } from "./AppShell";
 export { MainPage } from "./MainPage";
+export { mountApp } from "./mountApp";
 export { OfflineReadyNotice } from "./OfflineReadyNotice";
 export { RecoveryScreen } from "./RecoveryScreen";
 export { StorageWarning } from "./StorageWarning";

@@ -8,6 +8,7 @@ import { Temporal } from "@/lib/temporal";
 import {
   getMeetingRangeAfterHandleMove,
   getReferenceDay,
+  getZoneCoordinates,
   INITIAL_WORLD_CLOCK_STATE,
   MeetingHandle,
   type MeetingRange,
@@ -51,6 +52,7 @@ const presentRows = (meeting: MeetingRange): PresentedHourStrip[] =>
     });
     return presentHourStrip(zone, {
       day,
+      coordinates: getZoneCoordinates(zone),
       referenceZoneId: REFERENCE_ZONE,
       language: "en",
       hourFormat: HourFormat.H24,

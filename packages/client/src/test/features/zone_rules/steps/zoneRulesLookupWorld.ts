@@ -79,6 +79,7 @@ export function presentAlmaty(modules: FreshModules, instantText: string) {
   });
   const { cells } = presenter.presentHourStrip(ALMATY_ZONE_ID, {
     day: referenceDay,
+    coordinates: model.getZoneCoordinates(ALMATY_ZONE_ID),
     referenceZoneId: ALMATY_ZONE_ID,
     language: LANGUAGE,
     hourFormat: HourFormat.H24,

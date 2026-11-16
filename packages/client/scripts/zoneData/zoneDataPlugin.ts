@@ -3,11 +3,15 @@
  * Implements FR2, FR9, FR16 of add-locations-via-search (D6, D8).
  * Implements FR1, FR4 of show-zone-abbreviations-and-zone-label-setting (D1).
  * Implements FR9 of add-zone-rules-from-iana (D8): abbreviations from the release.
+ * Implements FR7, FR8, NFR-P2 of bind-day-periods-to-sun (D4): zone coordinates.
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Plugin } from "vite";
-import { ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
+import {
+  ZONE_COORDINATES_FILE,
+  ZONE_RULES_RELEASE_FILE,
+} from "../../app.config.ts";
 import {
   parseZoneRulesRelease,
   type ZoneRulesRelease,
@@ -23,6 +27,7 @@ const ALIASES_MODULE_ID = "virtual:time-zone-aliases";
 const CITIES_URL_MODULE_ID = "virtual:zone-cities-url";
 const CITIES_MODULE_ID = "virtual:zone-cities";
 const ABBREVIATIONS_MODULE_ID = "virtual:zone-abbreviations";
+const COORDINATES_MODULE_ID = "virtual:zone-coordinates";
 const UTC_ZONE_ID = "UTC";
 const RESOLVED_ID_PREFIX = "\0";
 const TEST_MODE = "test";
@@ -32,6 +37,15 @@ const JSON_CONTENT_TYPE = "application/json";
 const CONTENT_TYPE_HEADER = "Content-Type";
 
 let cachedZoneAbbreviations: string | undefined;
+
+type ZoneCoordinatesDocument = { zones: Record<string, [number, number]> };
+
+function loadZoneCoordinates(coordinatesFilePath: string): string {
+  const document = JSON.parse(
+    readFileSync(coordinatesFilePath, "utf8"),
+  ) as ZoneCoordinatesDocument;
+  return JSON.stringify(document.zones);
+}
 
 function readZoneRulesRelease(releaseFilePath: string): ZoneRulesRelease {
   const release = parseZoneRulesRelease(
@@ -60,6 +74,7 @@ export function zoneDataPlugin(): Plugin {
   let isTestMode = false;
   let base = "/";
   let releaseFilePath = ZONE_RULES_RELEASE_FILE;
+  let coordinatesFilePath = ZONE_COORDINATES_FILE;
   let datasetFilePath = DATASET_PATH;
   return {
     name: "time-zones-zone-data",
@@ -68,6 +83,7 @@ export function zoneDataPlugin(): Plugin {
       isTestMode = config.mode === TEST_MODE;
       base = config.base;
       releaseFilePath = resolve(config.root, ZONE_RULES_RELEASE_FILE);
+      coordinatesFilePath = resolve(config.root, ZONE_COORDINATES_FILE);
       datasetFilePath = resolve(config.root, DATASET_PATH);
     },
     configureServer(server) {
@@ -82,6 +98,7 @@ export function zoneDataPlugin(): Plugin {
       const isServed =
         source === ALIASES_MODULE_ID ||
         source === ABBREVIATIONS_MODULE_ID ||
+        source === COORDINATES_MODULE_ID ||
         source === CITIES_URL_MODULE_ID ||
         (source === CITIES_MODULE_ID && isTestMode);
       return isServed ? `${RESOLVED_ID_PREFIX}${source}` : undefined;
@@ -92,6 +109,9 @@ export function zoneDataPlugin(): Plugin {
       }
       if (resolvedId === `${RESOLVED_ID_PREFIX}${ABBREVIATIONS_MODULE_ID}`) {
         return `export default ${loadZoneAbbreviations(releaseFilePath)};`;
+      }
+      if (resolvedId === `${RESOLVED_ID_PREFIX}${COORDINATES_MODULE_ID}`) {
+        return `export default ${loadZoneCoordinates(coordinatesFilePath)};`;
       }
       if (resolvedId === `${RESOLVED_ID_PREFIX}${CITIES_MODULE_ID}`) {
         const { zoneCities, cityData } = loadCitySearchData(datasetFilePath);

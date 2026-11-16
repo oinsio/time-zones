@@ -16,18 +16,18 @@ describe("buildDayTrackGradient", () => {
     const gradient = buildDayTrackGradient([
       { fraction: 0.2708333333, colour: DayColour.NIGHT },
       { fraction: 0.3125, colour: DayColour.MORNING },
-      { fraction: 0.38020833, colour: DayColour.WORK },
+      { fraction: 0.38020833, colour: DayColour.DAY },
     ]);
 
     expect(gradient).toBe(
-      "linear-gradient(to right, var(--color-day-night) 27.0833%, var(--color-day-morning) 31.25%, var(--color-day-work) 38.0208%)",
+      "linear-gradient(to right, var(--color-day-night) 27.0833%, var(--color-day-morning) 31.25%, var(--color-day-daylight) 38.0208%)",
     );
   });
 
   it.each([
     [DayColour.NIGHT, "--color-day-night"],
     [DayColour.MORNING, "--color-day-morning"],
-    [DayColour.WORK, "--color-day-work"],
+    [DayColour.DAY, "--color-day-daylight"],
     [DayColour.EVENING, "--color-day-evening"],
     [DayColour.PLAIN, "--color-accent"],
     [DayColour.WORKING_TIME, "--color-accent"],
@@ -39,7 +39,7 @@ describe("buildDayTrackGradient", () => {
   it.each([
     [DayColour.NIGHT, "text-foreground"],
     [DayColour.MORNING, "text-hour-cell-foreground"],
-    [DayColour.WORK, "text-hour-cell-foreground"],
+    [DayColour.DAY, "text-hour-cell-foreground"],
     [DayColour.EVENING, "text-hour-cell-foreground"],
     [DayColour.PLAIN, "text-accent-foreground"],
     [DayColour.WORKING_TIME, "text-accent-foreground"],

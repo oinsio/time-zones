@@ -292,51 +292,6 @@ A time selection SHALL NOT write anything to storage and MUST NOT be passed to o
 - **THEN** the moment is still pinned to `2026-03-08T13:00:00Z`
 - **AND** the Moscow card shows `16:00`
 
-### Requirement: Day-period colours
-While the day colouring is Time of day (the default, see the `day-colouring` capability), each track SHALL be coloured by its location's day periods in the location's own local time: night from 22:00 to 07:00, morning from 07:00 to 09:00, work from 09:00 to 18:00, evening from 18:00 to 22:00. The colour at a position MUST be the colour of the period of the location's local time at that position's instant, except inside blend windows. Each boundary that occurs during the reference day blends the colours of the two periods linearly over a window of absolute time centred on the boundary's instant. The window is 60 minutes for 07:00 and 22:00, and 15 minutes for 09:00 and 18:00.
-
-A boundary whose local time does not exist on that local date (a DST gap) MUST be skipped. A boundary whose local time occurs twice uses the earlier instant. An offset change inside the reference day after which the local time falls in another period than just before it MUST be a hard colour edge at the instant of the change. The colours MUST be the night, morning, work and evening design tokens of the active theme, light or dark. Colours also differ in lightness, as the tokens do.
-
-Inputs: the location's IANA identifier and the reference day. Output: the colour stops, each a position (fraction of the day) and a period. Positions may lie slightly outside 0–1 for a window that crosses an end of the day. Errors: none for known zones; unknown zones have no track.
-
-In the Plain and the Working hours day colourings the track is coloured as the `day-colouring` capability defines, and this requirement does not apply.
-
-<!-- implements FR6 of add-time-sliders-to-location-cards; FR2, FR9, FR10 of add-day-colouring-setting -->
-
-#### Scenario: Colour stops of Almaty and New York
-- **GIVEN** the day colouring is Time of day and the device time zone is `Asia/Almaty`
-- **AND** the current instant is `2026-03-08T07:30:00Z`
-- **WHEN** the tracks of Almaty and New York are presented
-- **THEN** the colour stops of `<city>` are `<stops>` (±0.000001)
-
-| city | stops |
-|---|---|
-| Almaty | `0.270833` night, `0.3125` morning, `0.369792` morning, `0.380208` work, `0.744792` work, `0.755208` evening, `0.895833` evening, `0.9375` night |
-| New York | `0.161458` work, `0.171875` evening, `0.3125` evening, `0.354167` night, `0.645833` night, `0.6875` morning, `0.744792` morning, `0.755208` work |
-
-#### Scenario: Colours follow the local period outside blend windows
-- **GIVEN** the reference day of the previous scenario
-- **WHEN** the colour of the Almaty and New York tracks is read at each quarter-hour position of the day that lies outside a blend window
-- **THEN** it is the colour of the period of that location's local time at that instant
-
-#### Scenario: Boundaries of a skipped local date are left out
-- **GIVEN** the device time zone is `UTC`
-- **AND** the moment is pinned to `2011-12-30T12:00:00Z`
-- **WHEN** the track of Apia (`Pacific/Apia`) is presented
-- **THEN** no colour stop comes from a boundary of the local date `2011-12-30`, which Apia skipped
-- **AND** the stops are `0.161458` work, `0.171875` evening, `0.3125` evening, `0.354167` night, `0.6875` night, `0.729167` morning, `0.786458` morning, `0.796875` work (±0.000001)
-
-#### Scenario: A period change across an offset change is a hard edge
-- **GIVEN** an offset change inside the reference day at the position `0.5`
-- **AND** the local time is in the evening just before it and in the night just after it
-- **WHEN** the colour stops are assembled
-- **THEN** two stops at `0.5` change from evening to night, with no blend between them
-
-#### Scenario: Colours come from the theme tokens
-- **GIVEN** the list contains Almaty
-- **WHEN** the list is shown in the light or the dark theme
-- **THEN** the colours of the Almaty track are the night, morning, work and evening token colours of that theme
-
 ### Requirement: Local hour labels
 On screens 768 px and wider, every track SHALL show five local hour labels. They are placed at the start of the reference day, at 6, 12 and 18 hours of absolute time after it, and at its end, each at its position on the track. Each label MUST be the location's local time at that instant, written in the hour format (see the `settings` capability): in 24-hour format as two-digit hours (`04`), followed by the minutes when they are not zero (`00:30`, `05:45`); in 12-hour format as the hour with a day period marker by the interface language's conventions (`4 AM`), with the minutes when they are not zero (`12:30 AM`). The labels MUST be derived from the location's IANA identifier for those instants, so DST and :30 / :45 offsets are respected. Below 768 px no labels are shown. The labels are decorative: they MUST NOT be read by assistive technology, because the slider's value text names the time. Inputs: the location's IANA identifier, the reference day and the hour format. Output: five label texts with their positions. Errors: none for known zones. <!-- implements FR7 of add-time-sliders-to-location-cards; FR5 of add-settings-page-and-device-time-location -->
 
@@ -1058,3 +1013,63 @@ A text of digits alone that is no longer than its hour is shown as typed. A text
 | `12345` |
 | `9:60` |
 | `130` |
+
+### Requirement: Day-period colours by the sun
+While the day colouring is Time of day (the default, see the `day-colouring` capability), each track SHALL be coloured by its location's day periods as the `day-periods` capability defines them: night, morning, day and evening by the sun's elevation at the location's coordinates. The colour at a position MUST be the colour of the day period at that position's instant, except inside blend windows. Each day-period boundary that occurs during the reference day blends the colours of the two periods linearly over a blend window of 30 minutes of absolute time centred on the boundary's instant. A blend window MUST NOT pass the midpoint between its boundary and the neighbouring boundary; it is shortened on that side instead.
+
+A clock change inside the reference day MUST NOT make a colour edge and MUST NOT move a boundary in absolute time. A day in which the sun crosses no threshold has no boundary, and the track is one colour. The colours MUST be the night, morning, daylight and evening design tokens of the active theme, light or dark. Colours also differ in lightness, as the tokens do. A location without day periods is coloured as the `day-colouring` requirement "Locations without day periods" defines.
+
+Inputs: the location's coordinates and the reference day. Output: the colour stops, each a position (fraction of the day) and a period. Positions may lie slightly outside 0–1 for a window that crosses an end of the day. Errors: none.
+
+In the Plain and the Working hours day colourings the track is coloured as the `day-colouring` capability defines, and this requirement does not apply.
+
+<!-- implements FR5, FR9, UX1 of bind-day-periods-to-sun; continues FR6 of add-time-sliders-to-location-cards and FR2, FR9, FR10 of add-day-colouring-setting -->
+
+#### Scenario: Colour stops of Almaty and New York
+- **GIVEN** the day colouring is Time of day and the device time zone is `Asia/Almaty`
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **WHEN** the tracks of Almaty at 43.3, 76.9 and New York at 40.7, −74.0 are presented
+- **THEN** the colour stops of `<city>` change period, in order, around `<boundaries>` in the time of `Asia/Almaty`
+- **AND** each pair of stops is 30 minutes apart and centred within 3 minutes of that time
+
+| city | boundaries |
+|---|---|
+| Almaty | night to morning 05:48, morning to day 06:55, day to evening 17:11, evening to night 18:18 |
+| New York | day to evening 03:17, evening to night 04:21, night to morning 15:51, morning to day 16:55 |
+
+#### Scenario: Colours follow the day period outside blend windows
+- **GIVEN** the reference day of the previous scenario
+- **WHEN** the colour of the Almaty and New York tracks is read at each quarter-hour position of the day that lies outside a blend window
+- **THEN** it is the colour of that location's day period at that instant
+
+#### Scenario: Morning and evening are visible bands
+- **GIVEN** the day colouring is Time of day and Moscow at 55.8, 37.6
+- **WHEN** its track is presented for 8 March 2026
+- **THEN** the morning band, between its two boundaries, is between 3% and 7% of the track
+
+#### Scenario: A blend window stops at the midpoint
+- **GIVEN** two day-period boundaries 20 minutes apart inside the reference day
+- **WHEN** the colour stops are assembled
+- **THEN** the blend windows of the two boundaries meet at the midpoint between them and do not overlap
+
+#### Scenario: A clock change makes no colour edge
+- **GIVEN** the day colouring is Time of day and the device time zone is `America/New_York`
+- **AND** the moment is pinned to noon of 8 March 2026, when the clocks of New York go forward
+- **WHEN** the track of New York is presented
+- **THEN** no two colour stops stand at the position of the clock change
+- **AND** the stops are those of the four day-period boundaries of that day
+
+#### Scenario: A polar day is one colour
+- **GIVEN** the day colouring is Time of day and the location Longyearbyen at 78.2, 15.6
+- **WHEN** its track is presented for 21 June 2026
+- **THEN** the whole track is the daylight colour
+
+#### Scenario: A polar night is one colour
+- **GIVEN** the day colouring is Time of day and the location Longyearbyen at 78.2, 15.6
+- **WHEN** its track is presented for 21 December 2026
+- **THEN** the whole track is the night colour
+
+#### Scenario: Colours come from the theme tokens
+- **GIVEN** the list contains Almaty
+- **WHEN** the list is shown in the light or the dark theme
+- **THEN** the colours of the Almaty track are the night, morning, daylight and evening token colours of that theme

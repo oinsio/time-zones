@@ -18,7 +18,7 @@ import {
   useWallTimeInput,
 } from "@/controller";
 import { Temporal } from "@/lib/temporal";
-import { buildDeviceTimeLocation } from "@/model";
+import { buildDeviceTimeLocation, type Location } from "@/model";
 import { LocationsLoadStatus, PreferencesLoadStatus } from "@/ports";
 import {
   type DayColouring,
@@ -118,6 +118,15 @@ export const createTimeSelectionWorld = () => {
           locations: storedLocations.filter(
             (location) => location.id !== removedId,
           ),
+          homeLocationId: null,
+        });
+      });
+    },
+    /** Implements FR7 of bind-day-periods-to-sun: another tab saves the list with changed locations; the open app takes it over. */
+    saveListInAnotherTab: (change: (location: Location) => Location) => {
+      act(() => {
+        createInMemoryLocationRepository({ backend }).save({
+          locations: storedLocations.map(change),
           homeLocationId: null,
         });
       });

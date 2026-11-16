@@ -1,22 +1,37 @@
+// Verifies FR2, FR5, FR9, UX1, UX3 of bind-day-periods-to-sun.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
 import { expect } from "vitest";
-import { assembleDayPeriodStops, DayPeriod, type DayPeriodStop } from "@/model";
+import {
+  assembleDayPeriodStops,
+  collectBlendWindows,
+  DayPeriod,
+  type DayPeriodStop,
+} from "@/model";
 import {
   expectLabels,
   expectPeriodColoursOutsideBlends,
-  expectStops,
 } from "./dayColourChecks";
+import {
+  expectBoundaryStops,
+  expectWholeTrackColour,
+  getMorningBandPercent,
+} from "./dayPeriodStopChecks";
 import { createTimeSelectionWorld } from "./timeSelectionWorld";
 
 const feature = await loadFeature("../time_selection_day_colours.feature");
 
-const HARD_EDGE_FRACTION = 0.5;
+const MORNING_BAND_MIN_PERCENT = 3;
+const MORNING_BAND_MAX_PERCENT = 7;
+const DAY_LENGTH_MINUTES = 1440;
+const FIRST_BOUNDARY_MINUTES = 360;
+const CLOSE_BOUNDARIES_MINUTES = 20;
+const FOUR_BOUNDARIES = 4;
+const STOPS_PER_BOUNDARY = 2;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
-  let hardEdgeStops: DayPeriodStop[] = [];
 
   f.BeforeEachScenario(async () => {
     await world.reset();
@@ -31,30 +46,39 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const givenAppOpen = () => world.open();
   const givenPinnedHere = () =>
     world.selectFraction(world.rows()[0]?.dayTrack?.fraction ?? 0);
-  const expectCityStops = (city: string, stopsText: string) =>
-    expectStops(world, city, stopsText);
   const expectCityLabels = (city: string, labelsText: string) =>
     expectLabels(world, city, labelsText);
 
-  // @add-time-sliders-to-location-cards @FR6 @M5
+  // @bind-day-periods-to-sun @FR5
   f.ScenarioOutline(
     "Colour stops of Almaty and New York",
     ({ Given, And, When, Then }, variables) => {
-      Given("the device time zone is {string}", givenZone);
+      Given(
+        "the day colouring is Time of day and the device time zone is {string}",
+        givenZone,
+      );
       And("the current instant is {string}", givenInstant);
       And("the list contains {string}", givenList);
       When("the user opens the app", givenAppOpen);
-      Then("the colour stops of <city> are <stops>", () =>
-        expectCityStops(variables.city, variables.stops),
+      Then(
+        "the colour stops of <city> change period, in order, around <boundaries> in the time of Asia/Almaty",
+        () => expectBoundaryStops(world, variables.city, variables.boundaries),
+      );
+      And(
+        "each pair of stops is 30 minutes apart and centred within 3 minutes of that time",
+        () => undefined,
       );
     },
   );
 
-  // @add-time-sliders-to-location-cards @FR6 @M5
+  // @bind-day-periods-to-sun @FR5
   f.Scenario(
-    "Colours follow the local period outside blend windows",
+    "Colours follow the day period outside blend windows",
     ({ Given, And, When, Then }) => {
-      Given("the device time zone is {string}", givenZone);
+      Given(
+        "the day colouring is Time of day and the device time zone is {string}",
+        givenZone,
+      );
       And("the current instant is {string}", givenInstant);
       And("the list contains {string}", givenList);
       And("the app is open", givenAppOpen);
@@ -63,7 +87,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         () => undefined,
       );
       Then(
-        "it is the colour of the period of that location's local time at that instant",
+        "it is the colour of that location's day period at that instant",
         () => {
           expect(expectPeriodColoursOutsideBlends(world)).toBeGreaterThan(0);
         },
@@ -71,68 +95,129 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @add-time-sliders-to-location-cards @FR6
+  // @bind-day-periods-to-sun @FR5 @UX1 @M6
   f.Scenario(
-    "Boundaries of a skipped local date are left out",
+    "Morning and evening are visible bands",
     ({ Given, And, When, Then }) => {
-      Given("the device time zone is {string}", givenZone);
+      Given(
+        "the day colouring is Time of day and the device time zone is {string}",
+        givenZone,
+      );
       And("the current instant is {string}", givenInstant);
       And("the list contains {string}", givenList);
-      And("the app is open", givenAppOpen);
-      And("the moment is pinned at its current position", givenPinnedHere);
-      When("the track of Apia is presented", () =>
-        expect(world.trackOf("Apia")).toBeDefined(),
-      );
+      When("the user opens the app", givenAppOpen);
       Then(
-        "the colour stops of {string} are {string}",
-        (_ctx, city: string, stops: string) => expectCityStops(city, stops),
+        "the morning band of Moscow is between 3% and 7% of the track",
+        () => {
+          const percent = getMorningBandPercent(world, "Moscow");
+          expect(percent).toBeGreaterThanOrEqual(MORNING_BAND_MIN_PERCENT);
+          expect(percent).toBeLessThanOrEqual(MORNING_BAND_MAX_PERCENT);
+        },
       );
     },
   );
 
-  // @add-time-sliders-to-location-cards @FR6
+  // @bind-day-periods-to-sun @FR5
   f.Scenario(
-    "A period change across an offset change is a hard edge",
-    ({ Given, And, When, Then }) => {
-      let edgeInstantMinutes = 0;
-      const dayLengthMinutes = 1440;
+    "A blend window stops at the midpoint",
+    ({ Given, When, Then }) => {
+      let stops: readonly DayPeriodStop[] = [];
       Given(
-        "an offset change inside the reference day at the position {number}",
-        (_ctx, position: number) => {
-          edgeInstantMinutes = position * dayLengthMinutes;
-          expect(position).toBe(HARD_EDGE_FRACTION);
-        },
-      );
-      And(
-        "the local time is in the evening just before it and in the night just after it",
+        "two day-period boundaries 20 minutes apart inside the reference day",
         () => undefined,
       );
       When("the colour stops are assembled", () => {
         const start = world.clock().instant();
-        hardEdgeStops = assembleDayPeriodStops(
-          [],
-          [
-            {
-              instant: start.add({ minutes: edgeInstantMinutes }),
-              before: DayPeriod.EVENING,
-              after: DayPeriod.NIGHT,
-            },
-          ],
-          {
-            start,
-            end: start.add({ minutes: dayLengthMinutes }),
-            lengthMinutes: dayLengthMinutes,
-            clockChangeWindow: { start, end: start },
-          },
+        const day = {
+          start,
+          end: start.add({ minutes: DAY_LENGTH_MINUTES }),
+          lengthMinutes: DAY_LENGTH_MINUTES,
+          clockChangeWindow: { start, end: start },
+        };
+        const first = start.add({ minutes: FIRST_BOUNDARY_MINUTES });
+        stops = assembleDayPeriodStops(
+          collectBlendWindows(
+            [
+              { instant: first, from: DayPeriod.NIGHT, to: DayPeriod.MORNING },
+              {
+                instant: first.add({ minutes: CLOSE_BOUNDARIES_MINUTES }),
+                from: DayPeriod.MORNING,
+                to: DayPeriod.DAY,
+              },
+            ],
+            day,
+          ),
+          day,
         );
       });
       Then(
-        "two stops at {number} change from evening to night, with no blend between them",
-        (_ctx, position: number) =>
-          expect(hardEdgeStops).toEqual([
-            { fraction: position, period: DayPeriod.EVENING },
-            { fraction: position, period: DayPeriod.NIGHT },
-          ]),
+        "the blend windows of the two boundaries meet at the midpoint between them and do not overlap",
+        () => {
+          const midpointFraction =
+            (FIRST_BOUNDARY_MINUTES + CLOSE_BOUNDARIES_MINUTES / 2) /
+            DAY_LENGTH_MINUTES;
+          expect([stops[1].fraction, stops[2].fraction]).toEqual([
+            midpointFraction,
+            midpointFraction,
+          ]);
+          expect(stops.map((stop) => stop.fraction)).toEqual(
+            [...stops.map((stop) => stop.fraction)].sort((x, y) => x - y),
+          );
+        },
+      );
+    },
+  );
+
+  // @bind-day-periods-to-sun @FR5 @FR9
+  f.Scenario(
+    "A clock change makes no colour edge",
+    ({ Given, And, When, Then }) => {
+      Given(
+        "the day colouring is Time of day and the device time zone is {string}",
+        givenZone,
+      );
+      And("the current instant is {string}", givenInstant);
+      And("the list contains {string}", givenList);
+      And("the app is open", givenAppOpen);
+      And("the moment is pinned at its current position", givenPinnedHere);
+      When("the track of New York is presented", () =>
+        expect(world.trackOf("New York")).toBeDefined(),
+      );
+      Then(
+        "no two colour stops stand at the position of the clock change",
+        () => {
+          const fractions = world
+            .trackOf("New York")
+            .stops.map((stop) => stop.fraction);
+          expect(new Set(fractions).size).toBe(fractions.length);
+        },
+      );
+      And(
+        "the stops are those of the four day-period boundaries of that day",
+        () => {
+          expect(world.trackOf("New York").stops).toHaveLength(
+            FOUR_BOUNDARIES * STOPS_PER_BOUNDARY,
+          );
+        },
+      );
+    },
+  );
+
+  // @bind-day-periods-to-sun @FR2 @FR5 @UX3
+  f.ScenarioOutline(
+    "A polar track is one colour",
+    ({ Given, And, When, Then }, variables) => {
+      Given(
+        "the day colouring is Time of day and the device time zone is {string}",
+        givenZone,
+      );
+      And("the current instant is <instant>", () =>
+        world.setInstant(variables.instant),
+      );
+      And("the list contains {string}", givenList);
+      When("the user opens the app", givenAppOpen);
+      Then("the whole track of Longyearbyen is the <colour> colour", () =>
+        expectWholeTrackColour(world, "Longyearbyen", variables.colour),
       );
     },
   );

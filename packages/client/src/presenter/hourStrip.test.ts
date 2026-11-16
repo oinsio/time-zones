@@ -1,5 +1,6 @@
 // Verifies FR2, FR9–FR12, NFR-P1 of add-day-colouring-setting.
 // Verifies FR3, FR4, FR5, NFR-P1 of add-grid-hour-cells-and-hour-frame.
+// Verifies FR6, FR7, FR8, NFR-P1, UX2 of bind-day-periods-to-sun.
 
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
@@ -14,8 +15,12 @@ const DAY = getReferenceDay(
   { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "Asia/Almaty" },
   Temporal.Instant.from("2026-03-08T07:30:00Z"),
 );
+const ALMATY_COORDINATES = { latitude: 43.3, longitude: 76.9 };
+const MOSCOW_COORDINATES = { latitude: 55.8, longitude: 37.6 };
+const KAZAN_COORDINATES = { latitude: 55.8, longitude: 49.1 };
 const CONTEXT: HourStripContext = {
   day: DAY,
+  coordinates: ALMATY_COORDINATES,
   referenceZoneId: "Asia/Almaty",
   language: "en",
   hourFormat: HourFormat.H24,
@@ -91,7 +96,9 @@ describe("presentHourStrip", () => {
   });
 
   it("should pass the day colour and the offset edge through", () => {
-    const cell = presentCell("America/New_York", 12);
+    const cell = presentCell("America/New_York", 12, {
+      coordinates: { latitude: 40.7, longitude: -74.0 },
+    });
 
     expect([cell.dayColour, cell.hasOffsetEdge]).toEqual([
       DayColour.NIGHT,
@@ -192,4 +199,49 @@ describe("presentHourStrip day colouring", () => {
       }),
     );
   });
+});
+
+describe("presentHourStrip by the sun", () => {
+  const JUNE_DAY = getReferenceDay(
+    { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "Europe/Moscow" },
+    Temporal.Instant.from("2026-06-21T09:00:00Z"),
+  );
+  const JUNE_CONTEXT: HourStripContext = {
+    ...CONTEXT,
+    day: JUNE_DAY,
+    referenceZoneId: "Europe/Moscow",
+  };
+  const FOUR_O_CLOCK_COLUMN = 4;
+  const presentJune = (coordinates: HourStripContext["coordinates"]) =>
+    presentHourStrip("Europe/Moscow", { ...JUNE_CONTEXT, coordinates });
+
+  it("should colour the cell of 04:00 morning in Moscow and day in Kazan", () => {
+    expect([
+      presentJune(MOSCOW_COORDINATES).cells[FOUR_O_CLOCK_COLUMN].dayColour,
+      presentJune(KAZAN_COORDINATES).cells[FOUR_O_CLOCK_COLUMN].dayColour,
+    ]).toEqual([DayColour.MORNING, DayColour.DAY]);
+  });
+
+  it("should present Moscow with and without coordinates as different strips", () => {
+    expect(presentJune(MOSCOW_COORDINATES)).not.toBe(presentJune(undefined));
+  });
+
+  it("should colour a location without coordinates in the neutral colour", () => {
+    expect(
+      presentJune(undefined).cells.every(
+        (cell) => cell.dayColour === DayColour.NO_DAY_PERIOD,
+      ),
+    ).toBe(true);
+  });
+
+  it.each([
+    ["Moscow", MOSCOW_COORDINATES],
+    ["Kazan", KAZAN_COORDINATES],
+    ["no coordinates", undefined],
+  ])(
+    "should return the same strip object for %s on a second presentation",
+    (_name, coordinates) => {
+      expect(presentJune(coordinates)).toBe(presentJune(coordinates));
+    },
+  );
 });

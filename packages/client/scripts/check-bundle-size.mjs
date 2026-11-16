@@ -16,6 +16,8 @@
  * exactly one preload link, never by a modulepreload (NFR-P1, NFR-P2 of add-zone-rules-from-iana).
  * The served zone rules files (version file and release file) must exist in the
  * build and must not be precached. Implements FR2, NFR-P1 of add-remote-zone-rules-updates.
+ * The sun support chunk, which the first render waits for, must exist within its own
+ * gzipped budget, SUN_SUPPORT_CHUNK_BUDGET_KB (NFR-P2, M3 of bind-day-periods-to-sun).
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -23,6 +25,7 @@ import { gzipSync } from "node:zlib";
 import {
   BUILD_OUT_DIR,
   CITY_SEARCH_DATA_BUDGET_KB,
+  SUN_SUPPORT_CHUNK_BUDGET_KB,
   ZONE_RULES_ASSET_BUDGET_KB,
 } from "../app.config.ts";
 import {
@@ -49,6 +52,8 @@ const CITY_SEARCH_DATA_EXTENSION = ".json";
 const ZONE_RULES_ASSET_PREFIX = "zone-rules-";
 const ZONE_RULES_ASSET_EXTENSION = ".json";
 const EXPECTED_ZONE_RULES_PRELOAD_COUNT = 1;
+const SUN_SUPPORT_CHUNK_PREFIX = "sunSupport-";
+const SUN_SUPPORT_CHUNK_EXTENSION = ".js";
 const SERVICE_WORKER_FILE = "sw.js";
 
 const buildDirectory = join(import.meta.dirname, "..", BUILD_OUT_DIR);
@@ -153,6 +158,27 @@ if (zoneRulesAssetBytes > ZONE_RULES_ASSET_BUDGET_KB * BYTES_PER_KB) {
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 
+const sunSupportChunkFile = findAssetFile(
+  SUN_SUPPORT_CHUNK_PREFIX,
+  SUN_SUPPORT_CHUNK_EXTENSION,
+);
+if (sunSupportChunkFile === undefined) {
+  console.error(
+    `No ${SUN_SUPPORT_CHUNK_PREFIX}*${SUN_SUPPORT_CHUNK_EXTENSION} chunk in ${ASSETS_DIRECTORY}/ — the sun support must be a separate chunk (sunSupport.ts)`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const sunSupportChunkBytes = getGzippedSizeInBytes(
+  join(buildDirectory, ASSETS_DIRECTORY, sunSupportChunkFile),
+);
+if (sunSupportChunkBytes > SUN_SUPPORT_CHUNK_BUDGET_KB * BYTES_PER_KB) {
+  console.error(
+    `${sunSupportChunkFile}: ${formatKilobytes(sunSupportChunkBytes)} KB gzipped — over the ${SUN_SUPPORT_CHUNK_BUDGET_KB} KB budget`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
 const zoneRulesPreloadCount = countZoneRulesPreloadLinks(
   entryHtml,
   ZONE_RULES_ASSET_PREFIX,
@@ -201,4 +227,7 @@ console.log(
 );
 console.log(
   `Zone rules: ${formatKilobytes(zoneRulesAssetBytes)} KB gzipped (budget ${ZONE_RULES_ASSET_BUDGET_KB} KB)`,
+);
+console.log(
+  `Sun support: ${formatKilobytes(sunSupportChunkBytes)} KB gzipped (budget ${SUN_SUPPORT_CHUNK_BUDGET_KB} KB)`,
 );

@@ -12,7 +12,8 @@ const LABEL_SEPARATOR = " ";
 const COLOUR_BY_NAME: Record<string, DayColour> = {
   night: DayColour.NIGHT,
   morning: DayColour.MORNING,
-  work: DayColour.WORK,
+  day: DayColour.DAY,
+  neutral: DayColour.NO_DAY_PERIOD,
   evening: DayColour.EVENING,
   plain: DayColour.PLAIN,
   working: DayColour.WORKING_TIME,

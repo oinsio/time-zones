@@ -1,15 +1,19 @@
 // Verifies FR2, FR3, FR8, FR9, FR10 of add-day-colouring-setting.
+// Verifies FR5, FR7, FR8, UX4 of bind-day-periods-to-sun.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { Temporal } from "@/lib/temporal";
-import { isWorkingTime } from "@/model";
+import { getDayPeriodStops, isWorkingTime } from "@/model";
 import { DayColouring, DEFAULT_WORKING_HOURS } from "@/preferences";
+import { DayColour } from "@/presenter";
 import { KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { createTimeSelectionWorld } from "../../time_selection/steps/timeSelectionWorld";
 import { expectColourStops, parseWorkingHoursText } from "./dayColouringChecks";
 
 const feature = await loadFeature("../day_colouring_day_tracks.feature");
+
+const KAZAN_COORDINATES = { latitude: 55.8, longitude: 49.1 };
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createTimeSelectionWorld();
@@ -182,4 +186,82 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Then("the colour stops of {string} are {string}", expectStops);
     },
   );
+  const dayColouringFor = (colouring: string) =>
+    colouring === "Plain" ? DayColouring.PLAIN : DayColouring.WORKING_HOURS;
+
+  // @bind-day-periods-to-sun @FR8 @UX4
+  f.Scenario(
+    "UTC in the Time of day colouring",
+    ({ Given, And, When, Then }) => {
+      Given("the day colouring is Time of day", () =>
+        world.setDayColouring(DayColouring.TIME_OF_DAY),
+      );
+      And("the device time zone is {string}", givenZone);
+      And("the current instant is {string}", givenInstant);
+      And("the list contains {string}", givenList);
+      When("the user opens the app", givenAppOpen);
+      Then("the colour stops of {string} are {string}", expectStops);
+    },
+  );
+
+  // @bind-day-periods-to-sun @FR8
+  f.ScenarioOutline(
+    "UTC in the other colourings",
+    ({ Given, And, When, Then }, variables) => {
+      Given("the day colouring is <colouring> with 10:00-18:00", () =>
+        world.setDayColouring(
+          dayColouringFor(variables.colouring),
+          parseWorkingHoursText("10:00-18:00"),
+        ),
+      );
+      And("the device time zone is {string}", givenZone);
+      And("the current instant is {string}", givenInstant);
+      And("the list contains {string}", givenList);
+      When("the user opens the app", givenAppOpen);
+      Then("UTC is coloured <how>", () => {
+        const colours = world.trackOf("UTC").stops.map((stop) => stop.colour);
+        if (variables.colouring === "Plain") {
+          expect(colours).toEqual([DayColour.PLAIN]);
+        } else {
+          expect(colours).toContain(DayColour.WORKING_TIME);
+          expect(colours).not.toContain(DayColour.NO_DAY_PERIOD);
+        }
+      });
+    },
+  );
+
+  // @bind-day-periods-to-sun @FR7 @FR8
+  f.Scenario("A location gains coordinates", ({ Given, And, When, Then }) => {
+    Given("the day colouring is Time of day", () =>
+      world.setDayColouring(DayColouring.TIME_OF_DAY),
+    );
+    And("the device time zone is {string}", givenZone);
+    And("the current instant is {string}", givenInstant);
+    And("the list contains {string}", givenList);
+    And("the app is open", givenAppOpen);
+    When("the location gains the coordinates 55.8, 49.1", () => {
+      expect(world.trackOf("Nowhere").stops).toEqual([
+        { fraction: 0, colour: DayColour.NO_DAY_PERIOD },
+      ]);
+      world.saveListInAnotherTab((location) => ({
+        ...location,
+        coordinates: KAZAN_COORDINATES,
+      }));
+    });
+    Then(
+      "the track of {string} is coloured by the day periods of 55.8, 49.1 without a reload",
+      (_ctx, city: string) => {
+        const day = world.dayBoundsOf(city);
+        const expected = (
+          getDayPeriodStops(KAZAN_COORDINATES, {
+            ...day,
+            clockChangeWindow: { start: day.start, end: day.start },
+          }) ?? []
+        ).map((stop) => stop.fraction);
+        expect(world.trackOf(city).stops.map((stop) => stop.fraction)).toEqual(
+          expected,
+        );
+      },
+    );
+  });
 });

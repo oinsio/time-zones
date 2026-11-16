@@ -62,7 +62,7 @@ Each row is a card with the exact time in large digits and a day track with a ha
 ```
 
 - Every track spans the same day: 00-24 of the reference zone ([ADR-0007](../adr/0007-reference-zone-and-device-time.md)). The track of each row is colored by that location's own day periods, so the colors shift by the offset while all handles stand at the same position.
-- An offset change inside the day (DST) is a hard color edge on the track.
+- A clock change inside the day makes no color edge on the track: day-period boundaries are instants of the sun.
 - Dragging any handle changes the reference moment; all handles move together.
 - Phone: one card per row, text above the track. Tablet and wider: one full-width row per location — city and zone, then time and date, then the track with local hour labels (`22 · 04 · 10 · 16 · 22`).
 
@@ -83,7 +83,7 @@ Used by every view, implemented once in `views/shared/`:
 | Location menu | «⋯» button with a hit area of 44 px; opens on click, so it works without Pointer Events; items "Make home" / "Clear home" and "Remove" |
 | Device time location | a location of the list for the device zone; removable, reorderable, can be home; meta line "Device time · UTC+5" ([ADR-0010](../adr/0010-device-time-location.md)) |
 | Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — an active Now button signals a pinned moment |
-| Day-period colors | four pastel bands: night, morning, work, evening — from design tokens (Time of day colouring). Soft gradient transitions: 1 hour around night boundaries, 15 minutes around the work period, so 09:00 and 18:00 stay readable. Colors also differ in lightness, not only in hue |
+| Day-period colors | four pastel bands: night, morning, day, evening — from design tokens (Time of day colouring), decided by the sun at the location. Soft gradient transitions: 30 minutes around each boundary. Colors also differ in lightness, not only in hue |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
 | Now button | returns to `LIVE`; always shown, active when the moment is pinned, inactive and grey while live |
 | Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 does not exist on this day — clocks moved forward. Showing 03:30." / "01:30 occurs twice — showing the first (UTC−4)."; stays until the next change; `role="status"` (polite); text comes from the presenter; hides the clock change note of its row |
@@ -109,7 +109,7 @@ Screens: [docs/design](../design/README.md). Values become design tokens.
 | Evening | `#D4C6EE` | `#B9AADB` |
 
 - Hour frame: accent in Time of day, foreground colour on the accent cells of Plain and Working hours.
-- Grid (hour cells take the day-track colours above; in the dark theme digits on morning, working and evening cells use `#0F1729`):
+- Grid (hour cells take the day-track colours above; in the dark theme digits on morning, day and evening cells use `#0F1729`):
 
 | Element | Light | Dark |
 |---|---|---|

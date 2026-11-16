@@ -1,6 +1,6 @@
 import { expect } from "vitest";
 import { NANOSECONDS_PER_MINUTE, TRACK_STEP_MINUTES } from "@/constants";
-import { DAY_PERIOD_SCHEDULE, getDayPeriod } from "@/model";
+import { getDayPeriodAt, getZoneCoordinates } from "@/model";
 import { DayColour, type DayColourStop } from "@/presenter";
 import { KNOWN_CITIES } from "@/test/factories/buildLocation";
 import type { createTimeSelectionWorld } from "./timeSelectionWorld";
@@ -13,7 +13,8 @@ const LABEL_SEPARATOR = " ";
 const COLOUR_BY_NAME: Record<string, DayColour> = {
   night: DayColour.NIGHT,
   morning: DayColour.MORNING,
-  work: DayColour.WORK,
+  day: DayColour.DAY,
+  daylight: DayColour.DAY,
   evening: DayColour.EVENING,
 };
 
@@ -69,12 +70,14 @@ export const expectPeriodColoursOutsideBlends = (
         next !== undefined &&
         previous.colour !== next.colour;
       if (isInsideBlend) continue;
-      const localTime = day.start
-        .add({ nanoseconds: minute * NANOSECONDS_PER_MINUTE })
-        .toZonedDateTimeISO(zone)
-        .toPlainTime();
+      const instant = day.start.add({
+        nanoseconds: minute * NANOSECONDS_PER_MINUTE,
+      });
+      const coordinates = getZoneCoordinates(zone);
+      if (coordinates === undefined)
+        throw new Error(`no coordinates for ${zone}`);
       expect((previous ?? next)?.colour).toBe(
-        DayColour[getDayPeriod(localTime, DAY_PERIOD_SCHEDULE)],
+        DayColour[getDayPeriodAt(coordinates, instant.epochMilliseconds)],
       );
       checkedPositions += 1;
     }

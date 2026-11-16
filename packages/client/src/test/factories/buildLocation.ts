@@ -1,4 +1,9 @@
-import { buildLocationId, type Location, LocationKind } from "@/model";
+import {
+  buildLocationId,
+  type Coordinates,
+  type Location,
+  LocationKind,
+} from "@/model";
 
 /** Builds a location with its derived id; every field can be overridden. */
 export function buildLocation(overrides: Partial<Location> = {}): Location {
@@ -17,7 +22,7 @@ export function buildLocation(overrides: Partial<Location> = {}): Location {
 /** Well-known locations shared by feature steps, keyed by city label. */
 export const KNOWN_CITIES: Record<
   string,
-  { timeZoneId: string; countryCode: string }
+  { timeZoneId: string; countryCode: string; coordinates?: Coordinates }
 > = {
   Almaty: { timeZoneId: "Asia/Almaty", countryCode: "KZ" },
   Moscow: { timeZoneId: "Europe/Moscow", countryCode: "RU" },
@@ -44,7 +49,18 @@ export const KNOWN_CITIES: Record<
   "St. Vincent": { timeZoneId: "America/St_Vincent", countryCode: "VC" },
   Santiago: { timeZoneId: "America/Santiago", countryCode: "CL" },
   Kazan: { timeZoneId: "Europe/Moscow", countryCode: "RU" },
+  Nowhere: { timeZoneId: "Etc/GMT-5", countryCode: "" },
   Казань: { timeZoneId: "Europe/Moscow", countryCode: "RU" },
   Springfield: { timeZoneId: "America/Chicago", countryCode: "US" },
+  Longyearbyen: {
+    timeZoneId: "Arctic/Longyearbyen",
+    countryCode: "SJ",
+    coordinates: { latitude: 78.2, longitude: 15.6 },
+  },
+  Murmansk: {
+    timeZoneId: "Europe/Moscow",
+    countryCode: "RU",
+    coordinates: { latitude: 69.0, longitude: 33.1 },
+  },
   UTC: { timeZoneId: "UTC", countryCode: "" },
 };
