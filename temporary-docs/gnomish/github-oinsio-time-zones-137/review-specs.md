@@ -93,7 +93,8 @@ Q1 and Q2 are not defined as requirement lines; proposal.md:144 records both as 
 - Impact: The spec scenario "Another dependency" (`specs/app-delivery/spec.md:238-240`: "automatic merging is not enabled and no trailer is added"), FR6's "A pull request made by anyone else SHALL NOT be merged with the trailer" and NG5 are guaranteed only by Dependabot configuration and not by the workflow. A non-CLDR Dependabot pull request could merge as a data-only commit, and `apply-data-updates-silently` would then deploy code changes without a notice (`apply-data-updates-silently/design.md:86`).
 - Fix: In design D10, condition the auto-merge job of `cldr-update.yml` on the head branch starting with the CLDR branch prefix of `refreshConstants.ts` (`startsWith(github.head_ref, 'dependabot/npm_and_yarn/cldr')`), or on `data-refresh:check-paths` recognizing the branch as source `cldr`. In task 6.1, add to the workflow test's assertions that the auto-merge step carries that condition.
 - Fix risk: If Dependabot names the grouped branch differently from the assumed prefix, the CLDR pull request would not auto-merge and would wait for a human. That is safe, and H5 would catch it on the first CLDR update. No other artifact changes.
-- Status: open
+- Status: fixed
+- Resolution: design.md D10 now conditions the auto-merge job of `cldr-update.yml` on `startsWith(github.head_ref, 'dependabot/npm_and_yarn/cldr')` (the path check stays the second gate) and D7 lists that condition among the workflow test assertions; tasks.md 6.1 requires the condition and the workflow test assertion; specs/app-delivery/spec.md scenario "Another dependency" now covers any non-CLDR branch whatever the bot configuration allows.
 
 ### R2 — WARNING — ADR-0015 is refined but not annotated
 - Location: `openspec/changes/refresh-data-through-scheduled-pull-requests/tasks.md:40`; `proposal.md:27`

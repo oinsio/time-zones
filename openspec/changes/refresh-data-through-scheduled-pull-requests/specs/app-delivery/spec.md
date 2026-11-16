@@ -203,8 +203,9 @@ A dependency bot SHALL propose updates of the CLDR packages `cldr-bcp47` and `cl
 - **AND** the app that users have is unchanged
 
 #### Scenario: Another dependency
-- **WHEN** the dependency bot proposes an update of a package other than the two CLDR packages
+- **WHEN** the dependency bot proposes an update of a package other than the two CLDR packages, on a branch other than the CLDR group's
 - **THEN** automatic merging is not enabled and no trailer is added
+- **AND** this holds whatever the dependency bot's configuration allows, because the automation acts only on the CLDR group's branch
 
 ### Requirement: Schedules stay enabled
 Every scheduled run of the zone rules publication SHALL re-enable the scheduled workflows of the data refresh, so that a repository without other activity keeps its schedules. The operator notes MUST state how to see that a schedule was disabled and how to enable it again by hand. <!-- implements FR10 of refresh-data-through-scheduled-pull-requests -->
