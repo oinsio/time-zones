@@ -93,7 +93,7 @@ Each data source SHALL have at most one open data refresh pull request, on its o
 - **THEN** a separate pull request of the city data is opened
 
 ### Requirement: Data-only commits
-The commit a data refresh pull request leaves on `main` SHALL have a subject naming the source and its release or dump date and a message whose last line is the trailer `Data-Only: true`. A pull request check MUST fail when a data refresh pull request changes a path outside the data paths of its source. The automation MUST NOT give the trailer to any other pull request. <!-- implements FR5, FR6, G4, UX2 of refresh-data-through-scheduled-pull-requests -->
+The commit a data refresh pull request leaves on `main` SHALL have a message whose last line is the trailer `Data-Only: true`. For the zone rules and the city data its subject MUST name the source and its release or dump date; the commit of the CLDR pull request keeps the dependency bot's title with the pull request number as its subject. A pull request check MUST fail when a data refresh pull request changes a path outside the data paths of its source. The automation MUST NOT give the trailer to any other pull request. <!-- implements FR5, FR6, G4, UX2 of refresh-data-through-scheduled-pull-requests -->
 
 #### Scenario: The commit of a zone rules refresh
 - **WHEN** the pull request "Update zone rules to 2026g" with the number 140 merges
@@ -103,6 +103,11 @@ The commit a data refresh pull request leaves on `main` SHALL have a subject nam
 #### Scenario: The commit of a city data refresh
 - **WHEN** the pull request "Refresh city data to the dump of 2026-12-02" merges
 - **THEN** the last line of the commit's message on `main` is `Data-Only: true`
+
+#### Scenario: The commit of a CLDR update
+- **WHEN** the CLDR pull request of the dependency bot with the number 150 merges
+- **THEN** the subject of the commit on `main` is the dependency bot's title followed by "(#150)"
+- **AND** the last line of its message is `Data-Only: true`
 
 #### Scenario: Data paths of each source
 - **WHEN** the data paths of a source are named

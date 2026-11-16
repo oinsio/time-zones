@@ -113,7 +113,8 @@ Q1 and Q2 are not defined as requirement lines; proposal.md:144 records both as 
 - Impact: Whoever implements `cldr-update.yml` (H1) has to choose between FR5 and D3. If they follow D3, the CLDR commit on `main` breaks FR5 and UX2 ("reads at a glance in the history of `main`").
 - Fix: Pick one. Either narrow FR5 and the "Data-only commits" requirement so that "for the zone rules and the city data" the subject names the release or dump date, while the CLDR commit keeps the dependency bot's title (D3 unchanged). Or add to D10 and task 6.1 that `cldr-update.yml` passes `--subject "Update CLDR to <new version> (#<number>)"`, taking the version from the pull request's manifest diff, and have the H1 workflow test assert it. The first option is cheaper.
 - Fix risk: The first option weakens UX2 for CLDR only. The second adds a version-reading step to the workflow and a test assertion. Neither touches the scripts of groups 2–4.
-- Status: open
+- Status: fixed
+- Resolution: took the reviewer's first option: proposal.md FR5 and the "Data-only commits" requirement of specs/app-delivery/spec.md now require the release or dump date in the subject for the zone rules and the city data only, and the CLDR commit keeps the dependency bot's title with the pull request number (D3 unchanged); design.md D10 passes that `--subject`; new scenario "The commit of a CLDR update" is asserted by the H1 workflow test (tasks.md 6.1).
 
 ### R4 — WARNING — NFR-S1 has no delta spec requirement
 - Location: `openspec/changes/refresh-data-through-scheduled-pull-requests/proposal.md:99`
