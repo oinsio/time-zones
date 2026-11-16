@@ -8,6 +8,7 @@ import {
   type StoredLocation,
 } from "./locations_ui_e2e.fixtures";
 
+const UTC_ZONE_ID = "UTC";
 const RUSSIAN_LOCALE_FILE = join(process.cwd(), "src", "locales", "ru.json");
 const russianLocations = (
   JSON.parse(readFileSync(RUSSIAN_LOCALE_FILE, "utf8")) as {
@@ -32,6 +33,29 @@ export const UNREADABLE_DOCUMENT_TEXT = "{not json";
 /** Any valid place: a stored entry that holds coordinates is never filled, so never rewritten. */
 const SEEDED_COORDINATES = { latitude: 0, longitude: 0 };
 
+/**
+ * Where each seeded city is, so that its day tracks and cells follow the sun of
+ * that place (FR7 of bind-day-periods-to-sun). A zone not listed gets
+ * `SEEDED_COORDINATES`; UTC has none.
+ */
+const COORDINATES_BY_ZONE: Record<
+  string,
+  { latitude: number; longitude: number }
+> = {
+  "Asia/Almaty": { latitude: 43.3, longitude: 76.9 },
+  "Europe/Moscow": { latitude: 55.8, longitude: 37.6 },
+  "Asia/Kolkata": { latitude: 22.5, longitude: 88.4 },
+  "America/New_York": { latitude: 40.7, longitude: -74.0 },
+  "Asia/Tokyo": { latitude: 35.7, longitude: 139.7 },
+  "Asia/Kathmandu": { latitude: 27.7, longitude: 85.3 },
+  "Europe/Belgrade": { latitude: 44.8, longitude: 20.5 },
+  "Australia/Lord_Howe": { latitude: -31.5, longitude: 159.1 },
+  "America/Chicago": { latitude: 41.9, longitude: -87.6 },
+  "Europe/London": { latitude: 51.5, longitude: -0.1 },
+  "Australia/Adelaide": { latitude: -34.9, longitude: 138.6 },
+  "America/St_Vincent": { latitude: 13.2, longitude: -61.2 },
+};
+
 const KNOWN_CITIES: Record<string, StoredLocation> = {
   Almaty: { timeZoneId: "Asia/Almaty", label: "Almaty", countryCode: "KZ" },
   Moscow: { timeZoneId: "Europe/Moscow", label: "Moscow", countryCode: "RU" },
@@ -54,6 +78,7 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
     countryCode: "NP",
   },
   Tokyo: { timeZoneId: "Asia/Tokyo", label: "Tokyo", countryCode: "JP" },
+  UTC: { timeZoneId: "UTC", label: "UTC", countryCode: "" },
   "New York": {
     timeZoneId: "America/New_York",
     label: "New York",
@@ -106,7 +131,12 @@ export function buildStoredLocations(cityNames: string[]): StoredEntry[] {
     if (cityName === DEVICE_TIME_LIST_PHRASE) return DEVICE_TIME_ENTRY;
     const knownCity = KNOWN_CITIES[cityName];
     if (!knownCity) throw new Error(`Unknown city in a scenario: ${cityName}`);
-    return { ...knownCity, coordinates: SEEDED_COORDINATES };
+    if (knownCity.timeZoneId === UTC_ZONE_ID) return knownCity;
+    return {
+      ...knownCity,
+      coordinates:
+        COORDINATES_BY_ZONE[knownCity.timeZoneId] ?? SEEDED_COORDINATES,
+    };
   });
 }
 
