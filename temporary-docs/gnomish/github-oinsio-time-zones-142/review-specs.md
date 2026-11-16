@@ -63,7 +63,10 @@ None.
 - Impact: The implementer adds a second test file that repeats an existing assertion verbatim and splits the cell-colour tests of Grid over two files, so a later change of the cell colour must find and edit both.
 - Fix: Rewrite task 2.4 as: "Grid cell rendering (FR2): in `src/views/grid/HourStrip.test.tsx`, next to the plain and non-working cases, add `it(\"should colour a cell without a day period with the accent and its digits with the accent foreground\")` rendering `stripOf(DayColour.NO_DAY_PERIOD)` and asserting `cellOf(3).style.backgroundColor` is `var(--color-accent)` and `cellOf(3)` has the class `text-accent-foreground`; add the `// Verifies FR2 of colour-locations-without-day-periods-in-accent.` comment. Verify: `npx vitest run src/views/grid/HourStrip.test.tsx` passes." In task 5.2 replace `views/grid/HourCellView.test.tsx` by `views/grid/HourStrip.test.tsx`.
 - Fix risk: none — `HourStrip.test.tsx` is 148 lines, so one more case keeps it under 200; it is a jsdom unit test like the cases next to it, and the M4/FR2 coverage stays the same.
-- Status: open
+- Status: fixed
+- Resolution: confirmed `HourStrip.test.tsx:124-138` already tests the plain and non-working cell colours; task 2.4 in
+  tasks.md now adds one NO_DAY_PERIOD case (accent + text-accent-foreground, Verifies FR2) to HourStrip.test.tsx
+  instead of a new HourCellView.test.tsx, and the 5.2 file list names HourStrip.test.tsx.
 
 ## Verdict
 
