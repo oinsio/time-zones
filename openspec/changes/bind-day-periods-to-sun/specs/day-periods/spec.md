@@ -80,7 +80,7 @@ The sun's elevation SHALL be computed from the coordinates and the instant alone
 - **THEN** night ends within 3 minutes of the published civil dawn of that date
 
 ### Requirement: Coordinates of a location for the sun
-A city location SHALL use its own coordinates. A city location that has none MUST use the zone coordinates of its zone. The device time location MUST use the zone coordinates of the device time zone and MUST NOT ask for the device's position. A location for which no coordinates are known — a location in UTC, or in a zone without zone coordinates — has no day periods. <!-- implements FR7, FR8 of bind-day-periods-to-sun -->
+A city location SHALL use its own coordinates. A city location that has none MUST use the zone coordinates of its zone. The device time location MUST use the zone coordinates of the device time zone and MUST NOT request the device's coordinates. A location for which no coordinates are known — a location in UTC, or in a zone without zone coordinates — has no day periods. <!-- implements FR7, FR8 of bind-day-periods-to-sun -->
 
 #### Scenario: A city with its own coordinates
 - **GIVEN** the location Kazan holds the coordinates 55.8, 49.1
@@ -96,7 +96,7 @@ A city location SHALL use its own coordinates. A city location that has none MUS
 - **GIVEN** the device time zone is `Europe/Minsk`
 - **WHEN** the day periods of the device time location are computed
 - **THEN** they are those of the zone coordinates of `Europe/Minsk`
-- **AND** the device's position was not requested
+- **AND** the device's coordinates were not requested
 
 #### Scenario: No coordinates
 - **GIVEN** `<location>`
