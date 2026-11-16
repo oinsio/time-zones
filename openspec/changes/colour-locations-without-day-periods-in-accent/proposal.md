@@ -62,12 +62,11 @@ _None._
 
 #### Responsive
 
-- NFR-R1: Not affected: no layout changes.
+No responsive requirement: the layout does not change.
 
 ## UX Acceptance Criteria
 
 - UX1: The UTC track and cells in Time of day show exactly the same accent as a Plain track in the same theme — no third, near-accent shade.
-- UX2: Nothing marks the location as special: no message, icon or tooltip appears (unchanged).
 
 ## UI States Matrix
 
@@ -82,9 +81,9 @@ The change recolours rows that are already rendered; it loads no data and adds n
 
 ## Behavior
 
-- `packages/client/src/test/features/day_colouring/day_colouring_day_tracks.feature` (`@colour-locations-without-day-periods-in-accent @FR1`)
+- `packages/client/src/test/features/day_colouring/day_colouring_day_tracks.feature` (`@colour-locations-without-day-periods-in-accent @FR1 @FR3`)
 - `packages/client/src/test/features/day_colouring/day_colouring_hour_cells.feature` (`@colour-locations-without-day-periods-in-accent @FR2`)
-- `packages/client/src/test/features/day_colouring/day_colouring_e2e.feature` (`@colour-locations-without-day-periods-in-accent @FR1 @FR2 @NFR-A1`)
+- `packages/client/src/test/features/day_colouring/day_colouring_e2e.feature` (`@colour-locations-without-day-periods-in-accent @FR1 @FR2 @FR3 @NFR-A1 @UX1`)
 
 ## Visual Reference
 
