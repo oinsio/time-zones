@@ -45,11 +45,13 @@ Alternatives rejected:
 - A lookup table per city: data to ship and refresh for something that is a formula.
 - Sunrise and sunset (−0.833°) as boundaries: morning and evening would be the 30–40 minutes of twilight, about 2% of a track (UX1).
 
-### D2. The day period is a function of elevation and half-day (FR1, FR2)
+### D2. The day period is a function of elevation and half-day (FR1, FR2, NFR-P1)
 
 `getDayPeriodAt(coordinates, epochMilliseconds): DayPeriod` in `src/model/dayPeriods.ts`: night below −6°, day at +6° or more, otherwise morning when the instant lies between solar midnight and solar noon, evening otherwise. This is the definition; the polar cases need no branch.
 
-`getDayPeriodBoundaries(coordinates, span): DayPeriodBoundary[]` lists the boundaries inside a span from the solar days that overlap it: the four crossings where they exist; solar noon as morning→evening when the sun does not reach +6°; solar midnight as evening→morning when it does not go below −6°. A property test ties the two together: between two neighbouring boundaries `getDayPeriodAt` is constant and equals the earlier boundary's `to`.
+`getDayPeriodBoundaries(coordinates, day): DayPeriodBoundary[]` lists the boundaries inside the reference day, widened by half a blend window (`DAY_PERIOD_BLEND_MINUTES` / 2) at each end, from the solar days that overlap it: the four crossings where they exist; solar noon as morning→evening when the sun does not reach +6°; solar midnight as evening→morning when it does not go below −6°. A property test ties the two together: between two neighbouring boundaries `getDayPeriodAt` is constant and equals the earlier boundary's `to`.
+
+`getDayPeriodBoundaries` is memoized per reference day in a map keyed by the coordinates (`"latitude,longitude"`), reset when the reference day changes, as `getDayPeriodStops` is today. `getDayPeriodStops` and `getHourCells` both read their boundaries from it and never call `getSolarDay` themselves, so a location's track and cells share one computation: the widened day overlaps at most 3 solar days, which is the bound of NFR-P1.
 
 `DayPeriodBoundary` becomes `{ instant, from, to }`; `wallTime` and `blendMinutes` go away with `DAY_PERIOD_SCHEDULE` and `getDayPeriod(wallTime, schedule)`.
 
@@ -57,7 +59,7 @@ Alternatives rejected:
 
 `collectBlendWindows(boundaries, day)` centres a window of `DAY_PERIOD_BLEND_MINUTES = 30` on each boundary and clips each side at the midpoint to the neighbouring boundary. `assembleDayPeriodStops` stays. `collectOffsetEdges` and the type `OffsetEdge` are deleted: boundaries are instants, so a clock change cannot move them. `findOffsetTransitions` stays where `hourCells.ts` and the clock change note use it; if nothing else imports it from `dayPeriodWindows.ts`, it moves to `clockChange.ts`.
 
-When a span holds no boundary, `getDayPeriodStops` returns one stop with `getDayPeriodAt` of the span start.
+When the reference day holds no boundary, `getDayPeriodStops` returns one stop with `getDayPeriodAt` of the day start.
 
 ### D4. Coordinates for the sun are resolved once, in the model (FR7, FR8)
 
@@ -71,7 +73,7 @@ Alternative rejected: reading zone coordinates from the lazy search data — the
 
 ### D5. Callers pass the location's coordinates; caches key on them (FR5, FR6, NFR-P1)
 
-- `getDayPeriodStops(coordinates | undefined, day)` returns `undefined` without coordinates. Its per-day cache keys on `"latitude,longitude"`.
+- `getDayPeriodStops(coordinates | undefined, day)` returns `undefined` without coordinates. Its per-day cache keys on `"latitude,longitude"`. It and `getHourCells` take their boundaries from the memoized `getDayPeriodBoundaries` (D2), so the track and the cells of one coordinates compute the sun once per reference day.
 - `getHourCells(timeZoneId, day, referenceZoneId, coordinates | undefined)`: `HourCell.dayPeriod` becomes `DayPeriod | undefined`, decided by the largest share of the cell among the periods the boundaries cut it into (ties: earlier). The cache key gains the coordinates.
 - `presentDayColourStops` and `presentHourStrip` take the coordinates beside the zone ID; `presentZoneMoment` and `useHourGrid` pass `getSunCoordinates(location)`.
 - `presentHourStrip(timeZoneId, context)`: the context object gains a required `coordinates: Coordinates | undefined` key, so typecheck finds every caller; `presentDayTrack`'s `DayTrackContext` gains the same key.
