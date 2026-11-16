@@ -127,6 +127,14 @@ export {
   type RowWallClockNote,
 } from "./rowNote";
 export { createStore, type ReduceResult, type Store } from "./store";
+// Implements FR1-FR4 of bind-day-periods-to-sun.
+export {
+  getSolarDay,
+  getSunElevation,
+  type SolarDay,
+  type SunThreshold,
+  SunThresholdState,
+} from "./sun";
 export { canonicalizeTimeZoneId } from "./timeZoneId";
 // Implements FR2, FR6 of show-utc-offset-on-location-rows.
 export { getUtcOffsetMinutes } from "./utcOffset";
