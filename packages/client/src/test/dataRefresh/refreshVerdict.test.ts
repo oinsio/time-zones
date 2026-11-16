@@ -51,7 +51,7 @@ describe("decideCityDataRefresh", () => {
 
   it("states the count and the share of missing cities", () => {
     expect(decideCityDataRefresh(comparison({ lacks: 61 })).reasons).toEqual([
-      "61 committed cities are missing (1.0% of them)",
+      "61 committed cities are missing (1.02% of them)",
     ]);
   });
 

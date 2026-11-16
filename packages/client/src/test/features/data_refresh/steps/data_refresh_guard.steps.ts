@@ -2,10 +2,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
-import type {
-  CityDataset,
-  CityTuple,
-} from "../../../../../scripts/cityData/cityDataTypes.ts";
+import type { CityDataset } from "../../../../../scripts/cityData/cityDataTypes.ts";
 import { compareCityData } from "../../../../../scripts/dataRefresh/compareCityData.ts";
 import { compareZoneRules } from "../../../../../scripts/dataRefresh/compareZoneRules.ts";
 import {
@@ -14,57 +11,23 @@ import {
   type RefreshDecision,
 } from "../../../../../scripts/dataRefresh/refreshVerdict.ts";
 
+import {
+  ALMATY_CITY_ID,
+  buildCities,
+  buildCommittedCities,
+  buildDataset,
+  COMMITTED_CITY_COUNT,
+  LARGE_CITY_ID,
+  releaseOf,
+} from "./data_refresh_guard.fixtures.ts";
+
 const feature = await loadFeature("../data_refresh_guard.feature");
 
-const COMMITTED_CITY_COUNT = 6000;
-const SMALL_POPULATION = 150_000;
-const LARGE_POPULATION = 1_200_000;
-const ZONES = ["Europe/Paris", "Asia/Almaty"];
-const ALMATY_INDEX = 1;
-const LARGE_CITY_ID = COMMITTED_CITY_COUNT - 1;
-const ALMATY_CITY_ID = COMMITTED_CITY_COUNT;
 const REASON_FRAGMENTS: Record<string, string> = {
   "the count and the share": "committed cities are missing",
   "the city": "inhabitants is missing",
   "the zone": "No city uses the zone Asia/Almaty",
 };
-
-function buildCities(count: number, firstId = 1): CityTuple[] {
-  return Array.from({ length: count }, (_, index) => [
-    firstId + index,
-    `City ${firstId + index}`,
-    0,
-    "XX",
-    0,
-    SMALL_POPULATION,
-    10,
-    20,
-  ]);
-}
-
-function buildDataset(cities: CityTuple[], dumpDate: string): CityDataset {
-  return {
-    formatVersion: 1,
-    source: { name: "GeoNames", licence: "CC BY 4.0", dumpDate },
-    zones: ZONES,
-    regions: [],
-    cities,
-    zoneCityPopulations: {},
-    zoneCityRegions: {},
-  };
-}
-
-function buildCommittedCities(): CityTuple[] {
-  return [
-    ...buildCities(COMMITTED_CITY_COUNT - 2),
-    [LARGE_CITY_ID, "Large", 0, "XX", 0, LARGE_POPULATION, 10, 20],
-    [ALMATY_CITY_ID, "Almaty", 0, "KZ", ALMATY_INDEX, SMALL_POPULATION, 10, 20],
-  ];
-}
-
-const releaseOf = (ids: string[]) => ({
-  zones: Object.fromEntries(ids.map((id) => [id, {}])),
-});
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let committed: CityDataset;

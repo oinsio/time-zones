@@ -13,7 +13,7 @@ import {
 } from "./refreshConstants.ts";
 
 const PERCENT_FACTOR = 100;
-const PERCENT_DIGITS = 1;
+const PERCENT_DIGITS = 2;
 
 export type RefreshDecision = {
   verdict: RefreshVerdict;

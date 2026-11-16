@@ -3,15 +3,10 @@
  * Implements FR3, FR5, FR6, FR7, FR8 of refresh-data-through-scheduled-pull-requests (D5).
  */
 import {
-  ZONE_COORDINATES_FILE,
-  ZONE_RULES_RELEASE_FILE,
-} from "../../app.config.ts";
-import type { CityDataset } from "../cityData/cityDataTypes.ts";
-import { DATASET_PATH } from "../cityData/constants.ts";
-import {
   findPathsOutsideData,
   findSourceOfBranch,
 } from "./checkDataOnlyPaths.ts";
+import { readCityData, readZoneRulesInputs } from "./cliInputs.ts";
 import { compareCityData } from "./compareCityData.ts";
 import { compareZoneRules } from "./compareZoneRules.ts";
 import {
@@ -57,31 +52,8 @@ export type DataRefreshDependencies = {
   log: (line: string) => void;
 };
 
-type ReadFile = (path: string) => Promise<string | undefined>;
-
 function isRefreshSource(name: string): name is RefreshSource {
   return (Object.values(REFRESH_SOURCES) as string[]).includes(name);
-}
-
-async function requireFile(read: ReadFile, path: string): Promise<string> {
-  const content = await read(path);
-  if (content === undefined) {
-    throw new Error(`Missing file ${path}`);
-  }
-  return content;
-}
-
-async function readZoneRulesInputs(read: ReadFile) {
-  const coordinates = await read(ZONE_COORDINATES_FILE);
-  return {
-    release: JSON.parse(await requireFile(read, ZONE_RULES_RELEASE_FILE)),
-    coordinates:
-      coordinates === undefined ? undefined : JSON.parse(coordinates),
-  };
-}
-
-async function readCityData(read: ReadFile): Promise<CityDataset> {
-  return JSON.parse(await requireFile(read, DATASET_PATH));
 }
 
 export async function runVerdict(
