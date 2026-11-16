@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | Stale claims | 1 |
-| Requirements fully covered | 18/18 |
+| Requirements fully covered | 17/17 |
 | Contradictions | 0 |
 | CRITICAL | 0 |
 | WARNING | 0 |
