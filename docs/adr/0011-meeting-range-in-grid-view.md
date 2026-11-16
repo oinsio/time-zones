@@ -3,6 +3,8 @@
 ## Status
 Accepted (2026-11-09)
 
+Refined by [ADR-0013](0013-meeting-range-at-any-minute.md): the ends lie on any whole minute; the handles keep the track step.
+
 Refines [ADR-0003](0003-reference-instant-time-model.md): the reference moment stays the single source of time; a meeting range is a second, optional span that pins the reference moment to its start.
 
 ## Context

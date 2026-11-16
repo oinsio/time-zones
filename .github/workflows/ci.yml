@@ -40,12 +40,20 @@ jobs:
 
       - run: pnpm typecheck
 
+      # implements FR12 of add-geonames-city-source
+      - name: Check city data
+        run: pnpm --filter @time-zones/client city-data:check
+
       - run: pnpm test
 
       - run: pnpm build
 
       - name: Check initial JS budget
         run: pnpm --filter @time-zones/client check:bundle-size
+
+      # implements FR8 of add-zone-rules-from-iana
+      - name: Check zone rules
+        run: pnpm --filter @time-zones/client zone-rules:check
 
       # implements FR12, FR13 of support-legacy-ios-12-safari
       - name: Check legacy build

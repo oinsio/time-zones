@@ -3,6 +3,10 @@
 ## Status
 Accepted (2026-09-28)
 
+The zone list of ZoneCitiesSource comes from the zone rules release, not from `Intl.supportedValuesOf` ([ADR-0014](0014-zone-rules-from-iana.md), `add-zone-rules-from-iana`).
+
+GeoNamesSource is added by `add-geonames-city-source`; duplicates are removed per city and population orders after `rank` ([ADR-0015](0015-city-data-from-geonames.md)).
+
 The record format gains optional `coordinates` (`add-city-coordinates-to-locations`).
 
 ## Context
