@@ -1,5 +1,6 @@
 // Verifies FR8, UX1 of refresh-data-through-scheduled-pull-requests.
 import { describe, expect, it } from "vitest";
+import { REFRESH_FAILURE_LABEL } from "../../../scripts/dataRefresh/refreshConstants.ts";
 import {
   buildRefreshFailureIssue,
   buildRefreshRecoveryComment,
@@ -35,5 +36,11 @@ describe("buildRefreshFailureIssue", () => {
 describe("buildRefreshRecoveryComment", () => {
   it("links the successful run", () => {
     expect(buildRefreshRecoveryComment(RUN_URL)).toContain(RUN_URL);
+  });
+});
+
+describe("REFRESH_FAILURE_LABEL", () => {
+  it("is the label the failure issue steps create and search by", () => {
+    expect(REFRESH_FAILURE_LABEL).toBe("data-refresh-failure");
   });
 });
