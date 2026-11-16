@@ -1,4 +1,5 @@
 // Implements FR6, FR9, UX1 of add-city-coordinates-to-locations: coordinates of a city location.
+// Verifies FR7 of bind-day-periods-to-sun: only the day track colours follow the own coordinates.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the app must survive between steps.
@@ -34,6 +35,13 @@ const SPRINGFIELD = {
   timeZoneId: "America/Chicago",
   countryCode: "US",
 };
+
+/** The rows without the colour stops of their day tracks: the own coordinates of a city move the sun (FR7 of bind-day-periods-to-sun). */
+const withoutDayTrackColours = (rows: ReturnType<typeof presentBudgetRows>) =>
+  rows.map((row) => ({
+    ...row,
+    dayTrack: row.dayTrack && { ...row.dayTrack, stops: [] },
+  }));
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let app: OpenedApp;
@@ -135,16 +143,18 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         });
       });
       Then(
-        "every row shows the same content as for {string} without coordinates",
+        "every row shows the same content as for {string} without coordinates, apart from the colours of its day track",
         () => {
           const homeLocation = variables.view.startsWith("Grid")
             ? moscow
             : undefined;
-          expect(withCoordinates).toEqual(
-            presentBudgetRows([moscow, kazan], {
-              timestamp: BUDGET_FIRST_MOMENT,
-              homeLocation,
-            }),
+          expect(withoutDayTrackColours(withCoordinates)).toEqual(
+            withoutDayTrackColours(
+              presentBudgetRows([moscow, kazan], {
+                timestamp: BUDGET_FIRST_MOMENT,
+                homeLocation,
+              }),
+            ),
           );
           expect(withCoordinates).toHaveLength(2);
         },

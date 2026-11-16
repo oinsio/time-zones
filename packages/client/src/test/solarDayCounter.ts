@@ -33,12 +33,13 @@ type CounterState = {
 
 const COUNTER_STATE_KEY = Symbol.for("time-zones.solarDayCounter");
 const globalWithState = globalThis as unknown as Record<symbol, CounterState>;
-const state: CounterState = (globalWithState[COUNTER_STATE_KEY] ??= {
+globalWithState[COUNTER_STATE_KEY] ??= {
   isWrapped: false,
   isCounting: false,
   solarDayCalls: 0,
   elevationCalls: 0,
-});
+};
+const state: CounterState = globalWithState[COUNTER_STATE_KEY];
 
 /** The sun module with `getSolarDay` and `getSunElevation` counting their calls. */
 export function countSunCalls(actualSunModule: ActualSunModule) {
