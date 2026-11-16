@@ -22,7 +22,7 @@ Audience: every user of the default day colouring, in the Cards view and in the 
   - **Blend window** — the span around a day-period boundary where two colours blend: 30 minutes, shortened so it never passes the midpoint to the next boundary.
   - **Offset edge** — only the line in the hour strip at a clock change; no longer a colour edge of a day track.
   - **Colour stop** — unchanged meaning; a location without day periods has one neutral stop.
-- Glossary, new terms: **Sun elevation** — the angle of the sun's centre above the horizon at given coordinates and instant, in degrees; **Day-period boundary** — an instant at which a location's day period changes; **Zone coordinates of the device** is not a term: the device time location uses the zone coordinates.
+- Glossary, new terms: **Sun elevation** — the angle of the sun's centre above the horizon at given coordinates and instant, in degrees; **Day-period boundary** — an instant at which a location's day period changes; **Solar day** — the span from one solar midnight to the next at given coordinates, with its solar noon (the sun highest) and solar midnight (the sun lowest); **Zone coordinates of the device** is not a term: the device time location uses the zone coordinates.
 - Glossary, removed term: **Day-period schedule**.
 - Glossary (`docs/glossary/search.md`): **Zone coordinates** gains the code owner `getZoneCoordinates` (`src/model/sunCoordinates.ts`), which reads them in the app.
 - Glossary (`docs/glossary/settings.md`): **Working hours** drops "*Not:* the work period 09:00–18:00 of the day periods"; **Day colouring** says that Time of day follows the sun.
