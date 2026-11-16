@@ -20,7 +20,7 @@ export type SolarDayReader = (
   epochMilliseconds: number,
 ) => SolarDay;
 
-const HALF_WINDOW_MILLISECONDS =
+const getHalfWindowMilliseconds = () =>
   (DAY_PERIOD_BLEND_MINUTES * MILLISECONDS_PER_MINUTE) / 2;
 
 export function computeDayPeriodBoundaries(
@@ -28,8 +28,9 @@ export function computeDayPeriodBoundaries(
   coordinates: Coordinates,
   day: ReferenceDay,
 ): DayPeriodBoundary[] {
-  const windowStart = day.start.epochMilliseconds - HALF_WINDOW_MILLISECONDS;
-  const windowEnd = day.end.epochMilliseconds + HALF_WINDOW_MILLISECONDS;
+  const halfWindowMilliseconds = getHalfWindowMilliseconds();
+  const windowStart = day.start.epochMilliseconds - halfWindowMilliseconds;
+  const windowEnd = day.end.epochMilliseconds + halfWindowMilliseconds;
   const boundaries: DayPeriodBoundary[] = [];
   let solarDay = getSolarDay(coordinates, windowStart);
   let current: DayPeriod | undefined;
