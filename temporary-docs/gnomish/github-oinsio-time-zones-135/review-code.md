@@ -4,10 +4,10 @@
 
 | Item | Value |
 |---|---|
-| Tasks verified | 38/38 |
-| Requirements traced | 79/80 |
+| Tasks verified | 37/38 |
+| Requirements traced | 78/80 |
 | CRITICAL | 0 |
-| WARNING | 1 |
+| WARNING | 2 |
 | SUGGESTION | 0 |
 
 ## Tasks
@@ -49,7 +49,7 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `temp
 - ✅ 8.6 — `src/test/features/location_search/location_search_performance.feature:24` ("Coordinates of stored locations do no search work") with its step in `steps/location_search_performance.steps.ts`.
 - ✅ 9.1 — `pnpm run build` passes and `check:bundle-size` passes (148.9 KB / 141.5 KB), run in this review.
 - ✅ 9.2 — no file under `src/test/features/__screenshots__` in the branch diff; CI (E2E, axe-core, screenshots) is green.
-- ✅ 9.3 — scores measured in this review are all ≥ 90% (see Mutation); none below the minimum.
+- ❌ 9.3 — only partly verified. Measured in this review (see Mutation): 15 of the 24 files the task lists, plus `checkCityCoordinates.ts`. `reduceLocationCoordinates.ts` was also run but has no final score. Every measured score is ≥ 90%. Not measured, because each run hit the 10-minute limit: `src/model/locations.ts`, `src/adapters/locationsDocument.ts`, `src/adapters/city-search/createCompositeCitySearch.ts`, `fetchCitySearch.ts`, `parseGeoNamesCityData.ts`, `geoNamesCitySource.ts`, `zoneCitiesSource.ts`, `src/controller/createLocationsActions.ts`, `src/controller/useLocations.ts`. The task also says "kill survivors, re-run", but survivors remain in new checker code: `checkCityCoordinates.ts` is at 90.32% and `checkZoneCoordinates.ts` at 93.67%, both below the 95% target (R2).
 - ✅ 9.4 — `grep -rn "add-city-coordinates-to-locations" src scripts | grep -oE …` lists FR1–FR9, NFR-P1–NFR-P3, UX1, UX2.
 - ✅ 10.1 — `temporary-docs/gnomish/github-oinsio-time-zones-135/handoff/H1-adr-coordinates-notes.patch` passes `git apply --check`; `handoff/README.md` holds the H1 section; `docs/adr` untouched.
 
@@ -76,7 +76,7 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `temp
 - ✅ M3 — three GeoNames samples in `city_data_coordinates.feature` outline, seven zone samples in `zoneCoordinates.committed.test.ts:26` and `zone_rules_coordinates.feature`.
 - ✅ M4 — measured in this review: 141.5 KB and 148.9 KB, both ≤ 150 KB.
 - ✅ M5 — 0 screenshot files changed; axe-core scenarios green in CI.
-- ✅ M6 — every file measured here is ≥ 90% (minimum acceptable); two are below the 95% target (see Mutation).
+- ⚠️ M6 — only partly verified. Every file measured here is ≥ 90% (the minimum acceptable). Four are below the 95% target: `checkCityCoordinates.ts` 90.32%, `compile.ts` 90.48%, `loadCitySearchData.ts` 91.67% and `checkZoneCoordinates.ts` 93.67%. These changed production files have no score: `src/model/locations.ts`, `reduceAddLocation.ts`, `reduceLocationCoordinates.ts`, `locationsDocument.ts`, `createCompositeCitySearch.ts`, `fetchCitySearch.ts`, `parseGeoNamesCityData.ts`, `geoNamesCitySource.ts`, `zoneCitiesSource.ts`, `createLocationsActions.ts` and `useLocations.ts`. See Mutation and R2.
 - ✅ Scenario: A city carries its coordinates — `city_data_coordinates.feature:5`.
 - ✅ Scenario: Southern and western coordinates are negative — `city_data_coordinates.feature:10`.
 - ✅ Scenario: Sample cities of the committed city data — `city_data_coordinates.feature:15` (outline).
@@ -138,7 +138,7 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `temp
 
 ## Mutation
 
-Run in this review, one at a time, `cd packages/client && npx stryker run --mutate '<files>'`. Each run ends at the 10-minute foreground limit. The initial test run alone takes about 2.5 minutes, so runs over model or adapter files often hit that limit.
+Run in this review, one at a time: `cd packages/client && npx stryker run --mutate '<files>'`, with `--concurrency 4` on the later runs. Each run ends at the 10-minute foreground limit. The initial test run alone takes about 2.5 minutes, so runs over model, adapter or controller files hit that limit and write no report.
 
 | File | Score | Notes |
 |---|---|---|
@@ -146,16 +146,26 @@ Run in this review, one at a time, `cd packages/client && npx stryker run --muta
 | `src/controller/useLocationCoordinatesFill.ts` | 95.45% | 1 survivor reported at line 36 (the filter is at line 37): the `.filter(({ id }) => !lookedUpIds.has(id))` can be removed with no test failing (R1) |
 | `src/model/parseStoredLocations.ts` | 99.15% | 1 survivor at line 109 (home id guard, older code) |
 | `scripts/zoneRules/parseZoneTable.ts` | 96.92% | 1 survivor (`zoneId === undefined` half of the guard), 1 no-coverage |
-| `scripts/zoneRules/checkZoneCoordinates.ts` | 93.67% | 5 survivors in the `parseDocument` guards (catch body, `document === null`, `zones === null`). Most of them only change *how* a malformed file is rejected. The minimum is met; the 95% target is not |
+| `scripts/zoneRules/checkZoneCoordinates.ts` | 93.67% | 5 survivors in the `parseDocument` guards (catch body, `document === null`, `zones === null`). The minimum is met; the 95% target is not (R2) |
 | `scripts/zoneRules/writeZoneCoordinates.ts` | 100.00% | |
 | `scripts/cityData/parseGeoNamesRows.ts` | 96.67% | 1 survivor (`text.trim()` → `text`), 1 no-coverage |
 | `scripts/cityData/toCityTuple.ts` | 100.00% | |
-| `scripts/cityData/checkCityCoordinates.ts` | 90.32% | 3 survivors on `latitude === undefined \|\| longitude === undefined`. Only a tuple missing *both* fields is tested; with one field missing, the mutants still report the city, under the latitude/longitude message. The minimum is met; the 95% target is not |
+| `scripts/cityData/checkCityCoordinates.ts` | 90.32% | 3 survivors on `latitude === undefined \|\| longitude === undefined`. Only a tuple missing *both* fields is tested; with one field missing, the mutants still report the city, under the latitude/longitude message. The minimum is met; the 95% target is not (R2) |
+| `scripts/cityData/checkCityData.ts` | 98.31% | 3 survivors (lines 52, 75, 151) |
+| `scripts/cityData/compileCityData.ts` | 97.87% | 2 survivors (array literals at lines 101, 114) |
+| `scripts/cityData/serializeCityDataset.ts` | 100.00% | |
+| `scripts/cityData/toServedCityData.ts` | 100.00% | |
+| `scripts/zoneData/loadCitySearchData.ts` | 91.67% | 1 survivor: the cache guard `cachedCitySearchData === undefined` → `true` at line 50. It only changes whether the cache is reused; the loaded data is the same |
+| `scripts/zoneRules/check.ts` | 96.08% | 1 survivor (line 153), 1 no-coverage (line 128) |
+| `scripts/zoneRules/compile.ts` | 90.48% | 2 survivors (lines 44, 82) |
+| `scripts/zoneRules/compileWithZic.ts` | 97.37% | 2 survivors (line 106, the options object of a process call) |
 
-Not measured:
-- `src/model/reduceLocationCoordinates.ts`: the run was stopped at the time limit with 19 of 20 mutants tested (14 killed, 5 timeout, 0 survived), so it has no final score.
+Not measured (no score is claimed for these):
+- `src/model/reduceLocationCoordinates.ts`: a first run was stopped at the time limit with 19 of 20 mutants tested (14 killed, 5 timeout, 0 survived), so it has no final score.
 - `src/adapters/city-search/parseGeoNamesCityData.ts` and `fetchCitySearch.ts`: the run was stopped at 80 of 236 mutants (2 survived, 8 timeout), so they have no score.
-- `reduceAddLocation.ts`, `locationsDocument.ts`, `createCompositeCitySearch.ts`, `geoNamesCitySource.ts`, `zoneCitiesSource.ts`, `createLocationsActions.ts`, `loadCitySearchData.ts`, `compile.ts`, `compileWithZic.ts`, `check.ts`, `checkCityData.ts` and `toServedCityData.ts` were not run: each run takes 6–10 minutes.
+- `src/model/locations.ts`, `src/adapters/locationsDocument.ts`, `src/model/reduceLocationCoordinates.ts` and `src/model/reduceAddLocation.ts` were run together; the run was stopped at the 10-minute limit with no report written.
+- `src/adapters/city-search/geoNamesCitySource.ts` and `zoneCitiesSource.ts` were run together; the run was stopped at the 10-minute limit with no report written.
+- `src/adapters/city-search/createCompositeCitySearch.ts`, `src/controller/createLocationsActions.ts` and `src/controller/useLocations.ts` were not run. The runs over adapter and model files above did not finish within the limit, so these were not tried.
 
 ## Findings
 
@@ -168,6 +178,17 @@ Not measured:
 - Fix risk: none for production code; only a test changes. The `fill` mock assigns a new `locations` array again on its second call. That is harmless: `renderHook` reads `locations` only on a rerender, and the test triggers no further rerender. The test stays a hook unit test in its current file, where `.claude/rules/bdd-unit.md` puts no requirement.
 - Status: open
 
+### R2 — WARNING — Survivors left in the new coordinate checks, below the 95% target of task 9.3
+- Location: `packages/client/scripts/cityData/checkCityCoordinates.ts:26`
+- Rule: task 9.3 of add-city-coordinates-to-locations ("kill survivors, re-run … Target ≥ 95%, minimum 90% (M6)"); `.claude/rules/tdd-workflow.md` ("Analyze survived mutants — each survivor indicates a missed scenario or a weak assertion")
+- Problem: two checks this branch added keep survivors that tests could kill, and task 9.3 is ticked while their scores are below its target.
+  (1) `checkCityCoordinates.ts:26` (`if (latitude === undefined || longitude === undefined)`) scores 90.32%. Its three survivors live because the `it.each` at `src/test/cityData/checkCityData.coordinates.test.ts:64-102` only tests a tuple missing *both* fields (`base`). With one field missing, the mutants skip the "has no coordinates" error and report "has the latitude undefined" or "has the longitude undefined" instead.
+  (2) `scripts/zoneRules/checkZoneCoordinates.ts:42,45` (`document === null`, `zones === null`) survive, and the file scores 93.67%. The `it.each` at `src/test/zoneRules/checkZoneCoordinates.test.ts:30-38` never feeds the JSON `null` or a `zones` of `null`. Without these guards, both inputs throw a `TypeError` (destructuring `null`, `Object.values(null)`) instead of returning the format error.
+- Impact: a broken guard would go unnoticed. A city tuple missing only one coordinate would be reported under a misleading message. A zone coordinates file reading `null` or `{"release":"2026f","zones":null}` would crash the zone-rules check with a stack trace instead of the FR4 format error. Task 9.3 and M6 (target 95%) stay unmet for these files.
+- Fix: in `checkCityData.coordinates.test.ts`, add two rows to the `it.each` at `:64`, both expecting `` `The city Alpha (${FRESH_ID}) has no coordinates` ``: `["a missing longitude", [...base, 558], …]` and `["a missing latitude", [...base, undefined, 491], …]`. In `checkZoneCoordinates.test.ts`, add two rows to the `it.each` at `:30`: `["that is null", "null"]` and `["with zones null", JSON.stringify({ release: "2026f", zones: null })]`. Then re-run `cd packages/client && npx stryker run --mutate 'scripts/cityData/checkCityCoordinates.ts,scripts/zoneRules/checkZoneCoordinates.ts'`. After that, run the 9.3 files this review could not measure (listed in Mutation), at most five per run, and kill what survives there.
+- Fix risk: none for production code; only test rows are added, to unit test files that already exist. `.claude/rules/bdd-unit.md` asks for no Gherkin for these rows, because the BDD scenario "A broken file fails" already exists. `checkCityData.coordinates.test.ts` is 117 lines and stays under 200. The tuple is passed to `checkCityData` as an object (`checkCityData.ts:108` reads indexes 6 and 7 directly), so an `undefined` entry reaches the check unchanged. The catch-body survivor at `checkZoneCoordinates.ts:40` is equivalent: `document` stays `undefined` and is rejected at `:42`. So that file cannot reach 100%, but it passes 95%. The unmeasured runs cost 6–10 minutes each and may not finish within a 10-minute limit.
+- Status: open
+
 ## Verdict
 
-Ready. No CRITICAL finding. R1 (WARNING) is a test-strength gap with no wrong behaviour today; it should be fixed but does not block. All 38 tasks have evidence. Every requirement is implemented and traced, and NFR-P2 is only partly guarded by tests (R1). The build and the bundle budgets pass, and every mutation score measured is at least 90%.
+Not ready. Blocking: R2. Task 9.3 is ticked, but survivors remain in new checker code below the 95% target, and nine files the task lists have no measured score. There is no CRITICAL finding. R1 (WARNING) is a test-strength gap with no wrong behaviour today; fix it in the same pass. 37 of 38 tasks have full evidence. Every FR, NFR and UX id is implemented and traced. NFR-P2 is only partly guarded by tests (R1), and M6 is only partly verified (R2). The build and the bundle budgets pass, and every mutation score measured is at least 90%.
