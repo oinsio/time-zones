@@ -12,7 +12,7 @@ City data: [GeoNames](https://www.geonames.org/), licensed under
 GeoNames on its settings page. The file records the licence and the date of the
 dump it was compiled from.
 
-- Dump date: **2026-11-15** (`cities15000.zip`, `alternateNamesV2.zip`,
+- Dump date: `source.dumpDate` of `geonames-cities.json` (`cities15000.zip`, `alternateNamesV2.zip`,
   `admin1CodesASCII.txt` from `download.geonames.org/export/dump/`).
 
 ## Contents
@@ -50,6 +50,24 @@ running CI never request anything from GeoNames. A city whose zone the bundled
 zone rules release does not hold fails the run; fix it with an entry in
 `ZONE_OVERRIDES` (`scripts/cityData/zoneOverrides.ts`), and fix a wrong name
 with an entry in `NAME_OVERRIDES`.
+
+The workflow `.github/workflows/city-data-refresh.yml` ("City data refresh")
+runs the compile command monthly (the 2nd, 05:43 UTC) and on manual dispatch on
+`main`. When only `source.dumpDate` differs from the committed file it reports
+"already current" and opens nothing. Otherwise it runs `city-data:check` and
+`pnpm test` and opens or updates the data refresh pull request `Refresh city data
+to the dump of <date>` on the branch `data-refresh/city-data`, which merges by
+itself with the trailer `Data-Only: true` once every required check passes.
+
+- **Needs review:** more than 1% of the cities missing, a city of 1 000 000
+  inhabitants or more missing, or a zone no city uses any more: the pull request
+  gets the label `needs-review`, lists the reasons and waits for a human.
+- **Switch:** every step is conditioned on the repository variable
+  `DATA_REFRESH_ENABLED` being `true`.
+- **Failure issue:** "Data refresh failed: city data" is opened by a failed run
+  and closed by the next successful one.
+- **A disabled schedule:** the daily zone rules publication re-enables this
+  workflow; by hand, `gh workflow enable "City data refresh"`.
 
 ## Size and speed
 

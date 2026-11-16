@@ -71,7 +71,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     When("the workflow decides which release to publish", decide);
     Then(
-      "it stops reporting {string} and commits nothing",
+      "it stops reporting {string} and opens no pull request",
       (_ctx, message: string) => {
         expect(publishDecision.lines).toEqual([message]);
         expect(publishDecision.output).toEqual([]);
@@ -94,7 +94,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     When("the workflow decides which release to publish", decide);
     Then(
-      "{string} is the release to compile, check, commit and deploy",
+      "{string} is the release to compile, check and propose in a pull request",
       (_ctx, release: string) => {
         expect(publishDecision.output).toEqual([release]);
       },

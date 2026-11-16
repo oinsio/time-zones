@@ -7,22 +7,22 @@ Feature: Zone rules publication
     When the newest release is determined
     Then it is "2026aa"
 
-  @add-remote-zone-rules-updates @FR1
+  @add-remote-zone-rules-updates @FR1 @refresh-data-through-scheduled-pull-requests @FR1
   Scenario Outline: Already current
     Given the committed release is "<committed>" and the newest listed release is "2026f"
     When the workflow decides which release to publish
-    Then it stops reporting "already current" and commits nothing
+    Then it stops reporting "already current" and opens no pull request
 
     Examples:
       | committed |
       | 2026f     |
       | 2026g     |
 
-  @add-remote-zone-rules-updates @FR1
+  @add-remote-zone-rules-updates @FR1 @refresh-data-through-scheduled-pull-requests @FR1
   Scenario: A newer release
     Given the committed release is "2026f" and the newest listed release is "2026g"
     When the workflow decides which release to publish
-    Then "2026g" is the release to compile, check, commit and deploy
+    Then "2026g" is the release to compile, check and propose in a pull request
 
   @add-remote-zone-rules-updates @FR2
   Scenario: Files in the build

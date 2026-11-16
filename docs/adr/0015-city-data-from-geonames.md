@@ -3,6 +3,8 @@
 ## Status
 Accepted (2026-11-13)
 
+Refined by ADR-0017: the compile command is also run by the scheduled city data refresh, which proposes its result as a data refresh pull request; pull request checks, the build and the deploy still never contact GeoNames.
+
 ## Context
 
 ADR-0006 left room for a richer city source behind the `CitySearch` port. The zone cities alone find one city per time zone, so Kazan, Munich or Boston cannot be added by name. Related: ADR-0006, ADR-0014.

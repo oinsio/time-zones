@@ -1,0 +1,17 @@
+# Only the two CLDR packages, together, once a month: the data refresh pull
+# request of CLDR. Nothing else is proposed, so nothing else is auto-merged.
+# Implements FR9, NG5 of refresh-data-through-scheduled-pull-requests (D10).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    allow:
+      - dependency-name: cldr-bcp47
+      - dependency-name: cldr-dates-full
+    groups:
+      cldr:
+        patterns:
+          - cldr-bcp47
+          - cldr-dates-full

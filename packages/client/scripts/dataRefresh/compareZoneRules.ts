@@ -1,0 +1,46 @@
+/**
+ * Compares a refreshed zone rules release (and its zone coordinates) with the
+ * committed ones for the refresh guard.
+ * Implements FR7 of refresh-data-through-scheduled-pull-requests (D5).
+ */
+
+/** The identifiers of a release file: zones and links share one key space. */
+export type ZoneRulesFile = { zones: Record<string, unknown> };
+export type ZoneCoordinatesFile = { zones: Record<string, unknown> };
+
+export type ZoneRulesComparison = {
+  /** Identifiers of the committed release the refresh holds neither as zone nor as link. */
+  removedZoneIds: string[];
+  /** Zones whose coordinates the committed file held and the refreshed one lacks. */
+  zonesWithoutCoordinates: string[];
+};
+
+function listMissingKeys(
+  committed: Record<string, unknown>,
+  refreshed: Record<string, unknown>,
+): string[] {
+  return Object.keys(committed).filter(
+    (identifier) => !(identifier in refreshed),
+  );
+}
+
+export function compareZoneRules(
+  committed: { release: ZoneRulesFile; coordinates?: ZoneCoordinatesFile },
+  refreshed: { release: ZoneRulesFile; coordinates?: ZoneCoordinatesFile },
+): ZoneRulesComparison {
+  const committedCoordinates = committed.coordinates;
+  const refreshedCoordinates = refreshed.coordinates;
+  return {
+    removedZoneIds: listMissingKeys(
+      committed.release.zones,
+      refreshed.release.zones,
+    ),
+    zonesWithoutCoordinates:
+      committedCoordinates !== undefined && refreshedCoordinates !== undefined
+        ? listMissingKeys(
+            committedCoordinates.zones,
+            refreshedCoordinates.zones,
+          )
+        : [],
+  };
+}
