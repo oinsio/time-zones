@@ -3,6 +3,7 @@
 import { Temporal } from "@/lib/temporal";
 import {
   getReferenceDay,
+  getZoneCoordinates,
   INITIAL_WORLD_CLOCK_STATE,
   type ReferenceDay,
 } from "@/model";
@@ -41,10 +42,14 @@ export const createHourCellsSteps = (scenarios?: {
     day: undefined as unknown as ReferenceDay,
     language: "en",
     hourFormat: HourFormat.H24,
+    coordinates: undefined,
     ...TIME_OF_DAY_CONTEXT,
   };
   const stripOf = (city: string): PresentedHourStrip =>
-    presentHourStrip(ZONE_BY_CITY[city], world);
+    presentHourStrip(ZONE_BY_CITY[city], {
+      ...world,
+      coordinates: getZoneCoordinates(ZONE_BY_CITY[city]),
+    });
   const setDay = (instant: string) => {
     world.day = getReferenceDay(
       { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: world.referenceZoneId },

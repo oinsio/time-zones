@@ -1,45 +1,67 @@
 Feature: Day-period colours and labels of a day track
-  Implements change add-time-sliders-to-location-cards.
+  Implements change add-time-sliders-to-location-cards and bind-day-periods-to-sun.
   As a user I read the time of day of each location from its track colours and hour labels.
 
-  @add-time-sliders-to-location-cards @FR6 @M5
+  @bind-day-periods-to-sun @FR5
   Scenario Outline: Colour stops of Almaty and New York
-    Given the device time zone is "Asia/Almaty"
+    Given the day colouring is Time of day and the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
     And the list contains "Almaty, New York"
     When the user opens the app
-    Then the colour stops of <city> are <stops>
+    Then the colour stops of <city> change period, in order, around <boundaries> in the time of Asia/Almaty
+    And each pair of stops is 30 minutes apart and centred within 3 minutes of that time
 
     Examples:
-      | city       | stops                                                                                                                                          |
-      | Almaty   | 0.270833 night, 0.3125 morning, 0.369792 morning, 0.380208 work, 0.744792 work, 0.755208 evening, 0.895833 evening, 0.9375 night         |
-      | New York | 0.161458 work, 0.171875 evening, 0.3125 evening, 0.354167 night, 0.645833 night, 0.6875 morning, 0.744792 morning, 0.755208 work         |
+      | city     | boundaries                                                                                    |
+      | Almaty   | night to morning 05:48, morning to day 06:55, day to evening 17:11, evening to night 18:18    |
+      | New York | day to evening 03:17, evening to night 04:21, night to morning 15:51, morning to day 16:55    |
 
-  @add-time-sliders-to-location-cards @FR6 @M5
-  Scenario: Colours follow the local period outside blend windows
-    Given the device time zone is "Asia/Almaty"
+  @bind-day-periods-to-sun @FR5
+  Scenario: Colours follow the day period outside blend windows
+    Given the day colouring is Time of day and the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
     And the list contains "Almaty, New York"
     And the app is open
     When the colour of the tracks is read at each quarter-hour position outside a blend window
-    Then it is the colour of the period of that location's local time at that instant
+    Then it is the colour of that location's day period at that instant
 
-  @add-time-sliders-to-location-cards @FR6
-  Scenario: Boundaries of a skipped local date are left out
-    Given the device time zone is "UTC"
-    And the current instant is "2011-12-30T12:00:00Z"
-    And the list contains "Apia"
+  @bind-day-periods-to-sun @FR5 @UX1 @M6
+  Scenario: Morning and evening are visible bands
+    Given the day colouring is Time of day and the device time zone is "Asia/Almaty"
+    And the current instant is "2026-03-08T07:30:00Z"
+    And the list contains "Moscow"
+    When the user opens the app
+    Then the morning band of Moscow is between 3% and 7% of the track
+
+  @bind-day-periods-to-sun @FR5
+  Scenario: A blend window stops at the midpoint
+    Given two day-period boundaries 20 minutes apart inside the reference day
+    When the colour stops are assembled
+    Then the blend windows of the two boundaries meet at the midpoint between them and do not overlap
+
+  @bind-day-periods-to-sun @FR5 @FR9
+  Scenario: A clock change makes no colour edge
+    Given the day colouring is Time of day and the device time zone is "America/New_York"
+    And the current instant is "2026-03-08T16:00:00Z"
+    And the list contains "New York"
     And the app is open
     And the moment is pinned at its current position
-    When the track of Apia is presented
-    Then the colour stops of "Apia" are "0.161458 work, 0.171875 evening, 0.3125 evening, 0.354167 night, 0.6875 night, 0.729167 morning, 0.786458 morning, 0.796875 work"
+    When the track of New York is presented
+    Then no two colour stops stand at the position of the clock change
+    And the stops are those of the four day-period boundaries of that day
 
-  @add-time-sliders-to-location-cards @FR6
-  Scenario: A period change across an offset change is a hard edge
-    Given an offset change inside the reference day at the position 0.5
-    And the local time is in the evening just before it and in the night just after it
-    When the colour stops are assembled
-    Then two stops at 0.5 change from evening to night, with no blend between them
+  @bind-day-periods-to-sun @FR2 @FR5 @UX3
+  Scenario Outline: A polar track is one colour
+    Given the day colouring is Time of day and the device time zone is "UTC"
+    And the current instant is <instant>
+    And the list contains "Longyearbyen"
+    When the user opens the app
+    Then the whole track of Longyearbyen is the <colour> colour
+
+    Examples:
+      | instant              | colour   |
+      | 2026-06-21T12:00:00Z | daylight |
+      | 2026-12-21T12:00:00Z | night    |
 
   @add-time-sliders-to-location-cards @FR7 @M6
   Scenario Outline: Hour labels of four zones

@@ -3,7 +3,11 @@ import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { Temporal } from "@/lib/temporal";
-import { getReferenceDay, INITIAL_WORLD_CLOCK_STATE } from "@/model";
+import {
+  getReferenceDay,
+  getZoneCoordinates,
+  INITIAL_WORLD_CLOCK_STATE,
+} from "@/model";
 import {
   DayColouring,
   DEFAULT_WORKING_HOURS,
@@ -39,6 +43,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     return presentHourStrip(KNOWN_CITIES[city].timeZoneId, {
       day,
+      coordinates: getZoneCoordinates(KNOWN_CITIES[city].timeZoneId),
       referenceZoneId,
       language: "en",
       hourFormat: HourFormat.H24,

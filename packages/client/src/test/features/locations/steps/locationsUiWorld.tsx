@@ -18,6 +18,9 @@ export const cityEntry = (label: string) => ({
   label,
   timeZoneId: KNOWN_CITIES[label]?.timeZoneId ?? "",
   countryCode: KNOWN_CITIES[label]?.countryCode ?? "",
+  ...(KNOWN_CITIES[label]?.coordinates
+    ? { coordinates: KNOWN_CITIES[label].coordinates }
+    : {}),
 });
 
 export const seedStoredList = (labels: string[]) =>

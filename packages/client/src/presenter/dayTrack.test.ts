@@ -1,6 +1,7 @@
 // Verifies FR2, FR9, FR10 of add-day-colouring-setting.
 // Verifies FR3 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR2, FR7, FR9, NFR-A3 of add-time-sliders-to-location-cards (D5).
+// Verifies FR5, FR7, FR8 of bind-day-periods-to-sun.
 
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
@@ -22,6 +23,7 @@ import {
 
 const INSTANT = Temporal.Instant.from("2026-03-08T07:30:00Z");
 const PRECISION = 6;
+const ALMATY_COORDINATES = { latitude: 43.3, longitude: 76.9 };
 const DAY = getReferenceDay(
   { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: "Asia/Almaty" },
   INSTANT,
@@ -34,6 +36,7 @@ const contextFor = (
   localDateLabel = "Sun, Mar 8",
 ) => ({
   timeZoneId,
+  coordinates: ALMATY_COORDINATES,
   instant: INSTANT,
   day: DAY,
   language,
@@ -97,15 +100,23 @@ describe("presentDayTrack", () => {
     expect(present("Asia/Almaty").stops).toBe(
       presentDayColourStops(
         "Asia/Almaty",
+        ALMATY_COORDINATES,
         DAY,
         DayColouring.TIME_OF_DAY,
         DEFAULT_WORKING_HOURS,
       ),
     );
     expect(present("Asia/Almaty").stops[0]).toEqual({
-      fraction: getDayPeriodStops("Asia/Almaty", DAY)[0].fraction,
+      fraction: getDayPeriodStops(ALMATY_COORDINATES, DAY)?.[0].fraction,
       colour: DayColour.NIGHT,
     });
+  });
+
+  it("should colour a track without coordinates in one neutral stop", () => {
+    expect(
+      present("UTC", "en", "12:30", "Sun, Mar 8", { coordinates: undefined })
+        .stops,
+    ).toEqual([{ fraction: 0, colour: DayColour.NO_DAY_PERIOD }]);
   });
 
   it("should give Plain one plain stop", () => {

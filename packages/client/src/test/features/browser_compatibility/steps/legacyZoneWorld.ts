@@ -40,7 +40,9 @@ export async function checkAlmatyDayStops(
     temporal.Temporal.Instant.from(`${date}${SAMPLE_TIME_OF_DAY}`),
   );
   const canonicalZone = model.canonicalizeTimeZoneId(DEVICE_ZONE_ID);
-  const stops = model.getDayPeriodStops(DEVICE_ZONE_ID, day);
+  const stops =
+    model.getDayPeriodStops(model.getZoneCoordinates(DEVICE_ZONE_ID), day) ??
+    [];
   vi.unstubAllGlobals();
   return { canonicalZone, stops };
 }
