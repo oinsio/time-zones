@@ -77,6 +77,7 @@ Then(
   /^every cell of "([^"]+)" is the (light|dark) non-working grey with digits of a contrast of at least 4\.5:1$/,
   async ({ locationsWorld }, city: string, theme: Theme) => {
     const cells = cellsOf(locationsWorld.page, city);
+    await expect(cells.first()).toBeVisible();
     const cellCount = await cells.count();
     expect(cellCount).toBeGreaterThan(0);
     for (let column = 0; column < cellCount; column += 1) {
