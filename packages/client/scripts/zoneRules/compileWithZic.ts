@@ -1,9 +1,10 @@
 /**
  * Unpacks a tzdata archive, checks its `version` file against the requested
- * release, compiles the source files with the system `zic -b slim`, reads
- * every TZif file and truncates it to the cutoff.
+ * release, compiles the source files with the `zic -b slim` of the zone tools,
+ * reads every TZif file and truncates it to the cutoff.
  * Implements FR7 of add-zone-rules-from-iana (design D7).
  * Implements FR2 of add-city-coordinates-to-locations (D3): also returns the zone table.
+ * Implements FR3 of build-zic-from-tzcode (D2): compiles with the zone tools' `zic`, never the system one.
  */
 import { mkdir, readdir, readFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
@@ -37,7 +38,8 @@ export type CompiledZones = {
   zoneTable: string;
 };
 
-async function runChecked(
+/** Runs a program and throws with its exit code and error text when it fails. */
+export async function runChecked(
   runProcess: RunProcess,
   command: string,
   args: string[],
@@ -94,31 +96,35 @@ async function readCompiledZones(
   return zones;
 }
 
+/** The release an unpacked IANA archive names in its `version` file. */
+export async function readArchiveVersion(directory: string): Promise<string> {
+  return (await readFile(join(directory, VERSION_FILE), "utf8")).trim();
+}
+
 /** Unpacks the archive, checks its version and compiles it; returns the directories. */
 export async function compileArchive(
   archivePath: string,
   release: string,
   workDirectory: string,
   runProcess: RunProcess,
+  zicPath: string,
 ): Promise<{ sourceDirectory: string; outputDirectory: string }> {
   const sourceDirectory = join(workDirectory, "source");
   const outputDirectory = join(workDirectory, "compiled");
-  await mkdir(sourceDirectory, { recursive: true });
+  await mkdir(sourceDirectory);
   await runChecked(runProcess, "tar", [
     "-xzf",
     archivePath,
     "-C",
     sourceDirectory,
   ]);
-  const archiveVersion = (
-    await readFile(join(sourceDirectory, VERSION_FILE), "utf8")
-  ).trim();
+  const archiveVersion = await readArchiveVersion(sourceDirectory);
   if (archiveVersion !== release) {
     throw new Error(
       `The archive's version file names ${archiveVersion}, but ${release} was requested`,
     );
   }
-  await runChecked(runProcess, "zic", [
+  await runChecked(runProcess, zicPath, [
     "-b",
     "slim",
     "-d",
@@ -141,12 +147,14 @@ export async function compileWithZic(
   release: string,
   workDirectory: string,
   runProcess: RunProcess,
+  zicPath: string,
 ): Promise<CompiledZones> {
   const { sourceDirectory, outputDirectory } = await compileArchive(
     archivePath,
     release,
     workDirectory,
     runProcess,
+    zicPath,
   );
   const links = await readLinks(sourceDirectory);
   const zoneTable = await readZoneTable(sourceDirectory);

@@ -48,7 +48,7 @@ A new `scripts/zoneRules/buildZoneTools.ts` owns the whole step:
 5. run `make -C <work>/tools zic zdump` and stop on a non-zero exit with its code and stderr (FR5);
 6. return `{ zicPath, zdumpPath }` (absolute paths inside `<work>/tools`).
 
-`compileArchive` takes the `zicPath` instead of calling `"zic"`. `findFirstDifference` in `check.ts` takes the `zdumpPath` instead of `"zdump"`. `runZoneRulesCompile` and `runZoneRulesCheck` call `buildZoneTools` first. With `--compiled <dir>` the check still builds the tools for `zdump` (FR4).
+`compileArchive` takes the `zicPath` instead of calling `"zic"`. `findFirstDifference` in `check.ts` takes the `zdumpPath` instead of `"zdump"`. `runZoneRulesCompile` and `runZoneRulesCheck` call `buildZoneTools` first. With `--compiled <dir>` the check still downloads and verifies the data archive and builds the tools for `zdump` (FR4): the `Makefile` needs the data files (D3), so the tools cannot be built from the code archive alone. Only the compile step is skipped.
 
 The glossary owner of the new concept **zone tools** is `buildZoneTools` and its `ZoneTools` type.
 
@@ -66,7 +66,7 @@ Both archives contain a `version` file. The code archive is unpacked alone first
 
 ### D6: Recompiling `2026f`
 
-After the code change, `pnpm zone-rules:compile 2026f` runs on macOS with the built tools and rewrites `zone-rules/release.json` and `zone-rules/zone-coordinates.json`. The diff of `release.json` is reviewed: only `America/Ojinaga` (and the links to it, if any) may change. Any other zone that changes is investigated before the commit. The zone abbreviation fixtures are not affected: Ojinaga keeps `CST` and `CDT`.
+After the code change, `pnpm zone-rules:compile 2026f` runs on macOS with the built tools and rewrites `zone-rules/release.json` and `zone-rules/zone-coordinates.json`. The diff of `release.json` is reviewed: only `America/Ojinaga` (and the links to it, if any) may change. Any other zone that changes is investigated before the commit. Outcome: 17 zones changed. 14 differ only in the encoding of the last listed change before the future rule (the local time is the same every hour of 2000–2045); `Asia/Gaza` and `Asia/Hebron` are corrected from 2073 on (glibc's `zic` wrote EEST where the source, the tzcode `zdump` and ICU say EET); `America/Ojinaga` is the fix of this change. The zone abbreviation fixtures are not affected: Ojinaga keeps `CST` and `CDT`.
 
 ## Consequences
 

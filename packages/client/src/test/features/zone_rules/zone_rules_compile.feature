@@ -1,16 +1,16 @@
 Feature: Zone rules compiler
   As the maintainer I compile a zone rules release from a signed IANA archive.
 
-  @add-zone-rules-from-iana @FR7
+  @add-zone-rules-from-iana @FR7 @build-zic-from-tzcode @FR1
   Scenario: A valid archive compiles
-    Given a tzdata archive and a signature that verifies against the pinned fingerprint
+    Given a tzdata archive, a tzcode archive and signatures that verify against the pinned fingerprint
     When the release "2026f" is compiled
     Then a release named "2026f" is written with the zone rules of every zone id of the archive
 
-  @add-zone-rules-from-iana @FR7
+  @add-zone-rules-from-iana @FR7 @build-zic-from-tzcode @FR1
   Scenario: The archive comes from the release address
     When the release "2026f" is compiled
-    Then the compiler downloads "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz" and "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz.asc"
+    Then the compiler downloads "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz" and "https://data.iana.org/time-zones/releases/tzcode2026f.tar.gz" with the ".asc" of each
     And no address it requests contains "-latest"
 
   @add-zone-rules-from-iana @FR7

@@ -5,6 +5,8 @@ Accepted (2026-11-12)
 
 Supersedes the "Known limitation" of [ADR-0003](0003-reference-instant-time-model.md) (time zone rules come from the browser) and the legacy zone shim of [ADR-0009](0009-supported-browser-engines.md). Driven by `add-zone-rules-from-iana` and `add-remote-zone-rules-updates`.
 
+The zone tools (`zic`, `zdump`) are built from the signed `tzcode<release>.tar.gz` of the same release, never taken from the operating system (`build-zic-from-tzcode`).
+
 ## Context
 
 Every time the app shows comes from `temporal-polyfill`, which reads UTC offsets through `Intl.DateTimeFormat.formatToParts`, and from the presenter's own `Intl.DateTimeFormat` instances. Both take the time zone rules from the operating system's ICU data. That data moves with OS updates: iOS Safari 12.5 (a supported engine, ADR-0009) stopped receiving them in January 2023, and even current macOS and iOS lag an IANA release by months. IANA published Kazakhstan's unification on UTC+5 (release 2024a, effective 2024-03-01); devices without that release still show Almaty an hour late. A renamed or new zone id (`Europe/Kyiv`, `America/Ciudad_Juarez`) throws on such engines, which ADR-0009 patched with a retry under legacy names.

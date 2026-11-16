@@ -1,6 +1,6 @@
 // @add-zone-rules-from-iana @FR8: the zone rules check against zdump
-import { readdirSync } from "node:fs";
-import { tmpdir } from "node:os";
+// Verifies FR4 of build-zic-from-tzcode: a compiled directory still needs the zone tools.
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { runZoneRulesCheck } from "../../../scripts/zoneRules/check.ts";
@@ -15,6 +15,7 @@ import {
   RELEASE_FILE,
 } from "./checkWorld";
 import { createFakeFetch, createFakeProcessRunner } from "./compileFakes";
+import { getWorkDirectories } from "./compileWorld";
 
 // Verifies FR4 of add-city-coordinates-to-locations: the zone coordinates check of the zone rules check.
 describe("runZoneRulesCheck with broken zone coordinates", () => {
@@ -39,11 +40,18 @@ describe("runZoneRulesCheck with a compiled directory", () => {
     expect(run.exitCode).toBe(0);
   });
 
-  it("reads the committed release file and downloads nothing", async () => {
+  it("reads the committed release file and downloads only what the zone tools need", async () => {
     const run = await check(["--compiled", createCompiledDirectory()]);
     expect(run.readPaths).toEqual([RELEASE_FILE, COORDINATES_FILE]);
-    expect(run.urls).toEqual([]);
-    expect(run.calls).toEqual([]);
+    expect(run.urls).toEqual([
+      "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz",
+      "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz.asc",
+      "https://data.iana.org/time-zones/releases/tzcode2026f.tar.gz",
+      "https://data.iana.org/time-zones/releases/tzcode2026f.tar.gz.asc",
+    ]);
+    expect(run.calls.map((call) => call.command)).not.toContain(
+      expect.stringMatching(/zic$/),
+    );
   });
 
   it("runs zdump -v -c 2000,2041 on the absolute path of every compiled file", async () => {
@@ -137,14 +145,17 @@ describe("runZoneRulesCheck with a compiled directory", () => {
   });
 
   it("leaves no temporary directory behind", async () => {
-    const countWorkDirectories = () =>
-      readdirSync(tmpdir()).filter((name) =>
-        name.startsWith("zone-rules-check-"),
-      ).length;
-    const before = countWorkDirectories();
-    await check([]);
-    await check(["--compiled", createCompiledDirectory()]);
-    expect(countWorkDirectories()).toBe(before);
+    const runs = [
+      await check([]),
+      await check(["--compiled", createCompiledDirectory()]),
+    ];
+    const workDirectories = runs.flatMap((run) =>
+      getWorkDirectories(run.calls),
+    );
+    expect(workDirectories).toHaveLength(runs.length);
+    for (const directory of workDirectories) {
+      expect(existsSync(directory)).toBe(false);
+    }
   });
 
   it("exits 1 when the release file cannot be read", async () => {

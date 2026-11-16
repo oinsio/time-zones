@@ -1,12 +1,14 @@
 // @add-zone-rules-from-iana @FR7: compiling a release from a signed IANA archive
-import { readdirSync } from "node:fs";
-import { tmpdir } from "node:os";
+// Verifies FR3 of build-zic-from-tzcode: the zone tools are run by path; the work directory of each run is removed.
+import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { runZoneRulesCompile } from "../../../scripts/zoneRules/compile.ts";
 import { TZ_COORDINATOR_KEY_FINGERPRINT } from "../../../scripts/zoneRules/signing.ts";
 import { createFakeProcessRunner } from "./compileFakes";
 import {
   compile,
+  getWorkDirectories,
+  isProgram,
   logsMention,
   RELEASE,
   VALID_SCENARIO,
@@ -32,7 +34,7 @@ describe("a compile that must stop", () => {
       const run = await compile(scenario);
       expect(run.exitCode).not.toBe(0);
       expect(logsMention(run, checkName)).toBe(true);
-      expect(run.calls.some((call) => call.command === "zic")).toBe(false);
+      expect(run.calls.some((call) => isProgram(call, "zic"))).toBe(false);
       expect(run.writtenFiles.size).toBe(0);
     },
   );
@@ -48,7 +50,7 @@ describe("a compile that must stop", () => {
     expect(run.exitCode).not.toBe(0);
     expect(logsMention(run, OTHER_FINGERPRINT)).toBe(true);
     expect(logsMention(run, TZ_COORDINATOR_KEY_FINGERPRINT)).toBe(true);
-    expect(run.calls.some((call) => call.command === "zic")).toBe(false);
+    expect(run.calls.some((call) => isProgram(call, "zic"))).toBe(false);
     expect(run.writtenFiles.size).toBe(0);
   });
 
@@ -57,7 +59,7 @@ describe("a compile that must stop", () => {
     expect(run.exitCode).not.toBe(0);
     expect(logsMention(run, "2026e")).toBe(true);
     expect(logsMention(run, "2026f")).toBe(true);
-    expect(run.calls.some((call) => call.command === "zic")).toBe(false);
+    expect(run.calls.some((call) => isProgram(call, "zic"))).toBe(false);
     expect(run.writtenFiles.size).toBe(0);
   });
 
@@ -121,9 +123,10 @@ describe("a compile that must stop", () => {
 
   it("unpacks into a source directory and compiles into a compiled directory", async () => {
     const run = await compile(VALID_SCENARIO);
-    const tarArguments = run.calls.find((call) => call.command === "tar")
-      ?.args as string[];
-    const zicArguments = run.calls.find((call) => call.command === "zic")
+    const tarArguments = run.calls
+      .filter((call) => call.command === "tar")
+      .at(-1)?.args as string[];
+    const zicArguments = run.calls.find((call) => isProgram(call, "zic"))
       ?.args as string[];
     expect(tarArguments[0]).toBe("-xzf");
     expect(tarArguments[2]).toBe("-C");
@@ -132,14 +135,17 @@ describe("a compile that must stop", () => {
   });
 
   it("leaves no temporary directory behind", async () => {
-    const countWorkDirectories = () =>
-      readdirSync(tmpdir()).filter((name) =>
-        name.startsWith("zone-rules-compile-"),
-      ).length;
-    const before = countWorkDirectories();
-    await compile(VALID_SCENARIO);
-    await compile({ ...VALID_SCENARIO, archiveVersion: "2026e" });
-    expect(countWorkDirectories()).toBe(before);
+    const runs = [
+      await compile(VALID_SCENARIO),
+      await compile({ ...VALID_SCENARIO, archiveVersion: "2026e" }),
+    ];
+    const workDirectories = runs.flatMap((run) =>
+      getWorkDirectories(run.calls),
+    );
+    expect(workDirectories).toHaveLength(runs.length);
+    for (const directory of workDirectories) {
+      expect(existsSync(directory)).toBe(false);
+    }
   });
 
   it("exits non-zero with a usage line when the release argument is missing", async () => {

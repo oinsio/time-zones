@@ -1,10 +1,13 @@
 // Implements FR7 of add-zone-rules-from-iana: runs the compile CLI flow over the fakes of task 4.4.
+// Verifies FR3 of build-zic-from-tzcode: `isProgram` finds the zone tools run by path.
 import { readFileSync } from "node:fs";
+import { basename, dirname } from "node:path";
 import { runZoneRulesCompile } from "../../../scripts/zoneRules/compile.ts";
 import {
   createFakeFetch,
   createFakeProcessRunner,
   type FakeScenario,
+  type ProcessCall,
   VALID_VERIFY_STATUS_FILE,
 } from "./compileFakes";
 
@@ -39,6 +42,19 @@ export async function compile(
     calls: processes.calls,
     urls: downloads.urls,
   };
+}
+
+/** True when a call ran the program, by name or by path (the zone tools are run by path). */
+export function isProgram(call: ProcessCall, program: string): boolean {
+  return basename(call.command) === program;
+}
+
+/** The work directories of one run: the parents of every directory `tar` unpacked into. */
+export function getWorkDirectories(calls: ProcessCall[]): string[] {
+  const unpackDirectories = calls
+    .filter((call) => call.command === "tar")
+    .map((call) => call.args[call.args.indexOf("-C") + 1] as string);
+  return [...new Set(unpackDirectories.map((directory) => dirname(directory)))];
 }
 
 export function logsMention(run: CompileRun, text: string): boolean {

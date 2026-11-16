@@ -1,12 +1,14 @@
 // @add-zone-rules-from-iana @FR8: fixtures and fakes shared by the zone rules check tests
+// Verifies FR4 of build-zic-from-tzcode: the fake zdump answers to the zone tools' path.
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { runZoneRulesCheck } from "../../../scripts/zoneRules/check.ts";
 import type { RunProcess } from "../../../scripts/zoneRules/processTypes.ts";
 import {
   createFakeFetch,
   createFakeProcessRunner,
+  type FakeScenario,
   VALID_VERIFY_STATUS_FILE,
 } from "./compileFakes";
 import { FIXTURE_RELEASE_DOCUMENT } from "./fixtureReleaseDocument";
@@ -56,14 +58,20 @@ export function createCompiledDirectory(zoneIds = COMPILED_ZONE_IDS): string {
   return directory;
 }
 
+function isZdump(command: string): boolean {
+  return basename(command) === "zdump";
+}
+
 /** Plays zdump: America/New_York gets the captured fixture, every other zone no line. */
 function createZdumpRunner(
   zdumpCalls: string[][],
+  zdumpCommands: string[],
   zdumpFailure = false,
 ): RunProcess {
   return async (command, args) => {
-    if (command !== "zdump") return { exitCode: 0, stdout: "", stderr: "" };
+    if (!isZdump(command)) return { exitCode: 0, stdout: "", stderr: "" };
     zdumpCalls.push(args);
+    zdumpCommands.push(command);
     const paths = args.slice(3);
     if (zdumpFailure) return { exitCode: 3, stdout: "", stderr: "zdump broke" };
     const stdout = paths
@@ -93,20 +101,27 @@ export async function check(
   releaseText = buildReleaseText(),
   zdumpFailure = false,
   coordinatesText = readFileSync(COORDINATES_FILE, "utf8"),
+  scenario: Partial<FakeScenario> = {},
 ) {
   const zdumpCalls: string[][] = [];
+  const zdumpCommands: string[] = [];
   const logLines: string[] = [];
   const downloads = createFakeFetch();
   const fakes = createFakeProcessRunner({
     verifyStatus: readFileSync(VALID_VERIFY_STATUS_FILE, "utf8"),
     archiveVersion: "2026f",
+    ...scenario,
   });
-  const zdumpRunner = createZdumpRunner(zdumpCalls, zdumpFailure);
+  const zdumpRunner = createZdumpRunner(
+    zdumpCalls,
+    zdumpCommands,
+    zdumpFailure,
+  );
   const readPaths: string[] = [];
   const exitCode = await runZoneRulesCheck({
     argv,
     runProcess: async (command, args, options) =>
-      command === "zdump"
+      isZdump(command)
         ? zdumpRunner(command, args)
         : fakes.runProcess(command, args, options),
     fetchRelease: downloads.fetchRelease,
@@ -120,6 +135,7 @@ export async function check(
     exitCode,
     logLines,
     zdumpCalls,
+    zdumpCommands,
     urls: downloads.urls,
     readPaths,
     calls: fakes.calls,

@@ -44,15 +44,21 @@ time.
 
 ## Commands
 
-Run from `packages/client/`. Both need `zic`, `zdump` and `gpg`, and reach
-`data.iana.org` (never a `-latest` link).
+Run from `packages/client/`. Both need `cc`, `make` and `gpg`, and reach
+`data.iana.org` (never a `-latest` link). Both download `tzdata<release>.tar.gz`
+and `tzcode<release>.tar.gz` with their `.asc`, verify both signatures against
+the pinned key (every `gpg` call runs with a temporary `GNUPGHOME`) and build
+the zone tools: `make zic zdump` over both archives unpacked into one
+directory. They never use the `zic` or `zdump` of the operating system: glibc's
+`zic` (Ubuntu 24.04, Debian 12) miscompiles `America/Ojinaga` in 2022 and
+`Asia/Gaza` after 2073. Implements FR1–FR5, FR8 of build-zic-from-tzcode.
 
-- `pnpm zone-rules:compile 2026f`: downloads `tzdata2026f.tar.gz` and its
-  `.asc`, verifies the signature against the pinned key (every `gpg` call runs
-  with a temporary `GNUPGHOME`), compiles with `zic -b slim`, truncates to the
-  cutoff `2000-01-01T00:00:00Z` and writes `zone-rules/release.json`.
-- `pnpm zone-rules:check`: compiles the release the committed file names (or
-  takes `--compiled <dir>` of an already compiled release), runs
+- `pnpm zone-rules:compile 2026f`: compiles with the zone tools' `zic -b slim`,
+  truncates to the cutoff `2000-01-01T00:00:00Z` and writes
+  `zone-rules/release.json`.
+- `pnpm zone-rules:check`: compiles the release the committed file names with
+  the zone tools' `zic` (or takes `--compiled <dir>` of an already compiled
+  release; the zone tools are built either way), runs their
   `zdump -v -c 2000,2041` on every compiled file and compares it with the
   committed file. It prints `0 differences` or the first difference and exits
   non-zero.

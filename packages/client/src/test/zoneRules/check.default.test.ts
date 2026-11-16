@@ -1,4 +1,5 @@
 // @add-zone-rules-from-iana @FR8: the zone rules check against zdump
+// Verifies FR3, FR4 of build-zic-from-tzcode: the zone tools of the committed release.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { runZoneRulesCheck } from "../../../scripts/zoneRules/check.ts";
@@ -13,12 +14,19 @@ describe("runZoneRulesCheck by default", () => {
     expect(run.urls).toEqual([
       "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz",
       "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz.asc",
+      "https://data.iana.org/time-zones/releases/tzcode2026f.tar.gz",
+      "https://data.iana.org/time-zones/releases/tzcode2026f.tar.gz.asc",
     ]);
     expect(run.calls.map((call) => call.command)).toEqual([
       "gpg",
       "gpg",
+      "gpg",
+      "gpg",
       "tar",
-      "zic",
+      "tar",
+      "make",
+      "tar",
+      expect.stringMatching(/[\\/]tools[\\/]zic$/),
     ]);
     expect(run.logLines).toContain("0 differences");
     expect(run.exitCode).toBe(0);
