@@ -143,7 +143,8 @@ All runs were made from `packages/client`, one at a time in the foreground, each
 - Impact: the 150 KB check passes while what the first paint waits for exceeds it, and any growth of the sun chunk (more zone coordinates, more calculation) delays every first paint without failing a check — exactly the regression NFR-P2's budget is meant to catch.
 - Fix: give the chunk its own budget, as the zone rules asset already has one: add `SUN_SUPPORT_CHUNK_BUDGET_KB` (e.g. 8) to `packages/client/app.config.ts` beside `ZONE_RULES_ASSET_BUDGET_KB`, and in `check-bundle-size.mjs` find the `sunSupport-*.js` asset in `dist/assets`, fail when it is missing or its gzipped size exceeds the budget, and print its size on its own line ("Sun support: X KB gzipped (budget 8 KB)").
 - Fix risk: low — a build-script check only; it relies on Vite naming the chunk after `sunSupport.ts`, so renaming that file breaks the check (intended, the message names the file). It does not change the initial-JS figure, and it does not settle whether H2's lazy chunk is acceptable, which stays with the H2 reviewer.
-- Status: open
+- Status: fixed
+- Resolution: added SUN_SUPPORT_CHUNK_BUDGET_KB = 8 to app.config.ts and a sunSupport-*.js check in check-bundle-size.mjs (missing or over budget fails, prints "Sun support: 6.4 KB gzipped (budget 8 KB)"); verified by pnpm check:bundle-size on the fresh build.
 
 ### R2 — WARNING — No test pins the half-window margin of the day-period boundaries
 - Location: `packages/client/src/model/dayPeriodBoundaryCalculation.ts:23-24`
@@ -152,7 +153,8 @@ All runs were made from `packages/client`, one at a time in the foreground, each
 - Impact: a regression that shrinks the margin goes unnoticed. For example, a boundary at 00:10 of the next local day, whose 30-minute blend window starts at 23:55 of the reference day (for example evening→night after midnight in a high-latitude summer), would drop out of the list. The day track would then end on a hard colour edge instead of the start of the blend that D2 and FR5 call for. Widening the margin likewise goes unchecked.
 - Fix: add `packages/client/src/model/dayPeriodBoundaryCalculation.test.ts` (a plain Vitest unit test beside the module, like `dayPeriodWindows.test.ts`). It calls `computeDayPeriodBoundaries` with a stub `SolarDayReader` that returns one solar day whose `night`/`day` thresholds place a crossing at a chosen instant relative to `day.end` (and to `day.start`). Use `it.each` to assert that a crossing `DAY_PERIOD_BLEND_MINUTES / 2 − 1` minutes after `day.end` (and before `day.start`) is listed, and one at `DAY_PERIOD_BLEND_MINUTES / 2 + 1` minutes is not. Then re-run `npx stryker run --mutate 'src/model/dayPeriodBoundaryCalculation.ts'` and confirm both mutants are killed.
 - Fix risk: low — a test only, no production change. The stub must satisfy `getSolarDayPeriods` (`dayPeriodTransitions.ts:18`), which reads `solarNoon`, both solar midnights and the two thresholds, and the loop at lines 48-54 must end: the stub's `solarMidnightAfter` has to exceed the window end, or the stub must advance on each call.
-- Status: open
+- Status: fixed
+- Resolution: added dayPeriodBoundaryCalculation.test.ts (it.each, crossings half a blend window minus/plus one minute beyond day end and start); moved the margin into getHalfWindowMilliseconds() so the mutants are not static; Stryker on the file now scores 100% (31 killed, 0 survived).
 
 ### R3 — SUGGESTION — A test label still names the day period "work"
 - Location: `packages/client/src/styles/tokens.test.ts:114`
@@ -161,7 +163,8 @@ All runs were made from `packages/client`, one at a time in the foreground, each
 - Impact: the test output keeps the removed concept alive and the M2 intent ("no work period") is contradicted in the one file that checks NFR-A1's contrast for the day period.
 - Fix: rename the label to `"day"` (`["day", "day-daylight", "hour-cell-foreground"]`).
 - Fix risk: none — only test titles change; the tokens checked stay the same.
-- Status: open
+- Status: fixed
+- Resolution: renamed the label to "day" in tokens.test.ts DAY_COLOUR_TOKENS; the tokens checked are unchanged and the file passes in pnpm test.
 
 ## Verdict
 
