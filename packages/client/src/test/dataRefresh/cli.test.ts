@@ -41,7 +41,10 @@ function createHarness(fakes: Fakes = {}) {
 }
 
 const zoneRelease = (release: string, ids: string[]) =>
-  JSON.stringify({ release, zones: Object.fromEntries(ids.map((id) => [id, {}])) });
+  JSON.stringify({
+    release,
+    zones: Object.fromEntries(ids.map((id) => [id, {}])),
+  });
 const zoneCoordinates = (ids: string[]) =>
   JSON.stringify({ zones: Object.fromEntries(ids.map((id) => [id, [1, 2]])) });
 const cityData = (dumpDate: string, population = 200_000) =>
@@ -58,10 +61,19 @@ const cityData = (dumpDate: string, population = 200_000) =>
 describe("verdict zone-rules", () => {
   it("writes a merge verdict, the title and the body files", async () => {
     const harness = createHarness({
-      committed: { [RELEASE_PATH]: zoneRelease("2026f", ["Europe/Kyiv"]), [COORDINATES_PATH]: zoneCoordinates(["Europe/Kyiv"]) },
-      refreshed: { [RELEASE_PATH]: zoneRelease("2026g", ["Europe/Kyiv"]), [COORDINATES_PATH]: zoneCoordinates(["Europe/Kyiv"]) },
+      committed: {
+        [RELEASE_PATH]: zoneRelease("2026f", ["Europe/Kyiv"]),
+        [COORDINATES_PATH]: zoneCoordinates(["Europe/Kyiv"]),
+      },
+      refreshed: {
+        [RELEASE_PATH]: zoneRelease("2026g", ["Europe/Kyiv"]),
+        [COORDINATES_PATH]: zoneCoordinates(["Europe/Kyiv"]),
+      },
     });
-    const exitCode = await runDataRefreshCli(["verdict", "zone-rules"], harness.dependencies);
+    const exitCode = await runDataRefreshCli(
+      ["verdict", "zone-rules"],
+      harness.dependencies,
+    );
     expect([exitCode, harness.outputs]).toEqual([
       0,
       {
@@ -79,7 +91,9 @@ describe("verdict zone-rules", () => {
       refreshed: { [RELEASE_PATH]: zoneRelease("2026g", []) },
     });
     await runDataRefreshCli(["verdict", "zone-rules"], harness.dependencies);
-    expect(harness.files["merge-body.md"].split("\n").at(-1)).toBe("Data-Only: true");
+    expect(harness.files["merge-body.md"].split("\n").at(-1)).toBe(
+      "Data-Only: true",
+    );
   });
 
   it("prints the verdict and each reason when a zone is missing", async () => {
@@ -105,17 +119,32 @@ describe("verdict zone-rules", () => {
 
   it("needs review when a zone loses its coordinates", async () => {
     const harness = createHarness({
-      committed: { [RELEASE_PATH]: zoneRelease("2026f", ["Asia/Almaty"]), [COORDINATES_PATH]: zoneCoordinates(["Asia/Almaty"]) },
-      refreshed: { [RELEASE_PATH]: zoneRelease("2026g", ["Asia/Almaty"]), [COORDINATES_PATH]: zoneCoordinates([]) },
+      committed: {
+        [RELEASE_PATH]: zoneRelease("2026f", ["Asia/Almaty"]),
+        [COORDINATES_PATH]: zoneCoordinates(["Asia/Almaty"]),
+      },
+      refreshed: {
+        [RELEASE_PATH]: zoneRelease("2026g", ["Asia/Almaty"]),
+        [COORDINATES_PATH]: zoneCoordinates([]),
+      },
     });
     await runDataRefreshCli(["verdict", "zone-rules"], harness.dependencies);
-    expect(harness.lines).toEqual(["NEEDS_REVIEW", "- The coordinates of the zone Asia/Almaty are missing"]);
+    expect(harness.lines).toEqual([
+      "NEEDS_REVIEW",
+      "- The coordinates of the zone Asia/Almaty are missing",
+    ]);
   });
 
   it("fails when a refreshed file is missing", async () => {
-    const harness = createHarness({ committed: { [RELEASE_PATH]: zoneRelease("2026f", []) } });
-    expect(await runDataRefreshCli(["verdict", "zone-rules"], harness.dependencies)).toBe(1);
-    expect(harness.lines.at(-1)).toBe(`Data refresh failed: Missing file ${RELEASE_PATH}`);
+    const harness = createHarness({
+      committed: { [RELEASE_PATH]: zoneRelease("2026f", []) },
+    });
+    expect(
+      await runDataRefreshCli(["verdict", "zone-rules"], harness.dependencies),
+    ).toBe(1);
+    expect(harness.lines.at(-1)).toBe(
+      `Data refresh failed: Missing file ${RELEASE_PATH}`,
+    );
   });
 });
 
@@ -144,8 +173,16 @@ describe("verdict city-data", () => {
 
 describe("check-paths", () => {
   it("passes for an ordinary branch with the automatic source", async () => {
-    const harness = createHarness({ currentBranch: "feature/x", changedPaths: ["packages/client/src/a.ts"] });
-    expect(await runDataRefreshCli(["check-paths", "auto", "main", "HEAD"], harness.dependencies)).toBe(0);
+    const harness = createHarness({
+      currentBranch: "feature/x",
+      changedPaths: ["packages/client/src/a.ts"],
+    });
+    expect(
+      await runDataRefreshCli(
+        ["check-paths", "auto", "main", "HEAD"],
+        harness.dependencies,
+      ),
+    ).toBe(0);
     expect(harness.lines).toEqual(["feature/x is not a data refresh branch"]);
   });
 
@@ -155,7 +192,12 @@ describe("check-paths", () => {
       currentBranch: "feature/x",
       changedPaths: ["packages/client/zone-rules/release.json"],
     });
-    expect(await runDataRefreshCli(["check-paths", "auto", "main", "HEAD"], harness.dependencies)).toBe(1);
+    expect(
+      await runDataRefreshCli(
+        ["check-paths", "auto", "main", "HEAD"],
+        harness.dependencies,
+      ),
+    ).toBe(1);
     expect(harness.lines).toEqual([
       "Outside the data paths of city-data: packages/client/zone-rules/release.json",
     ]);
@@ -166,7 +208,12 @@ describe("check-paths", () => {
       currentBranch: "data-refresh/zone-rules",
       changedPaths: ["packages/client/zone-rules/release.json"],
     });
-    expect(await runDataRefreshCli(["check-paths", "auto", "main", "HEAD"], harness.dependencies)).toBe(0);
+    expect(
+      await runDataRefreshCli(
+        ["check-paths", "auto", "main", "HEAD"],
+        harness.dependencies,
+      ),
+    ).toBe(0);
   });
 
   it("reads the manifest diff of a CLDR branch", async () => {
@@ -175,42 +222,79 @@ describe("check-paths", () => {
       changedPaths: [MANIFEST, "pnpm-lock.yaml"],
       manifestDiff: '+    "react": "19.1.0",',
     });
-    expect(await runDataRefreshCli(["check-paths", "auto", "main", "HEAD"], harness.dependencies)).toBe(1);
-    expect(harness.lines).toEqual(['Outside the data paths of cldr: "react": "19.1.0",']);
+    expect(
+      await runDataRefreshCli(
+        ["check-paths", "auto", "main", "HEAD"],
+        harness.dependencies,
+      ),
+    ).toBe(1);
+    expect(harness.lines).toEqual([
+      'Outside the data paths of cldr: "react": "19.1.0",',
+    ]);
   });
 
   it("checks an explicit source", async () => {
-    const harness = createHarness({ changedPaths: ["packages/client/city-data/geonames-cities.json"] });
-    expect(await runDataRefreshCli(["check-paths", "city-data", "main", "HEAD"], harness.dependencies)).toBe(0);
+    const harness = createHarness({
+      changedPaths: ["packages/client/city-data/geonames-cities.json"],
+    });
+    expect(
+      await runDataRefreshCli(
+        ["check-paths", "city-data", "main", "HEAD"],
+        harness.dependencies,
+      ),
+    ).toBe(0);
   });
 
   it("rejects an unknown source", async () => {
     const harness = createHarness();
-    expect(await runDataRefreshCli(["check-paths", "nope", "main", "HEAD"], harness.dependencies)).toBe(1);
+    expect(
+      await runDataRefreshCli(
+        ["check-paths", "nope", "main", "HEAD"],
+        harness.dependencies,
+      ),
+    ).toBe(1);
   });
 });
 
 describe("issue", () => {
   it("writes the title and the body file", async () => {
     const harness = createHarness();
-    const exitCode = await runDataRefreshCli(["issue", "zone-rules", "Compile the release", "https://run"], harness.dependencies);
+    const exitCode = await runDataRefreshCli(
+      ["issue", "zone-rules", "Compile the release", "https://run"],
+      harness.dependencies,
+    );
     expect([exitCode, harness.outputs, harness.files["issue.md"]]).toEqual([
       0,
-      { title: "Data refresh failed: zone rules", "body-file": "/tmp/issue.md" },
+      {
+        title: "Data refresh failed: zone rules",
+        "body-file": "/tmp/issue.md",
+        "recovery-file": "/tmp/recovery.md",
+      },
       "Failed step: Compile the release\nRun: https://run",
     ]);
+    expect(harness.files["recovery.md"]).toContain("https://run");
   });
 
   it("rejects an unknown source", async () => {
     const harness = createHarness();
-    expect(await runDataRefreshCli(["issue", "nope", "step", "url"], harness.dependencies)).toBe(1);
+    expect(
+      await runDataRefreshCli(
+        ["issue", "nope", "step", "url"],
+        harness.dependencies,
+      ),
+    ).toBe(1);
   });
 });
 
 describe("usage", () => {
-  it.each([[[]], [["bogus"]], [["verdict", "cldr"]]])("prints the usage and exits 1 for %j", async (argumentsList) => {
-    const harness = createHarness();
-    expect(await runDataRefreshCli(argumentsList, harness.dependencies)).toBe(1);
-    expect(harness.lines[0]).toMatch(/^Usage:/);
-  });
+  it.each([[[]], [["bogus"]], [["verdict", "cldr"]]])(
+    "prints the usage and exits 1 for %j",
+    async (argumentsList) => {
+      const harness = createHarness();
+      expect(await runDataRefreshCli(argumentsList, harness.dependencies)).toBe(
+        1,
+      );
+      expect(harness.lines[0]).toMatch(/^Usage:/);
+    },
+  );
 });

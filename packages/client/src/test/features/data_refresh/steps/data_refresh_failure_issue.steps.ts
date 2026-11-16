@@ -17,21 +17,34 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("The first failure", ({ Given, When, Then }) => {
     let issue: ReturnType<typeof buildRefreshFailureIssue>;
     Given("no issue of the zone rules refresh is open", () => {});
-    When("the zone rules publication fails at the step {string}", (_ctx, step: string) => {
-      issue = buildRefreshFailureIssue(REFRESH_SOURCES.ZONE_RULES, step, RUN_URL);
-    });
-    Then("an issue {string} is opened that names the step and links the run", (_ctx, title: string) => {
-      expect(issue.title).toBe(title);
-      expect(issue.body).toContain("Compile the release");
-      expect(issue.body).toContain(RUN_URL);
-    });
+    When(
+      "the zone rules publication fails at the step {string}",
+      (_ctx, step: string) => {
+        issue = buildRefreshFailureIssue(
+          REFRESH_SOURCES.ZONE_RULES,
+          step,
+          RUN_URL,
+        );
+      },
+    );
+    Then(
+      "an issue {string} is opened that names the step and links the run",
+      (_ctx, title: string) => {
+        expect(issue.title).toBe(title);
+        expect(issue.body).toContain("Compile the release");
+        expect(issue.body).toContain(RUN_URL);
+      },
+    );
   });
 
   // @refresh-data-through-scheduled-pull-requests @FR8
   f.Scenario("Recovery", ({ Given, When, Then }) => {
     let comment = "";
     Given("the issue {string} is open", (_ctx, title: string) => {
-      expect(buildRefreshFailureIssue(REFRESH_SOURCES.ZONE_RULES, "any", RUN_URL).title).toBe(title);
+      expect(
+        buildRefreshFailureIssue(REFRESH_SOURCES.ZONE_RULES, "any", RUN_URL)
+          .title,
+      ).toBe(title);
     });
     When("the zone rules publication succeeds reporting {string}", () => {
       comment = buildRefreshRecoveryComment(RUN_URL);

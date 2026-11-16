@@ -36,7 +36,10 @@ export function compareZoneRules(
       refreshed.release.zones,
     ),
     zonesWithoutCoordinates: hasBothCoordinates
-      ? listMissingKeys(committed.coordinates.zones, refreshed.coordinates.zones)
+      ? listMissingKeys(
+          committed.coordinates.zones,
+          refreshed.coordinates.zones,
+        )
       : [],
   };
 }

@@ -13,19 +13,22 @@ describe("buildRefreshFailureIssue", () => {
     ["city-data", "Data refresh failed: city data"],
     ["cldr", "Data refresh failed: CLDR"],
   ] as const)("titles the issue of %s", (source, title) => {
-    expect(buildRefreshFailureIssue(source, "Compile the release", RUN_URL).title).toBe(title);
+    expect(
+      buildRefreshFailureIssue(source, "Compile the release", RUN_URL).title,
+    ).toBe(title);
   });
 
   it("names the failed step and links the run", () => {
-    expect(buildRefreshFailureIssue("zone-rules", "Compile the release", RUN_URL).body).toBe(
-      `Failed step: Compile the release\nRun: ${RUN_URL}`,
-    );
+    expect(
+      buildRefreshFailureIssue("zone-rules", "Compile the release", RUN_URL)
+        .body,
+    ).toBe(`Failed step: Compile the release\nRun: ${RUN_URL}`);
   });
 
   it("names the failed check and links the pull request for CLDR", () => {
-    expect(buildRefreshFailureIssue("cldr", "Lint, test, build, E2E", RUN_URL).body).toBe(
-      `Failed check: Lint, test, build, E2E\nPull request: ${RUN_URL}`,
-    );
+    expect(
+      buildRefreshFailureIssue("cldr", "Lint, test, build, E2E", RUN_URL).body,
+    ).toBe(`Failed check: Lint, test, build, E2E\nPull request: ${RUN_URL}`);
   });
 });
 

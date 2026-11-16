@@ -71,11 +71,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       ),
     readRefreshedFile: (path) => readIfPresent(() => readFile(path, "utf8")),
     listChangedPaths: async (base, head) =>
-      (await runGit(["diff", "--name-only", `${base}...${head}`]))
+      (await runGit(["diff", "--name-only", `${base}..${head}`]))
         .split("\n")
         .filter(Boolean),
     readManifestDiff: (base, head) =>
-      runGit(["diff", "-U0", `${base}...${head}`, "--", CLIENT_MANIFEST_PATH]),
+      runGit(["diff", "-U0", `${base}..${head}`, "--", CLIENT_MANIFEST_PATH]),
     readCurrentBranch: async () =>
       (await runGit(["branch", "--show-current"])).trim(),
     headBranchFromEnvironment: process.env.GITHUB_HEAD_REF,
@@ -85,7 +85,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       }
     },
     writeTextFile: async (fileName, content) => {
-      const path = join(await mkdtemp(join(tmpdir(), "data-refresh-")), fileName);
+      const path = join(
+        await mkdtemp(join(tmpdir(), "data-refresh-")),
+        fileName,
+      );
       await writeFile(path, content);
       return path;
     },

@@ -2,10 +2,16 @@
  * The three commands of the data refresh command line, over injected dependencies.
  * Implements FR3, FR5, FR6, FR7, FR8 of refresh-data-through-scheduled-pull-requests (D5).
  */
-import { ZONE_COORDINATES_FILE, ZONE_RULES_RELEASE_FILE } from "../../app.config.ts";
+import {
+  ZONE_COORDINATES_FILE,
+  ZONE_RULES_RELEASE_FILE,
+} from "../../app.config.ts";
 import type { CityDataset } from "../cityData/cityDataTypes.ts";
 import { DATASET_PATH } from "../cityData/constants.ts";
-import { findPathsOutsideData, findSourceOfBranch } from "./checkDataOnlyPaths.ts";
+import {
+  findPathsOutsideData,
+  findSourceOfBranch,
+} from "./checkDataOnlyPaths.ts";
 import { compareCityData } from "./compareCityData.ts";
 import { compareZoneRules } from "./compareZoneRules.ts";
 import {
@@ -14,9 +20,15 @@ import {
   REFRESH_VERDICTS,
   type RefreshSource,
 } from "./refreshConstants.ts";
-import { buildRefreshFailureIssue } from "./refreshFailureIssue.ts";
+import {
+  buildRefreshFailureIssue,
+  buildRefreshRecoveryComment,
+} from "./refreshFailureIssue.ts";
 import { buildRefreshPullRequest } from "./refreshPullRequest.ts";
-import { decideCityDataRefresh, decideZoneRulesRefresh } from "./refreshVerdict.ts";
+import {
+  decideCityDataRefresh,
+  decideZoneRulesRefresh,
+} from "./refreshVerdict.ts";
 
 export const EXIT_CODE_OK = 0;
 export const EXIT_CODE_FAILED = 1;
@@ -58,7 +70,8 @@ async function readZoneRulesInputs(read: ReadFile) {
   const coordinates = await read(ZONE_COORDINATES_FILE);
   return {
     release: JSON.parse(await requireFile(read, ZONE_RULES_RELEASE_FILE)),
-    coordinates: coordinates === undefined ? undefined : JSON.parse(coordinates),
+    coordinates:
+      coordinates === undefined ? undefined : JSON.parse(coordinates),
   };
 }
 
@@ -78,13 +91,21 @@ export async function runVerdict(
     decision = decideZoneRulesRefresh(
       compareZoneRules(await readZoneRulesInputs(readCommittedFile), refreshed),
     );
-    pullRequest = buildRefreshPullRequest(source, refreshed.release.release, decision);
+    pullRequest = buildRefreshPullRequest(
+      source,
+      refreshed.release.release,
+      decision,
+    );
   } else if (source === REFRESH_SOURCES.CITY_DATA) {
     const refreshed = await readCityData(readRefreshedFile);
     decision = decideCityDataRefresh(
       compareCityData(await readCityData(readCommittedFile), refreshed),
     );
-    pullRequest = buildRefreshPullRequest(source, refreshed.source.dumpDate, decision);
+    pullRequest = buildRefreshPullRequest(
+      source,
+      refreshed.source.dumpDate,
+      decision,
+    );
   } else {
     dependencies.log(USAGE);
     return EXIT_CODE_FAILED;
@@ -161,6 +182,13 @@ export async function runIssue(
   await dependencies.writeOutput(
     "body-file",
     await dependencies.writeTextFile("issue.md", issue.body),
+  );
+  await dependencies.writeOutput(
+    "recovery-file",
+    await dependencies.writeTextFile(
+      "recovery.md",
+      buildRefreshRecoveryComment(url),
+    ),
   );
   return EXIT_CODE_OK;
 }

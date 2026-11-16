@@ -53,7 +53,9 @@ function buildDescription(
 ): string {
   const sourceLabel =
     source === REFRESH_SOURCES.ZONE_RULES ? "zone rules" : "city data";
-  const lines = [`Data refresh of the ${sourceLabel}, compiled by the scheduled workflow.`];
+  const lines = [
+    `Data refresh of the ${sourceLabel}, compiled by the scheduled workflow.`,
+  ];
   if (decision.verdict === REFRESH_VERDICTS.NEEDS_REVIEW) {
     lines.push(
       `Automatic merging is withheld (label \`${NEEDS_REVIEW_LABEL}\`). Reasons:`,

@@ -31,7 +31,14 @@ const REASON_FRAGMENTS: Record<string, string> = {
 
 function buildCities(count: number, firstId = 1): CityTuple[] {
   return Array.from({ length: count }, (_, index) => [
-    firstId + index, `City ${firstId + index}`, 0, "XX", 0, SMALL_POPULATION, 10, 20,
+    firstId + index,
+    `City ${firstId + index}`,
+    0,
+    "XX",
+    0,
+    SMALL_POPULATION,
+    10,
+    20,
   ]);
 }
 
@@ -68,28 +75,45 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let committedCoordinateIds: string[] = [];
 
   // @refresh-data-through-scheduled-pull-requests @FR2
-  f.Scenario("Nothing but the dump date changed", ({ Given, And, When, Then }) => {
-    Given("the committed city data was compiled from the dump of {string}", (_ctx, dumpDate: string) => {
-      committed = buildDataset(buildCommittedCities(), dumpDate);
-    });
-    And("the dump of {string} gives the same cities, names, zones, regions, populations and coordinates", (_ctx, dumpDate: string) => {
-      refreshed = buildDataset(buildCommittedCities(), dumpDate);
-    });
-    When("the city data refresh is compared with the committed city data", () => {
-      cityDecision = decideCityDataRefresh(compareCityData(committed, refreshed));
-    });
-    Then("the verdict is {string}", (_ctx, verdict: string) => {
-      expect(cityDecision.verdict).toBe(verdict);
-    });
-  });
+  f.Scenario(
+    "Nothing but the dump date changed",
+    ({ Given, And, When, Then }) => {
+      Given(
+        "the committed city data was compiled from the dump of {string}",
+        (_ctx, dumpDate: string) => {
+          committed = buildDataset(buildCommittedCities(), dumpDate);
+        },
+      );
+      And(
+        "the dump of {string} gives the same cities, names, zones, regions, populations and coordinates",
+        (_ctx, dumpDate: string) => {
+          refreshed = buildDataset(buildCommittedCities(), dumpDate);
+        },
+      );
+      When(
+        "the city data refresh is compared with the committed city data",
+        () => {
+          cityDecision = decideCityDataRefresh(
+            compareCityData(committed, refreshed),
+          );
+        },
+      );
+      Then("the verdict is {string}", (_ctx, verdict: string) => {
+        expect(cityDecision.verdict).toBe(verdict);
+      });
+    },
+  );
 
   // @refresh-data-through-scheduled-pull-requests @FR2
   f.Scenario("Only the dump date differs", ({ Given, When, Then }) => {
     let isSameData = false;
-    Given("two compiled files with the dump dates {string} and {string} and the same cities", (_ctx, committedDate: string, refreshedDate: string) => {
-      committed = buildDataset(buildCommittedCities(), committedDate);
-      refreshed = buildDataset(buildCommittedCities(), refreshedDate);
-    });
+    Given(
+      "two compiled files with the dump dates {string} and {string} and the same cities",
+      (_ctx, committedDate: string, refreshedDate: string) => {
+        committed = buildDataset(buildCommittedCities(), committedDate);
+        refreshed = buildDataset(buildCommittedCities(), refreshedDate);
+      },
+    );
     When("they are compared for a refresh", () => {
       isSameData = compareCityData(committed, refreshed).isSameData;
     });
@@ -99,58 +123,88 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @refresh-data-through-scheduled-pull-requests @FR7
-  f.ScenarioOutline("The guard decides", ({ Given, When, Then, And }, variables) => {
-    Given("the committed city data holds {int} cities", (_ctx, count: number) => {
-      expect(count).toBe(COMMITTED_CITY_COUNT);
-      committed = buildDataset(buildCommittedCities(), "2026-11-14");
-    });
-    When(
-      'a refresh lacks "<lost>" cities, "<largeLost>" large city and "<zoneLost>" zone, and adds "<added>" cities',
-      () => {
-        const lostCount = Number(variables.lost);
-        const lostIds = new Set(Array.from({ length: lostCount }, (_, index) => index + 1));
-        if (variables.largeLost === "yes") lostIds.add(LARGE_CITY_ID);
-        if (variables.zoneLost === "yes") lostIds.add(ALMATY_CITY_ID);
-        const kept = committed.cities.filter((city) => !lostIds.has(Number(city[0])));
-        const added = buildCities(Number(variables.added), COMMITTED_CITY_COUNT + 1);
-        refreshed = buildDataset([...kept, ...added], "2026-12-02");
-        cityDecision = decideCityDataRefresh(compareCityData(committed, refreshed));
-      },
-    );
-    Then('the verdict is "<verdict>"', () => {
-      expect(cityDecision.verdict).toBe(variables.verdict);
-    });
-    And('the reasons are "<reasons>"', () => {
-      const fragment = REASON_FRAGMENTS[String(variables.reasons)];
-      if (fragment === undefined) {
-        expect(cityDecision.reasons).toEqual([]);
-      } else {
-        expect(cityDecision.reasons.join("\n")).toContain(fragment);
-      }
-    });
-  });
+  f.ScenarioOutline(
+    "The guard decides",
+    ({ Given, When, Then, And }, variables) => {
+      Given(
+        "the committed city data holds {int} cities",
+        (_ctx, count: number) => {
+          expect(count).toBe(COMMITTED_CITY_COUNT);
+          committed = buildDataset(buildCommittedCities(), "2026-11-14");
+        },
+      );
+      When(
+        'a refresh lacks "<lost>" cities, "<largeLost>" large city and "<zoneLost>" zone, and adds "<added>" cities',
+        () => {
+          const lostCount = Number(variables.lost);
+          const lostIds = new Set(
+            Array.from({ length: lostCount }, (_, index) => index + 1),
+          );
+          if (variables.largeLost === "yes") lostIds.add(LARGE_CITY_ID);
+          if (variables.zoneLost === "yes") lostIds.add(ALMATY_CITY_ID);
+          const kept = committed.cities.filter(
+            (city) => !lostIds.has(Number(city[0])),
+          );
+          const added = buildCities(
+            Number(variables.added),
+            COMMITTED_CITY_COUNT + 1,
+          );
+          refreshed = buildDataset([...kept, ...added], "2026-12-02");
+          cityDecision = decideCityDataRefresh(
+            compareCityData(committed, refreshed),
+          );
+        },
+      );
+      Then('the verdict is "<verdict>"', () => {
+        expect(cityDecision.verdict).toBe(variables.verdict);
+      });
+      And('the reasons are "<reasons>"', () => {
+        const fragment = REASON_FRAGMENTS[String(variables.reasons)];
+        if (fragment === undefined) {
+          expect(cityDecision.reasons).toEqual([]);
+        } else {
+          expect(cityDecision.reasons.join("\n")).toContain(fragment);
+        }
+      });
+    },
+  );
 
   // @refresh-data-through-scheduled-pull-requests @FR7
   f.Scenario("Zone rules that lose a zone", ({ Given, When, Then }) => {
-    Given("the committed release holds the identifier {string}", (_ctx, zoneId: string) => {
-      committedZoneIds = [zoneId];
-    });
-    When("the refreshed release has no entry {string}, neither a zone nor a link", () => {
-      zoneRulesDecision = decideZoneRulesRefresh(
-        compareZoneRules({ release: releaseOf(committedZoneIds) }, { release: releaseOf([]) }),
-      );
-    });
-    Then("the zone rules verdict is {string} and names {string}", (_ctx, verdict: string, zoneId: string) => {
-      expect(zoneRulesDecision.verdict).toBe(verdict);
-      expect(zoneRulesDecision.reasons.join("\n")).toContain(zoneId);
-    });
+    Given(
+      "the committed release holds the identifier {string}",
+      (_ctx, zoneId: string) => {
+        committedZoneIds = [zoneId];
+      },
+    );
+    When(
+      "the refreshed release has no entry {string}, neither a zone nor a link",
+      () => {
+        zoneRulesDecision = decideZoneRulesRefresh(
+          compareZoneRules(
+            { release: releaseOf(committedZoneIds) },
+            { release: releaseOf([]) },
+          ),
+        );
+      },
+    );
+    Then(
+      "the zone rules verdict is {string} and names {string}",
+      (_ctx, verdict: string, zoneId: string) => {
+        expect(zoneRulesDecision.verdict).toBe(verdict);
+        expect(zoneRulesDecision.reasons.join("\n")).toContain(zoneId);
+      },
+    );
   });
 
   // @refresh-data-through-scheduled-pull-requests @FR7
   f.Scenario("Zone rules that lose coordinates", ({ Given, When, Then }) => {
-    Given("the committed zone coordinates hold {string}", (_ctx, zoneId: string) => {
-      committedCoordinateIds = [zoneId];
-    });
+    Given(
+      "the committed zone coordinates hold {string}",
+      (_ctx, zoneId: string) => {
+        committedCoordinateIds = [zoneId];
+      },
+    );
     When("the refreshed zone coordinates do not", () => {
       const release = releaseOf(committedCoordinateIds);
       zoneRulesDecision = decideZoneRulesRefresh(
@@ -160,9 +214,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         ),
       );
     });
-    Then("the zone rules verdict is {string} and names {string}", (_ctx, verdict: string, zoneId: string) => {
-      expect(zoneRulesDecision.verdict).toBe(verdict);
-      expect(zoneRulesDecision.reasons.join("\n")).toContain(zoneId);
-    });
+    Then(
+      "the zone rules verdict is {string} and names {string}",
+      (_ctx, verdict: string, zoneId: string) => {
+        expect(zoneRulesDecision.verdict).toBe(verdict);
+        expect(zoneRulesDecision.reasons.join("\n")).toContain(zoneId);
+      },
+    );
   });
 });

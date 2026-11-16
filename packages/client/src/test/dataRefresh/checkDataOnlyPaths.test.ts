@@ -35,7 +35,11 @@ describe("findSourceOfBranch", () => {
 describe("findPathsOutsideData", () => {
   it.each([
     ["zone-rules", [RELEASE_FILE, COORDINATES_FILE], []],
-    ["zone-rules", [RELEASE_FILE, "packages/client/src/main.tsx"], ["packages/client/src/main.tsx"]],
+    [
+      "zone-rules",
+      [RELEASE_FILE, "packages/client/src/main.tsx"],
+      ["packages/client/src/main.tsx"],
+    ],
     ["city-data", [CITY_FILE], []],
     ["city-data", [CITY_FILE, RELEASE_FILE], [RELEASE_FILE]],
   ] as const)("%s with %j gives %j", (source, changedPaths, offenders) => {
@@ -43,7 +47,9 @@ describe("findPathsOutsideData", () => {
   });
 
   it("accepts the lockfile and the two CLDR version entries", () => {
-    expect(findPathsOutsideData("cldr", [LOCKFILE, MANIFEST], cldrDiff)).toEqual([]);
+    expect(
+      findPathsOutsideData("cldr", [LOCKFILE, MANIFEST], cldrDiff),
+    ).toEqual([]);
   });
 
   it("names another dependency's version entry", () => {
@@ -59,17 +65,21 @@ describe("findPathsOutsideData", () => {
   });
 
   it("names a changed file outside the CLDR data paths", () => {
-    expect(findPathsOutsideData("cldr", [LOCKFILE, "packages/client/src/main.tsx"])).toEqual([
-      "packages/client/src/main.tsx",
-    ]);
+    expect(
+      findPathsOutsideData("cldr", [LOCKFILE, "packages/client/src/main.tsx"]),
+    ).toEqual(["packages/client/src/main.tsx"]);
   });
 
   it("does not look at the manifest diff when the manifest is unchanged", () => {
-    expect(findPathsOutsideData("cldr", [LOCKFILE], '+    "react": "1"')).toEqual([]);
+    expect(
+      findPathsOutsideData("cldr", [LOCKFILE], '+    "react": "1"'),
+    ).toEqual([]);
   });
 
   it("ignores a manifest diff for the other sources", () => {
-    expect(findPathsOutsideData("zone-rules", [MANIFEST], cldrDiff)).toEqual([MANIFEST]);
+    expect(findPathsOutsideData("zone-rules", [MANIFEST], cldrDiff)).toEqual([
+      MANIFEST,
+    ]);
   });
 
   it("ignores the headers and hunk lines of a real diff", () => {
@@ -85,14 +95,20 @@ describe("findPathsOutsideData", () => {
   });
 
   it("names a changed line even when it contains three dashes", () => {
-    expect(findPathsOutsideData("cldr", [MANIFEST], '-    "react": "a---b",')).toEqual(['"react": "a---b",']);
+    expect(
+      findPathsOutsideData("cldr", [MANIFEST], '-    "react": "a---b",'),
+    ).toEqual(['"react": "a---b",']);
   });
 
   it("does not take a path that only starts like a data file as data", () => {
-    expect(findPathsOutsideData("cldr", ["packages/client/package.json.bak"])).toEqual(["packages/client/package.json.bak"]);
+    expect(
+      findPathsOutsideData("cldr", ["packages/client/package.json.bak"]),
+    ).toEqual(["packages/client/package.json.bak"]);
   });
 
   it("gives the other sources no manifest offenders when the manifest is unchanged", () => {
-    expect(findPathsOutsideData("zone-rules", [RELEASE_FILE], '+    "react": "1"')).toEqual([]);
+    expect(
+      findPathsOutsideData("zone-rules", [RELEASE_FILE], '+    "react": "1"'),
+    ).toEqual([]);
   });
 });

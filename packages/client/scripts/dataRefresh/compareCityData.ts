@@ -46,13 +46,17 @@ export function compareCityData(
   };
   return {
     isSameData: isDeepStrictEqual(committed, refreshedWithCommittedDate),
-    removedCities: removedTuples.map((cityTuple) => cityTuple[GEONAME_ID_INDEX]),
+    removedCities: removedTuples.map(
+      (cityTuple) => cityTuple[GEONAME_ID_INDEX],
+    ),
     removedShare:
       committed.cities.length === 0
         ? 0
         : removedTuples.length / committed.cities.length,
     removedLargeCities: removedTuples
-      .filter((cityTuple) => cityTuple[POPULATION_INDEX] >= LARGE_CITY_POPULATION)
+      .filter(
+        (cityTuple) => cityTuple[POPULATION_INDEX] >= LARGE_CITY_POPULATION,
+      )
       .map((cityTuple) => cityTuple[GEONAME_ID_INDEX]),
     removedZones: [...collectUsedZones(committed)].filter(
       (zone) => !refreshedZones.has(zone),

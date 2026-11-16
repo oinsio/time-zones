@@ -46,7 +46,9 @@ export function decideCityDataRefresh(
     );
   }
   for (const geonameId of comparison.removedLargeCities) {
-    reasons.push(`The city with GeoNames ID ${geonameId} of at least ${LARGE_CITY_POPULATION} inhabitants is missing`);
+    reasons.push(
+      `The city with GeoNames ID ${geonameId} of at least ${LARGE_CITY_POPULATION} inhabitants is missing`,
+    );
   }
   for (const zoneId of comparison.removedZones) {
     reasons.push(`No city uses the zone ${zoneId} any more`);
@@ -59,7 +61,8 @@ export function decideZoneRulesRefresh(
 ): RefreshDecision {
   const reasons = [
     ...comparison.removedZoneIds.map(
-      (zoneId) => `The zone identifier ${zoneId} of the committed release is missing`,
+      (zoneId) =>
+        `The zone identifier ${zoneId} of the committed release is missing`,
     ),
     ...comparison.zonesWithoutCoordinates.map(
       (zoneId) => `The coordinates of the zone ${zoneId} are missing`,
