@@ -60,9 +60,12 @@ export function countSunCalls(actualSunModule: ActualSunModule) {
   };
 }
 
-/** Loads modules afresh so that they bind to the wrapped sun module. */
-export function importWithSunCount<T>(load: () => Promise<T>): Promise<T> {
+/** Loads modules afresh so that they bind to the wrapped sun module, and loads their sun support. */
+export async function importWithSunCount<T>(
+  load: () => Promise<T>,
+): Promise<T> {
   vi.resetModules();
+  await (await import("@/model/sunRegistry")).loadSunSupport();
   return load();
 }
 

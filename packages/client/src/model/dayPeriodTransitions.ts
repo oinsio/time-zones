@@ -15,36 +15,33 @@ export type SolarDayPeriods = {
   transitions: DayPeriodTransition[];
 };
 
-/** The period at solar noon when the sun is beyond a threshold there, else undefined. */
-function getExtremePeriodAtNoon(solarDay: SolarDay): DayPeriod | undefined {
-  if (solarDay.day.state !== SunThresholdState.STAYS_BELOW)
-    return DayPeriod.DAY;
-  return solarDay.night.state === SunThresholdState.STAYS_BELOW
-    ? DayPeriod.NIGHT
-    : undefined;
-}
-
 export function getSolarDayPeriods(solarDay: SolarDay): SolarDayPeriods {
   const { night, day } = solarDay;
   const isNightCrossed = night.state === SunThresholdState.CROSSES;
-  const isDayCrossed = day.state === SunThresholdState.CROSSES;
+  const isDayReached = day.state !== SunThresholdState.STAYS_BELOW;
+  const isNightReached = night.state !== SunThresholdState.STAYS_BELOW;
   let initial = DayPeriod.NIGHT;
-  if (night.state === SunThresholdState.STAYS_ABOVE) {
+  if (!isNightCrossed && isNightReached) {
     initial =
       day.state === SunThresholdState.STAYS_ABOVE
         ? DayPeriod.DAY
         : DayPeriod.MORNING;
   }
-  const transitions: DayPeriodTransition[] = [];
-  const add = (instant: number | undefined, to: DayPeriod) => {
-    if (instant !== undefined) transitions.push({ instant, to });
+  const candidates: [number | undefined, DayPeriod][] = [
+    [night.rising, DayPeriod.MORNING],
+    [day.rising, DayPeriod.DAY],
+    // Between −6° and +6° at noon the morning turns into the evening there.
+    [
+      !isDayReached && isNightReached ? solarDay.solarNoon : undefined,
+      DayPeriod.EVENING,
+    ],
+    [day.setting, DayPeriod.EVENING],
+    [night.setting, DayPeriod.NIGHT],
+  ];
+  return {
+    initial,
+    transitions: candidates.flatMap(([instant, to]) =>
+      instant === undefined ? [] : [{ instant, to }],
+    ),
   };
-  if (isNightCrossed) add(night.rising, DayPeriod.MORNING);
-  if (isDayCrossed) add(day.rising, DayPeriod.DAY);
-  if (getExtremePeriodAtNoon(solarDay) === undefined) {
-    add(solarDay.solarNoon, DayPeriod.EVENING);
-  }
-  if (isDayCrossed) add(day.setting, DayPeriod.EVENING);
-  if (isNightCrossed) add(night.setting, DayPeriod.NIGHT);
-  return { initial, transitions };
 }

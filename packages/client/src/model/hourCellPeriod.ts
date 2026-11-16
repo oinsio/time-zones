@@ -12,41 +12,27 @@ export function getLargestSharePeriod(
   spanStart: number,
   spanEnd: number,
 ): DayPeriod {
-  const lastBefore = boundaries.filter(
-    (boundary) => boundary.instant.epochMilliseconds <= spanStart,
+  const instantOf = (boundary: DayPeriodBoundary) =>
+    boundary.instant.epochMilliseconds;
+  const passed = boundaries.filter(
+    (boundary) => instantOf(boundary) <= spanStart,
   );
-  const periodAtStart =
-    lastBefore.length > 0
-      ? lastBefore[lastBefore.length - 1].to
-      : (boundaries[0]?.from ?? periodWithoutBoundaries);
-  const insideBoundaries = boundaries.filter(
-    ({ instant }) =>
-      instant.epochMilliseconds > spanStart &&
-      instant.epochMilliseconds < spanEnd,
-  );
+  let period = passed.length
+    ? passed[passed.length - 1].to
+    : (boundaries[0]?.from ?? periodWithoutBoundaries);
   const shares = new Map<DayPeriod, number>();
   let segmentStart = spanStart;
-  let segmentPeriod = periodAtStart;
-  for (const boundary of insideBoundaries) {
-    const instant = boundary.instant.epochMilliseconds;
-    shares.set(
-      segmentPeriod,
-      (shares.get(segmentPeriod) ?? 0) + instant - segmentStart,
-    );
+  const addShare = (segmentEnd: number) =>
+    shares.set(period, (shares.get(period) ?? 0) + segmentEnd - segmentStart);
+  for (const boundary of boundaries) {
+    const instant = instantOf(boundary);
+    if (instant <= spanStart || instant >= spanEnd) continue;
+    addShare(instant);
     segmentStart = instant;
-    segmentPeriod = boundary.to;
+    period = boundary.to;
   }
-  shares.set(
-    segmentPeriod,
-    (shares.get(segmentPeriod) ?? 0) + spanEnd - segmentStart,
-  );
-  let largest = periodAtStart;
-  let largestShare = -1;
-  for (const [period, share] of shares) {
-    if (share > largestShare) {
-      largest = period;
-      largestShare = share;
-    }
-  }
-  return largest;
+  addShare(spanEnd);
+  return [...shares].reduce((largest, share) =>
+    share[1] > largest[1] ? share : largest,
+  )[0];
 }

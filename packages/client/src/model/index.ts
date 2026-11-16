@@ -137,6 +137,7 @@ export {
   SunThresholdState,
 } from "./sun";
 export { getSunCoordinates, getZoneCoordinates } from "./sunCoordinates";
+export { loadSunSupport } from "./sunRegistry";
 export { canonicalizeTimeZoneId } from "./timeZoneId";
 // Implements FR2, FR6 of show-utc-offset-on-location-rows.
 export { getUtcOffsetMinutes } from "./utcOffset";

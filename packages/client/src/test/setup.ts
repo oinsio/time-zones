@@ -7,6 +7,7 @@ import { initReactI18next } from "react-i18next";
 import { createI18nOptions } from "@/i18n";
 import { systemClock } from "@/lib/temporal";
 import { localeRegistry } from "@/locales";
+import { loadSunSupport } from "@/model/sunRegistry";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "./deviceTimeZone";
 import { FakePointerEvent } from "./fakePointerEvent";
 
@@ -32,6 +33,8 @@ Object.defineProperty(window, "matchMedia", {
     removeEventListener: vi.fn(),
   })),
 });
+
+await loadSunSupport();
 
 void i18n.use(initReactI18next).init({
   ...createI18nOptions(localeRegistry),

@@ -1,8 +1,8 @@
-import zoneCoordinates from "virtual:zone-coordinates";
 import { COORDINATE_TENTHS_PER_DEGREE } from "@/constants";
 import type { Coordinates } from "./coordinates";
 import { isDeviceTimeLocation } from "./deviceTimeLocation";
 import type { Location } from "./locations";
+import { getSunSupport } from "./sunRegistry";
 
 /**
  * The coordinates a location's sun uses: its own, else the zone coordinates
@@ -15,7 +15,7 @@ import type { Location } from "./locations";
 export function getZoneCoordinates(
   timeZoneId: string,
 ): Coordinates | undefined {
-  const tenths = zoneCoordinates[timeZoneId];
+  const tenths = getSunSupport().zoneCoordinates[timeZoneId];
   if (tenths === undefined) return undefined;
   return {
     latitude: tenths[0] / COORDINATE_TENTHS_PER_DEGREE,
