@@ -187,7 +187,7 @@ A data refresh run that fails SHALL open one issue for its source, titled with t
 - **THEN** the issue is closed with a comment linking the run
 
 ### Requirement: CLDR updates
-A dependency bot SHALL propose updates of the CLDR packages `cldr-bcp47` and `cldr-dates-full` together in one pull request, at most once a month. That pull request is the data refresh pull request of CLDR: it MUST merge automatically as a data-only commit only when it changes only the data paths of CLDR and every required check passed: the build, the tests and the data checks. When a required check fails, the pull request MUST NOT merge; it MUST stay open with the label `needs-review`, and the failure MUST be reported as "Failed refresh is reported" defines for a source, in the issue of CLDR, naming the failed check and linking the pull request. No other dependency update MUST be merged automatically. <!-- implements FR9, NG5 of refresh-data-through-scheduled-pull-requests -->
+A dependency bot SHALL propose updates of the CLDR packages `cldr-bcp47` and `cldr-dates-full` together in one pull request, at most once a month. That pull request is the data refresh pull request of CLDR: it MUST merge automatically as a data-only commit only when it changes only the data paths of CLDR and every required check passed: the build, the tests and the data checks. When a required check fails, the pull request MUST NOT merge; it MUST stay open with the label `needs-review`, and the failure MUST be reported as "Failed refresh is reported" defines for a source, in the issue of CLDR, naming the failed check and linking the pull request; when every required check of a later CLDR pull request passes, that issue MUST be closed with a comment. No other dependency update MUST be merged automatically. <!-- implements FR9, NG5 of refresh-data-through-scheduled-pull-requests -->
 
 #### Scenario: A new CLDR release
 - **GIVEN** `cldr-bcp47` and `cldr-dates-full` are at 48.2.0 and 49.0.0 is published
@@ -218,3 +218,17 @@ Every scheduled run of the zone rules publication SHALL re-enable the scheduled 
 - **WHEN** the zone rules publication runs
 - **THEN** the run still looks for a newer release
 - **AND** the run is reported as failed
+
+### Requirement: Data refresh switch
+The repository SHALL hold one switch for the data refresh, off until the maintainer turns it on. While it is off, every scheduled or dispatched run of the zone rules publication and of the city data refresh MUST stop at once reporting "data refresh is off" and MUST NOT open, change or merge a pull request or an issue, and a CLDR pull request of the dependency bot MUST NOT get automatic merging. Turning the switch on MUST need no change to a file of the repository. <!-- implements FR11 of refresh-data-through-scheduled-pull-requests -->
+
+#### Scenario: The switch is off
+- **GIVEN** the data refresh is switched off
+- **WHEN** the zone rules publication or the city data refresh runs
+- **THEN** it stops reporting "data refresh is off"
+- **AND** no pull request or issue is opened or changed
+
+#### Scenario: The switch is turned on
+- **GIVEN** the data refresh was switched off
+- **WHEN** the maintainer switches it on in the repository settings
+- **THEN** the next run of each workflow refreshes its data as the other requirements define
