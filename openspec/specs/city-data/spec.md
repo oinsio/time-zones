@@ -75,7 +75,7 @@ A city of the city data, zone cities included, SHALL carry a region — its firs
 - **THEN** Kazan carries no region
 
 ### Requirement: Compiled once, committed, no network at build time
-The city data SHALL be compiled from the GeoNames dumps by one maintainer command into one committed file that records the date of the dump and the licence. Compiling the same dumps twice MUST give byte-identical files. Building the app, running the tests and running CI MUST NOT request anything from GeoNames. A failed download or an unreadable dump MUST fail the command and leave the committed file unchanged. <!-- implements FR12, FR13 of add-geonames-city-source -->
+The city data SHALL be compiled from the GeoNames dumps by one compile command into one committed file that records the date of the dump and the licence. The command is run by a maintainer or by the city data refresh (see the `app-delivery` capability); no other automated run MUST contact GeoNames: building the app, running the tests, the checks of a pull request and the deploy MUST NOT request anything from GeoNames. Compiling the same dumps twice MUST give byte-identical files. A failed download or an unreadable dump MUST fail the command and leave the committed file unchanged. Two compiled files that differ in nothing but the recorded dump date hold the same city data, and the city data refresh MUST NOT publish the newer one. <!-- implements FR12, FR13 of add-geonames-city-source; FR2 of refresh-data-through-scheduled-pull-requests -->
 
 #### Scenario: Deterministic output
 - **WHEN** the same dumps are compiled twice
@@ -87,13 +87,22 @@ The city data SHALL be compiled from the GeoNames dumps by one maintainer comman
 
 #### Scenario: A failed download
 - **GIVEN** a GeoNames dump cannot be downloaded
-- **WHEN** the maintainer runs the compile command
+- **WHEN** the compile command runs
 - **THEN** the command fails with an error that names the dump
 - **AND** the committed file is unchanged
 
 #### Scenario: The build is offline
 - **WHEN** the app is built without network access
 - **THEN** the build succeeds and the search data file holds the cities of the committed file
+
+#### Scenario: Pull request checks are offline
+- **WHEN** the checks of a data refresh pull request run
+- **THEN** they request nothing from GeoNames
+
+#### Scenario: Only the dump date differs
+- **GIVEN** two compiled files with the dump dates `2026-11-14` and `2026-12-02` and the same cities
+- **WHEN** they are compared for a refresh
+- **THEN** they hold the same city data
 
 ### Requirement: The committed city data is checked
 A check command SHALL validate the committed city data without network access and MUST run in CI on every pull request. It MUST fail, naming the first offender, when the file breaks its format or any rule of this capability, holds fewer than 6 000 GeoNames cities, or has fewer than 95% of Russian names written in Cyrillic. <!-- implements FR12, M1, M4 of add-geonames-city-source -->
