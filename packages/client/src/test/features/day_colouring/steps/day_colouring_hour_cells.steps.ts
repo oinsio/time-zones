@@ -1,4 +1,5 @@
 // Verifies FR8, FR9, FR11 of add-day-colouring-setting.
+// Verifies FR8, UX4 of bind-day-periods-to-sun.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
@@ -159,6 +160,28 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       When("the hour cells of Cairo are presented", () => undefined);
       Then("exactly the columns 12-19 are working", () => {
         expect(workingColumnsOf("Cairo")).toEqual(parseColumnRange("12-19"));
+      });
+    },
+  );
+  // @bind-day-periods-to-sun @FR8 @UX4
+  f.Scenario(
+    "UTC hour cells in the Time of day colouring",
+    ({ Given, When, Then }) => {
+      Given(
+        "the day colouring is Time of day, the reference zone is {string} and the reference day is 2026-03-08",
+        (_ctx, zone: string) => {
+          dayColouring = DayColouring.TIME_OF_DAY;
+          referenceZoneId = zone;
+          referenceDate = "2026-03-08";
+        },
+      );
+      When("the hour cells of UTC are presented", () => undefined);
+      Then("every cell of UTC is the non-working grey", () => {
+        const cells = stripOf("UTC").cells;
+        expect(cells.length).toBeGreaterThan(0);
+        expect(
+          cells.every((cell) => cell.dayColour === DayColour.NO_DAY_PERIOD),
+        ).toBe(true);
       });
     },
   );

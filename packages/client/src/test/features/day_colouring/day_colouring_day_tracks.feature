@@ -1,15 +1,15 @@
 Feature: Day colouring of the day tracks
-  Implements change add-day-colouring-setting.
+  Implements change add-day-colouring-setting and bind-day-periods-to-sun.
   As a user I see my day tracks coloured plainly, by the time of day or by my working hours.
 
-  @add-day-colouring-setting @FR2
+  @add-day-colouring-setting @FR2 @bind-day-periods-to-sun @FR5
   Scenario: Time of day by default
     Given the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
     And the list contains "Almaty, New York"
     When the user opens the app
-    Then the colour stops of "Almaty" are "0.270833 night, 0.3125 morning, 0.369792 morning, 0.380208 work, 0.744792 work, 0.755208 evening, 0.895833 evening, 0.9375 night"
-    And the colour stops of "New York" are "0.161458 work, 0.171875 evening, 0.3125 evening, 0.354167 night, 0.645833 night, 0.6875 morning, 0.744792 morning, 0.755208 work"
+    Then the colour stops of "Almaty" are "0.231619 night, 0.252453 morning, 0.277771 morning, 0.298605 day, 0.705737 day, 0.726570 evening, 0.751960 evening, 0.772794 night"
+    And the colour stops of "New York" are "0.126775 day, 0.147609 evening, 0.171134 evening, 0.191968 night, 0.650388 night, 0.671221 morning, 0.694638 morning, 0.715472 day"
 
   @add-day-colouring-setting @FR3 @FR9
   Scenario: Changing the colouring keeps the moment
@@ -85,3 +85,36 @@ Feature: Day colouring of the day tracks
     And the list contains "Cairo"
     When the user opens the app
     Then the colour stops of "Cairo" are "0.5 non-working, 0.5 working, 0.833333 working, 0.833333 non-working"
+
+  @bind-day-periods-to-sun @FR8 @UX4
+  Scenario: UTC in the Time of day colouring
+    Given the day colouring is Time of day
+    And the device time zone is "Asia/Almaty"
+    And the current instant is "2026-03-08T07:30:00Z"
+    And the list contains "UTC"
+    When the user opens the app
+    Then the colour stops of "UTC" are "0 neutral"
+
+  @bind-day-periods-to-sun @FR8
+  Scenario Outline: UTC in the other colourings
+    Given the day colouring is <colouring> with 10:00-18:00
+    And the device time zone is "UTC"
+    And the current instant is "2026-03-09T06:00:00Z"
+    And the list contains "UTC"
+    When the user opens the app
+    Then UTC is coloured <how>
+
+    Examples:
+      | colouring     | how                                                         |
+      | Plain         | plain, as every location                                    |
+      | Working hours | working from 10:00 to 18:00 on working days, as every location |
+
+  @bind-day-periods-to-sun @FR7 @FR8
+  Scenario: A location gains coordinates
+    Given the day colouring is Time of day
+    And the device time zone is "UTC"
+    And the current instant is "2026-06-21T09:00:00Z"
+    And the list contains "Nowhere"
+    And the app is open
+    When the location gains the coordinates 55.8, 49.1
+    Then the track of "Nowhere" is coloured by the day periods of 55.8, 49.1 without a reload

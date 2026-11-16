@@ -49,6 +49,7 @@ export const KNOWN_CITIES: Record<
   "St. Vincent": { timeZoneId: "America/St_Vincent", countryCode: "VC" },
   Santiago: { timeZoneId: "America/Santiago", countryCode: "CL" },
   Kazan: { timeZoneId: "Europe/Moscow", countryCode: "RU" },
+  Nowhere: { timeZoneId: "Etc/GMT-5", countryCode: "" },
   Казань: { timeZoneId: "Europe/Moscow", countryCode: "RU" },
   Springfield: { timeZoneId: "America/Chicago", countryCode: "US" },
   Longyearbyen: {

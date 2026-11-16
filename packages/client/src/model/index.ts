@@ -60,6 +60,7 @@ export {
 } from "./deviceTimeLocation";
 export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
 // Implements FR1, FR2, FR5, FR6, FR8 of add-grid-hour-cells-and-hour-frame.
+export { getLargestSharePeriod } from "./hourCellPeriod";
 export {
   getHourCellCount,
   getHourCellStart,
