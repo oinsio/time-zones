@@ -2,12 +2,7 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { afterEach, expect, vi } from "vitest";
-import {
-  type Coordinates,
-  DayPeriod,
-  getDayPeriodAt,
-  type getSunCoordinates,
-} from "@/model";
+import { type Coordinates, DayPeriod, getDayPeriodAt } from "@/model";
 import {
   findBoundaryMilliseconds,
   getBoundariesOf,
