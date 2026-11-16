@@ -1,9 +1,7 @@
 import "@fontsource-variable/manrope";
 import "@/styles/globals.css";
 import "@/i18n";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { AppErrorBoundary, AppShell } from "@/app";
+import { mountApp } from "@/app";
 import { ROOT_ELEMENT_ID } from "@/constants";
 import { loadSunSupport } from "@/model";
 
@@ -18,15 +16,8 @@ if (!rootElement) {
 
 /**
  * The first render waits for the sun support, a precached chunk kept out of the
- * initial JavaScript, so that day tracks are coloured on the first paint.
+ * initial JavaScript, so that day tracks are coloured on the first paint; a
+ * failed load shows the recovery screen.
  * Implements NFR-P2 of bind-day-periods-to-sun (D4).
  */
-void loadSunSupport().then(() =>
-  createRoot(rootElement).render(
-    <StrictMode>
-      <AppErrorBoundary>
-        <AppShell />
-      </AppErrorBoundary>
-    </StrictMode>,
-  ),
-);
+void mountApp(rootElement, loadSunSupport);

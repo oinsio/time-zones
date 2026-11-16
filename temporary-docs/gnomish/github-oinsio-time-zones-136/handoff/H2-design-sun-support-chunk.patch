@@ -1,0 +1,31 @@
+diff --git a/openspec/changes/bind-day-periods-to-sun/design.md b/openspec/changes/bind-day-periods-to-sun/design.md
+index bef074c..94d7b68 100644
+--- a/openspec/changes/bind-day-periods-to-sun/design.md
++++ b/openspec/changes/bind-day-periods-to-sun/design.md
+@@ -32,7 +32,7 @@ Current state, read from the code:
+ 
+ ### D1. One pure sun module, NOAA equations, epoch milliseconds (FR1–FR4, NFR-P2, NFR-R2)
+ 
+-`src/model/sun.ts` owns:
++`src/model/sunCalculation.ts` owns the equations, and `src/model/sun.ts` forwards to them through the loaded sun support (D4):
+ 
+ - `getSunElevation(coordinates, epochMilliseconds): number` — degrees;
+ - `getSolarDay(coordinates, epochMilliseconds): SolarDay` — for the solar day around an instant: `solarNoon`, `solarMidnightBefore`, `solarMidnightAfter`, and the rising and setting crossing instants of each threshold, each `undefined` when the sun does not cross it, plus whether it stays above or below.
+@@ -67,7 +67,7 @@ When the reference day holds no boundary, `getDayPeriodStops` returns one stop w
+ 
+ The model never reads the device time zone itself: the device time location already holds it as `timeZoneId` (`architecture.md`: "it arrives as state via `SET_DEVICE_TIME_ZONE`"). `presentZoneMoment`'s `subject` type widens to carry `kind` and `coordinates`.
+ 
+-`getZoneCoordinates` reads a new virtual module `virtual:zone-coordinates`, built by the zone data plugin from `zone-rules/zone-coordinates.json` (418 zones as integer tenths of a degree, `COORDINATE_TENTHS_PER_DEGREE`; the file is about 5 KB gzipped, less once served as a module — to be measured against the 150 KB initial budget). It is eager, so the device time card and lists stored before coordinates are coloured on the first paint with no wait for the lazy search data.
++`getZoneCoordinates` reads the `zoneCoordinates` of the sun support, built by the zone data plugin from `zone-rules/zone-coordinates.json` (418 zones as integer tenths of a degree, `COORDINATE_TENTHS_PER_DEGREE`). The sun support is one lazy chunk, `src/model/sunSupport.ts`, holding the NOAA calculation and the zone coordinates; `src/model/sunRegistry.ts` (`SunSupport`, `registerSunSupport`, `getSunSupport`, `loadSunSupport`) holds it at runtime. The app loads the chunk, precached, before its first render (`mountApp`), so the device time card and lists stored before coordinates are coloured on the first paint with no wait for the lazy search data; if the chunk fails to load, the recovery screen is shown.
+ 
+ Alternative rejected: reading zone coordinates from the lazy search data — the device time card would be grey on every start until 140 KB load.
+ 
+@@ -94,7 +94,7 @@ Alternative rejected: reading zone coordinates from the lazy search data — the
+ - [Zone coordinates are approximate for the device time location and old lists; a user in Kazan sees Moscow's sun on the device card] → accepted (NG3); a city location is exact.
+ - [Atmosphere, altitude and terrain shift the real sun by minutes] → within the stated accuracy; boundaries blend over 30 minutes.
+ - [Near the polar circles a threshold is crossed or not depending on fractions of a degree] → the rule has no special case, so the worst outcome is a boundary a few minutes off or a short band appearing a day early.
+-- [The eager zone coordinates push the initial JavaScript over 150 KB] → measured in the first task of the group; fallback: ship them as a preloaded JSON beside the zone rules.
++- [The sun calculation and zone coordinates push the initial JavaScript over 150 KB] → they live in a lazy chunk loaded before the first render; if that chunk fails to load the recovery screen is shown.
+ - [Hour cells are hourly; a 50-minute morning near the equator fits one cell] → the largest-share rule keeps it visible.
+ 
+ ## Migration Plan
