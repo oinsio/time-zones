@@ -14,6 +14,7 @@ See `proposal.md` — Why. Facts found in the repository on 2026-11-16:
 - The repository is public. Its merge settings and the protection rules of `main` could not be read (the API call needs authentication), so they are a handoff item.
 - Constraint of the factory (`.gnomish/stages/specify/handoff.md`): the implement stage writes only under `packages/` and `docs/` other than `docs/adr/` and never edits `.github/` or `CLAUDE.md`; those are handoff patches, which the human applies on the pull request branch before it merges.
 - ADR-0014 point 5 (Accepted) says the workflow "commits it and deploys". This change refines that point; the refinement is recorded by the new ADR and a status note on ADR-0014 (H2), which land in the same pull request.
+- ADR-0015 (Accepted) says "A maintainer command (`city-data:compile`) downloads the dumps, compiles one file and commits it … The build, the tests and CI never contact GeoNames." The city data refresh runs that command from a scheduled workflow and lands its result through the data refresh bot, so ADR-0015 gets a status note refined by the new ADR too (H2); the pull request checks, the build and the deploy still never contact GeoNames.
 
 Driven by FR1–FR11, NFR-P1, NFR-P2, NFR-S1 from proposal.
 

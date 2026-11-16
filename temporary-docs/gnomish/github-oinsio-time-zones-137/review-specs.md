@@ -103,7 +103,8 @@ Q1 and Q2 are not defined as requirement lines; proposal.md:144 records both as 
 - Impact: After the change lands, ADR-0015 still says CI never contacts GeoNames and that a maintainer commits the city data, while a workflow does both. A later change or reviewer reading ADR-0015 would treat the city data refresh workflow as a violation, or would miss that ADR-0017 refines it.
 - Fix: In task 6.2 and H2 (`tasks.md:40,48`), and in proposal "What Changes" (`proposal.md:27`), add a status note under ADR-0015's status: "Refined by ADR-0017: the compile command is also run by the scheduled city data refresh, which proposes its result as a data refresh pull request; pull request checks, the build and the deploy still never contact GeoNames." Include `docs/adr/0015-city-data-from-geonames.md` in the H2 patch's files.
 - Fix risk: none. The note goes in the same handoff patch, under `docs/adr/`, which the factory already treats as a handoff path.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 6.2 and H2 now put a status note under ADR-0015 ("Refined by ADR-0017: the compile command is also run by the scheduled city data refresh …; pull request checks, the build and the deploy still never contact GeoNames.") into the H2 patch; proposal.md "What Changes" and design.md Context name the ADR-0015 refinement.
 
 ### R3 — WARNING — The CLDR commit subject contradicts FR5
 - Location: `openspec/changes/refresh-data-through-scheduled-pull-requests/proposal.md:74`; `design.md:52`
