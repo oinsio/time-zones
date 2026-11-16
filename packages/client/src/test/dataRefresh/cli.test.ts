@@ -94,6 +94,24 @@ describe("verdict zone-rules", () => {
     ]);
   });
 
+  it("merges when neither side has a zone coordinates file", async () => {
+    const harness = createHarness({
+      committed: { [RELEASE_PATH]: zoneRelease("2026f", ["Europe/Kyiv"]) },
+      refreshed: { [RELEASE_PATH]: zoneRelease("2026g", ["Europe/Kyiv"]) },
+    });
+    await runDataRefreshCli(["verdict", "zone-rules"], harness.dependencies);
+    expect(harness.outputs.verdict).toBe("MERGE");
+  });
+
+  it("needs review when a zone loses its coordinates", async () => {
+    const harness = createHarness({
+      committed: { [RELEASE_PATH]: zoneRelease("2026f", ["Asia/Almaty"]), [COORDINATES_PATH]: zoneCoordinates(["Asia/Almaty"]) },
+      refreshed: { [RELEASE_PATH]: zoneRelease("2026g", ["Asia/Almaty"]), [COORDINATES_PATH]: zoneCoordinates([]) },
+    });
+    await runDataRefreshCli(["verdict", "zone-rules"], harness.dependencies);
+    expect(harness.lines).toEqual(["NEEDS_REVIEW", "- The coordinates of the zone Asia/Almaty are missing"]);
+  });
+
   it("fails when a refreshed file is missing", async () => {
     const harness = createHarness({ committed: { [RELEASE_PATH]: zoneRelease("2026f", []) } });
     expect(await runDataRefreshCli(["verdict", "zone-rules"], harness.dependencies)).toBe(1);
@@ -128,6 +146,7 @@ describe("check-paths", () => {
   it("passes for an ordinary branch with the automatic source", async () => {
     const harness = createHarness({ currentBranch: "feature/x", changedPaths: ["packages/client/src/a.ts"] });
     expect(await runDataRefreshCli(["check-paths", "auto", "main", "HEAD"], harness.dependencies)).toBe(0);
+    expect(harness.lines).toEqual(["feature/x is not a data refresh branch"]);
   });
 
   it("takes the source from GITHUB_HEAD_REF before the current branch", async () => {

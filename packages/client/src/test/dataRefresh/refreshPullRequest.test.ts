@@ -51,6 +51,30 @@ describe("buildRefreshPullRequest", () => {
   });
 });
 
+describe("the text of the pull request", () => {
+  it.each([
+    ["zone-rules", "zone rules"],
+    ["city-data", "city data"],
+  ] as const)("describes the %s refresh", (source, label) => {
+    const { body, mergeBody } = buildRefreshPullRequest(source, "x", mergeDecision);
+    const expected = `Data refresh of the ${label}, compiled by the scheduled workflow.\n\nData-Only: true`;
+    expect([body, mergeBody]).toEqual([expected, expected]);
+  });
+
+  it("states the label and each reason when the verdict needs review", () => {
+    const { body } = buildRefreshPullRequest("zone-rules", "x", reviewDecision);
+    expect(body).toBe(
+      [
+        "Data refresh of the zone rules, compiled by the scheduled workflow.",
+        "Automatic merging is withheld (label `needs-review`). Reasons:",
+        "- The zone identifier Europe/Kyiv of the committed release is missing",
+        "",
+        "Data-Only: true",
+      ].join("\n"),
+    );
+  });
+});
+
 describe("the trailer helpers", () => {
   it("appends the trailer after a blank line", () => {
     expect(appendDataOnlyTrailer("Text")).toBe("Text\n\nData-Only: true");

@@ -71,4 +71,28 @@ describe("findPathsOutsideData", () => {
   it("ignores a manifest diff for the other sources", () => {
     expect(findPathsOutsideData("zone-rules", [MANIFEST], cldrDiff)).toEqual([MANIFEST]);
   });
+
+  it("ignores the headers and hunk lines of a real diff", () => {
+    const diff = [
+      "diff --git a/packages/client/package.json b/packages/client/package.json",
+      "index 1a2b3c..4d5e6f 100644",
+      "--- a/packages/client/package.json",
+      "+++ b/packages/client/package.json",
+      "@@ -40,2 +40,2 @@",
+      cldrDiff.split("\n").slice(2).join("\n"),
+    ].join("\n");
+    expect(findPathsOutsideData("cldr", [MANIFEST], diff)).toEqual([]);
+  });
+
+  it("names a changed line even when it contains three dashes", () => {
+    expect(findPathsOutsideData("cldr", [MANIFEST], '-    "react": "a---b",')).toEqual(['"react": "a---b",']);
+  });
+
+  it("does not take a path that only starts like a data file as data", () => {
+    expect(findPathsOutsideData("cldr", ["packages/client/package.json.bak"])).toEqual(["packages/client/package.json.bak"]);
+  });
+
+  it("gives the other sources no manifest offenders when the manifest is unchanged", () => {
+    expect(findPathsOutsideData("zone-rules", [RELEASE_FILE], '+    "react": "1"')).toEqual([]);
+  });
 });

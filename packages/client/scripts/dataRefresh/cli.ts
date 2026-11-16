@@ -20,13 +20,11 @@ import {
 } from "./cliCommands.ts";
 import { CLIENT_MANIFEST_PATH } from "./refreshConstants.ts";
 
-const CLIENT_DIRECTORY_IN_REPOSITORY = "packages/client/";
-const GIT_MAX_OUTPUT_BYTES = 256 * 1024 * 1024;
-
 export async function runDataRefreshCli(
   argumentsList: string[],
   dependencies: DataRefreshDependencies,
 ): Promise<number> {
+  // Stryker disable next-line StringLiteral: an absent argument fails the validation of its command either way
   const [command, first = "", second = "", third = ""] = argumentsList;
   try {
     if (command === "verdict") {
@@ -35,6 +33,7 @@ export async function runDataRefreshCli(
     if (command === "check-paths") {
       return await runCheckPaths(first, second, third, dependencies);
     }
+    // Stryker disable next-line ConditionalExpression: the fall-through to the usage gives the same exit code and line
     if (command === "issue") {
       return await runIssue(first, second, third, dependencies);
     }
@@ -50,6 +49,8 @@ export async function runDataRefreshCli(
 
 // Stryker disable all: the entry point binds the real dependencies; Node smoke runs cover it
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const CLIENT_DIRECTORY_IN_REPOSITORY = "packages/client/";
+  const GIT_MAX_OUTPUT_BYTES = 256 * 1024 * 1024;
   const runGit = async (gitArguments: string[]) =>
     (
       await promisify(execFile)("git", gitArguments, {
