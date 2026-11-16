@@ -34,6 +34,18 @@ describe("parseZdumpLines", () => {
   });
 
   it.each([
+    "CET  -9223372036854775808 (gmtime failed) = -9223372036854775808 (localtime failed)",
+    "CET  Wed Dec 31 23:00:00 2147485547 UT = 67768036191673200 (localtime failed)",
+    "Europe/Dublin  Thu Jan  1 00:00:00 -2147481748 UT = -67768040609740800 (localtime failed)",
+    "CET  -67768040609741850 (gmtime failed) = Thu Jan  1 00:00:00 -2147481748 LMT isdst=0 gmtoff=1050",
+    "CET  67768036191676800 (gmtime failed) = Thu Jan  1 01:00:00 2147485548 CET isdst=0 gmtoff=3600",
+    "CET  Thu Jan  1 00:00:00 -2147481748 UT = Thu Jan  1 00:17:30 -2147481748 LMT isdst=0 gmtoff=1050",
+    "CET  Wed Dec 31 22:59:59 2147485547 UT = Wed Dec 31 23:59:59 2147485547 CET isdst=0 gmtoff=3600",
+  ])("skips the end of time line of a newer zdump: %s", (endOfTimeLine) => {
+    expect(parseZdumpLines(endOfTimeLine)).toEqual([]);
+  });
+
+  it.each([
     ["Jan", 1, 946684800 + 0],
     ["Feb", 2, 949363200],
     ["Mar", 3, 951868800],

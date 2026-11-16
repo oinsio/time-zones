@@ -35,7 +35,12 @@ export type ZdumpDifference = {
 /** `<path> <weekday> <month> <day> hh:mm:ss <year> UT = ... <designation> isdst=<0|1> gmtoff=<seconds>` */
 const ZDUMP_LINE =
   /^\S+\s+\w{3} (\w{3})\s+(\d+) (\d\d):(\d\d):(\d\d) (\d+) UT = .* (\S+) isdst=(\d) gmtoff=(-?\d+)$/;
-const NULL_LINE = /= NULL$/;
+/**
+ * An end of time: `= NULL` from an older zdump; from a newer one, a failed
+ * conversion or a UT year that is not a four-digit year (`-2147481748`, `2147485547`).
+ */
+const END_OF_TIME_LINE =
+  /= NULL|\((?:gmtime|localtime) failed\)| -?\d{5,} UT = /;
 const MONTH_NAMES = [
   "Jan",
   "Feb",
@@ -85,11 +90,11 @@ function parseZdumpLine(line: string): ZdumpEntry {
   };
 }
 
-/** The entries of zdump's text, in order; the `NULL` lines (the ends of time) are skipped. */
+/** The entries of zdump's text, in order; the lines of the ends of time are skipped. */
 export function parseZdumpLines(text: string): ZdumpEntry[] {
   return text
     .split("\n")
-    .filter((line) => line.trim() !== "" && !NULL_LINE.test(line))
+    .filter((line) => line.trim() !== "" && !END_OF_TIME_LINE.test(line))
     .map(parseZdumpLine);
 }
 
