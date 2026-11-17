@@ -3,47 +3,27 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { APP_REVISION_FILE } from "@/constants";
-import { Temporal } from "@/lib/temporal";
 import { test } from "./app_shell_silent_update_e2e.fixtures";
+import {
+  checkForNewBuild,
+  deployClockOf,
+  entryScriptOf,
+  hasWaitingBuild,
+} from "./silentUpdatePage";
 import { SiteBuild } from "./silentUpdateSite";
 
 const { Given, When, Then } = createBdd(test);
 
 const NOTICES_REGION_SELECTOR = 'footer [role="status"]';
-const ENTRY_SCRIPT_SELECTOR = 'script[type="module"]';
 const DEPLOY_TIME_SELECTOR = "[data-deploy-time]";
 const UPDATE_NOTICE_TEXT = "A new version is available.";
 const RELOAD_BUTTON_NAME = "Reload";
 const SETTINGS_BUTTON_NAME = "Settings";
-const DEVICE_TIME_ZONE_ID = "Asia/Almaty";
 const CHECK_TIMEOUT_MS = 20_000;
 const RESTART_ATTEMPT_COUNT = 10;
 const RESTART_PAUSE_MS = 1000;
 const RECHECK_FAST_FORWARD = "16:00";
 const ZONE_RULES_NOTICE_PATTERN = /Time zone rules .* are ready/;
-
-const hasWaitingBuild = (page: Page) =>
-  page.evaluate(async () => {
-    const registration = await navigator.serviceWorker.getRegistration();
-    return registration?.waiting != null;
-  });
-
-const checkForNewBuild = (page: Page) =>
-  page.evaluate(async () => {
-    const registration = await navigator.serviceWorker.getRegistration();
-    await registration?.update();
-  });
-
-const entryScriptOf = async (page: Page) =>
-  (await page.locator(ENTRY_SCRIPT_SELECTOR).first().getAttribute("src")) ?? "";
-
-/** The time of day of the build instant on the device clock, as the settings page shows it. */
-const deployClockOf = (deployInstant: string) =>
-  Temporal.Instant.from(deployInstant)
-    .toZonedDateTimeISO(DEVICE_TIME_ZONE_ID)
-    .toPlainTime()
-    .toString({ smallestUnit: "minute" });
-
 Given(
   "build A of the app is running and controls the page",
   async ({ smokeWorld, silentUpdateSite }) => {
@@ -100,11 +80,17 @@ Given(
   },
 );
 
+// The app reads the app revision file once it knows that a build waits: wait for that read, so the empty region is not asserted too early.
 When(
   "a data-only build is published and the app checks for a new build",
   async ({ smokeWorld, silentUpdateSite }) => {
+    const { page } = smokeWorld;
+    const revisionRead = page.waitForResponse((response) =>
+      response.url().endsWith(APP_REVISION_FILE),
+    );
     silentUpdateSite.serve(SiteBuild.SILENT);
-    await checkForNewBuild(smokeWorld.page);
+    await checkForNewBuild(page);
+    await revisionRead;
   },
 );
 
