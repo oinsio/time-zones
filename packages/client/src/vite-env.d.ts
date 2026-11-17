@@ -75,3 +75,6 @@ declare module "virtual:legacy-core-js" {
 
 /** The build instant, replaced by Vite's `define` (see `app.config.ts`). */
 declare const __APP_DEPLOY_INSTANT__: string;
+
+/** The app revision of the build, replaced by Vite's `define` (see `app.config.ts`). */
+declare const __APP_REVISION__: string;

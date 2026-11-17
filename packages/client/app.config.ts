@@ -52,6 +52,17 @@ export const DEPLOY_INSTANT_DEFINE = "__APP_DEPLOY_INSTANT__";
 export const TEST_DEPLOY_INSTANT = "2026-03-08T07:30:00.000Z";
 
 /**
+ * Name of the global that Vite's `define` replaces with the app revision.
+ * Implements FR1 of apply-data-updates-silently (D1).
+ */
+export const APP_REVISION_DEFINE = "__APP_REVISION__";
+
+/** The app revision of every Vitest run, so that tests do not depend on git. */
+export const TEST_APP_REVISION = "test-app-revision";
+
+export { APP_REVISION_FILE } from "./src/constants/appRevisionFile.ts";
+
+/**
  * Gzipped size ceiling of the zone rules asset, in KB: the committed release
  * measures 18 204 bytes gzipped (17.8 KB); plus 20 %, rounded up.
  * Implements NFR-P1 of add-zone-rules-from-iana (D2).
@@ -88,3 +99,6 @@ export const ZONE_COORDINATES_FILE = "zone-rules/zone-coordinates.json";
  * Implements NFR-P2, M3 of bind-day-periods-to-sun.
  */
 export const SUN_SUPPORT_CHUNK_BUDGET_KB = 8;
+
+/** Largest size of the served app revision file, in bytes (1 KB). */
+export const APP_REVISION_FILE_MAX_BYTES = 1024;

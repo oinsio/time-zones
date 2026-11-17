@@ -2,8 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 import { cucumberReporter, defineBddConfig } from "playwright-bdd";
 import {
   APP_BASE_PATH,
+  APP_REVISION_DEFINE,
   DEPLOY_INSTANT_DEFINE,
   E2E_PORT,
+  TEST_APP_REVISION,
   TEST_DEPLOY_INSTANT,
 } from "./app.config";
 import type { ContractViewOptions } from "./src/test/features/view_contract/steps/view_contract_e2e.fixtures";
@@ -13,7 +15,10 @@ import type { ContractViewOptions } from "./src/test/features/view_contract/step
  * defines in a build. Playwright has no Vite, so it gets the test instant.
  * Implements FR6 of polish-settings-and-remove-offline-update-notice (D1).
  */
-Object.assign(globalThis, { [DEPLOY_INSTANT_DEFINE]: TEST_DEPLOY_INSTANT });
+Object.assign(globalThis, {
+  [DEPLOY_INSTANT_DEFINE]: TEST_DEPLOY_INSTANT,
+  [APP_REVISION_DEFINE]: TEST_APP_REVISION,
+});
 
 /**
  * E2E runs against `vite preview` of the production build, because the

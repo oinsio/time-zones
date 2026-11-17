@@ -1,4 +1,5 @@
 export { GEONAMES_URL, GNOMISH_FACTORY_LANDING_URL } from "./api";
+export { APP_REVISION_FILE } from "./appRevisionFile";
 export { MILLISECONDS_PER_MINUTE } from "./clock";
 export {
   COORDINATE_TENTHS_PER_DEGREE,
@@ -17,7 +18,7 @@ export {
   ONE_DAY,
 } from "./date";
 export { DAY_PERIOD_BLEND_MINUTES } from "./dayPeriods";
-export { APP_DEPLOY_INSTANT } from "./deploy";
+export { APP_DEPLOY_INSTANT, APP_REVISION } from "./deploy";
 export { DEVICE_TIME_ZONE_FALLBACK_ID } from "./deviceTimeZone";
 export {
   ADD_LOCATION_BUTTON_ID,
