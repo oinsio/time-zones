@@ -19,6 +19,7 @@ import {
   useStorageAvailability,
   useThemePreference,
   useViewMode,
+  useWatchedZoneIds,
   useZoneRulesUpdate,
 } from "@/controller";
 import { type Clock, systemClock } from "@/lib/temporal";
@@ -99,6 +100,7 @@ function AppShellContent({
   const zoneRulesUpdate = useZoneRulesUpdate({
     clock,
     versionSource: zoneRulesVersionSource,
+    watchedZoneIds: useWatchedZoneIds(),
     storedReleases,
   });
   const isStorageAvailable = useStorageAvailability();

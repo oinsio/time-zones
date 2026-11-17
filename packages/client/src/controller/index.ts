@@ -45,6 +45,8 @@ export {
   type WallTimeTarget,
   WallTimeTargetKind,
 } from "./useWallTimeInput";
+// Implements FR9, FR10 of apply-data-updates-silently.
+export { useWatchedZoneIds } from "./useWatchedZoneIds";
 export {
   useWorkingHoursInput,
   WorkingHoursInputOutcome,
