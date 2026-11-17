@@ -5,7 +5,7 @@ Accepted (2026-11-12)
 
 Supersedes the "Known limitation" of [ADR-0003](0003-reference-instant-time-model.md) (time zone rules come from the browser) and the legacy zone shim of [ADR-0009](0009-supported-browser-engines.md). Driven by `add-zone-rules-from-iana` and `add-remote-zone-rules-updates`.
 
-Point 5 is refined by [ADR-0017](0017-data-refresh-through-pull-requests.md): "commits it" becomes "proposes it as a pull request that merges automatically".
+Point 5 is refined by [ADR-0017](0017-data-refresh-through-pull-requests.md): "commits it" becomes "proposes it as a pull request that merges automatically". It is refined again by [ADR-0018](0018-silent-data-updates-and-the-app-revision.md): "offers a reload" becomes a notice only for a watched zone.
 
 The zone tools (`zic`, `zdump`) are built from the signed `tzcode<release>.tar.gz` of the same release, never taken from the operating system (`build-zic-from-tzcode`).
 
