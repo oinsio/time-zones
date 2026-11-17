@@ -3,8 +3,10 @@ import react from "@vitejs/plugin-react";
 import { configDefaults, defineConfig } from "vitest/config";
 import {
   APP_REVISION_DEFINE,
+  CITY_DATA_DATE_DEFINE,
   DEPLOY_INSTANT_DEFINE,
   TEST_APP_REVISION,
+  TEST_CITY_DATA_DATE,
   TEST_DEPLOY_INSTANT,
 } from "./app.config";
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
@@ -21,6 +23,7 @@ export default defineConfig({
   define: {
     [DEPLOY_INSTANT_DEFINE]: JSON.stringify(TEST_DEPLOY_INSTANT),
     [APP_REVISION_DEFINE]: JSON.stringify(TEST_APP_REVISION),
+    [CITY_DATA_DATE_DEFINE]: JSON.stringify(TEST_CITY_DATA_DATE),
   },
   test: {
     globals: true,

@@ -161,9 +161,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Given("storage is unavailable", () => undefined);
     And("the device time zone is {string}", world.givenDeviceZone);
     When("the user opens the app", world.openAppShell);
-    Then("the storage warning is shown", () =>
+    Then("the storage warning is shown", async () =>
       expect(
-        screen.getByText(i18n.t("mainPage.storageUnavailable")),
+        await screen.findByText(i18n.t("mainPage.storageUnavailable")),
       ).toBeVisible(),
     );
     And(

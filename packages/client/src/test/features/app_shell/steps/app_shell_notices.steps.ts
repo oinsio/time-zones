@@ -138,7 +138,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       fakeServiceWorker.isOfflineReady = true;
     });
     When("the user opens the app", () => openApp());
-    Then("the offline-ready notice is announced politely", () => {
+    Then("the offline-ready notice is announced politely", async () => {
+      await screen.findByText(i18n.t("app.offlineReady"));
       expect(getNoticeRegion()).toHaveAttribute("aria-live", "polite");
       expect(getNoticeRegion()).toHaveTextContent(i18n.t("app.offlineReady"));
     });

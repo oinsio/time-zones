@@ -102,3 +102,12 @@ export const SUN_SUPPORT_CHUNK_BUDGET_KB = 8;
 
 /** Largest size of the served app revision file, in bytes (1 KB). */
 export const APP_REVISION_FILE_MAX_BYTES = 1024;
+
+/**
+ * Name of the global that Vite's `define` replaces with the dump date of the
+ * city data. Implements FR12 of apply-data-updates-silently (D6).
+ */
+export const CITY_DATA_DATE_DEFINE = "__CITY_DATA_DATE__";
+
+/** The dump date of every Vitest run, so that tests do not depend on the committed city data. */
+export const TEST_CITY_DATA_DATE = "2026-11-14";

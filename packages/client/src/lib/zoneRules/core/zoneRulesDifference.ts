@@ -7,63 +7,30 @@
  * Implements FR8, NFR-P2 of apply-data-updates-silently (D4).
  */
 import { getLocalTimeType } from "./localTimeType.ts";
-import type {
-  ListedClockChange,
-  LocalTimeType,
-  ZoneRules,
-  ZoneRulesRelease,
-} from "./zoneRulesRelease.ts";
+import type { ZoneRules, ZoneRulesRelease } from "./zoneRulesRelease.ts";
 
-const areLocalTimeTypesEqual = (
-  first: LocalTimeType,
-  second: LocalTimeType,
-): boolean =>
-  first.utcOffsetSeconds === second.utcOffsetSeconds &&
-  first.designation === second.designation &&
-  first.isDaylightSavingTime === second.isDaylightSavingTime;
+/** Rules are plain data that one reader builds in one key order, so their JSON is their value. */
+const isSameValue = (first: unknown, second: unknown): boolean =>
+  JSON.stringify(first) === JSON.stringify(second);
 
-const areClockChangesEqual = (
-  first: ListedClockChange,
-  second: ListedClockChange,
-): boolean =>
-  first.epochSeconds === second.epochSeconds &&
-  areLocalTimeTypesEqual(first.localTimeType, second.localTimeType);
-
-const getChangesAfter = (
-  zoneRules: ZoneRules,
-  epochSeconds: number,
-): ListedClockChange[] =>
+const getChangesAfter = (zoneRules: ZoneRules, epochSeconds: number) =>
   zoneRules.changes.filter((change) => change.epochSeconds > epochSeconds);
-
-/** The future rule is plain data built by one parser, so its JSON is its value. */
-const areFutureRulesEqual = (first: ZoneRules, second: ZoneRules): boolean =>
-  JSON.stringify(first.futureRule) === JSON.stringify(second.futureRule);
 
 export function hasZoneRulesChangeFrom(
   activeRules: ZoneRules,
   storedRules: ZoneRules,
   epochSeconds: number,
 ): boolean {
-  if (
-    !areLocalTimeTypesEqual(
+  return (
+    !isSameValue(
       getLocalTimeType(activeRules, epochSeconds),
       getLocalTimeType(storedRules, epochSeconds),
-    )
-  ) {
-    return true;
-  }
-  const activeChanges = getChangesAfter(activeRules, epochSeconds);
-  const storedChanges = getChangesAfter(storedRules, epochSeconds);
-  return (
-    activeChanges.length !== storedChanges.length ||
-    activeChanges.some(
-      (change, index) =>
-        !areClockChangesEqual(
-          change,
-          storedChanges[index] as ListedClockChange,
-        ),
     ) ||
-    !areFutureRulesEqual(activeRules, storedRules)
+    !isSameValue(
+      getChangesAfter(activeRules, epochSeconds),
+      getChangesAfter(storedRules, epochSeconds),
+    ) ||
+    !isSameValue(activeRules.futureRule, storedRules.futureRule)
   );
 }
 

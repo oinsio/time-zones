@@ -40,9 +40,10 @@ describe("AppShell notices", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("should announce the offline-ready notice politely", () => {
+  it("should announce the offline-ready notice politely", async () => {
     mockServiceWorker({ isOfflineReady: true });
     render(<AppShell />);
+    await screen.findByText("The app is ready to work offline.");
     expect(getNoticesRegion()).toHaveTextContent(
       "The app is ready to work offline.",
     );

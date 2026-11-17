@@ -1,5 +1,6 @@
 // Verifies FR12, M1 of add-geonames-city-source: the format and tuple rows of "A broken file fails" name their offender.
 // Verifies FR1, FR4 of add-city-coordinates-to-locations (D2, D4).
+// Verifies FR12 of apply-data-updates-silently (D6): the dump date is an ISO date.
 import { describe, expect, it } from "vitest";
 import { checkCityData } from "../../../scripts/cityData/checkCityData.ts";
 import type { CityTuple } from "../../../scripts/cityData/cityDataTypes.ts";
@@ -38,6 +39,14 @@ describe("checkCityData format", () => {
     [
       "a source without a dump date",
       { source: { name: "a", licence: "b", dumpDate: 5 } },
+    ],
+    [
+      "a dump date that is not a calendar date",
+      { source: { name: "a", licence: "b", dumpDate: "2026-13-40" } },
+    ],
+    [
+      "a dump date that is not ISO",
+      { source: { name: "a", licence: "b", dumpDate: "14.11.2026" } },
     ],
     ["zones that are not an array", { zones: "Europe/Berlin" }],
     ["an empty zone", { zones: [""] }],

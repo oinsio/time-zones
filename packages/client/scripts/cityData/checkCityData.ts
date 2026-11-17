@@ -8,6 +8,7 @@ import type { ZoneCityRecord } from "../zoneData/extractZoneData.ts";
 import { checkCoordinates } from "./checkCityCoordinates.ts";
 import { checkRegions } from "./checkCityRegions.ts";
 import type { CityDataset } from "./cityDataTypes.ts";
+import { isDumpDate } from "./committedDumpDate.ts";
 import {
   COUNTRY_CODE_PATTERN,
   CYRILLIC_PATTERN,
@@ -43,7 +44,7 @@ function checkFormat(value: unknown): string | undefined {
     isObject(value.source) &&
     isNonEmptyString(value.source.name) &&
     isNonEmptyString(value.source.licence) &&
-    isNonEmptyString(value.source.dumpDate);
+    isDumpDate(value.source.dumpDate);
   const hasShape =
     hasSource &&
     Array.isArray(value.zones) &&

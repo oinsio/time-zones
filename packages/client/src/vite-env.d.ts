@@ -78,3 +78,6 @@ declare const __APP_DEPLOY_INSTANT__: string;
 
 /** The app revision of the build, replaced by Vite's `define` (see `app.config.ts`). */
 declare const __APP_REVISION__: string;
+
+/** The dump date of the city data, replaced by Vite's `define` (see `app.config.ts`). */
+declare const __CITY_DATA_DATE__: string;

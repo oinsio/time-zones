@@ -11,6 +11,8 @@ export {
   presentCalendarMonth,
   resolveFirstDayOfWeek,
 } from "./calendarMonth";
+// Implements FR5 of polish-settings-and-remove-offline-update-notice.
+export { presentCityDataAttribution } from "./cityDataAttribution";
 export { presentClockChangeNote } from "./clockChangeNote";
 export {
   type DateBarGap,
@@ -30,7 +32,6 @@ export {
 export { type DayPeriodMarkers, getDayPeriodMarkers } from "./dayPeriodMarkers";
 // Implements FR1, FR2, FR7, FR9 of add-time-sliders-to-location-cards.
 export type { HourLabel, PresentedDayTrack } from "./dayTrack";
-// Implements FR5 of polish-settings-and-remove-offline-update-notice.
 export { formatDeployTime } from "./deployTime";
 export { formatTypedWallTimeText } from "./formatTypedWallTimeText";
 // Implements FR3, FR4, FR5 of add-grid-hour-cells-and-hour-frame.
