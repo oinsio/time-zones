@@ -5,285 +5,138 @@
 [![en](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
 [![ru](https://img.shields.io/badge/lang-ru-red.svg)](README.ru.md)
 
-Кроссплатформенное PWA для мировых часов, перевода времени между часовыми поясами и планирования встреч. Только клиент, offline-first — без аккаунта и сервера, данные остаются на устройстве.
+Кроссплатформенное PWA для мировых часов, перевода времени между часовыми поясами и планирования встреч. Два вида показывают один и тот же список мест: «Карточки» — по карточке на место с временем и шкалой дня, и «Сетка» — часовые ячейки, выровненные по всем местам, для выбора времени встречи. Только клиент, offline-first — без аккаунта и сервера, данные остаются на устройстве.
 
 **Приложение:** <https://oinsio.github.io/time-zones/> — устанавливается на домашний экран, после первого визита работает офлайн.
 
 ## Содержание
 
+- [Возможности](#возможности)
 - [Скриншоты](#скриншоты)
-- [Возможности MVP](#возможности-mvp)
 - [Локализация](#локализация)
+- [Поддерживаемые браузеры](#поддерживаемые-браузеры)
 - [Технологии](#технологии)
 - [Разработка](#разработка)
-- [Деплой](#деплой)
+- [CI и деплой](#ci-и-деплой)
 - [Гномская фабрика](#гномская-фабрика)
+- [Участие в разработке](#участие-в-разработке)
 - [Лицензия](#лицензия)
+
+## Возможности
+
+Каждая группа ссылается на спецификации, которые кратко пересказывает; источник истины — спецификации в [`openspec/specs/`](openspec/specs/).
+
+- **Места и поиск** — добавление мест через поиск по городу, стране или аббревиатуре часового пояса (`EST`, `IST`), перемещение перетаскиванием или с клавиатуры, удаление. Место хранится по IANA-идентификатору (`"Europe/Moscow"`), а не по «сырому» смещению от UTC, список сохраняется на устройстве. ([locations](openspec/specs/locations/spec.md), [location-search](openspec/specs/location-search/spec.md), [zone-abbreviations](openspec/specs/zone-abbreviations/spec.md))
+- **Чтение времени** — «Время устройства» всегда показывает время вашего устройства, а отметка «Вы здесь» помечает место в поясе устройства. Одно место можно сделать домашним, и у остальных показывается разница смещений с ним (`−2 ч`, `+0:30`). Строка пояса показывает страну, аббревиатуру и смещение UTC, а заметка предупреждает о скорой смене часов. ([home-location](openspec/specs/home-location/spec.md), [main-page](openspec/specs/main-page/spec.md))
+- **Выбор времени и даты** — потяните ручку на шкале дня или введите время в любом месте, остальные пересчитаются. Смещения от UTC и летнее время вычисляются для выбранной даты, а не для сегодняшней. ([time-selection](openspec/specs/time-selection/spec.md), [date-selection](openspec/specs/date-selection/spec.md))
+- **Периоды суток и раскраска** — ночь, утро, день и вечер определяются по солнцу в каждом месте. Шкалы дня и ячейки раскрашиваются обычно, по времени суток или по вашим рабочим часам. ([day-periods](openspec/specs/day-periods/spec.md), [day-colouring](openspec/specs/day-colouring/spec.md))
+- **«Сетка» и встречи** — выберите встречу с точностью до минуты, увидьте её в местном времени каждого места и поделитесь ею текстом через «Поделиться встречей». ([grid-view](openspec/specs/grid-view/spec.md), [meeting-range](openspec/specs/meeting-range/spec.md))
+- **Настройки** — тема, формат времени (12 или 24 часа), вид, раскраска и рабочие часы, обозначение часового пояса и язык интерфейса. ([settings](openspec/specs/settings/spec.md), [app-shell](openspec/specs/app-shell/spec.md))
+- **Офлайн и обновления** — устанавливаемое PWA, работающее офлайн; новая версия приложения показывает уведомление с кнопкой «Обновить» (само приложение не перезагружается), а обновления только данных (правила поясов, данные о городах) приходят тихо; уведомление о правилах часовых поясов появляется, только если новый выпуск меняет отслеживаемый пояс. ([app-delivery](openspec/specs/app-delivery/spec.md), [zone-rules-updates](openspec/specs/zone-rules-updates/spec.md))
+- **Данные и движки** — приложение компилирует собственные правила часовых поясов IANA, использует данные о городах GeoNames и работает на старом iOS Safari. ([zone-rules](openspec/specs/zone-rules/spec.md), [city-data](openspec/specs/city-data/spec.md), [browser-compatibility](openspec/specs/browser-compatibility/spec.md))
 
 ## Скриншоты
 
-Вид «Карточки» на телефоне и планшете. Подробности: [docs/design](docs/design/README.md).
+«Карточки» на телефоне и планшете, «Сетка» на десктопе. Подробности: [docs/design](docs/design/README.md).
 
 <table>
   <tr>
-    <td align="center"><img src="docs/design/screens/phone-light.png" alt="Телефон, светлая тема" width="300"></td>
-    <td align="center"><img src="docs/design/screens/phone-dark.png" alt="Телефон, тёмная тема" width="300"></td>
-  </tr>
-  <tr>
-    <td align="center">Светлая тема</td>
-    <td align="center">Тёмная тема</td>
+    <td align="center"><img src="docs/design/screens/phone-light.png" alt="Вид «Карточки» на телефоне, светлая тема" width="300"></td>
+    <td align="center"><img src="docs/design/screens/phone-dark.png" alt="Вид «Карточки» на телефоне, тёмная тема" width="300"></td>
   </tr>
 </table>
 
-<img src="docs/design/screens/tablet-light.png" alt="Планшет, светлая тема" width="720">
+<img src="docs/design/screens/tablet-light.png" alt="Вид «Карточки» на планшете, светлая тема" width="720">
 
-## Возможности MVP
+<img src="docs/design/screens/grid-desktop-light.png" alt="Вид «Сетка» на десктопе, светлая тема" width="720">
 
-1. **Места** — добавление и удаление мест через поиск по городу, стране или аббревиатуре часового пояса (`EST`, `IST`). Каждое место хранится по IANA-идентификатору (`"Europe/Moscow"`), а не по «сырому» смещению от UTC.
-2. **Сохранение** — список мест сохраняется на устройстве и восстанавливается при следующем визите, полностью офлайн.
-3. **Домашнее место** — одно место можно отметить как домашнее; у остальных показывается разница смещений с ним (`−2 ч`, `+0:30`). Без дома разница считается от часового пояса устройства, который всегда виден: отметкой «здесь» у совпадающего места или строкой «Здесь».
-4. **Сравнение дня и ночи** — каждое место — это карточка с его временем и шкалой дня, раскрашенной по местным периодам суток (ночь / утро / рабочие часы / вечер), с отмеченной границей суток.
-5. **Выбор времени** — потяните ручку на любой шкале дня или введите время в любом месте; все остальные пересчитываются.
-6. **Выбор даты** — выберите дату; смещения от UTC и летнее время вычисляются для выбранной даты, а не для сегодняшней.
-7. **12/24-часовой формат** — переключение между 12- и 24-часовым форматом.
+<img src="docs/design/screens/grid-desktop-meeting-dark.png" alt="Вид «Сетка» на десктопе со встречей, тёмная тема" width="720">
 
 ## Локализация
 
-Русский и английский поддерживаются с самого начала. Система локалей рассчитана на добавление новых языков без изменения кода:
+Русский и английский встроены; новые языки добавляются без изменения кода:
 
 - **Автообнаружение файлов локалей** — каждый `src/locales/<code>.json` подхватывается автоматически. В каждом файле есть блок `_meta` (`code`, `name`, `nativeName`, `baseLanguage`, `emoji`); `_meta.code` должен совпадать с именем файла.
-- **Добавление языка** — положите новый файл локали с полным набором ключей; язык появится в переключателе.
-- **Шуточные диалекты** — тематические локали переопределяют только часть ключей своего `baseLanguage`, а всё остальное, включая правила множественного числа, берут из него.
-- **Определение языка** — при первом визите используется язык браузера (`en-US` → `en`); дальше выбор пользователя сохраняется локально.
+- **Добавление языка** — положите новый файл локали с полным набором ключей; язык появится в переключателе на странице настроек.
+- **Диалекты** — тематические локали переопределяют только часть ключей своего `baseLanguage`, а остальное, включая правила множественного числа, берут из него, затем из английского.
+- **Выбор языка** — язык интерфейса — тот, что выбран на странице настроек; без выбора используется язык браузера (`en-US` → `en`), затем английский.
+
+## Поддерживаемые браузеры
+
+Последние Chrome, Firefox, Edge и Safari, а также iOS Safari 12.5 — последний выпуск для iPhone 5s/6 и iPad Air / mini 2–3 ([ADR-0009](docs/adr/0009-supported-browser-engines.md)). Синтаксис production-сборки понижается до уровня Safari 12, а CI проверяет собранные файлы.
 
 ## Технологии
 
-- React 18, TypeScript, Vite, Tailwind CSS
-- Temporal API (`temporal-polyfill`) для всей работы с датой и временем
+- React 18, TypeScript, Vite, Tailwind CSS, Radix UI, dnd-kit
+- Temporal API (`temporal-polyfill`) для всей работы с датой и временем, с собственными скомпилированными правилами поясов IANA ([ADR-0014](docs/adr/0014-zone-rules-from-iana.md))
+- Данные о городах GeoNames ([ADR-0015](docs/adr/0015-city-data-from-geonames.md))
 - i18next + react-i18next
 - PWA через `vite-plugin-pwa` (Workbox)
-- Тестирование: Vitest, vitest-cucumber (BDD unit), playwright-bdd (BDD E2E), axe-core, Stryker (мутационное)
+- Тесты: Vitest, vitest-cucumber (BDD unit), playwright-bdd (BDD E2E), axe-core, Stryker (мутации)
+- Линтер и форматирование: Biome
 
 ## Разработка
 
-Нужны Node.js >= 26 (точная мажорная версия — в `.nvmrc`) и pnpm >= 9.
+Нужны Node.js >=26.0.0 (точная мажорная версия — в `.nvmrc`) и pnpm >=9.0.0.
 
-Единый язык проекта — каждый доменный термин, код, который им владеет, и его русское название — описан в [глоссарии](docs/glossary/README.md). Начинайте с него, прежде чем менять доменный код.
+Единый язык проекта — каждый термин предметной области, владеющий им код и его русское название — описан в [глоссарии](docs/glossary/README.md). Начинайте с него, прежде чем менять доменный код.
 
 ```bash
 pnpm install
 pnpm dev          # dev-сервер
 pnpm build        # production-сборка
-pnpm --filter @time-zones/client preview   # раздать production-сборку (с service worker)
+pnpm --filter @time-zones/client preview   # отдать production-сборку (с service worker)
 pnpm preflight    # lint + typecheck + тесты
+pnpm --filter @time-zones/client test:bdd  # набор BDD E2E
 ```
 
-Приложение во всех режимах (dev, preview, production) раздаётся по пути `/time-zones/`, поэтому открывайте `http://localhost:<port>/time-zones/`. Базовый путь задан в одном месте — [`packages/client/app.config.ts`](packages/client/app.config.ts).
+Приложение отдаётся под `/time-zones/` в любом режиме, поэтому открывайте `http://localhost:<port>/time-zones/`. Базовый путь задан один раз в [`packages/client/app.config.ts`](packages/client/app.config.ts).
 
 ### Замена логотипа
 
-Все иконки (favicon, Apple touch icon, иконки манифеста 192/512 px и maskable) генерируются при сборке из одного изображения. Чтобы сменить логотип, замените [`packages/client/assets/app-icon-source.png`](packages/client/assets/app-icon-source.png) квадратным PNG с прозрачным фоном (не меньше 512×512 px) и запустите `pnpm build` — больше ничего менять не нужно. Отступы и фон maskable- и Apple-иконок задаются в [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
+Все иконки генерируются при сборке из одного изображения. Чтобы сменить логотип, замените [`packages/client/assets/app-icon-source.png`](packages/client/assets/app-icon-source.png) квадратным PNG с прозрачным фоном (не меньше 512×512 px) и выполните `pnpm build`. Отступы и фон maskable- и Apple-иконок заданы в [`packages/client/pwa-assets.config.ts`](packages/client/pwa-assets.config.ts).
 
-Фичи разрабатываются через [OpenSpec](openspec/): `/opsx:propose` → `/opsx:apply` → `/opsx:archive`.
+Функции разрабатываются через [OpenSpec](openspec/): `/opsx:propose` → `/opsx:apply` → `/opsx:archive`.
 
-## Деплой
+## CI и деплой
 
-- Каждый pull request запускает [CI](.github/workflows/ci.yml): lint, typecheck, unit-тесты, production-сборку, бюджет начального JS (150 KB gzip), проверку, что сборка не изменила исходники, и smoke E2E.
-- Каждый push в `main` запускает те же проверки и, только если они прошли, [деплоит](.github/workflows/deploy.yml) сборку на GitHub Pages. Упавшая проверка оставляет в работе предыдущую версию; откат — это revert в `main`.
+В [`.github/workflows/`](.github/workflows/) лежат шесть workflow:
+
+- [`ci.yml`](.github/workflows/ci.yml) запускается на каждый pull request. Задача `check` выполняет lint, typecheck, unit-тесты, production-сборку, проверки data-only путей, данных о городах, правил поясов и legacy-сборки, бюджет начального JS (150 KB gzip), проверку, что сборка не изменила исходники, и полный набор BDD E2E. Неблокирующая задача `benchmark` сообщает о бюджетах бенчмарков. Задача `preview` выкладывает превью PR.
+- [`deploy.yml`](.github/workflows/deploy.yml) запускается на каждый push в `main`: те же проверки и, только если они прошли, деплой на GitHub Pages. Упавшая проверка оставляет в работе предыдущую версию; откат — это revert в `main`.
+- [`zone-rules-publication.yml`](.github/workflows/zone-rules-publication.yml), [`city-data-refresh.yml`](.github/workflows/city-data-refresh.yml) и [`cldr-update.yml`](.github/workflows/cldr-update.yml) обновляют правила поясов, данные о городах и данные CLDR через pull request; они работают, только пока переменная репозитория `DATA_REFRESH_ENABLED` равна `true`. Влитые данные доходят до пользователей тихим обновлением ([ADR-0017](docs/adr/0017-data-refresh-through-pull-requests.md), [ADR-0018](docs/adr/0018-silent-data-updates-and-the-app-revision.md)).
+- [`cla.yml`](.github/workflows/cla.yml) проверяет, что каждый участник подписал CLA.
 
 ## Гномская фабрика
 
-[Gnomish Factory](https://github.com/oinsio/gnomish-factory) прогоняет AI-агентов («гномов») через конвейер декларативных стадий, которые лежат в этом репозитории. Каждая стадия заканчивается автоматическими проверками и LLM-судьёй; стадия, которая раз за разом не проходит, передаётся человеку, а не уходит дальше. Вся настройка лежит в [`.gnomish/`](.gnomish/):
+[Gnomish Factory](https://github.com/oinsio/gnomish-factory) прогоняет ИИ-агентов («гномов») через конвейер декларативных стадий, которые лежат в этом репозитории. Каждая стадия завершается автоматическими проверками и, у большинства, LLM-судьёй; стадия, которая раз за разом не проходит, передаётся человеку, а не выпускается. Настройка лежит в [`.gnomish/`](.gnomish/): `config.yaml` (трекер, лимит попыток, метки), `pipeline.yaml` (порядок стадий), `lib/` (shell-помощники проверок), `stages/<name>/` (исполнитель, проверки, задание и критерии судьи) и `factory/` (всё, что запускает фабрику). Настройка машины, запуск и Docker: [руководство по фабрике](docs/gnomish-factory/README.ru.md).
 
-| Путь             | Что это                                                                                                          |
-|------------------|------------------------------------------------------------------------------------------------------------------|
-| `config.yaml`    | трекер (GitHub issues репозитория `oinsio/time-zones`), лимит попыток, WIP-лимит, метки                          |
-| `pipeline.yaml`  | порядок стадий                                                                                                   |
-| `lib/`           | shell-хелперы, которые подключают проверки стадий; `task-change.sh` находит change и отчёты задачи |
-| `stages/<name>/` | одна стадия: `stage.yaml` (исполнитель, проверки), `instructions.md` (задание), `acceptance.md` (критерии судьи) |
-| `factory/`       | всё, что запускает фабрику; лежит рядом с конвейером, но не является его частью — см. ниже                       |
+Конвейер ведёт задачу от идеи, или от change, уже написанного в `main`, до pull request за 10 стадий. Каждая стадия переходит к следующей автоматически; после лимита попыток стадии (по умолчанию `autonomy.attemptLimit` (4), стадия может его переопределить) задача передаётся человеку.
 
-В `factory/` лежат:
+| # | Стадия | Модель | Судья | Попытки | Что делает гном | Принимается, когда |
+|---|--------|--------|-------|---------|-----------------|--------------------|
+| 1 | `specify` | `opus` | `opus` | 8 | берёт change, названный в задаче, или пишет новый через `/opsx:propose`; проверяет его зависимости; пишет запись о change | запись о change называет активный change, строгая валидация, разделы и id proposal, судья |
+| 2 | `review-specs` | `opus` | `opus` | 6 | проверяет change и пишет замечания в `review-specs.md` | формат отчёта, другие файлы не тронуты, судья |
+| 3 | `fix-specs` | `opus` | `opus` | 4 | исправляет или обоснованно отклоняет каждое замечание | нет замечаний в `open`, ничего вне change, судья |
+| 4 | `implement` | `sonnet` | `opus` | 12 | реализует change в `packages/client` по TDD и отмечает все задачи | все задачи отмечены, лимит 300 строк, шаги CI, судья |
+| 5 | `review-code` | `opus` | `opus` | 4 | проверяет реализацию и пишет замечания в `review-code.md` | формат отчёта, другие файлы не тронуты, судья |
+| 6 | `fix-code` | `sonnet` | `opus` | 4 | исправляет по TDD замечания, которые стоит исправить, остальные отклоняет | нет замечаний в `open`, снова шаги CI, судья |
+| 7 | `archive` | `sonnet` | `sonnet` | 4 | архивирует change в `openspec/changes/archive/YYYY/MM/` и вливает его дельты в `openspec/specs/` | change больше не активен, строгая валидация спецификаций, судья |
+| 8 | `cleanup` | `claude-haiku-5-5` | — | 4 | удаляет отчёты задачи | каталога больше нет, больше ничего не тронуто |
+| 9 | `deliver` | `sonnet` | — | 4 | открывает или обновляет pull request в `main` | открыт PR с осмысленным заголовком и описанием, совпадающим с `pr-body.md` |
+| 10 | `usage-report` | `claude-haiku-5-5` | — | 4 | публикует время агента, время проверок и токены задачи одним комментарием в pull request | в PR есть помеченный комментарий `## Factory usage` |
 
-| Путь                             | Что это                                                                                   |
-|----------------------------------|-------------------------------------------------------------------------------------------|
-| `gnomish`                        | скрипт-обёртка — единственный способ запускать фабрику здесь                              |
-| `gnomish-up`                     | `serve` вместе с живым дашбордом и INFO-логом в одном терминале, через обёртку            |
-| `gnomish.env`                    | собственные настройки обёртки: имя проекта, уровень логов, версия фабрики, `gnomish-up`   |
-| `gnomish.local.env`              | необязательные личные переопределения `gnomish.env`, в git не попадает                    |
-| `project.yaml.example.host`      | шаблон файла проекта фабрики `~/.gnomish/projects/time-zones/project.yaml`, привязка host |
-| `project.yaml.example.container` | тот же шаблон для привязки `container`                                                    |
-| `gnomish-<version>/`             | распакованный релиз фабрики, в git не попадает, кладётся вручную                          |
-| `sandbox/`                       | Dockerfile контейнера, в котором работают гномы при привязке `container`                  |
-| `build-sandbox`                  | собирает этот образ с версиями инструментов, зафиксированными в репозитории               |
+**Откуда стартует задача.** Ветка задачи `gnomish/<task-id>` начинается от текущей `main`. Стадии, которые сравнивают ветку, берут базой родителя её коммита `gnomish: task started`.
 
-Конвейер ([`pipeline.yaml`](.gnomish/pipeline.yaml)) проводит задачу от идеи — или от change, уже написанного в `main`, — до pull request за девять стадий, а затем отчитывается, во что она обошлась. Ревьюеры и судьи, которые рассуживают ревьюера и исправляющего, работают на Opus; пишущие стадии — на Sonnet; отчёт — на Haiku.
+**Над каким change работает задача.** В `openspec/changes/` может лежать несколько активных change, задаче принадлежит один. `specify` записывает его в `temporary-docs/gnomish/<task>/change.md` (строки `Change:` и `Verdict:`), следующие стадии читают его оттуда. Чтобы запустить change, уже лежащий в `main`, назовите его в заголовке issue или строкой `Change: <name>` в описании. `cleanup` удаляет отчёты задачи до pull request.
 
-| # | Стадия         | Что делает гном                                                                                                                             | Принимается, когда                                                                                                                    |
-|---|----------------|---------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | `specify`      | берёт change, названный в задаче, или пишет новый через `/opsx:propose`; проверяет его зависимости; пишет запись о change | запись о change называет активный change, вердикт `no-blocking-dependencies`, `openspec validate <change> --strict`, разделы proposal и id FR/M из [`.claude/rules/`](.claude/rules/), судья |
-| 2 | `review-specs` | проверяет change на актуальность, полноту и согласованность и пишет замечания в `review-specs.md`, больше ничего не меняя                   | разделы отчёта, корректные замечания `R<n>` в статусе `open`, другие файлы не тронуты, судья                                          |
-| 3 | `fix-specs`    | исправляет или обоснованно отклоняет каждое замечание, правя только файлы change                                                            | нет замечаний в `open`, у каждого есть резолюция, ничего вне change, строгая валидация, судья                                         |
-| 4 | `implement`    | реализует change в `packages/client` по TDD (`/opsx:apply`) и отмечает все задачи                                                           | все задачи отмечены, лимит 300 строк, шаги CI: lint, typecheck, test, build, размер бандла, BDD E2E; судья                            |
-| 5 | `review-code`  | проверяет реализацию (задачи, требования, мутационное тестирование по изменённым файлам) и пишет замечания в `review-code.md`, не меняя код | тот же формат отчёта, что у `review-specs`, другие файлы не тронуты, судья                                                            |
-| 6 | `fix-code`     | исправляет по TDD замечания, которые стоит исправить, остальные обоснованно отклоняет                                                       | нет замечаний в `open`, задачи остаются отмеченными, снова шаги CI, судья                                                             |
-| 7 | `archive`      | архивирует change в `openspec/changes/archive/YYYY/MM/` и вливает его дельты спецификаций в `openspec/specs/`                               | change задачи больше не активен, архив сгруппирован по году и месяцу, `openspec validate --specs --strict`, судья                     |
-| 8 | `cleanup`      | удаляет отчёты задачи, `temporary-docs/gnomish/<task>/`, чтобы в pull request не попали служебные заметки | каталога больше нет, больше ничего не тронуто |
-| 9 | `deliver`      | открывает (или обновляет) pull request в `main` и дублирует его описание в `pr-body.md`                                                     | открыт PR в `main` с осмысленным заголовком, описание ссылается на issue и совпадает с `pr-body.md`, судья                            |
-| 10 | `usage-report` | запускает один скрипт, который публикует время агента, время проверок и токены по стадиям и моделям одним комментарием в pull request; берёт расход из round-коммитов ветки задачи, поэтому jar фабрики не нужен | в pull request есть помеченный комментарий `## Factory usage`, файлы не тронуты |
+**Handoff-пункты.** Стадия implement никогда не пишет в `.github/`, `.claude/`, `docs/adr/`, `CLAUDE.md`, `.gnomish/` и в `openspec/` — кроме чекбоксов `tasks.md`. Change, которому нужен один из этих путей, планирует его как handoff-пункт: патч и раздел README в `temporary-docs/gnomish/<task>/handoff/`, они появляются в разделе Human follow-up pull request. У пункта без изменения файла есть раздел README и нет патча.
 
-**Над каким change работает задача.** В `openspec/changes/` может лежать несколько активных change, написанных заранее; задаче принадлежит только один. `specify` записывает его в `temporary-docs/gnomish/<task>/change.md` (строки `Change:` и `Verdict:`), и все следующие стадии берут имя оттуда — остальные активные change не трогаются. Чтобы запустить change, который уже лежит в `main`, назовите его в issue: в заголовке или строкой `Change: <name>` в описании — она важнее любых других имён в тексте. Все отчёты задачи (`change.md`, `review-specs.md`, `review-code.md`) лежат в том же каталоге; `cleanup` удаляет его перед pull request, а отчёты остаются в истории ветки.
+**Вопрос человеку.** Стадия, которой нужно решение, пишет вопрос с вариантами в `$GNOMISH_DECISION_FILE`; задача получает метку `gnomish:needs-human`, а ответ возвращается как Decision. Как отвечать — в [руководствах оператора](https://github.com/oinsio/gnomish-factory/tree/main/docs/guides) фабрики.
 
-Каждая стадия переходит к следующей автоматически (`advancement: auto`); после `autonomy.attemptLimit` (2) неудачных попыток задача передаётся человеку. Проверки сравнивают ветку с `origin/main`, поэтому сам `.gnomish/` должен быть в `main`, прежде чем фабрика возьмётся за задачи — см. [Запуск](#запуск).
+## Участие в разработке
 
-### Настройка фабрики на своей машине
-
-Делается один раз на машину, из корня вашего клона. Всё личное — настройки, секреты, логи, worktree — фабрика хранит в своём домашнем каталоге `~/.gnomish` (или `$GNOMISH_HOME`) вне клона, так что ничего вашего в git не попадает.
-
-**1. Установите инструменты.**
-
-- Java 25+ и Claude Code CLI (`claude`) в `PATH`; один раз войдите, запустив `claude`.
-- git 2.56.0 или новее в `PATH`: со старым git фабрика не запускается (macOS: `brew install git`).
-- OpenSpec CLI, установленный глобально, той версии, что зафиксирована в `package.json` (`1.13.2`). Гном работает в worktree вне этого клона (`~/.gnomish/projects/time-zones/worktrees/time-zones/<task>`), где `node_modules` нет до первого `pnpm install` в стадии:
-
-  ```bash
-  npm install -g @fission-ai/openspec@1.13.2   # или: brew install openspec
-  ```
-
-- `git push` в `origin` из этого клона без запроса пароля (SSH-ключ или credential helper). Ветку задачи `gnomish/<task-id>` фабрика пушит сама, вашими git-учётными данными, и пароль никогда не спрашивает: push, которому нужен ввод, просто падает.
-- Для привязки host: инструменты проекта — Node.js >= 26, pnpm, `gh`, `jq` и Playwright Chromium для проверки BDD E2E в `implement` и `fix-code`:
-
-  ```bash
-  pnpm install
-  pnpm --filter @time-zones/client exec playwright install chromium
-  ```
-
-- Для привязки container: запущенный Docker. Инструменты уже есть в образе (шаг 6).
-
-**2. Распакуйте релиз фабрики** рядом с обёрткой (в git он не попадает). Версия задаётся в `GNOMISH_VERSION` в [`gnomish.env`](.gnomish/factory/gnomish.env); для обновления поменяйте её там и повторите:
-
-```bash
-cd .gnomish/factory
-VERSION=0.1.0
-BASE=https://github.com/oinsio/gnomish-factory/releases/download/v$VERSION
-curl -fL -O "$BASE/gnomish-$VERSION.tar.gz" -O "$BASE/SHA256SUMS"
-shasum -a 256 -c --ignore-missing SHA256SUMS   # Linux: sha256sum -c --ignore-missing SHA256SUMS
-tar -xzf "gnomish-$VERSION.tar.gz"
-gnomish-$VERSION/bin/gnomish --version         # печатает 0.1.0
-cd -
-```
-
-**3. Зарегистрируйте клон и выберите, где работают гномы.** В незарегистрированном каталоге фабрика не запускается. Регистрация создаёт файл проекта `~/.gnomish/projects/time-zones/project.yaml`; затем допишите в него шаблон одной из двух привязок:
-
-| Шаблон                                                                              | Где работают гномы                                                       | Когда выбирать                                      |
-|-------------------------------------------------------------------------------------|--------------------------------------------------------------------------|-----------------------------------------------------|
-| [`project.yaml.example.host`](.gnomish/factory/project.yaml.example.host)           | на этой машине, от вашего имени: ваши файлы, ваша сеть, без ограничений  | доверяете задачам и хотите самую простую настройку  |
-| [`project.yaml.example.container`](.gnomish/factory/project.yaml.example.container) | во временном Docker-контейнере на задачу, сеть ограничена тремя хостами  | нужна изоляция от вашей машины                      |
-
-```bash
-.gnomish/factory/gnomish project add time-zones --dir="$PWD"
-cat .gnomish/factory/project.yaml.example.host >> ~/.gnomish/projects/time-zones/project.yaml   # или .container
-```
-
-Настройки фабрики — привязка, образ песочницы, egress-список — живут в файле проекта. Обёртка ждёт имя проекта `time-zones` (`GNOMISH_PROJECT_NAME` в [`gnomish.env`](.gnomish/factory/gnomish.env)); если регистрируете под другим именем, задайте его в `.gnomish/factory/gnomish.local.env`.
-
-**4. Положите токены.** Каждый секрет — файл в `~/.gnomish/projects/time-zones/secrets/`. Имя файла точно совпадает с именем переменной, внутри только само значение (без `KEY=` и кавычек), права 600 — файл, доступный другим, фабрика отвергает.
-
-| Файл                      | Нужен                              | Что положить                                                                                                            | Кто использует                                                                          |
-|---------------------------|------------------------------------|-------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| `GNOMISH_GITHUB_TOKEN`    | да, для `take` и `serve`           | токен GitHub для репозитория трекера (`tracker.github.repo` в [`config.yaml`](.gnomish/config.yaml)): Issues read/write | фабрика: берёт issues, переставляет метки `gnomish:*`, пишет комментарии                |
-| `GH_TOKEN`                | желательно                         | fine-grained токен для того же репозитория: Contents и Pull requests read/write                                         | `gh` в стадии `deliver`, чтобы открыть pull request; экспортирует обёртка               |
-| `CLAUDE_CODE_OAUTH_TOKEN` | container: да; host: необязательно | токен, который печатает `claude setup-token`                                                                            | агент и судьи; экспортирует обёртка. На хосте без него используется ваш вход в `claude` |
-
-Без `GH_TOKEN` обёртка отдаёт `gh` токен трекера — тогда ему нужны ещё Contents и Pull requests, а у гнома заодно окажутся права на issues. Простому `run` без трекера `GNOMISH_GITHUB_TOKEN` не нужен.
-
-```bash
-secrets=~/.gnomish/projects/time-zones/secrets
-mkdir -p -m 700 "$secrets"
-for name in GNOMISH_GITHUB_TOKEN GH_TOKEN CLAUDE_CODE_OAUTH_TOKEN; do
-    install -m 600 /dev/null "$secrets/$name"
-done
-claude setup-token                              # печатает токен для CLAUDE_CODE_OAUTH_TOKEN
-$EDITOR "$secrets/GNOMISH_GITHUB_TOKEN"         # вставьте каждый токен в свой файл и сохраните
-```
-
-Токен, общий для всех проектов, можно один раз положить в `~/.gnomish/secrets/<ИМЯ>`: сначала ищется папка проекта, потом эта.
-
-**5. Проверьте настройку.**
-
-```bash
-.gnomish/factory/gnomish project show time-zones   # привязка и все настройки с файлом и строкой, откуда они взяты
-.gnomish/factory/gnomish board                     # доступ к трекеру с вашим токеном: три колонки, пустые или с задачами
-```
-
-Настройка не на своём месте или файл секрета со слишком широкими правами останавливают фабрику до любых действий; она перечисляет все проблемы сразу, каждую с исправлением.
-
-**6. Только для привязки container: соберите образ** — см. [Запуск в Docker](#запуск-в-docker):
-
-```bash
-.gnomish/factory/build-sandbox
-```
-
-**7. Запустите.** `serve` и `take` работают только с тем, что есть в `main`, поэтому начинайте с актуальной `main`:
-
-```bash
-.gnomish/factory/gnomish run --task="Add a meeting planner view"   # одна задача, без трекера
-.gnomish/factory/gnomish-up                                        # демон по issues с меткой gnomish:ready, с дашбордом
-```
-
-Команды, логи и метки — в разделе [Запуск](#запуск).
-
-### Запуск
-
-Обёртка добавляет `--dir` (этот проект), загружает [`gnomish.env`](.gnomish/factory/gnomish.env) и экспортирует `GH_TOKEN` и `CLAUDE_CODE_OAUTH_TOKEN` из папки секретов. Настройки фабрики берутся из `~/.gnomish/factory.yaml` (хост), затем из `~/.gnomish/projects/time-zones/project.yaml`, затем из флага (`--factory.git-network-timeout=10m`). Каждый следующий источник сильнее предыдущего. Исключение — ключи границы песочницы: их задаёт только `project.yaml`. Собственные настройки обёртки переопределяются в `gnomish.local.env` или в shell (`GNOMISH_LOG_LEVEL=DEBUG .gnomish/factory/gnomish ...`).
-
-```bash
-# Разовая задача без трекера: ветка gnomish/<task-id> в worktree, клон не трогается
-.gnomish/factory/gnomish run --task="Add a meeting planner view"
-
-# Задачи из GitHub issues: повесьте на issue метку gnomish:ready, затем
-.gnomish/factory/gnomish take 42          # взять этот issue
-.gnomish/factory/gnomish serve --drain    # отработать всю очередь ready и выйти
-
-# Тот же демон, но с наблюдением: открывает дашборд в браузере и показывает INFO-лог
-.gnomish/factory/gnomish-up               # флаги serve передаются как есть: --drain, --slots=2
-.gnomish/factory/gnomish-up --no-open --no-logs
-
-.gnomish/factory/gnomish status <task-id> # где задача и что с ней происходило
-```
-
-`serve` и `take` читают `tracker:` из ветки по умолчанию, а стадии — из базы задачи (`main`), поэтому изменения `.gnomish/` нужно закоммитить и влить в `main`, прежде чем они там заработают. `run` тоже запускайте с актуальной `main`: `fix-specs`, `implement` и `fix-code` сравнивают ветку с `origin/main`, и невлитые коммиты другой ветки засчитаются как изменения задачи.
-
-Без `--base` команда `run` читает `.gnomish/` из рабочей копии, так что незакоммиченные правки стадии действуют сразу. Завершённая задача оставляет ветку `gnomish/<task-id>`; вливайте её squash-merge, чтобы пораундовая история осталась в ветке. Логи: `~/.gnomish/projects/time-zones/logs/default.log`. Метки: `gnomish:ready` → `gnomish:working` → `gnomish:delivered`, или `gnomish:needs-human`, когда задача передана человеку.
-
-### Запуск в Docker
-
-С `factory.bindings.default: host` в `project.yaml` каждый процесс гнома работает на этой машине от вашего имени, с доступом к вашим файлам и без сетевых ограничений. Привязка `container` ([`project.yaml.example.container`](.gnomish/factory/project.yaml.example.container)) вместо этого запускает каждую задачу во временном Docker-контейнере за egress-фильтром, который пропускает только `api.anthropic.com`, `registry.npmjs.org` и `api.github.com`.
-
-1. **Docker**, запущенный на этой машине.
-2. **Образ** — собирается один раз и заново при каждой смене версий pnpm, openspec или Playwright в репозитории (тогда же поднимите тег `factory.sandbox.image` в `project.yaml`, `build-sandbox` читает его оттуда). В нём node из `.nvmrc`, pnpm, openspec, Claude Code CLI, `gh`, `jq` и Playwright Chromium тех версий, что зафиксированы в `package.json` и `pnpm-lock.yaml`:
-
-   ```bash
-   .gnomish/factory/build-sandbox
-   ```
-
-3. **`CLAUDE_CODE_OAUTH_TOKEN`** в папке секретов ([шаг 4](#настройка-фабрики-на-своей-машине)) или `ANTHROPIC_API_KEY` в shell — в контейнере нет keychain, поэтому вход с хоста туда не переносится.
-
-### Переключение между хостом и Docker
-
-Режим задаёт `factory.bindings.default` в `~/.gnomish/projects/time-zones/project.yaml`: `host` или `container`. Это ключ границы песочницы, поэтому задать его можно только в этом файле. Флаг `--factory.bindings.default=...` останавливает фабрику на старте. Чтобы переключиться, поправьте файл:
-
-```yaml
-factory:
-  bindings:
-    default: host        # или container
-```
-
-Что нужно каждому режиму, видно по двум шаблонам: `container` дополнительно задаёт образ, egress-список и лимиты ресурсов. Все стадии конвейера работают в одном режиме — фабрика отказывается смешивать `host` и `container` по стадиям.
-
-Java 25 и релиз фабрики остаются на хосте: сама фабрика работает там и управляет контейнерами через Docker. Хост, который нужен инструменту, но запрещён фильтром, появляется строкой `egress denial:` в `gnomish status`; добавляйте его в `factory.sandbox.egress-allowlist` в `project.yaml`, только когда знаете, какой инструмент его запросил.
-
-Полная документация — [руководства оператора](https://github.com/oinsio/gnomish-factory/tree/main/docs/guides) фабрики (`operator-guide.md` — трекер, `-run.md` — `run`, `-serve.md` — `serve`).
+Прочтите [CONTRIBUTING.md](CONTRIBUTING.md) и подпишите [CLA](CLA.md) до первого pull request.
 
 ## Лицензия
 
