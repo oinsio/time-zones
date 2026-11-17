@@ -1,6 +1,6 @@
 // Verifies FR3, FR4, FR11, M1, NFR-A1 of apply-data-updates-silently: the silent update in a real browser.
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { APP_REVISION_FILE } from "@/constants";
 import { test } from "./app_shell_silent_update_e2e.fixtures";
