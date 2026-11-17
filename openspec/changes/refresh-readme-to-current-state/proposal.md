@@ -56,7 +56,7 @@ None. Documentation only; no requirement in `openspec/specs/` changes.
 
 ### Functional
 
-- FR1: Both READMEs have a features section, "Features" / «Возможности», with no "MVP" in any heading. Its items describe the current user-facing behaviour, and each item links the stable spec(s) it summarizes. Taken together, the README links `openspec/specs/<capability>/spec.md` for all 18 capability directories.
+- FR1: Both READMEs have a features section, "Features" / «Возможности», with no "MVP" in any heading. Its items describe the current user-facing behaviour, and each item links the stable spec(s) it summarizes. Taken together, the README links `openspec/specs/<capability>/spec.md` for all 18 capability directories, and for every capability that an active change's delta specs add, so a capability-adding change updates the README before it is archived.
 - FR2: README and factory-guide text uses the glossary terms for the concepts it names. None of the stale or banned phrases listed in design D4 appears in any of the four documents.
 - FR3: Screenshots show both the Cards view and the Grid view, using images that exist under `docs/design/screens/`.
 - FR4: Localization says how the interface language is chosen (the settings page, otherwise the browser language, then English). It also covers how locale files are discovered (`_meta`), and how dialects fall back to their base language, then English.

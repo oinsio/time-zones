@@ -56,8 +56,8 @@ Row pattern: ``^\| (\d+) \| `([a-z-]+)` \| `([^`]+)` \| (`[^`]+`|—) \| (\d+) \
 
 ### D6: Link, script, version and size checks
 
-- **Links:** Markdown targets `](<target>)` and HTML `src="<target>"`, without `http(s):`, `mailto:` or a leading `#`, with any `#anchor` stripped, resolved against the document's directory, must exist (FR12). The guard asserts, for each document:
-  - FR1: each README contains a link to all 18 spec paths;
+- **Links:** Markdown targets `](<target>)` and HTML `src="<target>"`, without `http(s):`, `mailto:` or a leading `#`, with any `#anchor` stripped, resolved against the document's directory, must exist (FR12). A link to `openspec/specs/<cap>/spec.md` also counts as resolved when an active change holds `openspec/changes/<name>/specs/<cap>/spec.md` (any `<name>` except `archive`). The guard asserts, for each document:
+  - FR1: each README links `openspec/specs/<cap>/spec.md` for every capability directory under `openspec/specs/` (18 today) and for every `<cap>` that an active change's delta specs add under `openspec/changes/<name>/specs/<cap>/` (`archive/` excluded);
   - FR7: each README links all six files of `readdirSync('.github/workflows')`;
   - FR10: each README links `CONTRIBUTING.md` and `CLA.md`;
   - FR11: the English and Russian versions of each pair have equal `##` and `###` heading counts and equal sets of resolved relative link targets.
@@ -74,9 +74,11 @@ Positive:
 
 - The READMEs match the repository today, and the next stage, workflow or capability added without a README update fails `pnpm test`, naming what is missing.
 - Each document stays under the 300-line cap.
+- A later change that adds a capability fails the FR1 check in its own implement stage, while its delta is still under `openspec/changes/<name>/specs/`. So that stage adds the README link (root `README*.md` is inside its path check, D1). The link stays valid after the archive stage moves the delta into `openspec/specs/`, a stage that may not edit the README.
 
 Negative:
 
+- A change left active on `main` without being implemented still requires a README link to its capability, and the link check accepts a capability that exists only as an active delta.
 - The guard ties the README's stage table to a fixed column format. A later redesign of that table must update the guard with it.
 - Facts in prose (feature wording, tech stack) are not machine-checked. The review stages check them.
 
