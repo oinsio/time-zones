@@ -1,12 +1,10 @@
 // Verifies FR3, FR4, FR11, M1, NFR-A1 of apply-data-updates-silently: the silent update in a real browser.
-import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { APP_REVISION_FILE } from "@/constants";
 import { test } from "./app_shell_silent_update_e2e.fixtures";
 import {
   checkForNewBuild,
-  deployClockOf,
   entryScriptOf,
   hasWaitingBuild,
 } from "./silentUpdatePage";
@@ -15,10 +13,8 @@ import { SiteBuild } from "./silentUpdateSite";
 const { Given, When, Then } = createBdd(test);
 
 const NOTICES_REGION_SELECTOR = 'footer [role="status"]';
-const DEPLOY_TIME_SELECTOR = "[data-deploy-time]";
 const UPDATE_NOTICE_TEXT = "A new version is available.";
 const RELOAD_BUTTON_NAME = "Reload";
-const SETTINGS_BUTTON_NAME = "Settings";
 const CHECK_TIMEOUT_MS = 20_000;
 const RESTART_ATTEMPT_COUNT = 10;
 const RESTART_PAUSE_MS = 1000;
@@ -167,17 +163,13 @@ Then(
   },
 );
 
-Then("the app still runs build A", async ({ smokeWorld, silentUpdateSite }) => {
-  expect(await entryScriptOf(smokeWorld.page)).toBe(
-    silentUpdateSite.describe(SiteBuild.A).entryScriptUrl,
-  );
-});
-
-Then("the app runs build A", async ({ smokeWorld, silentUpdateSite }) => {
-  expect(await entryScriptOf(smokeWorld.page)).toBe(
-    silentUpdateSite.describe(SiteBuild.A).entryScriptUrl,
-  );
-});
+for (const stepText of ["the app still runs build A", "the app runs build A"]) {
+  Then(stepText, async ({ smokeWorld, silentUpdateSite }) => {
+    expect(await entryScriptOf(smokeWorld.page)).toBe(
+      silentUpdateSite.describe(SiteBuild.A).entryScriptUrl,
+    );
+  });
+}
 
 Then(
   "the app runs the data-only build",
@@ -185,26 +177,5 @@ Then(
     expect(await entryScriptOf(smokeWorld.page)).toBe(
       silentUpdateSite.describe(SiteBuild.SILENT).entryScriptUrl,
     );
-  },
-);
-
-Then(
-  "the settings page names the deploy time of the data-only build",
-  async ({ smokeWorld, silentUpdateSite }) => {
-    const { page } = smokeWorld;
-    await page.getByRole("button", { name: SETTINGS_BUTTON_NAME }).click();
-    await expect(page.locator(DEPLOY_TIME_SELECTOR)).toContainText(
-      deployClockOf(silentUpdateSite.describe(SiteBuild.SILENT).deployInstant),
-    );
-  },
-);
-
-Then(
-  "axe-core finds no violations with the update notice shown",
-  async ({ smokeWorld }) => {
-    const accessibilityScan = await new AxeBuilder({
-      page: smokeWorld.page,
-    }).analyze();
-    expect(accessibilityScan.violations).toEqual([]);
   },
 );

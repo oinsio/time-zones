@@ -1,29 +1,46 @@
 import type { MeetingShareNotice, PwaUpdateStatus } from "@/controller";
 
-interface NoticeConditions {
+export interface NoticeConditions {
   updateStatus: Pick<PwaUpdateStatus, "isOfflineReady" | "isUpdateAvailable">;
   readyRelease: string | undefined;
   hasStorageWarning: boolean;
   shareNotice: MeetingShareNotice | undefined;
 }
 
+export interface DueNotices {
+  isUpdateNoticeDue: boolean;
+  isOfflineReadyNoticeDue: boolean;
+  isZoneRulesNoticeDue: boolean;
+  isStorageWarningDue: boolean;
+  isShareNoticeDue: boolean;
+}
+
 /**
- * Whether the notices region has anything to show, so AppShell loads its lazy
- * chunk only then. Kept apart from AppShellNotices to stay in the main chunk;
- * a new notice is added here and there together.
+ * Which notices of the region are due: the one owner of the notice conditions,
+ * read by AppShellNotices to render and by hasShownNotice to gate its chunk.
  * Implements NFR-P1 of apply-data-updates-silently.
  */
-export function hasShownNotice({
+export function getDueNotices({
   updateStatus,
   readyRelease,
   hasStorageWarning,
   shareNotice,
-}: NoticeConditions): boolean {
-  return (
-    updateStatus.isUpdateAvailable ||
-    updateStatus.isOfflineReady ||
-    readyRelease !== undefined ||
-    hasStorageWarning ||
-    shareNotice !== undefined
-  );
+}: NoticeConditions): DueNotices {
+  return {
+    isUpdateNoticeDue: updateStatus.isUpdateAvailable,
+    isOfflineReadyNoticeDue:
+      !updateStatus.isUpdateAvailable && updateStatus.isOfflineReady,
+    isZoneRulesNoticeDue: readyRelease !== undefined,
+    isStorageWarningDue: hasStorageWarning,
+    isShareNoticeDue: shareNotice !== undefined,
+  };
+}
+
+/**
+ * Whether the notices region has anything to show, so AppShell loads its lazy
+ * chunk only then.
+ * Implements NFR-P1 of apply-data-updates-silently.
+ */
+export function hasShownNotice(conditions: NoticeConditions): boolean {
+  return Object.values(getDueNotices(conditions)).some(Boolean);
 }

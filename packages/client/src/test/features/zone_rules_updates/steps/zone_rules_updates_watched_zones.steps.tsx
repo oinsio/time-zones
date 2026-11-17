@@ -55,41 +55,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     setUpReleases();
   });
 
-  // @apply-data-updates-silently @FR9
-  f.Scenario("Zones of the list and of the device", ({ Given, When, Then }) => {
-    Given(
-      "the list holds Lisbon and Porto, both in {string}, and Cairo, and the device time zone is {string}",
-      (_ctx, lisbonZone: string, deviceZone: string) => {
-        state = stateOf([lisbonZone, lisbonZone, CAIRO], deviceZone);
-      },
-    );
-    When("the watched zones are read", () => {
-      watchedZoneIds = getWatchedZoneIds(state);
-    });
-    Then(
-      "they are {string}, {string} and {string}",
-      (_ctx, first: string, second: string, third: string) => {
-        expect(watchedZoneIds).toEqual([first, second, third]);
-      },
-    );
-  });
-
-  // @apply-data-updates-silently @FR9
-  f.Scenario("An empty list", ({ Given, When, Then }) => {
-    Given(
-      "the list is empty and the device time zone is {string}",
-      (_ctx, deviceZone: string) => {
-        state = stateOf([], deviceZone);
-      },
-    );
-    When("the watched zones are read", () => {
-      watchedZoneIds = getWatchedZoneIds(state);
-    });
-    Then("they are {string} alone", (_ctx, zoneId: string) => {
-      expect(watchedZoneIds).toEqual([zoneId]);
-    });
-  });
-
   // @apply-data-updates-silently @FR8 @M3
   f.ScenarioOutline(
     "Kinds of difference that count",

@@ -1,5 +1,5 @@
 // Implements FR6, NFR-P2 of add-remote-zone-rules-updates: shared data of the active release steps.
-import { STORED_RELEASE_SCHEMA_VERSION } from "@/constants";
+import { STORAGE_KEYS, STORED_RELEASE_SCHEMA_VERSION } from "@/constants";
 import { buildAlmatyReleaseDocument } from "@/test/zoneRules/buildReleaseDocument";
 
 export const RELEASE_URL = "/assets/zone-rules-abc.json";
@@ -34,3 +34,6 @@ export const envelopeOf = (document: unknown) =>
     schemaVersion: STORED_RELEASE_SCHEMA_VERSION,
     payload: document,
   });
+
+export const storeRelease = (document: unknown) =>
+  localStorage.setItem(STORAGE_KEYS.ZONE_RULES, envelopeOf(document));

@@ -17,10 +17,10 @@ import {
   ALMATY_EIGHT_UTC,
   ALMATY_UTC_PLUS_FOUR_CLOCK,
   BUNDLED_DOCUMENT,
-  envelopeOf,
   NEWER_DOCUMENT,
   nativeDateTimeFormat,
   RELEASE_URL,
+  storeRelease,
   UNREADABLE_DOCUMENTS,
 } from "./zoneRulesActiveReleaseWorld";
 
@@ -81,11 +81,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("Stored release is newer", ({ Given, When, Then, And }) => {
     Given(
       'the bundled release is "2026f" and the stored release is "2026g", whose rule for "Asia/Almaty" is UTC+4',
-      () =>
-        localStorage.setItem(
-          STORAGE_KEYS.ZONE_RULES,
-          envelopeOf(NEWER_DOCUMENT),
-        ),
+      () => storeRelease(NEWER_DOCUMENT),
     );
     When("the app starts", start);
     Then('the active release is "2026g"', () => {
@@ -102,11 +98,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     ({ Given, When, Then, And }) => {
       Given(
         'the bundled release is "2026f" and "2026g" was stored without a notice',
-        () =>
-          localStorage.setItem(
-            STORAGE_KEYS.ZONE_RULES,
-            envelopeOf(NEWER_DOCUMENT),
-          ),
+        () => storeRelease(NEWER_DOCUMENT),
       );
       When("the app starts again", start);
       Then('the active release is "2026g"', () => {
@@ -126,11 +118,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     ({ Given, When, Then, And }, variables) => {
       Given(
         'the bundled release is "2026f" and the stored release is "<stored>"',
-        () =>
-          localStorage.setItem(
-            STORAGE_KEYS.ZONE_RULES,
-            envelopeOf(buildReleaseDocument(String(variables.stored))),
-          ),
+        () => storeRelease(buildReleaseDocument(String(variables.stored))),
       );
       When("the app starts", start);
       Then('the active release is "2026f"', () => {
@@ -187,10 +175,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Given(
         'the request for the bundled release fails and the stored release "2026g" is valid',
         () => {
-          localStorage.setItem(
-            STORAGE_KEYS.ZONE_RULES,
-            envelopeOf(NEWER_DOCUMENT),
-          );
+          storeRelease(NEWER_DOCUMENT);
           fetchRelease = vi.fn(async () => {
             throw new Error("offline");
           });

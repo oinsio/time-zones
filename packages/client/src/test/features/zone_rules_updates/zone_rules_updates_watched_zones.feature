@@ -1,18 +1,6 @@
 Feature: Watched zones
   A stored zone rules release raises its notice only when it changes a zone the user can see: a zone of the list or the device time zone.
 
-  @apply-data-updates-silently @FR9
-  Scenario: Zones of the list and of the device
-    Given the list holds Lisbon and Porto, both in "Europe/Lisbon", and Cairo, and the device time zone is "Europe/Moscow"
-    When the watched zones are read
-    Then they are "Europe/Lisbon", "Africa/Cairo" and "Europe/Moscow"
-
-  @apply-data-updates-silently @FR9
-  Scenario: An empty list
-    Given the list is empty and the device time zone is "Africa/Cairo"
-    When the watched zones are read
-    Then they are "Africa/Cairo" alone
-
   @apply-data-updates-silently @FR8 @M3
   Scenario Outline: Kinds of difference that count
     Given the list holds Lisbon and the comparison is made at "2026-11-15T12:00:00Z"

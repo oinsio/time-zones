@@ -7,6 +7,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react/pure";
+import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
@@ -70,6 +71,12 @@ export function createSilentUpdateWorld() {
       );
       await act(async () => setPageVisibility("visible"));
     },
+    waitUntilNoticeShown: (isShown: boolean) =>
+      waitFor(() =>
+        expect(screen.queryByText(i18n.t("app.updateAvailable")) !== null).toBe(
+          isShown,
+        ),
+      ),
     getNoticesRegion: () => {
       const region = screen
         .getAllByRole("status")

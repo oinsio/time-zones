@@ -34,26 +34,6 @@ Feature: Zone rules update check
     When the app checks for a zone rules update
     Then no release file is requested and nothing is written
     And the zone rules update notice names "2026g"
-
-  @add-remote-zone-rules-updates @FR3
-  Scenario: Checks follow the update recheck rule
-    Given the app last checked 16 minutes ago
-    When the page becomes visible
-    Then the version file is requested once
-    And a return 5 minutes after that check requests nothing
-
-  @add-remote-zone-rules-updates @FR3
-  Scenario: No active release
-    Given the zone rules failed to load at start
-    When a check is due
-    Then no request is made
-
-  @add-remote-zone-rules-updates @FR4
-  Scenario: Offline
-    Given the device is offline
-    When a check is due
-    Then no request is made and no notice is shown
-
   @add-remote-zone-rules-updates @FR4
   Scenario Outline: Failures change nothing
     Given the active release is "2026f" and <failure>

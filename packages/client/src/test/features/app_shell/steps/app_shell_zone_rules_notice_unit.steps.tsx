@@ -2,36 +2,41 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the app must survive between steps.
-import { cleanup, render, screen } from "@testing-library/react/pure";
+import { cleanup, screen } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { expect, vi } from "vitest";
-import {
-  createInMemoryAppRevisionSource,
-  createInMemoryStoredReleaseRepository,
-  createInMemoryZoneRulesVersionSource,
-} from "@/adapters";
-import { AppShell } from "@/app";
 import { APP_REVISION } from "@/constants";
 import { ANOTHER_APP_REVISION } from "@/test/anotherAppRevisionSource";
-import { buildReleaseChangingZones } from "@/test/zoneRules/committedReleaseChanging";
 import {
   LISBON_LOCATION,
   seedListedLocations,
 } from "@/test/zoneRules/seedListedLocations";
-
-const fakeServiceWorker = vi.hoisted(() => ({
-  isUpdateAvailable: false,
-  updateServiceWorker: vi.fn(),
-}));
+import {
+  chooseReloadOfZoneRulesNotice,
+  expectNoticeText,
+  expectWaitingUpdateApplied,
+  getNoticesRegion,
+  givenListHoldsLisbon,
+  givenListHoldsLisbonAndWaitingBuild,
+  openApp,
+  openAppAndAwaitNotice,
+  reloadPage,
+  resetZoneRulesNoticeWorld,
+  SILENT_RELEASE,
+  whenCheckFinds,
+} from "./zoneRulesNoticeWorld";
 
 vi.mock("virtual:pwa-register/react", async () => {
   const { useState } = await import("react");
+  const { fakeServiceWorker: serviceWorker } = await import(
+    "./zoneRulesNoticeServiceWorker"
+  );
   return {
     useRegisterSW: () => ({
       offlineReady: useState(false),
-      needRefresh: useState(fakeServiceWorker.isUpdateAvailable),
-      updateServiceWorker: fakeServiceWorker.updateServiceWorker,
+      needRefresh: useState(serviceWorker.isUpdateAvailable),
+      updateServiceWorker: serviceWorker.updateServiceWorker,
     }),
   };
 });
@@ -40,74 +45,10 @@ const feature = await loadFeature(
   "../app_shell_zone_rules_notice_unit.feature",
 );
 
-const getNoticesRegion = () =>
-  screen
-    .getAllByRole("status")
-    .find(
-      (region) => region.getAttribute("aria-live") === "polite",
-    ) as HTMLElement;
-
-const SILENT_RELEASE = "2999a";
-
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
-  const reloadPage = vi.fn();
-  let publishedAppRevision = APP_REVISION;
-
-  const openApp = async (release: string, changedZoneIds: string[]) => {
-    render(
-      <AppShell
-        appRevisionSource={createInMemoryAppRevisionSource(
-          publishedAppRevision,
-        )}
-        zoneRulesVersionSource={createInMemoryZoneRulesVersionSource({
-          version: { release },
-          releases: {
-            [release]: buildReleaseChangingZones(release, changedZoneIds),
-          },
-        })}
-        storedReleases={createInMemoryStoredReleaseRepository()}
-        reloadPage={reloadPage}
-      />,
-    );
-  };
-  const openAppAndAwaitNotice = async (release: string) => {
-    await openApp(release, [LISBON_LOCATION.timeZoneId]);
-    await screen.findByText(new RegExp(release));
-  };
-  const chooseReloadOfZoneRulesNotice = async (
-    _ctx: unknown,
-    release: string,
-  ) => {
-    await openAppAndAwaitNotice(release);
-    const reloadButtons = screen.getAllByRole("button", { name: "Reload" });
-    await userEvent.click(reloadButtons[reloadButtons.length - 1]);
-  };
-  const givenListHoldsLisbon = () => seedListedLocations([LISBON_LOCATION]);
-  const givenListHoldsLisbonAndWaitingBuild =
-    (revision: () => string) => () => {
-      seedListedLocations([LISBON_LOCATION]);
-      fakeServiceWorker.isUpdateAvailable = true;
-      publishedAppRevision = revision();
-    };
-  const whenCheckFinds = async (
-    _ctx: unknown,
-    release: string,
-    zoneId: string,
-  ) => {
-    await openApp(release, [zoneId]);
-  };
-  const expectNoticeText = async (_ctx: unknown, text: string) => {
-    await screen.findByText(text);
-    expect(getNoticesRegion()).toHaveTextContent(text);
-  };
-
   f.BeforeEachScenario(async () => {
     cleanup();
-    localStorage.clear();
-    reloadPage.mockClear();
-    fakeServiceWorker.updateServiceWorker.mockClear();
-    fakeServiceWorker.isUpdateAvailable = false;
-    publishedAppRevision = APP_REVISION;
+    resetZoneRulesNoticeWorld();
     await i18n.changeLanguage("en");
   });
   f.AfterEachScenario(cleanup);
@@ -164,12 +105,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     Then(
       "the waiting update is applied and the page is not reloaded separately",
-      () => {
-        expect(fakeServiceWorker.updateServiceWorker).toHaveBeenCalledWith(
-          true,
-        );
-        expect(reloadPage).not.toHaveBeenCalled();
-      },
+      expectWaitingUpdateApplied,
     );
   });
 
@@ -239,10 +175,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "the waiting update is applied and the page is not reloaded separately",
         () => {
           expect(screen.queryByText(i18n.t("app.updateAvailable"))).toBeNull();
-          expect(fakeServiceWorker.updateServiceWorker).toHaveBeenCalledWith(
-            true,
-          );
-          expect(reloadPage).not.toHaveBeenCalled();
+          expectWaitingUpdateApplied();
         },
       );
     },

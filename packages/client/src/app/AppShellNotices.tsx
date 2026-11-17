@@ -3,13 +3,14 @@ import type {
   PwaUpdateStatus,
   ZoneRulesUpdate,
 } from "@/controller";
+import { getDueNotices } from "./hasShownNotice";
 import { MeetingShareNotice } from "./MeetingShareNotice";
 import { OfflineReadyNotice } from "./OfflineReadyNotice";
 import { StorageWarning } from "./StorageWarning";
 import { UpdateNotice } from "./UpdateNotice";
 import { ZoneRulesUpdateNoticeSlot } from "./ZoneRulesUpdateNoticeSlot";
 
-type AppShellNoticesProps = {
+export type AppShellNoticesProps = {
   updateStatus: PwaUpdateStatus;
   zoneRulesUpdate: ZoneRulesUpdate;
   reloadPage: () => void;
@@ -32,28 +33,35 @@ export function AppShellNotices({
   shareNotice,
   onDismissShareNotice,
 }: AppShellNoticesProps) {
-  const { isOfflineReady, isBuildWaiting, isUpdateAvailable } = updateStatus;
+  const { isBuildWaiting } = updateStatus;
+  const dueNotices = getDueNotices({
+    updateStatus,
+    readyRelease: zoneRulesUpdate.readyRelease,
+    hasStorageWarning,
+    shareNotice,
+  });
   return (
     <>
-      {isUpdateAvailable ? (
+      {dueNotices.isUpdateNoticeDue && (
         <UpdateNotice
           onReload={updateStatus.applyUpdate}
           onDismiss={updateStatus.dismiss}
         />
-      ) : (
-        isOfflineReady && (
-          <OfflineReadyNotice onDismiss={updateStatus.dismiss} />
-        )
       )}
-      <ZoneRulesUpdateNoticeSlot
-        readyRelease={zoneRulesUpdate.readyRelease}
-        isBuildWaiting={isBuildWaiting}
-        applyUpdate={updateStatus.applyUpdate}
-        reloadPage={reloadPage}
-        onDismiss={zoneRulesUpdate.dismiss}
-      />
-      {hasStorageWarning && <StorageWarning />}
-      {shareNotice !== undefined && (
+      {dueNotices.isOfflineReadyNoticeDue && (
+        <OfflineReadyNotice onDismiss={updateStatus.dismiss} />
+      )}
+      {dueNotices.isZoneRulesNoticeDue && (
+        <ZoneRulesUpdateNoticeSlot
+          readyRelease={zoneRulesUpdate.readyRelease}
+          isBuildWaiting={isBuildWaiting}
+          applyUpdate={updateStatus.applyUpdate}
+          reloadPage={reloadPage}
+          onDismiss={zoneRulesUpdate.dismiss}
+        />
+      )}
+      {dueNotices.isStorageWarningDue && <StorageWarning />}
+      {dueNotices.isShareNoticeDue && shareNotice !== undefined && (
         <MeetingShareNotice
           kind={shareNotice}
           onDismiss={onDismissShareNotice}

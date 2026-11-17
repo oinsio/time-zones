@@ -1,7 +1,7 @@
 // Verifies NFR-P1 of apply-data-updates-silently: the notices chunk loads only when a notice is due.
 import type { PwaUpdateStatus } from "@/controller";
 import { MeetingShareNotice } from "@/controller";
-import { hasShownNotice } from "./hasShownNotice";
+import { getDueNotices, hasShownNotice } from "./hasShownNotice";
 
 const quietInput = {
   updateStatus: { isOfflineReady: false, isUpdateAvailable: false } as Pick<
@@ -35,5 +35,18 @@ describe("hasShownNotice", () => {
     ],
   ])("is true when %s", (_, override) => {
     expect(hasShownNotice({ ...quietInput, ...override })).toBe(true);
+  });
+});
+
+describe("getDueNotices", () => {
+  it("prefers the update notice over the offline-ready notice", () => {
+    const dueNotices = getDueNotices({
+      ...quietInput,
+      updateStatus: { isOfflineReady: true, isUpdateAvailable: true },
+    });
+    expect([
+      dueNotices.isUpdateNoticeDue,
+      dueNotices.isOfflineReadyNoticeDue,
+    ]).toEqual([true, false]);
   });
 });
