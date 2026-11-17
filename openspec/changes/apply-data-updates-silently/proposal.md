@@ -13,14 +13,16 @@ Notices are for things the user can act on or look at. A new feature is one; a r
 - MODIFIED `app-shell`, the update notice: it is shown only when the waiting build differs from the running one in the app itself. A waiting build that differs in data only is applied silently: no notice, and it is the running version at the next start.
 - MODIFIED `app-shell` and `zone-rules-updates`, the zone rules update notice: it is shown only when the stored release changes the rules of a watched zone — a zone of a location in the list or the device time zone. Otherwise the stored release is applied silently at the next start, as it already is after a dismissal.
 - ADDED `app-delivery`: every build carries an app revision and the site serves it in a small file. The app revision is the identifier of the newest commit that is not a data-only commit, so builds made from data-only commits share the revision of the last app change. There are no version numbers and no release process; a human-set value can later take the place of the commit identifier without changing the app.
-- MODIFIED `settings`, the city data attribution: it names the date of the city data in use, next to the zone rules release line that already names the release.
+- MODIFIED `settings`, the city data attribution: it names the dump date of the city data in use, next to the zone rules release line that already names the release.
 - Unchanged: when and how often the app checks, the silence of failed checks, the offline-ready notice, the rule that the app never reloads by itself, the texts of both notices.
 - Glossary (`docs/glossary/app-shell.md`), new terms:
   - **App revision** — the value that identifies the app itself in a build, apart from its data: the identifier of the newest commit that is not a data-only commit. Two builds with one app revision differ in data only. *Never:* version, version number, build number.
   - **Waiting build** — a newer build the browser has downloaded and holds until the app's windows are closed or the user reloads into it.
   - **Silent update** — a waiting build with the running build's app revision, or a stored release that changes no watched zone: used from the next start, with no notice. *RU:* тихое обновление. *Never:* auto-update, background update.
 - Glossary (`docs/glossary/zone-rules.md`), new term: **Watched zone** — a zone whose rules the user sees: the zone of every location in the list and the device time zone.
-- Glossary, changed terms: **Update notice** (shown only when the app revision of the waiting build differs), **Zone rules update notice** (shown only when a watched zone changes), **Zone rules update** (may be silent), **City data attribution** (names the date of the city data; *RU:* «Данные о городах: GeoNames (14 ноября 2026 г.), CC BY 4.0»), **Data-only commit** (the build reads its trailer to keep the app revision).
+- Glossary (`docs/glossary/search.md`), new term: **Dump date** — the build day of the GeoNames dump the city data was compiled from, recorded in the city data when it is compiled. Its existing owners keep it (design D6); this change only names it and shows it.
+- Glossary (`docs/glossary/settings.md`), changed term: **Deploy time** — no longer "a stand-in for a version number"; the app revision identifies the app, the deploy time only names when the build was made (*Not:* the app revision).
+- Glossary, changed terms: **Update notice** (shown only when the app revision of the waiting build differs), **Zone rules update notice** (shown only when a watched zone changes), **Zone rules update** (may be silent), **City data attribution** (names the dump date of the city data; *RU:* «Данные о городах: GeoNames (14 ноября 2026 г.), CC BY 4.0»), **Data-only commit** (the build reads its trailer to keep the app revision).
 - The term **data-only commit** and its `Data-Only: true` trailer are defined by the archived `refresh-data-through-scheduled-pull-requests`; this change only reads the trailer, through its existing owner.
 
 ## Capabilities
@@ -41,7 +43,7 @@ None.
 - G1: 0 update notices for a deploy that changed data only.
 - G2: 1 update notice for a deploy that changed the app, as today.
 - G3: 0 zone rules update notices for a release that changes no watched zone; 1 for a release that does.
-- G4: A user can read the versions of both kinds of data in use on the settings page: the zone rules release and the date of the city data.
+- G4: A user can read the versions of both kinds of data in use on the settings page: the zone rules release and the dump date of the city data.
 
 ## Non-Goals
 
@@ -76,7 +78,7 @@ None.
 - FR9: The watched zones SHALL be the zone of every location in the list and the device time zone, whether or not the device time location is listed.
 - FR10: A stored release that changes no watched zone SHALL show no notice and SHALL be the active release at the next start, by the existing rule. While it waits, a change of the list or of the device time zone SHALL be compared again, and the notice SHALL appear when a watched zone is now changed.
 - FR11: The Reload of the zone rules update notice SHALL apply a waiting build whether or not the update notice is shown.
-- FR12: The city data attribution SHALL name the date of the city data in use: the dump date recorded in the committed city data, fixed into the build, written with the day, the month name and the year in the interface language. A build whose city data records no valid date SHALL fail.
+- FR12: The city data attribution SHALL name the dump date of the city data in use: the dump date recorded in the committed city data, fixed into the build, written with the day, the month name and the year in the interface language. A build whose city data records no valid date SHALL fail.
 - FR13: The changed attribution text SHALL exist in every locale file; `GeoNames` and `CC BY 4.0` stay untranslated.
 
 ### Non-Functional
@@ -101,7 +103,7 @@ None.
 - UX1: A user who only receives data updates never sees a notice about them.
 - UX2: An app change is announced exactly as today: the same notice, text, Reload and Dismiss.
 - UX3: A zone rules update notice always concerns the user: one of their zones changes now or later.
-- UX4: The date of the city data is quiet: part of the one attribution line at the end of the settings page, no new line and no new control.
+- UX4: The dump date of the city data is quiet: part of the one attribution line at the end of the settings page, no new line and no new control.
 
 ## UI States Matrix
 
@@ -116,7 +118,7 @@ None.
 | online | stored release changes no watched zone (empty) | no notice; active from the next start |
 | online | stored release changes a watched zone | the zone rules update notice |
 | any | storage unavailable | no zone rules update notice; the release arrives with its deploy, silently |
-| any | settings page | the attribution with the date of the city data, also offline |
+| any | settings page | the attribution with the dump date of the city data, also offline |
 
 ## Behavior
 
@@ -139,7 +141,7 @@ No changes.
 - M3: 0 zone rules update notices for a stored release that differs only in zones outside the watched zones or only before the comparison instant; 1 for each of the 5 kinds of difference of FR8.
 - M4: 0 requests of the app revision file while no build is waiting; at most 1 per update recheck while one is waiting.
 - M5: The settings page names the dump date of the committed city data in 2 languages; 0 axe-core violations in 2 themes; no horizontal scrolling at 320 px and 2560 px.
-- M6: Mutation score ≥ 95% (minimum acceptable 90%) on the new and changed production files of `src/controller/`, `src/lib/zoneRules/`, `src/adapters/`, `src/app/` and `scripts/appRevision/`.
+- M6: Mutation score ≥ 95% (minimum acceptable 90%) on the new and changed production files of `src/controller/`, `src/lib/zoneRules/`, `src/adapters/`, `src/app/`, `scripts/appRevision/` and `scripts/cityData/committedDumpDate.ts`.
 
 ## Open Questions
 
@@ -148,5 +150,5 @@ None. Decided by the owner:
 - The data refresh landed first. Until this change is deployed, every data-only deploy shows the update notice, as today; no order of deploys is needed.
 - A build that cannot see the app commit before its data-only commits (a shallow checkout) counts as an app change: a notice too many, never a silence too many.
 - An installed app that the system never closes keeps its data until it is closed; accepted (NG2).
-- The date of the city data stands inside the attribution line.
+- The dump date of the city data stands inside the attribution line.
 - The text of the zone rules update notice stays as it is and names no city.

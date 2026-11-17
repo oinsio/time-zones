@@ -10,7 +10,7 @@ See `proposal.md` for the motivation. What exists today, read from the code:
 - `useZoneRulesUpdate` stores a newer release and reports its name as `readyRelease`; `ZoneRulesUpdateNoticeSlot` shows the notice and chooses `applyUpdate` over a plain reload when `isUpdateAvailable`. "Active release at start" already makes a newer stored release active at the next start, notice or not.
 - The build fixes one value into the code already: `__APP_DEPLOY_INSTANT__` from `scripts/deployInstant/`, exposed as `APP_DEPLOY_INSTANT` (`src/constants/deploy.ts`). `zoneRulesPlugin` emits `zone-rules/version.json` and the release file; `vite.config.ts` keeps them out of the precache with `globIgnores`; `fetchZoneRulesVersionSource` reads the version file with `cache: "no-cache"`.
 - The committed city data records `source.dumpDate`, but `toServedCityData` drops `source`, so the client does not know the date. `CityDataAttribution` renders one translated link.
-- CI checks out with `actions/checkout@v5` at its default depth of one commit in the `check` job of `.github/workflows/ci.yml`, so a build there sees one commit. `deploy.yml` builds the published site by calling that workflow (`uses: ./.github/workflows/ci.yml`).
+- CI checks out with `actions/checkout@v5` at its default depth of one commit in the `check` job of `.github/workflows/ci.yml`, so a build there sees one commit. Its step "Check data-only paths" runs `git fetch --no-tags --depth=1 origin main` before `pnpm build`. `deploy.yml` builds the published site by calling that workflow (`uses: ./.github/workflows/ci.yml`).
 - The data-only commit is owned by `DATA_ONLY_TRAILER = "Data-Only: true"` in `scripts/dataRefresh/refreshConstants.ts` (glossary `docs/glossary/architecture.md`). Scripts inject child processes through the `RunProcess` type of `scripts/zoneRules/processTypes.ts`, as `scripts/cityData/compile.ts` does.
 - `src/app/AppShell.tsx` has 199 lines. `playwright.bdd.config.ts` runs the projects `chromium`, `mobile-chrome` and the view-contract projects — no WebKit — against one build served by `pnpm build && pnpm preview`.
 
@@ -71,9 +71,15 @@ The abbreviation counts because the zone label can show it.
 
 `getWatchedZoneIds(state)` (new selector in `src/model/`) returns the distinct zones of `state.locations` plus `state.deviceTimeZoneId`. `useZoneRulesUpdate` takes `watchedZoneIds` and keeps the parsed stored release it already has in hand (`downloaded`, or `storedLoadResult.release`) in a ref. It recomputes "changes a watched zone" only when the stored release name or the sorted, joined zone ids change, with the clock's instant at that moment; `readyRelease` is reported only when the result is true. A minute tick changes neither key.
 
-### D6. The date of the city data is a build constant, formatted by the presenter (FR12, FR13, NFR-P3)
+### D6. The dump date of the city data is a build constant, formatted by the presenter (FR12, FR13, NFR-P3)
 
-`scripts/cityData/readDumpDate.ts` (new) reads `source.dumpDate` of the committed file and throws unless it is a valid ISO date (parsed with `Temporal.PlainDate`). `vite.config.ts` defines `__CITY_DATA_DATE__`; `src/constants/deploy.ts` exposes `CITY_DATA_DATE`; Vitest gets `TEST_CITY_DATA_DATE`. The settings page must not load the search data to print one date, and the date must be right offline.
+The dump date already has owners: `readDumpDate` in `scripts/cityData/download.ts` (not exported) reads it from the archive entry time when the city data is compiled, and `checkFormat` in `scripts/cityData/checkCityData.ts` checks `source.dumpDate` of the committed file, today only as a non-empty text. No second reader or validator is written:
+
+- `scripts/cityData/checkCityData.ts` exports `isDumpDate(value)` — a string equal to `Temporal.PlainDate.from(value).toString()`, `false` when parsing throws — and its format check uses it for `source.dumpDate`, so `city-data:check` rejects a dump date that is not an ISO date.
+- `readCommittedDumpDate(cityDataText)` parses the committed file and returns `source.dumpDate`, throwing a message that names the dump date unless `isDumpDate` holds. Its name says what differs from `readDumpDate`: it reads the committed city data, not the archive. `checkCityData.ts` has 180 lines, so both functions live in `scripts/cityData/committedDumpDate.ts`, which `checkCityData.ts` imports — one module, one validation.
+- `vite.config.ts` calls `readCommittedDumpDate` on `city-data/geonames-cities.json` and defines `__CITY_DATA_DATE__`; `src/constants/deploy.ts` exposes `CITY_DATA_DATE`; Vitest gets `TEST_CITY_DATA_DATE`. The settings page must not load the search data to print one date, and the date must be right offline.
+
+The concept gets the glossary term **Dump date** in `docs/glossary/search.md` (*Code:* `CityDataset.source.dumpDate`, `readDumpDate`, `isDumpDate`, `readCommittedDumpDate`, `CITY_DATA_DATE`).
 
 `presentCityDataAttribution(language, translate)` (new, `src/presenter/`) formats the date with the cached formatter of the deploy date (`getDateTimeFormatter`, `DateTimeLabelKind.DEPLOY_DATE`) in `UTC_ZONE_ID`, so the calendar date does not shift with the device zone, and fills `settings.cityDataAttribution` (`"City data: GeoNames ({{date}}), CC BY 4.0"`). `CityDataAttribution` renders the text it is given.
 
@@ -81,7 +87,7 @@ Alternative rejected: a separate line. It would change the order rules of the de
 
 ### D7. CI gives the build its history (FR1)
 
-The `check` job of `.github/workflows/ci.yml` checks out with `fetch-depth: 0`; `deploy.yml` calls this workflow, so the published build sees the history too. The factory may not edit `.github/`, so this is a handoff patch. Until it is applied a CI build sees one commit: an app commit gives the right revision; a data-only commit gives the unique value and so a notice — the behaviour of today, never a wrong silence.
+Two edits in the `check` job of `.github/workflows/ci.yml`, both needed: the checkout gets `fetch-depth: 0`, and the step "Check data-only paths" fetches `main` without `--depth=1` (`git fetch --no-tags origin main`). With the first edit alone, that step's `git fetch --no-tags --depth=1 origin main` — which runs before `pnpm build` — records the fetched commit as a shallow boundary; on a push to `main` that commit is `HEAD`, so `git log` in `resolveAppRevision` sees one commit again and a data-only `HEAD` gets `unreadable-<instant>` and a notice. Without `--depth` the fetch adds nothing to a full clone, and `check-paths` diffs `origin/main..HEAD` (two dots, `scripts/dataRefresh/cli.ts`), which needs no merge base, so the path check is unchanged. `deploy.yml` calls this workflow, so with both edits the published build sees the history too. The factory may not edit `.github/`, so this is handoff patch H1. Until it is applied a CI build sees one commit: an app commit gives the right revision; a data-only commit gives the unique value and so a notice — the behaviour of today, never a wrong silence.
 
 ### D8. The silent update E2E serves two builds itself (FR3, FR4, FR11, M1)
 
