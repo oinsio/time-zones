@@ -101,8 +101,8 @@ Not measured. The branch changes no production module: the only TypeScript files
 - Impact: FR2 asks that README text use the glossary terms; the synonym contradicts ADR-0018's distinction between an app revision change (notice) and a data-only build (silent update) that the same sentence describes.
 - Fix: change `README.md:35` to "a build with a new app revision shows an update notice with Reload …". Leave `README.ru.md:35` («новая версия приложения») as is, since the glossary has no RU name for app revision and the interface text of the update notice is «Доступна новая версия».
 - Fix risk: none — no stale phrase, link or heading changes, so no guard check is affected.
-- Status: fixed
-- Resolution: README.md:35 now reads "a build with a new app revision shows an update notice"; the RU line is left as the review advised.
+- Status: rejected (out-of-scope)
+- Resolution: the root README.md lies outside what the fix-code stage may edit (only packages/client/ and docs/ outside docs/adr/); the earlier edit was reverted. The wording change belongs in a follow-up task.
 
 ## Verdict
 
