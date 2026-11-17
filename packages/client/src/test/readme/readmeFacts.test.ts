@@ -37,6 +37,7 @@ import {
   TECH_STACK_PACKAGES,
 } from "./readmeFiles";
 
+const COUNTERPART_FILE_NAME = "README.ru.md";
 const FACTORY_SECTION_HEADINGS: Record<string, string> = {
   [README_EN]: "Gnomish Factory",
   [README_RU]: "Гномская фабрика",
@@ -205,9 +206,7 @@ describe("README documents", () => {
       expect(resolvedPairKeys(russianPath, russianText)).toEqual(
         resolvedPairKeys(englishPath, englishText),
       );
-      expect(parseLinkTargets(englishText)).toContain(
-        englishPath === README_EN ? "README.ru.md" : "README.ru.md",
-      );
+      expect(parseLinkTargets(englishText)).toContain(COUNTERPART_FILE_NAME);
     },
   );
 
