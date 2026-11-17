@@ -61,7 +61,8 @@ Not measured. The branch changes no production module: the only TypeScript files
 - Impact: a ticked task with no evidence it was done; the mutation-style proof that the FR1 and FR8 guards catch a regression — the substitute the change chose for a Stryker run (design D2) — is missing from the history.
 - Fix: in the fix-code stage, delete one `| n | \`stage\` | …` row from `README.md`, run `pnpm --filter @time-zones/client exec vitest run src/test/readme` and note the failing test ("README.md has one stage table row per pipeline stage"); restore with `git checkout -- README.md`; repeat with one `openspec/specs/<cap>/spec.md` link ("README.md links the spec of every capability"); then commit with both failing test names in the commit message.
 - Fix risk: forgetting the restore leaves `README.md` broken, which the same guard then reports; otherwise none — no code or document changes remain.
-- Status: open
+- Status: fixed
+- Resolution: ran the guard twice and recorded both failures in an empty commit: deleting stage row 1 fails "README.md has one stage table row per pipeline stage"; repointing one spec link fails "README.md links the spec of every capability". README.md restored after each run.
 
 ### R2 — WARNING — Factory guide lists a stale three-host egress allowlist
 - Location: `docs/gnomish-factory/README.md:62`
@@ -70,7 +71,8 @@ Not measured. The branch changes no production module: the only TypeScript files
 - Impact: an operator choosing the container binding gets a wrong picture of what a box may reach (that `zone-rules:compile` and `city-data:compile` downloads are blocked), the exact kind of stale fact this change exists to remove; the guard does not check it.
 - Fix: in `docs/gnomish-factory/README.md:62` write "network limited to the hosts of its egress allowlist", and at `:142` list all six hosts from the template; mirror both edits in `docs/gnomish-factory/README.ru.md:62` and `:142`.
 - Fix risk: none — no heading, link or stage table cell changes, so the FR11 and FR12 guard checks are unaffected; the six host names must be copied from the template, not retyped from memory.
-- Status: open
+- Status: fixed
+- Resolution: both factory guides now say the network is limited to the egress allowlist and list all six hosts copied from project.yaml.example.container (EN and RU, lines 62 and 142).
 
 ### R3 — WARNING — FR11 guard does not check the Russian README links its English counterpart
 - Location: `packages/client/src/test/readme/readmeFacts.test.ts:209`
@@ -79,7 +81,8 @@ Not measured. The branch changes no production module: the only TypeScript files
 - Impact: removing the English badge `[![en](…)](README.md)` from `README.ru.md` leaves the Russian README without a link to its counterpart, and every guard test still passes — FR11 regresses silently.
 - Fix: add a constant `ENGLISH_COUNTERPART_FILE_NAME = "README.md"` beside `COUNTERPART_FILE_NAME` (`readmeFacts.test.ts:40`) and, after line 209, `expect(parseLinkTargets(russianText)).toContain(ENGLISH_COUNTERPART_FILE_NAME);` — the counterpart of both Russian documents is `README.md` in the same directory.
 - Fix risk: none — both Russian documents already link `README.md` (`README.ru.md:5`, `docs/gnomish-factory/README.ru.md:3`), the test stays a plain Vitest file as design D2 requires, and the file grows by two lines (285 → 287).
-- Status: open
+- Status: fixed
+- Resolution: added ENGLISH_COUNTERPART_FILE_NAME and an assertion that the Russian text links README.md in readmeFacts.test.ts; removing the en badge from README.ru.md now fails the mirror test (checked, restored).
 
 ### R4 — WARNING — `readmeFiles.ts` sits at the 300-line hard cap
 - Location: `packages/client/src/test/readme/readmeFiles.ts:1`
@@ -88,7 +91,8 @@ Not measured. The branch changes no production module: the only TypeScript files
 - Impact: the file is at the hard cap that the implement stage's check enforces; the next edit the design already anticipates ("A later redesign of that table must update the guard with it", design Consequences) pushes it over 300 and fails that check, and the file is 100 lines past the 200-line target today.
 - Fix: move the Markdown parsers (`STAGE_ROW_PATTERN`, `parseStageRows`, `parseHeadings`, `withoutFences`, `parseLinkTargets`, `resolveLinkTarget`, `isLinkResolved`, `toPairKey`, `resolvedPairKeys`, `parseFencedPnpmCommands`, `readImageAlts`, `readOpeningParagraph`) into a new `packages/client/src/test/readme/readmeMarkdown.ts` with the same `// Implements FR13 of refresh-readme-to-current-state` header, importing `REPOSITORY_ROOT`, `StageFacts` and `readActiveDeltaCapabilities` from `./readmeFiles`; update the imports of `readmeFacts.test.ts`.
 - Fix risk: low — a pure move with the guard as its own regression test (`vitest run src/test/readme` must stay 37/37 green); it departs from the two-file list of design D2 ("`readmeFiles.ts` (readers and parsers)"), so the fix-code commit should name the reason; `vitest.config.ts` and `tsconfig.test.json` already include `src/test/**`, so no config change.
-- Status: open
+- Status: fixed
+- Resolution: moved the Markdown parsers into readmeMarkdown.ts (104 lines); readmeFiles.ts is now 206 lines, the guard stays 37/37 green. Departs from design D2 two-file list, reason named in the commit.
 
 ### R5 — SUGGESTION — English README calls the app revision an "app version"
 - Location: `README.md:35`
@@ -97,7 +101,8 @@ Not measured. The branch changes no production module: the only TypeScript files
 - Impact: FR2 asks that README text use the glossary terms; the synonym contradicts ADR-0018's distinction between an app revision change (notice) and a data-only build (silent update) that the same sentence describes.
 - Fix: change `README.md:35` to "a build with a new app revision shows an update notice with Reload …". Leave `README.ru.md:35` («новая версия приложения») as is, since the glossary has no RU name for app revision and the interface text of the update notice is «Доступна новая версия».
 - Fix risk: none — no stale phrase, link or heading changes, so no guard check is affected.
-- Status: open
+- Status: fixed
+- Resolution: README.md:35 now reads "a build with a new app revision shows an update notice"; the RU line is left as the review advised.
 
 ## Verdict
 
