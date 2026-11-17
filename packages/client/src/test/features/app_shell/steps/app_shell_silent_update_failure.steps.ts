@@ -17,9 +17,7 @@ vi.mock(
     (await import("@/test/fakeServiceWorker")).fakeServiceWorkerModule,
 );
 
-const feature = await loadFeature(
-  "../app_shell_silent_update_failure.feature",
-);
+const feature = await loadFeature("../app_shell_silent_update_failure.feature");
 
 const ANOTHER_REVISION = "b2";
 
