@@ -86,16 +86,16 @@ Feature: Day colouring of the day tracks
     When the user opens the app
     Then the colour stops of "Cairo" are "0.5 non-working, 0.5 working, 0.833333 working, 0.833333 non-working"
 
-  @bind-day-periods-to-sun @FR8 @UX4
+  @bind-day-periods-to-sun @FR8 @UX4 @colour-locations-without-day-periods-in-accent @FR1
   Scenario: UTC in the Time of day colouring
     Given the day colouring is Time of day
     And the device time zone is "Asia/Almaty"
     And the current instant is "2026-03-08T07:30:00Z"
     And the list contains "UTC"
     When the user opens the app
-    Then the colour stops of "UTC" are "0 neutral"
+    Then the colour stops of "UTC" are "0 no-day-period"
 
-  @bind-day-periods-to-sun @FR8
+  @bind-day-periods-to-sun @FR8 @colour-locations-without-day-periods-in-accent @FR3
   Scenario Outline: UTC in the other colourings
     Given the day colouring is <colouring> with 10:00-18:00
     And the device time zone is "UTC"

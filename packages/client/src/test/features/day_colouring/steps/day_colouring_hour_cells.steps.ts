@@ -176,7 +176,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         },
       );
       When("the hour cells of UTC are presented", () => undefined);
-      Then("every cell of UTC is the non-working grey", () => {
+      Then("every cell of UTC has no day period", () => {
         const cells = stripOf("UTC").cells;
         expect(cells.length).toBeGreaterThan(0);
         expect(

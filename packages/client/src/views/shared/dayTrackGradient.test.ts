@@ -1,3 +1,4 @@
+// Verifies FR1, FR2, UX1 of colour-locations-without-day-periods-in-accent.
 // Verifies FR6 of add-time-sliders-to-location-cards (D7).
 // Verifies FR2, FR9–FR13 of add-day-colouring-setting.
 import { describe, expect, it } from "vitest";
@@ -32,6 +33,7 @@ describe("buildDayTrackGradient", () => {
     [DayColour.PLAIN, "--color-accent"],
     [DayColour.WORKING_TIME, "--color-accent"],
     [DayColour.NON_WORKING_TIME, "--color-day-non-working"],
+    [DayColour.NO_DAY_PERIOD, "--color-accent"],
   ])("should map %s to %s", (colour, variable) => {
     expect(DAY_COLOUR_VARIABLES[colour]).toBe(variable);
   });
@@ -44,6 +46,7 @@ describe("buildDayTrackGradient", () => {
     [DayColour.PLAIN, "text-accent-foreground"],
     [DayColour.WORKING_TIME, "text-accent-foreground"],
     [DayColour.NON_WORKING_TIME, "text-foreground"],
+    [DayColour.NO_DAY_PERIOD, "text-accent-foreground"],
   ])("should give the digits on %s the class %s", (colour, className) => {
     expect(DAY_COLOUR_FOREGROUND_CLASS_NAMES[colour]).toBe(className);
   });
@@ -51,6 +54,14 @@ describe("buildDayTrackGradient", () => {
   it("should write a single plain stop as two stops of its colour", () => {
     expect(
       buildDayTrackGradient([{ fraction: 0, colour: DayColour.PLAIN }]),
+    ).toBe(
+      "linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) 100%)",
+    );
+  });
+
+  it("should write a single no-day-period stop as two accent stops", () => {
+    expect(
+      buildDayTrackGradient([{ fraction: 0, colour: DayColour.NO_DAY_PERIOD }]),
     ).toBe(
       "linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) 100%)",
     );

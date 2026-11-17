@@ -1,3 +1,4 @@
+// Verifies FR2 of colour-locations-without-day-periods-in-accent.
 // Verifies FR12, NFR-A3 of add-day-colouring-setting.
 // Verifies FR1, FR3, FR5, FR6, FR8, FR11, FR12, NFR-A1, NFR-A2 of add-grid-hour-cells-and-hour-frame.
 import { fireEvent, render } from "@testing-library/react";
@@ -123,6 +124,13 @@ describe("HourStrip", () => {
 
   it("should colour a plain cell with the accent and its digits with the accent foreground", () => {
     renderStrip({ strip: stripOf(DayColour.PLAIN) });
+
+    expect(cellOf(3).style.backgroundColor).toBe("var(--color-accent)");
+    expect(cellOf(3)).toHaveClass("text-accent-foreground");
+  });
+
+  it("should colour a cell without a day period with the accent and its digits with the accent foreground", () => {
+    renderStrip({ strip: stripOf(DayColour.NO_DAY_PERIOD) });
 
     expect(cellOf(3).style.backgroundColor).toBe("var(--color-accent)");
     expect(cellOf(3)).toHaveClass("text-accent-foreground");
