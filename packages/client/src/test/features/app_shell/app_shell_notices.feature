@@ -37,31 +37,31 @@ Feature: App shell with offline and update notices
     When the user dismisses the notice
     Then the notice is cleared
 
-  @setup-app-shell-and-pages-deploy @FR7
+  @setup-app-shell-and-pages-deploy @FR7 @apply-data-updates-silently @FR3
   Scenario: New version becomes available
-    Given a new version of the app is waiting
+    Given a build with another app revision is waiting
     When the user opens the app
     Then the update notice is announced politely with a reload action
     And the app has not reloaded by itself
 
-  @setup-app-shell-and-pages-deploy @FR7
+  @setup-app-shell-and-pages-deploy @FR7 @apply-data-updates-silently @FR4
   Scenario: User accepts the update
-    Given a new version of the app is waiting
+    Given a build with another app revision is waiting
     And the user has opened the app
     When the user chooses to reload into the new version
     Then the app switches to the new version
 
-  @setup-app-shell-and-pages-deploy @FR7
+  @setup-app-shell-and-pages-deploy @FR7 @apply-data-updates-silently @FR7
   Scenario: User postpones the update
-    Given a new version of the app is waiting
+    Given a build with another app revision is waiting
     And the user has opened the app
     When the user dismisses the notice
     Then the notice is cleared
     And the app has not reloaded by itself
 
-  @setup-app-shell-and-pages-deploy @FR7 @NFR-A2
+  @setup-app-shell-and-pages-deploy @FR7 @NFR-A2 @apply-data-updates-silently @UX1
   Scenario: User postpones the update from the keyboard
-    Given a new version of the app is waiting
+    Given a build with another app revision is waiting
     And the user has opened the app
     When the user presses Escape
     Then the notice is cleared

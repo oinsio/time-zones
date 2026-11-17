@@ -1,91 +1,227 @@
-// Verifies FR2, NFR-P1 of apply-data-updates-silently: the app revision file of a build.
+// Verifies FR3, FR5, FR6, FR7 of apply-data-updates-silently: the update notice follows the app revision.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { expect } from "vitest";
-import { APP_REVISION_FILE_MAX_BYTES } from "../../../../../app.config.ts";
-import { buildServedAppRevisionFile } from "../../../../../scripts/appRevision/appRevisionPlugin.ts";
-import { findAppRevisionFileProblems } from "../../../../../scripts/appRevision/findAppRevisionFileProblems.ts";
-import { collectInitialScriptUrls } from "../../../../../scripts/bundle/initialScripts.ts";
+import { screen, waitFor } from "@testing-library/react/pure";
+import userEvent from "@testing-library/user-event";
+import i18n from "i18next";
+import { expect, vi } from "vitest";
+import {
+  createFetchAppRevisionSource,
+  createInMemoryAppRevisionSource,
+} from "@/adapters";
+import { AppRevisionFailure } from "@/ports";
+import { fakeServiceWorker } from "@/test/fakeServiceWorker";
+import { createSilentUpdateWorld, RECHECK_MINUTES } from "./silentUpdateWorld";
+
+vi.mock(
+  "virtual:pwa-register/react",
+  async () =>
+    (await import("@/test/fakeServiceWorker")).fakeServiceWorkerModule,
+);
 
 const feature = await loadFeature("../app_shell_silent_update_unit.feature");
 
-const KILOBYTE_IN_BYTES = 1024;
-const ENTRY_HTML = `<html><head><script type="module" src="/time-zones/assets/index-A1.js"></script><link rel="modulepreload" href="/time-zones/assets/vendor-B2.js"></head></html>`;
-const CLEAN_SERVICE_WORKER = `precacheAndRoute([{url:"index.html",revision:"1"}])`;
+const SHORT_RETURN_MINUTES = 5;
+const ANOTHER_REVISION = "b2";
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
-  let appRevision = "";
-  let serviceWorkerText = CLEAN_SERVICE_WORKER;
-  let servedText = "";
-  let problems: string[] = [];
-  let initialScriptUrls: string[] = [];
+  const world = createSilentUpdateWorld();
+  let source = createInMemoryAppRevisionSource();
+  let requestCountBefore = 0;
+  let fetchFile = vi.fn<typeof fetch>();
+  let isDeviceOffline = false;
+  const respondWith = (body: BodyInit, status = 200) =>
+    fetchFile.mockImplementation(async () => new Response(body, { status }));
 
-  const checkFile = () => {
-    problems = findAppRevisionFileProblems({
-      revisionFileText: servedText,
-      serviceWorkerText,
-      scriptTexts: [`const revision="${appRevision}";`],
-    });
+  f.BeforeEachScenario(async () => {
+    world.reset();
+    source = createInMemoryAppRevisionSource();
+    fetchFile = vi.fn<typeof fetch>();
+    isDeviceOffline = false;
+    vi.spyOn(navigator, "onLine", "get").mockImplementation(
+      () => !isDeviceOffline,
+    );
+    await i18n.changeLanguage("en");
+  });
+  f.AfterEachScenario(() => {
+    world.finish();
+    vi.restoreAllMocks();
+  });
+  f.AfterAllScenarios(async () => {
+    await i18n.changeLanguage("ru");
+  });
+
+  const waitUntilNoticeShown = (isShown: boolean) =>
+    waitFor(() =>
+      expect(screen.queryByText(i18n.t("app.updateAvailable")) !== null).toBe(
+        isShown,
+      ),
+    );
+  const openWithWaitingBuild = async (fileRevisionName: string) => {
+    fakeServiceWorker.isUpdateAvailable = true;
+    source.setAnswer(world.revisionNamed(fileRevisionName));
+    await world.open(source);
   };
+  const givenRunning = (_ctx: unknown, name: string) =>
+    world.nameRunningRevision(name);
+  const givenWaitingNaming = (_ctx: unknown, name: string) =>
+    openWithWaitingBuild(name);
 
-  // @apply-data-updates-silently @FR2 @NFR-P1
-  f.Scenario("The file in the build", ({ Given, When, Then, And }) => {
-    Given(
-      "a build with the app revision {string}",
-      (_ctx, revision: string) => {
-        appRevision = revision;
-        servedText = buildServedAppRevisionFile(revision).source;
-      },
+  // @apply-data-updates-silently @FR3 @UX1
+  f.Scenario("A data-only build is waiting", ({ Given, When, Then, And }) => {
+    Given("the running build has the app revision {string}", givenRunning);
+    When(
+      "a build is waiting and the app revision file names {string}",
+      givenWaitingNaming,
     );
-    When("the app revision file of the build is checked", checkFile);
-    Then(
-      "the file names the app revision {string}",
-      (_ctx, revision: string) => {
-        expect(JSON.parse(servedText)).toEqual({ appRevision: revision });
-        expect(problems).toEqual([]);
-      },
-    );
-    And("the file is at most 1 KB", () => {
-      expect(APP_REVISION_FILE_MAX_BYTES).toBe(KILOBYTE_IN_BYTES);
-      expect(Buffer.byteLength(servedText)).toBeLessThanOrEqual(
-        APP_REVISION_FILE_MAX_BYTES,
+    Then("the notices region stays empty", () => {
+      expect(world.getNoticesRegion()).toBeEmptyDOMElement();
+    });
+    And("the page keeps working without reloading", () => {
+      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.queryByText(i18n.t("app.updateAvailable"))).toBeNull();
+    });
+  });
+
+  // @apply-data-updates-silently @FR3 @FR5
+  f.Scenario(
+    "An app change arrives after a silent update",
+    ({ Given, And, When, Then }) => {
+      Given("the running build has the app revision {string}", givenRunning);
+      And(
+        "a build is waiting and the app revision file names {string}",
+        givenWaitingNaming,
       );
-    });
-  });
+      When(
+        "a later check finds that the app revision file names {string}",
+        async (_ctx, name: string) => {
+          source.setAnswer(world.revisionNamed(name));
+          await world.returnAfterMinutes(RECHECK_MINUTES);
+        },
+      );
+      Then("the update notice is shown", () => waitUntilNoticeShown(true));
+    },
+  );
 
-  // @apply-data-updates-silently @FR2 @NFR-P1
-  f.Scenario("Not precached", ({ Given, When, Then }) => {
-    Given(
-      "the precache manifest of the built service worker lists {string}",
-      (_ctx, fileName: string) => {
-        appRevision = "c3";
-        servedText = buildServedAppRevisionFile(appRevision).source;
-        serviceWorkerText = `precacheAndRoute([{url:"${fileName}",revision:"1"}])`;
-      },
+  // @apply-data-updates-silently @FR5 @NFR-P1 @M4
+  f.Scenario("No build is waiting", ({ Given, When, Then }) => {
+    Given("no build is waiting", async () => {
+      await world.open(source);
+    });
+    When(
+      "the app starts and later returns to the screen after {number} minutes",
+      (_ctx, minutes: number) => world.returnAfterMinutes(minutes),
     );
-    When("the app revision file of the build is checked", checkFile);
-    Then("the check fails because the file is precached", () => {
-      expect(problems).toHaveLength(1);
-      expect(problems[0]).toContain("precaches");
+    Then("the app revision file was not requested", () => {
+      expect(source.requestCount()).toBe(0);
     });
   });
 
-  // @apply-data-updates-silently @FR2 @NFR-P1
-  f.Scenario("Not initial JavaScript", ({ Given, When, Then }) => {
-    Given("the entry page of the build and its app revision file", () => {
-      servedText = buildServedAppRevisionFile("c3").source;
-    });
-    When("the initial JavaScript of the build is collected", () => {
-      initialScriptUrls = collectInitialScriptUrls(ENTRY_HTML);
-    });
-    Then(
-      "{string} is not among the initial scripts",
-      (_ctx, fileName: string) => {
-        expect(initialScriptUrls.length).toBeGreaterThan(0);
-        expect(initialScriptUrls.some((url) => url.includes(fileName))).toBe(
-          false,
+  // @apply-data-updates-silently @FR5 @NFR-P1 @M4
+  f.Scenario(
+    "The app revision is read once per check",
+    ({ Given, And, When, Then }) => {
+      Given("the running build has the app revision {string}", givenRunning);
+      And(
+        "a build is waiting and the app revision file names {string}",
+        async (_ctx, name: string) => {
+          await openWithWaitingBuild(name);
+          requestCountBefore = source.requestCount();
+        },
+      );
+      When(
+        "the page becomes visible after {number} minutes",
+        (_ctx, minutes: number) => world.returnAfterMinutes(minutes),
+      );
+      Then(
+        "the app revision file is requested exactly once for that check",
+        () => {
+          expect(source.requestCount() - requestCountBefore).toBe(1);
+        },
+      );
+      And(
+        "a return {number} minutes after that requests nothing",
+        async (_ctx, minutes: number) => {
+          expect(minutes).toBe(SHORT_RETURN_MINUTES);
+          const countBefore = source.requestCount();
+          await world.returnAfterMinutes(minutes);
+          expect(source.requestCount()).toBe(countBefore);
+        },
+      );
+    },
+  );
+
+  // @apply-data-updates-silently @FR6 @UX2
+  f.ScenarioOutline(
+    "The app revision cannot be read",
+    ({ Given, When, Then, And }, variables) => {
+      Given("a build is waiting and <failure>", async () => {
+        fakeServiceWorker.isUpdateAvailable = true;
+        const failure = String(variables.failure);
+        if (failure === "the device is offline") isDeviceOffline = true;
+        if (failure === "the request fails") {
+          fetchFile.mockRejectedValue(new TypeError("network unreachable"));
+        }
+        if (failure === "the file returns status 404") respondWith("", 404);
+        if (failure === "the file is not JSON") respondWith("<html></html>");
+        if (failure === "the file names no revision") respondWith("{}");
+        await world.open(
+          createFetchAppRevisionSource({ baseUrl: "/", fetchFile }),
         );
-      },
-    );
-  });
+      });
+      When("the app reads the app revision file", async () => {
+        await world.returnAfterMinutes(RECHECK_MINUTES);
+      });
+      Then("the notices region stays empty", () => {
+        expect(world.getNoticesRegion()).toBeEmptyDOMElement();
+      });
+      And("the next check reads the file again", async () => {
+        const callsBefore = fetchFile.mock.calls.length;
+        isDeviceOffline = false;
+        if (callsBefore === 0) respondWith("{}");
+        await world.returnAfterMinutes(RECHECK_MINUTES);
+        expect(fetchFile.mock.calls.length).toBeGreaterThan(callsBefore);
+      });
+    },
+  );
+
+  // @apply-data-updates-silently @FR6 @UX2
+  f.Scenario(
+    "A shown notice survives a failed read",
+    ({ Given, When, Then }) => {
+      Given("the update notice is shown", async () => {
+        await openWithWaitingBuild(ANOTHER_REVISION);
+        await waitUntilNoticeShown(true);
+      });
+      When("a later read of the app revision file fails", async () => {
+        source.setAnswer(AppRevisionFailure.REQUEST_FAILED);
+        await world.returnAfterMinutes(RECHECK_MINUTES);
+      });
+      Then("the update notice stays shown", () => waitUntilNoticeShown(true));
+    },
+  );
+
+  // @apply-data-updates-silently @FR7
+  f.ScenarioOutline(
+    "A dismissed notice returns for yet another revision",
+    ({ Given, When, Then }, variables) => {
+      Given(
+        "the user dismissed the update notice while the app revision file named {string}",
+        async (_ctx, name: string) => {
+          await openWithWaitingBuild(name);
+          await waitUntilNoticeShown(true);
+          await userEvent.click(
+            screen.getByRole("button", { name: i18n.t("app.dismiss") }),
+          );
+        },
+      );
+      When('a later check finds that the file names "<revision>"', async () => {
+        source.setAnswer(String(variables.revision));
+        await world.returnAfterMinutes(RECHECK_MINUTES);
+      });
+      Then("the update notice is <shown>", () => {
+        return waitUntilNoticeShown(variables.shown === "shown");
+      });
+    },
+  );
 });
