@@ -18,7 +18,8 @@ export const test = smokeTest.extend<
   { silentUpdateSite: SilentUpdateSite }
 >({
   silentUpdateSite: [
-    async ({}, use, workerInfo) => {
+    // Playwright reads the dependencies of a fixture from its first parameter, which must be destructured.
+    async ({ playwright: _playwright }, use, workerInfo) => {
       const site = await startSilentUpdateSite(
         CLIENT_ROOT,
         workerInfo.parallelIndex,
