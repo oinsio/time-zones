@@ -59,7 +59,7 @@ cd -
 | Шаблон                                                                              | Где работают гномы                                                       | Когда выбирать                                      |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------------------------|-----------------------------------------------------|
 | [`project.yaml.example.host`](../../.gnomish/factory/project.yaml.example.host)           | на этой машине, от вашего имени: ваши файлы, ваша сеть, без ограничений  | доверяете задачам и хотите самую простую настройку  |
-| [`project.yaml.example.container`](../../.gnomish/factory/project.yaml.example.container) | во временном Docker-контейнере на задачу, сеть ограничена тремя хостами  | нужна изоляция от вашей машины                      |
+| [`project.yaml.example.container`](../../.gnomish/factory/project.yaml.example.container) | во временном Docker-контейнере на задачу, сеть ограничена списком egress | нужна изоляция от вашей машины                      |
 
 ```bash
 .gnomish/factory/gnomish project add time-zones --dir="$PWD"
@@ -139,7 +139,7 @@ $EDITOR "$secrets/GNOMISH_GITHUB_TOKEN"         # вставьте каждый 
 
 ## Запуск в Docker
 
-С `factory.bindings.default: host` в `project.yaml` каждый процесс гнома работает на этой машине от вашего имени, с доступом к вашим файлам и без сетевых ограничений. Привязка `container` ([`project.yaml.example.container`](../../.gnomish/factory/project.yaml.example.container)) вместо этого запускает каждую задачу во временном Docker-контейнере за egress-фильтром, который пропускает только `api.anthropic.com`, `registry.npmjs.org` и `api.github.com`.
+С `factory.bindings.default: host` в `project.yaml` каждый процесс гнома работает на этой машине от вашего имени, с доступом к вашим файлам и без сетевых ограничений. Привязка `container` ([`project.yaml.example.container`](../../.gnomish/factory/project.yaml.example.container)) вместо этого запускает каждую задачу во временном Docker-контейнере за egress-фильтром, который пропускает только хосты своего списка egress: `api.anthropic.com`, `registry.npmjs.org`, `api.github.com`, `data.iana.org`, `www.iana.org` и `download.geonames.org`.
 
 1. **Docker**, запущенный на этой машине.
 2. **Образ** — собирается один раз и заново при каждой смене версий pnpm, openspec или Playwright в репозитории (тогда же поднимите тег `factory.sandbox.image` в `project.yaml`, `build-sandbox` читает его оттуда). В нём node из `.nvmrc`, pnpm, openspec, Claude Code CLI, `gh`, `jq` и Playwright Chromium тех версий, что зафиксированы в `package.json` и `pnpm-lock.yaml`:

@@ -59,7 +59,7 @@ cd -
 | Template                                                                               | Gnomes run                                                                  | Choose it when                                    |
 |----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|---------------------------------------------------|
 | [`project.yaml.example.host`](../../.gnomish/factory/project.yaml.example.host)              | on this machine, as you: your files, your network, no limits                | you trust the tasks and want the simplest setup   |
-| [`project.yaml.example.container`](../../.gnomish/factory/project.yaml.example.container)    | in an ephemeral Docker box per task, network limited to three hosts         | you want isolation from your machine              |
+| [`project.yaml.example.container`](../../.gnomish/factory/project.yaml.example.container)    | in an ephemeral Docker box per task, network limited to its egress allowlist       | you want isolation from your machine              |
 
 ```bash
 .gnomish/factory/gnomish project add time-zones --dir="$PWD"
@@ -139,7 +139,7 @@ Without `--base`, `run` reads `.gnomish/` from the working tree, so uncommitted 
 
 ## Running in Docker
 
-With `factory.bindings.default: host` in `project.yaml` every gnome process runs on this machine as you, with access to your files and no network restrictions. The `container` binding ([`project.yaml.example.container`](../../.gnomish/factory/project.yaml.example.container)) runs each task in an ephemeral Docker box instead, behind an egress guard that lets through only `api.anthropic.com`, `registry.npmjs.org` and `api.github.com`.
+With `factory.bindings.default: host` in `project.yaml` every gnome process runs on this machine as you, with access to your files and no network restrictions. The `container` binding ([`project.yaml.example.container`](../../.gnomish/factory/project.yaml.example.container)) runs each task in an ephemeral Docker box instead, behind an egress guard that lets through only the hosts of its egress allowlist: `api.anthropic.com`, `registry.npmjs.org`, `api.github.com`, `data.iana.org`, `www.iana.org` and `download.geonames.org`.
 
 1. **Docker** running on this machine.
 2. **The image**, built once and again whenever pnpm, openspec or Playwright change in the repository (bump the `factory.sandbox.image` tag in `project.yaml` then — `build-sandbox` reads it from there). It carries node from `.nvmrc`, pnpm, openspec, the Claude Code CLI, `gh`, `jq` and Playwright Chromium at the versions `package.json` and `pnpm-lock.yaml` pin:
