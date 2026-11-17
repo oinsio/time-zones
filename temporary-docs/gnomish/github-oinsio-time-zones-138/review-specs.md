@@ -104,7 +104,8 @@ None.
 - Impact: The implementer cannot complete task 7.3. `--update-snapshots` rewrites nothing, no PNG shows the attribution to confirm, and the Verify "lists only the 8 settings PNGs" fails because `git status` lists none. The implement stage either stalls on a check it cannot pass or ticks it falsely. NFR-R1 keeps a sentence that no test can meet.
 - Fix: Replace task 7.3 with: "The approved screenshots stay unchanged (NFR-R1): after `pnpm run test:bdd:gen`, run `npx playwright test -c playwright.bdd.config.ts --grep "Approved|Screenshot of the|screenshot"` once, without `--update-snapshots`. Verify: it passes and `git status --short src/test/features/__screenshots__` prints nothing." Drop the tag edit to `settings_e2e.feature` and the reading of the PNGs. In `proposal.md:99`, replace "The approved settings screenshots are re-approved once." with "The approved screenshots stay unchanged."
 - Fix risk: The attribution with its date gets no visual-regression baseline. Do not add one through `fullPage`: a baseline that shows the dump date would fail the next city data refresh pull request, which may change only the city data paths. Wrapping and the absence of horizontal scroll stay asserted by the E2E checks of task 7.2 at 320 px and 2560 px in both languages, so NFR-R1 keeps its test.
-- Status: open
+- Status: fixed
+- Resolution: confirmed the screenshot step calls `toHaveScreenshot` without `fullPage`; task 7.3 now only checks that every approved screenshot passes unchanged with an empty `git status` of `__screenshots__`, and NFR-R1 in proposal.md now says the approved screenshots stay unchanged and no baseline shows the dated attribution. Wrapping and no horizontal scroll stay covered by task 7.2.
 
 ### R2 — WARNING — Existing tests that assert the old attribution text have no task, and the scoped runs never reach them
 - Location: `openspec/changes/apply-data-updates-silently/tasks.md:40` (task 6.2), `tasks.md:46` (task 7.2); code `packages/client/src/app/settings/SettingsPage.sections.test.tsx:20,28`, `packages/client/src/test/features/settings/settings_city_data_attribution_e2e.feature:13-14,36`
@@ -113,7 +114,8 @@ None.
 - Impact: The implement stage finishes with every listed command green. Then the full `pnpm test` and `test:bdd` in CI fail on three old assertions, and the delta's changed scenarios never become executable in the E2E feature. An E2E check that names a literal date, or imports `CITY_DATA_DATE`, fails at once (test date ≠ committed date) or at the next city data refresh pull request, which may change only the city data paths.
 - Fix: In task 6.2, add "update `src/app/settings/SettingsPage.sections.test.tsx` to the new attribution text" and the command `npx vitest run src/app/settings/SettingsPage.sections.test.tsx`. In task 7.2, add "change the scenarios 'The attribution in both languages' and 'The attribution offline' of `settings_city_data_attribution_e2e.feature` to the delta's text, checking the date part only as non-empty text between the parentheses (patterns `^City data: GeoNames \(.+\), CC BY 4\.0$` and `^Данные о городах: GeoNames \(.+\), CC BY 4\.0$`, never a literal date and never `CITY_DATA_DATE`), adding `@apply-data-updates-silently @FR12 @FR13` to their tags", and run `npx playwright test -c playwright.bdd.config.ts --grep "attribution"` after `pnpm run test:bdd:gen`.
 - Fix risk: The E2E check no longer pins the exact date. The exact date stays covered by unit BDD 6.3, which runs with `TEST_CITY_DATA_DATE`. The Gherkin steps take a pattern instead of a literal, which is a small step-definition change inside task 7.2.
-- Status: open
+- Status: fixed
+- Resolution: task 6.2 now updates `CityDataAttribution.test.tsx` and `SettingsPage.sections.test.tsx` to the new text, runs the latter, and greps that no old text remains; task 7.2 changes "The attribution in both languages" and "The attribution offline" of `settings_city_data_attribution_e2e.feature` to the delta text with `@apply-data-updates-silently @FR12 @FR13`, checking the date only by the patterns `^City data: GeoNames \(.+\), CC BY 4\.0$` / Russian (never a literal date or `CITY_DATA_DATE`), and runs `--grep "attribution"`.
 
 ### R3 — SUGGESTION — FR8 uses "abbreviation" for the local time type's designation
 - Location: `openspec/changes/apply-data-updates-silently/proposal.md:77,141`, `specs/zone-rules-updates/spec.md:19,29`, `design.md:68`
@@ -122,7 +124,8 @@ None.
 - Impact: The stable spec that this change archives would name the compared field with a term for another concept. An implementer or step writer who follows the spec rather than D4 could compare `getZoneAbbreviation` output, which doesn't see numeric designations.
 - Fix: Replace "abbreviation" with "designation" in FR8 and M3 of `proposal.md`, in the requirement text at `specs/zone-rules-updates/spec.md:19`, and in the table row at `:29` (`| designation in force | the designation in force at the comparison instant |`). Rephrase `design.md:68` as "The designation counts because the zone label can show its abbreviation."
 - Fix risk: The task 5.1 wording ("the abbreviation in force") must follow, and M3's six rows keep their count. No code or steps exist yet.
-- Status: open
+- Status: fixed
+- Resolution: replaced "abbreviation" with "designation" (the `LocalTimeType.designation` field of the glossary's Local time type) in FR8 and M3 of proposal.md, the requirement text and both table rows of specs/zone-rules-updates/spec.md (lines 19, 29, 30), task 5.1, and design.md D4 ("The designation counts because the zone label can show its abbreviation.").
 
 ### R4 — SUGGESTION — The handoff patch tasks do not name the handoff folder
 - Location: `openspec/changes/apply-data-updates-silently/tasks.md:57-58` (tasks 9.1, 9.2)
@@ -131,7 +134,8 @@ None.
 - Impact: An implementer who writes the patch anywhere else, such as the repository root or the change folder (which the implement stage may not write), leaves the deliver stage nothing to hand over, so H1 and H2 never reach the pull request.
 - Fix: In tasks 9.1 and 9.2, write the paths in full: `temporary-docs/gnomish/github-oinsio-time-zones-138/handoff/H1-ci-fetch-history.patch` (and `…/H2-adr-silent-data-updates.patch`), each with its `## H<n>: <title>` section in `temporary-docs/gnomish/github-oinsio-time-zones-138/handoff/README.md`.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: tasks.md 9.1 and 9.2 now write the patches to `temporary-docs/gnomish/github-oinsio-time-zones-138/handoff/H1-ci-fetch-history.patch` and `…/H2-adr-silent-data-updates.patch`, each with its `## H<n>: <title>` section in that folder's `README.md`.
 
 ## Verdict
 
