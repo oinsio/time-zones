@@ -18,7 +18,7 @@ vi.mock(
 );
 
 const feature = await loadFeature(
-  "../app_shell_silent_update_failure_unit.feature",
+  "../app_shell_silent_update_failure.feature",
 );
 
 const ANOTHER_REVISION = "b2";
