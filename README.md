@@ -130,7 +130,7 @@ The pipeline takes a task from an idea, or from a change already written on `mai
 
 **Which change a task works on.** `openspec/changes/` may hold several active changes; only one is the task's. `specify` records it in `temporary-docs/gnomish/<task>/change.md` (`Change:` and `Verdict:` lines), and later stages read it from there. To run a change already on `main`, name it in the issue title or as a `Change: <name>` line in its body. `cleanup` removes the task's reports before the pull request.
 
-**Handoff items.** Paths a stage may not write (`.github/`, `.claude/`, `.gnomish/`, `docs/adr/`, `openspec/specs/`) go to a handoff patch under `temporary-docs/gnomish/<task>/handoff/` and appear in the Human follow-up section of the pull request.
+**Handoff items.** The implement stage never writes `.github/`, `.claude/`, `docs/adr/`, `CLAUDE.md`, `.gnomish/`, or anything under `openspec/` other than the checkboxes of `tasks.md`. A change that needs one of those paths plans it as a handoff item: a patch and a README section under `temporary-docs/gnomish/<task>/handoff/`, shown in the Human follow-up section of the pull request. An item with no file change has a README section and no patch.
 
 **Asking a human.** A stage that needs a decision writes a question with options to `$GNOMISH_DECISION_FILE`; the task gets the `gnomish:needs-human` label, and the answer comes back as a Decision. How to answer is in the factory's [operator guides](https://github.com/oinsio/gnomish-factory/tree/main/docs/guides).
 

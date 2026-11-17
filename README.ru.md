@@ -130,7 +130,7 @@ pnpm --filter @time-zones/client test:bdd  # набор BDD E2E
 
 **Над каким change работает задача.** В `openspec/changes/` может лежать несколько активных change, задаче принадлежит один. `specify` записывает его в `temporary-docs/gnomish/<task>/change.md` (строки `Change:` и `Verdict:`), следующие стадии читают его оттуда. Чтобы запустить change, уже лежащий в `main`, назовите его в заголовке issue или строкой `Change: <name>` в описании. `cleanup` удаляет отчёты задачи до pull request.
 
-**Handoff-пункты.** Пути, куда стадия писать не может (`.github/`, `.claude/`, `.gnomish/`, `docs/adr/`, `openspec/specs/`), попадают в handoff-патч в `temporary-docs/gnomish/<task>/handoff/` и появляются в разделе Human follow-up pull request.
+**Handoff-пункты.** Стадия implement никогда не пишет в `.github/`, `.claude/`, `docs/adr/`, `CLAUDE.md`, `.gnomish/` и в `openspec/` — кроме чекбоксов `tasks.md`. Change, которому нужен один из этих путей, планирует его как handoff-пункт: патч и раздел README в `temporary-docs/gnomish/<task>/handoff/`, они появляются в разделе Human follow-up pull request. У пункта без изменения файла есть раздел README и нет патча.
 
 **Вопрос человеку.** Стадия, которой нужно решение, пишет вопрос с вариантами в `$GNOMISH_DECISION_FILE`; задача получает метку `gnomish:needs-human`, а ответ возвращается как Decision. Как отвечать — в [руководствах оператора](https://github.com/oinsio/gnomish-factory/tree/main/docs/guides) фабрики.
 
