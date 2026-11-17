@@ -1,4 +1,5 @@
 // Verifies FR13, NFR-A2, UX4 of add-geonames-city-source (D10): the city data credit.
+// Verifies FR12, FR13 of apply-data-updates-silently: the credit names TEST_CITY_DATA_DATE (2026-11-14).
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import { GEONAMES_URL } from "@/constants";
@@ -10,8 +11,8 @@ describe("CityDataAttribution", () => {
   });
 
   it.each([
-    ["en", "City data: GeoNames, CC BY 4.0"],
-    ["ru", "Данные о городах: GeoNames, CC BY 4.0"],
+    ["en", "City data: GeoNames (November 14, 2026), CC BY 4.0"],
+    ["ru", "Данные о городах: GeoNames (14 ноября 2026 г.), CC BY 4.0"],
   ])(
     "should render one link named by the whole text in %s",
     async (language, text) => {

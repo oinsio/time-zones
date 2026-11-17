@@ -8,6 +8,7 @@ const { Given, When, Then } = createBdd(test);
 const TAB_KEY = "Tab";
 const ENTER_KEY = "Enter";
 const ESCAPE_KEY = "Escape";
+const ESCAPE_RETRY_TIMEOUT_MS = 500;
 const MAX_TAB_STOPS = 80;
 const RELOAD_BUTTON_NAME = "Reload";
 const DISMISS_BUTTON_NAME = "Dismiss";
@@ -96,7 +97,13 @@ When(
     await expect(zoneRulesNotice(page, publishedRelease)).toBeVisible({
       timeout: NOTICE_TIMEOUT_MS,
     });
-    await page.keyboard.press(ESCAPE_KEY);
+    // The lazily loaded notices region attaches its Escape listener just after it shows: press again until it takes effect.
+    await expect(async () => {
+      await page.keyboard.press(ESCAPE_KEY);
+      await expect(zoneRulesNotice(page, publishedRelease)).toBeHidden({
+        timeout: ESCAPE_RETRY_TIMEOUT_MS,
+      });
+    }).toPass({ timeout: NOTICE_TIMEOUT_MS });
   },
 );
 

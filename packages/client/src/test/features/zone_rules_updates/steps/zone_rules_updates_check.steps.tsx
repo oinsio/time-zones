@@ -1,30 +1,43 @@
 // Verifies FR3, FR4, FR7, FR9, NFR-P1, M4 of add-remote-zone-rules-updates: the check through the hook.
+// Verifies FR8, FR9 of apply-data-updates-silently: the notice only for a watched zone.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
 import { StoredReleaseLoadStatus } from "@/ports";
 import { resetPageVisibility } from "@/test/pageVisibility";
-import { buildReleaseDocument } from "@/test/zoneRules/buildReleaseDocument";
+import {
+  ASUNCION_ZONE_ID,
+  buildWatchedZonesDocument,
+  LISBON_ZONE_ID,
+  parseWatchedZonesRelease,
+} from "@/test/zoneRules/watchedZoneReleases";
 import {
   createZoneRulesUpdateWorld,
   publishing,
-  SIXTEEN_MINUTES_LATER,
   type ZoneRulesUpdateWorldOptions,
 } from "@/test/zoneRules/zoneRulesUpdateWorld";
 import { FAILURE_OPTIONS } from "./zoneRulesCheckFailureOptions";
 
 const feature = await loadFeature("../zone_rules_updates_check.feature");
 
-const FIVE_MINUTES_AFTER_THE_RETURN = "2026-03-08T07:51:00Z";
+/** The list holds Lisbon; the version file names "2026g", which changes the given zones. */
+const listHoldingLisbonAndPublishing = (
+  changedZoneIds: string[],
+): ZoneRulesUpdateWorldOptions => ({
+  activeRelease: parseWatchedZonesRelease("2026f"),
+  watchedZoneIds: [LISBON_ZONE_ID],
+  script: {
+    version: { release: "2026g" },
+    releases: { "2026g": buildWatchedZonesDocument("2026g", changedZoneIds) },
+  },
+});
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let options: ZoneRulesUpdateWorldOptions = {};
   let world: ReturnType<typeof createZoneRulesUpdateWorld>;
-  let versionRequestCounts: number[] = [];
 
   f.BeforeEachScenario(() => {
     options = {};
-    versionRequestCounts = [];
     localStorage.clear();
   });
   f.AfterEachScenario(resetPageVisibility);
@@ -37,9 +50,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   // @add-remote-zone-rules-updates @FR3
   f.Scenario("A newer release is published", ({ Given, When, Then, And }) => {
     Given(
-      'the active release is "2026f" and the version file names "2026g"',
+      'the active release is "2026f", the list holds Lisbon and the version file names "2026g", which changes the rules of "Europe/Lisbon"',
       () => {
-        options = { script: publishing("2026g") };
+        options = listHoldingLisbonAndPublishing([LISBON_ZONE_ID]);
       },
     );
     When("the app checks for a zone rules update", startCheck);
@@ -57,6 +70,33 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(world.result.current.readyRelease).toBe("2026g");
     });
   });
+
+  // @apply-data-updates-silently @FR8 @FR9
+  f.Scenario(
+    "A newer release that changes no watched zone",
+    ({ Given, When, Then, And }) => {
+      Given(
+        'the active release is "2026f", the list holds Lisbon and the version file names "2026g", which changes only the rules of "America/Asuncion"',
+        () => {
+          options = listHoldingLisbonAndPublishing([ASUNCION_ZONE_ID]);
+        },
+      );
+      When("the app checks for a zone rules update", startCheck);
+      Then('the release file of "2026g" is requested once', () => {
+        expect(world.versionSource.requestedReleases()).toEqual(["2026g"]);
+      });
+      And('"2026g" becomes the stored release', () => {
+        const stored = world.storedReleases.load();
+        expect(
+          stored.status === StoredReleaseLoadStatus.LOADED &&
+            stored.release.release,
+        ).toBe("2026g");
+      });
+      And("no notice is shown", () => {
+        expect(world.result.current.readyRelease).toBeUndefined();
+      });
+    },
+  );
 
   // @add-remote-zone-rules-updates @FR3
   f.ScenarioOutline(
@@ -82,11 +122,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "The newer release is already stored",
     ({ Given, When, Then, And }) => {
       Given(
-        'the active release is "2026f", "2026g" is the stored release and the version file names "2026g"',
+        'the active release is "2026f", "2026g" is the stored release and changes the rules of a watched zone, and the version file names "2026g"',
         () => {
           options = {
-            script: publishing("2026g"),
-            storedDocument: buildReleaseDocument("2026g"),
+            ...listHoldingLisbonAndPublishing([LISBON_ZONE_ID]),
+            storedDocument: buildWatchedZonesDocument("2026g", [
+              LISBON_ZONE_ID,
+            ]),
           };
         },
       );
@@ -100,63 +142,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       });
     },
   );
-
-  // @add-remote-zone-rules-updates @FR3
-  f.Scenario(
-    "Checks follow the update recheck rule",
-    ({ Given, When, Then, And }) => {
-      Given("the app last checked 16 minutes ago", () => {
-        options = { script: publishing("2026f") };
-      });
-      When("the page becomes visible", async () => {
-        await startCheck();
-        const before = world.versionSource.versionRequestCount();
-        await world.returnToPage(SIXTEEN_MINUTES_LATER);
-        const afterReturn = world.versionSource.versionRequestCount();
-        await world.returnToPage(FIVE_MINUTES_AFTER_THE_RETURN);
-        versionRequestCounts = [
-          before,
-          afterReturn,
-          world.versionSource.versionRequestCount(),
-        ];
-      });
-      Then("the version file is requested once", () => {
-        expect(versionRequestCounts[1] - versionRequestCounts[0]).toBe(1);
-      });
-      And("a return 5 minutes after that check requests nothing", () => {
-        expect(versionRequestCounts[2]).toBe(versionRequestCounts[1]);
-      });
-    },
-  );
-
-  // @add-remote-zone-rules-updates @FR3
-  f.Scenario("No active release", ({ Given, When, Then }) => {
-    Given("the zone rules failed to load at start", () => {
-      options = { activeRelease: null, script: publishing("2026g") };
-    });
-    When("a check is due", async () => {
-      await startCheck();
-      await world.returnToPage(SIXTEEN_MINUTES_LATER);
-    });
-    Then("no request is made", () => {
-      expect(world.versionSource.versionRequestCount()).toBe(0);
-    });
-  });
-
-  // @add-remote-zone-rules-updates @FR4
-  f.Scenario("Offline", ({ Given, When, Then }) => {
-    Given("the device is offline", () => {
-      options = { isOnline: false, script: publishing("2026g") };
-    });
-    When("a check is due", async () => {
-      await startCheck();
-      await world.returnToPage(SIXTEEN_MINUTES_LATER);
-    });
-    Then("no request is made and no notice is shown", () => {
-      expect(world.versionSource.versionRequestCount()).toBe(0);
-      expect(world.result.current.readyRelease).toBeUndefined();
-    });
-  });
 
   // @add-remote-zone-rules-updates @FR4
   f.ScenarioOutline(

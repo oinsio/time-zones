@@ -1,3 +1,4 @@
+// Verifies FR3, FR4, FR7 of apply-data-updates-silently: the update notice follows the app revision.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the app must survive between steps.
@@ -7,6 +8,7 @@ import i18n from "i18next";
 import { createElement } from "react";
 import { expect, type TestContext, vi } from "vitest";
 import { AppErrorBoundary, AppShell } from "@/app";
+import { createAnotherAppRevisionSource } from "@/test/anotherAppRevisionSource";
 import type { ViewDefinition } from "@/views";
 
 // Fake service worker: real React state behind the useRegisterSW contract.
@@ -60,7 +62,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   const openApp = () => {
     render(
-      createElement(AppErrorBoundary, { reloadPage }, createElement(AppShell)),
+      createElement(
+        AppErrorBoundary,
+        { reloadPage },
+        createElement(AppShell, {
+          appRevisionSource: createAnotherAppRevisionSource(),
+        }),
+      ),
     );
   };
 
@@ -131,7 +139,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       fakeServiceWorker.isOfflineReady = true;
     });
     When("the user opens the app", () => openApp());
-    Then("the offline-ready notice is announced politely", () => {
+    Then("the offline-ready notice is announced politely", async () => {
+      await screen.findByText(i18n.t("app.offlineReady"));
       expect(getNoticeRegion()).toHaveAttribute("aria-live", "polite");
       expect(getNoticeRegion()).toHaveTextContent(i18n.t("app.offlineReady"));
     });
@@ -147,7 +156,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the user has opened the app", () => openApp());
       When("the user dismisses the notice", async () => {
         await userEvent.click(
-          screen.getByRole("button", { name: i18n.t("app.dismiss") }),
+          await screen.findByRole("button", { name: i18n.t("app.dismiss") }),
         );
       });
       Then("the notice is cleared", () => {
@@ -158,19 +167,23 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @setup-app-shell-and-pages-deploy @FR7
   f.Scenario("New version becomes available", ({ Given, When, Then, And }) => {
-    Given("a new version of the app is waiting", () => {
+    Given("a build with another app revision is waiting", () => {
       fakeServiceWorker.isUpdateAvailable = true;
     });
     When("the user opens the app", () => openApp());
-    Then("the update notice is announced politely with a reload action", () => {
-      expect(getNoticeRegion()).toHaveAttribute("aria-live", "polite");
-      expect(getNoticeRegion()).toHaveTextContent(
-        i18n.t("app.updateAvailable"),
-      );
-      expect(
-        screen.getByRole("button", { name: i18n.t("app.reload") }),
-      ).toBeInTheDocument();
-    });
+    Then(
+      "the update notice is announced politely with a reload action",
+      async () => {
+        await screen.findByRole("button", { name: i18n.t("app.reload") });
+        expect(getNoticeRegion()).toHaveAttribute("aria-live", "polite");
+        expect(getNoticeRegion()).toHaveTextContent(
+          i18n.t("app.updateAvailable"),
+        );
+        expect(
+          screen.getByRole("button", { name: i18n.t("app.reload") }),
+        ).toBeInTheDocument();
+      },
+    );
     And("the app has not reloaded by itself", () => {
       expect(fakeServiceWorker.updateServiceWorker).not.toHaveBeenCalled();
     });
@@ -178,13 +191,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @setup-app-shell-and-pages-deploy @FR7
   f.Scenario("User accepts the update", ({ Given, And, When, Then }) => {
-    Given("a new version of the app is waiting", () => {
+    Given("a build with another app revision is waiting", () => {
       fakeServiceWorker.isUpdateAvailable = true;
     });
     And("the user has opened the app", () => openApp());
     When("the user chooses to reload into the new version", async () => {
       await userEvent.click(
-        screen.getByRole("button", { name: i18n.t("app.reload") }),
+        await screen.findByRole("button", { name: i18n.t("app.reload") }),
       );
     });
     Then("the app switches to the new version", () => {
@@ -194,13 +207,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @setup-app-shell-and-pages-deploy @FR7
   f.Scenario("User postpones the update", ({ Given, And, When, Then }) => {
-    Given("a new version of the app is waiting", () => {
+    Given("a build with another app revision is waiting", () => {
       fakeServiceWorker.isUpdateAvailable = true;
     });
     And("the user has opened the app", () => openApp());
     When("the user dismisses the notice", async () => {
       await userEvent.click(
-        screen.getByRole("button", { name: i18n.t("app.dismiss") }),
+        await screen.findByRole("button", { name: i18n.t("app.dismiss") }),
       );
     });
     Then("the notice is cleared", () => {
@@ -215,11 +228,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario(
     "User postpones the update from the keyboard",
     ({ Given, And, When, Then }) => {
-      Given("a new version of the app is waiting", () => {
+      Given("a build with another app revision is waiting", () => {
         fakeServiceWorker.isUpdateAvailable = true;
       });
       And("the user has opened the app", () => openApp());
       When("the user presses Escape", async () => {
+        await screen.findByRole("button", { name: i18n.t("app.reload") });
         await userEvent.keyboard("{Escape}");
       });
       Then("the notice is cleared", () => {

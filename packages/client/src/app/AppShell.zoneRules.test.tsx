@@ -1,3 +1,4 @@
+// Verifies FR3, FR4 of apply-data-updates-silently: the update notice shows when the site names another app revision.
 // Verifies FR7, UX1, UX2 of add-remote-zone-rules-updates: the shell shows the zone rules update notice and wires its actions.
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { render, screen } from "@testing-library/react";
@@ -7,6 +8,7 @@ import {
   createInMemoryStoredReleaseRepository,
   createInMemoryZoneRulesVersionSource,
 } from "@/adapters";
+import { createAnotherAppRevisionSource } from "@/test/anotherAppRevisionSource";
 import { buildReleaseDocument } from "@/test/zoneRules/buildReleaseDocument";
 import { AppShell } from "./AppShell";
 
@@ -24,10 +26,11 @@ const mockServiceWorker = (isUpdateAvailable = false) => {
   return { updateServiceWorker };
 };
 
-const renderShell = () => {
+const renderShell = (appRevisionSource = createAnotherAppRevisionSource()) => {
   const reloadPage = vi.fn();
   render(
     <AppShell
+      appRevisionSource={appRevisionSource}
       zoneRulesVersionSource={createInMemoryZoneRulesVersionSource({
         version: { release: NEWER_RELEASE },
         releases: { [NEWER_RELEASE]: buildReleaseDocument(NEWER_RELEASE) },

@@ -1,3 +1,4 @@
+// Verifies FR3 of apply-data-updates-silently: the notices region loads on demand.
 // Verifies FR8, NFR-P1, NFR-P2 of add-settings-page-and-device-time-location.
 
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
@@ -161,9 +162,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Given("storage is unavailable", () => undefined);
     And("the device time zone is {string}", world.givenDeviceZone);
     When("the user opens the app", world.openAppShell);
-    Then("the storage warning is shown", () =>
+    Then("the storage warning is shown", async () =>
       expect(
-        screen.getByText(i18n.t("mainPage.storageUnavailable")),
+        await screen.findByText(i18n.t("mainPage.storageUnavailable")),
       ).toBeVisible(),
     );
     And(

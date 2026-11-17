@@ -152,6 +152,8 @@ export {
   type WallClockNote,
   WallClockNotePlacement,
 } from "./wallClockNote";
+// Implements FR9 of apply-data-updates-silently.
+export { getWatchedZoneIds } from "./watchedZones";
 // Implements FR8, FR10, FR11 of add-day-colouring-setting.
 export {
   getHourCellWorkingFlags,

@@ -17,6 +17,24 @@ const GEONAMES_ORIGIN_PATTERN = "https://www.geonames.org/**";
 const GEONAMES_STUB_HTML = "<!doctype html><title>GeoNames</title>";
 const GEONAMES_HOST_SUFFIX = "geonames.org";
 const MAX_TAB_PRESSES = 60;
+const NO_OUTLINE_STYLE = "none";
+
+const DATE_PLACEHOLDER = "<date>";
+const ANY_DATE_PATTERN = ".+";
+
+const escapeForPattern = (text: string) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, (special) => `\\${special}`);
+
+/**
+ * The attribution text of a scenario as a pattern: the built app shows the
+ * committed dump date while this process holds a fixed test date, so the date
+ * part is any non-empty text between the parentheses; the exact date is the
+ * business of the unit BDD of settings_city_data_date.feature.
+ */
+const attributionPattern = (attributionText: string) =>
+  new RegExp(
+    `^${escapeForPattern(attributionText).replace(escapeForPattern(DATE_PLACEHOLDER), ANY_DATE_PATTERN)}$`,
+  );
 
 const attributionOf = (page: Page) => page.locator(`a[href="${GEONAMES_URL}"]`);
 
@@ -25,12 +43,12 @@ const attributionPopups = new WeakMap<Page, Page>();
 const geoNamesRequests = new WeakMap<Page, string[]>();
 
 // Verifies FR13, UX4 of add-geonames-city-source: the page shows the attribution link.
+// Verifies FR12, FR13, M5 of apply-data-updates-silently: it names the dump date.
 Then(
   "the settings page shows the link {string} to GeoNames",
   async ({ locationsWorld }, attributionText: string) => {
     const attribution = locationsWorld.page.getByRole(LINK_ROLE, {
-      name: attributionText,
-      exact: true,
+      name: attributionPattern(attributionText),
     });
     await expect(attribution).toHaveAttribute("href", GEONAMES_URL);
     await expect(attribution).toHaveAttribute("target", "_blank");
@@ -81,7 +99,7 @@ Then(
   "the city data attribution is {string}",
   async ({ locationsWorld }, attributionText: string) => {
     await expect(attributionOf(locationsWorld.page)).toHaveText(
-      attributionText,
+      attributionPattern(attributionText),
     );
   },
 );
@@ -118,6 +136,32 @@ Then(
   async ({ locationsWorld }) => {
     const box = await boxOf(attributionOf(locationsWorld.page));
     expect(box.height).toBeGreaterThanOrEqual(MIN_OPTION_HEIGHT_PX);
+  },
+);
+
+// Verifies NFR-A2 of apply-data-updates-silently: a focus outline, and a name equal to the visible text.
+Then(
+  "the city data attribution shows a focus outline",
+  async ({ locationsWorld }) => {
+    const outline = await attributionOf(locationsWorld.page).evaluate(
+      (link) => {
+        const { outlineStyle, outlineWidth } = getComputedStyle(link);
+        return { outlineStyle, outlineWidth: Number.parseFloat(outlineWidth) };
+      },
+    );
+    expect(outline.outlineStyle).not.toBe(NO_OUTLINE_STYLE);
+    expect(outline.outlineWidth).toBeGreaterThan(0);
+  },
+);
+
+Then(
+  "the city data attribution is named by its visible text",
+  async ({ locationsWorld }) => {
+    const { page } = locationsWorld;
+    const visibleText = (await attributionOf(page).textContent()) ?? "";
+    await expect(
+      page.getByRole(LINK_ROLE, { name: visibleText, exact: true }),
+    ).toHaveAttribute("href", GEONAMES_URL);
   },
 );
 

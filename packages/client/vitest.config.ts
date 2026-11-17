@@ -1,7 +1,14 @@
 import * as path from "node:path";
 import react from "@vitejs/plugin-react";
 import { configDefaults, defineConfig } from "vitest/config";
-import { DEPLOY_INSTANT_DEFINE, TEST_DEPLOY_INSTANT } from "./app.config";
+import {
+  APP_REVISION_DEFINE,
+  CITY_DATA_DATE_DEFINE,
+  DEPLOY_INSTANT_DEFINE,
+  TEST_APP_REVISION,
+  TEST_CITY_DATA_DATE,
+  TEST_DEPLOY_INSTANT,
+} from "./app.config";
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
 import { zoneRulesPlugin } from "./scripts/zoneRules/zoneRulesPlugin";
@@ -13,7 +20,11 @@ export default defineConfig({
     zoneRulesPlugin({ deployInstant: TEST_DEPLOY_INSTANT }),
     legacyCoreJsPlugin(),
   ],
-  define: { [DEPLOY_INSTANT_DEFINE]: JSON.stringify(TEST_DEPLOY_INSTANT) },
+  define: {
+    [DEPLOY_INSTANT_DEFINE]: JSON.stringify(TEST_DEPLOY_INSTANT),
+    [APP_REVISION_DEFINE]: JSON.stringify(TEST_APP_REVISION),
+    [CITY_DATA_DATE_DEFINE]: JSON.stringify(TEST_CITY_DATA_DATE),
+  },
   test: {
     globals: true,
     environment: "jsdom",

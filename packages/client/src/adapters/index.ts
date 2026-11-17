@@ -13,10 +13,19 @@ export {
   splitIntoWords,
 } from "./city-search";
 export {
+  createFetchAppRevisionSource,
+  type FetchAppRevisionSourceOptions,
+  fetchAppRevisionSource,
+} from "./fetchAppRevisionSource";
+export {
   createFetchZoneRulesVersionSource,
   type FetchZoneRulesVersionSourceOptions,
   fetchZoneRulesVersionSource,
 } from "./fetchZoneRulesVersionSource";
+export {
+  createInMemoryAppRevisionSource,
+  type InMemoryAppRevisionSource,
+} from "./inMemoryAppRevisionSource";
 export {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,

@@ -1,3 +1,4 @@
+// Verifies FR12, FR13 of apply-data-updates-silently: the attribution names the dump date.
 // Verifies FR13, UX4 of add-geonames-city-source (D10): the city data attribution is the last line of the page.
 // Verifies FR6 of the day colouring change: the working hours row appears only in Working hours.
 import { screen } from "@testing-library/react";
@@ -17,7 +18,9 @@ describe("SettingsPage city data attribution", () => {
   it("should show the attribution link to GeoNames", () => {
     renderSettingsPage();
     expect(
-      screen.getByRole("link", { name: "City data: GeoNames, CC BY 4.0" }),
+      screen.getByRole("link", {
+        name: "City data: GeoNames (November 14, 2026), CC BY 4.0",
+      }),
     ).toHaveAttribute("href", GEONAMES_URL);
   });
 
@@ -25,7 +28,7 @@ describe("SettingsPage city data attribution", () => {
     renderSettingsPage();
     const main = screen.getByRole("main");
     const attribution = screen.getByRole("link", {
-      name: "City data: GeoNames, CC BY 4.0",
+      name: "City data: GeoNames (November 14, 2026), CC BY 4.0",
     });
     expect(main.lastElementChild).toBe(attribution);
     expect(attribution.previousElementSibling).toHaveAttribute(

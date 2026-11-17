@@ -1,9 +1,11 @@
 // Verifies FR6, NFR-P2 of add-remote-zone-rules-updates: the active release at start.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
+import { renderHook } from "@testing-library/react";
 import { expect, vi } from "vitest";
 import { createLocalStorageStoredReleaseRepository } from "@/adapters/storedRelease";
 import { STORAGE_KEYS } from "@/constants";
+import { useZoneRulesRelease } from "@/controller";
 import {
   getInstalledRelease,
   installZoneRulesDateTimeFormat,
@@ -15,10 +17,10 @@ import {
   ALMATY_EIGHT_UTC,
   ALMATY_UTC_PLUS_FOUR_CLOCK,
   BUNDLED_DOCUMENT,
-  envelopeOf,
   NEWER_DOCUMENT,
   nativeDateTimeFormat,
   RELEASE_URL,
+  storeRelease,
   UNREADABLE_DOCUMENTS,
 } from "./zoneRulesActiveReleaseWorld";
 
@@ -79,11 +81,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.Scenario("Stored release is newer", ({ Given, When, Then, And }) => {
     Given(
       'the bundled release is "2026f" and the stored release is "2026g", whose rule for "Asia/Almaty" is UTC+4',
-      () =>
-        localStorage.setItem(
-          STORAGE_KEYS.ZONE_RULES,
-          envelopeOf(NEWER_DOCUMENT),
-        ),
+      () => storeRelease(NEWER_DOCUMENT),
     );
     When("the app starts", start);
     Then('the active release is "2026g"', () => {
@@ -94,17 +92,33 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
+  // @apply-data-updates-silently @FR8
+  f.Scenario(
+    "A silent release is active at the next start",
+    ({ Given, When, Then, And }) => {
+      Given(
+        'the bundled release is "2026f" and "2026g" was stored without a notice',
+        () => storeRelease(NEWER_DOCUMENT),
+      );
+      When("the app starts again", start);
+      Then('the active release is "2026g"', () => {
+        expect(getInstalledRelease()?.release).toBe("2026g");
+      });
+      And('the settings page names "2026g"', () => {
+        // The release line of the settings page shows this value.
+        const { result } = renderHook(() => useZoneRulesRelease());
+        expect(result.current).toContain("2026g");
+      });
+    },
+  );
+
   // @add-remote-zone-rules-updates @FR6
   f.ScenarioOutline(
     "Stored release is older or equal",
     ({ Given, When, Then, And }, variables) => {
       Given(
         'the bundled release is "2026f" and the stored release is "<stored>"',
-        () =>
-          localStorage.setItem(
-            STORAGE_KEYS.ZONE_RULES,
-            envelopeOf(buildReleaseDocument(String(variables.stored))),
-          ),
+        () => storeRelease(buildReleaseDocument(String(variables.stored))),
       );
       When("the app starts", start);
       Then('the active release is "2026f"', () => {
@@ -161,10 +175,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Given(
         'the request for the bundled release fails and the stored release "2026g" is valid',
         () => {
-          localStorage.setItem(
-            STORAGE_KEYS.ZONE_RULES,
-            envelopeOf(NEWER_DOCUMENT),
-          );
+          storeRelease(NEWER_DOCUMENT);
           fetchRelease = vi.fn(async () => {
             throw new Error("offline");
           });

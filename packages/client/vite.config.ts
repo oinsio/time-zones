@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -7,31 +8,62 @@ import {
   APP_ICON_SOURCE_DIR,
   APP_LIGHT_BACKGROUND_COLOR,
   APP_NAME,
+  APP_REVISION_DEFINE,
+  APP_REVISION_FILE,
   APP_SHORT_NAME,
   APP_THEME_COLOR,
   BUILD_OUT_DIR,
   BUILD_TARGETS,
+  CITY_DATA_DATE_DEFINE,
   DEPLOY_INSTANT_DEFINE,
 } from "./app.config";
+import { appRevisionPlugin } from "./scripts/appRevision/appRevisionPlugin";
+import { resolveAppRevision } from "./scripts/appRevision/resolveAppRevision";
+import { readCommittedDumpDate } from "./scripts/cityData/committedDumpDate";
+import { DATASET_PATH } from "./scripts/cityData/constants";
 import { resolveDeployInstant } from "./scripts/deployInstant/resolveDeployInstant";
 import { mainChunkPreloadPlugin } from "./scripts/legacyBoot/mainChunkPreloadPlugin";
 import { legacyCoreJsPlugin } from "./scripts/legacyCoreJs/legacyCoreJsPlugin";
 import { zoneDataPlugin } from "./scripts/zoneData/zoneDataPlugin";
+import { runChildProcess } from "./scripts/zoneRules/runChildProcess";
 import { zoneRulesPlugin } from "./scripts/zoneRules/zoneRulesPlugin";
 import { ZONE_RULES_RELEASE_DIRECTORY } from "./src/constants/zoneRules";
 
 /** The one build instant: the deploy time of the app and the `publishedAt` of the version file. */
 const DEPLOY_INSTANT = resolveDeployInstant();
+/** The dump date of the committed city data, which the settings page names (FR12 of apply-data-updates-silently). */
+const CITY_DATA_DATE = readCommittedDumpDate(
+  readFileSync(resolve(__dirname, DATASET_PATH), "utf8"),
+);
+/** The app of this build: data-only commits do not change it (FR1 of apply-data-updates-silently). */
+const APP_REVISION = await resolveAppRevision({
+  runProcess: runChildProcess,
+  environment: process.env,
+  deployInstant: DEPLOY_INSTANT,
+});
 /** The served zone rules files are fetched fresh, never precached (FR2 of add-remote-zone-rules-updates). */
 const ZONE_RULES_PRECACHE_IGNORE_PATTERN = `${ZONE_RULES_RELEASE_DIRECTORY}**`;
 
 const SHARED_VIEWS_PATH = "/src/views/shared/";
+/**
+ * Declarations only, no import-time effects: unused constants, enums and
+ * hooks stay out of the initial JavaScript (NFR-P1 of apply-data-updates-silently).
+ */
+const DECLARATION_ONLY_PATHS = [
+  "/src/constants/",
+  "/src/ports/",
+  "/src/controller/",
+];
 /** The city search adapters have no import-time effects either: the composite search loads as its own chunk. */
 const CITY_SEARCH_ADAPTERS_PATH = "/src/adapters/city-search/";
 
 export default defineConfig({
   base: APP_BASE_PATH,
-  define: { [DEPLOY_INSTANT_DEFINE]: JSON.stringify(DEPLOY_INSTANT) },
+  define: {
+    [DEPLOY_INSTANT_DEFINE]: JSON.stringify(DEPLOY_INSTANT),
+    [APP_REVISION_DEFINE]: JSON.stringify(APP_REVISION),
+    [CITY_DATA_DATE_DEFINE]: JSON.stringify(CITY_DATA_DATE),
+  },
   build: {
     outDir: BUILD_OUT_DIR,
     target: BUILD_TARGETS,
@@ -43,6 +75,7 @@ export default defineConfig({
       treeshake: {
         moduleSideEffects: (moduleId) =>
           !moduleId.includes(SHARED_VIEWS_PATH) &&
+          !DECLARATION_ONLY_PATHS.some((path) => moduleId.includes(path)) &&
           !moduleId.includes(CITY_SEARCH_ADAPTERS_PATH),
       },
     },
@@ -51,6 +84,7 @@ export default defineConfig({
     react(),
     zoneDataPlugin(),
     zoneRulesPlugin({ deployInstant: DEPLOY_INSTANT }),
+    appRevisionPlugin({ appRevision: APP_REVISION }),
     legacyCoreJsPlugin(),
     mainChunkPreloadPlugin(),
     VitePWA({
@@ -77,7 +111,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,mjs,css,html,ico,png,svg,json,woff2}"],
-        globIgnores: [ZONE_RULES_PRECACHE_IGNORE_PATTERN],
+        globIgnores: [ZONE_RULES_PRECACHE_IGNORE_PATTERN, APP_REVISION_FILE],
       },
     }),
   ],

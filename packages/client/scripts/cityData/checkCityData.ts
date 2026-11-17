@@ -1,3 +1,4 @@
+// Implements FR12 of apply-data-updates-silently (D6): `source.dumpDate` is an ISO date (`isDumpDate`).
 /**
  * Pure validation of the committed city data against the bundled zone rules
  * release and the thresholds of the `city-data` spec; every error names its offender.
@@ -8,6 +9,7 @@ import type { ZoneCityRecord } from "../zoneData/extractZoneData.ts";
 import { checkCoordinates } from "./checkCityCoordinates.ts";
 import { checkRegions } from "./checkCityRegions.ts";
 import type { CityDataset } from "./cityDataTypes.ts";
+import { isDumpDate } from "./committedDumpDate.ts";
 import {
   COUNTRY_CODE_PATTERN,
   CYRILLIC_PATTERN,
@@ -43,7 +45,7 @@ function checkFormat(value: unknown): string | undefined {
     isObject(value.source) &&
     isNonEmptyString(value.source.name) &&
     isNonEmptyString(value.source.licence) &&
-    isNonEmptyString(value.source.dumpDate);
+    isDumpDate(value.source.dumpDate);
   const hasShape =
     hasSource &&
     Array.isArray(value.zones) &&

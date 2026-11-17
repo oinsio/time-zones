@@ -16,20 +16,21 @@ The watched zones SHALL be the zone of every location in the list and the device
 - **THEN** they are `Africa/Cairo` alone
 
 ### Requirement: Releases that change a watched zone
-A stored release changes a zone when the zone differs from the active release in the UTC offset, abbreviation or daylight-saving flag in force at the comparison instant, in any later clock change, or in the rule after the listed changes. Differences before that instant MUST NOT count. A link MUST be compared by the rules it leads to. A zone that only one release holds MUST count as changed. <!-- implements FR8, M3 of apply-data-updates-silently -->
+A stored release changes a zone when the zone differs from the active release in the UTC offset, designation or daylight-saving flag in force at the comparison instant, in any later clock change, or in the rule after the listed changes. Differences before that instant MUST NOT count. A link MUST be compared by the rules it leads to. A zone that only one release holds MUST count as changed. <!-- implements FR8, M3 of apply-data-updates-silently -->
 
 #### Scenario: Kinds of difference that count
 - **GIVEN** the list holds Lisbon and the comparison is made at `2026-11-15T12:00:00Z`
-- **WHEN** the stored release differs from the active one for `Europe/Lisbon` in `<difference>`
+- **WHEN** the stored release differs from the active one for `Europe/Lisbon` only in `<difference>`, a difference of the kind `<kind>`
 - **THEN** the stored release changes a watched zone
 
-| difference |
-|---|
-| the UTC offset in force at the comparison instant |
-| the abbreviation in force at the comparison instant |
-| the instant of the clock change of March 2027 |
-| the UTC offset that the clock change of March 2027 starts |
-| the rule for the years after the listed clock changes |
+| kind | difference |
+|---|---|
+| UTC offset in force | the UTC offset in force at the comparison instant |
+| designation in force | the designation in force at the comparison instant |
+| daylight-saving flag in force | the daylight-saving flag in force at the comparison instant, with the same UTC offset and designation |
+| later clock change | the instant of the clock change of March 2027 |
+| later clock change | the UTC offset that the clock change of March 2027 starts |
+| rule after the listed changes | the rule for the years after the listed clock changes |
 
 #### Scenario: Differences that do not count
 - **GIVEN** the list holds Lisbon, the device time zone is `Europe/Moscow` and the comparison is made at `2026-11-15T12:00:00Z`
@@ -66,9 +67,9 @@ The comparison SHALL be made when a newer release becomes the stored release or 
 - **THEN** the zone rules update notice names `2026g`
 
 #### Scenario: Work bound
-- **GIVEN** the list holds 50 locations in 12 zones and a newer release was just stored
+- **GIVEN** the list holds 50 locations in 12 zones, the device time zone is none of them, and a newer release was just stored
 - **WHEN** the stored release is compared and 10 minutes pass
-- **THEN** at most 13 zones were compared, each once
+- **THEN** 13 zones were compared, each once: the 12 zones of the list and the device time zone
 - **AND** no zone was compared on a minute tick
 
 ## MODIFIED Requirements

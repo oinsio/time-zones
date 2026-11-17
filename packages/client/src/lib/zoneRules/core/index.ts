@@ -35,6 +35,10 @@ export {
   ZONE_RULES_RELEASE_NAME_PATTERN,
 } from "./zoneRulesConstants.ts";
 export {
+  findChangedZones,
+  hasZoneRulesChangeFrom,
+} from "./zoneRulesDifference.ts";
+export {
   type ListedClockChange,
   type LocalTimeType,
   parseZoneRulesRelease,

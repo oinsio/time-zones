@@ -1,9 +1,11 @@
+// Verifies FR3, FR4 of apply-data-updates-silently: the update notice shows when the site names another app revision.
 // Verifies FR1, FR2, FR3, FR4, FR5, FR7 of add-settings-page-and-device-time-location (D5, D7, D10, D11).
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { STORAGE_KEYS } from "@/constants";
+import { createAnotherAppRevisionSource } from "@/test/anotherAppRevisionSource";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import { AppShell } from "./AppShell";
 
@@ -154,8 +156,9 @@ describe("AppShell settings page", () => {
   // FR3: notices on the settings page
   it("should hold the update notice in a polite status region of the settings page", async () => {
     mockServiceWorker(true);
-    render(<AppShell />);
+    render(<AppShell appRevisionSource={createAnotherAppRevisionSource()} />);
     await openSettings();
+    await screen.findByRole("button", { name: "Reload" });
     expect(screen.getByRole("status")).toHaveTextContent(
       "A new version is available.",
     );

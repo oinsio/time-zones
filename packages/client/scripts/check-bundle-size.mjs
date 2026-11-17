@@ -16,6 +16,8 @@
  * exactly one preload link, never by a modulepreload (NFR-P1, NFR-P2 of add-zone-rules-from-iana).
  * The served zone rules files (version file and release file) must exist in the
  * build and must not be precached. Implements FR2, NFR-P1 of add-remote-zone-rules-updates.
+ * The app revision file must be in the build, name the revision fixed into the code, stay
+ * within APP_REVISION_FILE_MAX_BYTES and not be precached (FR2, NFR-P1 of apply-data-updates-silently).
  * The sun support chunk, which the first render waits for, must exist within its own
  * gzipped budget, SUN_SUPPORT_CHUNK_BUDGET_KB (NFR-P2, M3 of bind-day-periods-to-sun).
  */
@@ -23,6 +25,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 import {
+  APP_REVISION_FILE,
   BUILD_OUT_DIR,
   CITY_SEARCH_DATA_BUDGET_KB,
   SUN_SUPPORT_CHUNK_BUDGET_KB,
@@ -32,6 +35,7 @@ import {
   ZONE_RULES_RELEASE_DIRECTORY,
   ZONE_RULES_VERSION_PATH,
 } from "../src/constants/zoneRules.ts";
+import { findAppRevisionFileProblems } from "./appRevision/findAppRevisionFileProblems.ts";
 import {
   collectInitialScriptUrls,
   resolveBuildFilePath,
@@ -55,6 +59,7 @@ const EXPECTED_ZONE_RULES_PRELOAD_COUNT = 1;
 const SUN_SUPPORT_CHUNK_PREFIX = "sunSupport-";
 const SUN_SUPPORT_CHUNK_EXTENSION = ".js";
 const SERVICE_WORKER_FILE = "sw.js";
+const SCRIPT_EXTENSION = ".js";
 
 const buildDirectory = join(import.meta.dirname, "..", BUILD_OUT_DIR);
 
@@ -214,6 +219,26 @@ if (precachedZoneRulesFiles.length > 0) {
   console.error(
     `${SERVICE_WORKER_FILE} precaches ${precachedZoneRulesFiles.join(", ")} — the served zone rules files must be fetched fresh`,
   );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const appRevisionFilePath = join(buildDirectory, APP_REVISION_FILE);
+const appRevisionFileProblems = findAppRevisionFileProblems({
+  revisionFileText: existsSync(appRevisionFilePath)
+    ? readFileSync(appRevisionFilePath, "utf8")
+    : undefined,
+  serviceWorkerText: readFileSync(
+    join(buildDirectory, SERVICE_WORKER_FILE),
+    "utf8",
+  ),
+  scriptTexts: readdirSync(join(buildDirectory, ASSETS_DIRECTORY))
+    .filter((fileName) => fileName.endsWith(SCRIPT_EXTENSION))
+    .map((fileName) =>
+      readFileSync(join(buildDirectory, ASSETS_DIRECTORY, fileName), "utf8"),
+    ),
+});
+if (appRevisionFileProblems.length > 0) {
+  console.error(appRevisionFileProblems.join("; "));
   process.exit(EXIT_CODE_CHECK_FAILED);
 }
 

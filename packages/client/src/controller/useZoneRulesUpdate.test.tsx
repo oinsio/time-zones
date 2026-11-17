@@ -1,4 +1,5 @@
 // Verifies FR3, FR7, FR9, NFR-P1 of add-remote-zone-rules-updates: the check finds a newer release.
+// Verifies FR8, FR9 of apply-data-updates-silently: the default watched zone is one the stored release changes.
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -12,6 +13,7 @@ import { buildReleaseDocument } from "@/test/zoneRules/buildReleaseDocument";
 import {
   CHECK_START,
   createZoneRulesUpdateWorld,
+  DEFAULT_WATCHED_ZONE_IDS,
   FIVE_MINUTES_LATER,
   publishing,
   releaseNamed,
@@ -144,6 +146,7 @@ describe("useZoneRulesUpdate default online state", () => {
       useZoneRulesUpdate({
         clock: createSwitchableClock(CHECK_START),
         versionSource,
+        watchedZoneIds: DEFAULT_WATCHED_ZONE_IDS,
         storedReleases: createInMemoryStoredReleaseRepository(),
         getActiveRelease: () => releaseNamed("2026f"),
       }),

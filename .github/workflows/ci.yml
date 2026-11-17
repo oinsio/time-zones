@@ -24,7 +24,10 @@ jobs:
       group: ci-${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
+      # implements FR1 of apply-data-updates-silently: the build reads the history for the app revision
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       # pnpm version comes from `packageManager` in the root package.json
       - uses: pnpm/action-setup@v4
@@ -37,9 +40,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       # implements FR6 of refresh-data-through-scheduled-pull-requests
+      # implements FR1 of apply-data-updates-silently: no --depth, or HEAD would become a shallow boundary again
       - name: Check data-only paths
         run: |
-          git fetch --no-tags --depth=1 origin main
+          git fetch --no-tags origin main
           pnpm --filter @time-zones/client data-refresh:check-paths auto origin/main HEAD
 
       - run: pnpm lint

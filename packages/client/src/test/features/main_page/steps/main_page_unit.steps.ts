@@ -1,3 +1,4 @@
+// Verifies FR3 of apply-data-updates-silently: the update notice follows the app revision.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the page must survive between steps.
@@ -6,6 +7,7 @@ import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
+import { createAnotherAppRevisionSource } from "@/test/anotherAppRevisionSource";
 import { failUpdateCheck, fakeServiceWorker } from "@/test/fakeServiceWorker";
 import { registryOverride } from "@/test/registryOverride";
 import { storeDocument } from "../../locations/steps/locationsPersistenceWorld";
@@ -27,7 +29,11 @@ const feature = await loadFeature("../main_page_unit.feature");
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const openApp = async () => {
-    render(createElement(AppShell));
+    render(
+      createElement(AppShell, {
+        appRevisionSource: createAnotherAppRevisionSource(),
+      }),
+    );
     if (!fakeServiceWorker.shouldUpdateCheckFail) return;
     await act(async () => failUpdateCheck());
   };
@@ -81,7 +87,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the user opens the app", () => openApp());
     Then(
       "the update notice is announced politely in the notices region",
-      () => {
+      async () => {
+        await screen.findByText(i18n.t("app.updateAvailable"));
         expect(getNoticeRegion()).toHaveAttribute("aria-live", "polite");
         expect(getNoticeRegion()).toHaveTextContent(
           i18n.t("app.updateAvailable"),

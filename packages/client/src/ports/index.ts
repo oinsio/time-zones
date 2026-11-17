@@ -1,4 +1,9 @@
 export {
+  AppRevisionFailure,
+  type AppRevisionSource,
+  isAppRevisionFailure,
+} from "./appRevisionSource";
+export {
   type CityRecord,
   type CitySearch,
   type CitySearchResult,

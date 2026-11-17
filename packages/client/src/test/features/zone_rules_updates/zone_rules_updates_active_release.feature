@@ -8,6 +8,13 @@ Feature: Active release at start
     Then the active release is "2026g"
     And the offset of "Asia/Almaty" is UTC+4
 
+  @apply-data-updates-silently @FR8
+  Scenario: A silent release is active at the next start
+    Given the bundled release is "2026f" and "2026g" was stored without a notice
+    When the app starts again
+    Then the active release is "2026g"
+    And the settings page names "2026g"
+
   @add-remote-zone-rules-updates @FR6
   Scenario Outline: Stored release is older or equal
     Given the bundled release is "2026f" and the stored release is "<stored>"

@@ -22,5 +22,5 @@ Layers, the data flow between them, and the test stand-ins. Decisions: ADR-0002 
 - **Data refresh bot** — the GitHub App that opens, updates and merges data refresh pull requests; its pull requests start their checks without approval. *Never:* service account.
 - **City data refresh** — the monthly or manual data refresh of the city data from GeoNames. *Code:* `.github/workflows/city-data-refresh.yml`.
 - **Data refresh pull request** — the one pull request of a data source that carries its newest refresh, opened by the data refresh bot and merged automatically when every check and the refresh guard pass. *Code:* `buildRefreshPullRequest`.
-- **Data-only commit** — a commit on `main` that changes only committed data and carries the trailer `Data-Only: true`. *Code:* `DATA_ONLY_TRAILER`, `findPathsOutsideData`.
+- **Data-only commit** — a commit on `main` that changes only committed data and carries the trailer `Data-Only: true`; the build reads its trailer to keep the app revision. *Code:* `DATA_ONLY_TRAILER`, `findPathsOutsideData`, `resolveAppRevision`.
 - **Refresh guard** — the comparison of the refreshed data with the committed data that decides whether the pull request may merge by itself. *Code:* `decideCityDataRefresh`, `decideZoneRulesRefresh`.

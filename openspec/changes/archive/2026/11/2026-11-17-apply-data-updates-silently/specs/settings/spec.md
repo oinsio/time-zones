@@ -3,7 +3,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: City data attribution
-The settings page SHALL show the city data attribution as its last line, below every settings group, on every width, in the interface language: "City data: GeoNames (`<date>`), CC BY 4.0" («Данные о городах: GeoNames (`<date>`), CC BY 4.0»); `GeoNames` and `CC BY 4.0` stay untranslated. The date is the date of the city data in use: the dump date recorded in the committed city data, fixed into the build, the same online, offline and after a reload, changing only with a new build. It MUST be written with the day, the month name and the year in the interface language, as a calendar date that does not depend on the device time zone, and MUST follow a change of the interface language at once, without a reload. A build whose city data records no valid date MUST fail. The whole line MUST be one link to `https://www.geonames.org/` that opens in a new browsing context with no reference to the app's window. The app MUST NOT request that address itself. The text MUST exist in every locale file. The line MUST build at most one date formatter per interface language and none on a minute tick. Inputs: the date of the city data, the interface language. Output: the attribution line. Errors: none at run time. <!-- implements FR13, UX4 of add-geonames-city-source; FR12, FR13, NFR-P3, UX4 of apply-data-updates-silently -->
+The settings page SHALL show the city data attribution as its last line, below every settings group, on every width, in the interface language: "City data: GeoNames (`<date>`), CC BY 4.0" («Данные о городах: GeoNames (`<date>`), CC BY 4.0»); `GeoNames` and `CC BY 4.0` stay untranslated. The date is the dump date of the city data in use: the dump date recorded in the committed city data, fixed into the build, the same online, offline and after a reload, changing only with a new build. It MUST be written with the day, the month name and the year in the interface language, as a calendar date that does not depend on the device time zone, and MUST follow a change of the interface language at once, without a reload. A build whose city data records no valid date MUST fail. The whole line MUST be one link to `https://www.geonames.org/` that opens in a new browsing context with no reference to the app's window. The app MUST NOT request that address itself. The text MUST exist in every locale file. The line MUST build at most one date formatter per interface language and none on a minute tick. Inputs: the dump date of the city data, the interface language. Output: the attribution line. Errors: none at run time. <!-- implements FR13, UX4 of add-geonames-city-source; FR12, FR13, NFR-P3, UX4 of apply-data-updates-silently -->
 
 #### Scenario: The attribution in both languages
 - **GIVEN** the city data in use records the dump date `2026-11-14`
@@ -34,7 +34,7 @@ The settings page SHALL show the city data attribution as its last line, below e
 - **THEN** the attribution reads «Данные о городах: GeoNames (14 ноября 2026 г.), CC BY 4.0» without a reload
 
 #### Scenario: The date follows the build
-- **GIVEN** a build with the running build's app revision and the dump date `2026-12-14` was applied as a silent update
+- **GIVEN** the running build fixes the dump date `2026-12-14`, whatever date the device stores or the network serves
 - **WHEN** the user opens the settings in English
 - **THEN** the attribution names December 14, 2026
 

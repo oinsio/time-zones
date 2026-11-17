@@ -1,3 +1,4 @@
+// Verifies FR3, FR6 of apply-data-updates-silently: a waiting build with another app revision raises the notice.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the app must survive between steps.
@@ -14,6 +15,7 @@ import { expect, vi } from "vitest";
 import { AppShell } from "@/app";
 import { MILLISECONDS_PER_MINUTE } from "@/constants";
 import { Temporal } from "@/lib/temporal";
+import { createAnotherAppRevisionSource } from "@/test/anotherAppRevisionSource";
 import { fakeServiceWorker } from "@/test/fakeServiceWorker";
 import { resetPageVisibility, setPageVisibility } from "@/test/pageVisibility";
 import {
@@ -37,7 +39,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let update: ReturnType<typeof vi.fn>;
 
   const openAppWithRegistration = async () => {
-    render(createElement(AppShell, { clock }));
+    render(
+      createElement(AppShell, {
+        clock,
+        appRevisionSource: createAnotherAppRevisionSource(),
+      }),
+    );
     await waitFor(() =>
       expect(screen.getByRole("main").querySelector("[aria-busy]")).toBeNull(),
     );
@@ -172,7 +179,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         await openAppWithRegistration();
       },
     );
-    Then("the update notice stays alone in the notices region", () => {
+    Then("the update notice stays alone in the notices region", async () => {
+      await screen.findByText(i18n.t("app.updateAvailable"));
       expect(getNoticesRegion()).toHaveTextContent(
         i18n.t("app.updateAvailable"),
       );

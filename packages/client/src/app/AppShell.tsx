@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
+  fetchAppRevisionSource,
   fetchZoneRulesVersionSource,
   localStorageStoredReleaseRepository,
 } from "@/adapters";
@@ -18,10 +19,12 @@ import {
   useStorageAvailability,
   useThemePreference,
   useViewMode,
+  useWatchedZoneIds,
   useZoneRulesUpdate,
 } from "@/controller";
 import { type Clock, systemClock } from "@/lib/temporal";
 import type {
+  AppRevisionSource,
   StoredReleaseRepository,
   TextSharing,
   ZoneRulesVersionSource,
@@ -29,14 +32,10 @@ import type {
 import { resolveActiveView, viewRegistry } from "@/views";
 import { DateBar, LocationSearch, MeetingBar } from "@/views/shared";
 import { AppPage } from "./appPage";
+import { LazyAppShellNotices } from "./LazyAppShellNotices";
 import { MainPage } from "./MainPage";
-import { MeetingShareNotice } from "./MeetingShareNotice";
-import { OfflineReadyNotice } from "./OfflineReadyNotice";
 import { SettingsButton } from "./SettingsButton";
-import { StorageWarning } from "./StorageWarning";
-import { UpdateNotice } from "./UpdateNotice";
 import { ViewSkeleton } from "./ViewSkeleton";
-import { ZoneRulesUpdateNoticeSlot } from "./ZoneRulesUpdateNoticeSlot";
 
 const reloadWindow = () => window.location.reload();
 
@@ -60,10 +59,12 @@ const SettingsPage = lazy(async () => ({
  * and Share, and the share notice; `textSharing` is the port Share meeting uses.
  * Implements FR7 of add-remote-zone-rules-updates (D5): the zone rules update notice;
  * `zoneRulesVersionSource`, `storedReleases` and `reloadPage` are its ports and its Reload.
+ * Implements FR3, FR5 of apply-data-updates-silently (D3): `appRevisionSource` is the port of the update notice; the notices region is `AppShellNotices`.
  */
 export type AppShellDependencies = {
   clock?: Clock;
   textSharing?: TextSharing;
+  appRevisionSource?: AppRevisionSource;
   zoneRulesVersionSource?: ZoneRulesVersionSource;
   storedReleases?: StoredReleaseRepository;
   reloadPage?: () => void;
@@ -86,6 +87,7 @@ export function AppShell({
 function AppShellContent({
   clock,
   textSharing,
+  appRevisionSource = fetchAppRevisionSource,
   zoneRulesVersionSource = fetchZoneRulesVersionSource,
   storedReleases = localStorageStoredReleaseRepository,
   reloadPage = reloadWindow,
@@ -94,11 +96,11 @@ function AppShellContent({
   useThemePreference();
   useInterfaceLanguage();
   const { hasSaveFailed, loadStatus } = useLocations();
-  const { isOfflineReady, isUpdateAvailable, applyUpdate, dismiss } =
-    usePwaUpdateStatus(clock);
+  const updateStatus = usePwaUpdateStatus(clock, appRevisionSource);
   const zoneRulesUpdate = useZoneRulesUpdate({
     clock,
     versionSource: zoneRulesVersionSource,
+    watchedZoneIds: useWatchedZoneIds(),
     storedReleases,
   });
   const isStorageAvailable = useStorageAvailability();
@@ -134,25 +136,16 @@ function AppShellContent({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [page]);
 
+  const hasStorageWarning = !isStorageAvailable || hasSaveFailed;
   const notices = (
-    <>
-      {isUpdateAvailable ? (
-        <UpdateNotice onReload={applyUpdate} onDismiss={dismiss} />
-      ) : (
-        isOfflineReady && <OfflineReadyNotice onDismiss={dismiss} />
-      )}
-      <ZoneRulesUpdateNoticeSlot
-        readyRelease={zoneRulesUpdate.readyRelease}
-        isUpdateAvailable={isUpdateAvailable}
-        applyUpdate={applyUpdate}
-        reloadPage={reloadPage}
-        onDismiss={zoneRulesUpdate.dismiss}
-      />
-      {(!isStorageAvailable || hasSaveFailed) && <StorageWarning />}
-      {notice !== undefined && (
-        <MeetingShareNotice kind={notice} onDismiss={dismissNotice} />
-      )}
-    </>
+    <LazyAppShellNotices
+      updateStatus={updateStatus}
+      zoneRulesUpdate={zoneRulesUpdate}
+      reloadPage={reloadPage}
+      hasStorageWarning={hasStorageWarning}
+      shareNotice={notice}
+      onDismissShareNotice={dismissNotice}
+    />
   );
 
   if (page === AppPage.SETTINGS) {

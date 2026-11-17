@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Clock } from "@/lib/temporal";
 import {
+  findChangedZones,
   getInstalledRelease,
   isNewerRelease,
+  MILLISECONDS_PER_SECOND,
   parseZoneRulesRelease,
   type ZoneRulesRelease,
   ZoneRulesReleaseError,
@@ -16,9 +18,13 @@ import {
 } from "@/ports";
 import { useRecheckOnReturn } from "./useRecheckOnReturn";
 
+const WATCHED_ZONES_KEY_SEPARATOR = "\n";
+
 export type ZoneRulesUpdateOptions = {
   clock: Clock;
   versionSource: ZoneRulesVersionSource;
+  /** The zones the user can see; a stored release raises the notice only when it changes one. */
+  watchedZoneIds: readonly string[];
   storedReleases: StoredReleaseRepository;
   isOnline?: () => boolean;
   getActiveRelease?: () => ZoneRulesRelease | undefined;
@@ -37,15 +43,20 @@ export type ZoneRulesUpdate = {
  * validates and stores it, then reports it as ready. Every failure is silent.
  * A release whose save failed is not downloaded again for the page's life.
  * Implements FR3, FR4, FR7, FR9, NFR-P1 of add-remote-zone-rules-updates (design D4).
+ * Implements FR8, FR9, FR10, NFR-P2, UX3 of apply-data-updates-silently (D5): the stored
+ * release is reported only when it changes a watched zone, compared again only
+ * when the stored release or the watched zones change.
  */
 export function useZoneRulesUpdate({
   clock,
   versionSource,
+  watchedZoneIds,
   storedReleases,
   isOnline = () => navigator.onLine,
   getActiveRelease = getInstalledRelease,
 }: ZoneRulesUpdateOptions): ZoneRulesUpdate {
   const [storedRelease, setStoredRelease] = useState<string>();
+  const storedParsedRelease = useRef<ZoneRulesRelease>();
   const [dismissedRelease, setDismissedRelease] = useState<string>();
   const unstoredRelease = useRef<string>();
 
@@ -61,6 +72,7 @@ export function useZoneRulesUpdate({
       storedLoadResult.status === StoredReleaseLoadStatus.LOADED &&
       !isNewerRelease(publishedRelease, storedLoadResult.release.release)
     ) {
+      storedParsedRelease.current = storedLoadResult.release;
       setStoredRelease(storedLoadResult.release.release);
       return;
     }
@@ -73,6 +85,7 @@ export function useZoneRulesUpdate({
       unstoredRelease.current = publishedRelease;
       return;
     }
+    storedParsedRelease.current = downloaded;
     setStoredRelease(publishedRelease);
   };
 
@@ -87,9 +100,34 @@ export function useZoneRulesUpdate({
     isEnabled: true,
   });
 
+  const watchedZonesKey = [...watchedZoneIds]
+    .sort()
+    .join(WATCHED_ZONES_KEY_SEPARATOR);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: compared only when the stored release or the watched zones change, never on a tick or a render
+  const isStoredReleaseChangingWatchedZone = useMemo(() => {
+    const activeRelease = getActiveRelease();
+    const parsedRelease = storedParsedRelease.current;
+    if (storedRelease === undefined || !activeRelease || !parsedRelease) {
+      return false;
+    }
+    const epochSeconds = Math.floor(
+      clock.instant().epochMilliseconds / MILLISECONDS_PER_SECOND,
+    );
+    return (
+      findChangedZones(
+        activeRelease,
+        parsedRelease,
+        watchedZoneIds,
+        epochSeconds,
+      ).length > 0
+    );
+  }, [storedRelease, watchedZonesKey]);
+
   return {
     readyRelease:
-      storedRelease === dismissedRelease ? undefined : storedRelease,
+      storedRelease === dismissedRelease || !isStoredReleaseChangingWatchedZone
+        ? undefined
+        : storedRelease,
     dismiss: () => setDismissedRelease(storedRelease),
   };
 }

@@ -21,6 +21,10 @@ Time Zones is a client-only, offline-first PWA. The architecture separates a vie
 | [ADR-0013](../adr/0013-meeting-range-at-any-minute.md) | Meeting range at any minute: typed ends on any whole minute, handles keep the track step |
 | [ADR-0014](../adr/0014-zone-rules-from-iana.md) | Zone rules compiled from IANA, POSIX future rules, `Intl.DateTimeFormat` wrapper, daily remote updates |
 
+## Updates
+
+The app revision names the app of a build (the newest commit without the data-only trailer) and is published as `app-revision.json`. A waiting build whose app revision equals the running one is a silent update: no notice, the browser activates it at the next start. Zone rules releases raise their notice only for watched zones. See [app shell](../glossary/app-shell.md) and [zone rules](../glossary/zone-rules.md).
+
 ## Layers
 
 ```mermaid
@@ -74,6 +78,7 @@ assets/
   app-icon-source.png      single source of every PWA icon (exists)
 app.config.ts              base path, app name, colors shared by Vite, manifest, E2E (exists)
 scripts/zoneRules/         compiler and zdump check of the zone rules release, Vite plugin of its asset and served files, publication scripts (latest release, precache exclusion)
+scripts/appRevision/         app revision of the build (app-revision.json, its served file and precache check)
 zone-rules/                release.json: the committed zone rules of one IANA release, and its README (exists)
 src/
   main.tsx                 entry point: mounts AppShell inside AppErrorBoundary (exists)

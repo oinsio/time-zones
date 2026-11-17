@@ -18,10 +18,10 @@ When a waiting build differs from the running build in the app itself, the shell
 - **AND** the page keeps working without reloading
 
 #### Scenario: A silent update is in use at the next start
-- **GIVEN** a build with the running build's app revision and newer city data is waiting
+- **GIVEN** a build with the running build's app revision and a later deploy time is waiting
 - **WHEN** every window of the app is closed and the app is started again
 - **THEN** the app runs the waiting build
-- **AND** the settings page names the newer date of the city data
+- **AND** the settings page names the deploy time of the waiting build
 - **AND** no notice was shown
 
 #### Scenario: Reloading does not switch to a silent update
