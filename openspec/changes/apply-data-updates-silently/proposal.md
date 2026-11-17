@@ -96,7 +96,7 @@ None.
 
 #### Responsive
 
-- NFR-R1: From 320 px to 2560 px the attribution SHALL be shown in full in English and Russian, wrapping between words where needed, and the settings page SHALL NOT scroll horizontally. The approved settings screenshots are re-approved once.
+- NFR-R1: From 320 px to 2560 px the attribution SHALL be shown in full in English and Russian, wrapping between words where needed, and the settings page SHALL NOT scroll horizontally. The approved screenshots stay unchanged; no screenshot baseline shows the dated attribution, since its date changes with every city data refresh.
 
 ## UX Acceptance Criteria
 
