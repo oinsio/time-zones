@@ -1,0 +1,13 @@
+{"seq":0,"tool":"Bash","start":"2026-11-17T00:34:56.975451Z","durationMillis":41}
+{"seq":1,"tool":"Bash","start":"2026-11-17T00:34:59.269590Z","durationMillis":18}
+{"seq":2,"tool":"Bash","start":"2026-11-17T00:34:59.778031Z","durationMillis":22}
+{"seq":3,"tool":"Bash","start":"2026-11-17T00:35:06.862423Z","durationMillis":31}
+{"seq":4,"tool":"Bash","start":"2026-11-17T00:35:12.901859Z","durationMillis":17}
+{"seq":5,"tool":"Bash","start":"2026-11-17T00:35:18.527010Z","durationMillis":29}
+{"seq":6,"tool":"Bash","start":"2026-11-17T00:35:22.268633Z","durationMillis":18}
+{"seq":7,"tool":"Bash","start":"2026-11-17T00:35:24.587602Z","durationMillis":516444}
+{"seq":8,"tool":"Bash","start":"2026-11-17T00:44:10.855873Z","durationMillis":133}
+{"seq":9,"tool":"Bash","start":"2026-11-17T00:44:18.077519Z","durationMillis":16}
+{"seq":10,"tool":"Write","start":"2026-11-17T00:44:49.926131Z","durationMillis":111}
+{"seq":11,"tool":"Bash","start":"2026-11-17T00:44:53.519731Z","durationMillis":19}
+{"seq":12,"tool":"Bash","start":"2026-11-17T00:45:00.252589Z","durationMillis":44}
