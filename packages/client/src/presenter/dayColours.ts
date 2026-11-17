@@ -15,9 +15,10 @@ import { DayColouring, type WorkingHours } from "@/preferences";
  * colours; views only map a colour to design tokens.
  * Implements FR2, FR9–FR13, NFR-P1 of add-day-colouring-setting (D4).
  * Implements FR5, FR8, FR9 of bind-day-periods-to-sun (D6, D7).
+ * Implements FR1 of colour-locations-without-day-periods-in-accent (D1).
  */
 
-/** The colour of a track position or a cell. The four period members have the string values of `DayPeriod`; `NO_DAY_PERIOD` is the neutral colour of a location without day periods. */
+/** The colour of a track position or a cell. The four period members have the string values of `DayPeriod`; `NO_DAY_PERIOD` is the accent colour of a location without day periods. */
 export enum DayColour {
   NIGHT = "NIGHT",
   MORNING = "MORNING",

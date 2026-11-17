@@ -1,3 +1,4 @@
+// Verifies NFR-A1 of colour-locations-without-day-periods-in-accent.
 // Verifies FR4, NFR-A3 of add-settings-page-and-device-time-location (D7).
 // Verifies NFR-A3 of keep-now-button-visible-when-live.
 // Verifies UX5, NFR-A1 of add-locations-via-search (D10).
@@ -116,6 +117,7 @@ const DAY_COLOUR_TOKENS = [
   ["plain", "accent", "accent-foreground"],
   ["working time", "accent", "accent-foreground"],
   ["non-working time", "day-non-working", "foreground"],
+  ["no day period", "accent", "accent-foreground"],
 ] as const;
 const DAY_PERIOD_TOKENS = [
   "day-night",

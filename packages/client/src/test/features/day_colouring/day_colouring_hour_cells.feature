@@ -39,8 +39,8 @@ Feature: Day colouring of the hour cells
     When the hour cells of Cairo are presented
     Then exactly the columns 12-19 are working
 
-  @bind-day-periods-to-sun @FR8 @UX4
+  @bind-day-periods-to-sun @FR8 @UX4 @colour-locations-without-day-periods-in-accent @FR2
   Scenario: UTC hour cells in the Time of day colouring
     Given the day colouring is Time of day, the reference zone is "Asia/Almaty" and the reference day is 2026-03-08
     When the hour cells of UTC are presented
-    Then every cell of UTC is the non-working grey
+    Then every cell of UTC has no day period

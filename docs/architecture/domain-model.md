@@ -118,7 +118,7 @@ Selectors take the state and the current instant from the `Clock` and return vie
 
 ### Day periods
 
-A day period is decided by the sun's elevation at the location's coordinates (`getSunElevation`, NOAA equations on the device): night below −6°, day from +6°, between them morning from solar midnight to solar noon and evening after it. Polar cases need no branch. A location's coordinates are its own, else the zone coordinates of its zone (`getSunCoordinates`); a location without coordinates (UTC) has no day periods and is coloured grey.
+A day period is decided by the sun's elevation at the location's coordinates (`getSunElevation`, NOAA equations on the device): night below −6°, day from +6°, between them morning from solar midnight to solar noon and evening after it. Polar cases need no branch. A location's coordinates are its own, else the zone coordinates of its zone (`getSunCoordinates`); a location without coordinates (UTC) has no day periods and is coloured in the accent colour of the active theme.
 
 Views use four colors: night, morning, day, evening.
 

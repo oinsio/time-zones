@@ -1,6 +1,7 @@
+// Verifies FR1, FR2, FR3 of colour-locations-without-day-periods-in-accent.
 // Verifies FR9, FR11, FR12, NFR-A3, NFR-R2 of add-day-colouring-setting.
 // Verifies FR8, UX4, NFR-A1 of bind-day-periods-to-sun.
-import { expect } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import {
   cellOf,
@@ -30,6 +31,24 @@ const colourOf = (theme: Theme, colourName: string) => {
   return colourName === NON_WORKING_GREY
     ? colours.dayNonWorking
     : colours.accent;
+};
+
+const visibleCellsOf = async (page: Page, city: string) => {
+  const cells = cellsOf(page, city);
+  await expect(cells.first()).toBeVisible();
+  const cellCount = await cells.count();
+  expect(cellCount).toBeGreaterThan(0);
+  return Array.from({ length: cellCount }, (_, column) => cells.nth(column));
+};
+
+const expectDigitContrast = async (cell: Locator) => {
+  const [background, digits] = await cell.evaluate((element) => [
+    getComputedStyle(element).backgroundColor,
+    getComputedStyle(element).color,
+  ]);
+  expect(getContrastRatio(background, digits)).toBeGreaterThanOrEqual(
+    MIN_DIGIT_CONTRAST,
+  );
 };
 
 // Implements the default Cards view: no stored view mode.
@@ -73,27 +92,32 @@ Then(
   },
 );
 
+// Verifies FR2 of colour-locations-without-day-periods-in-accent
 Then(
-  /^every cell of "([^"]+)" is the (light|dark) non-working grey with digits of a contrast of at least 4\.5:1$/,
-  async ({ locationsWorld }, city: string, theme: Theme) => {
-    const cells = cellsOf(locationsWorld.page, city);
-    await expect(cells.first()).toBeVisible();
-    const cellCount = await cells.count();
-    expect(cellCount).toBeGreaterThan(0);
-    for (let column = 0; column < cellCount; column += 1) {
-      const cell = cells.nth(column);
+  /^every cell of "([^"]+)" is the (light|dark) (non-working grey|accent colour) with digits of a contrast of at least 4\.5:1$/,
+  async (
+    { locationsWorld },
+    city: string,
+    theme: Theme,
+    colourName: string,
+  ) => {
+    const cells = await visibleCellsOf(locationsWorld.page, city);
+    for (const cell of cells) {
       await expect(cell).toHaveCSS(
         "background-color",
-        readThemeColours(theme).dayNonWorking,
+        colourOf(theme, colourName),
       );
-      const [background, digits] = await cell.evaluate((element) => [
-        getComputedStyle(element).backgroundColor,
-        getComputedStyle(element).color,
-      ]);
-      expect(getContrastRatio(background, digits)).toBeGreaterThanOrEqual(
-        MIN_DIGIT_CONTRAST,
-      );
+      await expectDigitContrast(cell);
     }
+  },
+);
+
+// Verifies FR3 of colour-locations-without-day-periods-in-accent
+Then(
+  /^the digits of every cell of "([^"]+)" have a contrast of at least 4\.5:1$/,
+  async ({ locationsWorld }, city: string) => {
+    const cells = await visibleCellsOf(locationsWorld.page, city);
+    for (const cell of cells) await expectDigitContrast(cell);
   },
 );
 

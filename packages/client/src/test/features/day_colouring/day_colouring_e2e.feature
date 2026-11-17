@@ -33,15 +33,47 @@ Feature: Day colouring in a real browser
       | light | Working hours | non-working grey |
       | dark  | Working hours | non-working grey |
 
-  @bind-day-periods-to-sun @FR8 @UX4 @NFR-A1
+  @bind-day-periods-to-sun @FR8 @UX4 @NFR-A1 @colour-locations-without-day-periods-in-accent @FR3
   Scenario Outline: Readable digits on the grey in the <theme> theme
+    Given the view mode is Grid
+    And the day colouring is "Working hours"
+    And the current time is "2026-03-09T06:00:00Z"
+    And the stored locations are "UTC"
+    And the locations screen uses the <theme> theme
+    When the user opens the locations app
+    Then the cell of "UTC" in column 15 has the <theme> accent colour and the cell in column 13 the <theme> non-working grey
+    And the digits of every cell of "UTC" have a contrast of at least 4.5:1
+    And the locations screen has no accessibility violations
+
+    Examples:
+      | theme |
+      | light |
+      | dark  |
+
+  @colour-locations-without-day-periods-in-accent @FR1 @UX1
+  Scenario Outline: UTC track in the accent in a real browser in the <theme> theme
+    Given the view mode is Cards
+    And the day colouring is "Time of day"
+    And the current time is "2026-03-14T09:00:00Z"
+    And the stored locations are "UTC"
+    And the locations screen uses the <theme> theme
+    When the user opens the locations app
+    Then the track of "UTC" is a gradient with the <theme> accent colour at its left end and at its right end
+
+    Examples:
+      | theme |
+      | light |
+      | dark  |
+
+  @colour-locations-without-day-periods-in-accent @FR2 @NFR-A1 @UX1
+  Scenario Outline: Readable digits on the accent in the <theme> theme
     Given the view mode is Grid
     And the day colouring is "Time of day"
     And the current time is "2026-03-09T06:00:00Z"
     And the stored locations are "UTC"
     And the locations screen uses the <theme> theme
     When the user opens the locations app
-    Then every cell of "UTC" is the <theme> non-working grey with digits of a contrast of at least 4.5:1
+    Then every cell of "UTC" is the <theme> accent colour with digits of a contrast of at least 4.5:1
     And the locations screen has no accessibility violations
 
     Examples:

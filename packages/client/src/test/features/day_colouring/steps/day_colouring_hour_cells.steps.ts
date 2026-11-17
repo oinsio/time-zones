@@ -1,3 +1,4 @@
+// Verifies FR2 of colour-locations-without-day-periods-in-accent.
 // Verifies FR8, FR9, FR11 of add-day-colouring-setting.
 // Verifies FR8, UX4 of bind-day-periods-to-sun.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
@@ -176,7 +177,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         },
       );
       When("the hour cells of UTC are presented", () => undefined);
-      Then("every cell of UTC is the non-working grey", () => {
+      Then("every cell of UTC has no day period", () => {
         const cells = stripOf("UTC").cells;
         expect(cells.length).toBeGreaterThan(0);
         expect(

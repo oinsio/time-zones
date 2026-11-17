@@ -5,7 +5,8 @@ import { DayColour, type DayColourStop } from "@/presenter";
  * CSS custom properties of the design tokens of each day colour
  * (`styles/tokens.css`): the plain colour and working time are the accent.
  * Implements FR9, FR10 of add-day-colouring-setting (D4).
- * Implements FR8, FR9 of bind-day-periods-to-sun (D6, D7): `NO_DAY_PERIOD` is the non-working grey.
+ * Implements FR8, FR9 of bind-day-periods-to-sun (D6, D7): `NO_DAY_PERIOD` is the accent.
+ * Implements FR1, FR2 of colour-locations-without-day-periods-in-accent (D1).
  */
 export const DAY_COLOUR_VARIABLES: Record<DayColour, string> = {
   [DayColour.NIGHT]: "--color-day-night",
@@ -15,7 +16,7 @@ export const DAY_COLOUR_VARIABLES: Record<DayColour, string> = {
   [DayColour.PLAIN]: "--color-accent",
   [DayColour.WORKING_TIME]: "--color-accent",
   [DayColour.NON_WORKING_TIME]: "--color-day-non-working",
-  [DayColour.NO_DAY_PERIOD]: "--color-day-non-working",
+  [DayColour.NO_DAY_PERIOD]: "--color-accent",
 };
 
 /**
@@ -31,7 +32,7 @@ export const DAY_COLOUR_FOREGROUND_CLASS_NAMES: Record<DayColour, string> = {
   [DayColour.PLAIN]: "text-accent-foreground",
   [DayColour.WORKING_TIME]: "text-accent-foreground",
   [DayColour.NON_WORKING_TIME]: "text-foreground",
-  [DayColour.NO_DAY_PERIOD]: "text-foreground",
+  [DayColour.NO_DAY_PERIOD]: "text-accent-foreground",
 };
 
 const NO_GRADIENT = "none";
