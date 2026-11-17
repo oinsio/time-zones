@@ -87,7 +87,8 @@ The change sets `skip_specs: true` (`.openspec.yaml`), which `.gnomish/stages/sp
 - Impact: Every later factory change that adds a capability opens a PR whose CI fails on FR1. No stage of the pipeline is allowed to fix that, so a human must edit the README by hand each time. Capabilities have been added often: the specs went from the MVP set to 18. U4 expects the failure to name the missing link. It actually shows up after the only stage that could react to it.
 - Fix: In design D6 (and tasks 1.1/1.2), build the required capability set from `openspec/specs/*` **plus** the capability directories of active changes' delta specs (`openspec/changes/<name>/specs/<cap>/`, excluding `archive/`). Treat a link to `openspec/specs/<cap>/spec.md` as resolved when either that file or an active change's `specs/<cap>/spec.md` exists. Then the implement stage of a capability-adding change sees the guard fail on its own delta and adds the README link (root `README*.md` is inside its path check, `implement/stage.yaml:91`). The link stays valid after archive. Add one Consequences line that says so.
 - Fix risk: a change left active on `main` without being implemented would force a README link to an unbuilt capability. The link check becomes slightly more lenient for `openspec/specs/` paths. One more reader (`openspec/changes/`) in `readmeFiles.ts`.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 FR1 bullet now requires links for every `openspec/specs/<cap>/` plus every `<cap>` an active change adds under `openspec/changes/<name>/specs/` (archive excluded), and the Links bullet treats such a link as resolved; a Consequences pair records the effect and the leniency; proposal.md FR1 and tasks 1.1/1.2 match.
 
 ### R2 — WARNING — FR11 link-set parity cannot hold for language-counterpart links the design itself requires
 - Location: `openspec/changes/refresh-readme-to-current-state/design.md:34` and `design.md:63`; `proposal.md:69`
@@ -96,7 +97,8 @@ The change sets `skip_specs: true` (`.openspec.yaml`), which `.gnomish/stages/sp
 - Impact: The guard written per D6 fails against documents written per D3. Then the implementer has two bad choices: point the Russian README at the English guide, or loosen the check ad hoc. Either way, the outcome is decided during implementation instead of in the design.
 - Fix: In D6's FR11 bullet, compare link targets after normalizing each language pair to one key (`<path>.ru.md` → `<path>.md`). State in D3 that the Russian README links `docs/gnomish-factory/README.ru.md`. Mention the normalization in task 1.2's FR11 item.
 - Fix risk: parity would no longer catch a Russian document that links the English file of a pair, or the reverse. That is a small loss, since FR12 still checks that every link resolves.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 FR11 bullet now compares link sets after normalizing `<path>.ru.md` → `<path>.md`; D3 says README.ru.md links docs/gnomish-factory/README.ru.md; proposal.md FR11 states the pair-as-one-target rule; tasks 1.2 and 4.1 name the normalization and the Russian guide link.
 
 ### R3 — WARNING — UX1 and UX2 have no task and no automated check
 - Location: `openspec/changes/refresh-readme-to-current-state/proposal.md:89-90`; `tasks.md:13-34`
@@ -105,7 +107,8 @@ The change sets `skip_specs: true` (`.openspec.yaml`), which `.gnomish/stages/sp
 - Impact: The opening paragraph (`README.md:8`) can stay as it is, without mentioning the Grid view, meeting ranges or settings. The sections can drift from the D3 outline. Nothing would flag either, and the verification step cannot show that UX1 or UX2 is met.
 - Fix: In task 3.1/4.1, add "(UX1)": rewrite the opening paragraph so it names both views, meeting planning and offline work. Add "(UX2)": follow the D3 `##` list in order. In D6 and task 1.2, add one `it` (`// UX2:`) that asserts each README's `##` headings equal D3's list in order. Add one `it` (`// UX1:`) that asserts the text before the first `##` names the Cards view and the Grid view (in Russian, by their glossary *RU:* names).
 - Fix risk: the heading-order check ties the guard to D3's outline. A later reordering must update the constant. The UX1 anchors must use the glossary RU names, which the implementer has to look up in `docs/glossary/`.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 gains "Outline (UX2)" (each README's `##` headings equal its D3 row, in order) and "Opening paragraph (UX1)" (text before the first `##` names Cards view / Grid view, in Russian «Карточки» / «Сетка» from docs/glossary/views.md); task 1.2 adds the `// UX2:` and `// UX1:` its, tasks 3.1/4.1 name UX1/UX2 in the rewrite, FR13 and the D2/tasks traceability lines cover UX ids.
 
 ### R4 — SUGGESTION — Factory table check expects `` `sandbox` `` while task 2.1 writes `sandbox/`
 - Location: `openspec/changes/refresh-readme-to-current-state/design.md:66`; `tasks.md:18`
@@ -114,7 +117,8 @@ The change sets `skip_specs: true` (`.openspec.yaml`), which `.gnomish/stages/sp
 - Impact: Following task 2.1 literally makes the FR9 factory-table test fail on the `sandbox` entry. The implementer then has to pick one side.
 - Fix: In D6, say that a directory entry may also appear as `` `<entry>/` `` (match `` `<entry>` `` or `` `<entry>/` ``).
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 "Factory table (FR9)" now accepts an entry written as `` `<entry>` `` or, for a directory, `` `<entry>/` ``, matching task 2.1's `sandbox/`.
 
 ### R5 — SUGGESTION — FR8's "never `origin/main`" is banned by D4 and overstates the stage checks
 - Location: `openspec/changes/refresh-readme-to-current-state/proposal.md:12` and `proposal.md:66`; `design.md:40,43`
@@ -123,7 +127,8 @@ The change sets `skip_specs: true` (`.openspec.yaml`), which `.gnomish/stages/sp
 - Impact: An implementer who copies FR8's wording into the README fails the FR2 phrase check. The README would also claim more than the stage files do.
 - Fix: In FR8, replace "(the parent of `gnomish: task started`, never `origin/main`)" with "(the stages that diff the branch use the parent of the `gnomish: task started` commit)". In the Why bullet at `proposal.md:12`, replace "every stage check now diffs" with "the stages that diff the branch now diff". Do not list the stages by name, so the sentence cannot drift from the stage files.
 - Fix risk: the Why bullet no longer says which stages these are. The guard checks none of this prose, so no test changes.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md Why bullet now says "the stages that diff the branch now diff against the parent of the branch's `gnomish: task started` commit" (no "every stage check", no quoted `origin/main`), and FR8 now reads "(the stages that diff the branch use the parent of the `gnomish: task started` commit)", so copying it cannot trip the D4 phrase check; no stage is listed by name.
 
 ## Verdict
 
