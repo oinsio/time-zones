@@ -1,3 +1,4 @@
+// Implements FR1 of colour-locations-without-day-periods-in-accent: the no-day-period label of the shared checks.
 // Implements FR8, FR9, FR10, FR11 of add-day-colouring-setting: shared checks of the day colouring steps.
 import { expect } from "vitest";
 import { DayColour, type DayColourStop } from "@/presenter";

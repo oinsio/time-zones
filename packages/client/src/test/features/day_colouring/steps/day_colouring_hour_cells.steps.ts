@@ -1,3 +1,4 @@
+// Verifies FR2 of colour-locations-without-day-periods-in-accent.
 // Verifies FR8, FR9, FR11 of add-day-colouring-setting.
 // Verifies FR8, UX4 of bind-day-periods-to-sun.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";

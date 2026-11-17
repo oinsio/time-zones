@@ -61,7 +61,8 @@
 - Impact: `grep -rl colour-locations-without-day-periods-in-accent src` does not reach the step definitions that assert FR2 and FR1, so the requirement-to-test trace the change's own tasks prescribe is incomplete.
 - Fix: Add `// Verifies FR2 of colour-locations-without-day-periods-in-accent.` as the first line of `day_colouring_hour_cells.steps.ts`, and `// Implements FR1 of colour-locations-without-day-periods-in-accent: …` (matching its existing `// Implements …` header style) to `dayColouringChecks.ts`.
 - Fix risk: none — comment-only lines; no behaviour or test outcome changes.
-- Status: open
+- Status: fixed
+- Resolution: added the traceability header comments to day_colouring_hour_cells.steps.ts and dayColouringChecks.ts; comment-only, grep now reaches both files.
 
 ## Verdict
 
