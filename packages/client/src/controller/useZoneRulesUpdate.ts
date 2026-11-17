@@ -43,7 +43,7 @@ export type ZoneRulesUpdate = {
  * validates and stores it, then reports it as ready. Every failure is silent.
  * A release whose save failed is not downloaded again for the page's life.
  * Implements FR3, FR4, FR7, FR9, NFR-P1 of add-remote-zone-rules-updates (design D4).
- * Implements FR8, FR9, FR10, NFR-P2 of apply-data-updates-silently (D5): the stored
+ * Implements FR8, FR9, FR10, NFR-P2, UX3 of apply-data-updates-silently (D5): the stored
  * release is reported only when it changes a watched zone, compared again only
  * when the stored release or the watched zones change.
  */

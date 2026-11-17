@@ -1,4 +1,4 @@
-// Verifies FR1, NFR-P1 of apply-data-updates-silently.
+// Verifies FR1, NFR-P1, M2 of apply-data-updates-silently.
 import { describe, expect, it, vi } from "vitest";
 import {
   APP_REVISION_ENVIRONMENT_KEY,
@@ -89,6 +89,7 @@ describe("resolveAppRevision", () => {
 
   it.each([
     ["git fails", runnerWith("", 128)],
+    ["git fails after printing a commit", runnerWith(commit("aaa"), 128)],
     ["the output is empty", runnerWith("")],
     [
       "every commit is data-only",
@@ -98,6 +99,13 @@ describe("resolveAppRevision", () => {
     expect(await resolveWith(runProcess)).toBe(
       `${UNREADABLE_REVISION_PREFIX}${DEPLOY_INSTANT}`,
     );
+  });
+
+  it("should recognise the trailer line through surrounding white space", async () => {
+    const revision = await resolveWith(
+      runnerWith(commit("aaa", [`  ${DATA_ONLY_TRAILER}\r`]) + commit("bbb")),
+    );
+    expect(revision).toBe("bbb");
   });
 
   it("should return a unique value when git cannot be started", async () => {

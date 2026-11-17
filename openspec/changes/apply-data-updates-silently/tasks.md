@@ -48,9 +48,9 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `.git
 
 ## 8. Integration checks (all ids)
 
-- [ ] 8.1 `get_file_problems` (JetBrains MCP, when available) on every changed file, then `pnpm run build`. Verify: no errors; the build prints the app revision file among its outputs.
-- [ ] 8.2 Mutation testing, at most 5 files per run, each run finished before the next: `cd packages/client && npx stryker run --mutate '<files>'` over the new and changed production files of `scripts/appRevision/`, `scripts/cityData/committedDumpDate.ts`, `scripts/cityData/checkCityData.ts`, `src/controller/`, `src/lib/zoneRules/core/zoneRulesDifference.ts`, `src/model/`, `src/adapters/`, `src/presenter/cityDataAttribution.ts`, `src/app/`. Verify: every file scores ≥ 95% (minimum 90%) in `reports/mutation/mutation-report.json`; survivors are killed with new tests or justified in place.
-- [ ] 8.3 Traceability: `grep -rn "apply-data-updates-silently" packages/client/src packages/client/scripts | grep -oE "(FR|NFR-[PAR]|UX|M)[0-9]+" | sort -u` lists FR1–FR13, NFR-P1–P3, NFR-A1–A2, NFR-R1 and UX1–UX4. Verify: no id of `proposal.md` is missing.
+- [x] 8.1 `get_file_problems` (JetBrains MCP, when available) on every changed file, then `pnpm run build`. Verify: no errors; the build prints the app revision file among its outputs.
+- [x] 8.2 Mutation testing, at most 5 files per run, each run finished before the next: `cd packages/client && npx stryker run --mutate '<files>'` over the new and changed production files of `scripts/appRevision/`, `scripts/cityData/committedDumpDate.ts`, `scripts/cityData/checkCityData.ts`, `src/controller/`, `src/lib/zoneRules/core/zoneRulesDifference.ts`, `src/model/`, `src/adapters/`, `src/presenter/cityDataAttribution.ts`, `src/app/`. Verify: every file scores ≥ 95% (minimum 90%) in `reports/mutation/mutation-report.json`; survivors are killed with new tests or justified in place.
+- [x] 8.3 Traceability: `grep -rn "apply-data-updates-silently" packages/client/src packages/client/scripts | grep -oE "(FR|NFR-[PAR]|UX|M)[0-9]+" | sort -u` lists FR1–FR13, NFR-P1–P3, NFR-A1–A2, NFR-R1 and UX1–UX4. Verify: no id of `proposal.md` is missing.
 
 ## 9. Handoff patches (FR1; design D7)
 

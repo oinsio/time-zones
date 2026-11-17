@@ -1,7 +1,7 @@
 /**
  * The app revision of the build: the explicit `APP_REVISION`, else the newest
  * commit that is not a data-only commit, else a value unique to the build.
- * Implements FR1 of apply-data-updates-silently (D1).
+ * Implements FR1, M2 of apply-data-updates-silently (D1).
  */
 import { DATA_ONLY_TRAILER } from "../dataRefresh/refreshConstants.ts";
 import type { RunProcess } from "../zoneRules/processTypes.ts";
@@ -23,11 +23,12 @@ export type ResolveAppRevisionInput = {
 
 function findNewestUnmarkedCommit(gitLogOutput: string): string | undefined {
   for (const record of gitLogOutput.split(GIT_RECORD_SEPARATOR)) {
-    const [hash = "", trailers = ""] = record.trim().split(GIT_FIELD_SEPARATOR);
-    const isMarked = trailers
+    const [hash, ...trailerFields] = record.trim().split(GIT_FIELD_SEPARATOR);
+    const isMarked = trailerFields
+      .join(GIT_FIELD_SEPARATOR)
       .split("\n")
       .some((trailerLine) => trailerLine.trim() === DATA_ONLY_TRAILER);
-    if (hash !== "" && !isMarked) return hash;
+    if (hash && !isMarked) return hash;
   }
   return undefined;
 }

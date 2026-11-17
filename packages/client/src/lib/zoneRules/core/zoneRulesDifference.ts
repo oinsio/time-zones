@@ -14,6 +14,7 @@ const isSameValue = (first: unknown, second: unknown): boolean =>
   JSON.stringify(first) === JSON.stringify(second);
 
 const getChangesAfter = (zoneRules: ZoneRules, epochSeconds: number) =>
+  // Stryker disable next-line EqualityOperator: equivalent — a change exactly at the instant is the type in force, which is compared first
   zoneRules.changes.filter((change) => change.epochSeconds > epochSeconds);
 
 export function hasZoneRulesChangeFrom(

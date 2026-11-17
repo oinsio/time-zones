@@ -11,9 +11,9 @@ const DUMP_DATE_ERROR_PREFIX = "The dump date of the committed city data";
 
 /** True for a string that is an ISO calendar date, such as `2026-11-14`. */
 export function isDumpDate(value: unknown): value is string {
-  if (typeof value !== "string") return false;
   try {
-    return Temporal.PlainDate.from(value).toString() === value;
+    // Anything but an ISO date text throws, or prints as another value.
+    return Temporal.PlainDate.from(value as string).toString() === value;
   } catch {
     return false;
   }
@@ -21,10 +21,8 @@ export function isDumpDate(value: unknown): value is string {
 
 function readSourceDumpDate(cityDataText: string): unknown {
   try {
-    const parsedCityData = JSON.parse(cityDataText) as {
-      source?: { dumpDate?: unknown };
-    };
-    return parsedCityData?.source?.dumpDate;
+    return JSON.parse(cityDataText).source.dumpDate;
+    // Stryker disable next-line BlockStatement: equivalent — the function returns undefined either way
   } catch {
     return undefined;
   }

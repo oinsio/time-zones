@@ -43,7 +43,7 @@ const attributionPopups = new WeakMap<Page, Page>();
 const geoNamesRequests = new WeakMap<Page, string[]>();
 
 // Verifies FR13, UX4 of add-geonames-city-source: the page shows the attribution link.
-// Verifies FR12, FR13 of apply-data-updates-silently: it names the dump date.
+// Verifies FR12, FR13, M5 of apply-data-updates-silently: it names the dump date.
 Then(
   "the settings page shows the link {string} to GeoNames",
   async ({ locationsWorld }, attributionText: string) => {

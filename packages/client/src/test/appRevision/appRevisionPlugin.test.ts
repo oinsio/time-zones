@@ -24,6 +24,10 @@ describe("buildServedAppRevisionFile", () => {
 });
 
 describe("appRevisionPlugin", () => {
+  it("should be named after the app revision", () => {
+    expect(createPlugin("build").name).toBe("time-zones-app-revision");
+  });
+
   it("should emit the file in a build", () => {
     const emitFile = vi.fn();
     (createPlugin("build").generateBundle as Hook).call({ emitFile });

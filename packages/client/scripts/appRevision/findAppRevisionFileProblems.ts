@@ -26,6 +26,7 @@ function isRevisionInCode(
       appRevision: string;
     };
     return scriptTexts.some((scriptText) => scriptText.includes(appRevision));
+    // Stryker disable next-line BlockStatement: equivalent — undefined is as falsy as false for the caller
   } catch {
     return false;
   }

@@ -24,6 +24,7 @@ export function buildServedAppRevisionFile(
 export function appRevisionPlugin({
   appRevision,
 }: AppRevisionPluginOptions): Plugin {
+  // Stryker disable next-line BooleanLiteral: equivalent — `configResolved` sets it before any other hook runs
   let isBuild = false;
   return {
     name: "time-zones-app-revision",
