@@ -65,7 +65,7 @@ A silent update needs no code: the hook simply does not show the notice and the 
 
 "From the instant on" and not "any difference": most IANA releases correct the past, and the release file is cut at the year 2000 anyway. A user can pick a past date in the calendar, so a corrected past offset would be shown wrongly until the next start; that is accepted as the price of silence (the next start uses the release in every case).
 
-The abbreviation counts because the zone label can show it.
+The designation counts because the zone label can show its abbreviation.
 
 ### D5. Watched zones come from the model; the hook compares on a key (FR9, FR10, NFR-P2)
 
