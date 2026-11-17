@@ -1,3 +1,4 @@
+// Verifies FR3, FR4 of apply-data-updates-silently: the update notice shows when the site names another app revision.
 // Verifies FR6, FR7, UX2 of setup-app-shell-and-pages-deploy: the shell shows
 // service worker notices in the polite region and wires their actions.
 

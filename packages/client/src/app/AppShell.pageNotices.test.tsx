@@ -1,3 +1,4 @@
+// Verifies FR3, FR4 of apply-data-updates-silently: the update notice shows when the site names another app revision.
 // Verifies FR7, FR8 of polish-settings-and-remove-offline-update-notice.
 // Verifies FR8, FR9, NFR-A2 of add-main-page-scaffold: the page notices stack
 // next to the service worker notices in the polite region, and FR13 of

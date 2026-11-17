@@ -1,3 +1,4 @@
+// Verifies FR3, FR4 of apply-data-updates-silently: the update notice shows when the site names another app revision.
 // Verifies FR1, FR2, FR3, FR4, FR5, FR7 of add-settings-page-and-device-time-location (D5, D7, D10, D11).
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { render, screen, waitFor, within } from "@testing-library/react";

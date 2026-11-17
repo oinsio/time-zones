@@ -1,3 +1,4 @@
+// Verifies FR3, FR4 of apply-data-updates-silently: the update notice shows when the site names another app revision.
 // Verifies FR7, UX1, UX2 of add-remote-zone-rules-updates: the shell shows the zone rules update notice and wires its actions.
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { render, screen } from "@testing-library/react";

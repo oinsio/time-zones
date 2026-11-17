@@ -1,3 +1,4 @@
+// Verifies FR12, FR13 of apply-data-updates-silently: the attribution names the dump date.
 // Verifies FR13, UX4 of add-geonames-city-source (D10): the city data attribution is the last line of the page.
 // Verifies FR6 of the day colouring change: the working hours row appears only in Working hours.
 import { screen } from "@testing-library/react";

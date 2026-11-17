@@ -1,3 +1,4 @@
+// Verifies FR3 of apply-data-updates-silently: the notices region loads on demand.
 // Verifies FR8, NFR-P1, NFR-P2 of add-settings-page-and-device-time-location.
 
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";

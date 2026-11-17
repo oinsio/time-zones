@@ -1,3 +1,4 @@
+// Implements FR12 of apply-data-updates-silently (D6): `source.dumpDate` is an ISO date (`isDumpDate`).
 /**
  * Pure validation of the committed city data against the bundled zone rules
  * release and the thresholds of the `city-data` spec; every error names its offender.

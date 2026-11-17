@@ -1,3 +1,4 @@
+// Verifies FR3, FR6 of apply-data-updates-silently: a waiting build with another app revision raises the notice.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the app must survive between steps.
