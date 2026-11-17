@@ -1,81 +1,24 @@
 // Verifies FR8, NFR-P2, M3 of apply-data-updates-silently.
 import { describe, expect, it, vi } from "vitest";
-import { Temporal } from "@/lib/temporal";
+import {
+  AFTER_LAST_CHANGE_SECONDS,
+  COMPARISON_SECONDS,
+  changesWith,
+  createZone,
+  IN_FORCE_INDEX,
+  instantSeconds,
+  LATER_INDEX,
+  lisbonLikeChanges,
+  PAST_INDEX,
+  releaseOf,
+  SUMMER,
+  WINTER,
+} from "@/test/zoneRules/lisbonLikeZone";
 import { parseFutureRule } from "./futureRule.ts";
-import { MILLISECONDS_PER_SECOND } from "./zoneRulesConstants.ts";
 import {
   findChangedZones,
   hasZoneRulesChangeFrom,
 } from "./zoneRulesDifference.ts";
-import type {
-  ListedClockChange,
-  LocalTimeType,
-  ZoneRules,
-  ZoneRulesRelease,
-} from "./zoneRulesRelease.ts";
-
-const instantSeconds = (instant: string) =>
-  Temporal.Instant.from(instant).epochMilliseconds / MILLISECONDS_PER_SECOND;
-const COMPARISON_SECONDS = instantSeconds("2026-11-15T12:00:00Z");
-const AFTER_LAST_CHANGE_SECONDS = instantSeconds("2031-06-01T12:00:00Z");
-
-const WINTER: LocalTimeType = {
-  utcOffsetSeconds: 0,
-  designation: "WET",
-  isDaylightSavingTime: false,
-};
-const SUMMER: LocalTimeType = {
-  utcOffsetSeconds: 3600,
-  designation: "WEST",
-  isDaylightSavingTime: true,
-};
-const MARCH_2027 = "2027-03-28T01:00:00Z";
-const OCTOBER_2027 = "2027-10-31T01:00:00Z";
-const FUTURE_RULE_TEXT = "WET0WEST,M3.5.0/1,M10.5.0";
-
-const clockChange = (
-  instant: string,
-  localTimeType: LocalTimeType,
-): ListedClockChange => ({
-  epochSeconds: instantSeconds(instant),
-  localTimeType,
-});
-
-/** Indexes: 0 and 1 in the past, 2 starts 2026 summer, 3 is in force at the comparison, 4 and 5 are later. */
-const lisbonLikeChanges = (): ListedClockChange[] => [
-  clockChange("2009-03-29T01:00:00Z", SUMMER),
-  clockChange("2009-10-25T01:00:00Z", WINTER),
-  clockChange("2026-03-29T01:00:00Z", SUMMER),
-  clockChange("2026-10-25T01:00:00Z", WINTER),
-  clockChange(MARCH_2027, SUMMER),
-  clockChange(OCTOBER_2027, WINTER),
-];
-const IN_FORCE_INDEX = 3;
-const LATER_INDEX = 4;
-const PAST_INDEX = 0;
-
-function createZone(overrides: Partial<ZoneRules> = {}): ZoneRules {
-  return {
-    types: [WINTER, SUMMER],
-    cutoffType: WINTER,
-    changes: lisbonLikeChanges(),
-    futureRule: parseFutureRule(FUTURE_RULE_TEXT),
-    ...overrides,
-  };
-}
-
-const changesWith = (
-  index: number,
-  change: Partial<ListedClockChange>,
-): ListedClockChange[] =>
-  lisbonLikeChanges().map((listed, position) =>
-    position === index ? { ...listed, ...change } : listed,
-  );
-
-const releaseOf = (
-  zones: Record<string, ZoneRules>,
-  release = "2026f",
-): ZoneRulesRelease => ({ release, zones: new Map(Object.entries(zones)) });
 
 describe("hasZoneRulesChangeFrom", () => {
   it("should find no change between equal rules", () => {
