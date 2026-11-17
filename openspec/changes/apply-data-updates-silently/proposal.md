@@ -138,7 +138,7 @@ No changes.
 
 - M1: 0 update notices in the scenario "a data-only build is waiting"; 1 in the scenario "New version becomes available".
 - M2: 100% of builds made from a history whose newest commits are data-only carry the app revision of the newest other commit (checked on a fixture history of 4 commits).
-- M3: 0 zone rules update notices for a stored release that differs only in zones outside the watched zones or only before the comparison instant; 1 for each of the 5 kinds of difference of FR8.
+- M3: 0 zone rules update notices for a stored release that differs only in zones outside the watched zones or only before the comparison instant; 1 for each of the 5 kinds of difference of FR8 — the UTC offset, the abbreviation and the daylight-saving flag in force at the comparison instant, a later clock change (checked by its instant and by the offset it starts), the rule after the listed changes — 6 rows of the scenario "Kinds of difference that count" in all.
 - M4: 0 requests of the app revision file while no build is waiting; at most 1 per update recheck while one is waiting.
 - M5: The settings page names the dump date of the committed city data in 2 languages; 0 axe-core violations in 2 themes; no horizontal scrolling at 320 px and 2560 px.
 - M6: Mutation score ≥ 95% (minimum acceptable 90%) on the new and changed production files of `src/controller/`, `src/lib/zoneRules/`, `src/adapters/`, `src/app/`, `scripts/appRevision/` and `scripts/cityData/committedDumpDate.ts`.

@@ -61,7 +61,7 @@ A silent update needs no code: the hook simply does not show the notice and the 
 
 ### D4. Whether a release changes a zone is a pure function of the zone rules library (FR8, NFR-P2)
 
-`src/lib/zoneRules/core/zoneRulesDifference.ts` (new): `hasZoneRulesChangeFrom(activeRules, storedRules, epochSeconds)` compares the local time type in force (`getLocalTimeType`, the existing owner), the listed clock changes with `epochSeconds` greater than the instant, and the future rule, by value. `findChangedZones(activeRelease, storedRelease, zoneIds, epochSeconds)` applies it per zone; `ZoneRulesRelease.zones` already resolves links to their target's rules, so links need no special case; a zone in one release only is changed.
+`src/lib/zoneRules/core/zoneRulesDifference.ts` (new): `hasZoneRulesChangeFrom(activeRules, storedRules, epochSeconds)` compares the local time type in force (`getLocalTimeType`, the existing owner: `utcOffsetSeconds`, `designation` and `isDaylightSavingTime`), the listed clock changes with `epochSeconds` greater than the instant, and the future rule, by value. `findChangedZones(activeRelease, storedRelease, zoneIds, epochSeconds)` applies it per zone; `ZoneRulesRelease.zones` already resolves links to their target's rules, so links need no special case; a zone in one release only is changed.
 
 "From the instant on" and not "any difference": most IANA releases correct the past, and the release file is cut at the year 2000 anyway. A user can pick a past date in the calendar, so a corrected past offset would be shown wrongly until the next start; that is accepted as the price of silence (the next start uses the release in every case).
 
@@ -69,7 +69,7 @@ The abbreviation counts because the zone label can show it.
 
 ### D5. Watched zones come from the model; the hook compares on a key (FR9, FR10, NFR-P2)
 
-`getWatchedZoneIds(state)` (new selector in `src/model/`) returns the distinct zones of `state.locations` plus `state.deviceTimeZoneId`. `useZoneRulesUpdate` takes `watchedZoneIds` and keeps the parsed stored release it already has in hand (`downloaded`, or `storedLoadResult.release`) in a ref. It recomputes "changes a watched zone" only when the stored release name or the sorted, joined zone ids change, with the clock's instant at that moment; `readyRelease` is reported only when the result is true. A minute tick changes neither key.
+`getWatchedZoneIds(state)` (new selector in `src/model/`) returns the distinct zones of `state.locations` plus `state.deviceTimeZoneId`. `useZoneRulesUpdate` takes `watchedZoneIds` and keeps the parsed stored release it already has in hand (`downloaded`, or `storedLoadResult.release`) in a ref. It recomputes "changes a watched zone" only when the stored release name or the sorted, joined zone ids change, with the clock's instant at that moment; `readyRelease` is reported only when the result is true. A minute tick changes neither key. `findChangedZones` reads each given zone once from each release, so the zones compared are exactly the ids passed to it; tests count them by wrapping the `@/lib/zoneRules` export with `vi.mock` (test helper `src/test/zoneComparisonCount.ts`), because a call inside one ES module cannot be spied and `src/test/workCounters.ts` has no counter of compared zones.
 
 ### D6. The dump date of the city data is a build constant, formatted by the presenter (FR12, FR13, NFR-P3)
 
