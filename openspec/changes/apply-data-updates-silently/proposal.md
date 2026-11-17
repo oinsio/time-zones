@@ -1,6 +1,6 @@
 # Apply data updates silently
 
-Three other changes are active in `openspec/changes/`: `add-city-coordinates-to-locations`, `bind-day-periods-to-sun` and `refresh-data-through-scheduled-pull-requests`. Only the last one is related: it produces the data-only commits this change recognises, and it must not go live before this change (see "Open Questions", Q1). None of them modifies the requirements this change modifies.
+No other change is active. This change builds on `refresh-data-through-scheduled-pull-requests` (archived 2026-11-16, ADR-0017), which defines the data-only commit and its trailer `Data-Only: true` (glossary `docs/glossary/architecture.md`, *Code:* `DATA_ONLY_TRAILER`). It refines point 5 of ADR-0014, where a newer zone rules release always "offers a reload".
 
 ## Why
 
@@ -20,8 +20,8 @@ Notices are for things the user can act on or look at. A new feature is one; a r
   - **Waiting build** — a newer build the browser has downloaded and holds until the app's windows are closed or the user reloads into it.
   - **Silent update** — a waiting build with the running build's app revision, or a stored release that changes no watched zone: used from the next start, with no notice. *RU:* тихое обновление. *Never:* auto-update, background update.
 - Glossary (`docs/glossary/zone-rules.md`), new term: **Watched zone** — a zone whose rules the user sees: the zone of every location in the list and the device time zone.
-- Glossary, changed terms: **Update notice** (shown only when the app revision of the waiting build differs), **Zone rules update notice** (shown only when a watched zone changes), **Zone rules update** (may be silent), **City data attribution** (names the date of the city data; *RU:* «Данные о городах: GeoNames (14 ноября 2026 г.), CC BY 4.0»).
-- The term **data-only commit** and its `Data-Only: true` trailer are defined by `refresh-data-through-scheduled-pull-requests`; this change only reads the trailer.
+- Glossary, changed terms: **Update notice** (shown only when the app revision of the waiting build differs), **Zone rules update notice** (shown only when a watched zone changes), **Zone rules update** (may be silent), **City data attribution** (names the date of the city data; *RU:* «Данные о городах: GeoNames (14 ноября 2026 г.), CC BY 4.0»), **Data-only commit** (the build reads its trailer to keep the app revision).
+- The term **data-only commit** and its `Data-Only: true` trailer are defined by the archived `refresh-data-through-scheduled-pull-requests`; this change only reads the trailer, through its existing owner.
 
 ## Capabilities
 
@@ -121,8 +121,8 @@ None.
 ## Behavior
 
 - `packages/client/src/test/features/app_shell/app_shell_notices.feature`, `app_shell_update_recheck.feature` and new `app_shell_silent_update_unit.feature`, `app_shell_silent_update_e2e.feature` — scenarios tagged `@apply-data-updates-silently`.
-- `packages/client/src/test/features/app_shell/app_shell_zone_rules_notice_unit.feature`, `app_shell_zone_rules_notice_e2e.feature` and `packages/client/src/test/features/zone_rules_updates/` new `zone_rules_updates_watched_zones_unit.feature` — scenarios tagged `@apply-data-updates-silently`.
-- `packages/client/src/test/features/settings/settings_city_data_attribution_e2e.feature` and new `settings_city_data_date_unit.feature` — scenarios tagged `@apply-data-updates-silently`.
+- `packages/client/src/test/features/app_shell/app_shell_zone_rules_notice_unit.feature`, `app_shell_zone_rules_notice_e2e.feature` and `packages/client/src/test/features/zone_rules_updates/` new `zone_rules_updates_watched_zones.feature` — scenarios tagged `@apply-data-updates-silently`.
+- `packages/client/src/test/features/settings/settings_city_data_attribution_e2e.feature` and new `settings_city_data_date.feature` — scenarios tagged `@apply-data-updates-silently`.
 
 ## Visual Reference
 
@@ -145,7 +145,8 @@ No changes.
 
 None. Decided by the owner:
 
-- This change goes live before the scheduled refresh of `refresh-data-through-scheduled-pull-requests` is switched on; until then the trailer is absent and every build counts as an app change, as today.
+- The data refresh landed first. Until this change is deployed, every data-only deploy shows the update notice, as today; no order of deploys is needed.
+- A build that cannot see the app commit before its data-only commits (a shallow checkout) counts as an app change: a notice too many, never a silence too many.
 - An installed app that the system never closes keeps its data until it is closed; accepted (NG2).
 - The date of the city data stands inside the attribution line.
 - The text of the zone rules update notice stays as it is and names no city.

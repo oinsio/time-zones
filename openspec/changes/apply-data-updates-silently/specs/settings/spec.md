@@ -34,7 +34,7 @@ The settings page SHALL show the city data attribution as its last line, below e
 - **THEN** the attribution reads «Данные о городах: GeoNames (14 ноября 2026 г.), CC BY 4.0» without a reload
 
 #### Scenario: The date follows the build
-- **GIVEN** a build with the running build's app revision and the dump date `2026-12-14` was applied as a silent update
+- **GIVEN** the running build fixes the dump date `2026-12-14`, whatever date the device stores or the network serves
 - **WHEN** the user opens the settings in English
 - **THEN** the attribution names December 14, 2026
 

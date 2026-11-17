@@ -10,7 +10,9 @@ See `proposal.md` for the motivation. What exists today, read from the code:
 - `useZoneRulesUpdate` stores a newer release and reports its name as `readyRelease`; `ZoneRulesUpdateNoticeSlot` shows the notice and chooses `applyUpdate` over a plain reload when `isUpdateAvailable`. "Active release at start" already makes a newer stored release active at the next start, notice or not.
 - The build fixes one value into the code already: `__APP_DEPLOY_INSTANT__` from `scripts/deployInstant/`, exposed as `APP_DEPLOY_INSTANT` (`src/constants/deploy.ts`). `zoneRulesPlugin` emits `zone-rules/version.json` and the release file; `vite.config.ts` keeps them out of the precache with `globIgnores`; `fetchZoneRulesVersionSource` reads the version file with `cache: "no-cache"`.
 - The committed city data records `source.dumpDate`, but `toServedCityData` drops `source`, so the client does not know the date. `CityDataAttribution` renders one translated link.
-- CI checks out with `actions/checkout@v5` at its default depth of one commit (`.github/workflows/ci.yml`), so a build there sees one commit.
+- CI checks out with `actions/checkout@v5` at its default depth of one commit in the `check` job of `.github/workflows/ci.yml`, so a build there sees one commit. `deploy.yml` builds the published site by calling that workflow (`uses: ./.github/workflows/ci.yml`).
+- The data-only commit is owned by `DATA_ONLY_TRAILER = "Data-Only: true"` in `scripts/dataRefresh/refreshConstants.ts` (glossary `docs/glossary/architecture.md`). Scripts inject child processes through the `RunProcess` type of `scripts/zoneRules/processTypes.ts`, as `scripts/cityData/compile.ts` does.
+- `src/app/AppShell.tsx` has 199 lines. `playwright.bdd.config.ts` runs the projects `chromium`, `mobile-chrome` and the view-contract projects — no WebKit — against one build served by `pnpm build && pnpm preview`.
 
 Constraints: no backend; the legacy iOS 12 build (ADR-0009) runs the same shell code, has `fetch` and no BigInt; iOS does not restart an installed PWA on its own (the reason the update recheck exists); the factory may not write `.github/`, `docs/adr/` or `CLAUDE.md`.
 
@@ -29,7 +31,7 @@ Constraints: no backend; the legacy iOS 12 build (ADR-0009) runs the same shell 
 
 ### D1. The app revision is computed at build time from git, with an override (FR1)
 
-`scripts/appRevision/resolveAppRevision.ts` (new, pure over an injected `runProcess`, as `scripts/zoneRules/` does) returns, in this order: the environment value `APP_REVISION` when set and not empty; else the first commit of `git log --format=%H%x00%(trailers:key=Data-Only,valueonly)` from `HEAD` whose trailer value is not `true`; else a unique value built from the deploy instant (`unreadable-<instant>`). The trailer name and value are constants shared with nothing in the client. `vite.config.ts` passes the result as the define `__APP_REVISION__`; `src/constants/deploy.ts` exposes `APP_REVISION`; Vitest gets `TEST_APP_REVISION` from `app.config.ts`, like `TEST_DEPLOY_INSTANT`.
+`scripts/appRevision/resolveAppRevision.ts` (new, pure over an injected `RunProcess`) returns, in this order: the environment value `APP_REVISION` when set and not empty; else the first commit of `git log --format=%H%x00%(trailers:only,unfold)%x1e` from `HEAD` none of whose trailer lines equals `DATA_ONLY_TRAILER`; else a unique value built from the deploy instant (`unreadable-<instant>`). The trailer is imported from its owner, `scripts/dataRefresh/refreshConstants.ts`, never written a second time; only the format string and the prefix are new constants (`scripts/appRevision/constants.ts`). Nothing under `src/` knows the trailer. `vite.config.ts` passes the result as the define `__APP_REVISION__`; `src/constants/deploy.ts` exposes `APP_REVISION`; Vitest gets `TEST_APP_REVISION` from `app.config.ts`, like `TEST_DEPLOY_INSTANT`.
 
 Why git and not a hash of the built files: the build embeds the deploy instant, so every build hashes differently; a hash of "code without data" would need a list of data files kept in step with the bundler. The trailer is one explicit statement by the author of the commit, human or bot.
 
@@ -53,7 +55,7 @@ The hook keeps the owner role for the update notice and returns:
 - `isUpdateAvailable` — `isBuildWaiting`, a published revision was read, it differs from `APP_REVISION`, and it is not the dismissed revision;
 - `applyUpdate`, `dismiss` (records the published revision as dismissed), `isOfflineReady` as today.
 
-The published revision is read when `isBuildWaiting` turns true and on each update recheck while it is true, in the same `onRecheck` that calls `registration.update()`; a failure keeps the last value read. `ZoneRulesUpdateNoticeSlot` takes `isBuildWaiting` instead of `isUpdateAvailable`, so its Reload applies a silent update too. `AppShell` passes the source; nothing else changes there.
+The published revision is read when `isBuildWaiting` turns true and on each update recheck while it is true, in the same `onRecheck` that calls `registration.update()`; a failure keeps the last value read. `ZoneRulesUpdateNoticeSlot` takes `isBuildWaiting` instead of `isUpdateAvailable`, so its Reload applies a silent update too. `AppShell` passes the source. Because `AppShell.tsx` is already at 199 lines, the notices region moves into a new `src/app/AppShellNotices.tsx`, which takes the update status and the zone rules update and renders both notices; `AppShell` renders it.
 
 A silent update needs no code: the hook simply does not show the notice and the worker stays waiting until the browser activates it at the next start (see Context). The page never calls skip-waiting for it. Skip-waiting without a reload was rejected: the old page would keep running old code while the precache of the old build is cleaned up, and its lazy chunks (views, search data) would fail to load.
 
@@ -79,20 +81,26 @@ Alternative rejected: a separate line. It would change the order rules of the de
 
 ### D7. CI gives the build its history (FR1)
 
-The build job of `.github/workflows/ci.yml` checks out with `fetch-depth: 0`. The factory may not edit `.github/`, so this is a handoff patch. Until it is applied a CI build sees one commit: an app commit gives the right revision; a data-only commit gives the unique value and so a notice — the behaviour of today, never a wrong silence.
+The `check` job of `.github/workflows/ci.yml` checks out with `fetch-depth: 0`; `deploy.yml` calls this workflow, so the published build sees the history too. The factory may not edit `.github/`, so this is a handoff patch. Until it is applied a CI build sees one commit: an app commit gives the right revision; a data-only commit gives the unique value and so a notice — the behaviour of today, never a wrong silence.
+
+### D8. The silent update E2E serves two builds itself (FR3, FR4, FR11, M1)
+
+The preview server of `playwright.bdd.config.ts` serves one build, and a waiting build needs a second one. A worker-scoped fixture of `app_shell_silent_update_e2e.steps.ts` (helpers in `src/test/features/app_shell/steps/silentUpdateSite.ts`) builds the app twice with `vite build --outDir <temporary directory> --emptyOutDir`: build A as is, build B with `APP_REVISION` set to the revision in A's `app-revision.json` (a silent update) or to another value (an app change). The deploy instant differs between two builds, so B has its own JavaScript, its own service worker and its own deploy time on the settings page — the observable proof of which build runs. A `node:http` static server in the fixture serves A or B under `APP_BASE_PATH` on its own port (`SILENT_UPDATE_E2E_PORT` in `app.config.ts`) and is switched by a step. Closing every page of the browser context and opening a new one is "every window closed". No production code exists for the test, and nothing is written inside the repository.
+
+Alternative rejected: a build input that overrides the city data date for build B — it would exist only for one test.
 
 ## Risks / Trade-offs
 
 - [A commit that changes code carries `Data-Only: true`] → users get code without a notice. Guarding the trailer (only on commits that touch data files) belongs to `refresh-data-through-scheduled-pull-requests`; this design assumes it.
 - [Squash merges rewrite the commit message] → the trailer must be on the commit that lands on `main`. Assumed from the same change; if it is missing, the build errs towards a notice.
-- [An installed PWA that is never closed keeps the old data] → accepted (NG2, Q2). Zone rules that change a watched zone still raise their notice.
-- [Activation of a waiting worker at the next start is browser behaviour, not verified on iOS 12 here] → the E2E scenario "A silent update is in use at the next start" checks Chromium and WebKit; iOS 12 itself is outside the automated matrix.
+- [An installed PWA that is never closed keeps the old data] → accepted (NG2). Zone rules that change a watched zone still raise their notice.
+- [Activation of a waiting worker at the next start is browser behaviour, not verified on iOS 12 here] → the E2E scenario "A silent update is in use at the next start" checks it in the Chromium projects, the only engines `playwright.bdd.config.ts` runs; Safari and iOS 12 are outside the automated matrix.
 - [The site serves a newer app revision than the waiting build holds] → the notice appears and Reload brings the waiting build; the next check finds the newer one. One extra notice in a rare race.
 - [Past corrections of a watched zone stay unannounced] → see D4.
 
 ## Migration Plan
 
-Deploy order: this change before the scheduled refresh goes live (Q1). The first deploy of this change is itself an app change, so users see one last ordinary notice. Rollback: revert the change; the notices return to today's behaviour, the extra file is ignored.
+No deploy order: the data refresh has landed, and until this change is deployed every data-only deploy shows the update notice, as today. The global decision (app revision, published file, watched zones) refines ADR-0014 point 5 and is recorded as a new ADR through handoff H2, not here. The first deploy of this change is itself an app change, so users see one last ordinary notice. Rollback: revert the change; the notices return to today's behaviour, the extra file is ignored.
 
 ## Open Questions
 
