@@ -111,3 +111,10 @@ export const CITY_DATA_DATE_DEFINE = "__CITY_DATA_DATE__";
 
 /** The dump date of every Vitest run, so that tests do not depend on the committed city data. */
 export const TEST_CITY_DATA_DATE = "2026-11-14";
+
+/**
+ * First port of the sites that the silent update E2E serves itself; each
+ * Playwright worker adds its own index. Implements FR3, FR4, FR11 of
+ * apply-data-updates-silently (D8).
+ */
+export const SILENT_UPDATE_E2E_PORT = 4180;

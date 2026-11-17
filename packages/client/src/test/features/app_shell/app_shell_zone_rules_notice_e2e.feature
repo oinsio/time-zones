@@ -23,7 +23,7 @@ Feature: Zone rules update notice in a real browser
     And the user dismisses the zone rules update notice with Escape
     Then the zone rules update notice is hidden
 
-  @add-remote-zone-rules-updates @NFR-A1
+  @add-remote-zone-rules-updates @NFR-A1 @apply-data-updates-silently @NFR-A1
   Scenario Outline: No accessibility violations with the zone rules update notice in the <color scheme> theme
     Given the system prefers the <color scheme> color scheme
     And a newer zone rules release is published

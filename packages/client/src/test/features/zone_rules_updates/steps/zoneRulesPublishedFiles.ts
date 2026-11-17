@@ -52,23 +52,32 @@ const buildNewerDocument = (): ReleaseDocument => {
   };
 };
 
+/**
+ * The version file and the release file of the newer release as the site
+ * serves them, for a server of its own (the silent update E2E).
+ * Implements FR11 of apply-data-updates-silently (D8).
+ */
+export function buildNewerReleaseFiles() {
+  const release = readNewerReleaseName();
+  return {
+    release,
+    versionFileBody: JSON.stringify({
+      release,
+      publishedAt: Temporal.Now.instant().toString(),
+    }),
+    releaseFileBody: JSON.stringify(buildNewerDocument()),
+  };
+}
+
 /** Makes the site answer a version file and a release file one release above the bundled one. */
 export async function publishNewerRelease(page: Page): Promise<string> {
-  const release = readNewerReleaseName();
+  const { release, versionFileBody, releaseFileBody } =
+    buildNewerReleaseFiles();
   await page.route(VERSION_FILE_URL_PATTERN, (route) =>
-    route.fulfill({
-      contentType: JSON_CONTENT_TYPE,
-      body: JSON.stringify({
-        release,
-        publishedAt: Temporal.Now.instant().toString(),
-      }),
-    }),
+    route.fulfill({ contentType: JSON_CONTENT_TYPE, body: versionFileBody }),
   );
   await page.route(`**/zone-rules/${release}.json`, (route) =>
-    route.fulfill({
-      contentType: JSON_CONTENT_TYPE,
-      body: JSON.stringify(buildNewerDocument()),
-    }),
+    route.fulfill({ contentType: JSON_CONTENT_TYPE, body: releaseFileBody }),
   );
   return release;
 }
