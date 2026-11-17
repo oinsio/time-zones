@@ -1,3 +1,4 @@
+// Verifies FR3, FR4 of apply-data-updates-silently.
 // Verifies FR7, FR8 of polish-settings-and-remove-offline-update-notice.
 // Verifies FR6, FR7 of setup-app-shell-and-pages-deploy: offline-ready and
 // update-available state from the service worker, reload only on request.
@@ -36,11 +37,11 @@ describe("usePwaUpdateStatus", () => {
   );
 
   it.each([true, false])(
-    "should expose isUpdateAvailable as %s from the service worker",
+    "should expose isBuildWaiting as %s from the service worker",
     (isUpdateAvailable) => {
       mockServiceWorker({ isUpdateAvailable });
       const { result } = renderHook(() => usePwaUpdateStatus());
-      expect(result.current.isUpdateAvailable).toBe(isUpdateAvailable);
+      expect(result.current.isBuildWaiting).toBe(isUpdateAvailable);
     },
   );
 
@@ -68,11 +69,11 @@ describe("usePwaUpdateStatus", () => {
     expect(setOfflineReady).toHaveBeenCalledWith(false);
   });
 
-  it("should clear the update-available state when dismissed", () => {
+  it("should not clear the waiting build when dismissed", () => {
     const { setNeedRefresh } = mockServiceWorker({ isUpdateAvailable: true });
     const { result } = renderHook(() => usePwaUpdateStatus());
     act(() => result.current.dismiss());
-    expect(setNeedRefresh).toHaveBeenCalledWith(false);
+    expect(setNeedRefresh).not.toHaveBeenCalled();
   });
 });
 
@@ -111,6 +112,7 @@ describe("usePwaUpdateStatus update check", () => {
     expect(Object.keys(result.current).sort()).toEqual([
       "applyUpdate",
       "dismiss",
+      "isBuildWaiting",
       "isOfflineReady",
       "isUpdateAvailable",
     ]);

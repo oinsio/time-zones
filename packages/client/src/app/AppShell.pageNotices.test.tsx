@@ -8,6 +8,7 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { STORAGE_KEYS } from "@/constants";
+import { createAnotherAppRevisionSource } from "@/test/anotherAppRevisionSource";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import { AppShell } from "./AppShell";
 
@@ -65,8 +66,9 @@ describe("AppShell page notices", () => {
 
   it("should keep the update notice alone after a failed check", async () => {
     mockServiceWorker(true);
-    render(<AppShell />);
+    render(<AppShell appRevisionSource={createAnotherAppRevisionSource()} />);
     await failUpdateCheck();
+    await screen.findByRole("button", { name: "Reload" });
     expect(getNoticesRegion()).toHaveTextContent("A new version is available.");
     expect(getNoticesRegion()).not.toHaveTextContent("could not be fetched");
   });

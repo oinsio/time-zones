@@ -7,6 +7,7 @@ import {
   createInMemoryStoredReleaseRepository,
   createInMemoryZoneRulesVersionSource,
 } from "@/adapters";
+import { createAnotherAppRevisionSource } from "@/test/anotherAppRevisionSource";
 import { buildReleaseDocument } from "@/test/zoneRules/buildReleaseDocument";
 import { AppShell } from "./AppShell";
 
@@ -24,10 +25,11 @@ const mockServiceWorker = (isUpdateAvailable = false) => {
   return { updateServiceWorker };
 };
 
-const renderShell = () => {
+const renderShell = (appRevisionSource = createAnotherAppRevisionSource()) => {
   const reloadPage = vi.fn();
   render(
     <AppShell
+      appRevisionSource={appRevisionSource}
       zoneRulesVersionSource={createInMemoryZoneRulesVersionSource({
         version: { release: NEWER_RELEASE },
         releases: { [NEWER_RELEASE]: buildReleaseDocument(NEWER_RELEASE) },
