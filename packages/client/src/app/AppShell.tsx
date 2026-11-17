@@ -32,13 +32,14 @@ import type {
 import { resolveActiveView, viewRegistry } from "@/views";
 import { DateBar, LocationSearch, MeetingBar } from "@/views/shared";
 import { AppPage } from "./appPage";
+import { hasShownNotice } from "./hasShownNotice";
 import { MainPage } from "./MainPage";
 import { SettingsButton } from "./SettingsButton";
 import { ViewSkeleton } from "./ViewSkeleton";
 
 const reloadWindow = () => window.location.reload();
 
-/** The notices region loads on demand, as the notices appear rarely and the initial JavaScript is budgeted (NFR-P1 of apply-data-updates-silently). */
+/** The notices region loads only when a notice is due (hasShownNotice), as notices appear rarely and the initial JavaScript is budgeted (NFR-P1 of apply-data-updates-silently). */
 const AppShellNotices = lazy(async () => ({
   default: (await import("./AppShellNotices")).AppShellNotices,
 }));
@@ -140,18 +141,24 @@ function AppShellContent({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [page]);
 
-  const notices = (
+  const hasStorageWarning = !isStorageAvailable || hasSaveFailed;
+  const notices = hasShownNotice({
+    updateStatus,
+    readyRelease: zoneRulesUpdate.readyRelease,
+    hasStorageWarning,
+    shareNotice: notice,
+  }) ? (
     <Suspense fallback={null}>
       <AppShellNotices
         updateStatus={updateStatus}
         zoneRulesUpdate={zoneRulesUpdate}
         reloadPage={reloadPage}
-        hasStorageWarning={!isStorageAvailable || hasSaveFailed}
+        hasStorageWarning={hasStorageWarning}
         shareNotice={notice}
         onDismissShareNotice={dismissNotice}
       />
     </Suspense>
-  );
+  ) : null;
 
   if (page === AppPage.SETTINGS) {
     return (
