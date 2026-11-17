@@ -2,7 +2,7 @@
 
 ## Context
 
-Driven by FR1–FR13 and NFR-A1 of `proposal.md`. Only documents change, plus one test-only guard. No runtime module, port, stored document or layer is touched, so `.claude/rules/architecture.md` and ADR-0002…0018 constrain only what the text may say about them. The READMEs must describe the decisions of those ADRs as they are: ADR-0009 (supported engines), ADR-0014 (zone rules from IANA), ADR-0015 (city data from GeoNames), ADR-0016 (day periods follow the sun), ADR-0017 (data refresh through pull requests) and ADR-0018 (silent data updates). The READMEs restate no ADR decision. They link the ADR instead.
+Driven by FR1–FR13, NFR-A1, UX1 and UX2 of `proposal.md`. Only documents change, plus one test-only guard. No runtime module, port, stored document or layer is touched, so `.claude/rules/architecture.md` and ADR-0002…0018 constrain only what the text may say about them. The READMEs must describe the decisions of those ADRs as they are: ADR-0009 (supported engines), ADR-0014 (zone rules from IANA), ADR-0015 (city data from GeoNames), ADR-0016 (day periods follow the sun), ADR-0017 (data refresh through pull requests) and ADR-0018 (silent data updates). The READMEs restate no ADR decision. They link the ADR instead.
 
 ## Decision
 
@@ -17,7 +17,7 @@ Driven by FR1–FR13 and NFR-A1 of `proposal.md`. Only documents change, plus on
 - Not Gherkin: the guard checks documents, not a business rule (`.claude/rules/bdd-unit.md` scopes vitest-cucumber to "business logic"). Not E2E: no browser is involved (`.claude/rules/bdd-e2e.md`).
 - No Stryker run: the change adds no production module. The guard lives under `src/test/`, which `vitest.config.ts` already excludes from coverage. This is the same reasoning as the archived `fix-stale-now-button-checks-in-drag-tests` (its D3).
 - Names follow `.claude/rules/naming.md`. Paths, phrase lists and patterns are named constants in `readmeFiles.ts` (`.claude/rules/code-style.md`).
-- Every file starts with `// Implements FR… of refresh-readme-to-current-state.`, and every `it` names the requirement it checks in a `// FRn:` comment (`.claude/rules/traceability.md`).
+- Every file starts with `// Implements FR… of refresh-readme-to-current-state.`, and every `it` names the requirement it checks in a `// FRn:` (or `// UXn:`, `// NFR-A1:`) comment (`.claude/rules/traceability.md`).
 
 ### D3: The four documents and their outline
 
@@ -64,6 +64,8 @@ Row pattern: ``^\| (\d+) \| `([a-z-]+)` \| `([^`]+)` \| (`[^`]+`|—) \| (\d+) \
 - **Scripts (FR6):** in fenced code blocks, every `pnpm <word>` and `pnpm --filter @time-zones/client <word>` must be a key of the root or the client `scripts`, or a pnpm built-in (`install`, `add`, `exec`, `dlx`). `pnpm --filter @time-zones/client exec …` is allowed.
 - **Versions (FR9):** in the guides, `VERSION=<x>` equals `GNOMISH_VERSION=<x>` of `.gnomish/factory/gnomish.env`, and `@fission-ai/openspec@<y>` equals the root `devDependencies["@fission-ai/openspec"]`.
 - **Factory table (FR9):** every entry of `readdirSync('.gnomish/factory')` appears as `` `<entry>` `` in the English and Russian guides. Skipped are `.gitignore` and the local names that file ignores: directories `gnomish-*`, `*.tar.gz`, `*.zip`, `SHA256SUMS`, `gnomish.local.env`, `logs`. A fresh checkout has exactly the seven tracked entries.
+- **Outline (UX2):** each README's `##` headings, in order, equal its D3 row (`README_SECTIONS_EN`, `README_SECTIONS_RU`), so every section keeps the one question D3 gives it.
+- **Opening paragraph (UX1):** the text before the first `##` of `README.md` names `Cards view` and `Grid view`; that of `README.ru.md` names the glossary *RU:* names «Карточки» and «Сетка» (`docs/glossary/views.md`).
 - **Size (FR12):** each document has at most 300 lines (`MAX_DOCUMENT_LINES = 300`).
 - **Images (FR3, NFR-A1):** each README references at least one `docs/design/screens/grid-*.png` and at least one Cards image (`phone-*.png` or `tablet-*.png`), and every `<img>` has a non-empty `alt="…"` and every `![…](…)` non-empty alt text.
 - **Anchors of prose sections (FR4, FR5):** each README contains `_meta`, `baseLanguage` (FR4) and `iOS Safari 12.5` (FR5). `TECH_STACK_PACKAGES` = `react`, `vite`, `typescript`, `tailwindcss`, `@radix-ui/react-dialog`, `@dnd-kit/core`, `temporal-polyfill`, `vite-plugin-pwa`, `i18next`, `@biomejs/biome`, `vitest`, `playwright-bdd`, `@amiceli/vitest-cucumber`, `@stryker-mutator/core`: each must be a dependency of the root or the client `package.json`, and each README must name it, either as the package name or as the display name the constant pairs it with (`React`, `Vite`, `TypeScript`, `Tailwind CSS`, `Radix UI`, `dnd-kit`, `temporal-polyfill`, `vite-plugin-pwa`, `i18next`, `Biome`, `Vitest`, `playwright-bdd`, `vitest-cucumber`, `Stryker`).

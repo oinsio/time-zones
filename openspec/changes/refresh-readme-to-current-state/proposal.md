@@ -68,7 +68,7 @@ None. Documentation only; no requirement in `openspec/specs/` changes.
 - FR10: A Contributing section links `CONTRIBUTING.md` and `CLA.md`. License keeps the Apache 2.0 and GeoNames attribution lines.
 - FR11: The English and Russian versions of each document mirror each other. They have the same number of `##` and `###` headings and the same set of relative link targets (the English and Russian files of a pair count as one target, so each document may link the own-language file of a pair), and each document links its counterpart.
 - FR12: Every relative link and image target in the four documents resolves to an existing path. Each document stays at most 300 lines (`.claude/rules/process-invariants.md`).
-- FR13: A Vitest guard under `packages/client/src/test/readme/` checks FR1–FR12 and NFR-A1 against the repository files (for FR3–FR5 the anchors D6 names), and runs in `pnpm test`.
+- FR13: A Vitest guard under `packages/client/src/test/readme/` checks FR1–FR12, NFR-A1, UX1 and UX2 against the repository files (for FR3–FR5 and UX1 the anchors D6 names, for UX2 the section order), and runs in `pnpm test`.
 
 ### Non-Functional
 
