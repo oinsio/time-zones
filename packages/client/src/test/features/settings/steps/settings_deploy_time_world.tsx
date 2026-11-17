@@ -1,5 +1,12 @@
 // Implements FR5, FR6 of polish-settings-and-remove-offline-update-notice: the settings page over real preferences storage, with a chosen device time zone, language and hour format.
-import { cleanup, render, screen } from "@testing-library/react/pure";
+// Implements FR12, FR13 of apply-data-updates-silently: the city data attribution of that page.
+import {
+  act,
+  cleanup,
+  render,
+  screen,
+  within,
+} from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import {
@@ -32,6 +39,7 @@ export type LanguageName = keyof typeof LANGUAGE_CODE_BY_NAME;
 /** Per-scenario state of the deploy time features. */
 export const createDeployTimeWorld = () => {
   let container: HTMLElement | undefined;
+  const tickScheduler = createManualTickScheduler();
 
   const showSettings = async (options: {
     zone: string;
@@ -64,7 +72,7 @@ export const createDeployTimeWorld = () => {
           clock={
             options.clock ?? fakeClock(A_DAY_AFTER_THE_BUILD, options.zone)
           }
-          tickScheduler={createManualTickScheduler()}
+          tickScheduler={tickScheduler}
         >
           <SettingsPage notices={null} onBack={NO_OP} />
         </LocationsProvider>
@@ -84,6 +92,24 @@ export const createDeployTimeWorld = () => {
       cleanup();
       await i18n.changeLanguage("ru");
     },
+    /** A minute passes: the locations re-present their rows. */
+    runMinuteTick: () => act(() => tickScheduler.runPending()),
+    /** Expands the language group, then picks the language by its native name. */
+    chooseLanguage: async (nativeName: string) => {
+      await userEvent.click(
+        screen.getByRole("button", { name: /^(Language|Язык)/ }),
+      );
+      await userEvent.click(
+        within(screen.getByRole("list")).getByRole("button", {
+          name: nativeName,
+        }),
+      );
+    },
+    /** The city data attribution link text, with ICU no-break spaces written as spaces. */
+    cityDataAttributionText: () =>
+      (
+        screen.getByRole("link", { name: /GeoNames/ }).textContent ?? ""
+      ).replace(/[\u202F\u00A0]/g, " "),
     chooseHourFormat: (hourFormatName: HourFormatName) =>
       userEvent.click(screen.getByRole("radio", { name: hourFormatName })),
     /** The elements of the settings main that come after the deploy time. */
