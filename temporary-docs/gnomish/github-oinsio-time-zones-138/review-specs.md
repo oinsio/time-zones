@@ -4,11 +4,11 @@
 
 | Item | Value |
 |---|---|
-| Stale claims | 0 |
+| Stale claims | 1 |
 | Requirements fully covered | 39/39 |
 | Contradictions | 0 |
-| CRITICAL | 1 |
-| WARNING | 1 |
+| CRITICAL | 0 |
+| WARNING | 2 |
 | SUGGESTION | 2 |
 
 ## Freshness
@@ -39,7 +39,10 @@
 - ✅ `settings.cityDataAttribution` exists in every locale file (`en.json`, `ru.json`) and `CityDataAttribution` renders one translated link (`design.md:12`): `src/locales/en.json:142`, `src/locales/ru.json:142`, `src/app/settings/CityDataAttribution.tsx:20`.
 - ✅ The model state carries `deviceTimeZoneId` for `getWatchedZoneIds` (`design.md:72`): e.g. `src/model/workingTime.spans.test.ts:21` (`INITIAL_WORLD_CLOCK_STATE`).
 - ✅ The existing zone rules update notice E2E keeps showing the notice under FR8/FR9: the E2E device time zone is `Asia/Almaty` (`playwright.bdd.config.ts:69`) and the published test release changes only Almaty (`src/test/features/zone_rules_updates/steps/zoneRulesPublishedFiles.ts:31-50`), so Almaty is a watched zone.
-- ✅ The deploy time and the zone rules release line are hidden in the approved screenshots because they change between builds: `src/test/features/locations/steps/locations_layout_e2e.steps.ts:12-13,71-75`. That precedent matters for finding R1.
+- ✅ The deploy time and the zone rules release line are hidden in the approved screenshots because they change between builds: `src/test/features/locations/steps/locations_layout_e2e.steps.ts:12-13,71-75`.
+- ❌ Task 7.3 (`tasks.md:47`: "FR12 puts a date into the city data attribution", "Read the 375 px PNGs and confirm the attribution line names the date of the city data") and NFR-R1 (`proposal.md:99`: "The approved settings screenshots are re-approved once") assume the approved settings screenshots show the city data attribution. They do not. The screenshot step captures only the viewport (`locations_layout_e2e.steps.ts:76` calls `toHaveScreenshot` with the file name only, no `fullPage`), and the baselines `src/test/features/__screenshots__/chromium/Approved-screenshots-of-the-settings-at-{375,1024}-px-in-the-light-theme.png` end at the Language group and the offline notice. The attribution is the page's last line, so none of the 8 settings PNGs contains it. See R1.
+- ✅ Existing tests still assert the old attribution text: `src/app/settings/SettingsPage.sections.test.tsx:20,28`, `src/app/settings/CityDataAttribution.test.tsx:13`, `src/test/features/settings/settings_city_data_attribution_e2e.feature:13,36`.
+- ✅ The E2E scenarios run against `pnpm build && pnpm preview` (`playwright.bdd.config.ts:131-145`). Under task 6.1 the built app shows the committed dump date from the `vite.config.ts` define. The Playwright process, by contrast, gets `TEST_CITY_DATA_DATE` through `Object.assign(globalThis, …)`, so `CITY_DATA_DATE` imported into an E2E step is not the date the page shows. See R2.
 - ✅ The MODIFIED requirements exist in `openspec/specs/` as restated: app-shell "New version notice" (`app-shell/spec.md:71`) and "Zone rules update notice" (`:246`), zone-rules-updates "Zone rules update check" (`:35`) and "Stored release document" (`:137`), settings "City data attribution" (`settings/spec.md:999`); every stable scenario is kept in the deltas. The ADDED app-delivery and zone-rules-updates requirements have no namesake in `openspec/specs/`.
 - ✅ Glossary terms the change edits exist as described (`proposal.md:18-25`): **Deploy time** says "a stand-in for a version number" and "*Not:* a version number" (`docs/glossary/settings.md:11`), **Update notice** and **Zone rules update notice** (`docs/glossary/app-shell.md:8,11`), **City data attribution** (`settings.md:21`), **Zone rules update** (`zone-rules.md:15`); no **App revision**, **Waiting build**, **Silent update**, **Watched zone** or **Dump date** exists yet. `docs/architecture/overview.md:68` has "Where things live".
 - ✅ Nothing of the change is implemented yet: no `scripts/appRevision/`, no `app-revision.json`, no `findChangedZones`, `getWatchedZoneIds` or `CITY_DATA_DATE` in the tree, and no archived change covers it.
@@ -66,7 +69,7 @@
 | NFR-P3 | ✅ | ✅ "No formatter on a tick" | ✅ 6.2, 6.3 |
 | NFR-A1 | ✅ | ✅ "No accessibility violations" of both notices | ✅ 7.2 |
 | NFR-A2 | ✅ | ✅ settings "Accessible and fitting" (focus outline and contrast stay in the stable "Accessible and responsive attribution") | ✅ 7.2 |
-| NFR-R1 | ✅ | ✅ settings "Accessible and fitting" | ✅ 7.2, 7.3 (see R1) |
+| NFR-R1 | ✅ | ✅ settings "Accessible and fitting" | ✅ 7.2 (320 px / 2560 px E2E); the re-approval in 7.3 cannot happen, see R1 |
 | UX1 | ✅ | ✅ "A data-only build is waiting" | ✅ 4.4, 7.1 |
 | UX2 | ✅ | ✅ "New version becomes available", "User accepts / postpones" | ✅ 4.4, 7.1 |
 | UX3 | ✅ | ✅ "A release that changes no watched zone" | ✅ 5.4 |
@@ -75,7 +78,7 @@
 | M2 | ✅ | n/a | ✅ 2.1 (fixture histories) |
 | M3 | ✅ | n/a | ✅ 5.1 (six rows of "Kinds of difference that count") |
 | M4 | ✅ | n/a | ✅ 4.4 |
-| M5 | ✅ | n/a | ✅ 6.3, 7.2, 7.3 |
+| M5 | ✅ | n/a | ✅ 6.3, 7.2 |
 | M6 | ✅ | n/a | ✅ 8.2 |
 | G1 | ✅ | n/a — met by FR3, FR4, M1 | n/a — FR3, FR4, M1 |
 | G2 | ✅ | n/a — met by FR3, M1 | n/a — FR3, M1 |
@@ -94,22 +97,22 @@ None.
 
 ## Findings
 
-### R1 — CRITICAL — The dump date in the approved screenshots and E2E texts blocks every city data refresh pull request
-- Location: `openspec/changes/apply-data-updates-silently/tasks.md:47` (task 7.3), `tasks.md:46` (task 7.2), `specs/settings/spec.md:241-251,291-294`
-- Rule: `openspec/specs/app-delivery/spec.md` "Data-only commits" ("A pull request check MUST fail when a data refresh pull request changes a path outside the data paths of its source")
-- Problem: FR12 puts the dump date of the committed city data into the attribution line of the settings page. Task 7.3 re-approves the settings screenshots with that date visible ("Read the 375 px PNGs and confirm the attribution line names the date of the city data"). Task 7.2 adds E2E checks of the attribution text on the real `pnpm build`, and nothing says how they get the date. The monthly city data refresh changes `source.dumpDate`, so the next build shows another date, possibly another month name and another line wrap. `test:bdd` runs on every pull request (`.github/workflows/ci.yml:76-77`), and a city data refresh pull request may change only the city data directory, so it cannot update the PNGs or any test literal. The existing screenshot step already hides the deploy time and the zone rules release line for this reason (`src/test/features/locations/steps/locations_layout_e2e.steps.ts:12-13,71-75`). The tasks do not do the same for the date.
-- Impact: As written, the first city data refresh after this change fails the approved settings screenshots, and a hard-coded date in an attribution E2E check fails too. The refresh pull request never merges by itself, and a human can't fix it inside the data paths. The automated city data refresh from `refresh-data-through-scheduled-pull-requests` breaks without anyone declaring it. This also defeats the goal of this change: data updates that need nobody.
-- Fix: In task 7.3, drop "Read the 375 px PNGs and confirm the attribution line names the date of the city data". Instead: `CityDataAttribution` renders the date in its own element inside the link (`data-city-data-date`). The screenshot step in `locations_layout_e2e.steps.ts` replaces that element's text with a fixed sample date before `toHaveScreenshot`, the same way it handles the deploy time today. Name that step and its `// Verifies NFR-R1 of apply-data-updates-silently` comment in task 7.3. In task 7.2 (and the E2E scenarios of `settings_city_data_attribution_e2e.feature`), check the attribution text against the pattern `City data: GeoNames (<date>), CC BY 4.0` / `Данные о городах: GeoNames (<date>), CC BY 4.0` and check that the link name equals the visible text, with no literal date. The exact date stays covered by the unit BDD of task 6.3, which runs with `TEST_CITY_DATA_DATE`.
-- Fix risk: The screenshots no longer show the real date, but unit BDD 6.3 covers it. The extra element inside the link must keep the accessible name equal to the visible text, which the NFR-A2 E2E check of task 7.2 already asserts. With a fixed sample date, the 1024 px and 375 px baselines get one fixed wrap, so re-approving once (NFR-R1) still holds.
+### R1 — WARNING — Task 7.3 re-approves settings screenshots that never show the city data attribution
+- Location: `openspec/changes/apply-data-updates-silently/tasks.md:47` (task 7.3), `openspec/changes/apply-data-updates-silently/proposal.md:99` (NFR-R1, last sentence)
+- Rule: `.claude/rules/test-planning.md` ("The `tasks.md` verification section must list concrete test commands, not \"check manually\"")
+- Problem: Task 7.3 re-approves the settings screenshots because "FR12 puts a date into the city data attribution". It asks to "Read the 375 px PNGs and confirm the attribution line names the date of the city data", and its Verify requires `git status --short src/test/features/__screenshots__` to list exactly the 8 settings PNGs. NFR-R1 ends with "The approved settings screenshots are re-approved once." But the screenshot step (`src/test/features/locations/steps/locations_layout_e2e.steps.ts:76`) calls `toHaveScreenshot` without `fullPage`, so it captures only the viewport. The baselines (`src/test/features/__screenshots__/chromium/Approved-screenshots-of-the-settings-at-1024-px-in-the-light-theme.png`, and the 375 px one) end at the Language group and the offline notice. The attribution is the last line of the page and appears in none of them.
+- Impact: The implementer cannot complete task 7.3. `--update-snapshots` rewrites nothing, no PNG shows the attribution to confirm, and the Verify "lists only the 8 settings PNGs" fails because `git status` lists none. The implement stage either stalls on a check it cannot pass or ticks it falsely. NFR-R1 keeps a sentence that no test can meet.
+- Fix: Replace task 7.3 with: "The approved screenshots stay unchanged (NFR-R1): after `pnpm run test:bdd:gen`, run `npx playwright test -c playwright.bdd.config.ts --grep "Approved|Screenshot of the|screenshot"` once, without `--update-snapshots`. Verify: it passes and `git status --short src/test/features/__screenshots__` prints nothing." Drop the tag edit to `settings_e2e.feature` and the reading of the PNGs. In `proposal.md:99`, replace "The approved settings screenshots are re-approved once." with "The approved screenshots stay unchanged."
+- Fix risk: The attribution with its date gets no visual-regression baseline. Do not add one through `fullPage`: a baseline that shows the dump date would fail the next city data refresh pull request, which may change only the city data paths. Wrapping and the absence of horizontal scroll stay asserted by the E2E checks of task 7.2 at 320 px and 2560 px in both languages, so NFR-R1 keeps its test.
 - Status: open
 
 ### R2 — WARNING — Existing tests that assert the old attribution text have no task, and the scoped runs never reach them
 - Location: `openspec/changes/apply-data-updates-silently/tasks.md:40` (task 6.2), `tasks.md:46` (task 7.2); code `packages/client/src/app/settings/SettingsPage.sections.test.tsx:20,28`, `packages/client/src/test/features/settings/settings_city_data_attribution_e2e.feature:13-14,36`
 - Rule: `.claude/rules/tdd-workflow.md` ("When modifying existing code: verify a test exists first"); `.claude/rules/test-planning.md`
-- Problem: Task 6.2 changes `settings.cityDataAttribution` to carry `{{date}}`, but it updates and runs only `cityDataAttribution.test.ts`, `CityDataAttribution.test.tsx` and `src/locales`. `SettingsPage.sections.test.tsx` looks up the link by the exact name "City data: GeoNames, CC BY 4.0". The E2E scenarios "The attribution in both languages" and "The attribution offline" assert that same old text. The delta spec changes both scenarios (`specs/settings/spec.md:241-251,291-294`), but no task edits them, and the Playwright runs of tasks 7.1–7.3 are scoped to `--grep @apply-data-updates-silently`, a tag those scenarios do not carry.
-- Impact: The implement stage finishes with every listed command green. Then the full `pnpm test` and `test:bdd` in CI fail on three old assertions, and the delta's changed scenarios never become executable in the E2E feature.
-- Fix: In task 6.2, add "update `src/app/settings/SettingsPage.sections.test.tsx` to the new attribution text" and the command `npx vitest run src/app/settings/SettingsPage.sections.test.tsx`. In task 7.2, add "change the scenarios 'The attribution in both languages' and 'The attribution offline' of `settings_city_data_attribution_e2e.feature` to the delta's text (date checked as in R1), adding `@apply-data-updates-silently @FR12 @FR13` to their tags", and run `npx playwright test -c playwright.bdd.config.ts --grep "attribution"` after `pnpm run test:bdd:gen`.
-- Fix risk: none. It only adds edits and runs that the change already needs. The expected E2E text follows R1, so the two fixes must agree.
+- Problem: Task 6.2 changes `settings.cityDataAttribution` to carry `{{date}}`, but it updates and runs only `cityDataAttribution.test.ts`, `CityDataAttribution.test.tsx` and `src/locales`. `SettingsPage.sections.test.tsx` looks up the link by the exact name "City data: GeoNames, CC BY 4.0". The E2E scenarios "The attribution in both languages" and "The attribution offline" assert that same old text. The delta spec changes both scenarios (`specs/settings/spec.md:241-251,291-294`), but no task edits them, and the Playwright runs of tasks 7.1–7.2 are scoped to `--grep @apply-data-updates-silently`, a tag those scenarios do not carry. Nothing says how an E2E check gets the date either. The built app under test shows the committed dump date (`vite.config.ts` define, task 6.1), while the Playwright process holds `TEST_CITY_DATA_DATE` (`Object.assign(globalThis, …)` in `playwright.bdd.config.ts`).
+- Impact: The implement stage finishes with every listed command green. Then the full `pnpm test` and `test:bdd` in CI fail on three old assertions, and the delta's changed scenarios never become executable in the E2E feature. An E2E check that names a literal date, or imports `CITY_DATA_DATE`, fails at once (test date ≠ committed date) or at the next city data refresh pull request, which may change only the city data paths.
+- Fix: In task 6.2, add "update `src/app/settings/SettingsPage.sections.test.tsx` to the new attribution text" and the command `npx vitest run src/app/settings/SettingsPage.sections.test.tsx`. In task 7.2, add "change the scenarios 'The attribution in both languages' and 'The attribution offline' of `settings_city_data_attribution_e2e.feature` to the delta's text, checking the date part only as non-empty text between the parentheses (patterns `^City data: GeoNames \(.+\), CC BY 4\.0$` and `^Данные о городах: GeoNames \(.+\), CC BY 4\.0$`, never a literal date and never `CITY_DATA_DATE`), adding `@apply-data-updates-silently @FR12 @FR13` to their tags", and run `npx playwright test -c playwright.bdd.config.ts --grep "attribution"` after `pnpm run test:bdd:gen`.
+- Fix risk: The E2E check no longer pins the exact date. The exact date stays covered by unit BDD 6.3, which runs with `TEST_CITY_DATA_DATE`. The Gherkin steps take a pattern instead of a literal, which is a small step-definition change inside task 7.2.
 - Status: open
 
 ### R3 — SUGGESTION — FR8 uses "abbreviation" for the local time type's designation
@@ -132,4 +135,4 @@ None.
 
 ## Verdict
 
-Needs revision. Blocking: R1. R2 should be fixed in the same revision, because the two fixes share the expected attribution text. R3 and R4 are polish.
+Needs revision. Blocking: R1 and R2 (both WARNING). Task 7.3 cannot be completed as written, and the old attribution assertions would fail outside the scoped runs. R3 and R4 are polish.
