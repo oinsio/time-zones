@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Карточки без дома, сейчас — светлая</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* Design tokens of this screen: light theme, vivid day palette. */
+:root {
+  --color-background: #f7f7f5;
+  --color-surface: #ffffff;
+  --color-card-border: #a9adb8;
+  --color-control-border: #8a8a93;
+  --color-control-border-inactive: #c9ccd4;
+  --color-foreground: #1c1c20;
+  --color-muted-foreground: #60616c;
+  --color-accent: #3159e7;
+  --color-accent-foreground: #ffffff;
+  --color-handle-border: #1c1c20;
+  --color-notice: #fff4d6;
+  --color-notice-foreground: #5c4300;
+  --color-danger: #b42318;
+  --color-day-non-working: #ececef;
+  --color-midnight-shade: rgba(24, 24, 27, 0.10);
+  --color-hour-cell-foreground: #1c1c20;
+  --color-night-cell-foreground: #1c1c20;
+  --color-meeting: #00aa00;
+  --color-meeting-text: #008800;
+  --color-meeting-bar: #e0f5e0;
+  --color-day-night: #a4afd4;
+  --color-day-morning: #f0c6b8;
+  --color-day-daylight: #f8e5a0;
+  --color-day-evening: #e8c7df;
+  --handle-border-width: 2px;
+  --lift-shadow: 0 8px 24px rgba(24,24,27,.18);
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px; background: #d9d9d4; display: flex; justify-content: center; font-family: "Manrope", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+svg.icon { display: block; flex-shrink: 0; }
+#screen { width: 390px; height: 844px; overflow: hidden; display: flex; flex-direction: column; background: var(--color-background); color: var(--color-foreground); position: relative; }
+.column { width: 100%; max-width: 1120px; margin: 0 auto; }
+/* Header: title left, both actions right, no divider line */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 24px 16px 20px; }
+.title { margin: 0; font-size: 27px; line-height: 32px; font-weight: 700; letter-spacing: -0.5px; }
+.header-actions { display: flex; color: var(--color-accent); }
+.icon-button { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+.header-actions .icon-button:last-child { margin-right: -8px; }
+/* Location list */
+.cards { display: flex; flex-direction: column; gap: 12px; padding: 0 13px; }
+.card { background: var(--color-surface); border: 1px solid var(--color-card-border); border-radius: 14px; padding: 10px 15px 11px; position: relative; }
+.card-head { display: flex; flex-wrap: wrap; align-items: flex-start; column-gap: 9px; }
+.place { display: flex; flex-wrap: wrap; align-items: center; column-gap: 9px; flex: 1 1 0; min-width: min-content; }
+.mark { color: var(--color-accent); }
+.city { margin: 0; font-size: 24px; line-height: 33px; font-weight: 700; letter-spacing: -0.4px; min-width: 0; }
+.difference { font-size: 16px; font-weight: 600; color: var(--color-muted-foreground); white-space: nowrap; }
+.time-group { display: flex; align-items: flex-start; margin-left: auto; }
+.time { font-size: 26px; line-height: 33px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.day-half { font-size: 14px; font-weight: 700; margin-left: 4px; }
+.menu-button { margin: 5px -4px 0 14px; }
+.card-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-top: 1px; }
+.zone-line, .date { color: var(--color-muted-foreground); font-size: 14px; line-height: 21px; }
+.date { white-space: nowrap; }
+/* Zone line: parts joined by a middle dot; a dot at a line break is not shown */
+.zone-line { display: block; overflow: hidden; }
+.zone-line > span { display: flex; flex-wrap: wrap; margin-left: -14px; }
+.zone-line > span > span { position: relative; padding-left: 14px; }
+.zone-line > span > span::before { content: "·"; position: absolute; left: 5px; }
+.zone-line > span > span:not(:first-child) { white-space: nowrap; }
+/* Day track: 12 px bar, 23 px visible handle, 44 px hit area */
+.day-track { position: relative; height: 23px; margin-top: 12px; }
+.day-track-bar { position: absolute; left: 0; right: 0; top: 5.5px; height: 12px; border-radius: 9999px; }
+.day-track-handle { position: absolute; top: 0; width: 23px; height: 23px; margin-left: -11.5px; border-radius: 50%; background: var(--color-surface); border: var(--handle-border-width) solid var(--color-handle-border); }
+.hour-labels { position: relative; height: 16px; margin-top: 3px; font-size: 12px; line-height: 16px; color: var(--color-muted-foreground); font-variant-numeric: tabular-nums; }
+.hour-labels span { position: absolute; top: 0; white-space: nowrap; }
+.row-note { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 6px; background: var(--color-notice); color: var(--color-notice-foreground); font-size: 13px; line-height: 1.375; }
+.row-note svg { margin-top: 1px; }
+/* Wide card (from 768 px): header line, then the track across the card */
+.wide .header { padding: 24px 20px 20px; }
+.wide .cards { padding: 0 16px; }
+.wide .card { padding: 12px 20px 12px; }
+.wide .card-head { flex-wrap: nowrap; align-items: center; column-gap: 14px; }
+.wide .place { align-items: baseline; column-gap: 10px; }
+.wide .place .mark { align-self: center; }
+.wide .city { font-size: 26px; }
+.wide .zone-line { font-size: 15px; flex: 1 1 200px; }
+.wide .date { font-size: 15px; }
+.wide .time { font-size: 28px; }
+.wide .menu-button { margin: 0 -4px 0 0; }
+.wide .day-track { margin-top: 6px; }
+/* Date bar: page background, no top line, one centred group */
+.spacer { flex: 1; }
+.date-bar { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px; background: var(--color-background); }
+.date-nav { display: flex; align-items: center; }
+.date-button { font-size: 16px; font-weight: 700; padding: 0 4px; white-space: nowrap; }
+.now { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border: 1px solid var(--color-control-border); border-radius: 13px; font-size: 16px; font-weight: 600; white-space: nowrap; }
+.now.inactive { border-color: var(--color-control-border-inactive); color: var(--color-muted-foreground); }
+/* Location menu */
+.menu { position: absolute; right: 12px; top: 46px; z-index: 5; min-width: 200px; padding: 4px 0; border-radius: 10px; border: 1px solid var(--color-control-border); background: var(--color-surface); box-shadow: var(--lift-shadow); display: flex; flex-direction: column; }
+.menu span { min-height: 44px; padding: 0 16px; display: flex; align-items: center; font-size: 15px; }
+.menu .disabled { color: var(--color-muted-foreground); opacity: 0.55; }
+.card.lifted { transform: translateY(-104px) scale(1.02); box-shadow: var(--lift-shadow); z-index: 4; }
+.card.shifted { transform: translateY(126px); }
+/* Grid */
+.grid-panel { list-style: none; margin: 0 13px; padding: 0; position: relative; background: var(--color-surface); border: 1px solid var(--color-card-border); border-radius: 14px; overflow: hidden; }
+.wide .grid-panel { margin: 0 16px; }
+.grid-row { padding: 12px 14px 14px; border-top: 1px solid var(--color-card-border); }
+.grid-row:first-child { border-top: 0; }
+.wide .grid-row { padding: 12px 20px 14px; }
+.grid-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; position: relative; z-index: 2; }
+.grid-head .place { align-items: baseline; }
+.grid-head .mark { align-self: center; }
+.grid-head .city { font-size: 20px; line-height: 26px; }
+.wide .grid-head .city { font-size: 22px; }
+.grid-head .time { font-size: 24px; line-height: 1.15; }
+.wide .grid-head .time { font-size: 26px; }
+.grid-head .time.meeting-span { color: var(--color-meeting-text); font-size: 20px; }
+.wide .grid-head .time.meeting-span { font-size: 26px; }
+.grid-head .date-time { display: flex; flex-direction: column; align-items: flex-end; }
+.wide .grid-head .date-time { flex-direction: row; align-items: baseline; gap: 12px; }
+.grid-head .menu-button { margin: 0 -4px 0 0; }
+.grid-head .city, .grid-head .difference, .grid-head .zone-line > span > span, .grid-head .date, .grid-head .time, .day-shift { background: var(--color-surface); }
+.day-shift { color: var(--color-danger); font-size: 14px; font-weight: 700; white-space: nowrap; }
+.hour-strip { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 3px; }
+.narrow .hour-strip-window { overflow: hidden; margin: 0 -14px; }
+.narrow .hour-strip { display: flex; width: max-content; }
+.narrow .hour-cell { width: 38px; flex: none; height: 44px; }
+.hour-cell { height: 48px; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-size: 15px; line-height: 1.1; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--color-hour-cell-foreground); position: relative; }
+.hour-cell.night { color: var(--color-night-cell-foreground); }
+.hour-cell.accent { color: var(--color-accent-foreground); }
+.hour-cell small { font-size: 10px; font-weight: 600; line-height: 1; }
+.hour-cell.midnight { box-shadow: inset 0 0 0 999px var(--color-midnight-shade); }
+.hour-cell.midnight small { font-size: 9px; font-weight: 700; }
+.hour-cell.current, .hour-cell.in-meeting { font-weight: 800; }
+.hour-cell.dimmed { opacity: 0.4; }
+.hour-cell.dst-edge::before { content: ""; position: absolute; left: -2.5px; top: 0; bottom: 0; width: 2px; background: var(--color-foreground); }
+.frame { position: absolute; top: 6px; bottom: 6px; border: 2px solid var(--color-accent); border-radius: 9px; z-index: 1; pointer-events: none; }
+.frame.meeting { border-color: var(--color-meeting); }
+.meeting-handle { position: absolute; width: 12px; height: 36px; margin: -18px 0 0 -6px; border-radius: 4px; background: var(--color-meeting); z-index: 3; }
+.meeting-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 24px 20px 20px; background: var(--color-meeting-bar); border-bottom: 1px solid var(--color-meeting); margin-bottom: 12px; }
+.narrow .meeting-bar { padding: 24px 16px 20px; }
+.meeting-bar .title { grid-column: 2; font-size: 24px; font-weight: 600; letter-spacing: 0; }
+.meeting-bar .header-actions { color: var(--color-meeting); justify-self: end; }
+.grid-row .row-note { position: relative; z-index: 2; }
+/* Settings */
+.settings { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+.settings-group { background: var(--color-surface); border: 1px solid var(--color-control-border); border-radius: 10px; padding: 6px 6px 6px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 56px; }
+.settings-group.new { outline: 2px dashed var(--color-accent); outline-offset: 3px; }
+.settings-caption { font-size: 15px; font-weight: 600; }
+.options { display: flex; gap: 4px; }
+.option { white-space: nowrap; min-height: 44px; min-width: 44px; padding: 0 12px; border-radius: 8px; border: 1px solid transparent; display: flex; align-items: center; font-size: 14px; }
+.option.checked { border-color: var(--color-accent); color: var(--color-accent); font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="screen" class="narrow" data-theme="light" data-day-palette="vivid">
+<header class="header column"><h1 class="title">Часовые пояса</h1><div class="header-actions"><span class="icon-button" aria-label="Добавить место"><svg class="icon " data-lucide="plus" width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span><span class="icon-button" aria-label="Настройки"><svg class="icon " data-lucide="settings" width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></span></div></header><main class="column"><ul class="cards" style="list-style: none; margin: 0"><li class="card "><div class="card-head"><div class="place"><span class="mark" role="img" aria-label="Вы здесь"><svg class="icon " data-lucide="map-pin" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span><h2 class="city">Алматы</h2></div><span class="time-group"><span class="time">12:30</span><span class="menu-button" aria-label="Действия: Алматы"><svg class="icon " data-lucide="ellipsis" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/><circle cx="5" cy="12" r="1" fill="currentColor"/></svg></span></span></div><div class="card-meta"><span class="zone-line" data-zone-line><span><span>Время устройства</span><span>UTC+5</span></span></span><span class="date">вс, 8 мар.</span></div><div class="day-track" role="slider" aria-label="Время: Алматы"><div class="day-track-bar" style="background: linear-gradient(to right, var(--color-day-night) 23.1619%, var(--color-day-morning) 25.2453%, var(--color-day-morning) 27.7771%, var(--color-day-daylight) 29.8605%, var(--color-day-daylight) 70.5737%, var(--color-day-evening) 72.657%, var(--color-day-evening) 75.196%, var(--color-day-night) 77.2794%)"></div><div class="day-track-handle" style="left: 52.0833%"></div></div></li><li class="card "><div class="card-head"><div class="place"><h2 class="city">Москва</h2><span class="difference">−2 ч</span></div><span class="time-group"><span class="time">10:30</span><span class="menu-button" aria-label="Действия: Москва"><svg class="icon " data-lucide="ellipsis" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/><circle cx="5" cy="12" r="1" fill="currentColor"/></svg></span></span></div><div class="card-meta"><span class="zone-line" data-zone-line><span><span>Россия</span><span>МСК</span><span>UTC+3</span></span></span><span class="date">вс, 8 мар.</span></div><div class="day-track" role="slider" aria-label="Время: Москва"><div class="day-track-bar" style="background: linear-gradient(to right, var(--color-day-night) 34.1408%, var(--color-day-morning) 36.2241%, var(--color-day-morning) 40.1566%, var(--color-day-daylight) 42.2399%, var(--color-day-daylight) 80.1018%, var(--color-day-evening) 82.1852%, var(--color-day-evening) 86.1322%, var(--color-day-night) 88.2155%)"></div><div class="day-track-handle" style="left: 52.0833%"></div></div></li><li class="card "><div class="card-head"><div class="place"><h2 class="city">Калькутта</h2><span class="difference">+0:30</span></div><span class="time-group"><span class="time">13:00</span><span class="menu-button" aria-label="Действия: Калькутта"><svg class="icon " data-lucide="ellipsis" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/><circle cx="5" cy="12" r="1" fill="currentColor"/></svg></span></span></div><div class="card-meta"><span class="zone-line" data-zone-line><span><span>Индия</span><span>IST</span><span>UTC+5:30</span></span></span><span class="date">вс, 8 мар.</span></div><div class="day-track" role="slider" aria-label="Время: Калькутта"><div class="day-track-bar" style="background: linear-gradient(to right, var(--color-day-night) 19.7552%, var(--color-day-morning) 21.8385%, var(--color-day-morning) 23.378%, var(--color-day-daylight) 25.4614%, var(--color-day-daylight) 68.6159%, var(--color-day-evening) 70.6993%, var(--color-day-evening) 72.2409%, var(--color-day-night) 74.3242%)"></div><div class="day-track-handle" style="left: 52.0833%"></div></div></li><li class="card "><div class="card-head"><div class="place"><h2 class="city">Нью-Йорк</h2><span class="difference">−9 ч</span></div><span class="time-group"><span class="time">03:30</span><span class="menu-button" aria-label="Действия: Нью-Йорк"><svg class="icon " data-lucide="ellipsis" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/><circle cx="5" cy="12" r="1" fill="currentColor"/></svg></span></span></div><div class="card-meta"><span class="zone-line" data-zone-line><span><span>Соединенные Штаты</span><span>EDT</span><span>UTC−4</span></span></span><span class="date">вс, 8 мар.</span></div><div class="day-track" role="slider" aria-label="Время: Нью-Йорк"><div class="day-track-bar" style="background: linear-gradient(to right, var(--color-day-daylight) 12.6775%, var(--color-day-evening) 14.7609%, var(--color-day-evening) 17.1134%, var(--color-day-night) 19.1968%, var(--color-day-night) 65.0388%, var(--color-day-morning) 67.1221%, var(--color-day-morning) 69.4638%, var(--color-day-daylight) 71.5472%)"></div><div class="day-track-handle" style="left: 52.0833%"></div></div><p class="row-note" style="margin-bottom: 0"><svg class="icon " data-lucide="info" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>8 мар. в 02:00 часы переведены на 1 ч вперёд</span></p></li></ul></main><div class="spacer"></div><footer class="date-bar" data-date-bar><div class="date-nav"><span class="icon-button" aria-label="Предыдущий день"><svg class="icon " data-lucide="chevron-left" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span><span class="date-button">вс, 8 марта</span><span class="icon-button" aria-label="Следующий день"><svg class="icon " data-lucide="chevron-right" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span></div><span class="now inactive" aria-disabled="true"><svg class="icon " data-lucide="clock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Сейчас</span></footer>
+</div>
+</body>
+</html>
