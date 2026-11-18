@@ -55,7 +55,10 @@ The sample of [`../README.md`](../README.md): Sunday, 8 March 2026, 12:30 in Alm
 
 | Screen | Files | Shows |
 |---|---|---|
-| Colours group | [PNG](screens/settings-palette-light.png) · [HTML](screens/settings-palette-light.html) | where the new group stands. Only its place and its two options are the target; the look of the other groups stays as built |
+| Settings, Time of day | [PNG](screens/settings-phone-light.png) · [HTML](screens/settings-phone-light.html) · [dark PNG](screens/settings-phone-dark.png) · [dark HTML](screens/settings-phone-dark.html) | the Colours group under the colouring group, with the palette swatches |
+| Settings, Working hours | [PNG](screens/settings-phone-working-hours-light.png) · [HTML](screens/settings-phone-working-hours-light.html) | no Colours group; the working hours row stands in its place, as built |
+
+The settings screens copy the built page with the new tokens. Only the Colours group is new.
 
 ## Not covered
 
