@@ -9,6 +9,10 @@ Screens are the visual target for development. Documents stay the source of trut
 
 Each screen has a PNG (2x) and a self-contained HTML file with inline styles. Open the HTML in a browser to inspect sizes, spacing and colors with developer tools. The only external dependency is the Manrope font from Google Fonts.
 
+## Redesign in progress
+
+The target look after the redesign of November 2026 is in [redesign/](redesign/README.md): its specification and screens. It is not built yet; the screens below show the app as it is. Each change that builds a part of the redesign moves its screens here.
+
 ## Sample data
 
 All screens show the same moment so they can be compared:
