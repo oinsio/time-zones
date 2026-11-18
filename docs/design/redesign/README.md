@@ -28,7 +28,7 @@ The sample of [`../README.md`](../README.md): Sunday, 8 March 2026, 12:30 in Alm
 |---|---|---|
 | Phone, light | [PNG](screens/cards-phone-light.png) · [HTML](screens/cards-phone-light.html) | narrow card, home mark, offset differences, zone line with dots, wall-time hint, date bar with an active Now |
 | Phone, dark | [PNG](screens/cards-phone-dark.png) · [HTML](screens/cards-phone-dark.html) | the same with dark tokens and the Vivid palette |
-| Phone, dark, Muted | [PNG](screens/cards-phone-dark-muted.png) · [HTML](screens/cards-phone-dark-muted.html) | the Muted palette |
+| Phone, Muted | [dark PNG](screens/cards-phone-dark-muted.png) · [dark HTML](screens/cards-phone-dark-muted.html) · [light PNG](screens/cards-phone-light-muted.png) · [light HTML](screens/cards-phone-light-muted.html) | the Muted palette |
 | No home, live | [PNG](screens/cards-phone-no-home-light.png) · [HTML](screens/cards-phone-no-home-light.html) · [dark PNG](screens/cards-phone-no-home-dark.png) · [dark HTML](screens/cards-phone-no-home-dark.html) | device time location with the Here mark and no caption, inactive Now, clock change note |
 | Travelling | [PNG](screens/cards-phone-travel-light.png) · [HTML](screens/cards-phone-travel-light.html) | home is Almaty, the device is in Moscow |
 | UTC | [PNG](screens/cards-phone-utc-light.png) · [HTML](screens/cards-phone-utc-light.html) · [dark PNG](screens/cards-phone-utc-dark.png) · [dark HTML](screens/cards-phone-utc-dark.html) | the UTC location: "Всемирное время" and a plain accent track |
