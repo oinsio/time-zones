@@ -8,7 +8,7 @@ The redesigned cards SHALL keep out the five defects fixed earlier (`spec.md` §
 - **AND** the list is shown `<width>` px wide
 - **WHEN** the user moves the Almaty handle to the `<end>` of the day
 - **THEN** the visible Almaty handle does not overlap the Almaty time or the Almaty location menu button
-- **AND** the handle's hit area lies inside its slider's hit area
+- **AND** the visible handle lies inside the Almaty card
 
 | width | end |
 |---|---|
@@ -72,7 +72,7 @@ The redesigned cards SHALL keep out the five defects fixed earlier (`spec.md` §
 ## MODIFIED Requirements
 
 ### Requirement: Day track layout
-On every width the track SHALL sit on its own line, spanning the card's content width: below 768 px under the zone line and the date, 12 px below them, without hour labels; from 768 px under the first line of the card, with the hour labels under it. The bar MUST be 12 px high and fully rounded on every width. The handle's centre MUST be exactly at the effective instant's position, with the start of the day at the track's left edge and its end at the right edge. The one exception is the dragged handle during an active drag: its centre MUST be at the pointer's horizontal position, within 1 px, clamped to the track's edges, and MUST be at the effective instant's position again, within 1 px, once the drag ends ("Handle position"). The visible handle is a circle of 23 px on every width, filled with the surface colour of the card it stands on and outlined with the handle border token (2 px in the light theme, 3 px in the dark theme), whether the dark theme comes from the system or from the Dark theme preference. The slider's hit area MUST be at least 44 px high and its handle's hit area at least 44 × 44 px, and the handle's hit area MUST stay inside the slider's hit area at every position. The hour labels are 12 px, muted, with tabular figures; the first stands under the track's left edge and the last under its right edge, within 1 px, and every label MUST be on one line in both hour formats and both interface languages.
+On every width the track SHALL sit on its own line, spanning the card's content width: below 768 px under the zone line and the date, 12 px below them, without hour labels; from 768 px under the first line of the card, with the hour labels under it. The bar MUST be 12 px high and fully rounded on every width. The handle's centre MUST be exactly at the effective instant's position, with the start of the day at the track's left edge and its end at the right edge. The one exception is the dragged handle during an active drag: its centre MUST be at the pointer's horizontal position, within 1 px, clamped to the track's edges, and MUST be at the effective instant's position again, within 1 px, once the drag ends ("Handle position"). The visible handle is a circle of 23 px on every width, filled with the surface colour of the card it stands on and outlined with the handle border token (2 px in the light theme, 3 px in the dark theme), whether the dark theme comes from the system or from the Dark theme preference. The slider's hit area MUST be at least 44 px high and its handle's hit area at least 44 × 44 px, as built; the bar spans the card's content width, and the visible handle MUST stay inside its card at every position. The hour labels are 12 px, muted, with tabular figures; the first stands under the track's left edge and the last under its right edge, within 1 px, and every label MUST be on one line in both hour formats and both interface languages.
 A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card in the list. A vertical swipe that starts on a track still scrolls the page and MUST NOT select a time; a finger tap on a track selects the time at that position. The page with tracks MUST NOT scroll horizontally at 320, 390, 768, 820, 1024, 1440 and 2560 px, in both hour formats. The approved screenshots of the main page in Cards MUST show the tracks. <!-- implements FR3, NFR-R1, NFR-R2, NFR-R3, UX1, UX2, UX3 of add-time-sliders-to-location-cards; FR1, FR4, NFR-R1, NFR-R2, UX1 of fix-day-track-handle-overlap-and-end-of-day; FR2, FR3 of keep-now-button-visible-when-live; FR3, NFR-R1, UX2 of fix-day-track-drag-continuity-and-smoothness; FR2, FR5, FR6, NFR-R1, UX3, UX4 of fix-location-card-and-header-layout; FR13, NFR-R1 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: Track under the text on a narrow screen
@@ -122,7 +122,7 @@ A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card
 - **GIVEN** the list contains Almaty and Moscow
 - **AND** the list is shown `<width>` px wide
 - **WHEN** the user moves the Almaty handle to the `<end>` of the day
-- **THEN** the Almaty handle's hit area lies inside its slider's hit area
+- **THEN** the visible Almaty handle lies inside the Almaty card
 - **AND** the visible handle does not overlap the Almaty time or the Almaty location menu button
 
 | width | end |
