@@ -2,7 +2,7 @@
 
 ## Context
 
-Driven by FR1–FR5, NFR-A1, NFR-R1 and UX1 of the proposal. The concept is the **Location menu** (`docs/glossary/locations.md`). Its *Code:* owner is `LocationMenu` (`packages/client/src/views/shared/LocationMenu.tsx`), a shared block that both views use through `LocationRow` → `ZoneRowContent` (the `menu` slot after `LocalDateTime` in the time group). This change extends that owner and adds no second one.
+Driven by FR1–FR5, NFR-A1, NFR-R1, UX1 and UX2 of the proposal. The concept is the **Location menu** (`docs/glossary/locations.md`). Its *Code:* owner is `LocationMenu` (`packages/client/src/views/shared/LocationMenu.tsx`), a shared block that both views use through `LocationRow` → `ZoneRowContent` (the `menu` slot after `LocalDateTime` in the time group). This change extends that owner and adds no second one.
 
 The code today:
 
