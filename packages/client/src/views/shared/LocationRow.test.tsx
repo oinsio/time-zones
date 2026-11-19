@@ -1,3 +1,4 @@
+// Verifies FR1 of make-location-menu-button-vertical.
 // Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR5, FR6, NFR-R1, UX1 of show-zone-abbreviations-and-zone-label-setting (D6).
 // Verifies FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).

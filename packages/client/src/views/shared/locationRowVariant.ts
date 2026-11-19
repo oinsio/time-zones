@@ -7,6 +7,7 @@ import {
  * How a view shows one location row: a card of its own, or a row of the grid panel.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4).
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
+ * Implements FR2, FR3, UX1 of make-location-menu-button-vertical (D2).
  */
 export enum LocationRowVariant {
   CARD = "card",
