@@ -46,6 +46,7 @@ Feature: Location card layout in a real browser
   Scenario: A long city wraps and the time drops
     Given the locations interface language is Russian
     And the day colouring is "Time of day" and the hour format is "H12"
+    And the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Петропавловск-Камчатский"
     And the screen is 320 px wide for the locations
     When the user opens the locations app

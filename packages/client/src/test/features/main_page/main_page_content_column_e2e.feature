@@ -10,7 +10,7 @@ Feature: Content column of the main page in a real browser
     When the user opens the locations app
     Then the header, the list and the date bar group are at most 1120 px wide
     And their centre is the centre of the page width
-    And the main page does not scroll horizontally
+    And the locations screen does not scroll horizontally
 
     Examples:
       | width | view  |

@@ -6,7 +6,7 @@ import {
   type Theme,
 } from "../../main_page/steps/themeTokens";
 import { requireBox } from "../../time_selection/steps/timeSelectionE2eHelpers";
-import { sliderOf } from "../../time_selection/steps/timeSelectionE2eHelpers";
+import { barOf } from "../../time_selection/steps/timeSelectionE2eHelpers";
 import { englishLocale } from "../../main_page/steps/englishTexts";
 import { test } from "./locations_ui_e2e.fixtures";
 import {
@@ -158,7 +158,7 @@ Then(
   "the day track of {string} is under that line",
   async ({ locationsWorld }, city: string) => {
     const { page } = locationsWorld;
-    const trackBox = await requireBox(sliderOf(page, city));
+    const trackBox = await requireBox(barOf(page, city));
     const zoneBox = await requireBox(zoneLineOf(page, city));
     expect(trackBox.y).toBeGreaterThanOrEqual(zoneBox.y + zoneBox.height - 1);
   },
@@ -182,7 +182,7 @@ Then(
   "the day track of {string} is under that line and spans the content width of the card",
   async ({ locationsWorld }, city: string) => {
     const { page } = locationsWorld;
-    const trackBox = await requireBox(sliderOf(page, city));
+    const trackBox = await requireBox(barOf(page, city));
     const timeBox = await requireBox(timeOf(page, city));
     expect(trackBox.y).toBeGreaterThanOrEqual(timeBox.y + timeBox.height - 1);
     const cityBox = await requireBox(cityOf(page, city));

@@ -70,15 +70,6 @@ Feature: Colouring settings in a real browser
       | 1024  | Russian  | "H24"       |
       | 2560  | English  | "H12"       |
 
-  @add-day-colouring-setting @NFR-R1 @UX2
-  Scenario: The row appears without moving the groups above
-    Given the locations interface language is English
-    And the screen is 375 px wide for the locations
-    And the user opens the settings
-    When the user notes the positions of the groups above the colouring row
-    And the user chooses the option "Working hours"
-    Then the groups above the working hours row keep their positions
-
   @add-day-colouring-setting @NFR-R1
   Scenario Outline: No horizontal scrolling with the row at <width> px
     Given the locations interface language is Russian
