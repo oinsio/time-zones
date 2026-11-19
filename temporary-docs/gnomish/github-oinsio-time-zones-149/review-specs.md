@@ -111,7 +111,8 @@
 - Impact: At every width above 1152 px, the green meeting bar becomes a centred strip with page background on both sides. That breaks NG5 ("No change to the meeting bar"), spec §4 ("The meeting bar keeps its built layout") and the meeting screens. The date bar fails the main-page "Content column" sentence "keeps the page background across the whole viewport width". No scenario checks either width, so the drift reaches the re-approved meeting screenshots unnoticed.
 - Fix: In D4, make the outer wrapper full width (`min-h-dvh w-full flex flex-col`, no max width). Put `mx-auto w-full max-w-content px-4` on three inner elements: the header's title and actions row, `main`, and the footer's inner group. The meeting header and the footer then keep their full-width backgrounds. Correct the sentence about negative margins to match. Add to the main-page "Content column" requirement a scenario "The bars span the viewport": at 1440 px, the date bar and (in Grid, with a meeting range) the meeting bar are as wide as the viewport, within 1 px. List that scenario in task 6.3.
 - Fix risk: The header row and the list must keep the same side padding so the title still lines up with the cards. The existing "The column is centred on a wide screen" scenario of task 6.3 already checks that. Nothing else changes.
-- Status: open
+- Status: fixed
+- Resolution: design.md D4 now keeps the outer wrapper full width and puts `mx-auto w-full max-w-content px-4` on the header row, `main` and the footer inner group, so the meeting header and the footer span the viewport (their `-mx-4` goes). specs/main-page/spec.md "Content column" says the meeting bar keeps its background across the viewport and gains the scenario "The bars span the viewport" (1440 px, Grid with a meeting range); task 6.3 lists it.
 
 ### R2 — WARNING — Task 13.4 leaves the settings language screenshots out of the re-take
 - Location: `openspec/changes/redesign-cards-grid-and-day-palettes/tasks.md:96`
@@ -120,7 +121,8 @@
 - Impact: The language screenshot scenarios fail on the next full E2E run (CI), and the implement stage does not see it, because tasks 15.1 and 15.2 run no E2E outside the view-contract projects.
 - Fix: Add `settings_language_e2e.feature` ("Approved language screenshots") to the list of task 13.4. Also extend its Verify with a guard: every feature from `grep -rl "screenshot" src/test/features --include=*_e2e.feature` was run without `--update-snapshots` and passed.
 - Fix risk: none (one more feature to re-take and run, one command at a time).
-- Status: open
+- Status: fixed
+- Resolution: task 13.4 now re-takes `settings_language_e2e.feature` ("Approved language screenshots") and its Verify adds a guard: every feature from `grep -rl "screenshot" src/test/features --include=*_e2e.feature` is run without `--update-snapshots`, one at a time, and passes.
 
 ### R3 — WARNING — The NFR-P2 bundle check inspects only the boot entry
 - Location: `openspec/changes/redesign-cards-grid-and-day-palettes/tasks.md:81`
@@ -129,7 +131,8 @@
 - Impact: Suppose the new `MouseSensor`/`TouchSensor` wiring or a `views/shared` re-export pulls dnd-kit into the main chunk. The check still prints 0 and NFR-P2 and the locations scenario "Reorder stays out of the initial bundle" pass while being false. No other test covers this scenario today.
 - Fix: Change the Verify of 11.7 to check every initial script. Take every `src="…js"` and every `rel="modulepreload"` `href` of `dist/index.html`, the same set `collectInitialScriptUrls` returns. Each such file under `dist/` must give `grep -c DndDescribedBy` = 0, and `grep -rl DndDescribedBy dist/assets` must still find a lazy chunk.
 - Fix risk: If dnd-kit really is in a preloaded chunk today, the task now fails and the implement stage must move the import behind the lazy views. That is the behaviour NFR-P2 asks for.
-- Status: open
+- Status: fixed
+- Resolution: task 11.7 now checks every initial script, the set `collectInitialScriptUrls` (`scripts/bundle/initialScripts.ts`) returns: the module script plus every `rel="modulepreload"` href of `dist/index.html`; each must give `grep -c DndDescribedBy` = 0 (at least two files checked), and the lazy-chunk sanity check stays.
 
 ### R4 — WARNING — M5 has no mutation run for the preferences, the adapter and the controller
 - Location: `openspec/changes/redesign-cards-grid-and-day-palettes/tasks.md:19-27`
@@ -138,7 +141,8 @@
 - Impact: The migration that sets `dayPalette` to `VIVID` and the validation that rejects an unknown palette are the persistence-critical code of FR3. They ship without the mutation check that M5 and `tdd-workflow.md` require, so M5 cannot be reported as met.
 - Fix: Add a task after 4.3: "4.6 Mutation (M5): `cd packages/client && npx stryker run --mutate 'src/preferences/preferencesCommands.ts,src/preferences/parseStoredPreferences.ts,src/adapters/preferencesDocument.ts,src/controller/useDayPalettePreference.ts,src/controller/PreferencesProvider.tsx'`, score ≥ 95 % (minimum 90 %)." That is 5 files, within the CLAUDE.md limit.
 - Fix risk: none (one more scoped run, within the 5-file limit).
-- Status: open
+- Status: fixed
+- Resolution: new task 4.6 runs scoped Stryker on `preferences.ts`, `preferencesCommands.ts`, `parseStoredPreferences.ts`, `adapters/preferencesDocument.ts`, `controller/useDayPalettePreference.ts` (5 files), then separately on `controller/PreferencesProvider.tsx`, target ≥ 95 % (min 90 %, M5).
 
 ### R5 — WARNING — FR2 and NFR-P1 have no scenario in any delta spec
 - Location: `openspec/changes/redesign-cards-grid-and-day-palettes/proposal.md:73` (FR2), `proposal.md:102` (NFR-P1)
@@ -147,7 +151,8 @@
 - Impact: At archive, the stable specs lose two rules this change introduces. Nothing in `openspec/specs/` then stops a later change from re-adding a second dark block or a palette switch that re-presents rows. The feature scenarios of 4.4 and 7.4 also trace to no spec requirement, which `traceability.md` treats as a missing link.
 - Fix: (a) Add an ADDED requirement "Colour tokens are defined once" to `specs/settings/spec.md` (the theme's capability), tagged `FR2, M4`. It needs two scenarios: "Each colour is one value" (the token source declares the dark values in one block and no colour twice) and "The system dark theme uses the same values" (with Theme System and a dark system, the page background is `#0b1628`). Name it on the `settings` line of "Modified Capabilities". (b) Add the scenario "Changing the day palette re-presents nothing" to `specs/day-colouring/spec.md` "Day palette". Add the scenario "Presenting 50 rows again in the 12-hour format builds no formatter" to `specs/locations/spec.md` "Card growth" (the day period marker). Tag both requirements' implements comments with `NFR-P1`.
 - Fix risk: The capability list in `proposal.md` and the task 2.3/4.4/7.4 texts must name the new scenarios. Placement still follows `bdd-unit.md`: the token-source and work-bound scenarios are unit, the system-theme one is E2E.
-- Status: open
+- Status: fixed
+- Resolution: specs/settings/spec.md adds the requirement "Colour tokens are defined once" (FR2, M4) with "Each colour is one value" (unit, task 2.3) and "The system dark theme uses the same values" (E2E, new task 2.5 in settings_e2e.feature); proposal "Modified Capabilities" names it. specs/day-colouring "Day palette" gains "Changing the day palette re-presents nothing" and specs/locations "Card growth" gains "Presenting 50 rows again in the 12-hour format builds no formatter", both requirements now tagged NFR-P1; tasks 4.4 and 7.4 name these scenarios.
 
 ### R6 — SUGGESTION — D6 points focus handling at refs ViewLocationList does not own
 - Location: `openspec/changes/redesign-cards-grid-and-day-palettes/design.md:81`
@@ -156,7 +161,8 @@
 - Impact: The implementer must restructure on the fly: lift the refs, or handle the step move inside `LocationList` next to `handleRemove`, which already focuses through them. The design does not say which.
 - Fix: In D6, have `LocationList` turn a step move into `onMove(id, rowIndex ± 1)` and focus `menuButtons.current[targetIndex]` after the rows change, the same way `focusIndexAfterRemoval` works. `ViewLocationList` only sets the polite announcement. Point the focus assertion of task 11.1 at `LocationList.menu.test.tsx`.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 now has `LocationList`, which owns the `menuButtons` refs, turn a step move into `onMove(id, rowIndex ± 1)` and focus the target menu button after the rows change (as `focusIndexAfterRemoval` does); `ViewLocationList` only sets the announcement. Task 11.1 puts the focus assertion in `LocationList.menu.test.tsx` and keeps the announcement in `ViewLocationList.test.tsx`.
 
 ### R7 — SUGGESTION — M7 counts UX1, which task 15.3 leaves to a human
 - Location: `openspec/changes/redesign-cards-grid-and-day-palettes/proposal.md:156`, `tasks.md:106`
@@ -165,7 +171,8 @@
 - Impact: As written, M7 can never be reported as met, and the archive reports a failed metric.
 - Fix: Reword M7 as "Every FR, NFR and UX id except UX1 (handoff H1) …".
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md M7 now reads "Every FR, NFR and UX id of this proposal except UX1 (the human visual comparison, handoff H1) …", matching task 15.3.
 
 ### R8 — SUGGESTION — Three scenario titles describe the removed design
 - Location: `specs/time-selection/spec.md:85`, `specs/home-location/spec.md:34`, `specs/locations/spec.md:315`
@@ -174,7 +181,8 @@
 - Impact: Tasks 9.3 and 9.4 copy these titles into the feature files. The archived specs and the features then name a layout, a filled mark and a caption that no longer exist.
 - Fix: Rename them to "Track on its own line on a wide screen", "The Here mark next to the house" and "Icon before the city, no caption". Update the scenario names quoted in tasks 9.3 and 9.4.
 - Fix risk: none.
-- Status: open
+- Status: rejected (harmful)
+- Resolution: renaming the three titles makes `openspec validate --strict` fail: a MODIFIED block must keep every scenario name of the stable spec ("MODIFIED "Home mark" omits scenario(s) the current spec still has: "The Here mark stays filled next to the house" … archive refuses to drop them"), same for "Day track layout" and "Here mark on location rows". The bodies already state the new layout (own line, outline map pin, no caption), so the old titles stay as stable ids; the rename was tried and reverted.
 
 ## Verdict
 
