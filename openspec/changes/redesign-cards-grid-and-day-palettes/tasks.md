@@ -83,8 +83,8 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `open
 
 ## 12. Grid (FR17; design D5)
 
-- [ ] 12.1 RED: `src/views/grid/hourCellLayout.test.ts`: the equal share subtracts the 3 px gap, below the 32 px threshold a cell is `HOUR_CELL_SCROLL_WIDTH_PX` (38) wide. `src/views/grid/HourStrip.test.tsx`: cells have `rounded-cell` and the 15 px / 500 digit class. Verify: `npx vitest run src/views/grid/hourCellLayout.test.ts` fails.
-- [ ] 12.2 GREEN: `hourCellLayout.ts`, `HourCellView.tsx`, `HourStrip.tsx`, the grid variant of `locationRowVariant.ts` (panel `border-card-border rounded-card`, divider colour, row header sizes, `GRID_MARK_ICON_SIZE_PX`). Verify: both test files of 12.1 pass, then `npx vitest run src/views/grid`.
+- [ ] 12.1 RED: `src/views/grid/hourCellLayout.test.ts`: the gap between cells is 3 px (`HOUR_CELL_GAP_PX`), and below the 32 px threshold a cell is `HOUR_CELL_SCROLL_WIDTH_PX` (38) wide at any strip width. `src/views/grid/HourStrip.test.tsx`: cells have `rounded-cell` and the 15 px / 500 digit class. Verify: `npx vitest run src/views/grid/hourCellLayout.test.ts` fails.
+- [ ] 12.2 GREEN: `src/constants/grid.ts`, `hourCellLayout.ts`, `HourCellView.tsx`, `HourStrip.tsx`, the grid variant of `locationRowVariant.ts` (panel `border-card-border rounded-card`, divider colour, row header sizes, `GRID_MARK_ICON_SIZE_PX`). Verify: both test files of 12.1 pass, then `npx vitest run src/views/grid`.
 - [ ] 12.3 E2E: update `src/test/features/main_page/main_page_grid_view_e2e.feature` (no drag handle, "Grid rows use the theme token colours" with the card border, 14 px radius, header sizes, "Grid fits narrow and wide screens" at the seven widths and both formats), `src/test/features/grid_view/grid_view_width_e2e.feature` ("All hours fit" with 2560, 38 px cells), new `grid_view_redesign_e2e.feature` ("Cell sizes by width", "Cells 38 px wide on a phone"), and `grid_view_meeting_lock_e2e.feature` (cursor and menu buttons instead of drag handles; "Tab order skips the locked controls"). Verify: the E2E command for these four features passes.
 - [ ] 12.4 Mutation: Stryker on `src/views/grid/hourCellLayout.ts` (M5).
 
