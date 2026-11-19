@@ -5,6 +5,7 @@ import {
   cityOf,
   dateOf,
   LAYOUT_TOLERANCE_PX,
+  TIME_BUTTON_NAME,
   zoneLineOf,
 } from "./locationsCardLayoutHelpers";
 import { listRow } from "./locationsE2eHelpers";
@@ -17,7 +18,6 @@ const HALF = 2;
 const GRID_PANEL_SELECTOR = 'ul[data-row-variant="grid-row"]';
 const STICKY_HEADER_SELECTOR = ".sticky";
 const OFFSET_DIFFERENCE_SELECTOR = "[data-offset-difference]";
-const WALL_TIME_PATTERN = /^(Enter time|Ввести время)/;
 const MEETING_TIME_PATTERN = /^(Enter meeting time|Ввести время встречи)/;
 const MENU_BUTTON_PATTERN = /^(Actions for|Действия:)/;
 
@@ -30,7 +30,7 @@ export const menuButtonOf = (row: Locator) =>
   row.getByRole("button", { name: MENU_BUTTON_PATTERN });
 export const menuDotsOf = (row: Locator) => menuButtonOf(row).locator("svg");
 export const timeButtonOf = (row: Locator) =>
-  row.getByRole("button", { name: WALL_TIME_PATTERN }).first();
+  row.getByRole("button", { name: TIME_BUTTON_NAME }).first();
 export const meetingTimeOf = (row: Locator) =>
   row.getByRole("button", { name: MEETING_TIME_PATTERN }).first();
 
@@ -92,11 +92,12 @@ export const overlapsBy = (first: Box, second: Box) =>
 export const centreOfBoxY = (box: Box) => box.y + box.height / HALF;
 export const centreOfBoxX = (box: Box) => box.x + box.width / HALF;
 
-/** The row's neighbours of the button: time, date, city, offset difference and zone line. */
+/** The row's neighbours of the button: time, meeting time, date, city, offset difference and zone line. */
 export const neighboursOf = (page: Page, city: string): Locator[] => {
   const row = listRow(page, city);
   return [
     timeButtonOf(row),
+    meetingTimeOf(row),
     dateOf(page, city),
     cityOf(page, city),
     row.locator(OFFSET_DIFFERENCE_SELECTOR).first(),

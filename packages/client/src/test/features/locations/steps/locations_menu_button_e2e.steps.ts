@@ -127,7 +127,11 @@ Then(
     const { page } = locationsWorld;
     for (const row of await rowsOf(page)) {
       const buttonBox = await requireBox(menuButtonOf(row));
-      for (const neighbour of neighboursOf(page, await cityOfRow(row))) {
+      const city = await cityOfRow(row);
+      const timeButtonCount =
+        (await timeButtonOf(row).count()) + (await meetingTimeOf(row).count());
+      expect(timeButtonCount).toBeGreaterThan(0);
+      for (const neighbour of neighboursOf(page, city)) {
         if ((await neighbour.count()) === 0) continue;
         expect(overlapsBy(buttonBox, await requireBox(neighbour))).toBe(false);
       }
