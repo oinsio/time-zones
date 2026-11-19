@@ -1,15 +1,18 @@
+import type { HTMLAttributes, ReactNode } from "react";
 import type {
   MeetingRangeInputOutcome,
   TrackMove,
   WallTimeInputOutcome,
 } from "@/controller";
 import type {
+  LocationRow,
   PresentedDayTrack,
   PresentedLocationMark,
   PresentedLocationMeetingRange,
   ZoneLinePart,
 } from "@/presenter";
 import { DayTrack } from "./DayTrack";
+import { LocalDate } from "./LocalDate";
 import { LocalDateTime } from "./LocalDateTime";
 import { LocationMarkIcon } from "./LocationMarkIcon";
 import {
@@ -28,6 +31,7 @@ type ZoneRowContentProps = {
   /** Elements of the zone line under the city: place, zone abbreviation, UTC offset. */
   zoneLineParts: readonly ZoneLinePart[];
   localTimeLabel: string;
+  localTimeParts: LocationRow["localTimeParts"];
   localDateLabel: string;
   localIsoDate: string;
   wallTimeInputLabel: string;
@@ -46,6 +50,15 @@ type ZoneRowContentProps = {
   ) => MeetingRangeInputOutcome;
   /** The meeting range's local span and day shift mark. */
   meetingRange?: PresentedLocationMeetingRange;
+  /** The grab area's activator ref, pointer listeners and cursor; absent where the row cannot be reordered. */
+  grabAreaProps?: GrabAreaProps;
+  /** The location menu button, placed after the time. */
+  menu: ReactNode;
+};
+
+/** What makes the place and the zone line the grab area of a row. */
+export type GrabAreaProps = HTMLAttributes<HTMLSpanElement> & {
+  ref?: (element: HTMLElement | null) => void;
 };
 
 /**
@@ -63,6 +76,8 @@ type ZoneRowContentProps = {
  * Implements FR8 of add-grid-meeting-range-and-share (D8): passes the meeting range to the time.
  * Implements FR8, UX3 of fix-grid-meeting-range-lock-and-layering (D6): the zone line container has no surface, only its parts.
  * Implements FR3, FR4 of fix-grid-meeting-range-lock-and-layering (D4): passes the meeting range input to the time.
+ * Implements FR7, FR8, FR9, FR10, FR11, FR15, FR17 of redesign-cards-grid-and-day-palettes (D5, D6): the two
+ * lines of the row header, the grab area (place and zone line), the date by the width and the menu after the time.
  */
 export function ZoneRowContent({
   cityLabel,
@@ -72,6 +87,7 @@ export function ZoneRowContent({
   offsetDifferenceAccessibleLabel,
   zoneLineParts,
   localTimeLabel,
+  localTimeParts,
   localDateLabel,
   localIsoDate,
   wallTimeInputLabel,
@@ -82,22 +98,28 @@ export function ZoneRowContent({
   rowVariant = LocationRowVariant.CARD,
   meetingRange,
   onConfirmMeetingRange,
+  grabAreaProps,
+  menu,
 }: ZoneRowContentProps) {
   const variantClassNames = LOCATION_ROW_VARIANT_CLASS_NAMES[rowVariant];
   const hasDifference = offsetDifferenceLabel !== "";
+  const isTimeKnown = localTimeLabel !== "";
   return (
     <>
-      <span
-        className={`flex min-w-0 flex-1 items-start gap-3 ${variantClassNames.placeAndTime}`}
-      >
-        <span
-          className={`flex min-w-0 flex-1 flex-col break-words ${variantClassNames.place}`}
-        >
+      <span className={variantClassNames.header}>
+        <span className={variantClassNames.lineOne}>
           <span
-            className={`flex flex-wrap items-center gap-x-2 ${variantClassNames.cityLine}`}
+            {...grabAreaProps}
+            className={`${variantClassNames.place} ${grabAreaProps?.className ?? ""}`}
           >
-            {mark && <LocationMarkIcon mark={mark} id={ids.mark} />}
-            <span id={ids.city} className="bg-surface font-semibold">
+            {mark && (
+              <LocationMarkIcon
+                mark={mark}
+                id={ids.mark}
+                sizePx={variantClassNames.markSizePx}
+              />
+            )}
+            <span id={ids.city} className={variantClassNames.city}>
               {cityLabel}
             </span>
             {hasDifference && (
@@ -105,7 +127,7 @@ export function ZoneRowContent({
                 <span
                   aria-hidden="true"
                   data-offset-difference
-                  className="bg-surface text-sm font-semibold text-muted-foreground"
+                  className={variantClassNames.difference}
                 >
                   {offsetDifferenceLabel}
                 </span>
@@ -119,24 +141,40 @@ export function ZoneRowContent({
               </>
             )}
           </span>
+          <span className={variantClassNames.timeGroup}>
+            <LocalDateTime
+              localTimeLabel={localTimeLabel}
+              localTimeParts={localTimeParts}
+              localIsoDate={localIsoDate}
+              wallTimeInputLabel={wallTimeInputLabel}
+              onConfirmWallTime={onConfirmWallTime}
+              rowVariant={rowVariant}
+              cityLabel={cityLabel}
+              onConfirmMeetingRange={onConfirmMeetingRange}
+              meetingRange={meetingRange}
+            />
+            {menu}
+          </span>
+        </span>
+        <span className={variantClassNames.lineTwo}>
           {zoneLineParts.length > 0 && (
-            <ZoneLine
-              parts={zoneLineParts}
-              className="text-sm text-muted-foreground"
+            <span
+              {...grabAreaProps}
+              ref={undefined}
+              className={`${variantClassNames.zoneLine} ${grabAreaProps?.className ?? ""}`}
+            >
+              <ZoneLine parts={zoneLineParts} />
+            </span>
+          )}
+          {isTimeKnown && (
+            <LocalDate
+              localDateLabel={localDateLabel}
+              localIsoDate={localIsoDate}
+              rowVariant={rowVariant}
+              meetingRange={meetingRange}
             />
           )}
         </span>
-        <LocalDateTime
-          localTimeLabel={localTimeLabel}
-          localDateLabel={localDateLabel}
-          localIsoDate={localIsoDate}
-          wallTimeInputLabel={wallTimeInputLabel}
-          onConfirmWallTime={onConfirmWallTime}
-          rowVariant={rowVariant}
-          cityLabel={cityLabel}
-          onConfirmMeetingRange={onConfirmMeetingRange}
-          meetingRange={meetingRange}
-        />
       </span>
       {dayTrack && variantClassNames.hasDayTrack && (
         <DayTrack

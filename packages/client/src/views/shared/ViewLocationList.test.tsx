@@ -81,13 +81,10 @@ describe("ViewLocationList with card rows", () => {
     expect(screen.getByRole("button", { name: "Add location" })).toHaveFocus();
   });
 
-  it("should render move handles when two locations are stored", () => {
+  it("should render grab areas, not handles, when two locations are stored", () => {
     renderCards(savedLocations("Moscow", "Almaty"));
-    expect(
-      screen.getByRole("button", { name: "Move Moscow" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Move Almaty" }),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
+    expect(screen.getByText("Moscow").parentElement).toHaveClass("cursor-grab");
+    expect(screen.getByText("Almaty").parentElement).toHaveClass("cursor-grab");
   });
 });

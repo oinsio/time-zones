@@ -54,8 +54,8 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `open
 
 ## 8. Zone line with middle dots (FR9; design D5)
 
-- [ ] 8.1 RED: `src/views/shared/zoneLineBreaks.test.ts` (new): `getZoneLinePartLineStarts([0, 0, 20])` is `[true, false, true]`, equal tops are one line, a single part starts a line. `src/views/shared/ZoneLine.test.tsx` (new): every part after the first has an `aria-hidden` dot, the accessible text has no dot. Verify: `npx vitest run src/views/shared/zoneLineBreaks.test.ts` fails.
-- [ ] 8.2 GREEN: `zoneLineBreaks.ts`, `ZONE_LINE_SEPARATOR` in `src/constants/`, `ZoneLine.tsx` with the `ResizeObserver` measurement and `data-line-start`. Verify: both tests of 8.1 pass.
+- [x] 8.1 RED: `src/views/shared/zoneLineBreaks.test.ts` (new): `getZoneLinePartLineStarts([0, 0, 20])` is `[true, false, true]`, equal tops are one line, a single part starts a line. `src/views/shared/ZoneLine.test.tsx` (new): every part after the first has an `aria-hidden` dot, the accessible text has no dot. Verify: `npx vitest run src/views/shared/zoneLineBreaks.test.ts` fails.
+- [x] 8.2 GREEN: `zoneLineBreaks.ts`, `ZONE_LINE_SEPARATOR` in `src/constants/`, `ZoneLine.tsx` with the `ResizeObserver` measurement and `data-line-start`. Verify: both tests of 8.1 pass.
 - [ ] 8.3 E2E: in `src/test/features/locations/locations_zone_line_e2e.feature` add "Elements joined by middle dots", "No dot at a wrap", "Dots are not read", and update "No overflow and no clipping" (390 and 820 rows) and "Wrapping between elements only". Verify: the E2E command for this feature passes.
 
 ## 9. Cards: narrow and wide layout, day track (FR7, FR8, FR10, FR11, FR13; design D5)

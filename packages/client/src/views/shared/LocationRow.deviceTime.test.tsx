@@ -67,7 +67,9 @@ describe("LocationRow of the device time location", () => {
     renderRow(deviceTimeRow);
     expect(screen.getByText("Device time")).toBeInTheDocument();
     expect(screen.getByText("UTC+5")).toBeInTheDocument();
-    expect(screen.queryByText(/·/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Device time").parentElement?.firstElementChild,
+    ).toBe(screen.getByText("Device time"));
   });
 
   it("should use the accessible name of the row for the item", () => {
@@ -81,9 +83,7 @@ describe("LocationRow of the device time location", () => {
 
   it("should offer the same controls as a city card", () => {
     renderRow(deviceTimeRow);
-    expect(
-      screen.getByRole("button", { name: "Move Almaty" }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Almaty").parentElement).toHaveClass("cursor-grab");
     expect(
       screen.getByRole("button", { name: "Actions for Almaty" }),
     ).toBeInTheDocument();

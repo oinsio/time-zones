@@ -1,4 +1,7 @@
-import { GRID_MARK_ICON_SIZE_PX, LOCATION_MARK_ICON_SIZE_PX } from "@/constants";
+import {
+  GRID_MARK_ICON_SIZE_PX,
+  LOCATION_MARK_ICON_SIZE_PX,
+} from "@/constants";
 
 /**
  * How a view shows one location row: a card of its own, or a row of the grid panel.
@@ -61,7 +64,7 @@ const PLACE_CLASS_NAMES =
 const LINE_TWO_CLASS_NAMES =
   "flex items-baseline justify-between gap-x-3 md:contents";
 const DATE_CLASS_NAMES =
-  "shrink-0 whitespace-nowrap bg-surface text-muted-foreground md:order-3 md:ml-auto";
+  "shrink-0 whitespace-nowrap bg-surface text-muted-foreground ml-auto md:order-3";
 const TIME_GROUP_CLASS_NAMES =
   "ml-auto flex shrink-0 items-center gap-x-3.5 md:order-4 md:ml-0";
 

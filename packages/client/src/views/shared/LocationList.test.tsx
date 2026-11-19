@@ -124,23 +124,18 @@ describe("LocationList", () => {
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);
   });
 
-  it("should offer a move handle before the remove action of each of two rows", () => {
+  it("should make the place of each of two rows a grab area, with no handle button", () => {
     render(<LocationList {...noopHandlers} rows={[rows[0], rows[1]]} />);
-    const moveHandle = screen.getByRole("button", { name: "Move Moscow" });
-    const removeButton = screen.getByRole("button", {
-      name: "Actions for Moscow",
-    });
-    expect(
-      moveHandle.compareDocumentPosition(removeButton) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: "Move Tokyo" }),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
+    for (const city of ["Moscow", "Tokyo"]) {
+      expect(screen.getByText(city).parentElement).toHaveClass("cursor-grab");
+    }
   });
 
-  it("should offer no move handle for a single row", () => {
+  it("should offer no grab cursor for a single row", () => {
     render(<LocationList {...noopHandlers} rows={[rows[0]]} />);
-    expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
+    expect(screen.getByText("Moscow").parentElement).not.toHaveClass(
+      "cursor-grab",
+    );
   });
 });

@@ -9,7 +9,6 @@ import type {
   LocationRow as LocationRowModel,
   PresentedLocationMeetingRange,
 } from "@/presenter";
-import { DragHandle } from "./DragHandle";
 import type { ConfirmMeetingRange } from "./hourGridSlots";
 import { LocationMenu } from "./LocationMenu";
 import {
@@ -20,7 +19,11 @@ import { OptionalBox } from "./OptionalBox";
 import { RowNotes } from "./RowNotes";
 import { useLocationMenuItems } from "./useLocationMenuItems";
 import { useSortableLocationRow } from "./useSortableLocationRow";
-import { ZoneRowContent } from "./ZoneRowContent";
+import { type GrabAreaProps, ZoneRowContent } from "./ZoneRowContent";
+
+/** The grab area never selects text nor shows the iOS long-press callout. */
+const GRAB_AREA_CLASS_NAMES =
+  "select-none touch-manipulation [-webkit-touch-callout:none]";
 
 type LocationRowProps = {
   row: LocationRowModel;
@@ -43,7 +46,7 @@ type LocationRowProps = {
   meetingRange?: PresentedLocationMeetingRange;
   /** Confirms the meeting range typed in this row; `locationId` is the row. */
   onConfirmMeetingRange?: ConfirmMeetingRange;
-  /** Locks the drag handle and the location menu; `false` when omitted. */
+  /** Locks the grab area and the location menu; `false` when omitted. */
   areRowControlsLocked?: boolean;
 };
 
@@ -123,6 +126,15 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       variantClassNames.headerBox === undefined
         ? undefined
         : `${variantClassNames.headerBox} ${headerBoxLayer}`;
+    const grabAreaProps: GrabAreaProps = {
+      ...(isReorderable && !areRowControlsLocked && sortable.listeners),
+      ref: isReorderable ? sortable.setActivatorNodeRef : undefined,
+      className: `${GRAB_AREA_CLASS_NAMES} ${
+        isReorderable && !areRowControlsLocked
+          ? "cursor-grab"
+          : "cursor-default"
+      }`,
+    };
     return (
       <li
         ref={sortable.setItemRef}
@@ -134,18 +146,9 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             ? labelIds.filter(Boolean).join(" ")
             : undefined
         }
-        className={`bg-surface py-3 ${variantClassNames.row}${sortable.draggingClassName}`}
+        className={`${variantClassNames.row}${sortable.draggingClassName}`}
       >
         <OptionalBox className={headerBoxClassName}>
-          {isReorderable && (
-            <DragHandle
-              ref={sortable.setActivatorNodeRef}
-              city={row.cityLabel}
-              attributes={sortable.attributes}
-              listeners={sortable.listeners}
-              isDisabled={areRowControlsLocked}
-            />
-          )}
           <ZoneRowContent
             cityLabel={row.cityLabel}
             ids={{ city: cityId, mark: markId, difference: differenceId }}
@@ -156,6 +159,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
             }
             zoneLineParts={row.zoneLineParts}
             localTimeLabel={row.localTimeLabel}
+            localTimeParts={row.localTimeParts}
             localDateLabel={row.localDateLabel}
             localIsoDate={row.localIsoDate}
             wallTimeInputLabel={row.wallTimeInputLabel}
@@ -176,14 +180,17 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
               ((startText, endText, date) =>
                 onConfirmMeetingRange(row.id, startText, endText, date))
             }
-          />
-          <LocationMenu
-            ref={menuButtonRef}
-            city={row.cityLabel}
-            items={menuItems}
-            isMenuFixedToViewport={variantClassNames.isMenuFixedToViewport}
-            isDisabled={areRowControlsLocked}
-            onOpenChange={setIsMenuOpen}
+            grabAreaProps={grabAreaProps}
+            menu={
+              <LocationMenu
+                ref={menuButtonRef}
+                city={row.cityLabel}
+                items={menuItems}
+                isMenuFixedToViewport={variantClassNames.isMenuFixedToViewport}
+                isDisabled={areRowControlsLocked}
+                onOpenChange={setIsMenuOpen}
+              />
+            }
           />
         </OptionalBox>
         {hourStrip}

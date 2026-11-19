@@ -18,7 +18,7 @@ describe("the wall-time input without Pointer Events", () => {
     render(
       <LocalDateTime
         localTimeLabel="03:30"
-        localDateLabel="Sun, Mar 8"
+        localTimeParts={{ digits: "03:30", dayPeriodMarker: "" }}
         localIsoDate="2026-03-08"
         wallTimeInputLabel={NAME}
         onConfirmWallTime={() => WallTimeInputOutcome.CLOSED}

@@ -1,6 +1,9 @@
 // Verifies FR8 of fix-grid-meeting-range-lock-and-layering: the layer tokens of the row boxes.
 // Verifies FR7, FR8, FR17 of redesign-cards-grid-and-day-palettes: the two layouts and the sizes.
-import { GRID_MARK_ICON_SIZE_PX, LOCATION_MARK_ICON_SIZE_PX } from "@/constants";
+import {
+  GRID_MARK_ICON_SIZE_PX,
+  LOCATION_MARK_ICON_SIZE_PX,
+} from "@/constants";
 import {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
   LocationRowVariant,

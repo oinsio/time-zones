@@ -45,31 +45,24 @@ const renderList = (areRowControlsLocked: boolean) => {
   );
   return { onMove };
 };
-const dragHandleOf = (city: string) => {
-  const handle = screen
-    .getAllByRole("button")
-    .find(
-      (button) =>
-        button.hasAttribute("aria-roledescription") &&
-        button.getAttribute("aria-label")?.endsWith(city),
-    );
-  if (handle === undefined) throw new Error(`no drag handle of ${city}`);
-  return handle;
+const grabAreaOf = (city: string) => {
+  const cityElement = screen.getAllByText(city)[0];
+  return cityElement.parentElement as HTMLElement;
 };
 
 describe("LocationRow with locked controls", () => {
   it.each(["Moscow", "Tokyo"])(
-    "should disable the drag handle and the menu button of %s",
+    "should disable the menu button and give the grab area of %s the default cursor",
     (city) => {
       renderList(true);
       const buttons = screen
         .getAllByRole("button")
         .filter((button) => button.getAttribute("aria-label")?.endsWith(city));
-      expect(buttons).toHaveLength(2);
-      for (const button of buttons) {
-        expect(button).toBeDisabled();
-        expect(button).toHaveClass("disabled:opacity-40");
-      }
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0]).toBeDisabled();
+      expect(buttons[0]).toHaveClass("disabled:opacity-40");
+      expect(grabAreaOf(city)).toHaveClass("cursor-default");
+      expect(grabAreaOf(city)).not.toHaveClass("cursor-grab");
     },
   );
 
@@ -84,19 +77,23 @@ describe("LocationRow with locked controls", () => {
     expect(screen.queryByRole("menu")).toBeNull();
   });
 
-  it("should move nothing on a keyboard reorder", async () => {
+  it("should move nothing on a pointer drag of the grab area", async () => {
     const { onMove } = renderList(true);
-    dragHandleOf("Moscow").focus();
 
-    await userEvent.keyboard(" {ArrowDown} ");
+    await userEvent.pointer([
+      { keys: "[MouseLeft>]", target: grabAreaOf("Moscow") },
+      { coords: { x: 0, y: 200 } },
+      { keys: "[/MouseLeft]" },
+    ]);
 
     expect(onMove).not.toHaveBeenCalled();
   });
 
-  it("should keep the controls enabled without the lock", () => {
+  it("should keep the controls enabled and the grab cursor without the lock", () => {
     renderList(false);
     for (const button of screen.getAllByRole("button")) {
       expect(button).toBeEnabled();
     }
+    expect(grabAreaOf("Moscow")).toHaveClass("cursor-grab");
   });
 });

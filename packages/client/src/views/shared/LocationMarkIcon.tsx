@@ -34,6 +34,8 @@ export const LOCATION_MARK_ICONS: Record<
 type LocationMarkIconProps = {
   mark: PresentedLocationMark;
   id: string;
+  /** Side of the icon in px; the card size when omitted. */
+  sizePx?: number;
 };
 
 /**
@@ -42,18 +44,22 @@ type LocationMarkIconProps = {
  * Implements FR1, FR4, UX1 of match-here-mark-to-design (D3).
  * Implements FR1, FR2, FR3, FR4 of match-home-mark-to-design.
  */
-export function LocationMarkIcon({ mark, id }: LocationMarkIconProps) {
+export function LocationMarkIcon({
+  mark,
+  id,
+  sizePx = LOCATION_MARK_ICON_SIZE_PX,
+}: LocationMarkIconProps) {
   const { Icon, isFilled } = LOCATION_MARK_ICONS[mark.kind];
   return (
     <span
       id={id}
       role="img"
       aria-label={mark.accessibleLabel}
-      className="inline-flex shrink-0 text-accent"
+      className="inline-flex shrink-0 self-center text-accent"
     >
       <Icon
         aria-hidden="true"
-        size={LOCATION_MARK_ICON_SIZE_PX}
+        size={sizePx}
         fill={isFilled ? FILLED_ICON_FILL : OUTLINE_ICON_FILL}
       />
     </span>

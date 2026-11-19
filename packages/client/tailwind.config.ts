@@ -56,6 +56,8 @@ const config: Config = {
         "card-wide-y": "12px",
         "card-wide-x": "20px",
         "card-gap": "12px",
+        // The visible handle of a day track: 23 px.
+        handle: "23px",
       },
       /** Page layers, lowest first. Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5). */
       zIndex: {

@@ -59,7 +59,7 @@ describe("LocationRow while dragged", () => {
     expect(renderWithDragging(true)).toHaveClass(
       "relative",
       "z-dragged-row",
-      "shadow-lg",
+      "shadow-lift",
     );
   });
 

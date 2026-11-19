@@ -141,20 +141,16 @@ describe("LocationRow offset difference and marks", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("should show the difference after the city and before the here caption, hidden from assistive technology", () => {
+  it("should show the difference after the city, hidden from assistive technology", () => {
     renderRow({ mark: hereMark });
 
     const difference = screen.getByText("−2 h");
     const city = screen.getByText("Moscow");
-    const caption = screen.getByText("here");
     expect(difference).toHaveAttribute("aria-hidden", "true");
     expect(city.compareDocumentPosition(difference)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
-    expect(difference.compareDocumentPosition(caption)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-    expect(difference).toHaveClass("text-sm", "font-semibold");
+    expect(difference).toHaveClass("text-card-difference", "font-semibold");
   });
 
   it("should name the row by city, mark and difference", () => {
