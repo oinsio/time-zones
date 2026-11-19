@@ -48,6 +48,7 @@ Alternatives:
 - The new script `packages/client/scripts/designScreens/renderDesignScreens.ts` is exposed as `design:screens` in `packages/client/package.json`. It opens each named HTML file (all files when none is given) in Playwright Chromium with `deviceScaleFactor: 2` and writes the `#screen` element to the PNG of the same name.
 - The script serves Manrope locally: it routes the `fonts.googleapis.com` stylesheet request to an `@font-face` for family `Manrope` built from `@fontsource-variable/manrope` (already a dependency), and blocks other network requests. So the render works offline and gives the same result on every run.
 - The script refuses to write a PNG whose pixel size differs from the PNG it replaces.
+- The logic is split from the CLI so it is unit-tested without a browser (`src/test/designScreens/renderDesignScreens.test.ts`), as `scripts/zoneRules/*` are tested in `src/test/zoneRules/`: `designScreenRequests.ts` decides each request (serve the font stylesheet, continue a `file:` URL, abort the rest) and builds the `@font-face`; `designScreenPng.ts` reads the PNG pixel size and runs the screens with an injected renderer and file access. `renderDesignScreens.ts` only wires Playwright and the file system.
 
 Alternatives: hand-made screenshots, which cannot be repeated and are a human step (`handoff.md` "Automate first"). Leaving the PNGs stale breaks FR5.
 

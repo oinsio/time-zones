@@ -104,7 +104,7 @@ No changes.
 - M3: 0 overlaps between the button box and the time, date, city, difference or zone line boxes in the measured rows. 0 buttons stick out of their card or the Grid panel.
 - M4: 0 axe-core violations in Cards and Grid at 390 px.
 - M5: Every screenshot scenario (`grep -rl screenshot src/test/features --include=*_e2e.feature`, 11 features) passes without `--update-snapshots`. 0 design screen HTML files keep `data-lucide="ellipsis"`.
-- M6: Scoped Stryker on the changed production files scores ≥ 95% (minimum 90%).
+- M6: Scoped Stryker on the changed production files and on the testable design-screen script modules (`designScreenRequests.ts`, `designScreenPng.ts`) scores ≥ 95% (minimum 90%).
 
 ## Open Questions
 
