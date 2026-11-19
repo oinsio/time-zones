@@ -1,7 +1,11 @@
 import { Plus } from "lucide-react";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 import { useTranslation } from "react-i18next";
-import { ADD_LOCATION_BUTTON_ID, KeyboardKey } from "@/constants";
+import {
+  ADD_LOCATION_BUTTON_ID,
+  HEADER_ICON_SIZE_PX,
+  KeyboardKey,
+} from "@/constants";
 
 /**
  * The action that opens the location search; also the dialog trigger. It shows
@@ -12,6 +16,7 @@ import { ADD_LOCATION_BUTTON_ID, KeyboardKey } from "@/constants";
  * Implements FR2, FR16 of add-settings-page-and-device-time-location (D11).
  * Implements FR3, FR4, UX2 of fix-location-card-and-header-layout (D3): "+" at
  * the left of the header on every width.
+ * Implements FR6, UX4 of redesign-cards-grid-and-day-palettes (D4): at the right of the header, 27 px icon in a 44 px target.
  */
 export const AddLocationButton = forwardRef<
   HTMLButtonElement,
@@ -23,12 +28,12 @@ export const AddLocationButton = forwardRef<
       ref={buttonRef}
       id={ADD_LOCATION_BUTTON_ID}
       type="button"
-      className="order-1 col-start-1 flex min-h-11 min-w-11 justify-self-start items-center justify-center gap-2 rounded-md border border-transparent px-3 font-semibold text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+      className="flex h-11 w-11 items-center justify-center rounded-md font-semibold text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
       aria-label={t("locations.addLocation")}
       aria-keyshortcuts={KeyboardKey.SLASH}
       {...props}
     >
-      <Plus aria-hidden="true" />
+      <Plus aria-hidden="true" size={HEADER_ICON_SIZE_PX} />
     </button>
   );
 });

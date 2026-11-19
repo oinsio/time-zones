@@ -19,7 +19,13 @@ const config: Config = {
   theme: {
     extend: {
       boxShadow: { lift: "var(--lift-shadow)" },
-      fontSize: { credit: [CREDIT_FONT_SIZE, CREDIT_LINE_HEIGHT] },
+      /** The content column of the page: 1120 px. Implements FR12 of redesign-cards-grid-and-day-palettes (D4). */
+      maxWidth: { content: "70rem" },
+      fontSize: {
+        credit: [CREDIT_FONT_SIZE, CREDIT_LINE_HEIGHT],
+        "header-title": "27px",
+        "header-title-narrow": "23px",
+      },
       /** Page layers, lowest first. Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5). */
       zIndex: {
         "grid-frame": "1",

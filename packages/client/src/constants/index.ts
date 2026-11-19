@@ -41,6 +41,7 @@ export {
   OFFSET_EDGE_WIDTH_PX,
   SHORT_MONTH_TRAILING_STOP,
 } from "./grid";
+export { HEADER_ICON_SIZE_PX } from "./header";
 export { KeyboardKey } from "./keyboard";
 export {
   CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
