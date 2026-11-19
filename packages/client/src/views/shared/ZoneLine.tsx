@@ -68,16 +68,20 @@ export function ZoneLine({
         <Fragment key={part.kind}>
           <span
             data-zone-line-part
-            className={`bg-surface [&[data-line-start]>[data-zone-line-dot]]:hidden${
+            className={`[&[data-line-start]>[data-zone-line-dot]]:hidden${
               part.kind === ZoneLinePartKind.PLACE ? "" : " whitespace-nowrap"
             }`}
           >
             {partIndex > 0 && (
-              <span aria-hidden="true" data-zone-line-dot className="mr-1.5">
+              <span
+                aria-hidden="true"
+                data-zone-line-dot
+                className="mr-1.5 bg-surface"
+              >
                 {ZONE_LINE_SEPARATOR}
               </span>
             )}
-            {part.text}
+            <span className="bg-surface">{part.text}</span>
           </span>
           {isTextSeparated && " "}
         </Fragment>

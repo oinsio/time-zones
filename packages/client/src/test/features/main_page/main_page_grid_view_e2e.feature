@@ -1,20 +1,29 @@
 Feature: Grid view in a real browser
   Implements change add-view-mode-setting-and-grid-skeleton and add-grid-hour-cells-and-hour-frame.
+  Implements change redesign-cards-grid-and-day-palettes.
   The Grid view fits every screen, keeps the row header in one line on a wide screen, uses the theme tokens and works offline.
 
   @add-view-mode-setting-and-grid-skeleton @NFR-R1
-  Scenario Outline: Grid fits a <width> px wide screen
+  @redesign-cards-grid-and-day-palettes @NFR-R1 @FR17
+  Scenario Outline: Grid fits a <width> px wide screen in the <format> format
     Given the view mode is Grid
+    And the day colouring is "Time of day" and the hour format is "<format>"
     And the stored locations are "Almaty", "Moscow", "Kolkata", "New York"
     And the screen is <width> px wide for the locations
     When the user opens the locations app
     Then the locations screen does not scroll horizontally
 
     Examples:
-      | width |
-      | 320   |
-      | 2560  |
+      | width | format |
+      | 320   | H24    |
+      | 390   | H12    |
+      | 768   | H24    |
+      | 820   | H12    |
+      | 1024  | H24    |
+      | 1440  | H12    |
+      | 2560  | H24    |
 
+  @redesign-cards-grid-and-day-palettes @FR15 @FR17
   @add-view-mode-setting-and-grid-skeleton @FR7 @UX3
   Scenario: Grid row header in one line
     Given the view mode is Grid
@@ -23,7 +32,9 @@ Feature: Grid view in a real browser
     When the user opens the locations app
     Then the zone line of "Almaty" is on the same line as its city
     And the date of "Almaty" is on the same line as its time and before it
+    And the city of "Almaty" is 22 px and its time 26 px, both weight 700
 
+  @redesign-cards-grid-and-day-palettes @FR17 @UX3
   @add-view-mode-setting-and-grid-skeleton @UX3
   Scenario Outline: Grid rows use the <theme> theme token colours
     Given the view mode is Grid
@@ -32,6 +43,8 @@ Feature: Grid view in a real browser
     When the user opens the locations app
     Then every Grid row has the surface colour of the <theme> theme
     And the Grid panel has the border colour of the <theme> theme
+    And the Grid panel has a radius of 14 px
+    And the divider between the Grid rows has the <theme> card border colour
 
     Examples:
       | theme |
@@ -60,6 +73,7 @@ Feature: Grid view in a real browser
     Then the clock change note of "New York" comes after its hour strip, in the document and on the screen
 
   @add-grid-hour-cells-and-hour-frame @NFR-R3
+  @redesign-cards-grid-and-day-palettes @FR15 @FR17
   Scenario: Grid row header in two lines on a phone
     Given the view mode is Grid
     And the stored locations are "Almaty", "Moscow"
@@ -67,6 +81,7 @@ Feature: Grid view in a real browser
     When the user opens the locations app
     Then the time of "Almaty" is on the line of its city, right of it
     And the date of "Almaty" is on the line of its zone line, under its time
+    And the city of "Almaty" is 20 px and its time 24 px
 
   @add-grid-hour-cells-and-hour-frame @FR1
   Scenario Outline: The location menu of <city> is fully visible at <width> by <height> px

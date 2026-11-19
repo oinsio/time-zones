@@ -18,7 +18,7 @@ const RUSSIAN_CITY_NAMES: Record<string, string> = {
 };
 const SHARE_BUTTON_NAME = "Share meeting";
 const MEETING_END_NAME = "Meeting end";
-const MOVE_HANDLE_PREFIX = "Move ";
+const MENU_BUTTON_PREFIX = "Actions for ";
 const SAMPLE_COLUMN = 9;
 const SAMPLE_END_KEY = "PageUp";
 const SAMPLE_SPAN_END = "11:00";
@@ -129,13 +129,16 @@ Then(
   },
 );
 
-Then('no Tab stop is a handle "Move …"', async ({ locationsWorld }) => {
-  const visited = visitedByPage.get(locationsWorld.page) ?? [];
-  expect(visited.length).toBeGreaterThan(0);
-  expect(visited.filter((name) => name.startsWith(MOVE_HANDLE_PREFIX))).toEqual(
-    [],
-  );
-});
+Then(
+  "no Tab stop is a location menu button",
+  async ({ locationsWorld }) => {
+    const visited = visitedByPage.get(locationsWorld.page) ?? [];
+    expect(visited.length).toBeGreaterThan(0);
+    expect(
+      visited.filter((name) => name.startsWith(MENU_BUTTON_PREFIX)),
+    ).toEqual([]);
+  },
+);
 
 // Verifies FR3, FR4 of fix-grid-meeting-range-lock-and-layering.
 When(
