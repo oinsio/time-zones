@@ -4,11 +4,9 @@ import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import { listRow, menuButton } from "../../locations/steps/locationsE2eHelpers";
 import {
   barOf,
-  handleOf,
   hourLabelsOf,
   readTokenStyle,
   requireBox,
-  sliderOf,
   timeTextOf,
   visibleHandleOf,
 } from "./timeSelectionE2eHelpers";
@@ -134,17 +132,16 @@ Then(
 
 // Verifies FR4, UX1 of fix-day-track-handle-overlap-and-end-of-day: the handle covers nothing.
 Then(
-  "the handle of {string} lies inside its slider and clear of its time and its menu",
+  "the handle of {string} lies inside its card and clear of its time and its menu",
   async ({ locationsWorld }, city: string) => {
     const { page } = locationsWorld;
-    const slider = await requireBox(sliderOf(page, city));
-    const hitArea = await requireBox(handleOf(page, city));
+    const card = await requireBox(listRow(page, city));
     const visibleHandle = await requireBox(visibleHandleOf(page, city));
     const time = await requireBox(timeTextOf(page, city));
     const menu = await requireBox(menuButton(page, city));
-    expect(hitArea.x).toBeGreaterThanOrEqual(slider.x - TOLERANCE_PX);
-    expect(hitArea.x + hitArea.width).toBeLessThanOrEqual(
-      slider.x + slider.width + TOLERANCE_PX,
+    expect(visibleHandle.x).toBeGreaterThanOrEqual(card.x - TOLERANCE_PX);
+    expect(visibleHandle.x + visibleHandle.width).toBeLessThanOrEqual(
+      card.x + card.width + TOLERANCE_PX,
     );
     for (const covered of [time, menu]) {
       const overlapsHorizontally =

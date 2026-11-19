@@ -114,7 +114,7 @@ Feature: Day track layout in a real browser
     When the user opens the locations app
     And the user focuses the slider of "Almaty" with the keyboard
     And the user presses the key "<key>"
-    Then the handle of "Almaty" lies inside its slider and clear of its time and its menu
+    Then the handle of "Almaty" lies inside its card and clear of its time and its menu
 
     Examples:
       | width | key  |
