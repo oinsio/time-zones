@@ -37,6 +37,7 @@ describe("deserializePreferencesDocument", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
       },
     });
   });
@@ -111,10 +112,11 @@ describe("serializePreferencesDocument", () => {
           viewMode: null,
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
+          dayPalette: "VIVID",
         }),
       ),
     ).toEqual({
-      schemaVersion: 6,
+      schemaVersion: 7,
       payload: {
         theme: "DARK",
         hourFormat: "H12",
@@ -123,6 +125,7 @@ describe("serializePreferencesDocument", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
       },
     });
   });

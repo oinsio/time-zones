@@ -2,6 +2,7 @@ import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { type PreferencesLoadResult, PreferencesLoadStatus } from "@/ports";
 import {
   DayColouring,
+  DayPalette,
   DEFAULT_WORKING_HOURS,
   type Preferences,
   parseStoredPreferences,
@@ -22,6 +23,8 @@ import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
  * The country step implements FR6 of add-country-to-zone-label (D2).
  * Version 5 had no day colouring: step 5 adds Time of day and the default
  * working hours. Implements FR2, FR7 of add-day-colouring-setting (D2).
+ * Version 6 had no day palette: step 6 adds Vivid.
+ * Implements FR3 of redesign-cards-grid-and-day-palettes (D2).
  */
 export const createPreferencesMigrations = (
   legacyInterfaceLanguage: string | null,
@@ -50,6 +53,7 @@ export const createPreferencesMigrations = (
     dayColouring: DayColouring.TIME_OF_DAY,
     workingHours: DEFAULT_WORKING_HOURS,
   }),
+  6: (payload) => ({ ...(payload as object), dayPalette: DayPalette.VIVID }),
 });
 
 export const serializePreferencesDocument = (
@@ -65,6 +69,7 @@ export const serializePreferencesDocument = (
       viewMode: preferences.viewMode,
       dayColouring: preferences.dayColouring,
       workingHours: preferences.workingHours,
+      dayPalette: preferences.dayPalette,
     },
   });
 

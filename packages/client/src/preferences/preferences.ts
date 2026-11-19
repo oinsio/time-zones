@@ -4,6 +4,7 @@
  * The zone label implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4).
  * The view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
  * The day colouring implements FR1, FR2 of add-day-colouring-setting (D1).
+ * The day palette implements FR3 of redesign-cards-grid-and-day-palettes (D2).
  */
 import { DEFAULT_WORKING_HOURS, type WorkingHours } from "./workingHours";
 
@@ -34,6 +35,12 @@ export enum DayColouring {
   WORKING_HOURS = "WORKING_HOURS",
 }
 
+/** Which set of colours the four day periods use in the Time of day colouring; the display order is `DAY_PALETTE_ORDER`. */
+export enum DayPalette {
+  VIVID = "VIVID",
+  MUTED = "MUTED",
+}
+
 export type Preferences = {
   theme: ThemePreference;
   hourFormat: HourFormat;
@@ -47,6 +54,8 @@ export type Preferences = {
   dayColouring: DayColouring;
   /** The user's working hours, read in each location's local time. Implements FR6 of add-day-colouring-setting (D1). */
   workingHours: WorkingHours;
+  /** The colours of the day periods in the Time of day colouring. Implements FR3 of redesign-cards-grid-and-day-palettes (D2). */
+  dayPalette: DayPalette;
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -57,4 +66,5 @@ export const DEFAULT_PREFERENCES: Preferences = {
   viewMode: null,
   dayColouring: DayColouring.TIME_OF_DAY,
   workingHours: DEFAULT_WORKING_HOURS,
+  dayPalette: DayPalette.VIVID,
 };

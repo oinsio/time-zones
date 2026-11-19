@@ -94,6 +94,7 @@ describe("localStorage preferences repository", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
       }),
     ).toBe(SaveOutcome.FAILED);
   });
@@ -117,10 +118,11 @@ describe("localStorage preferences repository", () => {
       viewMode: null,
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
+      dayPalette: "VIVID",
     });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
-        schemaVersion: 6,
+        schemaVersion: 7,
         payload: {
           theme: "DARK",
           hourFormat: "H12",
@@ -129,6 +131,7 @@ describe("localStorage preferences repository", () => {
           viewMode: null,
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
+          dayPalette: "VIVID",
         },
       },
     );
@@ -198,6 +201,7 @@ describe("in-memory preferences repository", () => {
       viewMode: null,
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
+      dayPalette: "VIVID",
     });
     expect(outcome).toBe(SaveOutcome.FAILED);
     expect(repository.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });

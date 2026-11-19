@@ -15,7 +15,9 @@ describe("LOCATION_ROW_VARIANT_CLASS_NAMES", () => {
   });
 
   it("should draw a Cards row as a bordered, padded box", () => {
-    expect(cardClassNames.row).toContain("rounded-md border border-card-border");
+    expect(cardClassNames.row).toContain(
+      "rounded-md border border-card-border",
+    );
   });
 
   it("should keep the Cards place and time on one line from md", () => {

@@ -1,5 +1,6 @@
 import {
   type DayColouring,
+  type DayPalette,
   type HourFormat,
   type Preferences,
   type ThemePreference,
@@ -14,6 +15,7 @@ import { checkWorkingHours, type WorkingHours } from "./workingHours";
  * SET_ZONE_LABEL_PART implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4);
  * SET_VIEW_MODE implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1);
  * SET_DAY_COLOURING and SET_WORKING_HOURS implement FR1, FR6, FR7 of add-day-colouring-setting (D1).
+ * SET_DAY_PALETTE implements FR3 of redesign-cards-grid-and-day-palettes (D2).
  */
 export enum PreferencesCommandType {
   SET_THEME = "SET_THEME",
@@ -22,6 +24,7 @@ export enum PreferencesCommandType {
   SET_ZONE_LABEL_PART = "SET_ZONE_LABEL_PART",
   SET_VIEW_MODE = "SET_VIEW_MODE",
   SET_DAY_COLOURING = "SET_DAY_COLOURING",
+  SET_DAY_PALETTE = "SET_DAY_PALETTE",
   SET_WORKING_HOURS = "SET_WORKING_HOURS",
 }
 
@@ -42,6 +45,7 @@ export type PreferencesCommand =
       type: PreferencesCommandType.SET_DAY_COLOURING;
       dayColouring: DayColouring;
     }
+  | { type: PreferencesCommandType.SET_DAY_PALETTE; dayPalette: DayPalette }
   | {
       type: PreferencesCommandType.SET_WORKING_HOURS;
       workingHours: WorkingHours;
@@ -106,6 +110,10 @@ export function reducePreferences(
       return preferences.dayColouring === command.dayColouring
         ? preferences
         : { ...preferences, dayColouring: command.dayColouring };
+    case PreferencesCommandType.SET_DAY_PALETTE:
+      return preferences.dayPalette === command.dayPalette
+        ? preferences
+        : { ...preferences, dayPalette: command.dayPalette };
     case PreferencesCommandType.SET_WORKING_HOURS:
       return reduceWorkingHours(preferences, command.workingHours);
   }

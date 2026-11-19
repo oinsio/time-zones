@@ -1,5 +1,6 @@
 import {
   DayColouring,
+  DayPalette,
   HourFormat,
   ThemePreference,
   ZoneLabelPart,
@@ -7,7 +8,7 @@ import {
 import { KeyboardKey } from "./keyboard";
 
 /** Version of the stored preferences document (ADR-0004 envelope). */
-export const PREFERENCES_SCHEMA_VERSION = 6;
+export const PREFERENCES_SCHEMA_VERSION = 7;
 
 /**
  * The zone of the live example under the zone label group.
@@ -102,4 +103,13 @@ export const DAY_COLOURING_ORDER: readonly DayColouring[] = [
   DayColouring.PLAIN,
   DayColouring.TIME_OF_DAY,
   DayColouring.WORKING_HOURS,
+];
+
+/**
+ * The order of the day palette options on the settings page: Vivid, Muted.
+ * Implements FR3 of redesign-cards-grid-and-day-palettes (D2).
+ */
+export const DAY_PALETTE_ORDER: readonly DayPalette[] = [
+  DayPalette.VIVID,
+  DayPalette.MUTED,
 ];
