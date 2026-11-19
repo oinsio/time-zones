@@ -32,7 +32,7 @@ describe("DayTrack", () => {
     expect(labels[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  // Verifies FR6 of redesign-cards-grid-and-day-palettes: bar 12 px, handle 23 px in the card colour.
+  // Verifies FR13 of redesign-cards-grid-and-day-palettes: bar 12 px, handle 23 px in the card colour.
   it("should draw a 12 px bar on every width", () => {
     const { container } = renderTrack();
 
