@@ -27,7 +27,19 @@ The header, the content region and the group of the date bar SHALL sit in one co
 ### Requirement: Header actions
 The header SHALL hold the Add location button, which opens the location search, and the settings button, which opens the settings page (see the `settings` capability). On every width the header MUST show the app title at the left and, at the right, the Add location button followed by the settings button. The title MUST be 27 px with weight 700, and 23 px up to 360 px wide. The Add location button MUST show the Lucide `Plus` icon and the settings button the Lucide `Settings` icon (the gear), both 27 px, in the accent colour of the active theme, with no visible text, each in a target of at least 44 × 44 px. The header MUST have no divider line under it. The settings button has the accessible name "Settings" («Настройки») and the Add location button "Add location" («Добавить место») on every width. While the stored location list is unreadable, the Add location button MUST NOT be shown; the title MUST stay at the left and the settings button at the right. The slash shortcut MUST keep opening the search, and the content region MUST NOT show a second Add location button. Tab MUST reach the Add location button before the settings button, which is their visual order. The page MUST NOT scroll horizontally at 320 px and 2560 px. axe-core MUST report no violations with the header in the light and the dark theme at 375 px and 1024 px. The approved screenshots of the main page states MUST show this header. While the meeting bar is shown (`grid-view` → Meeting bar: a meeting range is set and the Grid view shows at least one row), it MUST take the place of the title and both buttons, keeping its built layout: the Add location button, the settings button and the title are not shown, and the slash shortcut opens nothing; once the meeting range is cleared or the view without the meeting bar is shown, this header comes back unchanged. <!-- implements FR1, FR2, NFR-A1, NFR-A2, NFR-A3, NFR-R1, NFR-R3, UX1 of add-settings-page-and-device-time-location; FR13 of add-grid-meeting-range-and-share; FR6, NFR-A3, NFR-R1 of redesign-cards-grid-and-day-palettes -->
 
-#### Scenario: Header order on every width
+#### Scenario: Narrow header
+- **GIVEN** the interface language is Russian
+- **WHEN** the page is `<width>` px wide
+- **THEN** the header shows, from left to right, the title «Часовые пояса», the button named «Добавить место» and the button named «Настройки»
+- **AND** both buttons show an icon in the accent colour and no visible text
+- **AND** the header has no bottom border
+
+| width |
+|---|
+| 320 |
+| 390 |
+
+#### Scenario: Wide header
 - **GIVEN** the interface language is Russian
 - **WHEN** the page is `<width>` px wide
 - **THEN** the header shows, from left to right, the title «Часовые пояса», the button named «Добавить место» and the button named «Настройки»
@@ -37,8 +49,6 @@ The header SHALL hold the Add location button, which opens the location search, 
 
 | width |
 |---|
-| 320 |
-| 390 |
 | 768 |
 | 1024 |
 | 1440 |
@@ -151,7 +161,7 @@ The Grid view SHALL show the location rows in list order, all inside one panel s
 - **AND** the date of Almaty is on the line of its zone line, under its time
 - **AND** the city is 20 px and the time 24 px
 
-#### Scenario: The Grid panel uses the card tokens
+#### Scenario: Grid rows use the theme token colours
 - **GIVEN** the view mode is Grid, the stored locations are Almaty and Moscow, and the `<theme>` theme is active
 - **WHEN** the main page is shown
 - **THEN** the panel's background is the `<theme>` surface token colour and its radius 14 px

@@ -130,11 +130,30 @@ No card of the Cards view and no row of the Grid view SHALL show a drag handle. 
 - **WHEN** the user drags New York by its city above Moscow with the mouse
 - **THEN** the list is New York, Moscow, Almaty in that order
 
-#### Scenario: Drag a card down by touch after a hold
+#### Scenario: Drag a card down by touch
 - **GIVEN** the list is Moscow, Almaty, New York on a phone-sized touch screen
 - **WHEN** the user holds Moscow's city with a finger for 250 ms and drags it below New York
 - **THEN** the list is Almaty, New York, Moscow in that order
 - **AND** the page did not scroll during the drag
+
+#### Scenario: Scrolling over a card scrolls the page
+- **GIVEN** the list is Almaty, Moscow, Kolkata, Tokyo, New York on a touch screen too short to show the whole page
+- **WHEN** the user swipes up with a finger over the time of Almaty
+- **THEN** the page scrolls down
+- **AND** the list is Almaty, Moscow, Kolkata, Tokyo, New York in that order
+- **AND** nothing is written to storage
+
+#### Scenario: A single location has no handle
+- **GIVEN** the list contains only Moscow
+- **WHEN** the user drags Moscow by its city with the mouse
+- **THEN** no drag starts, the Moscow card is not lifted and it shows no drag handle
+
+#### Scenario: A quick swipe over the handle scrolls without Pointer Events
+- **GIVEN** the engine has no Pointer Events
+- **AND** the list is Almaty, Moscow, Kolkata, Tokyo, New York on a touch screen too short to show the whole page
+- **WHEN** the user swipes up over Almaty's city without holding it first
+- **THEN** the page scrolls down
+- **AND** the list is Almaty, Moscow, Kolkata, Tokyo, New York in that order
 
 #### Scenario: A swipe without a hold scrolls the page
 - **GIVEN** the list is Almaty, Moscow, Kolkata, Tokyo, New York on a touch screen too short to show the whole page
@@ -210,17 +229,24 @@ While a card is dragged, it SHALL be lifted: raised above the other rows, drawn 
 - **THEN** the Moscow card settles into its slot with a 200 ms transform transition
 - **AND** the list is Almaty, Moscow, New York in that order
 
-#### Scenario: The dragged card keeps its column and its slot
+#### Scenario: The dragged card keeps its width and its slot
 - **GIVEN** the list is Moscow, Almaty, New York
 - **WHEN** the user drags Moscow with the mouse to the right and slightly down without passing another card
-- **THEN** the Moscow card stays in its column and is raised above the others
+- **THEN** the Moscow card stays in its column, keeps its width (scaled by 1.02) and is raised above the others
 - **AND** the list keeps its height and the Almaty card stays where it was
 
 #### Scenario: Reduced motion
 - **GIVEN** the system asks to reduce motion
 - **AND** the list is Moscow, Almaty, New York
+- **WHEN** the user drags Moscow by its city below Almaty with the mouse, before dropping
+- **THEN** the Almaty card runs no transition
+- **AND** after the drop the list is Almaty, Moscow, New York in that order
+
+#### Scenario: Reduced motion has no drop animation
+- **GIVEN** the system asks to reduce motion
+- **AND** the list is Moscow, Almaty, New York
 - **WHEN** the user drags Moscow below Almaty with the mouse and releases it away from the centre of its new slot
-- **THEN** no card runs a transition
+- **THEN** the Moscow card runs no transition
 - **AND** the list is Almaty, Moscow, New York in that order
 
 ### Requirement: Reorder is accessible and fits every screen
@@ -235,6 +261,17 @@ The list SHALL have no axe-core violations at rest, with a location menu open an
 - **GIVEN** the list is Moscow, Almaty
 - **WHEN** the user tabs through the Moscow card
 - **THEN** the focus reaches the time, the location menu button and the day track, and nothing else of the card
+
+#### Scenario: Handle target size
+- **WHEN** the list is Moscow, Almaty and Moscow's location menu is open
+- **THEN** the location menu button and each menu item are at least 44 × 44 CSS px
+- **AND** no drag handle is shown
+
+#### Scenario: List screenshots show the handles
+- **GIVEN** the list state with Almaty and Moscow
+- **WHEN** it is shown at 375 px or 1024 px in the light or the dark theme
+- **THEN** the cards show no drag handle
+- **AND** the screen matches the list screenshot re-taken once for the redesign
 
 #### Scenario: Narrow and wide screens
 - **GIVEN** the list is Almaty, Moscow, Kolkata, Tokyo, New York
@@ -275,13 +312,20 @@ A location row SHALL show the "here" mark when the location's canonical IANA ide
 - **THEN** the Almaty row shows the here mark
 - **AND** the Moscow row shows no here mark
 
-#### Scenario: Map pin before the city, no caption
+#### Scenario: Icon before the city, caption after it
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the list contains Almaty and Moscow
 - **WHEN** the user opens the app
 - **THEN** on the Almaty row the map pin icon comes before the city name, 23 px, in the accent colour
-- **AND** no row shows the text "here"
+- **AND** no caption comes after the city: no row shows the text "here"
 - **AND** the Moscow row's city line starts with the city name
+
+#### Scenario: The former pill is gone
+- **GIVEN** the device time zone is `Europe/Moscow`
+- **AND** the list contains Moscow, Saint Petersburg and Almaty
+- **WHEN** the user opens the app
+- **THEN** exactly 2 rows show the here mark
+- **AND** no row shows the text "Your time zone"
 
 #### Scenario: No row matches
 - **GIVEN** the device time zone is `Asia/Tokyo`
@@ -357,7 +401,13 @@ A location row SHALL show the "here" mark when the location's canonical IANA ide
 ### Requirement: Here mark text
 The mark's accessible label SHALL come from the locale files and exist in English and Russian with identical key sets: "You are here" in English and "Вы здесь" in Russian. No locale MAY keep a visible caption text for the mark ("here", «здесь») or the former "Your time zone" text. <!-- implements FR5, UX2 of mark-device-time-zone-in-location-list; FR2, FR3, UX1, UX2 of match-here-mark-to-design; FR10 of redesign-cards-grid-and-day-palettes -->
 
-#### Scenario: Russian accessible label
+#### Scenario: English interface
+- **GIVEN** the interface language is English
+- **AND** the device time zone is `Asia/Almaty` and the list contains Almaty
+- **WHEN** the user opens the app
+- **THEN** the Almaty row has one image named "You are here" and no visible text "here"
+
+#### Scenario: Russian interface
 - **GIVEN** the interface language is Russian
 - **AND** the device time zone is `Asia/Almaty` and the list contains Almaty
 - **WHEN** the user opens the app
@@ -394,12 +444,32 @@ The accessible name of a row SHALL be its city, followed by its leading mark's a
 - **WHEN** the list is shown at 320 px or 2560 px
 - **THEN** the page does not scroll horizontally
 
+#### Scenario: List screenshots show the badge
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list contains Almaty and Moscow
+- **WHEN** the list is shown at 375 px or 1024 px in the light or the dark theme
+- **THEN** the Almaty row shows the here mark and the Moscow row does not
+- **AND** the screen matches the screenshot re-taken once for the redesign
+
 ### Requirement: One leading mark per row
 A location row SHALL show at most one leading mark, in the slot before the city name. The mark's kind MUST decide its icon and its accessible label; no kind has a visible caption. Every kind the app knows MUST have an icon and an accessible label defined in both locales. The kinds are "here" (Lucide `MapPin`, label "You are here" / «Вы здесь») and "home" (Lucide `House`, label "Home location" / «Домашнее место»). A row that is both home and in the device time zone MUST show "home". Inputs: the row's location, the home location and the device time zone. Output: the row's mark kind, or none. Errors: none. Every kind MUST take the same slot, be the same size and MUST NOT add a second leading icon to a row. <!-- implements FR4 of match-here-mark-to-design ; FR7 of set-home-location-and-show-differences; FR10 of redesign-cards-grid-and-day-palettes -->
 
-#### Scenario: Home in the device time zone
+#### Scenario: A marked row has exactly one leading icon
 - **GIVEN** the device time zone is `Asia/Almaty`
-- **AND** the list is Almaty and Moscow and Almaty is home
+- **AND** the list contains Almaty and Moscow
+- **WHEN** the user opens the app
+- **THEN** the Almaty row has exactly 1 leading mark, of the kind "here"
+- **AND** the Moscow row has no leading mark
+
+#### Scenario: Every mark kind is fully defined
+- **GIVEN** the set of mark kinds the app knows
+- **WHEN** each kind is presented in English and in Russian
+- **THEN** each kind has an icon and a non-empty accessible label
+- **AND** no kind has a visible caption
+
+#### Scenario: Home wins over here
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the list contains Almaty and Moscow and Almaty is home
 - **WHEN** the user opens the app
 - **THEN** the Almaty row has exactly 1 leading mark, of the kind "home"
 
@@ -412,10 +482,19 @@ A location row SHALL show at most one leading mark, in the slot before the city 
 ### Requirement: Offset difference text
 The difference text SHALL have a sign and the hours. Whole hours MUST carry the unit (`−2 h`, «−2 ч»). Hours with minutes MUST have no unit (`+0:30`, `−5:30`, `+5:45`). Zero MUST be `0 h` («0 ч») without a sign. The minus MUST be the typographic minus `−`. The text MUST stand right after the city, in the muted foreground colour, 16 px with weight 600 in a card (in a grid row: the size of its row header's zone line, weight 600); when the city wraps, it follows the last word of the city. <!-- implements FR6, UX1 of set-home-location-and-show-differences; FR7, FR8 of redesign-cards-grid-and-day-palettes -->
 
-#### Scenario: Difference texts
-- **GIVEN** the reference zone is `Asia/Almaty` and the current time is `2026-03-08T07:30:00Z`
-- **WHEN** Moscow, Kolkata and New York are presented in English
-- **THEN** their differences read `−2 h`, `+0:30` and `−9 h`
+#### Scenario: Texts in both languages
+- **WHEN** a difference of `<minutes>` minutes is shown in `<language>`
+- **THEN** the text is `<text>`
+
+| minutes | language | text |
+|---|---|---|
+| -120 | English | `−2 h` |
+| 180 | Russian | `+3 ч` |
+| 30 | English | `+0:30` |
+| -330 | English | `−5:30` |
+| 345 | Russian | `+5:45` |
+| 0 | English | `0 h` |
+| 0 | Russian | `0 ч` |
 
 #### Scenario: Difference look in a card
 - **GIVEN** the list is Almaty and Moscow and home is Almaty
@@ -425,24 +504,69 @@ The difference text SHALL have a sign and the hours. Whole hours MUST carry the 
 ### Requirement: Local time and date layout
 The time SHALL be the most prominent text of a card — larger and bolder than the city — and MUST use tabular figures. Below 768 px the time MUST be on the city's line at the right end of the card's content, followed by the location menu button, and the date MUST be on the next line at the right end, opposite the zone line (see "Narrow card layout"). From 768 px the date, the time and the location menu button MUST stand in this order at the right end of the card's first line (see "Wide card layout"). Every time of either hour format (for example `12:59 PM`) MUST be shown in full, on one line, with its day period marker as "Card growth" says. A list with times and dates MUST NOT scroll horizontally at 320 px and 2560 px, and the approved list screenshots, taken at the pinned instant `2026-03-08T07:30:00Z`, MUST show `12:30` on Almaty and `10:30` on Moscow with their dates. <!-- implements NFR-R1, NFR-R2, NFR-R3, UX1, UX2 of show-local-time-and-date-on-location-cards ; UX3 of set-home-location-and-show-differences; FR5, UX3 of fix-location-card-and-header-layout; FR7, FR11 of redesign-cards-grid-and-day-palettes -->
 
-#### Scenario: Time and date on a phone
-- **GIVEN** the current time is `2026-03-08T07:30:00Z` and the list is Almaty and Moscow
+#### Scenario: Narrow screen
+- **GIVEN** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Almaty and Moscow
 - **WHEN** the list is shown 390 px wide in Russian
 - **THEN** Moscow's `10:30` is on its city's line, left of its location menu button
 - **AND** Moscow's `вс, 8 мар.` is on the next line at the right end of the card's content
 
-#### Scenario: Time and date on a wide screen
-- **GIVEN** the current time is `2026-03-08T07:30:00Z` and the list is Almaty and Moscow
+#### Scenario: Wide screen
+- **GIVEN** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Almaty and Moscow
 - **WHEN** the list is shown 1024 px wide in Russian
-- **THEN** Moscow's `вс, 8 мар.`, `10:30` and location menu button are on its city's line, in this order, at the right
+- **THEN** Moscow's `вс, 8 мар.`, `10:30` and location menu button are on its city's line, in this order, at the right end of the card's content
+
+#### Scenario: One time column width in the 12-hour format
+- **GIVEN** the interface language is English
+- **AND** the hour format is 12-hour
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list contains Moscow, New York, Tokyo and Kolkata
+- **WHEN** the list is shown `<width>` px wide
+- **THEN** the cards show `10:30 AM`, `3:30 AM`, `4:30 PM` and `1:00 PM`
+- **AND** each time is shown in full on one line
+- **AND** the right edges of the four location menu buttons line up, within 1 px
+
+| width |
+|---|
+| 390 |
+| 768 |
+| 1024 |
+| 1440 |
 
 #### Scenario: Times fit narrow and wide screens
-- **GIVEN** the hour format is 12-hour and the list is Almaty, Kathmandu and New York
+- **GIVEN** the hour format is 12-hour and the list is Almaty, Kathmandu, New York and Tokyo
 - **WHEN** the list is shown at 320 px or 2560 px
 - **THEN** the page does not scroll horizontally and every time is on one line
 
+#### Scenario: List screenshots show the time and the date
+- **GIVEN** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list state with Almaty and Moscow
+- **WHEN** it is shown at 375 px or 1024 px in the light or the dark theme
+- **THEN** the Almaty row shows `12:30` and the Moscow row shows `10:30`, each with its date
+- **AND** the screen matches the list screenshot re-taken once for the redesign
+
 ### Requirement: Location menu
 Each card and grid row SHALL have a location menu button showing "⋯" with a hit area of at least 44 × 44 px, on the first line of its row header, after the time. The menu has the surface background, the control border and the lift shadow, and its items are the home action, "Move up", "Move down" and "Remove", in this order. It MUST follow the WAI-ARIA menu button pattern: Enter, Space or Arrow Down open it on the first enabled item, the arrows move between enabled items, Enter activates, Esc closes it and returns focus to the button. Opening it MUST NOT start a reorder or move a day track's handle. In the Grid view, while a meeting range is set, the location menu button MUST be locked as "Row controls are locked while a meeting range is set" of `grid-view` says: it MUST NOT be a Tab stop, no pointer, finger or key MUST open the menu, and a menu open when the range is set MUST close; once the meeting range is removed the button MUST work again. The Cards view never locks it. <!-- implements FR11, NFR-A2, UX3 of set-home-location-and-show-differences; FR1, FR2 of fix-grid-meeting-range-lock-and-layering; FR1, FR7, FR16, NFR-A3 of redesign-cards-grid-and-day-palettes -->
+
+#### Scenario: Keyboard
+- **GIVEN** the list is Almaty and Moscow
+- **WHEN** the user focuses Moscow's location menu button and presses Enter
+- **THEN** the menu opens with focus on its first enabled item
+- **WHEN** the user presses Esc
+- **THEN** the menu is closed and focus is on Moscow's location menu button
+
+#### Scenario: The menu does not start a reorder
+- **GIVEN** the list is Almaty and Moscow
+- **WHEN** the user opens Moscow's location menu with a pointer
+- **THEN** the list order is unchanged
+
+#### Scenario: The menu is locked in Grid while a meeting range is set
+- **GIVEN** the Grid view with Almaty and Moscow and the meeting range 09:00–11:00 in Almaty
+- **WHEN** the user clicks Moscow's location menu button
+- **THEN** no menu opens and the button is disabled
+- **WHEN** the user clears the meeting range and clicks Moscow's location menu button
+- **THEN** the menu opens with "Move up" and "Move down"
 
 #### Scenario: Keyboard opens the menu on the first enabled item
 - **GIVEN** the list is Almaty, Moscow and home is Almaty
@@ -461,6 +585,16 @@ Each card and grid row SHALL have a location menu button showing "⋯" with a hi
 ### Requirement: Device time location
 The device time location SHALL be a location of the list whose zone is the device time zone. Its row MUST show the Here mark without a caption (the Home mark instead while it is home), the city of the device time zone, the zone line with "Device time" («Время устройства») in place of the country name, then the zone abbreviation and the UTC offset, each shown as the zone label allows ("Время устройства · CET · UTC+1", see "Zone line on location rows"), the local time and date at the effective instant, its offset difference by the rule of every location row, and a day track on the shared reference day. "Device time" is not a country name: it MUST stay the first element of the zone line whether or not the zone label shows the country. Its zone MUST change in the same render whenever the device time zone is read with a new value: at start, at every minute tick and when the page becomes visible. An unknown device time zone MUST be shown as `UTC`. Inputs: the device time zone, the effective instant, the reference zone. Output: the row. Errors: none. <!-- implements FR8, UX3 of add-settings-page-and-device-time-location; FR6 of show-zone-abbreviations-and-zone-label-setting; FR4 of add-country-to-zone-label; FR18 of redesign-cards-grid-and-day-palettes -->
 
+#### Scenario: Device time location on the design sample
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the interface language is Russian
+- **AND** the zone cities data is loaded
+- **AND** the current instant is `2026-03-08T07:30:00Z`
+- **AND** the list is the device time location, Moscow, Kolkata, New York
+- **WHEN** the user opens the app
+- **THEN** the first row shows the map pin, `Алматы`, no caption, the zone line `Время устройства · UTC+5` (Almaty has no zone abbreviation), the time `12:30`, the date `вс, 8 мар.` and no offset difference
+- **AND** Moscow shows `−2 ч`, Kolkata `+0:30` and New York `−9 ч`
+
 #### Scenario: Device time zone line
 - **GIVEN** the interface language is Russian, the device time zone is `Europe/Berlin` and the current time is `2026-03-08T07:30:00Z`
 - **AND** the list is the device time location
@@ -468,16 +602,36 @@ The device time location SHALL be a location of the list whose zone is the devic
 - **THEN** its zone line reads «Время устройства · CET · UTC+1»
 - **AND** it shows the map pin and no text «здесь»
 
-#### Scenario: Device time stays with the country hidden
-- **GIVEN** the interface language is English and the device time zone is `Europe/Berlin`
-- **AND** the zone label shows the zone abbreviation and the UTC offset, not the country
-- **WHEN** the user opens the app
-- **THEN** the device time location's zone line reads "Device time · CET · UTC+1"
+#### Scenario: The device moves to another zone
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the interface language is English
+- **AND** the list is the device time location, New York
+- **WHEN** the device time zone becomes `Europe/Moscow` and the minute tick reads it
+- **THEN** the first row shows `Moscow` and the zone line elements `Device time`, `MSK`, `UTC+3`
+- **AND** the list is still the device time location, New York
 
 #### Scenario: Unknown device time zone
 - **GIVEN** the device reports the time zone `Mars/Olympus_Mons`
-- **WHEN** the user opens the app with the list holding the device time location
-- **THEN** its row shows the zone `UTC`
+- **AND** the interface language is English
+- **AND** the list is the device time location
+- **WHEN** the user opens the app
+- **THEN** the row shows `UTC`, the map pin, no caption and the zone line elements `Device time`, `UTC`
+
+#### Scenario: Meta line follows the zone label
+- **GIVEN** the device time zone is `Europe/Moscow`
+- **AND** the interface language is Russian
+- **AND** the list is the device time location
+- **WHEN** the zone label shows `<parts>`
+- **THEN** the zone line is `<meta line>`
+
+| parts | meta line |
+|---|---|
+| the country, the zone abbreviation and the UTC offset | Время устройства · МСК · UTC+3 |
+| the zone abbreviation and the UTC offset | Время устройства · МСК · UTC+3 |
+| the country and the UTC offset | Время устройства · UTC+3 |
+| the country and the zone abbreviation | Время устройства · МСК |
+| the country only | Время устройства |
+| nothing | Время устройства |
 
 ### Requirement: Device time location has the controls of every card
 The device time location's row SHALL have the same controls as a city location's row: a grab area, a location menu with the home action (Make home or Clear home), Move up, Move down and Remove. It MUST be an item of the numbered location list, and reorder positions and announcements MUST count it like any location. Removing it MUST take it out of the list and keep the order of the others. Inputs: the user's reorder, home and remove actions. Effects: as for any location. Errors: location not found when it is no longer in the list. <!-- implements FR9, UX3 of add-settings-page-and-device-time-location; FR15, FR16 of redesign-cards-grid-and-day-palettes -->
@@ -502,28 +656,52 @@ The device time location's row SHALL have the same controls as a city location's
 ### Requirement: Accessible device time location
 The device time location's row SHALL be an item of the numbered location list. Its accessible name MUST include the city, the Here mark label (or the Home mark label while it is home) and "Device time". Its location menu button MUST be named like a city card's ("Actions for Almaty"). Its time MUST be a wall-time input and its day track one Tab stop, named like a city card's. In the Grid view, while a meeting range is set, its grab area, location menu button and wall-time input MUST be locked as a city card's are ("Row controls are locked while a meeting range is set" of `grid-view`). axe-core MUST report no violations with the device time location shown, alone, above cities and as home, in the light and the dark theme. <!-- implements NFR-A1, NFR-A2 of add-settings-page-and-device-time-location; FR1, FR2 of fix-grid-meeting-range-lock-and-layering; FR15 of redesign-cards-grid-and-day-palettes -->
 
-#### Scenario: Accessible name
-- **GIVEN** the interface language is English, the device time zone is `Asia/Almaty` and the list is the device time location
+#### Scenario: Name and list size
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the interface language is Russian
+- **AND** the zone cities data is loaded
+- **AND** the list is the device time location, Moscow, New York
 - **WHEN** the user opens the app
-- **THEN** the row's accessible name is "Almaty, You are here, Device time"
+- **THEN** the first list item is named `Алматы, Вы здесь, Время устройства`
+- **AND** the location list has 3 items
+- **AND** its location menu button is named `Действия: Алматы`
 
-#### Scenario: No accessibility violations
-- **GIVEN** the device time location is shown alone, above Moscow, and as home
-- **WHEN** each state is checked in the light and the dark theme
-- **THEN** axe-core reports no violations
+#### Scenario: No violations
+- **GIVEN** the device time location is shown alone, above a list, or as home
+- **WHEN** axe-core checks the page in the light and dark themes
+- **THEN** it reports no violations
 
 ### Requirement: Device time location layout
 The device time location SHALL use the card layout of every location row ("Narrow card layout", "Wide card layout") and the grid row layout of every row. The page MUST NOT scroll horizontally at 320 px and 2560 px with it shown. Replacing the derived city with the exemplar city MUST NOT change its height. The approved screenshots that show the device time location MUST match. <!-- implements NFR-R1, NFR-R3, UX3 of add-settings-page-and-device-time-location; FR18 of redesign-cards-grid-and-day-palettes -->
 
-#### Scenario: Same layout as a city card
-- **GIVEN** the list is the device time location and Moscow
-- **WHEN** the list is shown `<width>` px wide
-- **THEN** both cards have the same line structure and the same height, within 1 px
+#### Scenario: Narrow and wide screens
+- **GIVEN** the list is the device time location, Moscow
+- **WHEN** the viewport is `<width>` px wide
+- **THEN** the page does not scroll horizontally
+- **AND** the device time location's card has the same line structure and height as the Moscow card, within 1 px
 
 | width |
 |---|
+| 320 |
 | 390 |
 | 1024 |
+| 2560 |
+
+#### Scenario: The exemplar city keeps the height
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the interface language is Russian
+- **AND** the zone cities data is held back
+- **AND** the list is the device time location, Moscow
+- **WHEN** the user opens the app and the device time location shows `Almaty`
+- **AND** the zone cities data finishes loading and it shows `Алматы`
+- **THEN** its height is the same as before the load
+- **AND** the Moscow card has not moved
+
+#### Scenario: Approved screenshots
+- **GIVEN** the device time zone is `Asia/Almaty`
+- **AND** the state is "device-time", "device-time-home" or "first-launch"
+- **WHEN** it is rendered at 375 px and 1024 px in the light and dark themes
+- **THEN** it matches the approved screenshot, re-taken once for the redesign
 
 ### Requirement: UTC offset on location rows
 Every location row SHALL show the location's UTC offset as the last element of its zone line, after the country name and the zone abbreviation, while the zone label shows the UTC offset (see the `settings` capability); while it does not, the row MUST show no offset and MUST leave no gap for it. A city location in the zone `UTC` is the one exception: its zone line is the Universal Time label alone (see "Zone line on location rows"). The offset MUST be derived from the location's canonical IANA identifier for the reference moment — the current instant while the moment is live, the pinned instant while it is pinned (see the `date-selection` capability) — so daylight saving time is respected for the shown date; a raw offset MUST NOT be stored or used to identify a location. The offset MUST be computed when the list is presented (the app opens, a location is added or removed, the list changes in another tab, the interface language changes, the reference moment changes), at the start of every minute while the page is visible, and when the page becomes visible again; it MUST NOT be refreshed while the page is hidden. Inputs: the location's IANA identifier, the reference moment (ISO 8601 with `Z`), the interface language. Output: the offset text. Errors: when the offset cannot be computed for the identifier, the row MUST be shown without the offset and the rest of the list MUST be unaffected. The offset needs no network and behaves the same offline. <!-- implements FR1, FR2, FR4, FR6, UX1 of show-utc-offset-on-location-rows; FR4 of show-local-time-and-date-on-location-cards; FR5 of select-date-with-calendar-and-now; FR5, FR13 of show-zone-abbreviations-and-zone-label-setting; FR19 of redesign-cards-grid-and-day-palettes -->
@@ -558,6 +736,14 @@ Every location row SHALL show the location's UTC offset as the last element of i
 - **AND** the list contains Reykjavik (`Atlantic/Reykjavik`)
 - **WHEN** the user opens the app
 - **THEN** the Reykjavik row's zone line ends with `UTC`
+
+#### Scenario: Offset is computed again when the list changes
+- **GIVEN** the list contains New York (`America/New_York`)
+- **AND** the app was opened at `2026-01-15T12:00:00Z`, so the New York row shows `UTC−5`
+- **WHEN** the current instant is `2026-07-15T12:00:00Z`
+- **AND** the user adds Kolkata
+- **THEN** the New York row shows `UTC−4`
+- **AND** the Kolkata row shows `UTC+5:30`
 
 #### Scenario: Offset is computed again at the minute boundary
 - **GIVEN** the list contains New York (`America/New_York`)
@@ -619,6 +805,21 @@ The line of every city location row after its city, its zone line, SHALL consist
 - **THEN** New York shows `EST` and Dublin shows `GMT`
 - **WHEN** the user pins the moment to `2026-07-15T12:00:00Z`
 - **THEN** New York shows `EDT` and Dublin shows `IST`
+
+#### Scenario: Unknown elements leave nothing behind
+- **GIVEN** the current instant is `2026-07-15T12:00:00Z`
+- **AND** the list contains Almaty and a location whose zone the browser does not know (for example `Mars/Olympus_Mons`)
+- **WHEN** the user opens the app
+- **THEN** the Almaty row's zone line elements are `Kazakhstan`, `UTC+5`
+- **AND** the other row shows no zone line and no empty line
+
+#### Scenario: UTC with the zone abbreviation only
+- **GIVEN** the interface language is English
+- **AND** the zone label shows the zone abbreviation only
+- **AND** the current instant is `2026-07-15T12:00:00Z`
+- **AND** the list contains UTC
+- **WHEN** the user opens the app
+- **THEN** the UTC row shows no zone line
 
 #### Scenario: Universal Time on the UTC row
 - **GIVEN** the interface language is `<language>`
@@ -682,6 +883,18 @@ The zone line SHALL join its elements with a middle dot (` · `) at even spacing
 | English | 820 |
 | English | 1024 |
 | Russian | 1440 |
+
+#### Scenario: Wrapping between elements only
+- **GIVEN** the list is shown 320 px wide in Russian
+- **AND** the list contains St. Vincent and the current instant is `2026-01-15T12:00:00Z`
+- **WHEN** its zone line does not fit on one line
+- **THEN** it wraps between elements or between words of the country name
+- **AND** `AST` and `UTC−4` are each on one line
+
+#### Scenario: Re-approved screenshots
+- **GIVEN** an approved screenshot state that shows a card
+- **WHEN** it is rendered at its approved width and theme
+- **THEN** it matches the screenshot re-taken once for the redesign, with the zone line joined by middle dots
 
 #### Scenario: Dots are not read
 - **GIVEN** the interface language is English and the list contains Kolkata
