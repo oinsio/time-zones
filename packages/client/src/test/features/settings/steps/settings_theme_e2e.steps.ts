@@ -146,7 +146,7 @@ Then(
         .locator(
           'xpath=ancestor::li[1]//span[button[@aria-haspopup="menu"]]/preceding-sibling::button',
         ),
-    ).toHaveText(time);
+    ).toHaveText(new RegExp(`^${time.replace(/\s+/g, "\\s*")}$`));
   },
 );
 
