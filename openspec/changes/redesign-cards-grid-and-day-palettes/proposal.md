@@ -133,7 +133,7 @@ _None._ The day palette is a part of the existing `day-colouring` and `settings`
 
 ## Behavior
 
-Gherkin under `packages/client/src/test/features/`, tagged `@redesign-cards-grid-and-day-palettes`: `settings/settings_day_palette_*.feature`, `locations/locations_reorder_*.feature`, `locations/locations_card_layout_e2e.feature`, `main_page/main_page_header_e2e.feature`, `time_selection/time_selection_layout_e2e.feature`, `date_selection/date_selection_layout_e2e.feature`, `grid_view/grid_view_redesign_e2e.feature`, `locations/locations_redesign_regressions_e2e.feature` (see `tasks.md`).
+Gherkin under `packages/client/src/test/features/`, tagged `@redesign-cards-grid-and-day-palettes`: `settings/settings_day_palette_*.feature`, `locations/locations_reorder_*.feature`, `locations/locations_card_layout_e2e.feature`, `main_page/main_page_header_e2e.feature`, `time_selection/time_selection_layout_e2e.feature`, `date_selection/date_selection_layout_e2e.feature`, `grid_view/grid_view_redesign_e2e.feature`, `time_selection/time_selection_regressions_e2e.feature`, `day_colouring/day_colouring_palette_e2e.feature` (see `tasks.md`).
 
 ## Visual Reference
 
