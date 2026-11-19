@@ -47,6 +47,7 @@ export function ZoneLine({
   ...lineProps
 }: ZoneLineProps) {
   const lineRef = useRef<HTMLSpanElement | null>(null);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the line breaks are measured again when the parts change
   useLayoutEffect(() => {
     const lineElement = lineRef.current;
     if (lineElement === null) return;

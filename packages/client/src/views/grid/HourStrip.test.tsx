@@ -1,6 +1,7 @@
 // Verifies FR2 of colour-locations-without-day-periods-in-accent.
 // Verifies FR12, NFR-A3 of add-day-colouring-setting.
 // Verifies FR1, FR3, FR5, FR6, FR8, FR11, FR12, NFR-A1, NFR-A2 of add-grid-hour-cells-and-hour-frame.
+// Verifies FR17 of redesign-cards-grid-and-day-palettes: the cell shape and digits.
 import { fireEvent, render } from "@testing-library/react";
 import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,6 +34,14 @@ describe("HourStrip", () => {
 
     expect(slider).toHaveAttribute("tabindex", "0");
     expect(slider.querySelector("[tabindex]")).toBeNull();
+  });
+
+  it("should round the cells by the cell radius and write the digits 15 px", () => {
+    const { slider } = renderStrip();
+
+    const cell = slider.querySelector("[data-hour-cell]") as HTMLElement;
+    expect(cell).toHaveClass("rounded-cell", "h-11", "md:h-12");
+    expect(cell.querySelector("span")).toHaveClass("text-grid-cell");
   });
 
   it("should draw 24 cells", () => {

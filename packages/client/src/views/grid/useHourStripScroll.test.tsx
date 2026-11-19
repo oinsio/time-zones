@@ -1,3 +1,4 @@
+// Verifies FR17 of redesign-cards-grid-and-day-palettes: a scrolling cell is 38 px plus the 3 px gap.
 // Verifies NFR-R1, NFR-R2, UX3 of add-grid-hour-cells-and-hour-frame (D5).
 // Verifies FR10, FR11 of add-grid-meeting-range-and-share (D6): no follow during a meeting.
 import { act, render } from "@testing-library/react";
@@ -50,9 +51,7 @@ describe("useHourStripScroll", () => {
     const style = panelOf(container).style;
     expect(style.getPropertyValue("--grid-panel-width")).toBe("390px");
     expect(style.getPropertyValue("--hour-cell-count")).toBe("24");
-    expect(style.getPropertyValue("--hour-cell-pitch")).toBe(
-      `${(390 - 32) / 9}px`,
-    );
+    expect(style.getPropertyValue("--hour-cell-pitch")).toBe("41px");
   });
 
   it("should share the strip equally while the cells fit", () => {
