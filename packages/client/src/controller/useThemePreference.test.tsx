@@ -5,6 +5,7 @@ import { createInMemoryPreferencesRepository } from "@/adapters";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DayColouring,
+  DayPalette,
   DEFAULT_PREFERENCES,
   DEFAULT_WORKING_HOURS,
   HourFormat,
@@ -26,6 +27,7 @@ const storedTheme = (theme: ThemePreference) =>
       viewMode: null,
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: DEFAULT_WORKING_HOURS,
+      dayPalette: DayPalette.VIVID,
     },
   }) as const;
 

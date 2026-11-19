@@ -9,6 +9,7 @@ import {
   LocationsProvider,
   LocationsStatus,
   PreferencesProvider,
+  useDayPalettePreference,
   useDocumentLanguage,
   useInterfaceLanguage,
   useLocations,
@@ -94,6 +95,7 @@ function AppShellContent({
 }: AppShellDependencies & { clock: Clock }) {
   useDocumentLanguage();
   useThemePreference();
+  useDayPalettePreference();
   useInterfaceLanguage();
   const { hasSaveFailed, loadStatus } = useLocations();
   const updateStatus = usePwaUpdateStatus(clock, appRevisionSource);

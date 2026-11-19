@@ -7,6 +7,7 @@ import {
 import { PreferencesLoadStatus, SaveOutcome } from "@/ports";
 import {
   DayColouring,
+  DayPalette,
   DEFAULT_PREFERENCES,
   HourFormat,
   ThemePreference,
@@ -94,7 +95,7 @@ describe("localStorage preferences repository", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
-        dayPalette: "VIVID",
+        dayPalette: DayPalette.VIVID,
       }),
     ).toBe(SaveOutcome.FAILED);
   });
@@ -118,7 +119,7 @@ describe("localStorage preferences repository", () => {
       viewMode: null,
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
-      dayPalette: "VIVID",
+      dayPalette: DayPalette.VIVID,
     });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
@@ -131,7 +132,7 @@ describe("localStorage preferences repository", () => {
           viewMode: null,
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
-          dayPalette: "VIVID",
+          dayPalette: DayPalette.VIVID,
         },
       },
     );
@@ -201,7 +202,7 @@ describe("in-memory preferences repository", () => {
       viewMode: null,
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
-      dayPalette: "VIVID",
+      dayPalette: DayPalette.VIVID,
     });
     expect(outcome).toBe(SaveOutcome.FAILED);
     expect(repository.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });
