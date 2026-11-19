@@ -1,8 +1,6 @@
 // Verifies FR5 of make-location-menu-button-vertical.
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DESIGN_SCREEN_DEVICE_SCALE_FACTOR,
   DESIGN_SCREEN_SELECTOR,
@@ -98,23 +96,40 @@ describe("readPngPixelSize", () => {
 });
 
 describe("runDesignScreens", () => {
-  let screensFolder: string;
+  const screensFolder = "/screens";
+  let files: Map<string, Uint8Array>;
 
-  beforeEach(async () => {
-    screensFolder = await mkdtemp(join(tmpdir(), "design-screens-"));
-  });
-  afterEach(async () => {
-    await rm(screensFolder, { recursive: true, force: true });
+  beforeEach(() => {
+    files = new Map();
   });
 
-  async function seedScreen(name: string, png: Buffer) {
-    await writeFile(join(screensFolder, `${name}.html`), "<html></html>");
-    await writeFile(join(screensFolder, `${name}.png`), png);
+  function seedScreen(name: string, png: Buffer) {
+    files.set(join(screensFolder, `${name}.html`), Buffer.from("<html>"));
+    files.set(join(screensFolder, `${name}.png`), png);
     return join(screensFolder, `${name}.html`);
   }
 
-  const dependenciesFor = (renderedPng: Buffer, rendered: string[] = []) => ({
+  const pngOf = (htmlPath: string) =>
+    files.get(htmlPath.replace(".html", ".png"));
+
+  const fileDependencies = () => ({
     screensFolder,
+    listFileNames: async (folder: string) =>
+      [...files.keys()]
+        .filter((path) => path.startsWith(`${folder}/`))
+        .map((path) => path.slice(folder.length + 1)),
+    readPng: async (pngPath: string) => {
+      const png = files.get(pngPath);
+      if (!png) throw new Error(`${pngPath}: no such file`);
+      return png;
+    },
+    writePng: async (pngPath: string, png: Uint8Array) => {
+      files.set(pngPath, png);
+    },
+  });
+
+  const dependenciesFor = (renderedPng: Buffer, rendered: string[] = []) => ({
+    ...fileDependencies(),
     renderScreens: async (
       htmlPaths: string[],
       options: { deviceScaleFactor: number; selector: string },
@@ -126,7 +141,7 @@ describe("runDesignScreens", () => {
 
   it("should not write a PNG of another pixel size and should fail", async () => {
     const original = buildPng(100, 200, 1);
-    const htmlPath = await seedScreen("a", original);
+    const htmlPath = seedScreen("a", original);
 
     const exitCode = await runDesignScreens(
       [htmlPath],
@@ -134,11 +149,11 @@ describe("runDesignScreens", () => {
     );
 
     expect(exitCode).not.toBe(0);
-    expect(await readFile(htmlPath.replace(".html", ".png"))).toEqual(original);
+    expect(pngOf(htmlPath)).toEqual(original);
   });
 
   it("should write a PNG of the same pixel size and succeed", async () => {
-    const htmlPath = await seedScreen("a", buildPng(100, 200, 1));
+    const htmlPath = seedScreen("a", buildPng(100, 200, 1));
     const replacement = buildPng(100, 200, 2);
 
     const exitCode = await runDesignScreens(
@@ -147,13 +162,11 @@ describe("runDesignScreens", () => {
     );
 
     expect(exitCode).toBe(0);
-    expect(await readFile(htmlPath.replace(".html", ".png"))).toEqual(
-      replacement,
-    );
+    expect(pngOf(htmlPath)).toEqual(replacement);
   });
 
   it("should render with the scale factor and the screen selector", async () => {
-    const htmlPath = await seedScreen("a", buildPng(100, 200));
+    const htmlPath = seedScreen("a", buildPng(100, 200));
     const rendered: string[] = [];
 
     await runDesignScreens(
@@ -170,15 +183,13 @@ describe("runDesignScreens", () => {
   });
 
   it("should render every HTML file of the folder when no path is given", async () => {
-    await seedScreen("a", buildPng(1, 1));
-    await seedScreen("b", buildPng(1, 1));
-    await mkdir(join(screensFolder, "nested"));
-    await mkdir(join(screensFolder, "folder.html"));
-    await writeFile(join(screensFolder, "notes.txt"), "x");
+    seedScreen("a", buildPng(1, 1));
+    seedScreen("b", buildPng(1, 1));
+    files.set(join(screensFolder, "notes.txt"), Buffer.from("x"));
     const renderedPaths: string[] = [];
 
     await runDesignScreens([], {
-      screensFolder,
+      ...fileDependencies(),
       renderScreens: async (htmlPaths) => {
         renderedPaths.push(...htmlPaths);
         return htmlPaths.map((htmlPath) => ({
@@ -195,12 +206,12 @@ describe("runDesignScreens", () => {
   });
 
   it("should render only the named screens", async () => {
-    const namedPath = await seedScreen("named", buildPng(1, 1));
-    await seedScreen("other", buildPng(1, 1));
+    const namedPath = seedScreen("named", buildPng(1, 1));
+    seedScreen("other", buildPng(1, 1));
     const renderedPaths: string[] = [];
 
     await runDesignScreens([namedPath], {
-      screensFolder,
+      ...fileDependencies(),
       renderScreens: async (htmlPaths) => {
         renderedPaths.push(...htmlPaths);
         return [];
@@ -211,7 +222,7 @@ describe("runDesignScreens", () => {
   });
 
   it("should name both sizes when only the width differs", async () => {
-    const htmlPath = await seedScreen("a", buildPng(100, 200, 1));
+    const htmlPath = seedScreen("a", buildPng(100, 200, 1));
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const exitCode = await runDesignScreens(
@@ -228,7 +239,7 @@ describe("runDesignScreens", () => {
 
   it("should fail when a screen has no PNG to compare with", async () => {
     const htmlPath = join(screensFolder, "lonely.html");
-    await writeFile(htmlPath, "<html></html>");
+    files.set(htmlPath, Buffer.from("<html>"));
 
     const exitCode = await runDesignScreens(
       [htmlPath],

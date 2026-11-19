@@ -1,4 +1,3 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   DESIGN_SCREEN_DEVICE_SCALE_FACTOR,
@@ -16,6 +15,10 @@ export type RenderedScreen = { htmlPath: string; png: Uint8Array };
 export type RenderOptions = { deviceScaleFactor: number; selector: string };
 export type DesignScreenDependencies = {
   screensFolder: string;
+  /** The names of the files (not folders) directly in a folder. */
+  listFileNames: (folder: string) => Promise<string[]>;
+  readPng: (pngPath: string) => Promise<Uint8Array>;
+  writePng: (pngPath: string, png: Uint8Array) => Promise<void>;
   renderScreens: (
     htmlPaths: string[],
     options: RenderOptions,
@@ -46,11 +49,13 @@ export function readPngPixelSize(pngBytes: Uint8Array): PixelSize {
 const pngPathOf = (htmlPath: string) =>
   htmlPath.slice(0, -HTML_EXTENSION.length) + PNG_EXTENSION;
 
-async function listScreenPaths(screensFolder: string) {
-  const entries = await readdir(screensFolder, { withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(HTML_EXTENSION))
-    .map((entry) => join(screensFolder, entry.name))
+async function listScreenPaths(dependencies: DesignScreenDependencies) {
+  const fileNames = await dependencies.listFileNames(
+    dependencies.screensFolder,
+  );
+  return fileNames
+    .filter((fileName) => fileName.endsWith(HTML_EXTENSION))
+    .map((fileName) => join(dependencies.screensFolder, fileName))
     .sort();
 }
 
@@ -64,9 +69,7 @@ export async function runDesignScreens(
   dependencies: DesignScreenDependencies,
 ): Promise<number> {
   const htmlPaths =
-    screenPaths.length > 0
-      ? screenPaths
-      : await listScreenPaths(dependencies.screensFolder);
+    screenPaths.length > 0 ? screenPaths : await listScreenPaths(dependencies);
   const renderedScreens = await dependencies.renderScreens(htmlPaths, {
     deviceScaleFactor: DESIGN_SCREEN_DEVICE_SCALE_FACTOR,
     selector: DESIGN_SCREEN_SELECTOR,
@@ -75,7 +78,9 @@ export async function runDesignScreens(
   for (const { htmlPath, png } of renderedScreens) {
     const pngPath = pngPathOf(htmlPath);
     try {
-      const existingSize = readPngPixelSize(await readFile(pngPath));
+      const existingSize = readPngPixelSize(
+        await dependencies.readPng(pngPath),
+      );
       const renderedSize = readPngPixelSize(png);
       if (
         existingSize.width !== renderedSize.width ||
@@ -85,7 +90,7 @@ export async function runDesignScreens(
           `${pngPath}: ${renderedSize.width}x${renderedSize.height} px replaces ${existingSize.width}x${existingSize.height} px`,
         );
       }
-      await writeFile(pngPath, png);
+      await dependencies.writePng(pngPath, png);
     } catch (error) {
       console.error(error instanceof Error ? error.message : error);
       exitCode = FAILURE_EXIT_CODE;

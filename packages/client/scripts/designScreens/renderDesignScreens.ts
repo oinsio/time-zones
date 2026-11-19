@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -30,6 +30,12 @@ try {
     process.argv.slice(2).map((path) => resolve(path)),
     {
       screensFolder: resolve(DESIGN_SCREENS_FOLDER),
+      listFileNames: async (folder) =>
+        (await readdir(folder, { withFileTypes: true }))
+          .filter((entry) => entry.isFile())
+          .map((entry) => entry.name),
+      readPng: (pngPath) => readFile(pngPath),
+      writePng: (pngPath, png) => writeFile(pngPath, png),
       renderScreens: async (htmlPaths, { deviceScaleFactor, selector }) => {
         const context = await browser.newContext({
           deviceScaleFactor,
