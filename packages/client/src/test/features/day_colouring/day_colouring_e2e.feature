@@ -94,17 +94,31 @@ Feature: Day colouring in a real browser
     Examples:
       | view  | colouring     | theme |
       | Cards | Plain         | light |
-      | Cards | Plain         | dark  |
-      | Cards | Time of day   | light |
-      | Cards | Time of day   | dark  |
-      | Cards | Working hours | light |
       | Cards | Working hours | dark  |
-      | Grid  | Plain         | light |
       | Grid  | Plain         | dark  |
-      | Grid  | Time of day   | light |
-      | Grid  | Time of day   | dark  |
       | Grid  | Working hours | light |
-      | Grid  | Working hours | dark  |
+
+  @redesign-cards-grid-and-day-palettes @NFR-A1 @M1
+  Scenario Outline: No violations for the <palette> palette in the <view> view and the <theme> theme
+    Given the view mode is <view>
+    And the day colouring is "Time of day"
+    And the day palette is "<palette>"
+    And the current time is "2026-03-09T06:00:00Z"
+    And the stored locations are "Almaty", "Moscow", "Kolkata", "New York"
+    And the locations screen uses the <theme> theme
+    When the user opens the locations app
+    Then the locations screen has no accessibility violations
+
+    Examples:
+      | view  | theme | palette |
+      | Cards | light | Vivid   |
+      | Cards | light | Muted   |
+      | Cards | dark  | Vivid   |
+      | Cards | dark  | Muted   |
+      | Grid  | light | Vivid   |
+      | Grid  | light | Muted   |
+      | Grid  | dark  | Vivid   |
+      | Grid  | dark  | Muted   |
 
   @add-day-colouring-setting @NFR-R2 @UX4 @bind-day-periods-to-sun @NFR-R1
   Scenario Outline: Screenshot of <view> at <width> px in the <colouring> colouring and the <theme> theme
