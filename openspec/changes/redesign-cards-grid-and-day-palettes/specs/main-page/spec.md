@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Content column
-The header, the content region and the group of the date bar SHALL sit in one column of at most 1120 px, centred in the viewport; the page MUST NOT stretch them to the full width. Below 1120 px the column is the viewport width minus the side paddings of each page part. The date bar keeps the page background across the whole viewport width and stays stuck to the bottom of the viewport. This holds in every page state (loading, error, empty, storage unavailable) and in both views. Inputs: the viewport width. Output: the column's position and width. Errors: none. <!-- implements FR12, NFR-R1, UX4 of redesign-cards-grid-and-day-palettes -->
+The header, the content region and the group of the date bar SHALL sit in one column of at most 1120 px, centred in the viewport; the page MUST NOT stretch them to the full width. Below 1120 px the column is the viewport width minus the side paddings of each page part. The date bar keeps the page background across the whole viewport width and stays stuck to the bottom of the viewport; the meeting bar, while shown, keeps its background across the whole viewport width too. This holds in every page state (loading, error, empty, storage unavailable) and in both views. Inputs: the viewport width. Output: the column's position and width. Errors: none. <!-- implements FR12, NFR-R1, UX4 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: The column is centred on a wide screen
 - **GIVEN** the stored locations are Almaty, Moscow, Kolkata and New York
@@ -16,6 +16,13 @@ The header, the content region and the group of the date bar SHALL sit in one co
 | 2560 | Cards |
 | 1440 | Grid |
 | 2560 | Grid |
+
+#### Scenario: The bars span the viewport
+- **GIVEN** the view mode is Grid, the stored locations are Almaty and Moscow and a meeting range is set
+- **WHEN** the main page is 1440 px wide
+- **THEN** the meeting bar is as wide as the viewport, within 1 px
+- **AND** the date bar is as wide as the viewport, within 1 px
+- **AND** the date bar group is at most 1120 px wide and centred, within 1 px
 
 #### Scenario: The empty state sits in the column
 - **GIVEN** the stored location list is empty
