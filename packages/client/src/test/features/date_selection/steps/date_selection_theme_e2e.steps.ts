@@ -17,27 +17,26 @@ import {
 const { When, Then } = createBdd(test);
 
 const CALENDAR_DAY_SELECTOR = "table button";
-const ACCENT_COLOUR_VARIABLE = "--color-accent";
-const ACCENT_FOREGROUND_VARIABLE = "--color-accent-foreground";
+const CONTROL_BORDER_VARIABLE = "--color-control-border";
 const FOREGROUND_VARIABLE = "--color-foreground";
 
 const eachBox = async (locator: Locator) =>
   Promise.all((await locator.all()).map((item) => requireBox(item)));
 // Verifies UX2 of select-date-with-calendar-and-now.
 Then(
-  "Now shows a clock icon and the label {string} in the accent colours",
+  "Now shows a clock icon and the label {string} outlined in the control colours",
   async ({ locationsWorld }, label: string) => {
     const { page } = locationsWorld;
     const now = nowButton(page);
     await expect(now.locator("svg")).toHaveCount(1);
     await expect(now).toHaveText(label);
     await expect(now).toHaveCSS(
-      "background-color",
-      await computedColourOfVariable(page, ACCENT_COLOUR_VARIABLE),
+      "border-top-color",
+      await computedColourOfVariable(page, CONTROL_BORDER_VARIABLE),
     );
     await expect(now).toHaveCSS(
       "color",
-      await computedColourOfVariable(page, ACCENT_FOREGROUND_VARIABLE),
+      await computedColourOfVariable(page, FOREGROUND_VARIABLE),
     );
   },
 );
@@ -122,9 +121,10 @@ Then("each bar control is at least 44 by 44 px", async ({ locationsWorld }) => {
 Then(
   "each calendar day is at least 44 by 44 px",
   async ({ locationsWorld }) => {
-    const boxes = await eachBox(
-      calendarOf(locationsWorld.page).locator(CALENDAR_DAY_SELECTOR),
-    );
+    const days = calendarOf(locationsWorld.page).locator(CALENDAR_DAY_SELECTOR);
+    // The month grid loads when the dialog opens.
+    await expect(days.first()).toBeVisible();
+    const boxes = await eachBox(days);
     expect(boxes.length).toBeGreaterThan(0);
     for (const box of boxes) {
       expect(box.width).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET_PX);

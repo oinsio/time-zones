@@ -58,8 +58,8 @@ Feature: Here mark in a real browser
       | 1024  | dark  |
 
   @match-here-mark-to-design @NFR-A1 @FR1
-  Scenario: The mark icon is named and the caption is not announced
+  Scenario: The mark icon is named and there is no visible caption
     Given the stored locations are "Almaty", "Moscow"
     And the user opens the locations app
     Then the row of "Almaty" has a mark icon named "You are here"
-    And the here caption of "Almaty" is hidden from assistive technology
+    And the row of "Almaty" shows no visible here caption

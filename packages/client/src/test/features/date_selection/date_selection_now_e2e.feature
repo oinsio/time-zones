@@ -38,13 +38,13 @@ Feature: Now button always visible in the date bar (browser)
     And the bar has a Now button named "Now" that is inactive
 
   @keep-now-button-visible-when-live @FR4 @UX1 @M1
-  Scenario Outline: An inactive Now is grey in the <theme> theme
+  Scenario Outline: An inactive Now has its own look in the <theme> theme
     Given the current time is "2026-03-08T07:30:00Z"
     And the locations screen uses the <theme> theme
     And the user opens the locations app
-    Then the inactive Now shows a clock icon and the label "Now" in the muted colours
+    Then the inactive Now shows a clock icon and the label "Now" in the inactive colours
     When the user moved to the next day with the bar
-    Then Now shows a clock icon and the label "Now" in the accent colours
+    Then Now shows a clock icon and the label "Now" outlined in the control colours
 
     Examples:
       | theme |

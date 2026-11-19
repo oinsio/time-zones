@@ -240,7 +240,9 @@ Then(
       await expect(button).toBeDisabled();
       await expect(button).toHaveCSS("opacity", "0.4");
     }
-    for (const area of await locationsWorld.page.locator(GRAB_AREA_SELECTOR).all()) {
+    for (const area of await locationsWorld.page
+      .locator(GRAB_AREA_SELECTOR)
+      .all()) {
       await expect(area).toHaveCSS("cursor", "default");
     }
   },
@@ -253,7 +255,9 @@ Then(
     expect(await buttons.count()).toBeGreaterThan(0);
     for (const button of await buttons.all())
       await expect(button).toBeEnabled();
-    for (const area of await locationsWorld.page.locator(GRAB_AREA_SELECTOR).all()) {
+    for (const area of await locationsWorld.page
+      .locator(GRAB_AREA_SELECTOR)
+      .all()) {
       await expect(area).toHaveCSS("cursor", "grab");
     }
   },

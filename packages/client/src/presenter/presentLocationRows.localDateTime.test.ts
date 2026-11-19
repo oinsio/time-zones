@@ -11,6 +11,7 @@ import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 
 import { buildReferenceDay } from "@/test/referenceDay";
+import { startWorkCount } from "@/test/workCounters";
 import { presentLocationRows } from "./presentLocationRows";
 
 const july = fakeClock("2026-07-15T12:00:00Z").instant();
@@ -117,5 +118,36 @@ describe("present the local time parts", () => {
     );
 
     expect(row?.localTimeParts).toEqual(expected);
+  });
+});
+
+// Verifies NFR-P1 of redesign-cards-grid-and-day-palettes: the day period marker split builds no formatter.
+describe("present 50 rows again in the 12-hour format", () => {
+  it("should build no formatter for the time parts", () => {
+    const locations = Array.from({ length: 50 }, (_, index) =>
+      buildLocation({ label: `City ${index}` }),
+    );
+    const instant = fakeClock("2026-07-15T12:00:00Z").instant();
+    const presentAll = () =>
+      presentLocationRows(locations, {
+        language: "en",
+        hourFormat: HourFormat.H12,
+        ...TIME_OF_DAY_CONTEXT,
+        zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+        instant,
+        deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
+        homeLocationId: null,
+        referenceOffsetMinutes: undefined,
+        referenceDay: buildReferenceDay(instant, UNIT_TEST_DEVICE_TIME_ZONE),
+        translate: i18n.getFixedT("en"),
+      });
+    presentAll();
+
+    const work = startWorkCount();
+    const rows = presentAll();
+    work.stop();
+
+    expect(work.formatters()).toBe(0);
+    expect(rows[0]?.localTimeParts.dayPeriodMarker).toMatch(/^(AM|PM)$/);
   });
 });

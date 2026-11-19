@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { englishLocale } from "../../main_page/steps/englishTexts";
 import { test } from "./locations_ui_e2e.fixtures";
@@ -25,18 +25,9 @@ import { waitForTwoAnimationFrames } from "./locationsShortcutE2eHelpers";
 
 const { Given, When } = createBdd(test);
 
-const LIVE_REGION = "[aria-live]";
 const ESCAPE_KEY = "Escape";
 const MOVE_ABOVE = "above";
 const MOVE_DOWN = "down";
-
-const POSITION_IN_ANNOUNCEMENT = /position (\d+) of/;
-const readAnnouncedPosition = async (page: Page) => {
-  const announcement = await page
-    .locator(LIVE_REGION, { hasText: POSITION_IN_ANNOUNCEMENT })
-    .textContent();
-  return Number(announcement?.match(POSITION_IN_ANNOUNCEMENT)?.[1]);
-};
 
 // Verifies FR1, NFR-R2 of reorder-locations-by-drag-and-drop: mouse drag.
 When(
@@ -138,14 +129,10 @@ When(
         ? englishLocale.locations.moveDown
         : englishLocale.locations.moveUp;
     for (let move = 0; move < Number(times); move++) {
-      const positionBefore = await readAnnouncedPosition(page).catch(
-        () => undefined,
-      );
+      const orderBefore = await readListOrder(page);
       await menuButton(page, cityName).click();
       await page.getByRole("menuitem", { name: itemName }).click();
-      await expect
-        .poll(() => readAnnouncedPosition(page).catch(() => undefined))
-        .not.toBe(positionBefore);
+      await expect.poll(() => readListOrder(page)).not.toEqual(orderBefore);
     }
   },
 );

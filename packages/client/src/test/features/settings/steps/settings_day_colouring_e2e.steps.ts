@@ -53,6 +53,7 @@ Given(
       {
         dayColouring: COLOURING_VALUES[name],
         workingHours: DEFAULT_WORKING_HOURS,
+        dayPalette: "VIVID",
       },
       locationsWorld.seededInterfaceLanguage,
     );
@@ -67,6 +68,7 @@ Given(
       {
         dayColouring: COLOURING_VALUES[name],
         workingHours: DEFAULT_WORKING_HOURS,
+        dayPalette: "VIVID",
         hourFormat,
       },
       locationsWorld.seededInterfaceLanguage,

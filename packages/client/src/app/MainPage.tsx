@@ -76,7 +76,7 @@ export function MainPage({
         >
           {notices}
         </div>
-        <div className={COLUMN_CLASS_NAME}>{bottomBar}</div>
+        <div className="mx-auto w-full max-w-content">{bottomBar}</div>
       </footer>
     </div>
   );

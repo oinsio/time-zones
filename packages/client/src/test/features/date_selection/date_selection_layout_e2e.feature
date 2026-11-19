@@ -71,7 +71,7 @@ Feature: Date bar layout in a real browser
     And the locations screen uses the <theme> theme
     And the user opens the locations app
     When the user moved to the next day with the bar
-    Then Now shows a clock icon and the label "Now" in the accent colours
+    Then Now shows a clock icon and the label "Now" outlined in the control colours
     And the previous-day and next-day buttons show an icon and no visible text
 
     Examples:

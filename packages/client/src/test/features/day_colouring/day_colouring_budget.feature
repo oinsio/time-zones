@@ -21,3 +21,10 @@ Feature: Day colouring work bound
     Given the day tracks and the hour strips of 50 rows in 10 zones were presented in the Time of day colouring
     When they are presented in the Plain colouring
     Then no formatter is built
+
+  @redesign-cards-grid-and-day-palettes @NFR-P1
+  Scenario: Changing the day palette re-presents nothing
+    Given the day tracks and the hour strips of 50 rows in 10 zones were presented in the Time of day colouring
+    When the day palette changes to Muted and they are presented again
+    Then no formatter is built and no time zone transition is looked up
+    And every row gets the same colour stops and the same strip as before
