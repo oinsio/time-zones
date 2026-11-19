@@ -42,6 +42,7 @@ export const KNOWN_CITIES: Record<
   "Boa Vista": { timeZoneId: "America/Boa_Vista", countryCode: "BR" },
   Chicago: { timeZoneId: "America/Chicago", countryCode: "US" },
   Dublin: { timeZoneId: "Europe/Dublin", countryCode: "IE" },
+  Reykjavik: { timeZoneId: "Atlantic/Reykjavik", countryCode: "IS" },
   Adelaide: { timeZoneId: "Australia/Adelaide", countryCode: "AU" },
   Sydney: { timeZoneId: "Australia/Sydney", countryCode: "AU" },
   Panama: { timeZoneId: "America/Panama", countryCode: "PA" },

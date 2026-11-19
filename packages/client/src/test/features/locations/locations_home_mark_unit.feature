@@ -19,10 +19,11 @@ Feature: Home mark wins over the here mark
     Then the "Almaty" row has exactly 1 leading mark, of the kind "home"
 
   @match-home-mark-to-design @FR1 @FR2 @FR4 @M3
-  Scenario: The home mark is the design's outlined house
+  @redesign-cards-grid-and-day-palettes @FR10
+  Scenario: The marks are outlined Lucide icons
     Given the device time zone is "Europe/Moscow"
     And the list contains "Almaty, Moscow"
     And "Almaty" is home
     When the user opens the app
-    Then the house of "Almaty" draws exactly 1 closed outline and paints nothing inside
-    And the arrow of "Moscow" is filled
+    Then the house of "Almaty" is the outlined Lucide icon "house"
+    And the pin of "Moscow" is the outlined Lucide icon "map-pin"

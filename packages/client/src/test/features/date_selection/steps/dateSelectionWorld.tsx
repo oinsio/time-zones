@@ -22,6 +22,7 @@ import { buildDeviceTimeLocation } from "@/model";
 import { type LocationRepository, LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { resetPageVisibility } from "@/test/pageVisibility";
+import { getRowTimeText } from "@/test/rowTimeText";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
@@ -210,9 +211,7 @@ export const createDateSelectionWorld = () => {
     },
     expectRowShows: (city: string, time: string, date: string) => {
       const row = rowOf(city);
-      expect(
-        row.querySelector("time")?.previousElementSibling?.textContent,
-      ).toBe(time);
+      expect(getRowTimeText(row)).toBe(time);
       expect(row.querySelector("time")).toHaveTextContent(date);
     },
     expectRowOffset: (city: string, offset: string) =>

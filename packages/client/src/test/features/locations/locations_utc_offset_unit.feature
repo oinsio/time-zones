@@ -38,9 +38,9 @@ Feature: UTC offset on location rows
   @show-utc-offset-on-location-rows @FR3
   Scenario: Zero offset
     Given the current instant is "2026-07-15T12:00:00Z"
-    And the list contains "UTC"
+    And the list contains "Reykjavik"
     When the user opens the app
-    Then the "UTC" row shows "UTC"
+    Then the "Reykjavik" row shows "UTC"
 
   @show-utc-offset-on-location-rows @FR4
   Scenario: Offset is computed again when the list changes

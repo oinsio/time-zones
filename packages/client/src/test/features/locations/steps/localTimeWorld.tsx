@@ -10,6 +10,7 @@ import { LocationsLoadStatus } from "@/ports";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { resetPageVisibility } from "@/test/pageVisibility";
+import { getRowTimeText } from "@/test/rowTimeText";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import {
   createManualWriteScheduler,
@@ -53,8 +54,7 @@ export const createLocalTimeWorld = () => {
       })
       .closest("li") as HTMLElement;
 
-  const timeOf = (city: string) =>
-    rowOf(city).querySelector("time")?.previousElementSibling?.textContent;
+  const timeOf = (city: string) => getRowTimeText(rowOf(city));
 
   const dateElementOf = (city: string) => rowOf(city).querySelector("time");
 

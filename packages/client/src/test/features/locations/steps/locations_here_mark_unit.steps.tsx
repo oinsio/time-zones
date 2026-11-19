@@ -15,6 +15,7 @@ import {
 
 const feature = await loadFeature("../locations_here_mark_unit.feature");
 
+const CAPTION_TEXT = "here";
 const FORMER_PILL_TEXT = /Your time zone/;
 const MARK_ID = "mark";
 
@@ -26,7 +27,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   f.AfterAllScenarios(() => cleanup());
 
   const cityLineIn = (row: HTMLElement) => {
-    const citySpan = row.querySelector(`[id][class*="font-semibold"]`);
+    const citySpan = row.querySelector(`[id][class*="font-bold"]`);
     return {
       citySpan: citySpan as HTMLElement,
       line: citySpan?.parentElement as HTMLElement,
@@ -49,22 +50,20 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @match-here-mark-to-design @FR1 @UX1 @UX2 @UX3
   f.Scenario(
-    "Icon before the city, caption after it",
+    "Icon before the city, no caption",
     ({ Given, And, When, Then }) => {
       Given("the device time zone is {string}", givenDeviceZone);
       And("the list contains {string}", givenList);
       When("the user opens the app", openApp);
       Then(
-        "on the city line of {string} the mark image precedes the city and the caption follows it",
+        "on the city line of {string} the mark image precedes the city and no caption follows it",
         (_ctx, city: string) => {
           const { citySpan, line } = cityLineOf(city);
           const children = Array.from(line.children);
-          expect(children).toHaveLength(3);
+          expect(children).toHaveLength(2);
           expect(children[0]?.querySelector("svg")).not.toBeNull();
           expect(children[1]).toBe(citySpan);
-          expect(children[2]).toHaveTextContent(
-            hereMarkLabel(ENGLISH_LANGUAGE),
-          );
+          expect(line).not.toHaveTextContent(CAPTION_TEXT);
         },
       );
       And(

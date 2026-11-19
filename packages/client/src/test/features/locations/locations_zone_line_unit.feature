@@ -46,7 +46,7 @@ Feature: Zone line on location rows
     And the list contains "Almaty" and "UTC"
     When the user opens the app
     Then the "Almaty" zone line elements are "Kazakhstan, UTC+5"
-    And the "UTC" zone line elements are "UTC"
+    And the "UTC" zone line elements are "Universal Time, UTC"
 
   @show-zone-abbreviations-and-zone-label-setting @FR5
   Scenario: UTC with the zone abbreviation only

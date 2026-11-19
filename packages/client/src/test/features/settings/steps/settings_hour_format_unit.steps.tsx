@@ -1,12 +1,14 @@
 // Verifies FR5, FR6, NFR-P1 of add-settings-page-and-device-time-location.
+
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { screen, within } from "@testing-library/react/pure";
+import { screen } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { expect } from "vitest";
 import { DEFAULT_LANGUAGE } from "@/locales";
 import { getDayPeriodMarkers, parseWallTimeInput } from "@/presenter";
+import { getRowTimeText } from "@/test/rowTimeText";
 import { getCardOf } from "../../locations/steps/deviceTimeQueries";
 import { createHourFormatBudgetCheck } from "./hourFormatBudgetWorld";
 import { createHourFormatWorld, hourFormatOf } from "./hourFormatWorld";
@@ -25,7 +27,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     openApp,
   } = world;
   const expectCardShowsTime = (_ctx: unknown, city: string, time: string) =>
-    expect(within(getCardOf(city)).getByText(time)).toBeVisible();
+    expect(getRowTimeText(getCardOf(city))).toBe(time);
   const confirmInOpenField = async (text: string) => {
     await userEvent.clear(screen.getByRole("textbox"));
     await userEvent.type(screen.getByRole("textbox"), `${text}{Enter}`);

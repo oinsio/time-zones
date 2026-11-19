@@ -66,40 +66,35 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   });
 
   // @match-home-mark-to-design @FR1 @FR2 @FR4 @M3
+  // @redesign-cards-grid-and-day-palettes @FR10
   f.Scenario(
-    "The home mark is the design's outlined house",
+    "The marks are outlined Lucide icons",
     ({ Given, And, When, Then }) => {
       Given("the device time zone is {string}", givenDeviceZone);
       And("the list contains {string}", givenList);
       And("{string} is home", givenHome);
       When("the user opens the app", openApp);
+      const expectOutlinedIcon = (
+        row: HTMLElement,
+        label: string,
+        iconName: string,
+      ) => {
+        const icon = within(row)
+          .getByRole("img", { name: label })
+          .querySelector("svg");
+        expect(icon).toHaveAttribute("fill", "none");
+        expect(icon).toHaveClass(`lucide-${iconName}`);
+      };
       Then(
-        "the house of {string} draws exactly {int} closed outline and paints nothing inside",
-        (_ctx, city: string, outlineCount: number) => {
-          const house = within(rowOf(city)).getByRole("img", {
-            name: HOME_MARK_LABEL,
-          });
-          const icon = house.querySelector("svg");
-          const paths = icon?.querySelectorAll("path") ?? [];
-          expect(icon).toHaveAttribute("fill", "none");
-          expect(paths).toHaveLength(outlineCount);
-          expect(paths[0].getAttribute("d")).toMatch(/z$/i);
-          expect(
-            icon?.querySelectorAll(
-              "circle, rect, line, polyline, polygon, ellipse",
-            ),
-          ).toHaveLength(0);
-        },
+        "the house of {string} is the outlined Lucide icon {string}",
+        (_ctx, city: string, iconName: string) =>
+          expectOutlinedIcon(rowOf(city), HOME_MARK_LABEL, iconName),
       );
-      And("the arrow of {string} is filled", (_ctx, city: string) => {
-        const arrow = within(rowOf(city)).getByRole("img", {
-          name: HERE_MARK_LABEL,
-        });
-        expect(arrow.querySelector("svg")).toHaveAttribute(
-          "fill",
-          "currentColor",
-        );
-      });
+      And(
+        "the pin of {string} is the outlined Lucide icon {string}",
+        (_ctx, city: string, iconName: string) =>
+          expectOutlinedIcon(rowOf(city), HERE_MARK_LABEL, iconName),
+      );
     },
   );
 });

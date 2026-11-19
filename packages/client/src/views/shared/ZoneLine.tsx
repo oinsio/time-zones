@@ -1,4 +1,4 @@
-import { type HTMLAttributes, useLayoutEffect, useRef } from "react";
+import { Fragment, type HTMLAttributes, useLayoutEffect, useRef } from "react";
 import { ZONE_LINE_SEPARATOR } from "@/constants";
 import { type ZoneLinePart, ZoneLinePartKind } from "@/presenter";
 import { getZoneLinePartLineStarts } from "./zoneLineBreaks";
@@ -64,21 +64,22 @@ export function ZoneLine({
       className={`flex flex-wrap gap-x-1.5${className ? ` ${className}` : ""}`}
     >
       {parts.map((part, partIndex) => (
-        <span
-          key={part.kind}
-          data-zone-line-part
-          className={`bg-surface [&[data-line-start]>[data-zone-line-dot]]:hidden${
-            part.kind === ZoneLinePartKind.PLACE ? "" : " whitespace-nowrap"
-          }`}
-        >
-          {partIndex > 0 && (
-            <span aria-hidden="true" data-zone-line-dot className="mr-1.5">
-              {ZONE_LINE_SEPARATOR}
-            </span>
-          )}
-          {part.text}
+        <Fragment key={part.kind}>
+          <span
+            data-zone-line-part
+            className={`bg-surface [&[data-line-start]>[data-zone-line-dot]]:hidden${
+              part.kind === ZoneLinePartKind.PLACE ? "" : " whitespace-nowrap"
+            }`}
+          >
+            {partIndex > 0 && (
+              <span aria-hidden="true" data-zone-line-dot className="mr-1.5">
+                {ZONE_LINE_SEPARATOR}
+              </span>
+            )}
+            {part.text}
+          </span>
           {isTextSeparated && " "}
-        </span>
+        </Fragment>
       ))}
     </span>
   );

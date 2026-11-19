@@ -85,7 +85,7 @@ Feature: Here mark on location rows in the device time zone
     And the device time zone is "Asia/Almaty"
     And the list contains "Almaty"
     When the user opens the app
-    Then the "Almaty" row shows the caption "here"
+    Then the "Almaty" row shows the Here mark named "You are here"
 
   @match-here-mark-to-design @FR3
   @mark-device-time-zone-in-location-list @FR5
@@ -94,7 +94,7 @@ Feature: Here mark on location rows in the device time zone
     And the device time zone is "Asia/Almaty"
     And the list contains "Almaty"
     When the user opens the app
-    Then the "Almaty" row shows the Russian here caption
+    Then the "Almaty" row shows the Russian Here mark
 
   @match-here-mark-to-design @NFR-P1
   @mark-device-time-zone-in-location-list @NFR-P1 @replace-wall-clock-row-budgets-with-deterministic-checks @FR2

@@ -20,13 +20,14 @@ import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { LocationList } from "@/views/shared";
-import { cityEntry, HIDDEN_FROM_TEXT_SELECTOR } from "./locationsUiWorld";
+import { cityEntry } from "./locationsUiWorld";
 import {
   BUDGET_ROW_COUNT,
   BUDGET_SECOND_MOMENT,
   buildBudgetLocations,
   presentBudgetRows,
 } from "./rowBudgetWorld";
+import { readZoneLineElements } from "./zoneLineQueries";
 
 const feature = await loadFeature("../locations_utc_offset_unit.feature");
 const UNKNOWN_ZONE_LABEL = "Olympus";
@@ -80,13 +81,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   };
 
-  const textWithoutHourLabels = (card: HTMLElement) => {
-    const copy = card.cloneNode(true) as HTMLElement;
-    for (const label of copy.querySelectorAll(HIDDEN_FROM_TEXT_SELECTOR)) {
-      label.remove();
-    }
-    return copy.textContent;
-  };
   const rowOf = (city: string) =>
     screen
       .getByRole("button", {
@@ -173,10 +167,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then(
       "the {string} row shows {string}",
       (_ctx, city: string, offset: string) =>
-        // exact text: the city label "UTC" alone must not satisfy the offset check
-        expect(textWithoutHourLabels(rowOf(city))).toBe(
-          `${city}${offset}12:00Wed, Jul 15`,
-        ),
+        expect(readZoneLineElements(rowOf(city))).toContain(offset),
     );
   });
 

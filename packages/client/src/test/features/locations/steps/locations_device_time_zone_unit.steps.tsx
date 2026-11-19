@@ -147,7 +147,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
     Then(
-      "the {string} row shows the caption {string}",
+      "the {string} row shows the Here mark named {string}",
       (_ctx, city: string, text) => expectRowShows(city, text),
     );
   });
@@ -159,10 +159,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the device time zone is {string}", givenDeviceZone);
     And("the list contains {string}", givenList);
     When("the user opens the app", openApp);
-    Then(
-      "the {string} row shows the Russian here caption",
-      (_ctx, city: string) =>
-        expectRowShows(city, hereMarkLabel(RUSSIAN_LANGUAGE)),
+    Then("the {string} row shows the Russian Here mark", (_ctx, city: string) =>
+      expectRowShows(city, hereMarkLabel(RUSSIAN_LANGUAGE)),
     );
   });
 
