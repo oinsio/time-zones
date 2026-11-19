@@ -5,59 +5,8 @@ import {
   DESIGN_SCREEN_DEVICE_SCALE_FACTOR,
   DESIGN_SCREEN_SELECTOR,
 } from "../../../scripts/designScreens/constants.ts";
-import {
-  readPngPixelSize,
-  runDesignScreens,
-} from "../../../scripts/designScreens/designScreenPng.ts";
-
-const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
-const IHDR_LENGTH = 13;
-const WIDTH_OFFSET = 16;
-const HEIGHT_OFFSET = 20;
-const PNG_HEADER_BYTES = 24;
-
-function buildPng(width: number, height: number, marker = 0) {
-  const bytes = Buffer.alloc(PNG_HEADER_BYTES + 1);
-  Buffer.from(PNG_SIGNATURE).copy(bytes);
-  bytes.writeUInt32BE(IHDR_LENGTH, PNG_SIGNATURE.length);
-  bytes.write("IHDR", PNG_SIGNATURE.length + 4, "ascii");
-  bytes.writeUInt32BE(width, WIDTH_OFFSET);
-  bytes.writeUInt32BE(height, HEIGHT_OFFSET);
-  bytes.writeUInt8(marker, PNG_HEADER_BYTES);
-  return bytes;
-}
-
-describe("readPngPixelSize", () => {
-  it("should read the width and the height from the header", () => {
-    expect(readPngPixelSize(buildPng(780, 1560))).toEqual({
-      width: 780,
-      height: 1560,
-    });
-  });
-
-  it("should read a PNG that is only its header", () => {
-    expect(
-      readPngPixelSize(buildPng(3, 4).subarray(0, PNG_HEADER_BYTES)),
-    ).toEqual({ width: 3, height: 4 });
-  });
-
-  it("should refuse a long enough header with a wrong signature", () => {
-    const bytes = buildPng(3, 4);
-    bytes[PNG_SIGNATURE.length - 1] = 0;
-
-    expect(() => readPngPixelSize(bytes)).toThrow("not a PNG");
-  });
-
-  it("should refuse a valid signature with a cut header", () => {
-    const bytes = buildPng(3, 4).subarray(0, PNG_HEADER_BYTES - 1);
-
-    expect(() => readPngPixelSize(bytes)).toThrow("not a PNG");
-  });
-
-  it("should refuse bytes that are not a PNG", () => {
-    expect(() => readPngPixelSize(Buffer.alloc(PNG_HEADER_BYTES))).toThrow();
-  });
-});
+import { runDesignScreens } from "../../../scripts/designScreens/designScreenPng.ts";
+import { buildPng } from "./buildPng.ts";
 
 describe("runDesignScreens", () => {
   const screensFolder = "/screens";

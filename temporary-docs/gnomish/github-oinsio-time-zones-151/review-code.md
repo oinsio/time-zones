@@ -105,7 +105,7 @@ The `reports/mutation/mutation-report.json` in the checkout was written at 12:20
 - Fix: split it into `src/test/designScreens/designScreenRequests.test.ts` (routing and stylesheet) and `src/test/designScreens/designScreenPng.test.ts` (PNG size and `runDesignScreens`). Keep the `// Verifies FR5 of make-location-menu-button-vertical.` header in both.
 - Fix risk: none. Same tests, same location under `src/test/`. Task 6.1 names the old file, so its path in `tasks.md` goes stale.
 - Status: fixed
-- Resolution: renderDesignScreens.test.ts split into designScreenRequests.test.ts (72 lines) and designScreenPng.test.ts (215 lines), both with the FR5 header; same tests, now all under the 300-line cap.
+- Resolution: renderDesignScreens.test.ts split into designScreenRequests.test.ts (80 lines), designScreenPng.test.ts (165 lines), readPngPixelSize.test.ts (40 lines) and the buildPng.ts helper, PNG constants imported from scripts/designScreens/constants.ts; every file is now under 200 lines and keeps the FR5 header.
 
 ## Verdict
 
