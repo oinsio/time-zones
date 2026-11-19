@@ -153,7 +153,7 @@ No changes: the pages, regions and navigation stay; only the header's order and 
 - M4: `tokens.css` declares each colour of each theme and each palette exactly once (0 duplicated dark declarations), checked by a unit test.
 - M5: Mutation score at least 95% (minimum 90%) on each new or changed model, presenter and controller file of this change.
 - M6: 0 drag handles in the DOM of Cards and Grid; 2 menu items (Move up, Move down) on every row of a list of 2 or more.
-- M7: Every FR, NFR and UX id of this proposal is referenced by at least one test or feature file carrying the change tag.
+- M7: Every FR, NFR and UX id of this proposal except UX1 (the human visual comparison, handoff H1) is referenced by at least one test or feature file carrying the change tag.
 
 ## Open Questions
 
