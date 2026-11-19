@@ -123,6 +123,12 @@ Feature: Settings page in a real browser
     When the user chooses the option "Light"
     Then the page background is the light token colour
 
+  @redesign-cards-grid-and-day-palettes @FR2
+  Scenario: The system dark theme uses the same values
+    Given the system colour scheme is dark
+    When the user opens the settings
+    Then the page background is the dark token colour
+
   @add-settings-page-and-device-time-location @FR4
   @compact-settings-controls @M4
   Scenario: System follows a change of the system preference
