@@ -39,7 +39,7 @@ Each line names exactly the requirements its delta file adds, modifies or remove
 - `time-selection`: ADDED "Earlier layout defects stay fixed"; MODIFIED "Day track layout".
 - `date-selection`: MODIFIED "Date bar layout".
 - `day-colouring`: ADDED "Day palette"; MODIFIED "Day colouring", "Day colours are readable", "Approved screenshots of the colourings".
-- `settings`: ADDED "Colours group", "Accessible Colours group", "Day palette is kept on the device"; MODIFIED "Option group", "Settings page layout", "Colouring settings layout", "Colouring strings are localized".
+- `settings`: ADDED "Colours group", "Accessible Colours group", "Day palette is kept on the device", "Colour tokens are defined once"; MODIFIED "Option group", "Settings page layout", "Colouring settings layout", "Colouring strings are localized".
 - `grid-view`: ADDED "Hour cell look"; MODIFIED "Hour cell colour", "Row controls are locked while a meeting range is set", "Accessible meeting state", "Approved screenshots of the meeting state", "Hour strip width", "Hour frame lies behind texts".
 
 ## Goals

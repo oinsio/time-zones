@@ -10,7 +10,7 @@ The day palette SHALL decide the colours of the four day periods in the Time of 
 | Day | `#f8e5a0` | `#fff68e` | `#f8e6a6` | `#eedba3` |
 | Evening | `#e8c7df` | `#fda9e9` | `#d4c6ee` | `#b9aadb` |
 
-In the Time of day colouring, the day tracks of Cards and the hour cells of Grid MUST use the colours of the day palette in force and of the active theme. The Plain colouring (accent) and the Working hours colouring (accent and non-working grey) MUST NOT change with the day palette, and a location without day periods keeps its accent colour in both palettes. A change of the day palette MUST recolour every day track and every hour cell at once, without a reload, and MUST NOT change the reference moment, the meeting range, the location list, the colour stops or the hour labels. Each colour of each palette and theme is one design token value, so a palette is swapped as a set. Inputs: the day palette, the day colouring, the active theme. Output: the colours of the day periods. Errors: none. <!-- implements FR3, FR4 of redesign-cards-grid-and-day-palettes -->
+In the Time of day colouring, the day tracks of Cards and the hour cells of Grid MUST use the colours of the day palette in force and of the active theme. The Plain colouring (accent) and the Working hours colouring (accent and non-working grey) MUST NOT change with the day palette, and a location without day periods keeps its accent colour in both palettes. A change of the day palette MUST recolour every day track and every hour cell at once, without a reload, and MUST NOT change the reference moment, the meeting range, the location list, the colour stops or the hour labels. Each colour of each palette and theme is one design token value, so a palette is swapped as a set. Inputs: the day palette, the day colouring, the active theme. Output: the colours of the day periods. Errors: none. <!-- implements FR3, FR4, NFR-P1 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: Vivid by default
 - **GIVEN** no preferences document is stored, the day colouring is Time of day and the light theme is active
@@ -43,6 +43,12 @@ In the Time of day colouring, the day tracks of Cards and the hour cells of Grid
 - **GIVEN** the list contains Almaty and the moment is pinned to `2026-03-09T06:00:00Z`
 - **WHEN** the user chooses the Muted day palette
 - **THEN** the moment is still pinned to `2026-03-09T06:00:00Z` and Almaty's colour stops are unchanged
+
+#### Scenario: Changing the day palette re-presents nothing
+- **GIVEN** 50 location rows are presented in the Time of day colouring with the Vivid day palette
+- **WHEN** the day palette changes to Muted
+- **THEN** the colour stops of every row keep their identity
+- **AND** no date, time or region name formatter is built and no zone transition is looked up
 
 ## MODIFIED Requirements
 

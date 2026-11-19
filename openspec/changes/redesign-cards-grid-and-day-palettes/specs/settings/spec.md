@@ -94,6 +94,20 @@ The day palette SHALL be saved in the versioned preferences document with the ot
 - **WHEN** the user chooses Plain and then Time of day again
 - **THEN** the Muted day palette is in force
 
+### Requirement: Colour tokens are defined once
+Every colour of a theme and of a day palette SHALL be one design token value in the token source: the dark values MUST be written once and serve both the Dark theme preference and the System theme preference with a dark system color-scheme, and no colour token MUST be declared twice for the same theme. No colour value MUST live in a component; components use the tokens. Changing any colour is an edit of one value. Inputs: the theme preference, the system color-scheme preference. Output: the active token values. Errors: none. <!-- implements FR2, M4 of redesign-cards-grid-and-day-palettes -->
+
+#### Scenario: Each colour is one value
+- **GIVEN** the token source of the app
+- **WHEN** its colour declarations are read
+- **THEN** the dark values are declared in exactly one block
+- **AND** no colour token is declared twice in the same theme
+
+#### Scenario: The system dark theme uses the same values
+- **GIVEN** the theme preference is System and the system color-scheme preference is dark
+- **WHEN** the main page is shown
+- **THEN** the page background is `#0b1628`, the same as with the Dark theme preference
+
 ## MODIFIED Requirements
 
 ### Requirement: Option group

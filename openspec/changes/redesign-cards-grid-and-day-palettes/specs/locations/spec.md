@@ -41,7 +41,7 @@ From 768 px wide, every card SHALL have two lines and no other layout: line 1 ho
 | 2560 |
 
 ### Requirement: Card growth
-A card SHALL grow in height instead of cutting any text. A long city MUST wrap onto more lines, never be cut and never end in an ellipsis, and the offset difference follows it. When the city and the time do not fit on one line, the time with the location menu button MUST move to its own line at the right of the card. The zone line wraps between its parts (see "Zone line layout"). In the 12-hour format the day period marker (`AM`, `PM`) MUST be 14 px, weight 700, 4 px after the digits, at every width. Inputs: the presented row, the viewport width, the hour format. Output: the card's lines. Errors: none. <!-- implements FR8, NFR-R1 of redesign-cards-grid-and-day-palettes -->
+A card SHALL grow in height instead of cutting any text. A long city MUST wrap onto more lines, never be cut and never end in an ellipsis, and the offset difference follows it. When the city and the time do not fit on one line, the time with the location menu button MUST move to its own line at the right of the card. The zone line wraps between its parts (see "Zone line layout"). In the 12-hour format the day period marker (`AM`, `PM`) MUST be 14 px, weight 700, 4 px after the digits, at every width. Splitting the day period marker from the digits MUST reuse the formatter that writes the local time: presenting the rows again in the same language and reference day builds no date, time or region name formatter. Inputs: the presented row, the viewport width, the hour format. Output: the card's lines. Errors: none. <!-- implements FR8, NFR-R1, NFR-P1 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: A long city wraps and the time drops
 - **GIVEN** the interface language is Russian, the hour format is 12-hour and the list contains Petropavlovsk-Kamchatsky («Петропавловск-Камчатский», `Asia/Kamchatka`)
@@ -61,6 +61,12 @@ A card SHALL grow in height instead of cutting any text. A long city MUST wrap o
 |---|
 | 390 |
 | 820 |
+
+#### Scenario: Presenting 50 rows again in the 12-hour format builds no formatter
+- **GIVEN** the interface language is English, the hour format is 12-hour and 50 location rows have been presented once
+- **WHEN** the same 50 rows are presented again in the same language and reference day
+- **THEN** every row's local time has its day period marker split from the digits
+- **AND** no date, time or region name formatter is built
 
 ### Requirement: Move a location from its location menu
 The location menu of every row SHALL offer "Move up" («Поднять выше») and "Move down" («Опустить ниже») between the home action and "Remove". Move up MUST move the location one position up and Move down one position down, by the rule of "Move a location"; Move up MUST be disabled on the first row and Move down on the last, and both on a list of one location. A disabled item MUST be exposed as disabled, MUST be skipped by the arrow keys and MUST do nothing when activated. After a move the menu closes and focus MUST be on the moved location's menu button. The move MUST be announced politely with the city and the new position ("Moscow moved to position 1 of 3"). These items are the keyboard way and the single-pointer alternative to dragging. In the Grid view, while a meeting range is set, the menu is locked with them. Inputs: the location and the chosen item. Effects: the list order as "Move a location"; the new order is kept and shared. Errors: location not found; the list stays unchanged. <!-- implements FR16, NFR-A3 of redesign-cards-grid-and-day-palettes -->
