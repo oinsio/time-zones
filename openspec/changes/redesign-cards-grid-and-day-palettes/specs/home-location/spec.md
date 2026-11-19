@@ -31,7 +31,7 @@ The home location's row SHALL show the home mark in the leading mark slot, with 
 - **AND** its outline has the dark accent colour `#4dd5f4`
 - **AND** it is 23 × 23 px
 
-#### Scenario: The Here mark next to the house
+#### Scenario: The Here mark stays filled next to the house
 - **GIVEN** the device time zone is `Europe/Moscow`
 - **AND** the list is Almaty and Moscow and Almaty is home
 - **WHEN** the user opens the app
