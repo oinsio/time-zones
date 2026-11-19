@@ -51,7 +51,7 @@ Each row is a card with the exact time in large digits and a day track with a ha
 
 ```
 +------------------------------------------------------------+
-| Almaty +2 h                                  15:30  ⋯  |
+| Almaty +2 h                                  15:30  ⋮  |
 | Kazakhstan · GMT+5                       mon, 28 Sep    |
 | ====-------==============(O)====-------====                |
 +------------------------------------------------------------+
@@ -68,7 +68,7 @@ Each row is a card with the exact time in large digits and a day track with a ha
 
 ```
 +----------------------------------------------------------------------------+
-| Moscow -2 h  Russia · MSK    sun, 8 Mar  10:30  ⋯    |
+| Moscow -2 h  Russia · MSK    sun, 8 Mar  10:30  ⋮    |
 | |===night===~morning~====work====~even~==|             |
 | 22     04     10(O)   16     22                       |
 +----------------------------------------------------------------------------+
@@ -81,7 +81,7 @@ Used by every view, implemented once in `views/shared/`:
 | Block | Content |
 |---|---|
 | Row header | home icon (Lucide `House`, wins) or "here" icon (Lucide `MapPin`, no caption); city; difference from the reference zone (`−2 h`, `+0:30`, `0 h`); country and zone abbreviation or `GMT+N`; date with the day shift mark: «днём раньше» / «днём позже» in red before the date when the local date differs from the reference zone's |
-| Location menu | «⋯» button with a hit area of 44 px; opens on click, so it works without Pointer Events; items "Make home" / "Clear home", "Move up", "Move down" and "Remove" |
+| Location menu | «⋮» button with a hit area of 44 px; opens on click, so it works without Pointer Events; items "Make home" / "Clear home", "Move up", "Move down" and "Remove" |
 | Device time location | a location of the list for the device zone; removable, reorderable, can be home; meta line "Device time · UTC+5" ([ADR-0010](../adr/0010-device-time-location.md)) |
 | Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — an active Now button signals a pinned moment |
 | Day-period colors | four bands in the active day palette (Vivid or Muted, set in the settings): night, morning, day, evening — from design tokens (Time of day colouring), decided by the sun at the location. Soft gradient transitions: 30 minutes around each boundary. Colors also differ in lightness, not only in hue |

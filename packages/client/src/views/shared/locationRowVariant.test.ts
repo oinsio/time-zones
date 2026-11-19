@@ -1,4 +1,5 @@
 // Verifies FR8 of fix-grid-meeting-range-lock-and-layering: the layer tokens of the row boxes.
+// Verifies FR2 of make-location-menu-button-vertical: no gap before the menu button.
 // Verifies FR7, FR8, FR17 of redesign-cards-grid-and-day-palettes: the two layouts and the sizes.
 import {
   GRID_MARK_ICON_SIZE_PX,
@@ -29,6 +30,12 @@ describe("LOCATION_ROW_VARIANT_CLASS_NAMES", () => {
     for (const classNames of [cardClassNames, gridClassNames]) {
       expect(classNames.place).not.toMatch(/md:w-\d/);
       expect(classNames.timeGroup).not.toMatch(/md:w-\d/);
+    }
+  });
+
+  it("should put no gap between the time and the menu button", () => {
+    for (const classNames of [cardClassNames, gridClassNames]) {
+      expect(classNames.timeGroup).not.toMatch(/gap-x-/);
     }
   });
 

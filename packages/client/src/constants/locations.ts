@@ -23,10 +23,10 @@ export const LOCATION_MARK_ICON_SIZE_PX = 23;
 export const GRID_MARK_ICON_SIZE_PX = 20;
 
 /**
- * The glyph on the location menu button.
- * Implements FR11 of set-home-location-and-show-differences (D7).
+ * Side of the vertical dots icon on the location menu button, in px.
+ * Implements FR1 of make-location-menu-button-vertical (D1).
  */
-export const LOCATION_MENU_TRIGGER_GLYPH = "⋯";
+export const LOCATION_MENU_ICON_SIZE_PX = 20;
 
 /**
  * The separator between the elements of a zone line.

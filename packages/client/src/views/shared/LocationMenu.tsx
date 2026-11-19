@@ -1,3 +1,4 @@
+import { EllipsisVertical } from "lucide-react";
 import {
   type FocusEvent,
   forwardRef,
@@ -8,7 +9,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { LOCATION_MENU_TRIGGER_GLYPH, OutsidePressEvent } from "@/constants";
+import { LOCATION_MENU_ICON_SIZE_PX, OutsidePressEvent } from "@/constants";
 import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import { getMenuKeyAction, MenuKeyAction } from "./locationMenuKeys";
 import {
@@ -41,7 +42,7 @@ const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
   : [OutsidePressEvent.TOUCH_START, OutsidePressEvent.MOUSE_DOWN];
 
 /**
- * The "⋯" menu of a location card, a WAI-ARIA menu button driven by `click`, so
+ * The vertical-dots menu of a location card, a WAI-ARIA menu button driven by `click`, so
  * it works on engines without Pointer Events. Escape returns focus to the
  * button; a press outside, or focus moving outside, closes it.
  * Implements FR11, FR14, NFR-A2, UX3 of set-home-location-and-show-differences (D7).
@@ -49,6 +50,7 @@ const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
  * Implements FR1, UX1 of fix-grid-meeting-range-lock-and-layering (D1): `isDisabled`.
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5): `onOpenChange`.
  * Implements FR16, NFR-A3 of redesign-cards-grid-and-day-palettes (D6): disabled items.
+ * Implements FR1, FR2, FR3, NFR-A1, UX2 of make-location-menu-button-vertical (D1, D2).
  */
 export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
   function LocationMenu(
@@ -182,7 +184,7 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
     return (
       <span
         ref={rootRef}
-        className="relative inline-flex"
+        className="relative -mr-3 inline-flex"
         onKeyDown={isOpen ? handleMenuKeyDown : handleTriggerKeyDown}
         onBlur={handleBlur}
       >
@@ -204,9 +206,12 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
           onClick={() =>
             isOpen ? setIsOpen(false) : openAt(firstEnabledIndex)
           }
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-xl font-bold disabled:cursor-default disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md disabled:cursor-default disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
         >
-          <span aria-hidden="true">{LOCATION_MENU_TRIGGER_GLYPH}</span>
+          <EllipsisVertical
+            aria-hidden="true"
+            size={LOCATION_MENU_ICON_SIZE_PX}
+          />
         </button>
         {isOpen && (
           <div

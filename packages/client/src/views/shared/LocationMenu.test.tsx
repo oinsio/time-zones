@@ -1,3 +1,4 @@
+// Verifies FR1 of make-location-menu-button-vertical: the button holds no text.
 // Verifies FR11, NFR-A2 of set-home-location-and-show-differences (D7): the location menu.
 // Verifies FR1 of add-grid-hour-cells-and-hour-frame (D5): the menu of a grid row.
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -25,12 +26,12 @@ function renderMenu() {
 }
 
 describe("LocationMenu", () => {
-  it("should be a closed menu button with the glyph", () => {
+  it("should be a closed menu button without text", () => {
     const { trigger } = renderMenu();
 
     expect(trigger).toHaveAttribute("aria-haspopup", "menu");
     expect(trigger).toHaveAttribute("aria-expanded", "false");
-    expect(trigger).toHaveTextContent("⋯");
+    expect(trigger).toHaveTextContent("");
     expect(screen.queryByRole("menu")).toBeNull();
   });
 

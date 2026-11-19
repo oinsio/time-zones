@@ -66,7 +66,7 @@ const LINE_TWO_CLASS_NAMES =
 const DATE_CLASS_NAMES =
   "shrink-0 whitespace-nowrap bg-surface text-muted-foreground ml-auto md:order-3";
 const TIME_GROUP_CLASS_NAMES =
-  "ml-auto flex shrink-0 items-center gap-x-3.5 md:order-4 md:ml-0";
+  "ml-auto flex shrink-0 items-center md:order-4 md:ml-0";
 
 /**
  * The classes that differ between the variants, in one place so the shared
