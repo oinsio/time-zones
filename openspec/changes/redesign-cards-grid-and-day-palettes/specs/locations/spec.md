@@ -318,7 +318,7 @@ A location row SHALL show the "here" mark when the location's canonical IANA ide
 - **THEN** the Almaty row shows the here mark
 - **AND** the Moscow row shows no here mark
 
-#### Scenario: Icon before the city, caption after it
+#### Scenario: Icon before the city, no caption
 - **GIVEN** the device time zone is `Asia/Almaty`
 - **AND** the list contains Almaty and Moscow
 - **WHEN** the user opens the app

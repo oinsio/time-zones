@@ -82,7 +82,7 @@ A horizontal drag on a track MUST NOT scroll the page and MUST NOT move the card
 - **AND** the bar is 12 px high and the visible handle 23 px wide
 - **AND** no hour label is shown
 
-#### Scenario: Track beside the time on a wide screen
+#### Scenario: Track on its own line on a wide screen
 - **GIVEN** the list contains Almaty and Moscow
 - **WHEN** the list is shown 1024 px wide
 - **THEN** the Almaty track is on its own line below the line of its city and time, spans the card's content width and has its hour labels under it
