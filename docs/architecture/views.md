@@ -30,7 +30,7 @@ All rows sit in one panel with dividers, so a frame can cross every row. Each ro
                                hour frame across all rows
 ```
 
-- **Row header:** drag handle, home or here icon, city, difference, zone line; on the right the date with the day shift mark, the time and the location menu. On a narrow screen it takes two lines (city and zone line on the left, time and date on the right).
+- **Row header:** home or here icon (the grab area starts here), city, difference, zone line; on the right the date with the day shift mark, the time and the location menu. On a narrow screen it takes two lines (city and zone line on the left, time and date on the right).
 - **Hour cells:** the hour strip is the Grid view's slider for the keyboard; a tap sets a one-hour meeting range. One absolute hour of the reference day each, labelled with the location's local start hour (`9`, `9:30`), coloured by its day period. Where a location's local midnight falls the cell shows the date (`MAR` over `8`) instead of `0` and is shaded; the row of the reference zone shows a plain `0`, since its day always starts there. A DST offset edge is a dark line on the cell's left side.
 - **Width:** all 24 cells when each is at least 32 px wide (desktop about 58 px, tablet 46 px, phone in landscape 33 px). Otherwise about 9 cells of 36–40 px (phone in portrait) and the strips of all rows scroll horizontally together.
 - **Day colouring:** the setting with three colourings (Plain, Time of day, Working hours) for the hour cells of Grid and the day tracks of Cards alike. Working hours uses the accent for working cells and a non-working grey for the rest.
@@ -41,18 +41,18 @@ All rows sit in one panel with dividers, so a frame can cross every row. Each ro
 - **Meeting:** tapping a cell sets a one-hour meeting range, dragging across cells stretches it ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)). The frame turns green and spans the range, cells outside it are dimmed, and every row shows its local range in green (`23:00–01:00`).
 - **Meeting handles:** green grips on the left and right side of the meeting frame, placed on different rows so both are easy to grab. They move the start and the end onto the 15-minute track step, while a typed meeting may start and end at any minute ([ADR-0013](../adr/0013-meeting-range-at-any-minute.md)); they stand on the rows visible on screen and have a 44 × 44 px hit area; for assistive technology they are sliders (arrows ±15 min, Page Up / Page Down ±1 h, Home / End the day's ends).
 - **Meeting bar:** while a meeting range is set the header turns green: the title «Встреча · 2 ч», then «Поделиться встречей» (Lucide `Share2`) and «Сбросить выбор встречи» (Lucide `X`). Clear returns the hour frame; the Now button also clears the range. Share sends text only (Q8): the date and duration, then every location's city and local span in list order, with its day shift where its date differs, by the system share where the browser has it and by the clipboard otherwise; a closed share sheet is silent.
-- **Locked controls:** while a meeting range is set, the drag handles, location menus and wall-time inputs of every row are locked; they work again when the range is cleared.
+- **Locked controls:** while a meeting range is set, the grab areas, location menus and wall-time inputs of every row are locked; they work again when the range is cleared.
 - **Meeting range input:** while a meeting range is set, the span opens start and end fields in the row's local time; Enter or leaving both fields confirms, Esc closes.
 - **Layers:** page order, lowest first: hour cells, then the frame, then the row header texts and notes, then the meeting handles, then the focused header, then the date bar with its notices, then a dragged row, then the location menu with the header box that holds it, then dialogs. Text and notes have the surface background behind their glyphs only, so the frame breaks only behind words and numbers.
 
 ## Cards
 
-Each row is a card with the exact time in large digits and a day track with a handle.
+Each row is a card with the exact time in large digits and a day track with a handle. Two layouts only: narrow (below 768 px) and wide (from 768 px); the content sits in a column of at most 1120 px, centred.
 
 ```
 +------------------------------------------------------------+
-| Almaty                                            15:30    |
-| Kazakhstan | GMT+5                         Mon, 28 Sep     |
+| Almaty +2 h                                  15:30  ⋯  |
+| Kazakhstan · GMT+5                       mon, 28 Sep    |
 | ====-------==============(O)====-------====                |
 +------------------------------------------------------------+
 | Moscow                                            13:30    |
@@ -64,12 +64,13 @@ Each row is a card with the exact time in large digits and a day track with a ha
 - Every track spans the same day: 00-24 of the reference zone ([ADR-0007](../adr/0007-reference-zone-and-device-time.md)). The track of each row is colored by that location's own day periods, so the colors shift by the offset while all handles stand at the same position.
 - A clock change inside the day makes no color edge on the track: day-period boundaries are instants of the sun.
 - Dragging any handle changes the reference moment; all handles move together.
-- Phone: one card per row, text above the track. Tablet and wider: one full-width row per location — city and zone, then time and date, then the track with local hour labels (`22 · 04 · 10 · 16 · 22`).
+- Narrow: line 1 mark, city, difference and, at the right, time and menu; line 2 zone line (middle dots, none at a wrap) and date; line 3 the 12 px track. Wide: line 1 mark, city, difference, zone line, date, time, menu; line 2 the track across the card with hour labels under it (`22 · 04 · 10 · 16 · 22`). Reorder is by the grab area (the place part of the row header) or by Move up / Move down in the location menu.
 
 ```
 +----------------------------------------------------------------------------+
-| Moscow  -2 h        10:30      |===night===~morning~====work====~even~==|  |
-| Russia | MSK        Sun, 8 Mar  22     04     10(O)   16     22           |
+| Moscow -2 h  Russia · MSK    sun, 8 Mar  10:30  ⋯    |
+| |===night===~morning~====work====~even~==|             |
+| 22     04     10(O)   16     22                       |
 +----------------------------------------------------------------------------+
 ```
 
@@ -79,13 +80,13 @@ Used by every view, implemented once in `views/shared/`:
 
 | Block | Content |
 |---|---|
-| Row header | home icon (wins) or "here" icon (location arrow); city; difference from the reference zone (`−2 h`, `+0:30`, `0 h`); caption "here"; country and zone abbreviation or `GMT+N`; date with the day shift mark: «днём раньше» / «днём позже» in red before the date when the local date differs from the reference zone's |
-| Location menu | «⋯» button with a hit area of 44 px; opens on click, so it works without Pointer Events; items "Make home" / "Clear home" and "Remove" |
+| Row header | home icon (Lucide `House`, wins) or "here" icon (Lucide `MapPin`, no caption); city; difference from the reference zone (`−2 h`, `+0:30`, `0 h`); country and zone abbreviation or `GMT+N`; date with the day shift mark: «днём раньше» / «днём позже» in red before the date when the local date differs from the reference zone's |
+| Location menu | «⋯» button with a hit area of 44 px; opens on click, so it works without Pointer Events; items "Make home" / "Clear home", "Move up", "Move down" and "Remove" |
 | Device time location | a location of the list for the device zone; removable, reorderable, can be home; meta line "Device time · UTC+5" ([ADR-0010](../adr/0010-device-time-location.md)) |
 | Time display | time of the reference moment in large digits: follows the clock in `LIVE`, shows the selected moment in `PINNED`; tap to type an exact time. The current time is not shown separately — an active Now button signals a pinned moment |
-| Day-period colors | four pastel bands: night, morning, day, evening — from design tokens (Time of day colouring), decided by the sun at the location. Soft gradient transitions: 30 minutes around each boundary. Colors also differ in lightness, not only in hue |
+| Day-period colors | four bands in the active day palette (Vivid or Muted, [settings](../design/redesign/spec.md)): night, morning, day, evening — from design tokens (Time of day colouring), decided by the sun at the location. Soft gradient transitions: 30 minutes around each boundary. Colors also differ in lightness, not only in hue |
 | Midnight marker | cell or track mark with the new date, so day boundaries are visible per row |
-| Now button | returns to `LIVE`; always shown, active when the moment is pinned, inactive and grey while live |
+| Now button | returns to `LIVE`; always shown, an outlined button, active when the moment is pinned, with the inactive control border and a muted label while live |
 | Wall-time hint | shown in the card where a time was typed when the model reports `GAP` or `AMBIGUOUS`: "02:30 does not exist on this day — clocks moved forward. Showing 03:30." / "01:30 occurs twice — showing the first (UTC−4)."; stays until the next change; `role="status"` (polite); text comes from the presenter; hides the clock change note of its row |
 | Clock change note | shown after the day track of a card whose zone changes its UTC offset within seven days of the date in the date bar: "On Oct 25 at 03:00 clocks will go back 1 h"; same place and look as the wall-time hint, but not a live region and not part of the row's accessible name; hidden in a row with a wall-time hint; text comes from the presenter |
 | Date bar | bottom bar `[<] Mon, 28 Sep [>]  [Now]`: arrows switch to the previous / next day, tapping the date opens a calendar for distant dates; placed at the bottom for thumb reach. Grid uses the same bar |
@@ -96,20 +97,20 @@ Screens: [docs/design](../design/README.md). Values become design tokens.
 
 - One layout for light and dark themes; only token values differ. The theme follows the theme preference (System by default).
 - Font: Manrope; time uses tabular figures.
-- Accent: `#2F5BD3` (light), `#5EC2E8` (dark).
-- Inactive control (the Now button while live): fill `#E4E4E7` (light), `#2A3550` (dark), label in the muted foreground colour.
-- Day track (pastel, 10 px on phones, 12 px on tablets):
+- Tokens (`styles/tokens.css`, dark theme written once): background `#f7f7f5` / `#0b1628`, surface `#ffffff` / `#142136`, card border `#a9adb8` / `#647a98` (2.2:1 in light, accepted for cards and the grid panel only), control border `#8a8a93` / `#6b7a99`, inactive Now border `#c9ccd4` / `#33415c`, accent `#3159e7` / `#4dd5f4`.
+- Day track (12 px bar, 23 px handle filled with the card surface) in the day palette, Vivid by default:
 
-| Period | Light | Dark |
-|---|---|---|
-| Night | `#A3AFD3` | `#56679A` |
-| Morning | `#F8CBBE` | `#E0B1A4` |
-| Work | `#F8E6A6` | `#EEDBA3` |
-| Non-working (Working hours colouring, add-day-colouring-setting) | `#ECECEF` | `#3B4660` |
-| Evening | `#D4C6EE` | `#B9AADB` |
+| Period | Vivid light | Vivid dark | Muted light | Muted dark |
+|---|---|---|---|---|
+| Night | `#a4afd4` | `#4c5efa` | `#a3afd3` | `#56679a` |
+| Morning | `#f0c6b8` | `#ffc3a5` | `#f8cbbe` | `#e0b1a4` |
+| Day | `#f8e5a0` | `#fff68e` | `#f8e6a6` | `#eedba3` |
+| Evening | `#e8c7df` | `#fda9e9` | `#d4c6ee` | `#b9aadb` |
+
+The Working hours colouring keeps its non-working grey (`#ECECEF` / `#3B4660`).
 
 - Hour frame: accent in Time of day, foreground colour on the accent cells of Plain and Working hours.
-- Grid (hour cells take the day-track colours above; in the dark theme digits on morning, day and evening cells use `#0F1729`):
+- Grid (hour cells take the day-track colours above; in the dark theme digits on morning, day and evening cells use `#0b1628`):
 
 | Element | Light | Dark |
 |---|---|---|
@@ -125,7 +126,7 @@ Screens: [docs/design](../design/README.md). Values become design tokens.
 | Overlay | Content |
 |---|---|
 | Search | full screen on phones, dialog on wide screens; input plus results as "City, Region, Country" (region once a richer source is added, [ADR-0006](../adr/0006-city-data-sources.md)); suggestions are shown before typing (never an empty screen) |
-| Settings | the Gnomish Factory credit above the theme; theme (System, Light, Dark; icons only) and hour format (12 / 24); view (Cards, Grid; names); colouring (Plain, Time of day, Working hours; icons) and, only in Working hours, the working hours row (two time fields); interface language (collapsible list of the locale registry) |
+| Settings | the Gnomish Factory credit above the theme; theme (System, Light, Dark; icons only) and hour format (12 / 24); view (Cards, Grid; names); colouring (Plain, Time of day, Working hours; icons), only in Time of day the Colours group (Vivid, Muted; palette swatches) and, only in Working hours, the working hours row (two time fields); interface language (collapsible list of the locale registry) |
 
 ## View contract
 
