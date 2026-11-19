@@ -97,7 +97,8 @@
 - Impact: When the change is archived, the stable `locations` spec loses the ≤ 10 px spacing rule, and a later change can break it without touching a spec. The 411–767 px card padding (18 px, so a 7 px difference by D2) and the Grid 844/1180 widths are never measured, so UX1 as written is only partly verified.
 - Fix: Add to the delta requirement: "Measured from the centre of the dots, the distance to the time's right edge and the distance to the row's right border (card border or Grid panel border) MUST differ by at most 10 px." Add a scenario "Even spacing around the dots" with an Examples table of view and width: Cards at 320, 390, 411, 768, 1024 and 1440, and Grid at 390, 844, 1180 and 1440. Add `UX1` to the implements comment. In task 3.3, run the @UX1 scenario at those same widths.
 - Fix risk: Six more e2e examples. By D2's arithmetic the largest difference is 9 px (cards at md+: 10 + 20 + 1 − 22), so every width passes with 1 px to spare. A sub-pixel rounding could make that edge tight, which is already true at 1024 in the current plan.
-- Status: open
+- Status: fixed
+- Resolution: the delta requirement in specs/locations/spec.md now carries the ≤ 10 px spacing rule (implements comment lists UX1) and a new scenario "Even spacing around the dots" with Cards 320/390/411/768/1024/1440 and Grid 390/844/1180/1440; task 3.3 in tasks.md runs that scenario at exactly those widths (@UX1 @NFR-R1).
 
 ### R4 — WARNING — Task 3.3 measures UX1 against "the row's right border", which a Grid row does not have
 - Location: `openspec/changes/make-location-menu-button-vertical/tasks.md:16`
