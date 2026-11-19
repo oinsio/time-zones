@@ -6,7 +6,7 @@ import type { LocationRow } from "@/presenter";
 type RowLabel = Pick<LocationRow, "id" | "cityLabel">;
 
 /**
- * Screen-reader instructions and live announcements for moving a card.
+ * Live announcements for moving a card by dragging it.
  * The first over-event of a drag is the card over its own slot; it is not
  * announced, so the pick-up announcement is not replaced at once.
  * Dropping outside the list is announced as cancelled because the list stays
@@ -49,8 +49,5 @@ export function useReorderAnnouncements(
         : cancelled(active.id),
     onDragCancel: ({ active }) => cancelled(active.id),
   };
-  return {
-    announcements,
-    screenReaderInstructions: { draggable: t("locations.reorderInstructions") },
-  };
+  return { announcements };
 }

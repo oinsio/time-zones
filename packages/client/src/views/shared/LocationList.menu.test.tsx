@@ -83,3 +83,78 @@ describe("LocationList location menu", () => {
     ).toEqual(["Almaty", "Moscow"]);
   });
 });
+
+// Verifies FR16, NFR-A3 of redesign-cards-grid-and-day-palettes: the moves of the location menu.
+describe("LocationList menu moves", () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
+  });
+
+  it.each([
+    ["Moscow", "Move up", -1],
+    ["Almaty", "Move down", 1],
+  ])(
+    "should move %s with %s by one place and keep the focus on its menu button",
+    async (city, itemName, step) => {
+      const onMove = vi.fn();
+      const onMovedByMenu = vi.fn();
+      const rows = ["Almaty", "Moscow"].map(buildRow);
+      const { rerender } = render(
+        <LocationList
+          rows={rows}
+          onRemove={vi.fn()}
+          onSetHome={vi.fn()}
+          onMove={onMove}
+          onMovedByMenu={onMovedByMenu}
+          onSelectTrackFraction={vi.fn()}
+          onMoveTrack={vi.fn()}
+          onConfirmWallTime={ignoreWallTime}
+        />,
+      );
+      const rowIndex = rows.findIndex((row) => row.cityLabel === city);
+
+      await userEvent.click(
+        screen.getByRole("button", { name: `Actions for ${city}` }),
+      );
+      await userEvent.click(screen.getByRole("menuitem", { name: itemName }));
+
+      expect(onMove).toHaveBeenCalledWith(city.toLowerCase(), rowIndex + step);
+      expect(onMovedByMenu).toHaveBeenCalledWith(
+        city.toLowerCase(),
+        rowIndex + step,
+      );
+      rerender(
+        <LocationList
+          rows={[...rows].reverse()}
+          onRemove={vi.fn()}
+          onSetHome={vi.fn()}
+          onMove={onMove}
+          onSelectTrackFraction={vi.fn()}
+          onMoveTrack={vi.fn()}
+          onConfirmWallTime={ignoreWallTime}
+        />,
+      );
+      expect(
+        screen.getAllByRole("button", { name: /^Actions for / })[
+          rowIndex + step
+        ],
+      ).toHaveFocus();
+    },
+  );
+
+  it("should disable Move up on the first row and Move down on the last", async () => {
+    renderList();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Actions for Almaty" }),
+    );
+
+    expect(screen.getByRole("menuitem", { name: "Move up" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    expect(
+      screen.getByRole("menuitem", { name: "Move down" }),
+    ).not.toHaveAttribute("aria-disabled");
+  });
+});

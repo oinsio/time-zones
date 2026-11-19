@@ -2,8 +2,6 @@
 import type { Announcements } from "@dnd-kit/core";
 import { renderHook } from "@testing-library/react";
 import i18n from "i18next";
-import en from "@/locales/en.json";
-import ru from "@/locales/ru.json";
 import { useReorderAnnouncements } from "./useReorderAnnouncements";
 
 const rows = ["Moscow", "Almaty", "New York"].map((cityLabel) => ({
@@ -112,21 +110,17 @@ describe("useReorderAnnouncements", () => {
     );
   });
 
-  it("should give the keyboard instructions", () => {
-    const { screenReaderInstructions } = renderAnnouncements();
-    expect(screenReaderInstructions?.draggable).toBe(
-      en.locations.reorderInstructions,
+  it("should give no keyboard instructions: the keyboard moves by the menu", () => {
+    expect(renderAnnouncements()).not.toHaveProperty(
+      "screenReaderInstructions",
     );
   });
 
   it("should speak Russian in the Russian interface", async () => {
     await i18n.changeLanguage("ru");
-    const { announcements, screenReaderInstructions } = renderAnnouncements();
+    const { announcements } = renderAnnouncements();
     expect(
       announcements?.onDragStart?.({ active: eventOf("Moscow").active }),
     ).toBe("Moscow: взято, позиция 1 из 3");
-    expect(screenReaderInstructions?.draggable).toBe(
-      ru.locations.reorderInstructions,
-    );
   });
 });

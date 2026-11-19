@@ -1,39 +1,61 @@
-// Verifies FR1 of fix-grid-meeting-range-lock-and-layering: the row's list
-// item is registered as the sortable node.
-import * as sortable from "@dnd-kit/sortable";
-import { render, screen } from "@testing-library/react";
+// Verifies FR15 of redesign-cards-grid-and-day-palettes: the picked-up row is lifted.
+import * as dndSortable from "@dnd-kit/sortable";
+import { renderHook } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { REORDER_LIFT_SCALE } from "@/constants";
 import { useSortableLocationRow } from "./useSortableLocationRow";
 
 vi.mock("@dnd-kit/sortable", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@dnd-kit/sortable")>();
-  return { ...actual, useSortable: vi.fn() };
+  const original = await importOriginal<typeof import("@dnd-kit/sortable")>();
+  return { ...original, useSortable: vi.fn() };
 });
 
-function Row() {
-  const { setItemRef } = useSortableLocationRow("kolkata", false, false);
-  return <li ref={setItemRef}>Kolkata</li>;
-}
+const sortableState = (isDragging: boolean) =>
+  ({
+    listeners: undefined,
+    setNodeRef: vi.fn(),
+    setActivatorNodeRef: vi.fn(),
+    transform: { x: 0, y: 40, scaleX: 1, scaleY: 1 },
+    transition: undefined,
+    isDragging,
+    isSorting: isDragging,
+  }) as unknown as ReturnType<typeof dndSortable.useSortable>;
 
 describe("useSortableLocationRow", () => {
-  it("should register the list item as the sortable node", () => {
-    const setNodeRef = vi.fn();
-    vi.mocked(sortable.useSortable).mockReturnValue({
-      attributes: {},
-      listeners: undefined,
-      setNodeRef,
-      setActivatorNodeRef: vi.fn(),
-      transform: null,
-      transition: undefined,
-      isDragging: false,
-      isSorting: false,
-    } as unknown as ReturnType<typeof sortable.useSortable>);
+  afterEach(() => vi.mocked(dndSortable.useSortable).mockReset());
 
-    render(
-      <ul>
-        <Row />
-      </ul>,
+  it("should scale the dragged row by the lift scale and give it the lift shadow", () => {
+    vi.mocked(dndSortable.useSortable).mockReturnValue(sortableState(true));
+
+    const { result } = renderHook(() =>
+      useSortableLocationRow("moscow", false, false),
     );
 
-    expect(setNodeRef).toHaveBeenCalledWith(screen.getByRole("listitem"));
+    expect(result.current.style.transform).toContain(
+      `scaleX(${REORDER_LIFT_SCALE})`,
+    );
+    expect(result.current.draggingClassName).toContain("shadow-lift");
+    expect(result.current.draggingClassName).toContain("z-dragged-row");
+  });
+
+  it("should not scale a row at rest", () => {
+    vi.mocked(dndSortable.useSortable).mockReturnValue(sortableState(false));
+
+    const { result } = renderHook(() =>
+      useSortableLocationRow("moscow", false, false),
+    );
+
+    expect(result.current.style.transform).toContain("scaleX(1)");
+    expect(result.current.draggingClassName).toBe("");
+  });
+
+  it("should not expose draggable attributes: the grab area is no button", () => {
+    vi.mocked(dndSortable.useSortable).mockReturnValue(sortableState(false));
+
+    const { result } = renderHook(() =>
+      useSortableLocationRow("moscow", false, false),
+    );
+
+    expect(result.current).not.toHaveProperty("attributes");
   });
 });

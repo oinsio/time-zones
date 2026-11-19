@@ -47,6 +47,8 @@ const renderRow = (row: LocationRowModel) =>
             row={row}
             onRemove={vi.fn()}
             onSetHome={vi.fn()}
+            rowPosition={{ rowIndex: 0, rowCount: 1 }}
+            onMoveStep={vi.fn()}
             onSelectTrackFraction={vi.fn()}
             onMoveTrack={vi.fn()}
             onConfirmWallTime={ignoreWallTime}

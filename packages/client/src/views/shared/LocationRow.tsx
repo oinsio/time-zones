@@ -17,7 +17,7 @@ import {
 } from "./locationRowVariant";
 import { OptionalBox } from "./OptionalBox";
 import { RowNotes } from "./RowNotes";
-import { useLocationMenuItems } from "./useLocationMenuItems";
+import { type RowPosition, useLocationMenuItems } from "./useLocationMenuItems";
 import { useSortableLocationRow } from "./useSortableLocationRow";
 import { type GrabAreaProps, ZoneRowContent } from "./ZoneRowContent";
 
@@ -46,6 +46,10 @@ type LocationRowProps = {
   meetingRange?: PresentedLocationMeetingRange;
   /** Confirms the meeting range typed in this row; `locationId` is the row. */
   onConfirmMeetingRange?: ConfirmMeetingRange;
+  /** Where the row stands in its list, for the move items of its menu. */
+  rowPosition: RowPosition;
+  /** Moves the row by the menu, by `step` places. */
+  onMoveStep: (id: string, step: number) => void;
   /** Locks the grab area and the location menu; `false` when omitted. */
   areRowControlsLocked?: boolean;
 };
@@ -89,6 +93,8 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
       row,
       onRemove,
       onSetHome,
+      rowPosition,
+      onMoveStep,
       onSelectTrackFraction,
       onMoveTrack,
       onConfirmWallTime,
@@ -112,7 +118,13 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
     const markId = useId();
     const differenceId = useId();
     const hasDifference = row.offsetDifferenceLabel !== "";
-    const menuItems = useLocationMenuItems(row, onSetHome, onRemove);
+    const menuItems = useLocationMenuItems(
+      row,
+      rowPosition,
+      onSetHome,
+      onRemove,
+      onMoveStep,
+    );
     const labelIds = [
       cityId,
       row.mark && markId,

@@ -51,6 +51,8 @@ function renderRow(overrides: Partial<LocationRowModel> = {}) {
             row={{ ...row, ...overrides }}
             onRemove={onRemove}
             onSetHome={onSetHome}
+            rowPosition={{ rowIndex: 0, rowCount: 1 }}
+            onMoveStep={vi.fn()}
             onSelectTrackFraction={vi.fn()}
             onMoveTrack={vi.fn()}
             onConfirmWallTime={ignoreWallTime}
@@ -72,24 +74,24 @@ describe("LocationRow location menu", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("should offer Make home and Remove in the menu of a row that is not home", async () => {
+  it("should offer Make home, the moves and Remove in the menu of a row that is not home", async () => {
     renderRow();
 
     await openMenu();
 
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual(["Make home", "Remove"]);
+    ).toEqual(["Make home", "Move up", "Move down", "Remove"]);
   });
 
-  it("should offer Clear home and Remove in the menu of the home row", async () => {
+  it("should offer Clear home, the moves and Remove in the menu of the home row", async () => {
     renderRow({ mark: homeMark });
 
     await openMenu();
 
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual(["Clear home", "Remove"]);
+    ).toEqual(["Clear home", "Move up", "Move down", "Remove"]);
   });
 
   it("should offer no home item for a row without a known zone", async () => {
@@ -99,7 +101,7 @@ describe("LocationRow location menu", () => {
 
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual(["Remove"]);
+    ).toEqual(["Move up", "Move down", "Remove"]);
   });
 
   it("should call onSetHome with the row id for Make home", async () => {

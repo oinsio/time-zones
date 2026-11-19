@@ -11,11 +11,17 @@ import { useTranslation } from "react-i18next";
 import { LOCATION_MENU_TRIGGER_GLYPH, OutsidePressEvent } from "@/constants";
 import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import { getMenuKeyAction, MenuKeyAction } from "./locationMenuKeys";
+import {
+  getEnabledMenuIndex,
+  MenuStepDirection,
+} from "./locationMenuNavigation";
 import { useFixedMenuPosition } from "./useFixedMenuPosition";
 
 export type LocationMenuItem = {
   label: string;
   onSelect: () => void;
+  /** A disabled item stays in the menu, is skipped by the arrow keys and does nothing when activated. */
+  isDisabled?: boolean;
 };
 
 type LocationMenuProps = {
@@ -42,6 +48,7 @@ const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
  * Implements FR1 of add-grid-hour-cells-and-hour-frame (D5): `isMenuFixedToViewport`.
  * Implements FR1, UX1 of fix-grid-meeting-range-lock-and-layering (D1): `isDisabled`.
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5): `onOpenChange`.
+ * Implements FR16, NFR-A3 of redesign-cards-grid-and-day-palettes (D6): disabled items.
  */
 export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
   function LocationMenu(
@@ -103,12 +110,22 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
       setIsOpen(false);
       triggerRef.current?.focus();
     };
-    const lastIndex = items.length - 1;
+    const disabledFlags = items.map((item) => item.isDisabled === true);
+    const firstEnabledIndex = getEnabledMenuIndex(
+      disabledFlags,
+      -1,
+      MenuStepDirection.NEXT,
+    );
+    const lastEnabledIndex = getEnabledMenuIndex(
+      disabledFlags,
+      items.length,
+      MenuStepDirection.PREVIOUS,
+    );
 
     const handleTriggerKeyDown = (event: KeyboardEvent) => {
       const action = getMenuKeyAction(event.key);
-      if (action === MenuKeyAction.NEXT) openAt(0);
-      else if (action === MenuKeyAction.PREVIOUS) openAt(lastIndex);
+      if (action === MenuKeyAction.NEXT) openAt(firstEnabledIndex);
+      else if (action === MenuKeyAction.PREVIOUS) openAt(lastEnabledIndex);
       else return;
       event.preventDefault();
     };
@@ -116,16 +133,28 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
     const handleMenuKeyDown = (event: KeyboardEvent) => {
       switch (getMenuKeyAction(event.key)) {
         case MenuKeyAction.NEXT:
-          setFocusedIndex((focusedIndex + 1) % items.length);
+          setFocusedIndex(
+            getEnabledMenuIndex(
+              disabledFlags,
+              focusedIndex,
+              MenuStepDirection.NEXT,
+            ),
+          );
           break;
         case MenuKeyAction.PREVIOUS:
-          setFocusedIndex((focusedIndex + lastIndex) % items.length);
+          setFocusedIndex(
+            getEnabledMenuIndex(
+              disabledFlags,
+              focusedIndex,
+              MenuStepDirection.PREVIOUS,
+            ),
+          );
           break;
         case MenuKeyAction.FIRST:
-          setFocusedIndex(0);
+          setFocusedIndex(firstEnabledIndex);
           break;
         case MenuKeyAction.LAST:
-          setFocusedIndex(lastIndex);
+          setFocusedIndex(lastEnabledIndex);
           break;
         case MenuKeyAction.CLOSE:
           closeAndFocusTrigger();
@@ -172,7 +201,9 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
           aria-controls={isOpen ? menuId : undefined}
           aria-label={t("locations.locationMenu", { city })}
           disabled={isDisabled}
-          onClick={() => (isOpen ? setIsOpen(false) : openAt(0))}
+          onClick={() =>
+            isOpen ? setIsOpen(false) : openAt(firstEnabledIndex)
+          }
           className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-xl font-bold disabled:cursor-default disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
         >
           <span aria-hidden="true">{LOCATION_MENU_TRIGGER_GLYPH}</span>
@@ -195,11 +226,13 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
                 type="button"
                 role="menuitem"
                 tabIndex={-1}
+                aria-disabled={item.isDisabled ? "true" : undefined}
                 onClick={() => {
+                  if (item.isDisabled) return;
                   closeAndFocusTrigger();
                   item.onSelect();
                 }}
-                className="min-h-11 px-4 text-left text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                className={`min-h-11 px-4 text-left text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent${item.isDisabled ? " cursor-default opacity-40" : ""}`}
               >
                 {item.label}
               </button>

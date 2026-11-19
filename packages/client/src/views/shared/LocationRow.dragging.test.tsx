@@ -43,6 +43,8 @@ const renderWithDragging = (isDragging: boolean) => {
         row={row}
         onRemove={vi.fn()}
         onSetHome={() => undefined}
+        rowPosition={{ rowIndex: 0, rowCount: 1 }}
+        onMoveStep={vi.fn()}
         onSelectTrackFraction={vi.fn()}
         onMoveTrack={vi.fn()}
         onConfirmWallTime={ignoreWallTime}

@@ -203,3 +203,70 @@ describe("LocationMenu fixed to the viewport", () => {
     expect(menu.style.position).toBe("");
   });
 });
+
+// Verifies FR16, NFR-A3 of redesign-cards-grid-and-day-palettes: disabled items.
+describe("LocationMenu with disabled items", () => {
+  const renderWithDisabled = () => {
+    const onDisabled = vi.fn();
+    const onLast = vi.fn();
+    render(
+      <LocationMenu
+        city="Moscow"
+        items={[
+          { label: "First off", onSelect: onDisabled, isDisabled: true },
+          { label: "Second", onSelect: vi.fn() },
+          { label: "Third off", onSelect: onDisabled, isDisabled: true },
+          { label: "Last", onSelect: onLast },
+        ]}
+      />,
+    );
+    return {
+      trigger: screen.getByRole("button", { name: "Действия: Moscow" }),
+      onDisabled,
+      onLast,
+    };
+  };
+
+  it("should open on the first enabled item", async () => {
+    const { trigger } = renderWithDisabled();
+
+    await userEvent.click(trigger);
+
+    expect(screen.getByRole("menuitem", { name: "Second" })).toHaveFocus();
+  });
+
+  it("should mark disabled items aria-disabled and do nothing when one is activated", async () => {
+    const { trigger, onDisabled } = renderWithDisabled();
+    await userEvent.click(trigger);
+
+    const disabledItem = screen.getByRole("menuitem", { name: "First off" });
+    await userEvent.click(disabledItem);
+
+    expect(disabledItem).toHaveAttribute("aria-disabled", "true");
+    expect(onDisabled).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it("should skip disabled items with the arrow keys, Home and End", async () => {
+    const { trigger } = renderWithDisabled();
+    await userEvent.click(trigger);
+
+    await userEvent.keyboard("{ArrowDown}");
+    expect(screen.getByRole("menuitem", { name: "Last" })).toHaveFocus();
+    await userEvent.keyboard("{ArrowDown}");
+    expect(screen.getByRole("menuitem", { name: "Second" })).toHaveFocus();
+    await userEvent.keyboard("{End}");
+    expect(screen.getByRole("menuitem", { name: "Last" })).toHaveFocus();
+    await userEvent.keyboard("{Home}");
+    expect(screen.getByRole("menuitem", { name: "Second" })).toHaveFocus();
+  });
+
+  it("should open on the last enabled item with ArrowUp on the button", async () => {
+    const { trigger } = renderWithDisabled();
+    trigger.focus();
+
+    await userEvent.keyboard("{ArrowUp}");
+
+    expect(screen.getByRole("menuitem", { name: "Last" })).toHaveFocus();
+  });
+});

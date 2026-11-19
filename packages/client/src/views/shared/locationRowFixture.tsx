@@ -41,6 +41,8 @@ export const renderKolkataRow = (
             row={{ ...kolkataRow, ...overrides }}
             onRemove={vi.fn()}
             onSetHome={() => undefined}
+            rowPosition={{ rowIndex: 0, rowCount: 1 }}
+            onMoveStep={vi.fn()}
             onSelectTrackFraction={vi.fn()}
             onMoveTrack={vi.fn()}
             onConfirmWallTime={onConfirmWallTime}
