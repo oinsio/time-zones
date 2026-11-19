@@ -28,13 +28,13 @@ Paths are relative to `packages/client/` unless they start with `docs/`, `opensp
 
 ## 6. Design screens and README images (FR5; design D3)
 
-- [ ] 6.1 RED: new `src/test/designScreens/renderDesignScreens.test.ts` (header `// Verifies FR5 of make-location-menu-button-vertical.`). It imports from `../../../scripts/designScreens/` the way `src/test/zoneRules/*.test.ts` import their scripts. It drives the script through injected fakes: no real browser, no network, files in a `mkdtemp` folder removed in `afterEach`. It asserts:
+- [x] 6.1 RED: new `src/test/designScreens/renderDesignScreens.test.ts` (header `// Verifies FR5 of make-location-menu-button-vertical.`). It imports from `../../../scripts/designScreens/` the way `src/test/zoneRules/*.test.ts` import their scripts. It drives the script through injected fakes: no real browser, no network, files in a `mkdtemp` folder removed in `afterEach`. It asserts:
   - (a) Request routing, with `it.each`: `decideDesignScreenRequest(url)` returns `DesignScreenRequest.SERVE_FONT_STYLESHEET` for `https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap` (the stylesheet link of `docs/design/screens/*.html`), `DesignScreenRequest.CONTINUE` for a `file:` URL of a screen, and `DesignScreenRequest.ABORT` for `https://fonts.gstatic.com/…`, `https://unpkg.com/…` and any other `http(s)` URL.
   - (b) The font stylesheet: `buildManropeStylesheet(fontBytes)` returns one `@font-face` with `font-family: "Manrope"`, a weight range covering 400–800, and a `data:font/woff2;base64,` source holding exactly the given bytes.
   - (c) The size guard: `readPngPixelSize(pngBytes)` reads width and height from the PNG header. `runDesignScreens(screenPaths, dependencies)` with a fake renderer that returns a PNG of another pixel size than the existing PNG resolves to a non-zero exit code, and the existing PNG's bytes are unchanged afterwards (no write). With a PNG of the same size it resolves to `0` and the file holds the new bytes.
   - (d) The render options: the fake renderer receives `DESIGN_SCREEN_DEVICE_SCALE_FACTOR` (2) and `DESIGN_SCREEN_SELECTOR` (`#screen`). With no paths given it is called once for every `*.html` file of the fake screens folder.
   - Verify: `npx vitest run src/test/designScreens/renderDesignScreens.test.ts` fails (the modules do not exist yet).
-- [ ] 6.2 GREEN: new folder `scripts/designScreens/`:
+- [x] 6.2 GREEN: new folder `scripts/designScreens/`:
   - `designScreenRequests.ts`: the `DesignScreenRequest` enum, `decideDesignScreenRequest`, `buildManropeStylesheet`;
   - `designScreenPng.ts`: `readPngPixelSize`, and `runDesignScreens` taking the renderer and the file reads and writes as dependencies;
   - `constants.ts`: `DESIGN_SCREEN_DEVICE_SCALE_FACTOR`, `DESIGN_SCREEN_SELECTOR`, the screens folder and the font stylesheet host (no magic numbers, `code-style.md`);

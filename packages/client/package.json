@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "check:bundle-size": "node scripts/check-bundle-size.mjs",
     "check:legacy-build": "node scripts/check-legacy-build.mjs",
+    "design:screens": "node scripts/designScreens/renderDesignScreens.ts",
     "zone-rules:compile": "node scripts/zoneRules/compile.ts",
     "zone-rules:check": "node scripts/zoneRules/check.ts",
     "city-data:compile": "node scripts/cityData/compile.ts",
