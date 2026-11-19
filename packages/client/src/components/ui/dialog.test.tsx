@@ -26,7 +26,7 @@ describe("Dialog", () => {
     ).toBeInTheDocument();
   });
 
-  it.each(["bg-surface", "border-border", "text-foreground"])(
+  it.each(["bg-surface", "border-control-border", "text-foreground"])(
     "should colour the content with the %s token",
     (tokenClass) => {
       renderOpenDialog();

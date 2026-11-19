@@ -6,7 +6,7 @@ import { listRow } from "./locationsE2eHelpers";
 export const DEVICE_TIME_NAME_PATTERN = /(Device time|Время устройства)$/;
 const TIME_ELEMENT = "time";
 const TIME_TEXT_XPATH =
-  "xpath=preceding-sibling::button | following-sibling::button";
+  'xpath=ancestor::li[1]//span[button[@aria-haspopup="menu"]]/preceding-sibling::button';
 const SLIDER_ROLE = "slider";
 const LIST_ITEM_ROLE = "listitem";
 

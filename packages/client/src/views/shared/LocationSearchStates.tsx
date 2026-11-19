@@ -37,7 +37,7 @@ export function LocationSearchStates({
         <button
           type="button"
           onClick={onRetry}
-          className="min-h-11 rounded-md border border-border px-4 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          className="min-h-11 rounded-md border border-control-border px-4 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
         >
           {t("locations.retry")}
         </button>

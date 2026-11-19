@@ -8,7 +8,7 @@ Feature: Home location menu
     And "Almaty" is home
     And the app is open
     When the user opens the location menu of "Moscow"
-    Then the menu offers "Make home, Remove"
+    Then the menu offers "Make home, Move up, Move down, Remove"
 
   @set-home-location-and-show-differences @FR11
   Scenario: Menu of the home row
@@ -16,14 +16,14 @@ Feature: Home location menu
     And "Almaty" is home
     And the app is open
     When the user opens the location menu of "Almaty"
-    Then the menu offers "Clear home, Remove"
+    Then the menu offers "Clear home, Move up, Move down, Remove"
 
   @set-home-location-and-show-differences @FR11
   Scenario: No home item for an unknown zone
     Given the list holds Moscow and a location whose zone the browser does not know
     And the app is open
     When the user opens the location menu of "Olympus"
-    Then the menu offers "Remove"
+    Then the menu offers "Move up, Move down, Remove"
 
   @set-home-location-and-show-differences @FR14
   Scenario: Remove without Pointer Events

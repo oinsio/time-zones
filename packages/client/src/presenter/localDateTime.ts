@@ -26,6 +26,39 @@ export function formatLocalTime(
   ).format(localDateTime.epochMilliseconds);
 }
 
+/** Local time split into the digits and the day period marker (`AM` / `PM`) of the 12-hour format. */
+export type LocalTimeParts = { digits: string; dayPeriodMarker: string };
+
+const DAY_PERIOD_PART_TYPE = "dayPeriod";
+
+/**
+ * Local time as the digits and the day period marker, read from the parts of
+ * the same cached formatter `formatLocalTime` uses, so no formatter is built.
+ * The marker is empty in the 24-hour format.
+ * Implements FR8, NFR-P1 of redesign-cards-grid-and-day-palettes (D5).
+ */
+export function formatLocalTimeParts(
+  localDateTime: Temporal.ZonedDateTime,
+  language: InterfaceLanguageCode,
+  hourFormat: HourFormat,
+): LocalTimeParts {
+  const parts = getDateTimeFormatter(
+    language,
+    localDateTime.timeZoneId,
+    DateTimeLabelKind.LOCAL_TIME,
+    hourFormat,
+  ).formatToParts(localDateTime.epochMilliseconds);
+  const dayPeriodPart = parts.find(({ type }) => type === DAY_PERIOD_PART_TYPE);
+  return {
+    digits: parts
+      .filter((part) => part !== dayPeriodPart)
+      .map(({ value }) => value)
+      .join("")
+      .trim(),
+    dayPeriodMarker: dayPeriodPart?.value ?? "",
+  };
+}
+
 /**
  * Local date as short weekday, day and short month in the interface language.
  * Implements FR2 of show-local-time-and-date-on-location-cards (D3).

@@ -128,10 +128,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           count,
         ),
     );
-    And(
-      "the {string} row shows no {string} caption",
-      (_ctx, city: string, caption: string) =>
-        expect(within(world.rowOf(city)).queryByText(caption)).toBeNull(),
+    And("the {string} row shows no Here mark", (_ctx, city: string) =>
+      expect(
+        within(world.rowOf(city)).queryByRole("img", {
+          name: i18n.t("locations.hereMarkLabel"),
+        }),
+      ).toBeNull(),
     );
   });
 
@@ -142,15 +144,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("{string} is home", givenHome);
     When("the user opens the app", givenOpen);
     Then("{string} shows the home mark", thenIsHome);
-    And(
-      "{string} shows the Here mark and the caption {string}",
-      (_ctx, city: string, caption: string) => {
-        const row = within(world.rowOf(city));
-        expect(
-          row.getByRole("img", { name: i18n.t("locations.hereMarkLabel") }),
-        ).toBeInTheDocument();
-        expect(row.getByText(caption)).toBeInTheDocument();
-      },
-    );
+    And("{string} shows the Here mark", (_ctx, city: string) => {
+      const row = within(world.rowOf(city));
+      expect(
+        row.getByRole("img", { name: i18n.t("locations.hereMarkLabel") }),
+      ).toBeInTheDocument();
+    });
   });
 });

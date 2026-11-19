@@ -1,6 +1,7 @@
 import { createContext } from "react";
 import type {
   DayColouring,
+  DayPalette,
   HourFormat,
   Preferences,
   ThemePreference,
@@ -28,6 +29,8 @@ export type PreferencesContextValue = {
   setViewMode: (viewMode: string) => void;
   /** Implements FR1, FR3 of add-day-colouring-setting (D1). */
   setDayColouring: (dayColouring: DayColouring) => void;
+  /** Implements FR3, FR4 of redesign-cards-grid-and-day-palettes (D2). */
+  setDayPalette: (dayPalette: DayPalette) => void;
   /** Implements FR6, FR7 of add-day-colouring-setting (D1). */
   setWorkingHours: (workingHours: WorkingHours) => void;
   /** Clears the stored document and returns to the defaults. */

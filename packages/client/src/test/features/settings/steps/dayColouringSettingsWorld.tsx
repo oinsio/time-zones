@@ -57,6 +57,7 @@ export const buildStoredPayload = (fields: Record<string, unknown>) => ({
   viewMode: DEFAULT_PREFERENCES.viewMode,
   dayColouring: DEFAULT_PREFERENCES.dayColouring,
   workingHours: DEFAULT_PREFERENCES.workingHours,
+  dayPalette: DEFAULT_PREFERENCES.dayPalette,
   ...fields,
 });
 
@@ -106,6 +107,10 @@ export const createDayColouringSettingsWorld = () => {
   const colouringGroup = (tab = firstTab()) =>
     within(tab.container).getByRole("radiogroup", {
       name: i18n.t("settings.dayColouringLabel"),
+    });
+  const paletteGroup = (tab = firstTab()) =>
+    within(tab.container).queryByRole("radiogroup", {
+      name: i18n.t("settings.dayPaletteLabel"),
     });
   const workingHoursRow = (tab = firstTab()) =>
     within(tab.container).queryByRole("group", {
@@ -186,6 +191,22 @@ export const createDayColouringSettingsWorld = () => {
     chooseHourFormat: (name: string) =>
       userEvent.click(screen.getByRole("radio", { name })),
     workingHoursRow,
+    /** The Colours group, `null` while it is not shown. */
+    paletteGroup,
+    paletteOptionNames: (tab = firstTab()) =>
+      within(paletteGroup(tab) as HTMLElement)
+        .getAllByRole("radio")
+        .map((radio) => (radio as HTMLInputElement).closest("label")?.title),
+    checkedPaletteName: (tab = firstTab()) => {
+      const checkedRadio = within(paletteGroup(tab) as HTMLElement)
+        .getAllByRole("radio")
+        .find((radio) => (radio as HTMLInputElement).checked);
+      return checkedRadio?.closest("label")?.title ?? "";
+    },
+    choosePalette: (name: string, tab = firstTab()) =>
+      userEvent.click(
+        within(paletteGroup(tab) as HTMLElement).getByRole("radio", { name }),
+      ),
     fieldTexts: (tab = firstTab()) => [
       (field("settings.workingHoursStartLabel", tab) as HTMLInputElement).value,
       (field("settings.workingHoursEndLabel", tab) as HTMLInputElement).value,

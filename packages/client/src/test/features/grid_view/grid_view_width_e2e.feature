@@ -1,7 +1,9 @@
 Feature: Hour strip width of the Grid view in a real browser
   Implements change add-grid-hour-cells-and-hour-frame.
+  Implements change redesign-cards-grid-and-day-palettes.
   All hours fit where each cell is at least 32 px wide; on a narrow screen the strips scroll together.
 
+  @redesign-cards-grid-and-day-palettes @FR17 @NFR-R1
   @add-grid-hour-cells-and-hour-frame @NFR-R1
   Scenario Outline: All hours fit at <width> by <height> px
     Given the view mode is Grid
@@ -13,6 +15,7 @@ Feature: Hour strip width of the Grid view in a real browser
 
     Examples:
       | width | height |
+      | 2560  | 1440   |
       | 1440  | 900    |
       | 1180  | 820    |
       | 844   | 390    |

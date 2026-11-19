@@ -68,7 +68,6 @@ Feature: Location card layout in a real browser
       | Tokyo    | 4:30 PM  |
       | Kolkata  | 1:00 PM  |
     And the tracks of the cards are equally long
-    And the time columns of the cards are equally wide
     And the hour labels of "Moscow", "New York", "Tokyo", "Kolkata" are on one line and end at the track's right edge
     And the time buttons of "Moscow", "New York", "Tokyo", "Kolkata" show their time on one line in full
 

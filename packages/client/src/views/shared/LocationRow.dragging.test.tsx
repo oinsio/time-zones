@@ -21,6 +21,7 @@ const row = {
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
+  localTimeParts: { digits: "", dayPeriodMarker: "" },
   localDateLabel: "",
   localIsoDate: "",
   wallTimeInputLabel: "",
@@ -42,6 +43,8 @@ const renderWithDragging = (isDragging: boolean) => {
         row={row}
         onRemove={vi.fn()}
         onSetHome={() => undefined}
+        rowPosition={{ rowIndex: 0, rowCount: 1 }}
+        onMoveStep={vi.fn()}
         onSelectTrackFraction={vi.fn()}
         onMoveTrack={vi.fn()}
         onConfirmWallTime={ignoreWallTime}
@@ -58,7 +61,7 @@ describe("LocationRow while dragged", () => {
     expect(renderWithDragging(true)).toHaveClass(
       "relative",
       "z-dragged-row",
-      "shadow-lg",
+      "shadow-lift",
     );
   });
 

@@ -34,6 +34,7 @@ type ViewLocationListProps = {
  * header, and focus returns to its button after the last removal.
  * Implements FR1, FR3 of add-wall-time-input-with-hint (D6): wires `useWallTimeInput().confirmWallTime`.
  * Implements FR1, FR8 of add-grid-hour-cells-and-hour-frame (D5): hands the hour grid slots to the list.
+ * Implements FR16, NFR-A3 of redesign-cards-grid-and-day-palettes (D6): announces a move made by the location menu.
  */
 export function ViewLocationList({
   rowVariant,
@@ -74,6 +75,18 @@ export function ViewLocationList({
     }
   };
 
+  const handleMovedByMenu = (id: string, targetIndex: number) => {
+    const movedRow = rows.find((row) => row.id === id);
+    if (movedRow === undefined) return;
+    setAnnouncement(
+      t("locations.reorderMovedOver", {
+        city: movedRow.cityLabel,
+        position: targetIndex + 1,
+        total: rows.length,
+      }),
+    );
+  };
+
   const handleSetHome = (id: string | null) => {
     const outcome = setHomeLocation(id);
     if (!outcome.ok) return;
@@ -97,6 +110,7 @@ export function ViewLocationList({
           onRemove={handleRemove}
           onSetHome={handleSetHome}
           onMove={moveLocation}
+          onMovedByMenu={handleMovedByMenu}
           onSelectTrackFraction={selectTrackFraction}
           onMoveTrack={moveTrack}
           onConfirmWallTime={confirmWallTime}

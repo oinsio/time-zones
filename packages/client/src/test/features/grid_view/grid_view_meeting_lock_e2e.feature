@@ -1,8 +1,8 @@
 Feature: Locked row controls and the meeting range input in a real browser
   Implements change fix-grid-meeting-range-lock-and-layering.
-  While a meeting range is set the drag handles, the location menus and the wall-time inputs are locked, the keyboard alone can type the meeting, and the input is accessible and fits a phone.
+  While a meeting range is set the grab areas, the location menus and the wall-time inputs are locked, the keyboard alone can type the meeting, and the input is accessible and fits a phone.
 
-  @fix-grid-meeting-range-lock-and-layering @FR1 @FR2 @NFR-A2
+  @fix-grid-meeting-range-lock-and-layering @FR1 @FR2 @NFR-A2 @redesign-cards-grid-and-day-palettes @FR15 @FR17
   Scenario: Tab order skips the locked controls
     Given the locations interface language is English
     And the view mode is Grid
@@ -23,7 +23,7 @@ Feature: Locked row controls and the meeting range input in a real browser
       | Meeting end                                 |
     When the user clears the meeting
     And the user tabs through the page
-    Then the Tab stops include "Move Almaty", "Actions for Almaty", "Move Moscow" and "Actions for Moscow"
+    Then the Tab stops include "Actions for Almaty" and "Actions for Moscow"
 
   @fix-grid-meeting-range-lock-and-layering @FR3 @NFR-A2
   Scenario: The open input's fields sit in place of the span in the Tab order
@@ -105,12 +105,12 @@ Feature: Locked row controls and the meeting range input in a real browser
     And the screen is 1440 by 900 px for the locations
     When the user opens the locations app
     And the user sets the sample meeting
-    Then every drag handle and every location menu button is disabled
+    Then every grab area shows the default cursor and every location menu button is disabled
     When the user clicks the location menu button of "Moscow" in spite of the lock
     Then no location menu is open
     And no row offers the wall-time input
     When the user clears the meeting
-    Then every drag handle and every location menu button is enabled
+    Then every grab area shows the grab cursor and every location menu button is enabled
     When the user taps the time of "Moscow"
     Then the wall-time input of "Moscow" is open
 
@@ -138,10 +138,10 @@ Feature: Locked row controls and the meeting range input in a real browser
     When the user opens the locations app
     And the user sets the meeting range 09:00–11:00 in Almaty
     And the user tabs through the page
-    Then no Tab stop is a handle "Move …"
+    Then no Tab stop is a location menu button
     When the user clears the meeting
     And the user tabs through the page
-    Then the Tab stops include "Move Moscow"
+    Then the Tab stops include "Actions for Moscow"
 
   @fix-grid-meeting-range-lock-and-layering @FR1 @FR2
   Scenario: The menu is locked in Grid while a meeting range is set

@@ -1,4 +1,4 @@
-import type { ComponentType, SVGProps } from "react";
+import type { ComponentType, ReactNode, SVGProps } from "react";
 import { useId } from "react";
 import {
   SETTINGS_GROUP_CAPTION_CLASS_NAME,
@@ -13,6 +13,8 @@ export type SettingsOption<Value extends string> = {
   Icon?: ComponentType<SVGProps<SVGSVGElement>>;
   /** Short language-neutral text shown instead of the label. */
   pictogram?: string;
+  /** A palette swatch shown instead of an icon. Implements FR5 of redesign-cards-grid-and-day-palettes (D3). */
+  swatch?: ReactNode;
 };
 
 type SettingsOptionGroupProps<Value extends string> = {
@@ -23,20 +25,22 @@ type SettingsOptionGroupProps<Value extends string> = {
 };
 
 function OptionFace<Value extends string>({
-  option: { label, Icon, pictogram },
+  option: { label, Icon, pictogram, swatch },
 }: {
   option: SettingsOption<Value>;
 }) {
-  if (Icon === undefined && pictogram === undefined) {
+  if (Icon === undefined && pictogram === undefined && swatch === undefined) {
     return <span>{label}</span>;
   }
   return (
     <>
-      {Icon === undefined ? (
-        <span aria-hidden="true">{pictogram}</span>
-      ) : (
-        <Icon aria-hidden="true" />
-      )}
+      {swatch !== undefined && <span aria-hidden="true">{swatch}</span>}
+      {swatch === undefined &&
+        (Icon === undefined ? (
+          <span aria-hidden="true">{pictogram}</span>
+        ) : (
+          <Icon aria-hidden="true" />
+        ))}
       <span className="sr-only">{label}</span>
     </>
   );
@@ -67,7 +71,7 @@ export function SettingsOptionGroup<Value extends string>({
       <span id={captionId} className={SETTINGS_GROUP_CAPTION_CLASS_NAME}>
         {caption}
       </span>
-      <div className="flex flex-nowrap rounded-md border border-border bg-surface">
+      <div className="flex flex-nowrap rounded-md border border-control-border bg-surface">
         {options.map((option) => {
           const isChecked = option.value === selectedValue;
           return (

@@ -1,5 +1,6 @@
 // Verifies FR2, FR5, FR6, FR13, UX1, UX2, M4 of show-zone-abbreviations-and-zone-label-setting.
 // Verifies FR3, FR4, UX2, M1 of add-country-to-zone-label.
+// Verifies FR19 of redesign-cards-grid-and-day-palettes.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen } from "@testing-library/react/pure";
@@ -19,6 +20,7 @@ vi.mock(
 const feature = await loadFeature("../locations_zone_line_unit.feature");
 const ELEMENT_SEPARATOR = ", ";
 const ABBREVIATION_TOGGLE = "Abbreviation";
+const COUNTRY_TOGGLE = "Country";
 const NO_ELEMENT_TEXT = "no element";
 
 type PartsName = keyof typeof ZONE_LABEL_PART_NAMES;
@@ -210,6 +212,66 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         expect(readZoneLineElements(world.deviceTimeRowOf())).toEqual(
           variables["meta line"].split(ELEMENT_SEPARATOR),
         ),
+      );
+    },
+  );
+
+  // @redesign-cards-grid-and-day-palettes @FR19
+  f.ScenarioOutline(
+    "Universal Time on the UTC row",
+    ({ Given, And, When, Then }, variables) => {
+      Given('the interface language is "<language>"', () =>
+        givenLanguage(undefined, variables.language),
+      );
+      And("the current instant is {string}", givenInstant);
+      And(
+        "the list contains {string} and {string}",
+        (_ctx: unknown, ...cities: string[]) =>
+          world.setList(cities.join(ELEMENT_SEPARATOR)),
+      );
+      And('the zone label shows "<parts>"', () =>
+        givenZoneLabel(undefined, variables.parts),
+      );
+      When("the user opens the app", openApp);
+      Then(
+        'the {string} zone line elements are "<almaty>"',
+        (_ctx, city: string) => thenElements(undefined, city, variables.almaty),
+      );
+      And('the {string} zone line elements are "<utc>"', (_ctx, city: string) =>
+        thenElements(undefined, city, variables.utc),
+      );
+    },
+  );
+
+  // @redesign-cards-grid-and-day-palettes @FR19
+  f.Scenario(
+    "Hiding the country applies to every row at once",
+    ({ Given, And, When, Then }) => {
+      Given("the interface language is {string}", givenLanguage);
+      And("the device time zone is {string}", givenDeviceZone);
+      And("the list is {string}", givenList);
+      When("the user opens the app", openApp);
+      And("the user turns the country off in the settings and goes back", () =>
+        world.toggleInSettings(COUNTRY_TOGGLE),
+      );
+      Then(
+        "no row shows {string}, {string} or {string}",
+        (_ctx: unknown, ...hidden: string[]) => {
+          for (const row of screen.getAllByRole("listitem")) {
+            for (const text of hidden) {
+              expect(readZoneLineElements(row)).not.toContain(text);
+            }
+          }
+        },
+      );
+      And(
+        'the "UTC" zone line elements are {string}',
+        (_ctx, elements: string) => thenElements(undefined, "UTC", elements),
+      );
+      And(
+        "the device time location still shows {string}",
+        (_ctx: unknown, text: string) =>
+          expect(readZoneLineElements(world.deviceTimeRowOf())).toContain(text),
       );
     },
   );

@@ -14,7 +14,7 @@ import { WallTimeInput } from "./WallTimeInput";
 
 type LocalDateTimeProps = Pick<
   LocationRow,
-  "localTimeLabel" | "localDateLabel" | "localIsoDate" | "wallTimeInputLabel"
+  "localTimeLabel" | "localTimeParts" | "localIsoDate" | "wallTimeInputLabel"
 > & {
   /** `date` is the local ISO date the row showed when the field opened. */
   onConfirmWallTime: (text: string, date: string) => WallTimeInputOutcome;
@@ -35,11 +35,12 @@ type LocalDateTimeProps = Pick<
 /** The input a row has open: which kind and the local ISO date the row showed when it opened. */
 type OpenedInput = { date: string; isMeetingRangeInput: boolean };
 
-const TIME_CLASS_NAMES = "text-2xl md:text-4xl";
 const MEETING_SPAN_CLASS_NAMES = "text-xl text-meeting-text md:text-[26px]";
+const DAY_PERIOD_MARKER_CLASS_NAMES = "ml-1 text-card-marker font-bold";
 
 /**
- * Local time with the date under it; renders nothing when the time cannot be
+ * Local time, with the small `AM` / `PM` marker in the 12-hour format; the date is
+ * `LocalDate`. Renders nothing when the time cannot be
  * computed. The time is a button that opens the wall-time input; it opens on
  * a plain click, so it works without Pointer Events. Not a live region, so
  * minute updates are not announced.
@@ -52,11 +53,12 @@ const MEETING_SPAN_CLASS_NAMES = "text-xl text-meeting-text md:text-[26px]";
  * grid row the date comes first and the date and time sit in one line from 768 px.
  * Implements FR8, UX1 of add-grid-meeting-range-and-share (D8): the local span in place of the time and the day shift mark before the date.
  * Implements FR8, UX3 of fix-grid-meeting-range-lock-and-layering (D6): the surface lies behind the label only.
+ * Implements FR8, FR17 of redesign-cards-grid-and-day-palettes (D5): the time sizes of the variant and the day period marker; the date moved to `LocalDate`.
  * Implements FR1, FR3, FR4, UX1, UX2 of fix-grid-meeting-range-lock-and-layering (D1, D4): the span opens the meeting range input; a wall-time input never opens while a meeting range is set.
  */
 export function LocalDateTime({
   localTimeLabel,
-  localDateLabel,
+  localTimeParts,
   localIsoDate,
   wallTimeInputLabel,
   cityLabel = "",
@@ -88,27 +90,6 @@ export function LocalDateTime({
     isFocusReturnDue.current = shouldRestoreFocus;
     setOpened(undefined);
   };
-  const dateElement = (
-    <time
-      dateTime={localIsoDate}
-      className="bg-surface text-sm text-muted-foreground"
-    >
-      {localDateLabel}
-    </time>
-  );
-  const dayShiftMark = meetingRange?.dayShiftLabel !== undefined && (
-    <span className="bg-surface text-sm font-bold text-danger">
-      {meetingRange.dayShiftLabel}
-    </span>
-  );
-  const dateWithMark = dayShiftMark ? (
-    <span className="flex items-baseline gap-x-1">
-      {dayShiftMark}
-      {dateElement}
-    </span>
-  ) : (
-    dateElement
-  );
   const buttonLabel =
     meetingRange === undefined
       ? wallTimeInputLabel
@@ -117,10 +98,11 @@ export function LocalDateTime({
           span: meetingRange.spanLabel,
         });
   const timeClassName =
-    meetingRange === undefined ? TIME_CLASS_NAMES : MEETING_SPAN_CLASS_NAMES;
+    meetingRange === undefined
+      ? variantClassNames.time
+      : MEETING_SPAN_CLASS_NAMES;
   return (
-    <span className={`flex shrink-0 items-end ${variantClassNames.dateTime}`}>
-      {variantClassNames.isDateBeforeTime && dateWithMark}
+    <>
       {openedDate === undefined ? (
         <button
           ref={buttonRef}
@@ -135,7 +117,13 @@ export function LocalDateTime({
           className={`min-h-11 min-w-11 cursor-text rounded-md font-bold leading-none whitespace-nowrap tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${timeClassName}`}
         >
           <span className="bg-surface">
-            {meetingRange?.spanLabel ?? localTimeLabel}
+            {meetingRange?.spanLabel ?? localTimeParts.digits}
+            {meetingRange === undefined &&
+              localTimeParts.dayPeriodMarker !== "" && (
+                <span className={DAY_PERIOD_MARKER_CLASS_NAMES}>
+                  {localTimeParts.dayPeriodMarker}
+                </span>
+              )}
           </span>
         </button>
       ) : meetingRange === undefined ? (
@@ -144,6 +132,7 @@ export function LocalDateTime({
           initialText={localTimeLabel}
           onConfirm={(text) => onConfirmWallTime(text, openedDate)}
           onClose={closeField}
+          sizeClassName={variantClassNames.time}
         />
       ) : (
         <MeetingRangeInput
@@ -157,7 +146,6 @@ export function LocalDateTime({
           onClose={closeField}
         />
       )}
-      {!variantClassNames.isDateBeforeTime && dateWithMark}
-    </span>
+    </>
   );
 }

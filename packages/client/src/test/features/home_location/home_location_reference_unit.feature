@@ -59,7 +59,7 @@ Feature: Home location as the reference
     And "Almaty" is home
     When the user opens the app
     Then the "Almaty" row has exactly 1 leading mark
-    And the "Almaty" row shows no "here" caption
+    And the "Almaty" row shows no Here mark
 
   @set-home-location-and-show-differences @FR7
   Scenario: Travelling
@@ -68,4 +68,4 @@ Feature: Home location as the reference
     And "Almaty" is home
     When the user opens the app
     Then "Almaty" shows the home mark
-    And "Moscow" shows the Here mark and the caption "here"
+    And "Moscow" shows the Here mark

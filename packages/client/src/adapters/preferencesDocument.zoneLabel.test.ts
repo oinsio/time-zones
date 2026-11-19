@@ -5,6 +5,7 @@ import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DayColouring,
+  DayPalette,
   HourFormat,
   type Preferences,
   ThemePreference,
@@ -34,6 +35,7 @@ describe("the zone label in the preferences document", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: DayPalette.VIVID,
       },
     });
   });
@@ -57,6 +59,7 @@ describe("the zone label in the preferences document", () => {
       viewMode: null,
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
+      dayPalette: DayPalette.VIVID,
     };
     expect(
       deserializePreferencesDocument(
@@ -76,8 +79,8 @@ describe("the zone label in the preferences document", () => {
     });
   });
 
-  it("should be at schema version 6", () => {
-    expect(PREFERENCES_SCHEMA_VERSION).toBe(6);
+  it("should be at schema version 7", () => {
+    expect(PREFERENCES_SCHEMA_VERSION).toBe(7);
   });
 
   it.each([
@@ -97,6 +100,7 @@ describe("the zone label in the preferences document", () => {
           viewMode: "grid",
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
+          dayPalette: DayPalette.VIVID,
         },
       });
       expect(deserializePreferencesDocument(rawDocument, null)).toEqual({
@@ -109,6 +113,7 @@ describe("the zone label in the preferences document", () => {
           viewMode: "grid",
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
+          dayPalette: DayPalette.VIVID,
         },
       });
     },
@@ -143,6 +148,7 @@ describe("the zone label in the preferences document", () => {
       viewMode: null,
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
+      dayPalette: DayPalette.VIVID,
     };
     expect(
       deserializePreferencesDocument(
@@ -169,6 +175,7 @@ describe("the zone label in the preferences document", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: DayPalette.VIVID,
       },
     });
     expect(deserializePreferencesDocument(rawDocument, null)).toEqual({

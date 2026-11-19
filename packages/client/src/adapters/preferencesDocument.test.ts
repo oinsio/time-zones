@@ -4,6 +4,7 @@ import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DayColouring,
+  DayPalette,
   DEFAULT_PREFERENCES,
   HourFormat,
   ThemePreference,
@@ -37,6 +38,7 @@ describe("deserializePreferencesDocument", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: DayPalette.VIVID,
       },
     });
   });
@@ -111,10 +113,11 @@ describe("serializePreferencesDocument", () => {
           viewMode: null,
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
+          dayPalette: DayPalette.VIVID,
         }),
       ),
     ).toEqual({
-      schemaVersion: 6,
+      schemaVersion: 7,
       payload: {
         theme: "DARK",
         hourFormat: "H12",
@@ -123,6 +126,7 @@ describe("serializePreferencesDocument", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: DayPalette.VIVID,
       },
     });
   });

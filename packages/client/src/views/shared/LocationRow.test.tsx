@@ -19,19 +19,23 @@ describe("LocationRow", () => {
 
   it("should show country, abbreviation and offset as separate elements on the muted zone line", () => {
     renderRow();
-    const zoneLine = screen.getByText("India").parentElement;
-    expect(zoneLine).toHaveClass("text-muted-foreground");
+    const zoneLine = screen.getByText("India").closest("[data-zone-line]");
+    expect(zoneLine?.parentElement).toHaveClass("text-muted-foreground");
     expect(
       Array.from(zoneLine?.children ?? []).map(
         (element) => element.textContent,
       ),
-    ).toEqual(["India", "IST", "UTC+5:30"]);
+    ).toEqual(["India", "·IST", "·UTC+5:30"]);
   });
 
   it("should keep the abbreviation and the offset on one line each", () => {
     renderRow();
-    expect(screen.getByText("IST")).toHaveClass("whitespace-nowrap");
-    expect(screen.getByText("UTC+5:30")).toHaveClass("whitespace-nowrap");
+    expect(
+      screen.getByText(/IST/).closest("[data-zone-line-part]"),
+    ).toHaveClass("whitespace-nowrap");
+    expect(
+      screen.getByText(/UTC\+5:30/).closest("[data-zone-line-part]"),
+    ).toHaveClass("whitespace-nowrap");
   });
 
   it("should let the place wrap between words", () => {
@@ -39,11 +43,15 @@ describe("LocationRow", () => {
     expect(screen.getByText("India")).not.toHaveClass("whitespace-nowrap");
   });
 
-  it("should never cut a zone line element or write a separator", () => {
+  it("should never cut a zone line element and hide its separators from assistive technology", () => {
     renderRow();
-    const zoneLine = screen.getByText("India").parentElement;
+    const zoneLine = screen.getByText("India").closest("[data-zone-line]");
     expect(zoneLine?.innerHTML).not.toMatch(/truncate|text-ellipsis/);
-    expect(zoneLine).not.toHaveTextContent("·");
+    const dots = zoneLine?.querySelectorAll("[data-zone-line-dot]") ?? [];
+    expect(dots).toHaveLength(2);
+    for (const dot of Array.from(dots)) {
+      expect(dot).toHaveAttribute("aria-hidden", "true");
+    }
   });
 
   it("should show no zone line when the row has no zone line parts", () => {
@@ -58,21 +66,29 @@ describe("LocationRow", () => {
     ).toBeInTheDocument();
   });
 
-  it("should show the move handle when reorderable", () => {
+  it("should make the place the grab area when reorderable, without a handle button", () => {
     renderRow();
-    expect(
-      screen.getByRole("button", { name: "Move Kolkata" }),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
+    expect(screen.getByText("Kolkata").parentElement).toHaveClass(
+      "cursor-grab",
+      "select-none",
+    );
   });
 
-  it("should show no move handle when not reorderable", () => {
+  it("should give a row that cannot be reordered no grab cursor", () => {
     renderRow({}, false);
-    expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
+    expect(screen.getByText("Kolkata").parentElement).toHaveClass(
+      "cursor-default",
+    );
+    expect(screen.getByText("Kolkata").parentElement).not.toHaveClass(
+      "cursor-grab",
+    );
   });
 
   describe("local time and date", () => {
     const withTime = {
       localTimeLabel: "12:30",
+      localTimeParts: { digits: "12:30", dayPeriodMarker: "" },
       localDateLabel: "Sun, Mar 8",
       localIsoDate: "2026-03-08",
     };
@@ -80,7 +96,7 @@ describe("LocationRow", () => {
     it("should read city, country, abbreviation and offset, time, date in that order", () => {
       renderRow(withTime);
       expect(screen.getByRole("listitem")).toHaveTextContent(
-        "KolkataIndiaISTUTC+5:3012:30Sun, Mar 8",
+        "Kolkata12:30⋯India·IST·UTC+5:30Sun, Mar 8",
       );
     });
 
@@ -89,7 +105,7 @@ describe("LocationRow", () => {
       expect(screen.getByText("12:30").closest("button")).toHaveClass(
         "font-bold",
       );
-      expect(screen.getByText("Kolkata")).toHaveClass("font-semibold");
+      expect(screen.getByText("Kolkata")).toHaveClass("font-bold");
     });
 
     it("should keep the row name as the city", () => {

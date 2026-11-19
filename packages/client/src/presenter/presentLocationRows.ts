@@ -1,3 +1,4 @@
+import { UTC_ZONE_ID } from "@/constants";
 import {
   getLocationMarkKind,
   isDeviceTimeLocation,
@@ -46,6 +47,7 @@ export type LocationRow = PresentedZoneMoment & {
  * Implements FR8, UX3 of add-settings-page-and-device-time-location (D4).
  * Implements FR1, FR3 of show-city-labels-in-interface-language (D4).
  * Implements FR5, FR6, FR13 of show-zone-abbreviations-and-zone-label-setting (D5): the zone line.
+ * Implements FR18, FR19 of redesign-cards-grid-and-day-palettes (D7): "Universal Time" in place of the country of a city location in `UTC`.
  */
 export function presentLocationRows(
   locations: readonly Location[],
@@ -61,6 +63,10 @@ export function presentLocationRows(
     );
     const mark = markKind === undefined ? undefined : marks[markKind];
     const isDeviceTime = isDeviceTimeLocation(location);
+    const isUniversalTime =
+      !isDeviceTime &&
+      location.timeZoneId === UTC_ZONE_ID &&
+      !location.countryCode;
     const cityLabel = isDeviceTime
       ? (context.deviceTimeCityLabel ?? location.timeZoneId)
       : (context.cityLabels?.get(location.id) ?? location.label);
@@ -75,7 +81,9 @@ export function presentLocationRows(
       zoneLineParts: presentZoneLine({
         placeText: isDeviceTime
           ? translate("locations.deviceTimeMeta")
-          : countryName,
+          : isUniversalTime
+            ? translate("locations.universalTime")
+            : countryName,
         zoneAbbreviationLabel: zoneMoment.zoneAbbreviationLabel,
         utcOffsetLabel: zoneMoment.utcOffsetLabel,
         zoneLabelParts: context.zoneLabelParts,

@@ -1,12 +1,10 @@
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 // "pure" skips auto-cleanup: each step is its own test, the app must survive between steps.
-import { act, cleanup, render } from "@testing-library/react/pure";
+import { act, cleanup } from "@testing-library/react/pure";
 import i18n from "i18next";
-import { createElement } from "react";
 import { expect } from "vitest";
 import { STORAGE_KEYS } from "@/constants";
-import ru from "@/locales/ru.json";
 import {
   INITIAL_WORLD_CLOCK_STATE,
   LocationCommandType,
@@ -15,10 +13,8 @@ import {
   reduceLocations,
 } from "@/model";
 import type { LocationRow } from "@/presenter";
-import { ignoreWallTime } from "@/test/ignoreWallTime";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
 import { startWorkCount, type WorkCount } from "@/test/workCounters";
-import { LocationList } from "@/views/shared";
 import {
   cityEntry,
   labelsOf,
@@ -69,8 +65,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   f.AfterEachScenario(() => workCount?.stop());
 
-  f.BeforeEachScenario(() => {
+  f.BeforeEachScenario(async () => {
     cleanup();
+    await i18n.changeLanguage("en");
     localStorage.clear();
     vi.restoreAllMocks();
     moveOutcome = undefined;
@@ -202,49 +199,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the storage warning is flagged", () => {
       expect(app.result.current.hasSaveFailed).toBe(true);
     });
-  });
-
-  // @reorder-locations-by-drag-and-drop @FR8
-  f.Scenario("Russian interface", ({ Given, When, Then }) => {
-    Given("the interface language is Russian", async () => {
-      await i18n.changeLanguage("ru");
-    });
-    When("the list {string} is shown", (_ctx, labels: string) => {
-      const rows = splitLabels(labels).map((label) => ({
-        id: idOf(label),
-        cityLabel: label,
-        countryName: "",
-        utcOffsetLabel: "",
-        zoneAbbreviationLabel: "",
-        zoneLineParts: [],
-        offsetDifferenceLabel: "",
-        offsetDifferenceAccessibleLabel: "",
-        localTimeLabel: "",
-        localDateLabel: "",
-        localIsoDate: "",
-        wallTimeInputLabel: "",
-      }));
-      render(
-        createElement(LocationList, {
-          rows,
-          onRemove: vi.fn(),
-          onSetHome: vi.fn(),
-          onMove: vi.fn(),
-          onSelectTrackFraction: vi.fn(),
-          onMoveTrack: vi.fn(),
-          onConfirmWallTime: ignoreWallTime,
-        }),
-      );
-    });
-    Then(
-      "the list offers the Russian move action for {string}",
-      (_ctx, label: string) => {
-        const name = ru.locations.moveLocation.replace("{{city}}", label);
-        expect(
-          document.querySelector(`button[aria-label="${name}"]`),
-        ).not.toBeNull();
-      },
-    );
   });
 
   // @reorder-locations-by-drag-and-drop @NFR-P1

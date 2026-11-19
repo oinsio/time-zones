@@ -6,10 +6,8 @@ import { test } from "./locations_ui_e2e.fixtures";
 const { Then } = createBdd(test);
 
 const LIST_ITEM_ROLE = "listitem";
-const HERE_CAPTION = englishLocale.locations.hereMarkCaption;
+const HERE_MARK_LABEL = englishLocale.locations.hereMarkLabel;
 const IMAGE_ROLE = "img";
-const ARIA_HIDDEN_ATTRIBUTE = "aria-hidden";
-const ARIA_HIDDEN_VALUE = "true";
 
 // Verifies NFR-A1, NFR-A2, NFR-R1, NFR-R2 of mark-device-time-zone-in-location-list
 // Verifies NFR-A1, NFR-A2, NFR-R1, NFR-R2 of match-here-mark-to-design
@@ -32,7 +30,9 @@ Then(
     const row = locationsWorld.page
       .getByRole(LIST_ITEM_ROLE)
       .filter({ hasText: city });
-    await expect(row.getByText(HERE_CAPTION, { exact: true })).toBeVisible();
+    await expect(
+      row.getByRole(IMAGE_ROLE, { name: HERE_MARK_LABEL, exact: true }),
+    ).toBeVisible();
   },
 );
 
@@ -43,7 +43,9 @@ Then(
       .getByRole(LIST_ITEM_ROLE)
       .filter({ hasText: city });
     await expect(row).toBeVisible();
-    await expect(row.getByText(HERE_CAPTION, { exact: true })).toHaveCount(0);
+    await expect(
+      row.getByRole(IMAGE_ROLE, { name: HERE_MARK_LABEL, exact: true }),
+    ).toHaveCount(0);
   },
 );
 
@@ -60,14 +62,11 @@ Then(
 );
 
 Then(
-  "the here caption of {string} is hidden from assistive technology",
+  "the row of {string} shows no visible here caption",
   async ({ locationsWorld }, city: string) => {
     const row = locationsWorld.page
       .getByRole(LIST_ITEM_ROLE)
       .filter({ hasText: city });
-    await expect(row.getByText(HERE_CAPTION, { exact: true })).toHaveAttribute(
-      ARIA_HIDDEN_ATTRIBUTE,
-      ARIA_HIDDEN_VALUE,
-    );
+    await expect(row.getByText("here", { exact: true })).toHaveCount(0);
   },
 );

@@ -104,7 +104,7 @@ export function SettingsTimeRangeGroup({
     onKeyDown: handleKeyDown,
     className: cn(
       FIELD_CLASS_NAME,
-      isInvalid ? "border-danger" : "border-border",
+      isInvalid ? "border-danger" : "border-control-border",
     ),
   });
 

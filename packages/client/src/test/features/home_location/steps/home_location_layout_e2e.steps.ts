@@ -7,7 +7,6 @@ const { Then } = createBdd(test);
 
 const MIN_HIT_AREA_PX = 44;
 const OFFSET_DIFFERENCE_SELECTOR = "[data-offset-difference][aria-hidden]";
-const HERE_CAPTION = "here";
 
 async function requireBox(locator: Locator) {
   const box = await locator.boundingBox();
@@ -29,35 +28,28 @@ Then(
 
 // Verifies UX1 of set-home-location-and-show-differences: reading order city, difference, caption.
 Then(
-  "the offset difference of {string} stands after the city and before the caption",
+  "the offset difference of {string} stands right after the city",
   async ({ locationsWorld }, cityName: string) => {
     const row = listRow(locationsWorld.page, cityName);
     const isInOrder = await row.evaluate(
-      (rowElement, { city, differenceSelector, caption }) => {
-        const [cityElement, differenceElement, captionElement] = [
+      (rowElement, { city, differenceSelector }) => {
+        const [cityElement, differenceElement] = [
           [...rowElement.querySelectorAll("span")].find(
             (element) => element.textContent === city,
           ),
           rowElement.querySelector(differenceSelector),
-          [...rowElement.querySelectorAll("span")].find(
-            (element) => element.textContent === caption,
-          ),
         ];
-        if (!cityElement || !differenceElement || !captionElement) return false;
+        if (!cityElement || !differenceElement) return false;
         const isFollowing = (earlier: Element, later: Element) =>
           Boolean(
             earlier.compareDocumentPosition(later) &
               Node.DOCUMENT_POSITION_FOLLOWING,
           );
-        return (
-          isFollowing(cityElement, differenceElement) &&
-          isFollowing(differenceElement, captionElement)
-        );
+        return isFollowing(cityElement, differenceElement);
       },
       {
         city: cityName,
         differenceSelector: OFFSET_DIFFERENCE_SELECTOR,
-        caption: HERE_CAPTION,
       },
     );
     expect(isInOrder).toBe(true);

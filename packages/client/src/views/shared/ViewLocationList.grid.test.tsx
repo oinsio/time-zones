@@ -65,10 +65,14 @@ describe("ViewLocationList with grid rows", () => {
   it("should draw the rows in one panel with dividers", () => {
     renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
     const panel = screen.getByRole("list");
-    expect(panel).toHaveClass("border", "border-border");
+    expect(panel).toHaveClass("border", "border-card-border");
     expect(panel).not.toHaveClass("divide-y");
     for (const row of screen.getAllByRole("listitem")) {
-      expect(row).toHaveClass("border-t", "border-border", "first:border-t-0");
+      expect(row).toHaveClass(
+        "border-t",
+        "border-card-border",
+        "first:border-t-0",
+      );
     }
   });
 
@@ -77,7 +81,7 @@ describe("ViewLocationList with grid rows", () => {
     for (const row of screen.getAllByRole("listitem")) {
       expect(row).toHaveClass("bg-surface");
       expect(row).not.toHaveClass("border");
-      expect(row).toHaveClass("first:rounded-t-md", "last:rounded-b-md");
+      expect(row).toHaveClass("first:rounded-t-card", "last:rounded-b-card");
     }
   });
 
@@ -109,17 +113,15 @@ describe("ViewLocationList with grid rows", () => {
     );
   });
 
-  it("should read the date before the time button in every row", () => {
+  it("should read the date before the time group from 768 px in every row", () => {
     renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
     for (const row of screen.getAllByRole("listitem")) {
       const dateElement = row.querySelector("time") as HTMLElement;
       const timeButton = within(row).getByRole("button", {
         name: /^Enter time/,
       });
-      expect(
-        dateElement.compareDocumentPosition(timeButton) &
-          Node.DOCUMENT_POSITION_FOLLOWING,
-      ).toBeTruthy();
+      expect(dateElement.parentElement).toHaveClass("md:order-3");
+      expect(timeButton.parentElement).toHaveClass("md:order-4");
     }
   });
 

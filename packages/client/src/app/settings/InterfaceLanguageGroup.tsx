@@ -91,7 +91,7 @@ export function InterfaceLanguageGroup({
         aria-controls={listId}
         aria-label={t("settings.languageButton", { language: activeName })}
         onClick={() => (isExpanded ? collapse() : setIsExpanded(true))}
-        className={cn(LANGUAGE_BUTTON_CLASS_NAME, "border-border")}
+        className={cn(LANGUAGE_BUTTON_CLASS_NAME, "border-control-border")}
       >
         <span aria-hidden="true">{activeMetadata?.emoji}</span>
         <span lang={activeMetadata?.code} className="flex-1 text-left">

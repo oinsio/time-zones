@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useReferenceMoment } from "@/controller";
 import { CalendarDialog } from "./CalendarDialog";
 
-const NOW_ICON_SIZE_PX = 16;
+const NOW_ICON_SIZE_PX = 18;
 
 const arrowButtonClassName =
   // Stryker disable next-line StringLiteral: the arrow classes are checked by the "Touch targets" scenario of date_selection_layout_e2e.feature
@@ -19,6 +19,8 @@ const arrowButtonClassName =
  * (D1, D2).
  * Implements FR15, NFR-R2, UX4 of add-settings-page-and-device-time-location
  * (D13): one centred group at every width, with no jump at the edges.
+ * Implements FR14, NFR-A2 of redesign-cards-grid-and-day-palettes (D8): Now is an outlined button, 44 px high, with
+ * its own inactive look; the bar itself is the page background.
  */
 export function DateBar() {
   const { t } = useTranslation();
@@ -66,7 +68,7 @@ export function DateBar() {
         <button
           type="button"
           disabled={!dateBar.isPinned}
-          className="flex min-h-11 items-center gap-2 rounded-full bg-accent px-4 text-sm font-medium text-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-default disabled:bg-muted disabled:text-muted-foreground"
+          className="flex h-11 items-center gap-1.5 rounded-now border border-control-border px-2.5 text-base font-semibold text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-default disabled:border-control-border-inactive disabled:text-muted-foreground"
           onClick={handleReturnToNow}
         >
           <Clock aria-hidden="true" size={NOW_ICON_SIZE_PX} />

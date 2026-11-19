@@ -5,6 +5,8 @@ import { WallTimeInputOutcome } from "@/controller";
 import { getTypedTimeFieldText } from "./typedTimeFieldText";
 import { isKeyKeptInField } from "./wallTimeFieldKeys";
 
+const DEFAULT_SIZE_CLASS_NAME = "text-2xl md:text-4xl";
+
 type WallTimeInputProps = {
   /** Accessible name: "Enter time — city, time". */
   label: string;
@@ -12,6 +14,8 @@ type WallTimeInputProps = {
   onConfirm: (text: string) => WallTimeInputOutcome;
   /** `shouldRestoreFocus` is false when the user already moved the focus away. */
   onClose: (shouldRestoreFocus: boolean) => void;
+  /** Font size classes of the row variant, so the open field is as tall as the time it replaces. */
+  sizeClassName?: string;
 };
 
 /**
@@ -27,6 +31,7 @@ export function WallTimeInput({
   initialText,
   onConfirm,
   onClose,
+  sizeClassName = DEFAULT_SIZE_CLASS_NAME,
 }: WallTimeInputProps) {
   const { t } = useTranslation();
   const errorId = useId();
@@ -78,7 +83,7 @@ export function WallTimeInput({
         onChange={(event) => setText(getTypedTimeFieldText(event, text))}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        className="min-h-11 w-24 rounded-md border border-accent bg-surface text-2xl font-bold leading-none tabular-nums md:w-36 md:text-4xl"
+        className={`min-h-11 w-20 rounded-md border border-accent bg-surface font-bold leading-none tabular-nums md:w-36 ${sizeClassName}`}
       />
       {hasError && (
         <span id={errorId} className="text-sm text-danger">

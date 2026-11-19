@@ -51,7 +51,7 @@ export function LocationSearchResults({
           onClick={deviceTimeOption.onChoose}
           className={cn(
             "flex min-h-11 cursor-pointer items-center rounded-md border border-transparent px-3 py-2 font-semibold",
-            activeIndex === 0 && "border-border bg-background",
+            activeIndex === 0 && "border-control-border bg-background",
           )}
         >
           {deviceTimeOption.label}
@@ -69,7 +69,7 @@ export function LocationSearchResults({
           className={cn(
             "flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-md border border-transparent px-3 py-2",
             resultPosition + optionOffset === activeIndex &&
-              "border-border bg-background",
+              "border-control-border bg-background",
             result.isAdded && "cursor-default text-muted-foreground",
           )}
         >

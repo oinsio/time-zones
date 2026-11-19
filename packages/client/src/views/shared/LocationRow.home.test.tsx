@@ -23,6 +23,7 @@ const row: LocationRowModel = {
   offsetDifferenceLabel: "−2 h",
   offsetDifferenceAccessibleLabel: "2 hours behind",
   localTimeLabel: "10:30",
+  localTimeParts: { digits: "10:30", dayPeriodMarker: "" },
   localDateLabel: "Sun, Mar 8",
   localIsoDate: "2026-03-08",
   wallTimeInputLabel: "",
@@ -50,6 +51,8 @@ function renderRow(overrides: Partial<LocationRowModel> = {}) {
             row={{ ...row, ...overrides }}
             onRemove={onRemove}
             onSetHome={onSetHome}
+            rowPosition={{ rowIndex: 0, rowCount: 1 }}
+            onMoveStep={vi.fn()}
             onSelectTrackFraction={vi.fn()}
             onMoveTrack={vi.fn()}
             onConfirmWallTime={ignoreWallTime}
@@ -71,24 +74,24 @@ describe("LocationRow location menu", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("should offer Make home and Remove in the menu of a row that is not home", async () => {
+  it("should offer Make home, the moves and Remove in the menu of a row that is not home", async () => {
     renderRow();
 
     await openMenu();
 
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual(["Make home", "Remove"]);
+    ).toEqual(["Make home", "Move up", "Move down", "Remove"]);
   });
 
-  it("should offer Clear home and Remove in the menu of the home row", async () => {
+  it("should offer Clear home, the moves and Remove in the menu of the home row", async () => {
     renderRow({ mark: homeMark });
 
     await openMenu();
 
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual(["Clear home", "Remove"]);
+    ).toEqual(["Clear home", "Move up", "Move down", "Remove"]);
   });
 
   it("should offer no home item for a row without a known zone", async () => {
@@ -98,7 +101,7 @@ describe("LocationRow location menu", () => {
 
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual(["Remove"]);
+    ).toEqual(["Move up", "Move down", "Remove"]);
   });
 
   it("should call onSetHome with the row id for Make home", async () => {
@@ -140,20 +143,16 @@ describe("LocationRow offset difference and marks", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("should show the difference after the city and before the here caption, hidden from assistive technology", () => {
+  it("should show the difference after the city, hidden from assistive technology", () => {
     renderRow({ mark: hereMark });
 
     const difference = screen.getByText("−2 h");
     const city = screen.getByText("Moscow");
-    const caption = screen.getByText("here");
     expect(difference).toHaveAttribute("aria-hidden", "true");
     expect(city.compareDocumentPosition(difference)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );
-    expect(difference.compareDocumentPosition(caption)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-    expect(difference).toHaveClass("text-sm", "font-semibold");
+    expect(difference).toHaveClass("text-card-difference", "font-semibold");
   });
 
   it("should name the row by city, mark and difference", () => {

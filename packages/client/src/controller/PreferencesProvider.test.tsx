@@ -9,6 +9,7 @@ import { PREFERENCES_WRITE_DEBOUNCE_MS } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DayColouring,
+  DayPalette,
   DEFAULT_PREFERENCES,
   DEFAULT_WORKING_HOURS,
   HourFormat,
@@ -28,6 +29,7 @@ const storedDarkTwelveHour = {
     viewMode: null,
     dayColouring: DayColouring.TIME_OF_DAY,
     workingHours: DEFAULT_WORKING_HOURS,
+    dayPalette: DayPalette.VIVID,
   },
 } as const;
 
@@ -196,3 +198,23 @@ function createSharedPair() {
     second: createInMemoryPreferencesRepository({ backend }),
   };
 }
+
+// Verifies FR3, FR4 of redesign-cards-grid-and-day-palettes.
+describe("setDayPalette", () => {
+  it("should dispatch SET_DAY_PALETTE", () => {
+    const { result } = renderHook(() => usePreferences(), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <PreferencesProvider
+          repository={createInMemoryPreferencesRepository()}
+          writeScheduler={createManualWriteScheduler()}
+        >
+          {children}
+        </PreferencesProvider>
+      ),
+    });
+
+    act(() => result.current.setDayPalette(DayPalette.MUTED));
+
+    expect(result.current.preferences.dayPalette).toBe(DayPalette.MUTED);
+  });
+});

@@ -9,12 +9,10 @@ describe("SettingsButton", () => {
     await i18n.changeLanguage("en");
   });
 
-  it("should be named Settings and draw the sliders icon", () => {
+  it("should be named Settings and draw the gear icon", () => {
     render(<SettingsButton onClick={vi.fn()} />);
     const button = screen.getByRole("button", { name: "Settings" });
-    expect(
-      button.querySelector("svg.lucide-sliders-horizontal"),
-    ).not.toBeNull();
+    expect(button.querySelector("svg.lucide-settings")).not.toBeNull();
   });
 
   it("should emit clicks", async () => {

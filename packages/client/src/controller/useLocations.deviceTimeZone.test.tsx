@@ -10,7 +10,7 @@ import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { renderLocations } from "@/test/renderLocations";
 
 const INSTANT = "2026-07-15T12:00:00Z";
-const BADGE_RU = "здесь";
+const BADGE_RU = "here";
 
 const cityOf = (label: string) =>
   buildLocation({ label, ...KNOWN_CITIES[label] });
@@ -30,8 +30,8 @@ const renderWith = (cities: string[], clock: Clock) =>
 
 const MOSCOW_INPUT = { ...KNOWN_CITIES.Moscow, label: "Moscow" };
 
-const badgesOf = (rows: { mark?: { caption: string } }[]) =>
-  rows.map((row) => row.mark?.caption ?? "");
+const badgesOf = (rows: { mark?: { kind: string } }[]) =>
+  rows.map((row) => row.mark?.kind ?? "");
 
 describe("useLocations device time zone", () => {
   it.each([

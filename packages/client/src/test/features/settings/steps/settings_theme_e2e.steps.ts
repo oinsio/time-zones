@@ -39,6 +39,7 @@ Given(
           viewMode: null,
           dayColouring: "TIME_OF_DAY",
           workingHours: { start: "10:00", end: "18:00" },
+          dayPalette: "VIVID",
         },
       }),
     );
@@ -142,8 +143,10 @@ Then(
     await expect(
       row
         .locator("time")
-        .locator("xpath=preceding-sibling::button | following-sibling::button"),
-    ).toHaveText(time);
+        .locator(
+          'xpath=ancestor::li[1]//span[button[@aria-haspopup="menu"]]/preceding-sibling::button',
+        ),
+    ).toHaveText(new RegExp(`^${time.replace(/\s+/g, "\\s*")}$`));
   },
 );
 

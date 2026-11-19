@@ -1,9 +1,17 @@
 // Verifies NFR-P1 of add-day-colouring-setting.
+// Verifies NFR-P1 of redesign-cards-grid-and-day-palettes: the day palette re-presents nothing.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import i18n from "i18next";
 import { expect, vi } from "vitest";
-import { DayColouring, type WorkingHours } from "@/preferences";
+import {
+  DayColouring,
+  DayPalette,
+  DEFAULT_PREFERENCES,
+  PreferencesCommandType,
+  reducePreferences,
+  type WorkingHours,
+} from "@/preferences";
 import {
   MAX_FORMATTERS_PER_ZONE,
   MAX_TRANSITION_LOOKUPS_PER_ZONE,
@@ -158,6 +166,59 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Then("no formatter is built", () => {
         expect((workCount as WorkCount).formatters()).toBe(0);
       });
+    },
+  );
+
+  // @redesign-cards-grid-and-day-palettes @NFR-P1
+  f.Scenario(
+    "Changing the day palette re-presents nothing",
+    ({ Given, When, Then, And }) => {
+      Given(
+        "the day tracks and the hour strips of 50 rows in 10 zones were presented in the Time of day colouring",
+        () => {
+          first = presentBudgetRows(
+            BUDGET_SAMPLE_INSTANT,
+            DayColouring.TIME_OF_DAY,
+            workingHours,
+          );
+        },
+      );
+      When(
+        "the day palette changes to Muted and they are presented again",
+        () => {
+          const changed = reducePreferences(DEFAULT_PREFERENCES, {
+            type: PreferencesCommandType.SET_DAY_PALETTE,
+            dayPalette: DayPalette.MUTED,
+          });
+          workCount = startWorkCount();
+          later = presentBudgetRows(
+            BUDGET_SAMPLE_INSTANT,
+            changed.dayColouring,
+            changed.workingHours,
+          );
+          workCount.stop();
+        },
+      );
+      Then(
+        "no formatter is built and no time zone transition is looked up",
+        () => {
+          expect((workCount as WorkCount).formatters()).toBe(0);
+          expect((workCount as WorkCount).transitionLookups()).toBe(0);
+        },
+      );
+      And(
+        "every row gets the same colour stops and the same strip as before",
+        () => {
+          (later as PresentedBudgetRows).rows.forEach((row, index) => {
+            expect(row.dayTrack?.stops).toBe(
+              first?.rows[index].dayTrack?.stops,
+            );
+            expect((later as PresentedBudgetRows).strips[index]).toBe(
+              first?.strips[index],
+            );
+          });
+        },
+      );
     },
   );
 });

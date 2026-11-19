@@ -59,7 +59,7 @@ An hour cell SHALL show the location's local wall-clock time at the cell's start
 - **THEN** column 9 shows `9` with the marker `AM` and column 21 shows `9` with the marker `PM`
 
 ### Requirement: Hour cell colour
-While the day colouring is Time of day (the default, see the `day-colouring` capability), an hour cell SHALL be coloured by the location's day period (night, morning, day, evening, as the `day-periods` capability defines them) that covers the largest part of the cell, and on a tie by the earlier one, with the day-period colour of the active theme that the day track uses. A cell of a location without day periods is coloured as the `day-colouring` requirement "Locations without day periods" defines. In the dark theme the digits on morning, day and evening cells MUST be `#0F1729`. In the Plain day colouring every cell is plain, and in the Working hours day colouring each cell is working or non-working, as the `day-colouring` capability defines; the digits then take the colour that the requirement "Day colours are readable" of that capability sets for the cell colour. A change of the day colouring MUST recolour every cell at once. <!-- implements FR4 of add-grid-hour-cells-and-hour-frame; FR2, FR9, FR11, FR12 of add-day-colouring-setting; FR6 of bind-day-periods-to-sun -->
+While the day colouring is Time of day (the default, see the `day-colouring` capability), an hour cell SHALL be coloured by the location's day period (night, morning, day, evening, as the `day-periods` capability defines them) that covers the largest part of the cell, and on a tie by the earlier one, with the day-period colour of the active theme and of the day palette in force that the day track uses (`day-colouring` → Day palette). A cell of a location without day periods is coloured as the `day-colouring` requirement "Locations without day periods" defines. In the dark theme the digits MUST be `#f7f8fc` on night cells and `#0b1628` on morning, day and evening cells, in both day palettes; in the light theme they are the foreground colour. In the Plain day colouring every cell is plain, and in the Working hours day colouring each cell is working or non-working, as the `day-colouring` capability defines; the digits then take the colour that the requirement "Day colours are readable" of that capability sets for the cell colour. A change of the day colouring or of the day palette MUST recolour every cell at once. <!-- implements FR4 of add-grid-hour-cells-and-hour-frame; FR2, FR9, FR11, FR12 of add-day-colouring-setting; FR6 of bind-day-periods-to-sun; FR4, FR17 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: Day periods of Almaty
 - **GIVEN** the day colouring is Time of day, the reference zone is `Asia/Almaty` and the reference day is 2026-03-08
@@ -78,14 +78,16 @@ While the day colouring is Time of day (the default, see the `day-colouring` cap
 - **THEN** the cell that starts at 06:00 is night
 
 #### Scenario: Theme colours of the cells
-- **GIVEN** the view mode is Grid, the stored location is Almaty at 43.3, 76.9 and the `<theme>` theme is active
+- **GIVEN** the view mode is Grid, the stored location is Almaty at 43.3, 76.9, the `<theme>` theme and the `<palette>` day palette
 - **WHEN** the main page is shown at `2026-03-08T07:30:00Z`
-- **THEN** column 3 has the `<theme>` night colour, column 6 the morning colour, column 9 the daylight colour and column 17 the evening colour
+- **THEN** column 3 has the night colour, column 6 the morning colour, column 9 the daylight colour and column 17 the evening colour of that theme and palette
 
-| theme |
-|---|
-| light |
-| dark |
+| theme | palette |
+|---|---|
+| light | Vivid |
+| light | Muted |
+| dark | Vivid |
+| dark | Muted |
 
 ### Requirement: Midnight marker in the hour strip
 The cell whose start is the first instant of a new local date of the location SHALL be the midnight cell of its row: it MUST show the short month name of that date in upper case without a trailing full stop over the day of the month, in the interface language, instead of the time, and MUST be shaded with the midnight cell shade of the active theme (`rgba(24, 24, 27, 0.10)` light, `rgba(15, 23, 41, 0.22)` dark). A row whose zone is the reference zone MUST show a plain `0` on its first cell and has no midnight cell. Any other row has at most one midnight cell per local date change inside the reference day. <!-- implements FR5 of add-grid-hour-cells-and-hour-frame -->
@@ -188,7 +190,7 @@ An hour frame SHALL surround, across all rows of the panel, the column of the ho
 | dark | Working hours | 2026-03-09T06:00:00Z | 11 |
 
 ### Requirement: Hour frame lies behind texts
-The hour frame SHALL lie above the hour cells and behind the row header texts and the row notes, and MUST NOT receive pointer events. It MUST be hidden only behind the glyphs of the row header texts — the city, the offset difference, the Here caption, each zone line part, the date, the day shift mark and the time or span — behind the row notes and behind an open wall-time input or meeting range input: these keep their background and stay fully visible where the frame passes. Every other point of the frame's border inside a row header MUST be drawn: between and beside zone line parts, inside a time button around its digits, and beside the drag handle and the location menu button. <!-- implements FR10 of add-grid-hour-cells-and-hour-frame; FR8, UX3 of fix-grid-meeting-range-lock-and-layering -->
+The hour frame SHALL lie above the hour cells and behind the row header texts and the row notes, and MUST NOT receive pointer events. It MUST be hidden only behind the glyphs of the row header texts — the city, the offset difference, each zone line part, the date, the day shift mark and the time or span — behind the row notes and behind an open wall-time input or meeting range input: these keep their background and stay fully visible where the frame passes. Every other point of the frame's border inside a row header MUST be drawn: between and beside zone line parts, inside a time button around its digits, beside the leading mark and beside the location menu button. No row header holds a drag handle or a visible Here caption (see the `locations` capability). <!-- implements FR10 of add-grid-hour-cells-and-hour-frame; FR8, UX3 of fix-grid-meeting-range-lock-and-layering; FR15, FR17 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: Notes and header texts cover the frame
 - **GIVEN** the view mode is Grid, the stored locations are Almaty and New York and the current time is `2026-03-08T07:30:00Z`
@@ -239,7 +241,7 @@ The hour strip of every row SHALL be a slider for assistive technology and the k
 | dark |
 
 ### Requirement: Hour strip width
-When the hour strip's width divided by its cell count is at least 32 px, every cell SHALL take an equal share of the strip and all cells of the reference day MUST be visible without scrolling. Otherwise every cell MUST take the width that shows 9 cells in the strip, kept between 36 px and 40 px, and the strips of all rows MUST scroll horizontally together while the row headers and row notes stay in place; the page itself MUST NOT scroll horizontally. On opening, the strips MUST be scrolled so that the hour frame is fully visible, and when the frame moves to a column outside the visible part they MUST scroll to show it. <!-- implements NFR-R1, NFR-R2, UX3 of add-grid-hour-cells-and-hour-frame -->
+When the hour strip's width divided by its cell count is at least 32 px, every cell SHALL take an equal share of the strip, less the 3 px gap between cells, and all cells of the reference day MUST be visible without scrolling. Otherwise every cell MUST be 38 px wide, and the strips of all rows MUST scroll horizontally together while the row headers and row notes stay in place; the page itself MUST NOT scroll horizontally. On opening, the strips MUST be scrolled so that the hour frame is fully visible, and when the frame moves to a column outside the visible part they MUST scroll to show it. <!-- implements NFR-R1, NFR-R2, UX3 of add-grid-hour-cells-and-hour-frame; FR17, NFR-R1 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: All hours fit
 - **GIVEN** the view mode is Grid and the stored locations are Almaty, Moscow, Kolkata and New York at `2026-03-08T07:30:00Z`
@@ -248,6 +250,7 @@ When the hour strip's width divided by its cell count is at least 32 px, every c
 
 | width | height |
 |---|---|
+| 2560 | 1440 |
 | 1440 | 900 |
 | 1180 | 820 |
 | 844 | 390 |
@@ -255,7 +258,7 @@ When the hour strip's width divided by its cell count is at least 32 px, every c
 #### Scenario: Phone in portrait scrolls all strips together
 - **GIVEN** the view mode is Grid and the stored locations are Almaty, Moscow, Kolkata and New York at `2026-03-08T07:30:00Z`
 - **WHEN** the main page is 390 by 844 px
-- **THEN** every cell is 36 to 40 px wide and 8 to 10 cells of each row are visible
+- **THEN** every cell is 38 px wide and 8 to 10 cells of each row are visible
 - **AND** the hour frame is fully visible
 - **AND** the page does not scroll horizontally
 - **WHEN** the user scrolls Moscow's strip to its end
@@ -571,7 +574,7 @@ The Grid view SHALL pass the meeting scenarios of the view contract in a real br
 - **THEN** the meeting was 09:00–10:00, then 09:00–11:00, the clipboard held its text, and after Clear the hour frame is back
 
 ### Requirement: Accessible meeting state
-With a meeting range set, axe-core SHALL report no violations on the Grid view in the light and the dark theme, with and without a share notice, with a meeting range input open and with its error shown. The Tab order MUST be: «Поделиться встречей», «Сбросить выбор встречи», then for each row its span button and its hour strip, then the meeting handles «Начало встречи», «Конец встречи»; no drag handle and no location menu button MUST be a Tab stop. While a row's meeting range input is open, its fields «Время начала — {city}» and «Время окончания — {city}» MUST take the place of that row's span button in the Tab order, start before end, followed by that row's hour strip and so before the meeting handles. After Clear meeting the drag handles and the location menu buttons MUST be Tab stops again. The fields of the meeting range input MUST have accessible names, and a field with an error MUST be `aria-invalid` and described by its error. <!-- implements NFR-A1, NFR-A2 of add-grid-meeting-range-and-share; NFR-A1, NFR-A2 of fix-grid-meeting-range-lock-and-layering -->
+With a meeting range set, axe-core SHALL report no violations on the Grid view in the light and the dark theme, with and without a share notice, with a meeting range input open and with its error shown. The Tab order MUST be: «Поделиться встречей», «Сбросить выбор встречи», then for each row its span button and its hour strip, then the meeting handles «Начало встречи», «Конец встречи»; no location menu button MUST be a Tab stop, and the grab area is never one. While a row's meeting range input is open, its fields «Время начала — {city}» and «Время окончания — {city}» MUST take the place of that row's span button in the Tab order, start before end, followed by that row's hour strip and so before the meeting handles. After Clear meeting the location menu buttons MUST be Tab stops again. The fields of the meeting range input MUST have accessible names, and a field with an error MUST be `aria-invalid` and described by its error. <!-- implements NFR-A1, NFR-A2 of add-grid-meeting-range-and-share; NFR-A1, NFR-A2 of fix-grid-meeting-range-lock-and-layering; FR15, NFR-A3 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: No accessibility violations in the meeting state
 - **GIVEN** the Grid view with Almaty, Moscow, Kolkata and New York and the sample meeting in the `<theme>` theme
@@ -598,7 +601,7 @@ With a meeting range set, axe-core SHALL report no violations on the Grid view i
 - **WHEN** the user presses Tab from the page start through the panel
 - **THEN** the focus visits «Поделиться встречей», «Сбросить выбор встречи», Almaty's span, Almaty's hour strip, Moscow's span, Moscow's hour strip, the meeting handles «Начало встречи» and «Конец встречи» in this order
 - **WHEN** the user clears the meeting range and presses Tab through the panel
-- **THEN** each row's drag handle and location menu button are Tab stops again
+- **THEN** each row's location menu button is a Tab stop again
 
 #### Scenario: The open input's fields sit in place of the span in the Tab order
 - **GIVEN** the Grid view with Almaty and Moscow, the sample meeting and Almaty's meeting range input open with the focus in «Время начала — Almaty»
@@ -631,34 +634,34 @@ After the rows of 50 locations in 10 zones were presented with a meeting range, 
 - **AND** every row gets the same hour strip as before
 
 ### Requirement: Approved screenshots of the meeting state
-Screenshots of the Grid view in the meeting state with the design's sample data (8 March 2026, home Almaty, Almaty, Moscow, Kolkata, New York, Russian interface, meeting 09:00–11:00 in Almaty) at 1440 × 900, 1180 × 820, 844 × 390 and 390 × 844, in the light and the dark theme, SHALL match their approved baselines on every run. <!-- implements NFR-R2, UX1 of add-grid-meeting-range-and-share -->
+Screenshots of the Grid view in the meeting state with the design's sample data (8 March 2026, home Almaty, Almaty, Moscow, Kolkata, New York, Russian interface, meeting 09:00–11:00 in Almaty) at 1440 × 900, 1180 × 820, 844 × 390 and 390 × 844, in the light and the dark theme, SHALL be re-taken once for the redesign and then match their approved baselines on every run. <!-- implements NFR-R2, UX1 of add-grid-meeting-range-and-share; NFR-R2 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: Approved screenshots of the meeting state
-- **GIVEN** the sample data with the meeting range 09:00–11:00 in Almaty in the `<theme>` theme
-- **WHEN** the main page is `<width>` by `<height>` px
-- **THEN** the page matches the approved screenshot
+- **WHEN** the Grid view with the sample meeting is rendered at `<size>` in the `<theme>` theme
+- **THEN** it matches the approved screenshot
 
-| width | height | theme |
-|---|---|---|
-| 1440 | 900 | light |
-| 1440 | 900 | dark |
-| 1180 | 820 | light |
-| 1180 | 820 | dark |
-| 844 | 390 | light |
-| 844 | 390 | dark |
-| 390 | 844 | light |
-| 390 | 844 | dark |
+| size | theme |
+|---|---|
+| 1440 × 900 | light |
+| 1440 × 900 | dark |
+| 1180 × 820 | light |
+| 1180 × 820 | dark |
+| 844 × 390 | light |
+| 844 × 390 | dark |
+| 390 × 844 | light |
+| 390 × 844 | dark |
 
 ### Requirement: Row controls are locked while a meeting range is set
-In the Grid view, while a meeting range is set, the drag handle, the location menu button and the wall-time input of every grid row SHALL be locked. A locked control MUST be shown dimmed to opacity 0.4 with the default cursor and no hover or pressed effect, MUST NOT react to a pointer, a finger or a key, MUST NOT be a Tab stop and MUST be exposed to assistive technology as disabled; no reorder MUST start, by drag or by keyboard. When a meeting range is set while a location menu is open, the menu MUST close; a wall-time input open at that moment MUST close without changing the time. When the meeting range is removed — by Clear meeting, Now, a time selection, a reference zone change or an emptied list — every one of these controls MUST be available again. The Cards view MUST NOT lock any of them. <!-- implements FR1, FR2, UX1 of fix-grid-meeting-range-lock-and-layering -->
+In the Grid view, while a meeting range is set, the grab area, the location menu button and the wall-time input of every grid row SHALL be locked. A locked location menu button or wall-time input MUST be shown dimmed to opacity 0.4 with the default cursor and no hover or pressed effect, MUST NOT react to a pointer, a finger or a key, MUST NOT be a Tab stop and MUST be exposed to assistive technology as disabled. A locked grab area keeps its look, shows the default cursor and starts no drag; no reorder MUST start, by drag or through the location menu. When a meeting range is set while a location menu is open, the menu MUST close; a wall-time input open at that moment MUST close without changing the time. When the meeting range is removed — by Clear meeting, Now, a time selection, a reference zone change or an emptied list — every one of these controls MUST be available again. The Cards view MUST NOT lock any of them. <!-- implements FR1, FR2, UX1 of fix-grid-meeting-range-lock-and-layering; FR15 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: Controls are locked during the meeting and free after it
 - **GIVEN** the Grid view with Almaty, Moscow, Kolkata and New York at `2026-03-08T07:30:00Z`
 - **WHEN** the user sets the meeting range 09:00–11:00 in Almaty
-- **THEN** every drag handle and every location menu button is disabled and dimmed
+- **THEN** every location menu button is disabled and dimmed
+- **AND** the cursor over every city is the default cursor
 - **AND** no row offers the wall-time input
 - **WHEN** the user clears the meeting range
-- **THEN** every drag handle and every location menu button is enabled
+- **THEN** every location menu button is enabled and the cursor over every city is `grab`
 - **AND** every row's time opens the wall-time input
 
 #### Scenario: Setting a meeting range closes an open location menu
@@ -669,7 +672,7 @@ In the Grid view, while a meeting range is set, the drag handle, the location me
 #### Scenario: Cards keeps its controls with a meeting range
 - **GIVEN** the meeting range 09:00–11:00 in Almaty was set in Grid
 - **WHEN** the view mode is changed to Cards
-- **THEN** every drag handle and every location menu button is enabled and every time opens the wall-time input
+- **THEN** every location menu button is enabled, a drag by the city works and every time opens the wall-time input
 
 ### Requirement: Meeting range input
 While a meeting range is set, the span of every grid row SHALL be a button named «Ввести время встречи — {city}, {span}» ("Enter meeting time — {city}, {span}"). The button MUST open the meeting range input in place of the span, with:
@@ -790,3 +793,23 @@ Screenshots of the Grid view with the design's sample data (8 March 2026, home A
 |---|---|---|---|
 | 390 | 844 | the hour frame | the search |
 | 1440 | 900 | the meeting range 09:00–11:00 | the calendar |
+
+### Requirement: Hour cell look
+Every hour cell SHALL have a radius of 5 px, stand 3 px from its neighbours, and show its digits at 15 px with weight 500 and tabular figures. From 768 px a cell MUST be 48 px high; below 768 px it MUST be 44 px high; its width follows "Hour strip width" (38 px where the strip scrolls). The hour frame, the midnight cell, the offset edge, the meeting frame, the meeting handles and the dimming of cells outside a meeting range keep their built behaviour and colours on the new cells. Inputs: the presented hour strip and the viewport width. Output: the cells. Errors: none. <!-- implements FR17, NFR-R1 of redesign-cards-grid-and-day-palettes -->
+
+#### Scenario: Cell sizes by width
+- **GIVEN** the view mode is Grid and the stored locations are Almaty and Moscow
+- **WHEN** the main page is `<width>` px wide
+- **THEN** every hour cell has a 5 px radius, 15 px digits and is `<height>` px high
+- **AND** neighbouring cells of a row are 3 px apart
+
+| width | height |
+|---|---|
+| 390 | 44 |
+| 1024 | 48 |
+| 1440 | 48 |
+
+#### Scenario: Cells 38 px wide on a phone
+- **GIVEN** the view mode is Grid and the stored location is Almaty
+- **WHEN** the main page is 390 px wide
+- **THEN** every hour cell is 38 px wide and the strip scrolls horizontally

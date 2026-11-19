@@ -22,6 +22,7 @@ const deviceTimeRow: LocationRowModel = {
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "12:30",
+  localTimeParts: { digits: "12:30", dayPeriodMarker: "" },
   localDateLabel: "Sun, Mar 8",
   localIsoDate: "2026-03-08",
   wallTimeInputLabel: "",
@@ -29,7 +30,6 @@ const deviceTimeRow: LocationRowModel = {
   mark: {
     kind: LocationMarkKind.HERE,
     accessibleLabel: "You are here",
-    caption: "here",
   },
   zoneLineParts: [
     { kind: ZoneLinePartKind.PLACE, text: "Device time" },
@@ -47,6 +47,8 @@ const renderRow = (row: LocationRowModel) =>
             row={row}
             onRemove={vi.fn()}
             onSetHome={vi.fn()}
+            rowPosition={{ rowIndex: 0, rowCount: 1 }}
+            onMoveStep={vi.fn()}
             onSelectTrackFraction={vi.fn()}
             onMoveTrack={vi.fn()}
             onConfirmWallTime={ignoreWallTime}
@@ -67,7 +69,9 @@ describe("LocationRow of the device time location", () => {
     renderRow(deviceTimeRow);
     expect(screen.getByText("Device time")).toBeInTheDocument();
     expect(screen.getByText("UTC+5")).toBeInTheDocument();
-    expect(screen.queryByText(/·/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Device time").parentElement?.firstElementChild,
+    ).toBe(screen.getByText("Device time"));
   });
 
   it("should use the accessible name of the row for the item", () => {
@@ -81,9 +85,7 @@ describe("LocationRow of the device time location", () => {
 
   it("should offer the same controls as a city card", () => {
     renderRow(deviceTimeRow);
-    expect(
-      screen.getByRole("button", { name: "Move Almaty" }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Almaty").parentElement).toHaveClass("cursor-grab");
     expect(
       screen.getByRole("button", { name: "Actions for Almaty" }),
     ).toBeInTheDocument();

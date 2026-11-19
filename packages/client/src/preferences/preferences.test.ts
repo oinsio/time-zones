@@ -21,6 +21,7 @@ describe("DEFAULT_PREFERENCES", () => {
       viewMode: null,
       dayColouring: "TIME_OF_DAY",
       workingHours: { start: "10:00", end: "18:00" },
+      dayPalette: "VIVID",
       zoneLabelParts: [
         ZoneLabelPart.UTC_OFFSET,
         ZoneLabelPart.ZONE_ABBREVIATION,
@@ -77,6 +78,7 @@ describe("parseStoredPreferences", () => {
       viewMode: null,
       dayColouring: "TIME_OF_DAY",
       workingHours: { start: "10:00", end: "18:00" },
+      dayPalette: "VIVID",
     });
     expect(outcome).toEqual({
       ok: true,
@@ -87,6 +89,7 @@ describe("parseStoredPreferences", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });
@@ -104,6 +107,7 @@ describe("parseStoredPreferences", () => {
           viewMode: null,
           dayColouring: "TIME_OF_DAY",
           workingHours: { start: "10:00", end: "18:00" },
+          dayPalette: "VIVID",
         }).ok,
       ).toBe(true);
     },
@@ -120,6 +124,7 @@ describe("parseStoredPreferences", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -131,6 +136,7 @@ describe("parseStoredPreferences", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -151,6 +157,7 @@ describe("parseStoredPreferences", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -163,6 +170,7 @@ describe("parseStoredPreferences", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -175,6 +183,7 @@ describe("parseStoredPreferences", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -187,6 +196,7 @@ describe("parseStoredPreferences", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -199,6 +209,7 @@ describe("parseStoredPreferences", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -236,6 +247,7 @@ describe("SET_INTERFACE_LANGUAGE", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
       }),
     ).toEqual({
       ok: true,
@@ -246,6 +258,7 @@ describe("SET_INTERFACE_LANGUAGE", () => {
         viewMode: null,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });

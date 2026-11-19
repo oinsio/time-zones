@@ -22,7 +22,12 @@ import {
 } from "@/preferences";
 import { presentClockChangeNote } from "./clockChangeNote";
 import { type PresentedDayTrack, presentDayTrack } from "./dayTrack";
-import { formatLocalDate, formatLocalTime } from "./localDateTime";
+import {
+  formatLocalDate,
+  formatLocalTime,
+  formatLocalTimeParts,
+  type LocalTimeParts,
+} from "./localDateTime";
 import { formatOffsetDifference } from "./offsetDifference";
 import { formatUtcOffset } from "./utcOffset";
 import { presentWallTimeHint } from "./wallTimeHint";
@@ -64,6 +69,8 @@ export type PresentedZoneMoment = {
   offsetDifferenceAccessibleLabel: string;
   /** "12:30" style label; empty when the zone is unknown. */
   localTimeLabel: string;
+  /** The same time as digits and the `AM` / `PM` marker of the 12-hour format; the label stays the accessible text. Implements FR8 of redesign-cards-grid-and-day-palettes (D5). */
+  localTimeParts: LocalTimeParts;
   /** "Sun, Mar 8" style label; empty when the zone is unknown. */
   localDateLabel: string;
   /** ISO date ("2026-03-08") of the local date; empty when the zone is unknown. */
@@ -128,6 +135,9 @@ export function presentZoneMoment(
   const localTimeLabel = localDateTime
     ? formatLocalTime(localDateTime, language, hourFormat)
     : "";
+  const localTimeParts = localDateTime
+    ? formatLocalTimeParts(localDateTime, language, hourFormat)
+    : { digits: "", dayPeriodMarker: "" };
   const localDateLabel = localDateTime
     ? formatLocalDate(localDateTime, language)
     : "";
@@ -154,6 +164,7 @@ export function presentZoneMoment(
     offsetDifferenceLabel: difference?.label ?? "",
     offsetDifferenceAccessibleLabel: difference?.accessibleLabel ?? "",
     localTimeLabel,
+    localTimeParts,
     localDateLabel,
     localIsoDate: localDateTime ? localDateTime.toPlainDate().toString() : "",
     dayTrack: localDateTime

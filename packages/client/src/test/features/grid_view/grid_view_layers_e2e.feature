@@ -41,12 +41,12 @@ Feature: Grid layers under the page bars and dialogs in a real browser
     And the stored locations are "Almaty", "Moscow", "Kolkata", "Kathmandu", "Tokyo", "New York", "Belgrade", "Lord Howe Island", "Chicago", "Adelaide", "St. Vincent", "London"
     And the screen is 390 by 844 px for the locations
     When the user opens the locations app
-    And the page is scrolled so that the menu button of "Tokyo" lies just above the date bar
-    And the user opens the location menu of "Tokyo"
+    And the page is scrolled so that the menu button of "London" lies just above the date bar
+    And the user opens the location menu of "London"
     Then every menu item over the date bar has that menu item on top
     And at least one menu item lies over the date bar
 
-  @fix-grid-meeting-range-lock-and-layering @FR8 @UX3
+  @fix-grid-meeting-range-lock-and-layering @FR8 @UX3 @redesign-cards-grid-and-day-palettes @FR17
   Scenario Outline: The frame border runs through the empty parts of the header at <width> px with <frame>
     Given the locations interface language is English
     And the view mode is Grid

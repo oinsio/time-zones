@@ -1,5 +1,6 @@
 import {
   DayColouring,
+  DayPalette,
   HourFormat,
   type Preferences,
   ThemePreference,
@@ -15,6 +16,8 @@ const THEME_VALUES: readonly unknown[] = Object.values(ThemePreference);
 const HOUR_FORMAT_VALUES: readonly unknown[] = Object.values(HourFormat);
 
 const DAY_COLOURING_VALUES: readonly unknown[] = Object.values(DayColouring);
+
+const DAY_PALETTE_VALUES: readonly unknown[] = Object.values(DayPalette);
 
 const ZONE_LABEL_PART_VALUES: readonly unknown[] = Object.values(ZoneLabelPart);
 
@@ -33,7 +36,8 @@ const isNullOrNonEmptyString = (value: unknown): value is string | null =>
  * the interface language implements FR7 of add-interface-language-selection (D1);
  * the zone label implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4);
  * the view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1);
- * the day colouring and working hours implement FR3, FR7 of add-day-colouring-setting (D1, D2).
+ * the day colouring and working hours implement FR3, FR7 of add-day-colouring-setting (D1, D2);
+ * the day palette implements FR3 of redesign-cards-grid-and-day-palettes (D2).
  */
 export function parseStoredPreferences(
   payload: unknown,
@@ -47,6 +51,7 @@ export function parseStoredPreferences(
     viewMode,
     dayColouring,
     workingHours,
+    dayPalette,
   } = payload as Record<string, unknown>;
   if (
     !THEME_VALUES.includes(theme) ||
@@ -55,7 +60,8 @@ export function parseStoredPreferences(
     !isZoneLabelParts(zoneLabelParts) ||
     !isNullOrNonEmptyString(viewMode) ||
     !DAY_COLOURING_VALUES.includes(dayColouring) ||
-    !isWorkingHours(workingHours)
+    !isWorkingHours(workingHours) ||
+    !DAY_PALETTE_VALUES.includes(dayPalette)
   ) {
     return { ok: false };
   }
@@ -67,6 +73,7 @@ export function parseStoredPreferences(
       interfaceLanguage,
       viewMode,
       dayColouring: dayColouring as DayColouring,
+      dayPalette: dayPalette as DayPalette,
       workingHours: { start: workingHours.start, end: workingHours.end },
       zoneLabelParts: Object.values(ZoneLabelPart).filter((part) =>
         zoneLabelParts.includes(part),

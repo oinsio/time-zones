@@ -7,7 +7,6 @@ import {
   expectHourLabelsOnOneLine,
   measureTimeButton,
   parseCities,
-  TIME_COLUMN_XPATH,
   TOLERANCE_PX,
   TRACK_SELECTOR,
 } from "./cardLayoutE2eHelpers";
@@ -117,7 +116,7 @@ Then(
         locationsWorld.page,
         city,
       ).innerText();
-      expect(text.replace(/ /g, " ")).toBe(time);
+      expect(text.replace(/\s/g, "")).toBe(time.replace(/\s/g, ""));
     }
   },
 );
@@ -132,25 +131,6 @@ Then("the tracks of the cards are equally long", async ({ locationsWorld }) => {
     TOLERANCE_PX,
   );
 });
-
-// Verifies FR5, UX3 of fix-location-card-and-header-layout: equal time columns.
-Then(
-  "the time columns of the cards are equally wide",
-  async ({ locationsWorld }) => {
-    const buttons = await locationsWorld.page
-      .getByRole("button", { name: /^Enter time/ })
-      .all();
-    const widths = await Promise.all(
-      buttons.map(
-        async (button) =>
-          (await requireBox(button.locator(TIME_COLUMN_XPATH))).width,
-      ),
-    );
-    expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(
-      TOLERANCE_PX,
-    );
-  },
-);
 
 // Verifies FR6, UX3 of fix-location-card-and-header-layout: hour labels never wrap.
 Then(

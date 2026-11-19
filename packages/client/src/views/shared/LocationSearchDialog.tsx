@@ -125,7 +125,7 @@ export function LocationSearchDialog({
             onQueryChange(event.target.value);
           }}
           onKeyDown={handleKeyDown}
-          className="min-h-11 rounded-md border border-border bg-surface px-3 text-foreground"
+          className="min-h-11 rounded-md border border-control-border bg-surface px-3 text-foreground"
         />
         <LocationSearchStates
           status={status}

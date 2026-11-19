@@ -13,11 +13,11 @@ interface MainPageProps {
   meetingBar?: ReactNode;
 }
 
-const HEADER_CLASS_NAMES =
-  "grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border pt-6 pb-4";
+// Physical-property utilities: iOS Safari 12.5 ignores the logical shorthands.
+const COLUMN_CLASS_NAME = "mx-auto w-full max-w-content px-column";
 // Below 360 px the title cannot stay centred beside the 92 px of buttons.
 const MEETING_HEADER_CLASS_NAMES =
-  "-mx-4 grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-meeting bg-meeting-bar px-4 pt-6 pb-4 min-[360px]:grid-cols-[1fr_auto_1fr]";
+  "grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-meeting bg-meeting-bar px-4 pt-6 pb-4 min-[360px]:grid-cols-[1fr_auto_1fr]";
 
 /**
  * The main page: header with the title and a slot for future controls, the
@@ -34,6 +34,9 @@ const MEETING_HEADER_CLASS_NAMES =
  * Implements FR13, NFR-R1, UX1 of add-grid-meeting-range-and-share (D7): the meeting bar takes the header's place.
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  * Implements FR7 of refine-meeting-range-entry-and-handles (D5): `data-date-bar` locates the date bar.
+ * Implements FR6, FR12, UX4 of redesign-cards-grid-and-day-palettes (D4): the title at the
+ * left, Add location and Settings at the right, no line under the header; the content sits
+ * in a centred column of at most 1120 px while the bars span the viewport.
  */
 export function MainPage({
   notices,
@@ -43,29 +46,29 @@ export function MainPage({
 }: MainPageProps) {
   const { t } = useTranslation();
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-screen-2xl flex-col px-4">
+    <div className="flex min-h-dvh w-full flex-col">
       <header
         className={
-          meetingBar === undefined
-            ? HEADER_CLASS_NAMES
-            : MEETING_HEADER_CLASS_NAMES
+          meetingBar === undefined ? undefined : MEETING_HEADER_CLASS_NAMES
         }
       >
         {meetingBar ?? (
-          <>
-            <h1 className="order-2 col-start-2 text-center text-2xl font-semibold">
+          <div
+            className={`${COLUMN_CLASS_NAME} flex items-center justify-between gap-2 pt-6 pb-4`}
+          >
+            <h1 className="text-header-title-narrow font-bold min-[361px]:text-header-title">
               {t("app.title")}
             </h1>
-            {headerActions}
-          </>
+            <div className="flex items-center">{headerActions}</div>
+          </div>
         )}
       </header>
-      <main className="flex-1">
+      <main className={`${COLUMN_CLASS_NAME} flex-1`}>
         <ViewHost />
       </main>
       <footer
         data-date-bar
-        className="sticky bottom-0 z-page-bar -mx-4 border-t border-border bg-surface"
+        className="sticky bottom-0 z-page-bar bg-background"
       >
         <div
           role="status"
@@ -74,7 +77,7 @@ export function MainPage({
         >
           {notices}
         </div>
-        {bottomBar}
+        <div className="mx-auto w-full max-w-content">{bottomBar}</div>
       </footer>
     </div>
   );

@@ -1,4 +1,9 @@
 // Verifies FR8 of fix-grid-meeting-range-lock-and-layering: the layer tokens of the row boxes.
+// Verifies FR7, FR8, FR17 of redesign-cards-grid-and-day-palettes: the two layouts and the sizes.
+import {
+  GRID_MARK_ICON_SIZE_PX,
+  LOCATION_MARK_ICON_SIZE_PX,
+} from "@/constants";
 import {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
   LocationRowVariant,
@@ -10,27 +15,44 @@ const gridClassNames =
   LOCATION_ROW_VARIANT_CLASS_NAMES[LocationRowVariant.GRID_ROW];
 
 describe("LOCATION_ROW_VARIANT_CLASS_NAMES", () => {
-  it("should stack the Cards rows in a column with a gap", () => {
-    expect(cardClassNames.list).toBe("flex flex-col gap-2");
+  it("should stack the Cards rows in a column with the card gap", () => {
+    expect(cardClassNames.list).toBe("flex flex-col gap-card-gap");
   });
 
-  it("should draw a Cards row as a bordered, padded box", () => {
-    expect(cardClassNames.row).toContain("rounded-md border border-border");
+  it("should draw a Cards row as a flat surface with the card radius and border", () => {
+    expect(cardClassNames.row).toContain(
+      "rounded-card border border-card-border bg-surface",
+    );
   });
 
-  it("should keep the Cards place and time on one line from md", () => {
-    expect(cardClassNames.placeAndTime).toBe("md:flex-none");
-    expect(cardClassNames.place).toBe("md:w-64 md:flex-none");
+  it("should have only two layouts, narrow and wide: no fixed-width columns", () => {
+    for (const classNames of [cardClassNames, gridClassNames]) {
+      expect(classNames.place).not.toMatch(/md:w-\d/);
+      expect(classNames.timeGroup).not.toMatch(/md:w-\d/);
+    }
   });
 
-  it("should add no class to the Cards city line", () => {
-    expect(cardClassNames.cityLine).toBe("");
+  it("should let the line wrappers join the header from md", () => {
+    expect(cardClassNames.lineOne).toContain("md:contents");
+    expect(cardClassNames.lineTwo).toContain("md:contents");
+  });
+
+  it("should move the time to its own line at the right when the place needs the room", () => {
+    expect(cardClassNames.place).toContain("flex-wrap");
+    expect(cardClassNames.place).toContain("min-w-[min-content]");
+    expect(cardClassNames.timeGroup).toContain("ml-auto");
   });
 
   it("should show the day track and a menu placed inside the Cards row", () => {
     expect(cardClassNames.hasDayTrack).toBe(true);
     expect(cardClassNames.isMenuFixedToViewport).toBe(false);
-    expect(cardClassNames.isDateBeforeTime).toBe(false);
+  });
+
+  it.each([
+    [cardClassNames, LOCATION_MARK_ICON_SIZE_PX],
+    [gridClassNames, GRID_MARK_ICON_SIZE_PX],
+  ])("should size the mark icon by the variant", (classNames, size) => {
+    expect(classNames.markSizePx).toBe(size);
   });
 
   it("should let the Grid panel scroll its strips sideways", () => {
@@ -51,15 +73,13 @@ describe("LOCATION_ROW_VARIANT_CLASS_NAMES", () => {
     expect(gridClassNames.headerBoxLayerWithOpenMenu).toBe("z-location-menu");
   });
 
-  it("should keep the Grid date before the time, with no day track and a fixed menu", () => {
-    expect(gridClassNames.isDateBeforeTime).toBe(true);
+  it("should show no day track in the Grid and fix its menu to the viewport", () => {
     expect(gridClassNames.hasDayTrack).toBe(false);
     expect(gridClassNames.isMenuFixedToViewport).toBe(true);
   });
 
-  it("should lay the Grid place and date-time columns out per breakpoint", () => {
-    expect(gridClassNames.place).toContain("md:flex-row");
-    expect(gridClassNames.dateTime).toContain("flex-col-reverse");
-    expect(gridClassNames.placeAndTime).toBe("md:flex-1");
+  it("should use the card border for the Grid panel and its dividers", () => {
+    expect(gridClassNames.list).toContain("border-card-border");
+    expect(gridClassNames.row).toContain("border-card-border");
   });
 });

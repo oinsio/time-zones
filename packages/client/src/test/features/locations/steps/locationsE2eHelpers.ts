@@ -65,6 +65,11 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
     countryCode: "RU",
   },
   Алматы: { timeZoneId: "Asia/Almaty", label: "Алматы", countryCode: "KZ" },
+  Катманду: {
+    timeZoneId: "Asia/Kathmandu",
+    label: "Катманду",
+    countryCode: "NP",
+  },
   Токио: { timeZoneId: "Asia/Tokyo", label: "Токио", countryCode: "JP" },
   Калькутта: {
     timeZoneId: "Asia/Kolkata",
@@ -119,6 +124,11 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
     timeZoneId: "America/St_Vincent",
     label: "St. Vincent",
     countryCode: "VC",
+  },
+  "Петропавловск-Камчатский": {
+    timeZoneId: "Asia/Kamchatka",
+    label: "Петропавловск-Камчатский",
+    countryCode: "RU",
   },
 };
 

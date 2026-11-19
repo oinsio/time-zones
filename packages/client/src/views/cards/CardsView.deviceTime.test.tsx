@@ -70,11 +70,11 @@ describe("CardsView device time location", () => {
     ).toBeInTheDocument();
   });
 
-  it("should give the device time location a drag handle next to a city", () => {
+  it("should give the device time location a grab area next to a city", () => {
     renderCards(storedList(buildDeviceTimeLocation(DEVICE_ZONE_ID), alpha));
-    expect(
-      screen.getByRole("button", { name: "Move Kiritimati" }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Kiritimati").parentElement).toHaveClass(
+      "cursor-grab",
+    );
   });
 
   it("should show no empty-state text while only the device time location is listed", () => {

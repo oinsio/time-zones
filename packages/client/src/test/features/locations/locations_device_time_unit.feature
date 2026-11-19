@@ -11,7 +11,7 @@ Feature: Device time location
     And the current instant is "2026-03-08T07:30:00Z"
     And the list is "the device time location, Moscow, Kolkata, New York"
     When the user opens the app
-    Then the device time location shows "Алматы", the caption "здесь", the meta line "Время устройства" and "UTC+5", the time "12:30" and the date "вс, 8 мар."
+    Then the device time location shows "Алматы", the Here mark "Вы здесь", the meta line "Время устройства" and "UTC+5", the time "12:30" and the date "вс, 8 мар."
     And the device time location shows no offset difference
     And the rows show the offset differences "Москва −2 ч, Калькутта +0:30, Нью-Йорк −9 ч"
 
@@ -39,14 +39,14 @@ Feature: Device time location
     And the interface language is "en"
     And the list is "the device time location"
     When the user opens the app
-    Then the device time location shows "UTC", the caption "here" and the meta line "Device time" and "UTC"
+    Then the device time location shows "UTC", the Here mark "You are here" and the meta line "Device time" and "UTC"
 
   @add-settings-page-and-device-time-location @FR9 @UX3
   Scenario: Same menu as a city card
     Given the interface language is "en"
     And the list is "the device time location, Moscow"
     When the user opens the app
-    Then the menu of the device time location offers "Make home" and "Remove", as the menu of "Moscow" does
+    Then the menu of the device time location offers "Make home", "Move up", "Move down" and "Remove", as the menu of "Moscow" does
 
   @add-settings-page-and-device-time-location @FR9
   Scenario: Remove the device time location

@@ -3,12 +3,13 @@
 export const HOUR_CELL_DURATION = { hours: 1 } as const;
 /** A cell this wide or wider fits all hours of the reference day without scrolling. */
 export const MIN_FITTING_HOUR_CELL_PX = 32;
-/** The cells a narrow strip shows at once. */
-export const NARROW_VISIBLE_HOUR_CELLS = 9;
-export const NARROW_HOUR_CELL_MIN_PX = 36;
-export const NARROW_HOUR_CELL_MAX_PX = 40;
-/** The gap between hour cells; the cell pitch includes it. */
-export const HOUR_CELL_GAP_PX = 2;
+/**
+ * The width of an hour cell of a scrolling strip, at any strip width.
+ * Implements FR17 of redesign-cards-grid-and-day-palettes (D5).
+ */
+export const HOUR_CELL_SCROLL_WIDTH_PX = 38;
+/** The gap between hour cells; the cell pitch includes it. Implements FR17 of redesign-cards-grid-and-day-palettes (D5). */
+export const HOUR_CELL_GAP_PX = 3;
 // Implements FR3, FR5 of add-grid-hour-cells-and-hour-frame (D2).
 /** Separates the hour from the minutes in an hour cell label. */
 export const HOUR_CELL_MINUTE_SEPARATOR = ":";

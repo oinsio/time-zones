@@ -1,3 +1,4 @@
+// Verifies FR14, NFR-A2 of redesign-cards-grid-and-day-palettes.
 // Verifies FR2, FR4, FR6, FR7 of select-date-with-calendar-and-now (D6).
 // Verifies FR1, FR2, FR3, FR4 of keep-now-button-visible-when-live (D1, D2).
 import { render, screen } from "@testing-library/react";
@@ -87,15 +88,18 @@ describe("DateBar", () => {
     },
   );
 
-  it("should style the inactive Now with the muted tokens", () => {
+  it("should draw Now as an outlined button with its own inactive look", () => {
     renderBar("2026-03-08T07:30:00Z", "Asia/Almaty");
 
     const { className } = screen.getByRole("button", { name: "Now" });
 
-    expect(className).toContain("disabled:bg-muted");
+    expect(className).toContain("border-control-border");
+    expect(className).toContain("disabled:border-control-border-inactive");
     expect(className).toContain("disabled:text-muted-foreground");
-    expect(className).toContain("bg-accent");
-    expect(className).toContain("text-accent-foreground");
+    expect(className).toContain("text-foreground");
+    expect(className).toContain("h-11");
+    expect(className).toContain("rounded-now");
+    expect(className).not.toMatch(/(^|\s)bg-accent/);
   });
 
   it("should show the previous day", async () => {

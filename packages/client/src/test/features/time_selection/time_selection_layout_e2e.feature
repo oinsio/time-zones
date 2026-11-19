@@ -1,24 +1,38 @@
 Feature: Day track layout in a real browser
   Implements change add-time-sliders-to-location-cards.
+  Implements change redesign-cards-grid-and-day-palettes.
   As a user I see the track under the text on a phone and beside the time on a
   wide screen, coloured by the theme, with the handle at the right place.
 
-  @add-time-sliders-to-location-cards @NFR-R2 @UX1 @M9
+  @redesign-cards-grid-and-day-palettes @FR13 @UX1
   Scenario: Track under the text on a narrow screen
     Given the stored locations are "Almaty", "Moscow"
-    And the screen is 375 px wide for the locations
+    And the screen is 390 px wide for the locations
     When the user opens the locations app
-    Then the track of "Almaty" is below its city and time and spans the card's content width
-    And the track of "Almaty" is 10 px high and its visible handle 28 px wide
+    Then the track of "Almaty" is below its zone line and date and spans the card's content width
+    And the track of "Almaty" is 12 px high and its visible handle 23 px wide
+    And no hour label is visible
 
-  @add-time-sliders-to-location-cards @NFR-R2 @UX1 @UX3 @M9
-  Scenario: Track beside the time on a wide screen
+  @redesign-cards-grid-and-day-palettes @FR13 @UX1
+  Scenario: Track on its own line on a wide screen
     Given the stored locations are "Almaty", "Moscow"
     And the screen is 1024 px wide for the locations
     When the user opens the locations app
-    Then the track of "Almaty" is right of its time column on the same line with its hour labels under it
-    And the track of "Almaty" is 12 px high and its visible handle 32 px wide
+    Then the track of "Almaty" is below the line of its city and time, spans the card's content width and has its hour labels under it
+    And the track of "Almaty" is 12 px high and its visible handle 23 px wide
     And the hour labels of "Almaty" are muted text with tabular figures
+
+  @redesign-cards-grid-and-day-palettes @FR13
+  Scenario Outline: Handle border by theme in the <theme> theme
+    Given the stored locations are "Almaty"
+    And the locations screen uses the <theme> theme
+    When the user opens the locations app
+    Then the visible handle of "Almaty" has a border of <width> px in the colour "<colour>"
+
+    Examples:
+      | theme | width | colour  |
+      | light | 2     | #1c1c20 |
+      | dark  | 3     | #f8f9ff |
 
   @add-time-sliders-to-location-cards @FR7 @NFR-R2
   Scenario: Labels only on wide screens
@@ -64,6 +78,10 @@ Feature: Day track layout in a real browser
     Examples:
       | width |
       | 320   |
+      | 390   |
+      | 820   |
+      | 1024  |
+      | 1440  |
       | 2560  |
 
     @fix-day-track-handle-overlap-and-end-of-day @NFR-R1
@@ -96,7 +114,7 @@ Feature: Day track layout in a real browser
     When the user opens the locations app
     And the user focuses the slider of "Almaty" with the keyboard
     And the user presses the key "<key>"
-    Then the handle of "Almaty" lies inside its slider and clear of its time and its menu
+    Then the handle of "Almaty" lies inside its card and clear of its time and its menu
 
     Examples:
       | width | key  |

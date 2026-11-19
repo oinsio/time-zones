@@ -44,7 +44,7 @@ export function HourCellView({
   isDimmed,
   onClick,
 }: HourCellViewProps) {
-  const digitClassName = `text-base leading-[1.1] ${isFramed ? "font-bold" : "font-medium"}`;
+  const digitClassName = `text-grid-cell leading-[1.1] ${isFramed ? "font-bold" : "font-medium"}`;
   const minuteLine = [cell.minuteText, cell.dayPeriodMarker]
     .filter((text) => text !== "")
     .join(" ");
@@ -54,7 +54,7 @@ export function HourCellView({
     <div
       data-hour-cell
       onClick={onClick}
-      className={`flex h-11 flex-col items-center justify-center gap-px rounded tabular-nums md:h-[38px] lg:h-12 xl:h-[52px] ${
+      className={`flex h-11 flex-col items-center justify-center gap-px rounded-cell tabular-nums md:h-12 ${
         DAY_COLOUR_FOREGROUND_CLASS_NAMES[cell.dayColour]
       }${dimmedClassName}`}
       style={{

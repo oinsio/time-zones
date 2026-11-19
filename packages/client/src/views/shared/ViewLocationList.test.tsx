@@ -81,13 +81,35 @@ describe("ViewLocationList with card rows", () => {
     expect(screen.getByRole("button", { name: "Add location" })).toHaveFocus();
   });
 
-  it("should render move handles when two locations are stored", () => {
+  it("should render grab areas, not handles, when two locations are stored", () => {
     renderCards(savedLocations("Moscow", "Almaty"));
-    expect(
-      screen.getByRole("button", { name: "Move Moscow" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Move Almaty" }),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Move / })).toBeNull();
+    expect(screen.getByText("Moscow").parentElement).toHaveClass("cursor-grab");
+    expect(screen.getByText("Almaty").parentElement).toHaveClass("cursor-grab");
+  });
+});
+
+// Verifies FR16, NFR-A3 of redesign-cards-grid-and-day-palettes: a move by the menu is announced.
+describe("ViewLocationList moves by the menu", () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
+    stubZoneCitiesFetch();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should move the row up and announce its new position", async () => {
+    renderCards(savedLocations("Alpha", "Beta", "Gamma"));
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Actions for Beta" }),
+    );
+    await userEvent.click(screen.getByRole("menuitem", { name: "Move up" }));
+
+    expect(screen.getAllByRole("listitem")[0]).toHaveTextContent("Beta");
+    expect(document.querySelector("p[aria-live]")).toHaveTextContent(
+      "Beta moved to position 1 of 3",
+    );
   });
 });

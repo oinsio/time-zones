@@ -9,6 +9,7 @@ import { expect } from "vitest";
 import { LocationErrorCode } from "@/model";
 import { createDeviceTimeChecks } from "./deviceTimeChecks";
 import { createDeviceTimeWorld, DataMode } from "./deviceTimeWorld";
+import { rowHasHereMark } from "./deviceTimeZoneWorld";
 import { readZoneLineElements } from "./zoneLineQueries";
 
 const DIFFERENCE_ENTRY_PATTERN = /^(.+?) ([+−].+)$/u;
@@ -57,9 +58,17 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       And("the list is {string}", givenList);
       When("the user opens the app", openApp);
       Then(
-        "the device time location shows {string}, the caption {string}, the meta line {string} and {string}, the time {string} and the date {string}",
-        async (_ctx: unknown, ...texts: string[]) => {
-          for (const text of texts) await checks.expectDeviceTimeShows(text);
+        "the device time location shows {string}, the Here mark {string}, the meta line {string} and {string}, the time {string} and the date {string}",
+        async (
+          _ctx: unknown,
+          city: string,
+          markLabel: string,
+          ...texts: string[]
+        ) => {
+          expect(rowHasHereMark(world.deviceTimeRow(), markLabel)).toBe(true);
+          for (const text of [city, ...texts]) {
+            await checks.expectDeviceTimeShows(text);
+          }
         },
       );
       And(
@@ -119,7 +128,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the list is {string}", givenList);
     When("the user opens the app", openApp);
     Then(
-      "the device time location shows {string}, the caption {string} and the meta line {string} and {string}",
+      "the device time location shows {string}, the Here mark {string} and the meta line {string} and {string}",
       async (
         _ctx: unknown,
         city: string,
@@ -127,7 +136,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         place: string,
         offset: string,
       ) => {
-        await checks.expectDeviceTimeShows(caption);
+        expect(rowHasHereMark(world.deviceTimeRow(), caption)).toBe(true);
         expect(readZoneLineElements(world.deviceTimeRow())).toEqual([
           place,
           offset,
@@ -143,12 +152,19 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the list is {string}", givenList);
     When("the user opens the app", openApp);
     Then(
-      "the menu of the device time location offers {string} and {string}, as the menu of {string} does",
-      async (_ctx: unknown, makeHome: string, remove: string, city: string) => {
+      "the menu of the device time location offers {string}, {string}, {string} and {string}, as the menu of {string} does",
+      async (
+        _ctx: unknown,
+        makeHome: string,
+        moveUp: string,
+        moveDown: string,
+        remove: string,
+        city: string,
+      ) => {
         const deviceTimeItems = await menuItemNamesOf(world.deviceTimeRow());
         await userEvent.keyboard("{Escape}");
         const cityItems = await menuItemNamesOf(world.cardOf(city));
-        expect(deviceTimeItems).toEqual([makeHome, remove]);
+        expect(deviceTimeItems).toEqual([makeHome, moveUp, moveDown, remove]);
         expect(cityItems).toEqual(deviceTimeItems);
       },
     );

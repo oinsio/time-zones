@@ -34,6 +34,7 @@ Given("the view mode is Grid", async ({ locationsWorld }) => {
         viewMode: GRID_VIEW_ID,
         dayColouring: "TIME_OF_DAY",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
       },
     }),
   );
@@ -86,7 +87,7 @@ Then(
   async ({ locationsWorld }, theme: Theme) => {
     await expect(locationsWorld.page.locator(GRID_PANEL_SELECTOR)).toHaveCSS(
       "border-top-color",
-      readThemeColours(theme).border,
+      readThemeColours(theme).cardBorder,
     );
   },
 );
@@ -123,5 +124,53 @@ Then(
     for (const statusText of await page.getByRole("status").allTextContents()) {
       expect(statusText).not.toMatch(NETWORK_NOTE_PATTERN);
     }
+  },
+);
+
+const LIGHT_ROW_HEADER_WEIGHT = "700";
+const GRID_PANEL_RADIUS_PX = 14;
+
+// Verifies FR17 of redesign-cards-grid-and-day-palettes: the row header sizes.
+Then(
+  /^the city of "([^"]+)" is (\d+) px and its time (\d+) px(, both weight 700)?$/,
+  async (
+    { locationsWorld },
+    city: string,
+    citySize: string,
+    timeSize: string,
+    bothBold: string | undefined,
+  ) => {
+    const row = listRow(locationsWorld.page, city);
+    const cityText = row.getByText(city, { exact: true }).first();
+    const timeButton = row.getByRole("button", { name: /^Enter time/ });
+    await expect(cityText).toHaveCSS("font-size", `${citySize}px`);
+    await expect(timeButton).toHaveCSS("font-size", `${timeSize}px`);
+    if (bothBold !== undefined) {
+      await expect(cityText).toHaveCSS("font-weight", LIGHT_ROW_HEADER_WEIGHT);
+      await expect(timeButton).toHaveCSS(
+        "font-weight",
+        LIGHT_ROW_HEADER_WEIGHT,
+      );
+    }
+  },
+);
+
+Then("the Grid panel has a radius of 14 px", async ({ locationsWorld }) => {
+  await expect(locationsWorld.page.locator(GRID_PANEL_SELECTOR)).toHaveCSS(
+    "border-top-left-radius",
+    `${GRID_PANEL_RADIUS_PX}px`,
+  );
+});
+
+Then(
+  /^the divider between the Grid rows has the (light|dark) card border colour$/,
+  async ({ locationsWorld }, theme: Theme) => {
+    const rows = locationsWorld.page
+      .locator(GRID_PANEL_SELECTOR)
+      .getByRole("listitem");
+    await expect(rows.nth(1)).toHaveCSS(
+      "border-top-color",
+      readThemeColours(theme).cardBorder,
+    );
   },
 );

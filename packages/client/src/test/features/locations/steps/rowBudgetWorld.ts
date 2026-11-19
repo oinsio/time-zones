@@ -34,6 +34,7 @@ type BudgetPresenting = {
   deviceTimeZoneId?: string;
   /** Presents the rows with this location as home (set-home-location-and-show-differences). */
   homeLocation?: Location;
+  hourFormat?: HourFormat;
 };
 
 export function presentBudgetRows(
@@ -43,12 +44,13 @@ export function presentBudgetRows(
     language = BUDGET_LANGUAGE,
     deviceTimeZoneId = UNIT_TEST_DEVICE_TIME_ZONE,
     homeLocation,
+    hourFormat = HourFormat.H24,
   }: BudgetPresenting = {},
 ): LocationRow[] {
   const instant = fakeClock(timestamp).instant();
   return presentLocationRows(locations, {
     language,
-    hourFormat: HourFormat.H24,
+    hourFormat,
     ...TIME_OF_DAY_CONTEXT,
     zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
     instant,
@@ -72,21 +74,29 @@ export function expectNoWarmWork(count: WorkCount) {
 }
 
 /** Presents rows once, then again under the work counter, and asserts that nothing was built. */
-export function createWarmRowsCheck() {
+export function createWarmRowsCheck(hourFormat: HourFormat = HourFormat.H24) {
   let locations: Location[] = [];
   let workCount: WorkCount | undefined;
+  let presentedRows: LocationRow[] = [];
   return {
     presentOnce: (count: number) => {
       expect(count).toBe(BUDGET_ROW_COUNT);
       locations = buildBudgetLocations(count);
-      presentBudgetRows(locations);
+      presentBudgetRows(locations, { hourFormat });
     },
     presentAgain: () => {
       workCount = startWorkCount();
-      presentBudgetRows(locations, { timestamp: BUDGET_SECOND_MOMENT });
+      presentedRows = presentBudgetRows(locations, {
+        timestamp: BUDGET_SECOND_MOMENT,
+        hourFormat,
+      });
       workCount.stop();
     },
     expectNoWarmWork: () => expectNoWarmWork(workCount as WorkCount),
+    expectDayPeriodMarkersSplit: () =>
+      presentedRows.forEach((row) =>
+        expect(row.localTimeParts.dayPeriodMarker).not.toBe(""),
+      ),
     stop: () => workCount?.stop(),
   };
 }

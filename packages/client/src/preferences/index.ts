@@ -7,6 +7,7 @@ export {
 } from "./parseStoredPreferences";
 export {
   DayColouring,
+  DayPalette,
   DEFAULT_PREFERENCES,
   HourFormat,
   type Preferences,

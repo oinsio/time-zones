@@ -6,26 +6,43 @@
  * Implements FR4, NFR-A3 of add-settings-page-and-device-time-location (D7).
  * Implements FR4, FR5, UX1 of add-grid-hour-cells-and-hour-frame (D6): midnight shade and hour cell digits.
  * Implements FR7, FR8, FR13, UX1 of add-grid-meeting-range-and-share (D9): the meeting colours.
+ * Implements FR1, FR2, FR3, FR4, NFR-A2, M4 of redesign-cards-grid-and-day-palettes (D1, D2):
+ * the dark theme is written once; the system dark theme is copied from it at build time by
+ * scripts/themeCss/copyDarkThemeToSystemTheme.mjs. Each day palette is a set of
+ * --color-day-<palette>-<period> tokens; --color-day-<period> points at the palette in force.
  */
 :root {
   color-scheme: light;
   --color-background: #f7f7f5;
-  --color-foreground: #18181b;
+  --color-surface: #ffffff;
+  --color-card-border: #a9adb8;
+  --color-control-border: #8a8a93;
+  --color-control-border-inactive: #c9ccd4;
+  --color-foreground: #1c1c20;
   --color-muted: #e4e4e7;
-  --color-muted-foreground: #5b5b63;
-  --color-accent: #2f5bd3;
+  --color-muted-foreground: #60616c;
+  --color-accent: #3159e7;
   --color-accent-foreground: #ffffff;
+  --color-handle-border: #1c1c20;
+  --handle-border-width: 2px;
+  --lift-shadow: 0 8px 24px rgba(24, 24, 27, 0.18);
   --color-notice: #fff4d6;
   --color-notice-foreground: #5c4300;
-  --color-day-night: #a3afd3;
-  --color-day-morning: #f8cbbe;
-  --color-day-daylight: #f8e6a6;
-  --color-day-evening: #d4c6ee;
+  --color-day-vivid-night: #a4afd4;
+  --color-day-vivid-morning: #f0c6b8;
+  --color-day-vivid-daylight: #f8e5a0;
+  --color-day-vivid-evening: #e8c7df;
+  --color-day-muted-night: #a3afd3;
+  --color-day-muted-morning: #f8cbbe;
+  --color-day-muted-daylight: #f8e6a6;
+  --color-day-muted-evening: #d4c6ee;
+  --color-day-night: var(--color-day-vivid-night);
+  --color-day-morning: var(--color-day-vivid-morning);
+  --color-day-daylight: var(--color-day-vivid-daylight);
+  --color-day-evening: var(--color-day-vivid-evening);
   --color-day-non-working: #ececef;
   --color-midnight-shade: rgba(24, 24, 27, 0.1);
-  --color-hour-cell-foreground: #18181b;
-  --color-surface: #ffffff;
-  --color-border: #8a8a93;
+  --color-hour-cell-foreground: #1c1c20;
   --color-overlay: #18181b;
   --color-danger: #b42318;
   --color-meeting: #00aa00;
@@ -33,26 +50,34 @@
   --color-meeting-bar: #e0f5e0;
 }
 
-/* The forced dark theme and the system dark theme hold the same values. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-background: #0f1729;
-  --color-foreground: #eef2fa;
+  --color-background: #0b1628;
+  --color-surface: #142136;
+  --color-card-border: #647a98;
+  --color-control-border: #6b7a99;
+  --color-control-border-inactive: #33415c;
+  --color-foreground: #f7f8fc;
   --color-muted: #2a3550;
-  --color-muted-foreground: #9aa8c2;
-  --color-accent: #5ec2e8;
+  --color-muted-foreground: #9aaed1;
+  --color-accent: #4dd5f4;
   --color-accent-foreground: #0b1220;
+  --color-handle-border: #f8f9ff;
+  --handle-border-width: 3px;
+  --lift-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   --color-notice: #2a2f1a;
   --color-notice-foreground: #f4d27a;
-  --color-day-night: #56679a;
-  --color-day-morning: #e0b1a4;
-  --color-day-daylight: #eedba3;
-  --color-day-evening: #b9aadb;
+  --color-day-vivid-night: #4c5efa;
+  --color-day-vivid-morning: #ffc3a5;
+  --color-day-vivid-daylight: #fff68e;
+  --color-day-vivid-evening: #fda9e9;
+  --color-day-muted-night: #56679a;
+  --color-day-muted-morning: #e0b1a4;
+  --color-day-muted-daylight: #eedba3;
+  --color-day-muted-evening: #b9aadb;
   --color-day-non-working: #3b4660;
-  --color-midnight-shade: rgba(15, 23, 41, 0.22);
-  --color-hour-cell-foreground: #0f1729;
-  --color-surface: #16213a;
-  --color-border: #6b7a99;
+  --color-midnight-shade: rgba(11, 22, 40, 0.25);
+  --color-hour-cell-foreground: #0b1628;
   --color-overlay: #000000;
   --color-danger: #ff8a80;
   --color-meeting: #3dd13d;
@@ -60,30 +85,9 @@
   --color-meeting-bar: #13301d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --color-background: #0f1729;
-    --color-foreground: #eef2fa;
-    --color-muted: #2a3550;
-    --color-muted-foreground: #9aa8c2;
-    --color-accent: #5ec2e8;
-    --color-accent-foreground: #0b1220;
-    --color-notice: #2a2f1a;
-    --color-notice-foreground: #f4d27a;
-    --color-day-night: #56679a;
-    --color-day-morning: #e0b1a4;
-    --color-day-daylight: #eedba3;
-    --color-day-evening: #b9aadb;
-    --color-day-non-working: #3b4660;
-    --color-midnight-shade: rgba(15, 23, 41, 0.22);
-    --color-hour-cell-foreground: #0f1729;
-    --color-surface: #16213a;
-    --color-border: #6b7a99;
-    --color-overlay: #000000;
-    --color-danger: #ff8a80;
-    --color-meeting: #3dd13d;
-    --color-meeting-text: #5edb5e;
-    --color-meeting-bar: #13301d;
-  }
+:root[data-day-palette="muted"] {
+  --color-day-night: var(--color-day-muted-night);
+  --color-day-morning: var(--color-day-muted-morning);
+  --color-day-daylight: var(--color-day-muted-daylight);
+  --color-day-evening: var(--color-day-muted-evening);
 }

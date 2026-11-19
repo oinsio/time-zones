@@ -16,6 +16,7 @@ import {
 } from "@/ports";
 import {
   type DayColouring,
+  type DayPalette,
   DEFAULT_PREFERENCES,
   type HourFormat,
   type Preferences,
@@ -157,6 +158,12 @@ export function PreferencesProvider({
         applyChange({
           type: PreferencesCommandType.SET_DAY_COLOURING,
           dayColouring,
+        }),
+      // Implements FR3, FR4 of redesign-cards-grid-and-day-palettes (D2).
+      setDayPalette: (dayPalette: DayPalette) =>
+        applyChange({
+          type: PreferencesCommandType.SET_DAY_PALETTE,
+          dayPalette,
         }),
       setWorkingHours: (workingHours: WorkingHours) =>
         applyChange({

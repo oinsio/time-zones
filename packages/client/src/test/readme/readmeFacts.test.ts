@@ -233,9 +233,12 @@ describe("README documents", () => {
     "%s shows Cards and Grid screenshots with alt text",
     (documentPath) => {
       // FR3, NFR-A1: both views shown, every image has alt text
+      // FR25 of redesign-cards-grid-and-day-palettes: the README shows the redesigned screens from docs/design/screens
       const text = readDocument(documentPath);
       expect(text).toMatch(/docs\/design\/screens\/grid-[\w-]+\.png/);
-      expect(text).toMatch(/docs\/design\/screens\/(phone|tablet)-[\w-]+\.png/);
+      expect(text).toMatch(
+        /docs\/design\/screens\/cards-(phone|tablet)-[\w-]+\.png/,
+      );
       const alts = readImageAlts(text);
       expect(alts.length).toBeGreaterThan(0);
       expect(alts.filter((alt) => alt.trim() === "")).toEqual([]);

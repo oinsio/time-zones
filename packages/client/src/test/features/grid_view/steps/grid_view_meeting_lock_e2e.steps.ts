@@ -18,15 +18,15 @@ const RUSSIAN_CITY_NAMES: Record<string, string> = {
 };
 const SHARE_BUTTON_NAME = "Share meeting";
 const MEETING_END_NAME = "Meeting end";
-const MOVE_HANDLE_PREFIX = "Move ";
+const MENU_BUTTON_PREFIX = "Actions for ";
 const SAMPLE_COLUMN = 9;
 const SAMPLE_END_KEY = "PageUp";
 const SAMPLE_SPAN_END = "11:00";
 const SPAN_BUTTON_PATTERN = /^(Enter meeting time|Ввести время встречи)/;
 const START_FIELD_PATTERN = /^(Start time|Время начала)/;
 const END_FIELD_PATTERN = /^(End time|Время окончания)/;
-const LOCKABLE_BUTTONS_SELECTOR =
-  "button[aria-roledescription], button[aria-haspopup='menu']";
+const LOCKABLE_BUTTONS_SELECTOR = "button[aria-haspopup='menu']";
+const GRAB_AREA_SELECTOR = "[data-grab-area]";
 const WALL_TIME_BUTTON_PATTERN = /^(Enter time|Ввести время —)/;
 
 /** The Tab stops a step visited, read by the step that checks them. */
@@ -129,10 +129,10 @@ Then(
   },
 );
 
-Then('no Tab stop is a handle "Move …"', async ({ locationsWorld }) => {
+Then("no Tab stop is a location menu button", async ({ locationsWorld }) => {
   const visited = visitedByPage.get(locationsWorld.page) ?? [];
   expect(visited.length).toBeGreaterThan(0);
-  expect(visited.filter((name) => name.startsWith(MOVE_HANDLE_PREFIX))).toEqual(
+  expect(visited.filter((name) => name.startsWith(MENU_BUTTON_PREFIX))).toEqual(
     [],
   );
 });
@@ -232,7 +232,7 @@ Then(
 
 // Verifies FR1, FR2, UX1 of fix-grid-meeting-range-lock-and-layering.
 Then(
-  "every drag handle and every location menu button is disabled",
+  "every grab area shows the default cursor and every location menu button is disabled",
   async ({ locationsWorld }) => {
     const buttons = locationsWorld.page.locator(LOCKABLE_BUTTONS_SELECTOR);
     expect(await buttons.count()).toBeGreaterThan(0);
@@ -240,16 +240,26 @@ Then(
       await expect(button).toBeDisabled();
       await expect(button).toHaveCSS("opacity", "0.4");
     }
+    for (const area of await locationsWorld.page
+      .locator(GRAB_AREA_SELECTOR)
+      .all()) {
+      await expect(area).toHaveCSS("cursor", "default");
+    }
   },
 );
 
 Then(
-  "every drag handle and every location menu button is enabled",
+  "every grab area shows the grab cursor and every location menu button is enabled",
   async ({ locationsWorld }) => {
     const buttons = locationsWorld.page.locator(LOCKABLE_BUTTONS_SELECTOR);
     expect(await buttons.count()).toBeGreaterThan(0);
     for (const button of await buttons.all())
       await expect(button).toBeEnabled();
+    for (const area of await locationsWorld.page
+      .locator(GRAB_AREA_SELECTOR)
+      .all()) {
+      await expect(area).toHaveCSS("cursor", "grab");
+    }
   },
 );
 

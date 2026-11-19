@@ -140,7 +140,7 @@ describe("present the here mark", () => {
     translate?: TFunction,
   ) =>
     present(cities.map(cityOf), "en", { deviceTimeZoneId, translate }).map(
-      (row) => row.mark?.caption ?? "",
+      (row) => row.mark?.kind ?? "",
     );
 
   it.each([
@@ -156,16 +156,15 @@ describe("present the here mark", () => {
     expect(labelsFor(cities, deviceZone)).toEqual(expected);
   });
 
-  it("should take the caption from the translate function", () => {
-    const translate = (() => "XYZ") as unknown as TFunction;
-    expect(labelsFor(["Almaty"], "Asia/Almaty", translate)).toEqual(["XYZ"]);
+  it("should mark the here row", () => {
+    expect(labelsFor(["Almaty"], "Asia/Almaty")).toEqual(["here"]);
   });
 
   it("should mark in Russian", () => {
     const rows = present([cityOf("Almaty")], "ru", {
       deviceTimeZoneId: "Asia/Almaty",
     });
-    expect(rows[0]?.mark?.caption).toBe("здесь");
+    expect(rows[0]?.mark?.accessibleLabel).toBe("Вы здесь");
   });
 });
 

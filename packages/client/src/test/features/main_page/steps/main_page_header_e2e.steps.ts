@@ -7,6 +7,7 @@ import {
 } from "../../locations/steps/locationsE2eHelpers";
 import { requireBox } from "../../time_selection/steps/timeSelectionE2eHelpers";
 import { englishLocale } from "./englishTexts";
+import { readThemeColours } from "./themeTokens";
 
 const { Given, When, Then } = createBdd(test);
 
@@ -17,6 +18,11 @@ const MIN_TARGET_SIZE_PX = 44;
 const CENTRE_TOLERANCE_PX = 1;
 const MAX_TAB_PRESSES = 12;
 const SETTINGS_HEADING = englishLocale.settings.title;
+const HEADER_ICON_SIZE_PX = 27;
+const HEADER_BUTTON_COUNT = 2;
+const CONTENT_COLUMN_MAX_WIDTH_PX = 1120;
+const COLUMN_PADDING_PX = 32;
+const TITLE_FONT_WEIGHT = "700";
 
 const headerOf = (page: Page) => page.getByRole(BANNER_ROLE);
 const headerButton = (page: Page, name: string) =>
@@ -45,17 +51,6 @@ Then(
     const edges = await Promise.all(parts.map(leftEdgeOf));
     expect(edges).toEqual([...edges].sort((left, right) => left - right));
     expect(new Set(edges).size).toBe(edges.length);
-  },
-);
-
-Then(
-  "the button named {string} shows no visible text",
-  async ({ locationsWorld }, name: string) => {
-    const visibleText = await headerButton(
-      locationsWorld.page,
-      name,
-    ).innerText();
-    expect(visibleText).toBe("");
   },
 );
 
@@ -114,50 +109,108 @@ Then(
   },
 );
 
-// Verifies NFR-A2 of add-settings-page-and-device-time-location: targets of 44 by 44 px.
+// Verifies NFR-A3 of redesign-cards-grid-and-day-palettes: targets of 44 by 44 px and icons of 27 px.
 Then(
-  "both header buttons are at least {int} by {int} px",
-  async ({ locationsWorld }, minWidth: number, minHeight: number) => {
+  "both header buttons are at least {int} by {int} px and their icons {int} px",
+  async (
+    { locationsWorld },
+    minWidth: number,
+    minHeight: number,
+    iconSize: number,
+  ) => {
     const { page } = locationsWorld;
-    expect([minWidth, minHeight]).toEqual([
+    expect([minWidth, minHeight, iconSize]).toEqual([
       MIN_TARGET_SIZE_PX,
       MIN_TARGET_SIZE_PX,
+      HEADER_ICON_SIZE_PX,
     ]);
     for (const name of ["Add location", "Settings"]) {
-      const box = await requireBox(headerButton(page, name));
+      const button = headerButton(page, name);
+      const box = await requireBox(button);
       expect(box.width).toBeGreaterThanOrEqual(minWidth);
       expect(box.height).toBeGreaterThanOrEqual(minHeight);
+      const iconBox = await requireBox(button.locator("svg"));
+      expect(iconBox.width).toBe(iconSize);
+      expect(iconBox.height).toBe(iconSize);
     }
   },
 );
 
-// Verifies FR4, UX2 of fix-location-card-and-header-layout: the title is centred on the page.
+// Verifies FR6, UX1 of redesign-cards-grid-and-day-palettes: accent icons without text.
 Then(
-  "the centre of the title is the centre of the page width",
+  "both header buttons show an icon in the accent colour and no visible text",
   async ({ locationsWorld }) => {
-    const { page } = locationsWorld;
-    const titleBox = await requireBox(headerOf(page).getByRole(HEADING_ROLE));
-    const pageWidth = await page.evaluate(
-      () => document.documentElement.clientWidth,
-    );
-    expect(
-      Math.abs(titleBox.x + titleBox.width / 2 - pageWidth / 2),
-    ).toBeLessThanOrEqual(CENTRE_TOLERANCE_PX);
+    const buttons = headerOf(locationsWorld.page).getByRole(BUTTON_ROLE);
+    await expect(buttons).toHaveCount(HEADER_BUTTON_COUNT);
+    for (const button of await buttons.all()) {
+      await expect(button.locator("svg")).toBeVisible();
+      expect(await button.innerText()).toBe("");
+      await expect(button).toHaveCSS("color", readThemeColours("light").accent);
+    }
   },
 );
 
-// Verifies FR4, UX2 of fix-location-card-and-header-layout: Settings stays at the right edge.
+Then("the header has no bottom border", async ({ locationsWorld }) => {
+  await expect(headerOf(locationsWorld.page)).toHaveCSS(
+    "border-bottom-width",
+    "0px",
+  );
+});
+
+// Verifies FR12 of redesign-cards-grid-and-day-palettes: the header fills the content column.
+Then(
+  "the title starts at the left edge of the content column and the settings button ends at its right edge",
+  async ({ locationsWorld }) => {
+    const { page } = locationsWorld;
+    const viewportWidth = await page.evaluate(
+      () => document.documentElement.clientWidth,
+    );
+    const columnWidth = Math.min(viewportWidth, CONTENT_COLUMN_MAX_WIDTH_PX);
+    const columnLeft = (viewportWidth - columnWidth) / 2;
+    const titleBox = await requireBox(headerOf(page).getByRole(HEADING_ROLE));
+    const settingsBox = await requireBox(headerButton(page, "Настройки"));
+    expect(titleBox.x).toBeGreaterThanOrEqual(columnLeft);
+    expect(titleBox.x - columnLeft).toBeLessThanOrEqual(COLUMN_PADDING_PX);
+    expect(settingsBox.x + settingsBox.width).toBeLessThanOrEqual(
+      columnLeft + columnWidth,
+    );
+    expect(
+      columnLeft + columnWidth - (settingsBox.x + settingsBox.width),
+    ).toBeLessThanOrEqual(COLUMN_PADDING_PX);
+  },
+);
+
+Then(
+  "the title font size is {int} px and its weight 700",
+  async ({ locationsWorld }, fontSize: number) => {
+    const title = headerOf(locationsWorld.page).getByRole(HEADING_ROLE);
+    await expect(title).toHaveCSS("font-size", `${fontSize}px`);
+    await expect(title).toHaveCSS("font-weight", TITLE_FONT_WEIGHT);
+  },
+);
+
+Then(
+  "the title is left of the button named {string}",
+  async ({ locationsWorld }, name: string) => {
+    const { page } = locationsWorld;
+    const titleBox = await requireBox(headerOf(page).getByRole(HEADING_ROLE));
+    const buttonBox = await requireBox(headerButton(page, name));
+    expect(titleBox.x + titleBox.width).toBeLessThanOrEqual(buttonBox.x);
+  },
+);
+
+// Verifies FR6 of redesign-cards-grid-and-day-palettes: Settings is the last control of the header.
 Then(
   "the button named {string} is the rightmost header control",
   async ({ locationsWorld }, name: string) => {
     const { page } = locationsWorld;
     const buttonBox = await requireBox(headerButton(page, name));
-    const titleBox = await requireBox(headerOf(page).getByRole(HEADING_ROLE));
-    expect(buttonBox.x).toBeGreaterThan(titleBox.x + titleBox.width);
-    const headerBox = await requireBox(headerOf(page));
-    expect(
-      Math.abs(buttonBox.x + buttonBox.width - (headerBox.x + headerBox.width)),
-    ).toBeLessThanOrEqual(CENTRE_TOLERANCE_PX);
+    for (const other of await headerOf(page).getByRole(BUTTON_ROLE).all()) {
+      const otherBox = await requireBox(other);
+      expect(otherBox.x + otherBox.width).toBeLessThanOrEqual(
+        buttonBox.x + buttonBox.width + CENTRE_TOLERANCE_PX,
+      );
+    }
   },
 );
 

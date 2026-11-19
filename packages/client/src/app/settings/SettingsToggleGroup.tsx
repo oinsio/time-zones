@@ -60,7 +60,7 @@ export function SettingsToggleGroup<Value extends string>({
                 onClick={() => onToggle(value, !isSelected)}
                 className={cn(
                   "flex min-h-11 min-w-11 items-center gap-1 rounded-md border bg-surface px-2 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent",
-                  isSelected ? "border-accent" : "border-border",
+                  isSelected ? "border-accent" : "border-control-border",
                 )}
               >
                 <span className="flex size-5 shrink-0 items-center justify-center">

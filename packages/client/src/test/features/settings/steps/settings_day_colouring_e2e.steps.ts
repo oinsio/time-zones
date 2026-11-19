@@ -22,7 +22,6 @@ const TAB_KEY = "Tab";
 const ENTER_KEY = "Enter";
 const ESCAPE_KEY = "Escape";
 const NO_OUTLINE_STYLE = "none";
-const GROUP_POSITION_TOLERANCE_PX = 1;
 const COLOURING_VALUES: Record<string, string> = {
   Plain: "PLAIN",
   "Time of day": "TIME_OF_DAY",
@@ -53,6 +52,7 @@ Given(
       {
         dayColouring: COLOURING_VALUES[name],
         workingHours: DEFAULT_WORKING_HOURS,
+        dayPalette: "VIVID",
       },
       locationsWorld.seededInterfaceLanguage,
     );
@@ -67,6 +67,7 @@ Given(
       {
         dayColouring: COLOURING_VALUES[name],
         workingHours: DEFAULT_WORKING_HOURS,
+        dayPalette: "VIVID",
         hourFormat,
       },
       locationsWorld.seededInterfaceLanguage,
@@ -211,35 +212,6 @@ Then(
         (controlsBox?.y ?? 0) + (controlsBox?.height ?? 0),
       );
     }
-  },
-);
-
-const readGroupTops = (page: Page) =>
-  page.evaluate(() =>
-    Array.from(document.querySelectorAll("main > [role=radiogroup]")).map(
-      (group) => group.getBoundingClientRect().top + window.scrollY,
-    ),
-  );
-let notedTops: number[] = [];
-
-When(
-  "the user notes the positions of the groups above the colouring row",
-  async ({ locationsWorld }) => {
-    notedTops = await readGroupTops(locationsWorld.page);
-  },
-);
-
-Then(
-  "the groups above the working hours row keep their positions",
-  async ({ locationsWorld }) => {
-    await expect(workingHoursRow(locationsWorld.page)).toBeVisible();
-    const tops = await readGroupTops(locationsWorld.page);
-    expect(tops).toHaveLength(notedTops.length);
-    tops.forEach((top, index) =>
-      expect(Math.abs(top - notedTops[index])).toBeLessThanOrEqual(
-        GROUP_POSITION_TOLERANCE_PX,
-      ),
-    );
   },
 );
 

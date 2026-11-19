@@ -12,6 +12,7 @@ export { useCityLabels } from "./useCityLabels";
 export { CitySearchStatus, useCitySearch } from "./useCitySearch";
 // Implements FR2, FR3, FR5, FR6, FR12 of add-day-colouring-setting.
 export { useDayColouring } from "./useDayColouring";
+export { useDayPalettePreference } from "./useDayPalettePreference";
 export { useDeployTime } from "./useDeployTime";
 export { useDocumentLanguage } from "./useDocumentLanguage";
 export { useHourFormat } from "./useHourFormat";

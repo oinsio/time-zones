@@ -1,15 +1,13 @@
 import {
   closestCenter,
   DndContext,
-  KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useEffect, useMemo, useRef } from "react";
@@ -25,7 +23,6 @@ import {
   type WallTimeInputOutcome,
   type WallTimeTarget,
 } from "@/controller";
-import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import type { LocationRow as LocationRowModel } from "@/presenter";
 import type { HourGridSlots } from "./hourGridSlots";
 import { LocationRow } from "./LocationRow";
@@ -37,17 +34,15 @@ import { restrictToVerticalAxis } from "./reorderModifiers";
 import { getMoveTargetIndex } from "./reorderTarget";
 import { useReorderAnnouncements } from "./useReorderAnnouncements";
 
-// Engines without Pointer Events (iOS Safari before 13) drag by finger through touch events.
-const FINGER_OR_POINTER_SENSOR = IS_POINTER_EVENTS_SUPPORTED
-  ? PointerSensor
-  : TouchSensor;
-const FINGER_OR_POINTER_OPTIONS = {
-  activationConstraint: IS_POINTER_EVENTS_SUPPORTED
-    ? { distance: REORDER_POINTER_ACTIVATION_DISTANCE_PX }
-    : {
-        delay: REORDER_TOUCH_ACTIVATION_DELAY_MS,
-        tolerance: REORDER_TOUCH_ACTIVATION_TOLERANCE_PX,
-      },
+// A mouse or pen drags after a short move; a finger needs a hold, so a swipe over the grab area still scrolls.
+const MOUSE_SENSOR_OPTIONS = {
+  activationConstraint: { distance: REORDER_POINTER_ACTIVATION_DISTANCE_PX },
+};
+const TOUCH_SENSOR_OPTIONS = {
+  activationConstraint: {
+    delay: REORDER_TOUCH_ACTIVATION_DELAY_MS,
+    tolerance: REORDER_TOUCH_ACTIVATION_TOLERANCE_PX,
+  },
 };
 
 type LocationListProps = {
@@ -56,6 +51,8 @@ type LocationListProps = {
   /** `null` clears home. */
   onSetHome: (id: string | null) => void;
   onMove: (id: string, targetIndex: number) => void;
+  /** Called after a move by the location menu, with the row and its new index. */
+  onMovedByMenu?: (id: string, targetIndex: number) => void;
   onSelectTrackFraction: (fraction: number) => void;
   onMoveTrack: (move: TrackMove) => void;
   onConfirmWallTime: (
@@ -90,12 +87,15 @@ type LocationListProps = {
  * Implements FR8 of add-grid-meeting-range-and-share (D8): the meeting range of each row.
  * Implements FR1, FR2 of fix-grid-meeting-range-lock-and-layering (D1): passes the lock to each row.
  * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D4): passes the meeting range input to each row.
+ * Implements FR15, FR16, NFR-A3 of redesign-cards-grid-and-day-palettes (D6): a mouse and a touch sensor on
+ * every engine, no keyboard sensor; the menu moves a row by one place and keeps the focus on its menu button.
  */
 export function LocationList({
   rows,
   onRemove,
   onSetHome,
   onMove,
+  onMovedByMenu,
   onSelectTrackFraction,
   onMoveTrack,
   onConfirmWallTime,
@@ -104,18 +104,20 @@ export function LocationList({
 }: LocationListProps) {
   const menuButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const focusIndexAfterRemoval = useRef<number | null>(null);
+  const focusIndexAfterMove = useRef<number | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const accessibility = useReorderAnnouncements(rows);
   // A stable array: a new one on every render makes dnd-kit drop the slide transition.
   const rowIds = useMemo(() => rows.map((row) => row.id), [rows]);
   const sensors = useSensors(
-    useSensor(FINGER_OR_POINTER_SENSOR, FINGER_OR_POINTER_OPTIONS),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    useSensor(MouseSensor, MOUSE_SENSOR_OPTIONS),
+    useSensor(TouchSensor, TOUCH_SENSOR_OPTIONS),
   );
 
   useEffect(() => {
+    const movedIndex = focusIndexAfterMove.current;
+    focusIndexAfterMove.current = null;
+    if (movedIndex !== null) menuButtons.current[movedIndex]?.focus();
     const focusIndex = focusIndexAfterRemoval.current;
     focusIndexAfterRemoval.current = null;
     if (focusIndex === null) return;
@@ -125,6 +127,13 @@ export function LocationList({
   const handleRemove = (rowIndex: number, id: string) => {
     focusIndexAfterRemoval.current = rowIndex;
     onRemove(id);
+  };
+
+  const handleMoveStep = (rowIndex: number, id: string, step: number) => {
+    const targetIndex = rowIndex + step;
+    focusIndexAfterMove.current = targetIndex;
+    onMove(id, targetIndex);
+    onMovedByMenu?.(id, targetIndex);
   };
 
   return (
@@ -161,6 +170,8 @@ export function LocationList({
               onConfirmWallTime={onConfirmWallTime}
               onRemove={(id) => handleRemove(rowIndex, id)}
               onSetHome={onSetHome}
+              rowPosition={{ rowIndex, rowCount: rows.length }}
+              onMoveStep={(id, step) => handleMoveStep(rowIndex, id, step)}
               isReorderable={rows.length >= MIN_LOCATIONS_TO_REORDER}
               prefersReducedMotion={prefersReducedMotion}
               rowVariant={rowVariant}

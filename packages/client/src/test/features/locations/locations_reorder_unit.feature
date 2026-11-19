@@ -64,12 +64,6 @@ Feature: Reorder locations
     Then the list is "Almaty, Moscow"
     And the storage warning is flagged
 
-  @reorder-locations-by-drag-and-drop @FR8
-  Scenario: Russian interface
-    Given the interface language is Russian
-    When the list "Moscow, Almaty" is shown
-    Then the list offers the Russian move action for "Moscow"
-
   @reorder-locations-by-drag-and-drop @NFR-P1 @replace-wall-clock-row-budgets-with-deterministic-checks @FR1
   Scenario: 50 locations within the budget
     Given a list of 50 locations whose rows have been presented once

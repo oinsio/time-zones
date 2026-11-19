@@ -31,8 +31,8 @@ const version5Payload = {
 };
 
 describe("the day colouring in the preferences document", () => {
-  it("should be written at schema version 6", () => {
-    expect(PREFERENCES_SCHEMA_VERSION).toBe(6);
+  it("should be written at schema version 7", () => {
+    expect(PREFERENCES_SCHEMA_VERSION).toBe(7);
   });
 
   it("should write both fields", () => {
@@ -61,6 +61,7 @@ describe("the day colouring in the preferences document", () => {
           zoneLabelParts: [ZoneLabelPart.UTC_OFFSET],
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
+          dayPalette: "VIVID",
         },
       },
     );
@@ -74,6 +75,7 @@ describe("the day colouring in the preferences document", () => {
       preferences: {
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
       },
     });
   });
@@ -84,6 +86,7 @@ describe("the day colouring in the preferences document", () => {
       {
         dayColouring: "RAINBOW",
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: "VIVID",
       },
     ],
     [

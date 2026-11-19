@@ -16,6 +16,9 @@ const { Given, Then } = createBdd(test);
 
 const NO_TRANSITION_DURATION = "0s";
 const NO_SHADOW = "none";
+const HALF = 2;
+const LIFT_SCALE = 1.02;
+const SCALED_BOX_TOLERANCE_PX = 1.5;
 
 // Verifies NFR-A4 of reorder-locations-by-drag-and-drop.
 Given("the system asks to reduce motion", async ({ locationsWorld }) => {
@@ -93,8 +96,15 @@ Then(
     const { page } = locationsWorld;
     const before = measurementsByPage.get(page);
     const dragged = await listRow(page, cityName).boundingBox();
-    expect(dragged?.x).toBe(before?.card.x);
-    expect(dragged?.width).toBe(before?.card.width);
+    const draggedCentre = (dragged?.x ?? 0) + (dragged?.width ?? 0) / HALF;
+    const beforeCentre =
+      (before?.card.x ?? 0) + (before?.card.width ?? 0) / HALF;
+    expect(Math.abs(draggedCentre - beforeCentre)).toBeLessThanOrEqual(
+      SCALED_BOX_TOLERANCE_PX,
+    );
+    expect(
+      Math.abs((dragged?.width ?? 0) - (before?.card.width ?? 0) * LIFT_SCALE),
+    ).toBeLessThanOrEqual(SCALED_BOX_TOLERANCE_PX);
     const boxShadow = await listRow(page, cityName).evaluate(
       (element) => getComputedStyle(element).boxShadow,
     );

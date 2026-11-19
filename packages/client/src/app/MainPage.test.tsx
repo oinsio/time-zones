@@ -2,6 +2,7 @@
 // Verifies FR13 of add-grid-meeting-range-and-share (D7): the meeting bar replaces the header.
 // Verifies FR1, UX3 of add-main-page-scaffold: fixed page regions.
 // Verifies FR8 of select-date-with-calendar-and-now (D7): the bottom bar.
+// Verifies FR6, FR12, UX4 of redesign-cards-grid-and-day-palettes: the header and the content column.
 import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import type { ReactNode } from "react";
@@ -70,9 +71,42 @@ describe("MainPage", () => {
     expect(getNoticesRegion()).toBeEmptyDOMElement();
   });
 
-  it("should set the header apart from the page with a bottom border", () => {
+  it("should draw no line under the header", () => {
     renderMainPage(null);
-    expect(screen.getByRole("banner")).toHaveClass("grid", "border-b");
+    expect(screen.getByRole("banner").className).not.toMatch(/\bborder-b\b/);
+  });
+
+  it("should put the title first and the header actions after it", () => {
+    render(
+      <LocationsProvider repository={createInMemoryLocationRepository()}>
+        <MainPage
+          notices={null}
+          bottomBar={null}
+          headerActions={<button type="button">header action</button>}
+        />
+      </LocationsProvider>,
+    );
+
+    const title = screen.getByRole("heading", { level: 1 });
+    const action = screen.getByText("header action");
+    expect(
+      title.compareDocumentPosition(action) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(screen.getByRole("banner").firstElementChild).toContainElement(
+      title,
+    );
+  });
+
+  it("should keep the content in a centred column and the bottom bar on the page background", () => {
+    renderMainPage(null);
+
+    expect(screen.getByRole("main")).toHaveClass(
+      "mx-auto w-full max-w-content px-column",
+    );
+    expect(screen.getByRole("contentinfo")).toHaveClass("bg-background");
+    expect(screen.getByRole("contentinfo").className).not.toMatch(
+      /\bborder-t\b/,
+    );
   });
 
   it("should render the bottom bar in a footer after the main landmark", () => {

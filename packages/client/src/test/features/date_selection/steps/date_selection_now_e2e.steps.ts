@@ -18,7 +18,7 @@ const { When, Then } = createBdd(test);
 const TAB_KEY = "Tab";
 const ENTER_KEY = "Enter";
 const NEXT_DAY_ISO_DATE = "2026-09-28";
-const MUTED_FILL_VARIABLE = "--color-muted";
+const INACTIVE_BORDER_VARIABLE = "--color-control-border-inactive";
 const MUTED_FOREGROUND_VARIABLE = "--color-muted-foreground";
 const MAX_POSITION_SHIFT_PX = 1;
 const INACTIVE = "inactive";
@@ -64,7 +64,7 @@ When(
 
 // Verifies FR4, UX1, M1 of keep-now-button-visible-when-live.
 Then(
-  "the inactive Now shows a clock icon and the label {string} in the muted colours",
+  "the inactive Now shows a clock icon and the label {string} in the inactive colours",
   async ({ locationsWorld }, label: string) => {
     const { page } = locationsWorld;
     const now = nowButton(page);
@@ -72,8 +72,8 @@ Then(
     await expect(now.locator("svg")).toHaveCount(1);
     await expect(now).toHaveText(label);
     await expect(now).toHaveCSS(
-      "background-color",
-      await computedColourOfVariable(page, MUTED_FILL_VARIABLE),
+      "border-top-color",
+      await computedColourOfVariable(page, INACTIVE_BORDER_VARIABLE),
     );
     await expect(now).toHaveCSS(
       "color",

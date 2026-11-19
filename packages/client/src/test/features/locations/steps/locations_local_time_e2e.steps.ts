@@ -8,11 +8,8 @@ const { Given, Then } = createBdd(test);
 
 const LIST_ITEM_ROLE = "listitem";
 const HALF = 2;
-const ALIGNMENT_TOLERANCE_PX = 1;
-const PLACE_COLUMN_XPATH =
-  "xpath=ancestor::span[contains(@class,'flex-col')][1]";
 const TIME_TEXT_XPATH =
-  "xpath=preceding-sibling::button | following-sibling::button";
+  'xpath=ancestor::li[1]//span[button[@aria-haspopup="menu"]]/preceding-sibling::button';
 const LIVE_REGION_XPATH = "xpath=ancestor-or-self::*[@aria-live]";
 const DATE_ELEMENT = "time";
 const MENU_BUTTON = "button";
@@ -30,7 +27,6 @@ const parts = async (row: Locator, city: string) => {
   const dateElement = row.locator(DATE_ELEMENT);
   return {
     city: await requireBox(cityElement),
-    place: await requireBox(cityElement.locator(PLACE_COLUMN_XPATH)),
     time: await requireBox(dateElement.locator(TIME_TEXT_XPATH)),
     date: await requireBox(dateElement),
     card: await requireBox(row),
@@ -59,35 +55,34 @@ Then(
   },
 );
 
-// Verifies NFR-R2, UX1, UX2 of show-local-time-and-date-on-location-cards.
+// Verifies FR7, FR8, NFR-R1 of redesign-cards-grid-and-day-palettes: the narrow card.
 Then(
-  "the time of {string} is at the right end of its city line with the date right-aligned under it",
+  "the time of {string} is on the first line at the right with the menu after it and the date right-aligned on the second line",
   async ({ locationsWorld }, city: string) => {
     const box = await parts(rowOf(locationsWorld.page, city), city);
-    expect(box.time.x).toBeGreaterThanOrEqual(box.city.x + box.city.width);
     expect(box.time.y).toBeLessThan(box.city.y + box.city.height);
-    expect(box.time.y + box.time.height).toBeGreaterThan(box.city.y);
-    expect(box.time.x + box.time.width).toBeLessThanOrEqual(
-      box.menuButton.x + ALIGNMENT_TOLERANCE_PX,
+    expect(box.time.x).toBeGreaterThanOrEqual(box.city.x + box.city.width);
+    expect(box.menuButton.x).toBeGreaterThanOrEqual(
+      box.time.x + box.time.width,
     );
-    expect(box.date.y).toBeGreaterThanOrEqual(box.time.y + box.time.height);
+    expect(box.date.y).toBeGreaterThanOrEqual(box.time.y + box.time.height - 1);
     expect(
-      Math.abs(box.date.x + box.date.width - (box.time.x + box.time.width)),
-    ).toBeLessThanOrEqual(ALIGNMENT_TOLERANCE_PX);
+      box.card.x + box.card.width - (box.date.x + box.date.width),
+    ).toBeLessThanOrEqual(box.card.width / HALF);
   },
 );
 
-// Verifies NFR-R2, UX1, UX2 of show-local-time-and-date-on-location-cards.
+// Verifies FR7, FR8, NFR-R1 of redesign-cards-grid-and-day-palettes: the wide card.
 Then(
-  "the time of {string} follows its place column in the left half of the card with the date left-aligned under it",
+  "the date, the time and the menu of {string} stand on one line at the right of the card",
   async ({ locationsWorld }, city: string) => {
     const box = await parts(rowOf(locationsWorld.page, city), city);
-    expect(box.time.x).toBeGreaterThanOrEqual(box.place.x + box.place.width);
-    expect(box.time.x).toBeLessThan(box.card.x + box.card.width / HALF);
-    expect(box.date.y).toBeGreaterThanOrEqual(box.time.y + box.time.height);
-    expect(Math.abs(box.date.x - box.time.x)).toBeLessThanOrEqual(
-      ALIGNMENT_TOLERANCE_PX,
+    expect(box.date.x + box.date.width).toBeLessThanOrEqual(box.time.x + 1);
+    expect(box.time.x + box.time.width).toBeLessThanOrEqual(
+      box.menuButton.x + 1,
     );
+    expect(Math.abs(box.date.y - box.time.y)).toBeLessThan(box.time.height);
+    expect(box.time.x).toBeGreaterThan(box.card.x + box.card.width / HALF);
   },
 );
 

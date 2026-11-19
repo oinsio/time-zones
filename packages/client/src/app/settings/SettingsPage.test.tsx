@@ -136,6 +136,7 @@ describe("SettingsPage", () => {
         viewMode: null,
         dayColouring: DEFAULT_PREFERENCES.dayColouring,
         workingHours: DEFAULT_PREFERENCES.workingHours,
+        dayPalette: DEFAULT_PREFERENCES.dayPalette,
         zoneLabelParts: [
           ZoneLabelPart.UTC_OFFSET,
           ZoneLabelPart.ZONE_ABBREVIATION,
@@ -154,13 +155,19 @@ describe("SettingsPage", () => {
     ).toBeChecked();
   });
 
-  it("should list the groups as Theme, Hour format, View, Colouring, Zone label, Language", () => {
+  it("should list the groups as Theme, Hour format, View, Colouring, Colours, Zone label, Language", () => {
     renderSettingsPage();
     const groupNames = screen.getAllByRole("radiogroup").map((group) => {
       const captionId = group.getAttribute("aria-labelledby") ?? "";
       return document.getElementById(captionId)?.textContent;
     });
-    expect(groupNames).toEqual(["Theme", "Hour format", "View", "Colouring"]);
+    expect(groupNames).toEqual([
+      "Theme",
+      "Hour format",
+      "View",
+      "Colouring",
+      "Colours",
+    ]);
     const zoneLabel = screen.getByRole("group", { name: "Timezone label" });
     expect(
       hourGroup().compareDocumentPosition(zoneLabel) &

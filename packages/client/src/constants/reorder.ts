@@ -3,7 +3,13 @@ export const REORDER_TRANSITION_DURATION_MS = 200;
 
 export const REORDER_TRANSITION_EASING = "ease";
 
-/** Pointer travel before a press on the handle becomes a drag. */
+/**
+ * Scale of a picked-up row, so it reads as lifted.
+ * Implements FR15 of redesign-cards-grid-and-day-palettes (D6).
+ */
+export const REORDER_LIFT_SCALE = 1.02;
+
+/** Pointer travel before a press on the grab area becomes a drag. */
 export const REORDER_POINTER_ACTIVATION_DISTANCE_PX = 4;
 
 /** Fewer locations than this have no order to change. */
@@ -12,7 +18,7 @@ export const MIN_LOCATIONS_TO_REORDER = 2;
 export const REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)";
 
 /**
- * Hold before a finger press on the handle becomes a drag, so a swipe that
+ * Hold before a finger press on the grab area becomes a drag, so a swipe that
  * starts scrolling still scrolls the page.
  * Implements FR9 of support-legacy-ios-12-safari.
  */

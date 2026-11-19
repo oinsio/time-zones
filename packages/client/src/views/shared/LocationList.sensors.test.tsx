@@ -1,4 +1,5 @@
-// FR9, UX2 of support-legacy-ios-12-safari: the drag sensor follows Pointer Events support.
+// FR9, UX2 of support-legacy-ios-12-safari: the drag sensors.
+// Verifies FR15, NFR-A3 of redesign-cards-grid-and-day-palettes (D6): a mouse and a touch sensor on every engine, no keyboard sensor.
 
 import * as dndCore from "@dnd-kit/core";
 import { render } from "@testing-library/react";
@@ -32,43 +33,46 @@ async function renderListWithSensors() {
   return vi.mocked(dndCore.useSensor).mock.calls;
 }
 
+const EXPECTED_SENSORS = [
+  [
+    dndCore.MouseSensor,
+    {
+      activationConstraint: {
+        distance: REORDER_POINTER_ACTIVATION_DISTANCE_PX,
+      },
+    },
+  ],
+  [
+    dndCore.TouchSensor,
+    {
+      activationConstraint: {
+        delay: REORDER_TOUCH_ACTIVATION_DELAY_MS,
+        tolerance: REORDER_TOUCH_ACTIVATION_TOLERANCE_PX,
+      },
+    },
+  ],
+];
+
 describe("LocationList sensors", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetModules();
   });
 
-  it("should use the touch sensor and the keyboard sensor without Pointer Events", async () => {
+  it("should use the mouse sensor and the touch sensor without Pointer Events, and no keyboard sensor", async () => {
     vi.stubGlobal("PointerEvent", undefined);
     vi.resetModules();
 
     const calls = await renderListWithSensors();
 
-    expect(calls[0]).toEqual([
-      dndCore.TouchSensor,
-      {
-        activationConstraint: {
-          delay: REORDER_TOUCH_ACTIVATION_DELAY_MS,
-          tolerance: REORDER_TOUCH_ACTIVATION_TOLERANCE_PX,
-        },
-      },
-    ]);
-    expect(calls[1][0]).toBe(dndCore.KeyboardSensor);
+    expect(calls).toEqual(EXPECTED_SENSORS);
   });
 
-  it("should use the pointer sensor and the keyboard sensor with Pointer Events", async () => {
+  it("should use the mouse sensor and the touch sensor with Pointer Events, and no keyboard sensor", async () => {
     vi.resetModules();
 
     const calls = await renderListWithSensors();
 
-    expect(calls[0]).toEqual([
-      dndCore.PointerSensor,
-      {
-        activationConstraint: {
-          distance: REORDER_POINTER_ACTIVATION_DISTANCE_PX,
-        },
-      },
-    ]);
-    expect(calls[1][0]).toBe(dndCore.KeyboardSensor);
+    expect(calls).toEqual(EXPECTED_SENSORS);
   });
 });

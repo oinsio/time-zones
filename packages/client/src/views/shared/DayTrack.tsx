@@ -42,6 +42,8 @@ const LABEL_ALIGNMENT_CLASS_NAMES = [
  * Implements FR4, UX3 of fix-day-track-drag-continuity-and-smoothness (a finger drag
  * without Pointer Events).
  * Implements FR6 of fix-location-card-and-header-layout (D5): hour labels never wrap.
+ * Implements FR13 of redesign-cards-grid-and-day-palettes (D5): a 12 px bar, a 23 px handle filled with the
+ * surface of its card, on its own line across the content width on every width.
  */
 export function DayTrack({
   track,
@@ -77,10 +79,7 @@ export function DayTrack({
   };
 
   return (
-    <div
-      data-day-track
-      className="order-last flex basis-full flex-col md:order-none md:min-w-0 md:basis-0 md:flex-1"
-    >
+    <div data-day-track className="-mt-1 flex basis-full flex-col">
       <div
         ref={sliderElement}
         role="slider"
@@ -104,14 +103,11 @@ export function DayTrack({
         onKeyDown={handleKeyDown}
         className="group relative h-11 w-full cursor-pointer touch-pan-y select-none outline-none"
       >
-        <div
-          data-day-track-inset
-          className="absolute inset-x-0 inset-y-0 md:inset-x-[22px]"
-        >
+        <div data-day-track-inset className="absolute inset-x-0 inset-y-0">
           <div
             ref={barElement}
             data-day-track-bar
-            className="absolute inset-x-0 top-1/2 h-2.5 -translate-y-1/2 rounded-full md:h-3"
+            className="absolute inset-x-0 top-1/2 h-3 -translate-y-1/2 rounded-full"
             style={{ backgroundImage: buildDayTrackGradient(track.stops) }}
           />
           <div
@@ -119,13 +115,13 @@ export function DayTrack({
             className="pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
             style={{ left: formatPercent(dragFraction ?? track.fraction) }}
           >
-            <span className="h-7 w-7 rounded-full border-2 border-foreground bg-surface group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-accent md:h-8 md:w-8" />
+            <span className="h-handle w-handle rounded-full border-[length:var(--handle-border-width)] border-handle-border bg-surface group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-accent" />
           </div>
         </div>
       </div>
       <div
         aria-hidden="true"
-        className="relative hidden h-4 text-xs tabular-nums text-muted-foreground md:mx-[22px] md:block"
+        className="relative hidden h-4 text-xs tabular-nums text-muted-foreground md:block"
       >
         {track.hourLabels.map((hourLabel, labelIndex) => (
           <span

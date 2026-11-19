@@ -4,6 +4,7 @@ import { PREFERENCES_SCHEMA_VERSION } from "@/constants";
 import { PreferencesLoadStatus } from "@/ports";
 import {
   DayColouring,
+  DayPalette,
   DEFAULT_PREFERENCES,
   HourFormat,
   ThemePreference,
@@ -42,6 +43,7 @@ describe("the view mode in the preferences document", () => {
         viewMode: null,
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: DayPalette.VIVID,
       },
     });
   });
@@ -69,6 +71,7 @@ describe("the view mode in the preferences document", () => {
         viewMode: "grid",
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
+        dayPalette: DayPalette.VIVID,
       }),
     );
     expect(written.schemaVersion).toBe(PREFERENCES_SCHEMA_VERSION);

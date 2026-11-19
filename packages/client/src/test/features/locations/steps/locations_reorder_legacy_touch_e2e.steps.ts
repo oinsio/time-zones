@@ -7,7 +7,7 @@ import {
   centreOf,
   dispatchTouch,
   dragWithFinger,
-  moveHandle,
+  grabArea,
   releasePointFor,
   startTouch,
   TOUCH_SWIPE_DISTANCE_PX,
@@ -27,11 +27,11 @@ Given("the engine has no Pointer Events", async ({ locationsWorld }) => {
 
 // Verifies FR9, UX2 of support-legacy-ios-12-safari: drag after the hold.
 When(
-  "the user holds the handle of {string} and drags it below {string} with a finger",
+  "the user holds the city of {string} and drags it below {string} with a finger",
   async ({ locationsWorld }, cityName: string, targetName: string) => {
     const { page } = locationsWorld;
     const session = await startTouch(page);
-    const from = await centreOf(moveHandle(page, cityName));
+    const from = await centreOf(grabArea(page, cityName));
     const to = await releasePointFor(page, targetName, false);
     await dispatchTouch(session, "touchStart", from);
     await page.waitForTimeout(HOLD_DURATION_MS);
@@ -49,11 +49,11 @@ When(
 
 // Verifies FR9, UX2 of support-legacy-ios-12-safari: a swipe without a hold scrolls.
 When(
-  "the user swipes up over the handle of {string} with a finger",
+  "the user swipes up over the city of {string} with a finger",
   async ({ locationsWorld }, cityName: string) => {
     const { page } = locationsWorld;
     const session = await startTouch(page);
-    const start = await centreOf(moveHandle(page, cityName));
+    const start = await centreOf(grabArea(page, cityName));
     await dragWithFinger(session, start, {
       x: start.x,
       y: start.y + TOUCH_SWIPE_DISTANCE_PX,
