@@ -117,7 +117,8 @@
 - Impact: Low. An implementer who trusts the sentence may not expect the Grid menu or the `grid_view_layers_e2e` "open location menu lies above the date bar" screenshot to shift. The "Open menu inside the screen" Grid 390 scenario still guards the containment.
 - Fix: Replace the sentence with "The Grid menu is right-aligned to the button by `useFixedMenuPosition`, so it also moves 12 px right; it stays inside the screen because the button stays inside the Grid panel."
 - Fix risk: none
-- Status: open
+- Status: fixed
+- Resolution: design.md D2 no longer says the Grid menu is unchanged; it now says useFixedMenuPosition right-aligns the Grid menu to the button, so it also moves 12 px right and stays inside the screen because the button stays inside the Grid panel.
 
 ## Verdict
 

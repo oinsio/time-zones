@@ -32,7 +32,7 @@ Alternatives: the text glyph «⋮» (U+22EE) in the constant. Rejected: how the
 - The menu root span gets `-mr-3`, a 12 px negative right margin. The 44 px box then ends 12 px into the side padding, which is always at least 13 px (cards) or 16 px (Grid). It stays inside the card's border box and the Grid panel.
 - The time-to-content-edge distance becomes 44 − 12 = 32 px (FR2, M1). The dots' centre sits 22 px right of the time's right edge and 10 px left of the content edge. From the dots to the row border that is 10 + padding + 1 px border: 24–31 px for cards, 27 px for Grid. The difference from the 22 px on the time side is at most 9 px, which meets UX1's ≤ 10 px.
 - The hit area starts right at the time's right edge, so it overlaps nothing (FR3).
-- The Cards menu stays `right-0` of the root, so it moves 12 px right and stays inside the card padding. The Grid menu is unchanged.
+- The Cards menu stays `right-0` of the root, so it moves 12 px right and stays inside the card padding. The Grid menu is right-aligned to the button by `useFixedMenuPosition` (`right: clientWidth - triggerBox.right`), so it also moves 12 px right; it stays inside the screen because the button stays inside the Grid panel.
 - "Right content edge" means: for a card, the card box minus its right border and right padding (computed style). For Grid, the sticky header box (`STICKY_BOX_CLASS_NAMES`, width `calc(var(--grid-panel-width) - 2*var(--grid-row-padding))`), which ends one row padding before the panel edge.
 
 Alternatives:
