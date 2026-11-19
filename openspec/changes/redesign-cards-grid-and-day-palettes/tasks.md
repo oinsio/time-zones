@@ -50,7 +50,7 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `open
 - [x] 7.2 GREEN: drop `caption`/`captionKey` and `locations.hereMarkCaption`; `isUniversalTime` in `presentZoneLine` and `presentLocationRows`; `locations.universalTime` in both locales; `formatLocalTimeParts` and `LocationRow.localTimeParts` through `presentZoneMoment`. Verify: the four test files of 7.1 pass one by one.
 - [x] 7.3 Unit BDD: update `src/test/features/locations/locations_here_mark_unit.feature`, `locations_zone_line_unit.feature`, `locations_device_time_unit.feature` and their steps to the `locations` scenarios "Every mark kind is fully defined", "Unknown elements leave nothing behind", "UTC with the zone abbreviation only", "Universal Time on the UTC row", "Hiding the country applies to every row at once", "Meta line follows the zone label", "Zero offset" (Reykjavik) in `locations_utc_offset_unit.feature`. Verify: each steps file passes, run one at a time.
 - [x] 7.4 Work bound (NFR-P1): in `src/test/features/locations/locations_local_time_unit.feature` add the `locations` "Card growth" scenario "Presenting 50 rows again in the 12-hour format builds no formatter" (the day period marker split included), steps with `startWorkCount()`. Verify: `npx vitest run src/test/features/locations/steps/locations_local_time_unit.steps.ts` passes.
-- [ ] 7.5 Mutation: Stryker on `src/presenter/zoneLine.ts src/presenter/locationMark.ts src/presenter/localDateTime.ts src/presenter/presentLocationRows.ts src/presenter/presentZoneMoment.ts` (M5).
+- [x] 7.5 Mutation: Stryker on `src/presenter/zoneLine.ts src/presenter/locationMark.ts src/presenter/localDateTime.ts src/presenter/presentLocationRows.ts src/presenter/presentZoneMoment.ts` (M5).
 
 ## 8. Zone line with middle dots (FR9; design D5)
 
@@ -106,7 +106,7 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `open
 - [ ] 15.1 `pnpm run lint`, `pnpm run typecheck`, `pnpm test`, `pnpm run build`, `pnpm run check:bundle-size`, `pnpm run check:legacy-build`, one at a time; all pass.
 - [ ] 15.2 Every view-contract feature still passes for Cards and Grid: `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts --project "view-contract-cards"`, then the same for `view-contract-grid`.
 - [ ] 15.3 Traceability (M7): for each id in FR1–FR25, NFR-P1, NFR-P2, NFR-A1–NFR-A3, NFR-R1, NFR-R2, UX2–UX4, `grep -rl "redesign-cards-grid-and-day-palettes" src | xargs grep -l "<id>\b"` prints at least one file; UX1 is covered by H1. M6: `grep -rn "DragHandle" src` prints nothing and the reorder unit BDD of 11.5 passes.
-- [ ] 15.4 Handoff H1: write the `## H1: Compare the re-approved screenshots with the design screens` section of `temporary-docs/gnomish/github-oinsio-time-zones-149/handoff/README.md` (Serves: UX1, NFR-R2; Files: none; Verify: the steps of the H1 bullet below; Why manual and Automated part copied from below). No patch: the item changes no file. Verify: `grep -c "^## H1:" temporary-docs/gnomish/github-oinsio-time-zones-149/handoff/README.md` prints 1.
+- [x] 15.4 Handoff H1: write the `## H1: Compare the re-approved screenshots with the design screens` section of `temporary-docs/gnomish/github-oinsio-time-zones-149/handoff/README.md` (Serves: UX1, NFR-R2; Files: none; Verify: the steps of the H1 bullet below; Why manual and Automated part copied from below). No patch: the item changes no file. Verify: `grep -c "^## H1:" temporary-docs/gnomish/github-oinsio-time-zones-149/handoff/README.md` prints 1.
 
 ## Human follow-up
 

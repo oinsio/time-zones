@@ -19,7 +19,7 @@ describe("LocationRow", () => {
 
   it("should show country, abbreviation and offset as separate elements on the muted zone line", () => {
     renderRow();
-    const zoneLine = screen.getByText("India").parentElement;
+    const zoneLine = screen.getByText("India").closest("[data-zone-line]");
     expect(zoneLine?.parentElement).toHaveClass("text-muted-foreground");
     expect(
       Array.from(zoneLine?.children ?? []).map(
@@ -30,8 +30,12 @@ describe("LocationRow", () => {
 
   it("should keep the abbreviation and the offset on one line each", () => {
     renderRow();
-    expect(screen.getByText(/IST/)).toHaveClass("whitespace-nowrap");
-    expect(screen.getByText(/UTC\+5:30/)).toHaveClass("whitespace-nowrap");
+    expect(
+      screen.getByText(/IST/).closest("[data-zone-line-part]"),
+    ).toHaveClass("whitespace-nowrap");
+    expect(
+      screen.getByText(/UTC\+5:30/).closest("[data-zone-line-part]"),
+    ).toHaveClass("whitespace-nowrap");
   });
 
   it("should let the place wrap between words", () => {
@@ -41,7 +45,7 @@ describe("LocationRow", () => {
 
   it("should never cut a zone line element and hide its separators from assistive technology", () => {
     renderRow();
-    const zoneLine = screen.getByText("India").parentElement;
+    const zoneLine = screen.getByText("India").closest("[data-zone-line]");
     expect(zoneLine?.innerHTML).not.toMatch(/truncate|text-ellipsis/);
     const dots = zoneLine?.querySelectorAll("[data-zone-line-dot]") ?? [];
     expect(dots).toHaveLength(2);
