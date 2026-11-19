@@ -45,7 +45,7 @@ describe("CalendarDialog", () => {
 
     const dialog = screen.getByRole("dialog");
     expect(
-      within(dialog).getByRole("heading", { name: "March 2026" }),
+      await within(dialog).findByRole("heading", { name: "March 2026" }),
     ).toBeInTheDocument();
     expect(within(dialog).getAllByRole("row")).toHaveLength(6);
   });

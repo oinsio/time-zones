@@ -120,6 +120,11 @@ const KNOWN_CITIES: Record<string, StoredLocation> = {
     label: "St. Vincent",
     countryCode: "VC",
   },
+  "Петропавловск-Камчатский": {
+    timeZoneId: "Asia/Kamchatka",
+    label: "Петропавловск-Камчатский",
+    countryCode: "RU",
+  },
 };
 
 /** The scenario phrase for the device time location in a stored list. */

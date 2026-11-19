@@ -6,6 +6,7 @@ export type Theme = "light" | "dark";
 export interface ThemeColours {
   background: string;
   foreground: string;
+  mutedForeground: string;
   notice: string;
   noticeForeground: string;
   surface: string;
@@ -74,6 +75,9 @@ export function readThemeColours(
   return {
     background: toComputedRgb(readTokenHex(themeBlock, "background")),
     foreground: toComputedRgb(readTokenHex(themeBlock, "foreground")),
+    mutedForeground: toComputedRgb(
+      readTokenHex(themeBlock, "muted-foreground"),
+    ),
     notice: toComputedRgb(readTokenHex(themeBlock, "notice")),
     noticeForeground: toComputedRgb(
       readTokenHex(themeBlock, "notice-foreground"),

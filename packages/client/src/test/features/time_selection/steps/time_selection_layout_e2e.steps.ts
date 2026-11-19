@@ -1,10 +1,9 @@
-import { expect } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import { listRow, menuButton } from "../../locations/steps/locationsE2eHelpers";
 import {
   barOf,
-  centreOfBox,
   handleOf,
   hourLabelsOf,
   readTokenStyle,
@@ -17,50 +16,60 @@ import {
 const { Then } = createBdd(test);
 
 const TOLERANCE_PX = 1;
-const CITY_LINE_SELECTOR = "span.font-semibold";
+const HOUR_LABEL_COUNT = 5;
 
-// Verifies NFR-R2 of add-time-sliders-to-location-cards: the track takes its own line.
+const cardContentWidthOf = async (page: Page, city: string) => {
+  const card = await requireBox(listRow(page, city));
+  const cardEdges = await listRow(page, city).evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      left:
+        Number.parseFloat(style.paddingLeft) +
+        Number.parseFloat(style.borderLeftWidth),
+      right:
+        Number.parseFloat(style.paddingRight) +
+        Number.parseFloat(style.borderRightWidth),
+    };
+  });
+  return card.width - cardEdges.left - cardEdges.right;
+};
+
+// Verifies FR13, UX1 of redesign-cards-grid-and-day-palettes: the track under the zone line and the date.
 Then(
-  "the track of {string} is below its city and time and spans the card's content width",
+  "the track of {string} is below its zone line and date and spans the card's content width",
   async ({ locationsWorld }, city: string) => {
     const { page } = locationsWorld;
     const bar = await requireBox(barOf(page, city));
-    const time = await requireBox(timeTextOf(page, city));
-    const card = await requireBox(listRow(page, city));
-    const cardEdges = await listRow(page, city).evaluate((element) => {
-      const style = getComputedStyle(element);
-      return {
-        left:
-          Number.parseFloat(style.paddingLeft) +
-          Number.parseFloat(style.borderLeftWidth),
-        right:
-          Number.parseFloat(style.paddingRight) +
-          Number.parseFloat(style.borderRightWidth),
-      };
-    });
-    expect(bar.y).toBeGreaterThanOrEqual(time.y + time.height - TOLERANCE_PX);
+    const zoneLine = await requireBox(
+      listRow(page, city).locator("[data-zone-line]").first(),
+    );
+    const date = await requireBox(listRow(page, city).locator("time").first());
+    expect(bar.y).toBeGreaterThanOrEqual(
+      Math.max(zoneLine.y + zoneLine.height, date.y + date.height) -
+        TOLERANCE_PX,
+    );
     expect(
-      Math.abs(bar.width - (card.width - cardEdges.left - cardEdges.right)),
+      Math.abs(bar.width - (await cardContentWidthOf(page, city))),
     ).toBeLessThanOrEqual(TOLERANCE_PX);
   },
 );
 
-// Verifies NFR-R2, UX3 of add-time-sliders-to-location-cards: the track sits on the city line.
+// Verifies FR13, UX1 of redesign-cards-grid-and-day-palettes: the track on its own line, labels under it.
 Then(
-  "the track of {string} is right of its time column on the same line with its hour labels under it",
+  "the track of {string} is below the line of its city and time, spans the card's content width and has its hour labels under it",
   async ({ locationsWorld }, city: string) => {
     const { page } = locationsWorld;
     const bar = await requireBox(barOf(page, city));
     const time = await requireBox(timeTextOf(page, city));
-    const cityLine = await requireBox(
-      listRow(page, city).locator(CITY_LINE_SELECTOR).first(),
+    const menu = await requireBox(menuButton(page, city));
+    expect(bar.y).toBeGreaterThanOrEqual(
+      Math.max(time.y + time.height, menu.y + menu.height) - TOLERANCE_PX,
     );
-    const barCentreY = centreOfBox(bar).y;
-    expect(bar.x).toBeGreaterThanOrEqual(time.x + time.width - TOLERANCE_PX);
-    expect(barCentreY).toBeGreaterThanOrEqual(cityLine.y);
-    expect(barCentreY).toBeLessThanOrEqual(cityLine.y + cityLine.height);
+    expect(
+      Math.abs(bar.width - (await cardContentWidthOf(page, city))),
+    ).toBeLessThanOrEqual(TOLERANCE_PX);
     const labels = hourLabelsOf(page, city);
-    await expect(labels).toHaveCount(5);
+    await expect(labels).toHaveCount(HOUR_LABEL_COUNT);
     for (const label of await labels.all()) {
       const labelBox = await requireBox(label);
       expect(labelBox.y).toBeGreaterThanOrEqual(
@@ -69,6 +78,22 @@ Then(
     }
   },
 );
+
+// Verifies FR13 of redesign-cards-grid-and-day-palettes: the handle border by theme.
+Then(
+  "the visible handle of {string} has a border of {int} px in the colour {string}",
+  async ({ locationsWorld }, city: string, width: number, colour: string) => {
+    const handle = visibleHandleOf(locationsWorld.page, city);
+    await expect(handle).toHaveCSS("border-top-width", `${width}px`);
+    await expect(handle).toHaveCSS("border-top-color", hexToRgb(colour));
+  },
+);
+
+const HEX_RADIX = 16;
+const hexToRgb = (hex: string): string =>
+  `rgb(${[1, 3, 5]
+    .map((start) => Number.parseInt(hex.slice(start, start + 2), HEX_RADIX))
+    .join(", ")})`;
 
 // Verifies NFR-R2, UX1 of add-time-sliders-to-location-cards: bar height and visible handle size.
 Then(
@@ -107,8 +132,6 @@ Then(
   },
 );
 
-const MIN_CLEARANCE_PX = 12;
-
 // Verifies FR4, UX1 of fix-day-track-handle-overlap-and-end-of-day: the handle covers nothing.
 Then(
   "the handle of {string} lies inside its slider and clear of its time and its menu",
@@ -123,11 +146,14 @@ Then(
     expect(hitArea.x + hitArea.width).toBeLessThanOrEqual(
       slider.x + slider.width + TOLERANCE_PX,
     );
-    expect(visibleHandle.x).toBeGreaterThanOrEqual(
-      time.x + time.width + MIN_CLEARANCE_PX,
-    );
-    expect(visibleHandle.x + visibleHandle.width).toBeLessThanOrEqual(
-      menu.x - MIN_CLEARANCE_PX,
-    );
+    for (const covered of [time, menu]) {
+      const overlapsHorizontally =
+        visibleHandle.x < covered.x + covered.width - TOLERANCE_PX &&
+        visibleHandle.x + visibleHandle.width > covered.x + TOLERANCE_PX;
+      const overlapsVertically =
+        visibleHandle.y < covered.y + covered.height - TOLERANCE_PX &&
+        visibleHandle.y + visibleHandle.height > covered.y + TOLERANCE_PX;
+      expect(overlapsHorizontally && overlapsVertically).toBe(false);
+    }
   },
 );

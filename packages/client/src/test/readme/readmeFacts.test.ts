@@ -235,7 +235,7 @@ describe("README documents", () => {
       // FR3, NFR-A1: both views shown, every image has alt text
       const text = readDocument(documentPath);
       expect(text).toMatch(/docs\/design\/screens\/grid-[\w-]+\.png/);
-      expect(text).toMatch(/docs\/design\/screens\/(phone|tablet)-[\w-]+\.png/);
+      expect(text).toMatch(/docs\/design\/screens\/cards-(phone|tablet)-[\w-]+\.png/);
       const alts = readImageAlts(text);
       expect(alts.length).toBeGreaterThan(0);
       expect(alts.filter((alt) => alt.trim() === "")).toEqual([]);

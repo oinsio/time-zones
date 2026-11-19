@@ -1,5 +1,6 @@
 Feature: Date bar layout in a real browser
   Implements change select-date-with-calendar-and-now.
+  Implements change redesign-cards-grid-and-day-palettes.
   The bar stays at the bottom, fits every screen and looks as approved.
 
   @select-date-with-calendar-and-now @NFR-R2
@@ -132,3 +133,75 @@ Feature: Date bar layout in a real browser
       | 2560  | live                   |
       | 2560  | pinned                 |
       | 2560  | calendar open           |
+
+  @redesign-cards-grid-and-day-palettes @FR14 @UX1
+  Scenario Outline: Bar on a narrow screen with the page background in the <theme> theme
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the locations screen uses the <theme> theme
+    And the screen is 390 px wide for the locations
+    And the user opens the locations app
+    When the user moved to the next day with the bar
+    Then the arrows, the date and Now form one group centred in the bar
+    And the bar touches the bottom of the viewport
+    And the bar has the <theme> page background and no top border
+
+    Examples:
+      | theme |
+      | light |
+      | dark  |
+
+  @redesign-cards-grid-and-day-palettes @FR14 @UX1
+  Scenario Outline: Bar controls look as approved in the <theme> theme with outline details
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the locations screen uses the <theme> theme
+    And the user opens the locations app
+    When the user moved to the next day with the bar
+    Then Now is an outlined button 44 px high with a 13 px radius, a 1 px border, no fill, an 18 px icon and a label of 16 px and weight 600
+
+    Examples:
+      | theme |
+      | light |
+      | dark  |
+
+  @redesign-cards-grid-and-day-palettes @FR14
+  Scenario Outline: An inactive Now is grey in the <theme> theme
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the locations screen uses the <theme> theme
+    When the user opens the locations app
+    Then the inactive Now has the border "<border>" and the label "<label>" with a contrast of at least 4.5:1 against the page background
+
+    Examples:
+      | theme | border  | label   |
+      | light | #c9ccd4 | #60616c |
+      | dark  | #33415c | #9aaed1 |
+
+  @redesign-cards-grid-and-day-palettes @FR14
+  Scenario Outline: Now keeps its place at <width> px in the <theme> theme
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the locations screen uses the <theme> theme
+    And the screen is <width> px wide for the locations
+    And the user opens the locations app
+    When the box of Now is recorded
+    And the user moved to the next day with the bar
+    Then the box of Now is the recorded box within 1 px
+
+    Examples:
+      | width | theme |
+      | 390   | light |
+      | 390   | dark  |
+      | 1024  | light |
+      | 1024  | dark  |
+
+  @redesign-cards-grid-and-day-palettes @FR14 @UX1
+  Scenario Outline: The shown date is bold and 16 px in the <theme> theme at <width> px
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the locations screen uses the <theme> theme
+    And the screen is <width> px wide for the locations
+    And the user opens the locations app
+    When the user moved to the next day with the bar
+    Then the shown date is 16 px with weight 700
+
+    Examples:
+      | theme | width |
+      | light | 390   |
+      | dark  | 1024  |

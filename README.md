@@ -41,12 +41,12 @@ Cards view on phone and tablet, Grid view on desktop. Details: [docs/design](doc
 
 <table>
   <tr>
-    <td align="center"><img src="docs/design/screens/phone-light.png" alt="Cards view on a phone, light theme" width="300"></td>
-    <td align="center"><img src="docs/design/screens/phone-dark.png" alt="Cards view on a phone, dark theme" width="300"></td>
+    <td align="center"><img src="docs/design/screens/cards-phone-light.png" alt="Cards view on a phone, light theme" width="300"></td>
+    <td align="center"><img src="docs/design/screens/cards-phone-dark.png" alt="Cards view on a phone, dark theme" width="300"></td>
   </tr>
 </table>
 
-<img src="docs/design/screens/tablet-light.png" alt="Cards view on a tablet, light theme" width="720">
+<img src="docs/design/screens/cards-tablet-light.png" alt="Cards view on a tablet, light theme" width="720">
 
 <img src="docs/design/screens/grid-desktop-light.png" alt="Grid view on a desktop, light theme" width="720">
 

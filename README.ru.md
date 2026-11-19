@@ -41,12 +41,12 @@
 
 <table>
   <tr>
-    <td align="center"><img src="docs/design/screens/phone-light.png" alt="Вид «Карточки» на телефоне, светлая тема" width="300"></td>
-    <td align="center"><img src="docs/design/screens/phone-dark.png" alt="Вид «Карточки» на телефоне, тёмная тема" width="300"></td>
+    <td align="center"><img src="docs/design/screens/cards-phone-light.png" alt="Вид «Карточки» на телефоне, светлая тема" width="300"></td>
+    <td align="center"><img src="docs/design/screens/cards-phone-dark.png" alt="Вид «Карточки» на телефоне, тёмная тема" width="300"></td>
   </tr>
 </table>
 
-<img src="docs/design/screens/tablet-light.png" alt="Вид «Карточки» на планшете, светлая тема" width="720">
+<img src="docs/design/screens/cards-tablet-light.png" alt="Вид «Карточки» на планшете, светлая тема" width="720">
 
 <img src="docs/design/screens/grid-desktop-light.png" alt="Вид «Сетка» на десктопе, светлая тема" width="720">
 
