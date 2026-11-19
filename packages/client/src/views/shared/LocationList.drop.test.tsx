@@ -43,6 +43,7 @@ const rows: LocationRow[] = ["moscow", "tokyo", "kyiv"].map((id) => ({
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
+  localTimeParts: { digits: "", dayPeriodMarker: "" },
   localDateLabel: "",
   localIsoDate: "",
   wallTimeInputLabel: "",

@@ -204,6 +204,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           viewMode: null,
           dayColouring: "PLAIN",
           workingHours: parseHours("18:00-10:00"),
+          dayPalette: "VIVID",
         }),
       );
       When("the settings page is shown", showSettings);

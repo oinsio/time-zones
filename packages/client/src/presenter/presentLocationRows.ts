@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { UTC_ZONE_ID } from "@/constants";
 import {
   getLocationMarkKind,
   isDeviceTimeLocation,
@@ -29,6 +31,22 @@ export type LocationRow = PresentedZoneMoment & {
   accessibleName?: string;
 };
 
+type ZoneLinePlaceKind = {
+  isDeviceTime: boolean;
+  isUniversalTime: boolean;
+  countryName: string;
+};
+
+/** The place element of a zone line: "Device time", "Universal Time" or the country. */
+function getZoneLinePlaceText(
+  translate: TFunction,
+  { isDeviceTime, isUniversalTime, countryName }: ZoneLinePlaceKind,
+): string {
+  if (isDeviceTime) return translate("locations.deviceTimeMeta");
+  if (isUniversalTime) return translate("locations.universalTime");
+  return countryName;
+}
+
 /**
  * Rows of the location list: city, country name in the interface language and
  * the UTC offset at the given instant. The device time location has the
@@ -46,6 +64,7 @@ export type LocationRow = PresentedZoneMoment & {
  * Implements FR8, UX3 of add-settings-page-and-device-time-location (D4).
  * Implements FR1, FR3 of show-city-labels-in-interface-language (D4).
  * Implements FR5, FR6, FR13 of show-zone-abbreviations-and-zone-label-setting (D5): the zone line.
+ * Implements FR18, FR19 of redesign-cards-grid-and-day-palettes (D7): "Universal Time" in place of the country of a city location in `UTC`.
  */
 export function presentLocationRows(
   locations: readonly Location[],
@@ -61,6 +80,10 @@ export function presentLocationRows(
     );
     const mark = markKind === undefined ? undefined : marks[markKind];
     const isDeviceTime = isDeviceTimeLocation(location);
+    const isUniversalTime =
+      !isDeviceTime &&
+      location.timeZoneId === UTC_ZONE_ID &&
+      !location.countryCode;
     const cityLabel = isDeviceTime
       ? (context.deviceTimeCityLabel ?? location.timeZoneId)
       : (context.cityLabels?.get(location.id) ?? location.label);
@@ -73,9 +96,11 @@ export function presentLocationRows(
       mark,
       ...zoneMoment,
       zoneLineParts: presentZoneLine({
-        placeText: isDeviceTime
-          ? translate("locations.deviceTimeMeta")
-          : countryName,
+        placeText: getZoneLinePlaceText(translate, {
+          isDeviceTime,
+          isUniversalTime,
+          countryName,
+        }),
         zoneAbbreviationLabel: zoneMoment.zoneAbbreviationLabel,
         utcOffsetLabel: zoneMoment.utcOffsetLabel,
         zoneLabelParts: context.zoneLabelParts,

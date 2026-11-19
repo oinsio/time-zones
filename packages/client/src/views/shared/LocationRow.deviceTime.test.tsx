@@ -22,6 +22,7 @@ const deviceTimeRow: LocationRowModel = {
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "12:30",
+  localTimeParts: { digits: "12:30", dayPeriodMarker: "" },
   localDateLabel: "Sun, Mar 8",
   localIsoDate: "2026-03-08",
   wallTimeInputLabel: "",
@@ -29,7 +30,6 @@ const deviceTimeRow: LocationRowModel = {
   mark: {
     kind: LocationMarkKind.HERE,
     accessibleLabel: "You are here",
-    caption: "here",
   },
   zoneLineParts: [
     { kind: ZoneLinePartKind.PLACE, text: "Device time" },

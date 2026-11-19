@@ -22,6 +22,7 @@ export const kolkataRow: LocationRowModel = {
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
+  localTimeParts: { digits: "", dayPeriodMarker: "" },
   localDateLabel: "",
   localIsoDate: "",
   wallTimeInputLabel: "",

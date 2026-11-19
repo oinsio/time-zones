@@ -45,7 +45,7 @@
     "clockChangeAmountMinutes": "{{minutes}} мин",
     "clockChangeAmountHoursMinutes": "{{hours}} ч {{minutes}} мин",
     "hereMarkLabel": "Вы здесь",
-    "hereMarkCaption": "здесь",
+    "universalTime": "Всемирное время",
     "deviceTimeMeta": "Время устройства",
     "deviceTimeName": "{{city}}, {{hereMark}}, Время устройства",
     "addLocation": "Добавить место",

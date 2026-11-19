@@ -74,7 +74,6 @@ describe("present location rows with a home location", () => {
     expect(rowOf(rows, "Almaty")?.mark).toEqual({
       kind: "home",
       accessibleLabel: "Home location",
-      caption: "",
     });
   });
 
@@ -99,7 +98,7 @@ describe("present location rows while travelling", () => {
     const moscow = rowOf(rows, "Moscow");
 
     expect(moscow?.mark?.kind).toBe("here");
-    expect(moscow?.mark?.caption).toBe("here");
+    expect(moscow?.mark?.kind).toBe("here");
     expect(moscow?.offsetDifferenceLabel).toBe("−2 h");
   });
 });

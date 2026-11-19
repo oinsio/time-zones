@@ -220,6 +220,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         offsetDifferenceLabel: "",
         offsetDifferenceAccessibleLabel: "",
         localTimeLabel: "",
+        localTimeParts: { digits: "", dayPeriodMarker: "" },
         localDateLabel: "",
         localIsoDate: "",
         wallTimeInputLabel: "",

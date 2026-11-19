@@ -22,6 +22,7 @@ const countrylessRow: LocationRowModel = {
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
+  localTimeParts: { digits: "", dayPeriodMarker: "" },
   localDateLabel: "",
   localIsoDate: "",
   wallTimeInputLabel: "",

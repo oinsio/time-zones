@@ -57,6 +57,7 @@ export const buildStoredPayload = (fields: Record<string, unknown>) => ({
   viewMode: DEFAULT_PREFERENCES.viewMode,
   dayColouring: DEFAULT_PREFERENCES.dayColouring,
   workingHours: DEFAULT_PREFERENCES.workingHours,
+  dayPalette: DEFAULT_PREFERENCES.dayPalette,
   ...fields,
 });
 

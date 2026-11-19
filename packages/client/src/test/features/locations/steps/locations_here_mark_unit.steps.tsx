@@ -4,16 +4,12 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { cleanup, render, screen } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
-import {
-  LOCATION_MARK_TEXT_KEYS,
-  LocationMarkKind,
-  presentLocationMarks,
-} from "@/presenter";
+import { LocationMarkKind, presentLocationMarks } from "@/presenter";
 import { LocationMarkIcon } from "@/views/shared";
 import {
   createDeviceTimeZoneWorld,
   ENGLISH_LANGUAGE,
-  hereCaption,
+  hereMarkLabel,
   rowHasHereMark,
 } from "./deviceTimeZoneWorld";
 
@@ -66,7 +62,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           expect(children).toHaveLength(3);
           expect(children[0]?.querySelector("svg")).not.toBeNull();
           expect(children[1]).toBe(citySpan);
-          expect(children[2]).toHaveTextContent(hereCaption(ENGLISH_LANGUAGE));
+          expect(children[2]).toHaveTextContent(
+            hereMarkLabel(ENGLISH_LANGUAGE),
+          );
         },
       );
       And(
@@ -86,7 +84,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     When("the user opens the app", openApp);
     Then("exactly {int} rows show the here mark", (_ctx, count: number) => {
       const markedRows = listRows().filter((row) =>
-        rowHasHereMark(row, hereCaption(ENGLISH_LANGUAGE)),
+        rowHasHereMark(row, hereMarkLabel(ENGLISH_LANGUAGE)),
       );
       expect(markedRows).toHaveLength(count);
     });
@@ -124,20 +122,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     "Every mark kind is fully defined",
     ({ Given, Then, And }, variables) => {
       Given("the interface language is {string}", givenLanguage);
-      Then(
-        "every mark kind has an accessible label and, where it has one, a caption",
-        () => {
-          const marks = presentLocationMarks(
-            i18n.getFixedT(variables.language),
-          );
-          for (const kind of Object.values(LocationMarkKind)) {
-            expect(marks[kind].accessibleLabel).not.toBe("");
-            if (LOCATION_MARK_TEXT_KEYS[kind].captionKey !== undefined) {
-              expect(marks[kind].caption).not.toBe("");
-            }
-          }
-        },
-      );
+      Then("every mark kind has an accessible label and no caption", () => {
+        const marks = presentLocationMarks(i18n.getFixedT(variables.language));
+        for (const kind of Object.values(LocationMarkKind)) {
+          expect(marks[kind].accessibleLabel).not.toBe("");
+          expect(marks[kind]).not.toHaveProperty("caption");
+        }
+      });
       And("every mark kind renders an icon", () => {
         const marks = presentLocationMarks(i18n.getFixedT(variables.language));
         for (const kind of Object.values(LocationMarkKind)) {

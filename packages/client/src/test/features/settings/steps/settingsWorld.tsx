@@ -98,6 +98,7 @@ export const createSettingsWorld = () => {
             viewMode: null,
             dayColouring: "TIME_OF_DAY",
             workingHours: { start: "10:00", end: "18:00" },
+            dayPalette: "VIVID",
           },
         }),
       ),

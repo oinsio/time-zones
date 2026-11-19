@@ -45,7 +45,7 @@
     "clockChangeAmountMinutes": "{{minutes}} min",
     "clockChangeAmountHoursMinutes": "{{hours}} h {{minutes}} min",
     "hereMarkLabel": "You are here",
-    "hereMarkCaption": "here",
+    "universalTime": "Universal Time",
     "deviceTimeMeta": "Device time",
     "deviceTimeName": "{{city}}, {{hereMark}}, Device time",
     "addLocation": "Add location",

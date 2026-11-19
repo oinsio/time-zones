@@ -21,6 +21,7 @@ const row = {
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "",
+  localTimeParts: { digits: "", dayPeriodMarker: "" },
   localDateLabel: "",
   localIsoDate: "",
   wallTimeInputLabel: "",

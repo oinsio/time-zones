@@ -13,7 +13,7 @@ import { startWorkCount, type WorkCount } from "@/test/workCounters";
 import {
   createDeviceTimeZoneWorld,
   ENGLISH_LANGUAGE,
-  hereCaption,
+  hereMarkLabel,
   RUSSIAN_LANGUAGE,
 } from "./deviceTimeZoneWorld";
 import { expectFormattersPerZoneAtMost } from "./rowBudgetWorld";
@@ -162,7 +162,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then(
       "the {string} row shows the Russian here caption",
       (_ctx, city: string) =>
-        expectRowShows(city, hereCaption(RUSSIAN_LANGUAGE)),
+        expectRowShows(city, hereMarkLabel(RUSSIAN_LANGUAGE)),
     );
   });
 

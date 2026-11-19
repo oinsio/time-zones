@@ -1,5 +1,6 @@
 // Verifies FR2, FR3, FR5, FR6, FR13 of show-zone-abbreviations-and-zone-label-setting (D5).
 // Verifies FR3, FR4 of add-country-to-zone-label.
+// Verifies FR18, FR19 of redesign-cards-grid-and-day-palettes.
 
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
@@ -106,8 +107,8 @@ describe("the zone line of a city row", () => {
     expect(texts(present(["Almaty"])[0])).toEqual(["Kazakhstan", "UTC+5"]);
   });
 
-  it("should show the UTC zone once", () => {
-    expect(texts(present(["UTC"])[0])).toEqual(["UTC"]);
+  it("should show the UTC zone once, after Universal Time", () => {
+    expect(texts(present(["UTC"])[0])).toEqual(["Universal Time", "UTC"]);
   });
 
   it("should show the UTC zone abbreviation when the offset is hidden", () => {
@@ -174,5 +175,38 @@ describe("the zone line of the device time row", () => {
   it("should have no meta label any more", () => {
     const [row] = present([], { includeDeviceTime: true });
     expect(row).not.toHaveProperty("metaLabel");
+  });
+});
+
+describe("Universal Time and the device time location in the zone line", () => {
+  it.each([
+    ["en", ["Universal Time", "UTC"]],
+    ["ru", ["Всемирное время", "UTC"]],
+  ] as const)("should read the UTC row in %s as %j", (language, expected) => {
+    expect(texts(present(["UTC"], { language })[0])).toEqual(expected);
+  });
+
+  it("should hide Universal Time with the country", () => {
+    expect(
+      texts(
+        present(["UTC"], {
+          zoneLabelParts: [UTC_OFFSET, ZONE_ABBREVIATION],
+        })[0],
+      ),
+    ).toEqual(["UTC"]);
+  });
+
+  it("should show nothing when no part is on", () => {
+    expect(texts(present(["UTC"], { zoneLabelParts: [] })[0])).toEqual([]);
+  });
+
+  it("should read the device time location in Berlin as Device time, CET, UTC+1", () => {
+    const rows = present([], {
+      includeDeviceTime: true,
+      deviceTimeZoneId: "Europe/Berlin",
+      instant: january,
+    });
+
+    expect(texts(rows[0])).toEqual(["Device time", "CET", "UTC+1"]);
   });
 });

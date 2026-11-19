@@ -1,4 +1,5 @@
 // Verifies FR1, FR2 of show-local-time-and-date-on-location-cards (D3).
+// Verifies FR8, NFR-P1 of redesign-cards-grid-and-day-palettes.
 import { describe, expect, it } from "vitest";
 import { fakeClock, Temporal } from "@/lib/temporal";
 import { HourFormat } from "@/preferences";
@@ -6,6 +7,7 @@ import { startWorkCount } from "@/test/workCounters";
 import {
   formatLocalDate,
   formatLocalTime,
+  formatLocalTimeParts,
   formatWallClockDate,
   formatWallClockTime,
 } from "./localDateTime";
@@ -122,5 +124,53 @@ describe("formatWallClockDate", () => {
 
     expect(work.formatters()).toBe(0);
     work.stop();
+  });
+});
+
+describe("formatLocalTimeParts", () => {
+  it.each([
+    [
+      "en",
+      HourFormat.H12,
+      "2026-03-08T12:30:00Z",
+      { digits: "12:30", dayPeriodMarker: "PM" },
+    ],
+    [
+      "en",
+      HourFormat.H12,
+      "2026-03-08T00:30:00Z",
+      { digits: "12:30", dayPeriodMarker: "AM" },
+    ],
+    [
+      "en",
+      HourFormat.H24,
+      "2026-03-08T12:30:00Z",
+      { digits: "12:30", dayPeriodMarker: "" },
+    ],
+  ] as const)(
+    "should split %s %s at %s",
+    (language, hourFormat, timestamp, expected) => {
+      expect(
+        formatLocalTimeParts(
+          localDateTimeOf("UTC", timestamp),
+          language,
+          hourFormat,
+        ),
+      ).toEqual(expected);
+    },
+  );
+
+  it("should build no formatter for a repeated call", () => {
+    const localDateTime = localDateTimeOf(
+      "Asia/Almaty",
+      "2026-03-08T12:30:00Z",
+    );
+    formatLocalTimeParts(localDateTime, "en", HourFormat.H12);
+
+    const work = startWorkCount();
+    formatLocalTimeParts(localDateTime, "en", HourFormat.H12);
+
+    work.stop();
+    expect(work.formatters()).toBe(0);
   });
 });

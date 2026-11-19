@@ -118,14 +118,6 @@ export function ZoneRowContent({
                 </span>
               </>
             )}
-            {mark?.caption && (
-              <span
-                aria-hidden="true"
-                className="bg-surface text-xs font-bold text-accent"
-              >
-                {mark.caption}
-              </span>
-            )}
           </span>
           {zoneLineParts.length > 0 && (
             <ZoneLine

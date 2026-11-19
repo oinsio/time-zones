@@ -11,11 +11,16 @@ export const DEVICE_TIME_LOCATION_ID = "device-time";
 export const LOCATIONS_WRITE_DEBOUNCE_MS = 300;
 
 /**
- * Side of the icon in the leading mark slot of a location row; the design
- * screens (phone-no-home, phone-travel) draw it at width="18".
- * Implements UX1 of match-here-mark-to-design.
+ * Side of the icon in the leading mark slot of a card, in px.
+ * Implements FR10 of redesign-cards-grid-and-day-palettes (D7).
  */
-export const LOCATION_MARK_ICON_SIZE_PX = 18;
+export const LOCATION_MARK_ICON_SIZE_PX = 23;
+
+/**
+ * Side of the icon in the leading mark slot of a grid row, in px.
+ * Implements FR17 of redesign-cards-grid-and-day-palettes (D5).
+ */
+export const GRID_MARK_ICON_SIZE_PX = 20;
 
 /**
  * The glyph on the location menu button.

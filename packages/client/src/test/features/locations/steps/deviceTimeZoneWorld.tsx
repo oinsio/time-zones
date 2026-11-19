@@ -33,14 +33,14 @@ const DEFAULT_DEVICE_ZONE = "UTC";
 
 type LocationsHandle = ReturnType<typeof useLocations>;
 
-export const hereCaption = (language: string) =>
+export const hereMarkLabel = (language: string) =>
   language === RUSSIAN_LANGUAGE
-    ? ru.locations.hereMarkCaption
-    : en.locations.hereMarkCaption;
+    ? ru.locations.hereMarkLabel
+    : en.locations.hereMarkLabel;
 
-/** True when the row holds an element whose whole text is the caption. */
-export const rowHasHereMark = (row: HTMLElement, caption: string) =>
-  within(row).queryByText(caption, { exact: true }) !== null;
+/** True when the row holds the Here mark, named by its accessible label. */
+export const rowHasHereMark = (row: HTMLElement, label: string) =>
+  within(row).queryByRole("img", { name: label }) !== null;
 
 /** Per-scenario state and the step handlers shared by the device time zone feature. */
 export const createDeviceTimeZoneWorld = () => {
@@ -123,15 +123,15 @@ export const createDeviceTimeZoneWorld = () => {
       await i18n.changeLanguage(language);
     },
     thenShowsHereMark: (_ctx: unknown, city: string) =>
-      expect(rowHasHereMark(rowOf(city), hereCaption(ENGLISH_LANGUAGE))).toBe(
+      expect(rowHasHereMark(rowOf(city), hereMarkLabel(ENGLISH_LANGUAGE))).toBe(
         true,
       ),
     thenShowsNoHereMark: (_ctx: unknown, city: string) =>
-      expect(rowHasHereMark(rowOf(city), hereCaption(ENGLISH_LANGUAGE))).toBe(
+      expect(rowHasHereMark(rowOf(city), hereMarkLabel(ENGLISH_LANGUAGE))).toBe(
         false,
       ),
     thenNoHereMarkAnywhere: () =>
-      expect(screen.queryByText(hereCaption(ENGLISH_LANGUAGE))).toBeNull(),
+      expect(screen.queryByText(hereMarkLabel(ENGLISH_LANGUAGE))).toBeNull(),
     whenAdds: (_ctx: unknown, city: string) => {
       act(() => {
         latestLocations.addLocation(cityEntry(city));

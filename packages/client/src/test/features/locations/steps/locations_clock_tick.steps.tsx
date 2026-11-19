@@ -6,7 +6,7 @@ import { expect } from "vitest";
 import { setPageVisibility } from "@/test/pageVisibility";
 import {
   ENGLISH_LANGUAGE,
-  hereCaption,
+  hereMarkLabel,
   rowHasHereMark,
 } from "./deviceTimeZoneWorld";
 import { createLocalTimeWorld } from "./localTimeWorld";
@@ -53,11 +53,11 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     expect(world.getTickScheduler().lastDelayMs()).toBe(delayMs);
   const thenShowsHereMark = (_ctx: unknown, city: string) =>
     expect(
-      rowHasHereMark(world.rowOf(city), hereCaption(ENGLISH_LANGUAGE)),
+      rowHasHereMark(world.rowOf(city), hereMarkLabel(ENGLISH_LANGUAGE)),
     ).toBe(true);
   const thenShowsNoHereMark = (_ctx: unknown, city: string) =>
     expect(
-      rowHasHereMark(world.rowOf(city), hereCaption(ENGLISH_LANGUAGE)),
+      rowHasHereMark(world.rowOf(city), hereMarkLabel(ENGLISH_LANGUAGE)),
     ).toBe(false);
 
   // @show-local-time-and-date-on-location-cards @FR3 @M3

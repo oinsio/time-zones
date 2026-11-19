@@ -23,6 +23,7 @@ const row: LocationRowModel = {
   offsetDifferenceLabel: "−2 h",
   offsetDifferenceAccessibleLabel: "2 hours behind",
   localTimeLabel: "10:30",
+  localTimeParts: { digits: "10:30", dayPeriodMarker: "" },
   localDateLabel: "Sun, Mar 8",
   localIsoDate: "2026-03-08",
   wallTimeInputLabel: "",

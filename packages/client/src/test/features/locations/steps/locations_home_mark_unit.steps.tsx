@@ -9,7 +9,7 @@ import { LocationMarkKind } from "@/presenter";
 import {
   createDeviceTimeZoneWorld,
   ENGLISH_LANGUAGE,
-  hereCaption,
+  hereMarkLabel,
   rowHasHereMark,
 } from "./deviceTimeZoneWorld";
 
@@ -37,7 +37,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         "the {string} row shows no here mark and no caption {string}",
         (_ctx, city: string) => {
           const row = rowOf(city);
-          expect(rowHasHereMark(row, hereCaption(ENGLISH_LANGUAGE))).toBe(
+          expect(rowHasHereMark(row, hereMarkLabel(ENGLISH_LANGUAGE))).toBe(
             false,
           );
           expect(

@@ -19,6 +19,7 @@ const buildRow = (cityLabel: string): LocationRow => ({
   offsetDifferenceLabel: "",
   offsetDifferenceAccessibleLabel: "",
   localTimeLabel: "10:30",
+  localTimeParts: { digits: "10:30", dayPeriodMarker: "" },
   localDateLabel: "Sun, Mar 8",
   localIsoDate: "2026-03-08",
   wallTimeInputLabel: "",

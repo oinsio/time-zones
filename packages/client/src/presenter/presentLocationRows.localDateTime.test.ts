@@ -1,4 +1,5 @@
 // Verifies FR1, FR2, FR6 of show-local-time-and-date-on-location-cards (D3).
+// Verifies FR8 of redesign-cards-grid-and-day-palettes.
 
 import i18n, { type TFunction } from "i18next";
 import { describe, expect, it } from "vitest";
@@ -88,5 +89,33 @@ describe("present the local time and date", () => {
       row?.localIsoDate,
       row?.cityLabel,
     ]).toEqual(["", "", "", "Olympus"]);
+  });
+});
+
+describe("present the local time parts", () => {
+  it.each([
+    [HourFormat.H12, { digits: "12:30", dayPeriodMarker: "PM" }],
+    [HourFormat.H24, { digits: "12:30", dayPeriodMarker: "" }],
+  ])("should split the time of a row in %s", (hourFormat, expected) => {
+    const [row] = presentLocationRows(
+      [buildLocation({ ...KNOWN_CITIES.Almaty, label: "Almaty" })],
+      {
+        language: "en",
+        hourFormat,
+        ...TIME_OF_DAY_CONTEXT,
+        zoneLabelParts: DEFAULT_PREFERENCES.zoneLabelParts,
+        instant: fakeClock("2026-03-08T07:30:00Z").instant(),
+        deviceTimeZoneId: UNIT_TEST_DEVICE_TIME_ZONE,
+        homeLocationId: null,
+        referenceOffsetMinutes: undefined,
+        referenceDay: buildReferenceDay(
+          fakeClock("2026-03-08T07:30:00Z").instant(),
+          UNIT_TEST_DEVICE_TIME_ZONE,
+        ),
+        translate: i18n.getFixedT("en"),
+      },
+    );
+
+    expect(row?.localTimeParts).toEqual(expected);
   });
 });
