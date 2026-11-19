@@ -125,3 +125,32 @@ describe("SettingsOptionGroup", () => {
     expect(container.querySelector("fieldset")).toBeNull();
   });
 });
+
+// Verifies FR5, NFR-A3 of redesign-cards-grid-and-day-palettes.
+describe("SettingsOptionGroup with a palette swatch", () => {
+  it("should hide the swatch, name the option and show no text", () => {
+    render(
+      <SettingsOptionGroup
+        caption="Sample"
+        options={[
+          {
+            value: "A",
+            label: "Swatch A",
+            swatch: <span data-testid="swatch" />,
+          },
+        ]}
+        selectedValue="A"
+        onSelect={vi.fn()}
+      />,
+    );
+
+    const label = screen
+      .getByRole("radio", { name: "Swatch A" })
+      .closest("label");
+    expect(label).toHaveAttribute("title", "Swatch A");
+    expect(
+      screen.getByTestId("swatch").closest("[aria-hidden='true']"),
+    ).not.toBeNull();
+    expect(screen.getByText("Swatch A")).toHaveClass("sr-only");
+  });
+});

@@ -10,6 +10,7 @@ import {
 import { HourFormat, ThemePreference } from "@/preferences";
 import { CityDataAttribution } from "./CityDataAttribution";
 import { DayColouringGroup } from "./DayColouringGroup";
+import { DayPaletteGroup } from "./DayPaletteGroup";
 import { DeployTime } from "./DeployTime";
 import { GnomishFactoryCredit } from "./GnomishFactoryCredit";
 import { InterfaceLanguageGroup } from "./InterfaceLanguageGroup";
@@ -140,6 +141,7 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
         />
         <ViewModeGroup />
         <DayColouringGroup />
+        <DayPaletteGroup />
         <WorkingHoursGroup />
         <ZoneLabelGroup />
         <InterfaceLanguageGroup
