@@ -1,6 +1,7 @@
 import type { CDPSession, Locator, Page } from "@playwright/test";
 import {
   LOCATIONS_WRITE_DEBOUNCE_MS,
+  REORDER_TOUCH_ACTIVATION_DELAY_MS,
   REORDER_TRANSITION_DURATION_MS,
   STORAGE_KEYS,
 } from "@/constants";
@@ -13,14 +14,12 @@ export const RELEASE_PAST_CENTRE_RATIO = 0.25;
 export const SIDEWAYS_DRAG_PX = 40;
 export const DOWNWARD_DRAG_PX = 8;
 export const TOUCH_SWIPE_DISTANCE_PX = -200;
+/** The hold that turns a finger press on the grab area into a drag, with a margin. */
+export const TOUCH_HOLD_MS = REORDER_TOUCH_ACTIVATION_DELAY_MS + 100;
 export const WRITE_SETTLE_MS = LOCATIONS_WRITE_DEBOUNCE_MS * 2;
 export const DROP_SETTLE_MS = REORDER_TRANSITION_DURATION_MS * 2;
 const WRITE_COUNT_KEY = "locationWriteCount";
 const TRANSITION_RUNS_KEY = "reorderTransitionRuns";
-const MOVE_PREFIX = englishLocale.locations.moveLocation.replace(
-  "{{city}}",
-  "",
-);
 const MENU_PREFIX = englishLocale.locations.locationMenu.replace(
   "{{city}}",
   "",
@@ -34,16 +33,16 @@ export type TransitionRun = {
 
 export type Point = { x: number; y: number };
 
-/** The handle of a city's card; `exact` so a card's handle never matches another button of the card. */
-export const moveHandle = (page: Page, cityName: string) =>
-  page.getByRole("button", { name: `${MOVE_PREFIX}${cityName}`, exact: true });
+/** The grab area of a city's card: its mark, city, difference and zone line. */
+export const grabArea = (page: Page, cityName: string) =>
+  listRow(page, cityName).locator("[data-grab-area]").first();
 
-/** A handle by its full accessible name, matched exactly. */
-export const handleNamed = (page: Page, handleName: string) =>
-  page.getByRole("button", { name: handleName, exact: true });
+/** The location menu button of a city's card. */
+export const menuButton = (page: Page, cityName: string) =>
+  page.getByRole("button", { name: `${MENU_PREFIX}${cityName}`, exact: true });
 
-export const allMoveHandles = (page: Page) =>
-  page.getByRole("button", { name: new RegExp(`^${MOVE_PREFIX}`) });
+/** Every grab area of the page. */
+export const allGrabAreas = (page: Page) => page.locator("[data-grab-area]");
 
 /** City names in list order, read from the remove buttons in DOM order. */
 export async function readListOrder(page: Page): Promise<string[]> {
@@ -84,7 +83,7 @@ export const readLocationWriteCount = (page: Page) =>
 /** Records `transitionrun` events of list items, from the first page load. */
 export const recordTransitionRuns = (page: Page) =>
   page.addInitScript(
-    ({ runsKey, movePrefix }) => {
+    ({ runsKey }) => {
       const runs: unknown[] = [];
       Reflect.set(window, runsKey, runs);
       document.addEventListener(
@@ -92,11 +91,9 @@ export const recordTransitionRuns = (page: Page) =>
         (event) => {
           const card = event.target;
           if (!(card instanceof HTMLLIElement)) return;
-          const handle = card.querySelector(
-            `button[aria-label^="${movePrefix}"]`,
-          );
+          const city = card.querySelector("[data-grab-area] [id]");
           runs.push({
-            handleName: handle?.getAttribute("aria-label") ?? "",
+            handleName: city?.textContent ?? "",
             propertyName: event.propertyName,
             duration: getComputedStyle(card).transitionDuration,
           });
@@ -104,7 +101,7 @@ export const recordTransitionRuns = (page: Page) =>
         true,
       );
     },
-    { runsKey: TRANSITION_RUNS_KEY, movePrefix: MOVE_PREFIX },
+    { runsKey: TRANSITION_RUNS_KEY },
   );
 
 export const readTransitionRuns = (page: Page) =>
@@ -119,7 +116,7 @@ export const clearTransitionRuns = (page: Page) =>
     if (runs) runs.length = 0;
   }, TRANSITION_RUNS_KEY);
 
-export const handleNameOf = (cityName: string) => `${MOVE_PREFIX}${cityName}`;
+export const handleNameOf = (cityName: string) => cityName;
 
 /** Where to release so the dragged card ends a quarter card past the target's centre. */
 export async function releasePointFor(
@@ -163,8 +160,10 @@ export async function dragWithFinger(
   session: CDPSession,
   from: Point,
   to: Point,
+  holdMs = 0,
 ) {
   await dispatchTouch(session, "touchStart", from);
+  if (holdMs > 0) await new Promise((resolve) => setTimeout(resolve, holdMs));
   for (let step = 1; step <= DRAG_MOVE_STEP_COUNT; step++) {
     const progress = step / DRAG_MOVE_STEP_COUNT;
     await dispatchTouch(session, "touchMove", {

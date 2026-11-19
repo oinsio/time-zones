@@ -59,6 +59,8 @@ type ZoneRowContentProps = {
 /** What makes the place and the zone line the grab area of a row. */
 export type GrabAreaProps = HTMLAttributes<HTMLSpanElement> & {
   ref?: (element: HTMLElement | null) => void;
+  /** Marks the element for tests that look for the grab area. */
+  "data-grab-area"?: string;
 };
 
 /**

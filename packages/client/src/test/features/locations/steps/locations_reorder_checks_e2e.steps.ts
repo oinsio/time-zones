@@ -4,9 +4,10 @@ import { englishLocale } from "../../main_page/steps/englishTexts";
 import { test } from "./locations_ui_e2e.fixtures";
 import { parseCityNames } from "./locationsE2eHelpers";
 import {
-  allMoveHandles,
+  allGrabAreas,
   countLocationWrites,
-  handleNamed,
+  grabArea,
+  menuButton,
   readListOrder,
   readLocationWriteCount,
   WRITE_SETTLE_MS,
@@ -76,40 +77,45 @@ Then(
   },
 );
 
-// Verifies FR1, NFR-A5 of reorder-locations-by-drag-and-drop: exact handle names.
+// Verifies FR15 of redesign-cards-grid-and-day-palettes: no drag handle anywhere.
+Then("the list offers no move handle", async ({ locationsWorld }) => {
+  await expect(allGrabAreas(locationsWorld.page).first()).toBeVisible();
+  await expect(
+    locationsWorld.page.getByRole("button", { name: /^Move / }),
+  ).toHaveCount(0);
+});
+
+// Verifies FR15 of redesign-cards-grid-and-day-palettes: the grab cursor.
 Then(
-  "the list offers the move handle {string}",
-  async ({ locationsWorld }, handleName: string) => {
-    await expect(handleNamed(locationsWorld.page, handleName)).toBeVisible();
+  "the grab area of {string} shows the {word} cursor",
+  async ({ locationsWorld }, cityName: string, cursor: string) => {
+    await expect(grabArea(locationsWorld.page, cityName)).toHaveCSS(
+      "cursor",
+      cursor,
+    );
   },
 );
 
+// Verifies FR15 of redesign-cards-grid-and-day-palettes: the grab area is not a Tab stop.
 Then(
-  "the list offers no move handle {string}",
-  async ({ locationsWorld }, handleName: string) => {
-    await expect(handleNamed(locationsWorld.page, handleName)).toHaveCount(0);
+  "the grab area of {string} is no button and no Tab stop",
+  async ({ locationsWorld }, cityName: string) => {
+    const area = grabArea(locationsWorld.page, cityName);
+    await expect(area).not.toHaveAttribute("role", /.+/);
+    await expect(area).not.toHaveAttribute("tabindex", /.+/);
   },
 );
 
-// Verifies NFR-A5 of reorder-locations-by-drag-and-drop.
+// Verifies FR16 of redesign-cards-grid-and-day-palettes: a move that cannot apply is disabled.
 Then(
-  "every move handle is at least {int} by {int} px",
-  async ({ locationsWorld }, minWidth: number, minHeight: number) => {
-    const handles = allMoveHandles(locationsWorld.page);
-    await expect(handles.first()).toBeVisible();
-    for (const handle of await handles.all()) {
-      const box = await handle.boundingBox();
-      expect(box?.width).toBeGreaterThanOrEqual(minWidth);
-      expect(box?.height).toBeGreaterThanOrEqual(minHeight);
-    }
-  },
-);
-
-// Verifies NFR-A2 of reorder-locations-by-drag-and-drop: focus returns to the handle.
-Then(
-  "focus is on the move handle {string}",
-  async ({ locationsWorld }, handleName: string) => {
-    await expect(handleNamed(locationsWorld.page, handleName)).toBeFocused();
+  "in the location menu of {string} the item {string} is disabled",
+  async ({ locationsWorld }, cityName: string, itemName: string) => {
+    const { page } = locationsWorld;
+    await menuButton(page, cityName).click();
+    await expect(
+      page.getByRole("menuitem", { name: itemName }),
+    ).toHaveAttribute("aria-disabled", "true");
+    await page.keyboard.press("Escape");
   },
 );
 

@@ -1,66 +1,66 @@
 # Screen Design
 
-Approved screens of the **Cards** view — the first view to build — and the **Grid** view, which comes next ([views](../architecture/views.md)).
+Approved screens of the **Cards** and **Grid** views and of the settings page, after the redesign of November 2026 ([views](../architecture/views.md)).
 
 Screens are the visual target for development. Documents stay the source of truth: when a screen and a document disagree, the document wins and the screen gets fixed:
 
 - behavior and rules — [views.md](../architecture/views.md), [domain-model.md](../architecture/domain-model.md), ADRs;
-- colors, fonts, sizes — the "Visual style" section of [views.md](../architecture/views.md), implemented as design tokens.
+- colors, fonts, sizes — the "Visual style" section of [views.md](../architecture/views.md), implemented as design tokens (`packages/client/src/styles/tokens.css`).
 
-Each screen has a PNG (2x) and a self-contained HTML file with inline styles. Open the HTML in a browser to inspect sizes, spacing and colors with developer tools. The only external dependency is the Manrope font from Google Fonts.
+The decisions of the redesign (tokens, day palettes, sizes, reorder) now live in [views.md](../architecture/views.md); the glossary names every term.
 
-## Redesign in progress
+## How to read a screen
 
-The target look after the redesign of November 2026 is in [redesign/](redesign/README.md): its specification and screens. It is not built yet; the screens below show the app as it is. Each change that builds a part of the redesign moves its screens here.
+Every screen is a PNG (2x) and a self-contained HTML file. The HTML starts with a `:root` block that lists the design tokens of that screen (theme and day palette), then one stylesheet shared by all screens. Open it in a browser to inspect sizes, spacing and colours. The only external dependency is the Manrope font from Google Fonts. The PNG is the `#screen` element of the HTML.
+
+Icons carry `data-lucide="<name>"`: the name of the Lucide icon to use.
 
 ## Sample data
 
-All screens show the same moment so they can be compared:
-
-- date: Sunday, 8 March 2026 — the day New York switches to daylight saving time;
-- reference moment: 12:30 in Almaty (GMT+5), pinned;
-- locations: Almaty, Moscow (−2 h), Kolkata (+0:30), New York (−9 h, EDT).
-
-This one moment covers a :30 offset, a DST jump inside the reference day and the wall-time hint.
+The sample: Sunday, 8 March 2026, 12:30 in Almaty, pinned; Almaty (home), Moscow (−2 h), Kolkata (+0:30), New York (−9 h, EDT). The day tracks, hour labels and hour cells are the values the app computes for that moment (commit `aa7310d`). The edge-case screens use other cities; their day tracks are illustrative.
 
 ## Cards
 
 | Screen | Files | Shows |
 |---|---|---|
-| Phone, light | [PNG](screens/phone-light.png) · [HTML](screens/phone-light.html) | home location (house icon), differences from home, day tracks on the shared reference day, wall-time hint, bottom date bar with Now |
-| Phone, dark | [PNG](screens/phone-dark.png) · [HTML](screens/phone-dark.html) | the same layout with dark theme tokens |
-| Tablet, light | [PNG](screens/tablet-light.png) · [HTML](screens/tablet-light.html) | one full-width row per location: city and zone, time and date, track with local hour labels |
-| No home | [PNG](screens/phone-no-home.png) · [HTML](screens/phone-no-home.html) | derived Here entry for the device zone (location arrow, "here", "Device time"); differences from the device zone ([ADR-0007](../adr/0007-reference-zone-and-device-time.md)) |
-| Travelling | [PNG](screens/phone-travel.png) · [HTML](screens/phone-travel.html) | home is Almaty, the device is in Moscow: Moscow gets the "here" mark, the reference day stays Almaty |
-
-## What to read from the tracks
-
-- Every track spans 00–24 of the reference zone, so all handles stand at the same position.
-- Colors are the location's own day periods: night, morning, day, evening by the sun, with soft transitions.
-- New York's track changes color abruptly at 12:00 Almaty time — the DST jump from EST to EDT.
+| Phone, light | [PNG](screens/cards-phone-light.png) · [HTML](screens/cards-phone-light.html) | narrow card, home mark, offset differences, zone line with dots, wall-time hint, date bar with an active Now |
+| Phone, dark | [PNG](screens/cards-phone-dark.png) · [HTML](screens/cards-phone-dark.html) | the same with dark tokens and the Vivid palette |
+| Phone, Muted | [dark PNG](screens/cards-phone-dark-muted.png) · [dark HTML](screens/cards-phone-dark-muted.html) · [light PNG](screens/cards-phone-light-muted.png) · [light HTML](screens/cards-phone-light-muted.html) | the Muted palette |
+| No home, live | [PNG](screens/cards-phone-no-home-light.png) · [HTML](screens/cards-phone-no-home-light.html) · [dark PNG](screens/cards-phone-no-home-dark.png) · [dark HTML](screens/cards-phone-no-home-dark.html) | device time location with the Here mark and no caption, inactive Now, clock change note |
+| Travelling | [PNG](screens/cards-phone-travel-light.png) · [HTML](screens/cards-phone-travel-light.html) | home is Almaty, the device is in Moscow |
+| UTC | [PNG](screens/cards-phone-utc-light.png) · [HTML](screens/cards-phone-utc-light.html) · [dark PNG](screens/cards-phone-utc-dark.png) · [dark HTML](screens/cards-phone-utc-dark.html) | the UTC location: "Всемирное время" and a plain accent track |
+| Location menu | [PNG](screens/cards-phone-menu-light.png) · [HTML](screens/cards-phone-menu-light.html) | the menu with Move up and Move down |
+| Reorder | [PNG](screens/cards-phone-reorder-light.png) · [HTML](screens/cards-phone-reorder-light.html) | a card picked up by its place area, lifted, the others making room |
+| Tablet | [PNG](screens/cards-tablet-light.png) · [HTML](screens/cards-tablet-light.html) · [dark PNG](screens/cards-tablet-dark.png) · [dark HTML](screens/cards-tablet-dark.html) | wide card at 820 px |
+| Desktop | [PNG](screens/cards-desktop-light.png) · [HTML](screens/cards-desktop-light.html) · [dark PNG](screens/cards-desktop-dark.png) · [dark HTML](screens/cards-desktop-dark.html) | wide card in the 1120 px column at 1440 px |
+| Edge cases, 390 px | [PNG](screens/cards-phone-edge-light.png) · [HTML](screens/cards-phone-edge-light.html) | long city, `+5:30`, long country, device time |
+| Edge cases, 12-hour | [390 px PNG](screens/cards-phone-edge-12h-light.png) · [HTML](screens/cards-phone-edge-12h-light.html) · [320 px PNG](screens/cards-phone-320-edge-12h-light.png) · [HTML](screens/cards-phone-320-edge-12h-light.html) · [tablet PNG](screens/cards-tablet-edge-12h-light.png) · [HTML](screens/cards-tablet-edge-12h-light.html) | small AM/PM, the time dropping under a long city at 320 px, 12-hour hour labels |
 
 ## Grid
 
-The Grid view in two states on every screen: the hour frame on the current hour, and a meeting range of 09:00–11:00 in Almaty ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)). The data is the sample above; the meeting starts the day before in New York.
-
-| Screen | Now | Meeting |
+| Screen | Files | Shows |
 |---|---|---|
-| Desktop, light | [PNG](screens/grid-desktop-light.png) · [HTML](screens/grid-desktop-light.html) | [PNG](screens/grid-desktop-meeting-light.png) · [HTML](screens/grid-desktop-meeting-light.html) |
-| Desktop, dark | [PNG](screens/grid-desktop-dark.png) · [HTML](screens/grid-desktop-dark.html) | [PNG](screens/grid-desktop-meeting-dark.png) · [HTML](screens/grid-desktop-meeting-dark.html) |
-| Tablet, landscape | [PNG](screens/grid-tablet-light.png) · [HTML](screens/grid-tablet-light.html) | [PNG](screens/grid-tablet-meeting-light.png) · [HTML](screens/grid-tablet-meeting-light.html) |
-| Phone, landscape | [PNG](screens/grid-phone-landscape-light.png) · [HTML](screens/grid-phone-landscape-light.html) | [PNG](screens/grid-phone-landscape-meeting-light.png) · [HTML](screens/grid-phone-landscape-meeting-light.html) |
-| Phone, portrait | [PNG](screens/grid-phone-portrait-light.png) · [HTML](screens/grid-phone-portrait-light.html) | [PNG](screens/grid-phone-portrait-meeting-light.png) · [HTML](screens/grid-phone-portrait-meeting-light.html) |
+| Desktop | [PNG](screens/grid-desktop-light.png) · [HTML](screens/grid-desktop-light.html) · [dark PNG](screens/grid-desktop-dark.png) · [dark HTML](screens/grid-desktop-dark.html) | panel in the 1120 px column, row header without a drag handle, hour frame, clock change note |
+| Desktop, dark, Muted | [PNG](screens/grid-desktop-dark-muted.png) · [HTML](screens/grid-desktop-dark-muted.html) | hour cells in the Muted palette |
+| Desktop, meeting | [PNG](screens/grid-desktop-meeting-light.png) · [HTML](screens/grid-desktop-meeting-light.html) · [dark PNG](screens/grid-desktop-meeting-dark.png) · [dark HTML](screens/grid-desktop-meeting-dark.html) | meeting bar, meeting frame, handles, day shift mark |
+| Desktop, UTC | [PNG](screens/grid-desktop-utc-dark.png) · [HTML](screens/grid-desktop-utc-dark.html) | accent hour cells of UTC |
+| Tablet, landscape | [PNG](screens/grid-tablet-light.png) · [HTML](screens/grid-tablet-light.html) | 1180 px |
+| Phone, portrait | [PNG](screens/grid-phone-portrait-light.png) · [HTML](screens/grid-phone-portrait-light.html) · [dark PNG](screens/grid-phone-portrait-dark.png) · [dark HTML](screens/grid-phone-portrait-dark.html) | nine cells, two-line row header |
+| Phone, meeting | [PNG](screens/grid-phone-portrait-meeting-light.png) · [HTML](screens/grid-phone-portrait-meeting-light.html) | the meeting on a phone |
 
-The tablet and phones in the dark theme differ from the light screens only by the token values in [views.md](../architecture/views.md#visual-style).
+## Settings
 
-What to read from the grid:
+| Screen | Files | Shows |
+|---|---|---|
+| Settings, Time of day | [PNG](screens/settings-phone-light.png) · [HTML](screens/settings-phone-light.html) · [dark PNG](screens/settings-phone-dark.png) · [dark HTML](screens/settings-phone-dark.html) | the Colours group under the colouring group, with the palette swatches |
+| Settings, Working hours | [PNG](screens/settings-phone-working-hours-light.png) · [HTML](screens/settings-phone-working-hours-light.html) | no Colours group; the working hours row stands in its place, as built |
 
-- All rows sit in one panel, so the hour frame and the meeting frame cross every row as one column.
-- Desktop, tablet and phone in landscape fit all 24 hours; the phone in portrait shows 9 and scrolls all rows together.
-- The midnight cell shows the date (`МАР 8`) in every row except the reference zone's, which starts with `0`.
-- In the meeting state: the green meeting bar with Share and Clear, dimmed cells outside the range, local ranges in green, the meeting handles on different rows, and «днём раньше» for New York.
-- The clock change note and the row header texts lie above the frame.
+The settings screens copy the built page with the new tokens. Only the Colours group is new.
 
-## Not covered yet
+## Before the redesign
 
-Search, settings, empty, error and offline states have no screens yet, in either view; build them from [views.md](../architecture/views.md) (Overlays, UI states).
+Three Grid screens have no redesigned counterpart and still show the layout before the redesign (a drag handle, a "here" caption, the old header): [tablet, meeting](screens/grid-tablet-meeting-light.png), [phone in landscape](screens/grid-phone-landscape-light.png) and [phone in landscape, meeting](screens/grid-phone-landscape-meeting-light.png). Their sizes and colours are superseded by [views.md](../architecture/views.md).
+
+## Not covered
+
+Search, calendar, the rest of the settings page, empty, error and offline states keep their built look; they take the new tokens of [views.md](../architecture/views.md) and nothing else.

@@ -99,7 +99,7 @@ Paths are relative to `packages/client/` unless they start with `docs/` or `open
 
 ## 14. Docs and screens moved (FR25; design D10)
 
-- [ ] 14.1 `git mv` every file of `docs/design/redesign/screens/` to `docs/design/screens/` (overwriting the Grid screens of the same name), delete `docs/design/screens/phone-light.*`, `phone-dark.*`, `tablet-light.*`, `phone-no-home.*`, `phone-travel.*`, rewrite `docs/design/README.md` (screen tables of the redesign, the three pre-redesign Grid screens marked, the "Redesign in progress" section removed), then `git rm -r docs/design/redesign`. Verify: `ls docs/design/screens/cards-phone-light.html docs/design/screens/settings-phone-light.png` succeeds, `test ! -e docs/design/redesign && echo removed` prints `removed`, and `grep -c "redesign/" docs/design/README.md docs/architecture/views.md` prints 0 for both.
+- [x] 14.1 `git mv` every file of `docs/design/redesign/screens/` to `docs/design/screens/` (overwriting the Grid screens of the same name), delete `docs/design/screens/phone-light.*`, `phone-dark.*`, `tablet-light.*`, `phone-no-home.*`, `phone-travel.*`, rewrite `docs/design/README.md` (screen tables of the redesign, the three pre-redesign Grid screens marked, the "Redesign in progress" section removed), then `git rm -r docs/design/redesign`. Verify: `ls docs/design/screens/cards-phone-light.html docs/design/screens/settings-phone-light.png` succeeds, `test ! -e docs/design/redesign && echo removed` prints `removed`, and `grep -c "redesign/" docs/design/README.md docs/architecture/views.md` prints 0 for both.
 
 ## 15. Final checks and traceability
 

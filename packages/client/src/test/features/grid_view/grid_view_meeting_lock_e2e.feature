@@ -1,6 +1,6 @@
 Feature: Locked row controls and the meeting range input in a real browser
   Implements change fix-grid-meeting-range-lock-and-layering.
-  While a meeting range is set the drag handles, the location menus and the wall-time inputs are locked, the keyboard alone can type the meeting, and the input is accessible and fits a phone.
+  While a meeting range is set the grab areas, the location menus and the wall-time inputs are locked, the keyboard alone can type the meeting, and the input is accessible and fits a phone.
 
   @fix-grid-meeting-range-lock-and-layering @FR1 @FR2 @NFR-A2
   Scenario: Tab order skips the locked controls
@@ -105,12 +105,12 @@ Feature: Locked row controls and the meeting range input in a real browser
     And the screen is 1440 by 900 px for the locations
     When the user opens the locations app
     And the user sets the sample meeting
-    Then every drag handle and every location menu button is disabled
+    Then every grab area shows the default cursor and every location menu button is disabled
     When the user clicks the location menu button of "Moscow" in spite of the lock
     Then no location menu is open
     And no row offers the wall-time input
     When the user clears the meeting
-    Then every drag handle and every location menu button is enabled
+    Then every grab area shows the grab cursor and every location menu button is enabled
     When the user taps the time of "Moscow"
     Then the wall-time input of "Moscow" is open
 

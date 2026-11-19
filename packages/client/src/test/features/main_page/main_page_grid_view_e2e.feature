@@ -107,12 +107,10 @@ Feature: Grid view in a real browser
       | 390   | 844    | dark  |
 
   @add-view-mode-setting-and-grid-skeleton @FR7 @NFR-A2
-  Scenario: Move a Grid row down with the keyboard
+  Scenario: Move a Grid row down from the menu
     Given the view mode is Grid
     And the stored locations are "Moscow", "Almaty", "New York"
     And the user opens the locations app
-    When the user picks up "Moscow" with the keyboard
-    And the user moves the picked-up card down 2 times
-    And the user drops the picked-up card with the keyboard
+    When the user moves "Moscow" down 2 times with its location menu
     Then the locations list order is "Almaty", "New York", "Moscow"
-    And focus is on the move handle "Move Moscow"
+    And focus is on the location menu button of "Moscow"

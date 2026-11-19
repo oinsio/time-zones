@@ -58,14 +58,12 @@ Feature: Device time location in a real browser
       | 1024  |
 
   @add-settings-page-and-device-time-location @FR9 @M3
-  Scenario: Reorder below a city with the keyboard
+  Scenario: Reorder below a city from the menu
     Given the stored locations are "the device time location", "Moscow", "New York"
     And the user opens the locations app
-    When the user picks up "Almaty" with the keyboard
-    And the user moves the picked-up card down 2 times
-    And the user drops the picked-up card with the keyboard
+    When the user moves "Almaty" down 2 times with its location menu
     Then the locations list order is "Moscow", "New York", "Almaty"
-    And the reorder announcement reads "Almaty dropped at position 3 of 3"
+    And the reorder announcement reads "Almaty moved to position 3 of 3"
 
   @add-settings-page-and-device-time-location @FR9 @M3
   Scenario: Reorder below a city with the mouse

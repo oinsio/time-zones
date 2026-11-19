@@ -139,6 +139,7 @@ export const LocationRow = forwardRef<HTMLButtonElement, LocationRowProps>(
         ? undefined
         : `${variantClassNames.headerBox} ${headerBoxLayer}`;
     const grabAreaProps: GrabAreaProps = {
+      "data-grab-area": "",
       ...(isReorderable && !areRowControlsLocked && sortable.listeners),
       ref: isReorderable ? sortable.setActivatorNodeRef : undefined,
       className: `${GRAB_AREA_CLASS_NAMES} ${
