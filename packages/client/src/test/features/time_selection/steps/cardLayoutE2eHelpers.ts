@@ -38,9 +38,15 @@ export const measureTimeButton = (
   wallTimeButtonOf(page, city).evaluate((button) => {
     const range = document.createRange();
     range.selectNodeContents(button);
-    const tops = [...range.getClientRects()].map((rect) => rect.top);
+    const rects = [...range.getClientRects()];
+    // Text of different sizes shares one line when the boxes overlap vertically.
+    const hasSecondLine = rects.some((lower) =>
+      rects.some((upper) => lower.top >= upper.bottom - 1),
+    );
     return {
-      lineSpread: Math.max(...tops) - Math.min(...tops),
+      lineSpread: hasSecondLine
+        ? 1 + Math.max(...rects.map((rect) => rect.height))
+        : 0,
       isClipped: button.scrollWidth > button.clientWidth,
       overflowPx:
         button.getBoundingClientRect().right -

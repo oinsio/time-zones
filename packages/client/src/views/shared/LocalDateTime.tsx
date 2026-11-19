@@ -132,6 +132,7 @@ export function LocalDateTime({
           initialText={localTimeLabel}
           onConfirm={(text) => onConfirmWallTime(text, openedDate)}
           onClose={closeField}
+          sizeClassName={variantClassNames.time}
         />
       ) : (
         <MeetingRangeInput

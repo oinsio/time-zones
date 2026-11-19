@@ -129,16 +129,13 @@ Then(
   },
 );
 
-Then(
-  "no Tab stop is a location menu button",
-  async ({ locationsWorld }) => {
-    const visited = visitedByPage.get(locationsWorld.page) ?? [];
-    expect(visited.length).toBeGreaterThan(0);
-    expect(
-      visited.filter((name) => name.startsWith(MENU_BUTTON_PREFIX)),
-    ).toEqual([]);
-  },
-);
+Then("no Tab stop is a location menu button", async ({ locationsWorld }) => {
+  const visited = visitedByPage.get(locationsWorld.page) ?? [];
+  expect(visited.length).toBeGreaterThan(0);
+  expect(visited.filter((name) => name.startsWith(MENU_BUTTON_PREFIX))).toEqual(
+    [],
+  );
+});
 
 // Verifies FR3, FR4 of fix-grid-meeting-range-lock-and-layering.
 When(

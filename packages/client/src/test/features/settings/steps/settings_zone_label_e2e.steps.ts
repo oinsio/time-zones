@@ -136,7 +136,14 @@ Then(
   async ({ locationsWorld }, example: string) => {
     await expect(
       zoneLabelGroupOf(locationsWorld.page).locator(ZONE_LINE_ELEMENTS),
-    ).toHaveText(example.split(ELEMENT_SEPARATOR));
+    ).toHaveText(
+      example
+        .split(ELEMENT_SEPARATOR)
+        .map(
+          (element) =>
+            new RegExp(`^(?:·\\s*)?${element.replace(/[+]/g, "\\+")}$`),
+        ),
+    );
   },
 );
 

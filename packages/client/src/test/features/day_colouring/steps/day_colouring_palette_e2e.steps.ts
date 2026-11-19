@@ -1,6 +1,7 @@
 // Verifies FR4, FR17 of redesign-cards-grid-and-day-palettes: the day palette in a real browser.
 import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import { STORAGE_KEYS } from "@/constants";
 import { cellOf } from "../../grid_view/steps/hourGridE2eHelpers";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import {
@@ -10,7 +11,6 @@ import {
 } from "../../main_page/steps/themeTokens";
 import { seedPreferenceFields } from "../../settings/steps/settingsE2eHelpers";
 import { dayTrackBarOf } from "./dayColouringE2eHelpers";
-import { STORAGE_KEYS } from "@/constants";
 
 const { Given, When, Then } = createBdd(test);
 

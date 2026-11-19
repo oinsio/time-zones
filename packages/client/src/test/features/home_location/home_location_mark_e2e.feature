@@ -7,9 +7,10 @@ Feature: Home mark in a real browser
   Scenario Outline: The house is outlined in the accent colour in the <theme> theme
     Given the locations screen uses the <theme> theme
     And the list holds "Almaty", "Moscow" and home is "Almaty"
+    And the screen is 390 px wide for the locations
     And the user opens the locations app
     Then the house of "Almaty" has no fill and an outline in the accent colour
-    And the house of "Almaty" is 18 px wide and tall
+    And the house of "Almaty" is 23 px wide and tall
 
     Examples:
       | theme |

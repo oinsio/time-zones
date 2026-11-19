@@ -45,14 +45,14 @@ Feature: Home location in a real browser
     And the list holds "Алматы", "Москва" and home is "Алматы"
     And the user opens the locations app
     When the user opens the location menu named "Действия: Москва"
-    Then the menu offers the items "Сделать домашним, Удалить"
+    Then the menu offers the items "Сделать домашним, Поднять выше, Опустить ниже, Удалить"
     And the row of "Алматы" has a mark named "Домашнее место"
 
   @set-home-location-and-show-differences @UX1 @FR7
-  Scenario: The difference stands between the city and the caption
+  Scenario: The difference stands right after the city
     Given the list holds "Almaty", "Moscow" and home is "Moscow"
     And the user opens the locations app
-    Then the offset difference of "Almaty" stands after the city and before the caption
+    Then the offset difference of "Almaty" stands right after the city
     And the offset difference of "Almaty" reads "+2 h"
 
   @set-home-location-and-show-differences @UX3

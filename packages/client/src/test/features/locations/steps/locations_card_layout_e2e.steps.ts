@@ -1,13 +1,15 @@
 // Verifies FR7, FR8, FR10, FR11, NFR-R1, UX1 of redesign-cards-grid-and-day-palettes: the card layout.
 import { expect, type Locator, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import { englishLocale } from "../../main_page/steps/englishTexts";
 import {
   readThemeColours,
   type Theme,
 } from "../../main_page/steps/themeTokens";
-import { requireBox } from "../../time_selection/steps/timeSelectionE2eHelpers";
-import { barOf } from "../../time_selection/steps/timeSelectionE2eHelpers";
-import { englishLocale } from "../../main_page/steps/englishTexts";
+import {
+  barOf,
+  requireBox,
+} from "../../time_selection/steps/timeSelectionE2eHelpers";
 import { test } from "./locations_ui_e2e.fixtures";
 import {
   buildStoredLocations,

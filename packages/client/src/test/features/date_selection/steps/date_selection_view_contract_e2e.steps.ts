@@ -27,6 +27,7 @@ When(
   async ({ locationsWorld }, fullDate: string) => {
     const { page } = locationsWorld;
     await openCalendarWithMouse(page);
+    await page.getByRole("grid").waitFor();
     const nextMonthButton = page.getByRole("button", {
       name: englishLocale.date.nextMonth,
     });
