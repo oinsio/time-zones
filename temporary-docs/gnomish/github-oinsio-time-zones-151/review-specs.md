@@ -107,7 +107,8 @@
 - Impact: An implementer who measures the `li` box in Grid gets the far right end of a scrolling row. The step then fails at 390 px, or gets "fixed" by measuring something else, so the 27 px Grid distance that D2 relies on is never actually checked.
 - Fix: In task 3.3, replace "the distance to the row's right border" with "the distance to the right border: in Cards the right edge of the card box minus its computed `border-right-width`, in Grid the right edge of the Grid list (`ul`) box minus its computed `border-right-width`". Add the same definition to the measurement-rules bullet of task 3.3 (`tasks.md:18`).
 - Fix risk: none. The definition matches UX1 and the containment box task 3.3 already uses for Grid.
-- Status: open
+- Status: fixed
+- Resolution: the measurement-rules bullet of task 3.3 in tasks.md now defines the right border: the card box minus its computed border-right-width in Cards, and the Grid list (ul) box minus its computed border-right-width in Grid, never the borderless w-max row li; the @UX1 scenario text in 3.3 measures to "the right border" so defined.
 
 ### R5 — SUGGESTION — Design says the Grid menu does not move, but it moves 12 px with the button
 - Location: `openspec/changes/make-location-menu-button-vertical/design.md:35`
