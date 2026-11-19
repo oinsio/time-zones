@@ -1,3 +1,5 @@
+import { GRID_MARK_ICON_SIZE_PX, LOCATION_MARK_ICON_SIZE_PX } from "@/constants";
+
 /**
  * How a view shows one location row: a card of its own, or a row of the grid panel.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4).
@@ -21,25 +23,47 @@ type LocationRowVariantClassNames = {
   headerBoxLayerWithOpenMenu?: string;
   /** The box around the row notes; none where the notes need none. */
   notesBox?: string;
-  /** The block holding the place column and the local time. */
-  placeAndTime: string;
-  /** The place column: the city line and the zone line. */
+  /** The row header: below 768 px two lines, from 768 px one line of flex items. */
+  header: string;
+  /** Line 1 below 768 px: the place and the time group; its children join the header from 768 px. */
+  lineOne: string;
+  /** The grab area: mark, city and offset difference; it may wrap, never narrower than its longest word. */
   place: string;
-  /** The city line: as tall as the time button on a phone, so the zone line stands level with the date. */
-  cityLine: string;
-  /** The local time and date column. */
-  dateTime: string;
-  /** Whether the date comes before the time button in the reading order. */
-  isDateBeforeTime: boolean;
-  /** Whether the row shows the day track under or beside its header. */
+  /** The city. */
+  city: string;
+  /** The offset difference after the city. */
+  difference: string;
+  /** Line 2 below 768 px: the zone line and the date; its children join the header from 768 px. */
+  lineTwo: string;
+  /** The zone line element, also part of the grab area. */
+  zoneLine: string;
+  /** The local date. */
+  date: string;
+  /** The time and the location menu button; it moves to its own line at the right when the place needs the room. */
+  timeGroup: string;
+  /** The time button. */
+  time: string;
+  /** Side of the mark icon, in px. */
+  markSizePx: number;
+  /** Whether the row shows the day track under its header. */
   hasDayTrack: boolean;
   /** Whether an open location menu is placed from its button, clear of the panel's overflow. */
   isMenuFixedToViewport: boolean;
 };
 
-const HEADER_LINE_CLASS_NAMES = "flex flex-wrap items-center gap-x-3 gap-y-2";
 const STICKY_BOX_CLASS_NAMES =
   "sticky left-[var(--grid-row-padding)] z-grid-box w-[calc(var(--grid-panel-width)-2*var(--grid-row-padding))]";
+const HEADER_CLASS_NAMES =
+  "flex flex-col gap-y-1 md:flex-row md:flex-wrap md:items-baseline md:gap-x-3";
+const LINE_ONE_CLASS_NAMES = "flex flex-wrap items-center gap-x-3 md:contents";
+const PLACE_CLASS_NAMES =
+  "flex min-w-[min-content] flex-1 basis-0 flex-wrap items-baseline gap-x-2 md:order-1 md:min-w-0 md:flex-none";
+const LINE_TWO_CLASS_NAMES =
+  "flex items-baseline justify-between gap-x-3 md:contents";
+const DATE_CLASS_NAMES =
+  "shrink-0 whitespace-nowrap bg-surface text-muted-foreground md:order-3 md:ml-auto";
+const TIME_GROUP_CLASS_NAMES =
+  "ml-auto flex shrink-0 items-center gap-x-3.5 md:order-4 md:ml-0";
 
 /**
  * The classes that differ between the variants, in one place so the shared
@@ -50,34 +74,52 @@ const STICKY_BOX_CLASS_NAMES =
  * the grid panel scrolls its strips while the sticky boxes keep the header and
  * the notes in place and above the hour frame.
  * Implements FR9 of add-grid-meeting-range-and-share (D6): an open location menu stays above the meeting handles.
+ * Implements FR7, FR8, FR10, FR11, FR17 of redesign-cards-grid-and-day-palettes (D5): the two
+ * layouts, narrow and wide, with the sizes of spec.md sections 5, 6 and 10.
  */
 export const LOCATION_ROW_VARIANT_CLASS_NAMES: Record<
   LocationRowVariant,
   LocationRowVariantClassNames
 > = {
   [LocationRowVariant.CARD]: {
-    list: "flex flex-col gap-2",
-    row: `${HEADER_LINE_CLASS_NAMES} px-4 rounded-md border border-card-border`,
-    placeAndTime: "md:flex-none",
-    place: "md:w-64 md:flex-none",
-    cityLine: "",
-    dateTime: "flex-col md:items-start md:w-44",
-    isDateBeforeTime: false,
+    list: "flex flex-col gap-card-gap",
+    row: "flex flex-col rounded-card border border-card-border bg-surface px-card-side-small pb-card-bottom pt-card-top min-[361px]:px-card-side min-[411px]:px-card-side-large md:px-card-wide-x md:py-card-wide-y",
+    header: HEADER_CLASS_NAMES,
+    lineOne: LINE_ONE_CLASS_NAMES,
+    place: PLACE_CLASS_NAMES,
+    city: "break-words bg-surface text-card-city-small font-bold min-[361px]:text-card-city min-[411px]:text-card-city-large",
+    difference:
+      "bg-surface text-card-difference font-semibold text-muted-foreground",
+    lineTwo: LINE_TWO_CLASS_NAMES,
+    zoneLine:
+      "min-w-0 flex-1 text-card-meta-small text-muted-foreground min-[361px]:text-card-meta min-[411px]:text-card-meta-large md:order-2 md:flex-none",
+    date: `${DATE_CLASS_NAMES} text-card-meta-small min-[361px]:text-card-meta min-[411px]:text-card-meta-large`,
+    timeGroup: TIME_GROUP_CLASS_NAMES,
+    time: "text-card-time-small min-[361px]:text-card-time min-[411px]:text-card-time-large",
+    markSizePx: LOCATION_MARK_ICON_SIZE_PX,
     hasDayTrack: true,
     isMenuFixedToViewport: false,
   },
   [LocationRowVariant.GRID_ROW]: {
-    list: "relative overflow-x-auto overscroll-x-contain rounded-md border border-card-border",
-    row: "flex flex-col gap-y-2 px-[var(--grid-row-padding)] min-w-full w-max border-t border-card-border first:border-t-0 first:rounded-t-md last:rounded-b-md",
-    headerBox: `${HEADER_LINE_CLASS_NAMES} ${STICKY_BOX_CLASS_NAMES}`,
+    list: "relative overflow-x-auto overscroll-x-contain rounded-card border border-card-border",
+    row: "flex flex-col gap-y-2 bg-surface px-[var(--grid-row-padding)] py-3 min-w-full w-max border-t border-card-border first:border-t-0 first:rounded-t-card last:rounded-b-card",
+    headerBox: STICKY_BOX_CLASS_NAMES,
     headerBoxLayer: "focus-within:z-grid-box-focused",
     headerBoxLayerWithOpenMenu: "z-location-menu",
     notesBox: `${STICKY_BOX_CLASS_NAMES} order-last`,
-    placeAndTime: "md:flex-1",
-    place: "md:flex-1 md:flex-row md:items-baseline md:gap-x-2",
-    cityLine: "min-h-11 md:min-h-0",
-    dateTime: "flex-col-reverse md:flex-row md:items-baseline md:gap-x-3",
-    isDateBeforeTime: true,
+    header: HEADER_CLASS_NAMES,
+    lineOne: LINE_ONE_CLASS_NAMES,
+    place: PLACE_CLASS_NAMES,
+    city: "break-words bg-surface text-grid-city font-bold md:text-grid-city-wide",
+    difference:
+      "bg-surface text-card-difference font-semibold text-muted-foreground",
+    lineTwo: LINE_TWO_CLASS_NAMES,
+    zoneLine:
+      "min-w-0 flex-1 text-grid-meta text-muted-foreground md:order-2 md:flex-none",
+    date: `${DATE_CLASS_NAMES} text-grid-meta`,
+    timeGroup: TIME_GROUP_CLASS_NAMES,
+    time: "text-grid-time md:text-grid-time-wide",
+    markSizePx: GRID_MARK_ICON_SIZE_PX,
     hasDayTrack: false,
     isMenuFixedToViewport: true,
   },

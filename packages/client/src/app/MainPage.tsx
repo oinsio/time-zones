@@ -13,7 +13,7 @@ interface MainPageProps {
   meetingBar?: ReactNode;
 }
 
-const COLUMN_CLASS_NAMES = "mx-auto w-full max-w-content px-4";
+const COLUMN_CLASS_NAMES = "mx-auto w-full max-w-content px-column";
 const HEADER_ROW_CLASS_NAMES = `${COLUMN_CLASS_NAMES} flex items-center justify-between gap-2 pt-6 pb-4`;
 // Below 360 px the title cannot stay centred beside the 92 px of buttons.
 const MEETING_HEADER_CLASS_NAMES =

@@ -27,3 +27,9 @@ export const GRID_MARK_ICON_SIZE_PX = 20;
  * Implements FR11 of set-home-location-and-show-differences (D7).
  */
 export const LOCATION_MENU_TRIGGER_GLYPH = "⋯";
+
+/**
+ * The separator between the elements of a zone line.
+ * Implements FR9 of redesign-cards-grid-and-day-palettes (D5).
+ */
+export const ZONE_LINE_SEPARATOR = "·";
