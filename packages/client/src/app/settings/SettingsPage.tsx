@@ -78,7 +78,7 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-screen-2xl flex-col px-4">
-      <header className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-border pt-6 pb-4">
+      <header className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-control-border pt-6 pb-4">
         <button
           type="button"
           onClick={onBack}
@@ -106,7 +106,7 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
             <button
               type="button"
               onClick={resetPreferences}
-              className="min-h-11 rounded-md border border-border px-4 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+              className="min-h-11 rounded-md border border-control-border px-4 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
             >
               {t("settings.reset")}
             </button>

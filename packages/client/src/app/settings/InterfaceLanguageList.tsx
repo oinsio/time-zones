@@ -39,7 +39,7 @@ export function InterfaceLanguageList({
           value={query}
           aria-label={t("settings.languageSearch")}
           onChange={(event) => onQueryChange(event.target.value)}
-          className="min-h-11 w-full rounded-md border border-border bg-surface px-4 py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          className="min-h-11 w-full rounded-md border border-control-border bg-surface px-4 py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
         />
       )}
       {locales.length === 0 && (
@@ -58,7 +58,7 @@ export function InterfaceLanguageList({
                 onClick={() => onChoose(metadata.code)}
                 className={cn(
                   LANGUAGE_BUTTON_CLASS_NAME,
-                  isActive ? "border-accent" : "border-border",
+                  isActive ? "border-accent" : "border-control-border",
                 )}
               >
                 <span aria-hidden="true">{metadata.emoji}</span>

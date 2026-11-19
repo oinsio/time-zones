@@ -24,7 +24,7 @@ export function DialogContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-dialog bg-overlay opacity-60" />
       <DialogPrimitive.Content
         className={cn(
-          "fixed inset-0 z-dialog flex flex-col gap-4 overflow-y-auto border border-border bg-surface p-4 text-foreground",
+          "fixed inset-0 z-dialog flex flex-col gap-4 overflow-y-auto border border-control-border bg-surface p-4 text-foreground",
           "sm:inset-auto sm:left-1/2 sm:top-1/2 sm:max-h-[85vh] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg",
           className,
         )}

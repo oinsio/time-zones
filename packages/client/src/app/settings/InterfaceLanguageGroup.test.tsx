@@ -87,7 +87,7 @@ describe("InterfaceLanguageGroup", () => {
     expect(activeRow).toHaveAttribute("aria-current", "true");
     expect(activeRow).toHaveClass("border-accent");
     expect(activeRow?.querySelector("svg")).not.toBeNull();
-    expect(otherRow).toHaveClass("border-border");
+    expect(otherRow).toHaveClass("border-control-border");
     expect(otherRow).not.toHaveAttribute("aria-current");
     expect(otherRow?.querySelector("svg")).toBeNull();
   });

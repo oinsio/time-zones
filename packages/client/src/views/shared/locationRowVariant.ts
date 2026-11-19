@@ -57,7 +57,7 @@ export const LOCATION_ROW_VARIANT_CLASS_NAMES: Record<
 > = {
   [LocationRowVariant.CARD]: {
     list: "flex flex-col gap-2",
-    row: `${HEADER_LINE_CLASS_NAMES} px-4 rounded-md border border-border`,
+    row: `${HEADER_LINE_CLASS_NAMES} px-4 rounded-md border border-card-border`,
     placeAndTime: "md:flex-none",
     place: "md:w-64 md:flex-none",
     cityLine: "",
@@ -67,8 +67,8 @@ export const LOCATION_ROW_VARIANT_CLASS_NAMES: Record<
     isMenuFixedToViewport: false,
   },
   [LocationRowVariant.GRID_ROW]: {
-    list: "relative overflow-x-auto overscroll-x-contain rounded-md border border-border",
-    row: "flex flex-col gap-y-2 px-[var(--grid-row-padding)] min-w-full w-max border-t border-border first:border-t-0 first:rounded-t-md last:rounded-b-md",
+    list: "relative overflow-x-auto overscroll-x-contain rounded-md border border-card-border",
+    row: "flex flex-col gap-y-2 px-[var(--grid-row-padding)] min-w-full w-max border-t border-card-border first:border-t-0 first:rounded-t-md last:rounded-b-md",
     headerBox: `${HEADER_LINE_CLASS_NAMES} ${STICKY_BOX_CLASS_NAMES}`,
     headerBoxLayer: "focus-within:z-grid-box-focused",
     headerBoxLayerWithOpenMenu: "z-location-menu",

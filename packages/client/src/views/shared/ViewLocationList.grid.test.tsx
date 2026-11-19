@@ -65,10 +65,10 @@ describe("ViewLocationList with grid rows", () => {
   it("should draw the rows in one panel with dividers", () => {
     renderCards(savedAlmatyAndMoscow(), LocationRowVariant.GRID_ROW);
     const panel = screen.getByRole("list");
-    expect(panel).toHaveClass("border", "border-border");
+    expect(panel).toHaveClass("border", "border-card-border");
     expect(panel).not.toHaveClass("divide-y");
     for (const row of screen.getAllByRole("listitem")) {
-      expect(row).toHaveClass("border-t", "border-border", "first:border-t-0");
+      expect(row).toHaveClass("border-t", "border-card-border", "first:border-t-0");
     }
   });
 

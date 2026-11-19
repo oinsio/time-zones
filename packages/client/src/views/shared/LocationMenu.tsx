@@ -184,7 +184,7 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
             tabIndex={-1}
             aria-label={t("locations.locationMenu", { city })}
             style={fixedPosition}
-            className={`${isMenuFixedToViewport ? "fixed" : "absolute right-0 top-full mt-1"} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-border bg-surface py-1 shadow-lg`}
+            className={`${isMenuFixedToViewport ? "fixed" : "absolute right-0 top-full mt-1"} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-control-border bg-surface py-1 shadow-lg`}
           >
             {items.map((item, index) => (
               <button

@@ -18,6 +18,7 @@ const config: Config = {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      boxShadow: { lift: "var(--lift-shadow)" },
       fontSize: { credit: [CREDIT_FONT_SIZE, CREDIT_LINE_HEIGHT] },
       /** Page layers, lowest first. Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5). */
       zIndex: {
@@ -44,7 +45,10 @@ const config: Config = {
           foreground: "var(--color-notice-foreground)",
         },
         surface: "var(--color-surface)",
-        border: "var(--color-border)",
+        "card-border": "var(--color-card-border)",
+        "control-border": "var(--color-control-border)",
+        "control-border-inactive": "var(--color-control-border-inactive)",
+        "handle-border": "var(--color-handle-border)",
         overlay: "var(--color-overlay)",
         danger: "var(--color-danger)",
         meeting: "var(--color-meeting)",

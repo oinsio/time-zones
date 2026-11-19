@@ -14,7 +14,7 @@ interface MainPageProps {
 }
 
 const HEADER_CLASS_NAMES =
-  "grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border pt-6 pb-4";
+  "grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-control-border pt-6 pb-4";
 // Below 360 px the title cannot stay centred beside the 92 px of buttons.
 const MEETING_HEADER_CLASS_NAMES =
   "-mx-4 grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-meeting bg-meeting-bar px-4 pt-6 pb-4 min-[360px]:grid-cols-[1fr_auto_1fr]";
@@ -65,7 +65,7 @@ export function MainPage({
       </main>
       <footer
         data-date-bar
-        className="sticky bottom-0 z-page-bar -mx-4 border-t border-border bg-surface"
+        className="sticky bottom-0 z-page-bar -mx-4 border-t border-control-border bg-surface"
       >
         <div
           role="status"

@@ -86,7 +86,7 @@ Then(
   async ({ locationsWorld }, theme: Theme) => {
     await expect(locationsWorld.page.locator(GRID_PANEL_SELECTOR)).toHaveCSS(
       "border-top-color",
-      readThemeColours(theme).border,
+      readThemeColours(theme).cardBorder,
     );
   },
 );

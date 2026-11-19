@@ -67,7 +67,7 @@ export function SettingsOptionGroup<Value extends string>({
       <span id={captionId} className={SETTINGS_GROUP_CAPTION_CLASS_NAME}>
         {caption}
       </span>
-      <div className="flex flex-nowrap rounded-md border border-border bg-surface">
+      <div className="flex flex-nowrap rounded-md border border-control-border bg-surface">
         {options.map((option) => {
           const isChecked = option.value === selectedValue;
           return (
