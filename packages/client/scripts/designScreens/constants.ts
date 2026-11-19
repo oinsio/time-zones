@@ -19,3 +19,5 @@ export const PNG_WIDTH_OFFSET = 16;
 export const PNG_HEIGHT_OFFSET = 20;
 export const PNG_HEADER_BYTES = 24;
 export const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+/** Wider than every screen, so the fixed-width `#screen` is never shrunk by the viewport. */
+export const DESIGN_SCREEN_VIEWPORT = { width: 2000, height: 1600 };

@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { chromium } from "@playwright/test";
 import {
   CSS_CONTENT_TYPE,
+  DESIGN_SCREEN_VIEWPORT,
   DESIGN_SCREENS_FOLDER,
   MANROPE_FONT_FILE,
 } from "./constants.ts";
@@ -30,7 +31,10 @@ try {
     {
       screensFolder: resolve(DESIGN_SCREENS_FOLDER),
       renderScreens: async (htmlPaths, { deviceScaleFactor, selector }) => {
-        const context = await browser.newContext({ deviceScaleFactor });
+        const context = await browser.newContext({
+          deviceScaleFactor,
+          viewport: DESIGN_SCREEN_VIEWPORT,
+        });
         await context.route("**/*", (route) => {
           const decision = decideDesignScreenRequest(route.request().url());
           if (decision === DesignScreenRequest.SERVE_FONT_STYLESHEET) {
