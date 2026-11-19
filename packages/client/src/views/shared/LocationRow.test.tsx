@@ -1,3 +1,4 @@
+// Verifies FR1 of make-location-menu-button-vertical.
 // Verifies FR4 of fix-day-track-handle-overlap-and-end-of-day.
 // Verifies FR5, FR6, NFR-R1, UX1 of show-zone-abbreviations-and-zone-label-setting (D6).
 // Verifies FR1, FR6, UX1 of show-utc-offset-on-location-rows (D5).
@@ -56,7 +57,7 @@ describe("LocationRow", () => {
 
   it("should show no zone line when the row has no zone line parts", () => {
     renderRow({ zoneLineParts: [] });
-    expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata⋯$/);
+    expect(screen.getByRole("listitem")).toHaveTextContent(/^Kolkata$/);
   });
 
   it("should keep the remove action when the zone line is empty", () => {
@@ -96,7 +97,7 @@ describe("LocationRow", () => {
     it("should read city, country, abbreviation and offset, time, date in that order", () => {
       renderRow(withTime);
       expect(screen.getByRole("listitem")).toHaveTextContent(
-        "Kolkata12:30⋯India·IST·UTC+5:30Sun, Mar 8",
+        "Kolkata12:30India·IST·UTC+5:30Sun, Mar 8",
       );
     });
 

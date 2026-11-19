@@ -7,6 +7,7 @@ import {
  * How a view shows one location row: a card of its own, or a row of the grid panel.
  * Implements FR7, UX3 of add-view-mode-setting-and-grid-skeleton (D4).
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
+ * Implements FR2, FR3, UX1 of make-location-menu-button-vertical (D2).
  */
 export enum LocationRowVariant {
   CARD = "card",
@@ -66,7 +67,7 @@ const LINE_TWO_CLASS_NAMES =
 const DATE_CLASS_NAMES =
   "shrink-0 whitespace-nowrap bg-surface text-muted-foreground ml-auto md:order-3";
 const TIME_GROUP_CLASS_NAMES =
-  "ml-auto flex shrink-0 items-center gap-x-3.5 md:order-4 md:ml-0";
+  "ml-auto flex shrink-0 items-center md:order-4 md:ml-0";
 
 /**
  * The classes that differ between the variants, in one place so the shared
