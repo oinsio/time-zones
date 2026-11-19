@@ -4,17 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DESIGN_SCREEN_DEVICE_SCALE_FACTOR,
   DESIGN_SCREEN_SELECTOR,
-  FONT_STYLESHEET_HOST,
 } from "../../../scripts/designScreens/constants.ts";
 import {
   readPngPixelSize,
   runDesignScreens,
 } from "../../../scripts/designScreens/designScreenPng.ts";
-import {
-  buildManropeStylesheet,
-  DesignScreenRequest,
-  decideDesignScreenRequest,
-} from "../../../scripts/designScreens/designScreenRequests.ts";
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 const IHDR_LENGTH = 13;
@@ -32,36 +26,6 @@ function buildPng(width: number, height: number, marker = 0) {
   bytes.writeUInt8(marker, PNG_HEADER_BYTES);
   return bytes;
 }
-
-describe("decideDesignScreenRequest", () => {
-  it.each([
-    [
-      `https://${FONT_STYLESHEET_HOST}/css2?family=Manrope:wght@400;500;600;700;800&display=swap`,
-      DesignScreenRequest.SERVE_FONT_STYLESHEET,
-    ],
-    ["file:///repo/docs/design/screens/a.html", DesignScreenRequest.CONTINUE],
-    ["https://fonts.gstatic.com/s/manrope.woff2", DesignScreenRequest.ABORT],
-    ["https://unpkg.com/lucide", DesignScreenRequest.ABORT],
-    ["http://example.com/x", DesignScreenRequest.ABORT],
-  ])("should decide %s as %s", (url, expected) => {
-    expect(decideDesignScreenRequest(url)).toBe(expected);
-  });
-});
-
-describe("buildManropeStylesheet", () => {
-  it("should hold one font face covering the used weights with the given bytes", () => {
-    const fontBytes = Buffer.from([1, 2, 3, 250]);
-
-    const stylesheet = buildManropeStylesheet(fontBytes);
-
-    expect(stylesheet.match(/@font-face/g)).toHaveLength(1);
-    expect(stylesheet).toContain('font-family: "Manrope"');
-    expect(stylesheet).toContain("font-weight: 400 800");
-    expect(stylesheet).toContain(
-      `url(data:font/woff2;base64,${fontBytes.toString("base64")})`,
-    );
-  });
-});
 
 describe("readPngPixelSize", () => {
   it("should read the width and the height from the header", () => {

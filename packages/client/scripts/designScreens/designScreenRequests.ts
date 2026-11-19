@@ -33,17 +33,30 @@ export function decideDesignScreenRequest(url: string): DesignScreenRequest {
   return DesignScreenRequest.ABORT;
 }
 
+/** The bytes of one Manrope subset and the characters it covers. */
+export interface ManropeSubsetFont {
+  unicodeRange: string;
+  bytes: Uint8Array;
+}
+
 /**
- * One `@font-face` for Manrope that holds the font bytes inline.
+ * One `@font-face` per Manrope subset, each with its `unicode-range` and its
+ * font bytes inline, so Latin and Cyrillic text both use Manrope.
  * Implements FR5 of make-location-menu-button-vertical (D3).
  */
-export function buildManropeStylesheet(fontBytes: Uint8Array): string {
-  const base64Font = Buffer.from(fontBytes).toString("base64");
-  return `@font-face {
+export function buildManropeStylesheet(
+  subsetFonts: readonly ManropeSubsetFont[],
+): string {
+  return subsetFonts
+    .map(
+      ({ unicodeRange, bytes }) => `@font-face {
   font-family: "${MANROPE_FONT_FAMILY}";
   font-style: normal;
   font-weight: ${MANROPE_FONT_WEIGHTS};
-  src: url(data:font/woff2;base64,${base64Font}) format("woff2");
+  src: url(data:font/woff2;base64,${Buffer.from(bytes).toString("base64")}) format("woff2");
+  unicode-range: ${unicodeRange};
 }
-`;
+`,
+    )
+    .join("");
 }

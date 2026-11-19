@@ -7,7 +7,7 @@ import {
   CSS_CONTENT_TYPE,
   DESIGN_SCREEN_VIEWPORT,
   DESIGN_SCREENS_FOLDER,
-  MANROPE_FONT_FILE,
+  MANROPE_FONT_SUBSETS,
 } from "./constants.ts";
 import { runDesignScreens } from "./designScreenPng.ts";
 import {
@@ -21,8 +21,12 @@ import {
  * design screen (all screens when none is named), offline.
  * Implements FR5 of make-location-menu-button-vertical (D3).
  */
-const fontBytes = await readFile(
-  createRequire(import.meta.url).resolve(MANROPE_FONT_FILE),
+const resolveModule = createRequire(import.meta.url).resolve;
+const subsetFonts = await Promise.all(
+  MANROPE_FONT_SUBSETS.map(async ({ file, unicodeRange }) => ({
+    unicodeRange,
+    bytes: await readFile(resolveModule(file)),
+  })),
 );
 const browser = await chromium.launch();
 try {
@@ -46,7 +50,7 @@ try {
           if (decision === DesignScreenRequest.SERVE_FONT_STYLESHEET) {
             return route.fulfill({
               contentType: CSS_CONTENT_TYPE,
-              body: buildManropeStylesheet(fontBytes),
+              body: buildManropeStylesheet(subsetFonts),
             });
           }
           return decision === DesignScreenRequest.CONTINUE
