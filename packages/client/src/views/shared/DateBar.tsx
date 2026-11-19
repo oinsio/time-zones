@@ -68,7 +68,7 @@ export function DateBar() {
         <button
           type="button"
           disabled={!dateBar.isPinned}
-          className="flex h-11 items-center gap-2 rounded-now border border-control-border bg-transparent px-4 text-base font-semibold text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-default disabled:border-control-border-inactive disabled:text-muted-foreground"
+          className="flex h-11 items-center gap-2 rounded-now border border-control-border px-4 text-base font-semibold text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-default disabled:border-control-border-inactive disabled:text-muted-foreground"
           onClick={handleReturnToNow}
         >
           <Clock aria-hidden="true" size={NOW_ICON_SIZE_PX} />

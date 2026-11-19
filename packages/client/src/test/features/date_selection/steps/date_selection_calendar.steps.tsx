@@ -46,9 +46,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     And("the list contains {string}", givenList);
     And("the app is open", givenAppOpen);
     When("the user opens the calendar", openCalendar);
-    Then("it shows {string}", (_ctx, heading: string) =>
+    Then("it shows {string}", async (_ctx, heading: string) =>
       expect(
-        within(screen.getByRole("dialog")).getByRole("heading", {
+        await within(screen.getByRole("dialog")).findByRole("heading", {
           name: heading,
         }),
       ).toBeInTheDocument(),

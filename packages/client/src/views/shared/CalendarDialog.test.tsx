@@ -1,3 +1,4 @@
+// Verifies NFR-P2 of redesign-cards-grid-and-day-palettes: the month grid loads when the calendar opens.
 // Verifies FR3 of select-date-with-calendar-and-now (D6).
 // Verifies FR1, FR2, FR3, FR4 of keep-now-button-visible-when-live (D1, D2).
 import { render, screen, within } from "@testing-library/react";

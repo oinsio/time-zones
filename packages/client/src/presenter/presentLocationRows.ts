@@ -1,4 +1,3 @@
-import type { TFunction } from "i18next";
 import { UTC_ZONE_ID } from "@/constants";
 import {
   getLocationMarkKind,
@@ -30,22 +29,6 @@ export type LocationRow = PresentedZoneMoment & {
   /** "Almaty, You are here, Device time": the row's name; only the device time location has it. */
   accessibleName?: string;
 };
-
-type ZoneLinePlaceKind = {
-  isDeviceTime: boolean;
-  isUniversalTime: boolean;
-  countryName: string;
-};
-
-/** The place element of a zone line: "Device time", "Universal Time" or the country. */
-function getZoneLinePlaceText(
-  translate: TFunction,
-  { isDeviceTime, isUniversalTime, countryName }: ZoneLinePlaceKind,
-): string {
-  if (isDeviceTime) return translate("locations.deviceTimeMeta");
-  if (isUniversalTime) return translate("locations.universalTime");
-  return countryName;
-}
 
 /**
  * Rows of the location list: city, country name in the interface language and
@@ -96,11 +79,11 @@ export function presentLocationRows(
       mark,
       ...zoneMoment,
       zoneLineParts: presentZoneLine({
-        placeText: getZoneLinePlaceText(translate, {
-          isDeviceTime,
-          isUniversalTime,
-          countryName,
-        }),
+        placeText: isDeviceTime
+          ? translate("locations.deviceTimeMeta")
+          : isUniversalTime
+            ? translate("locations.universalTime")
+            : countryName,
         zoneAbbreviationLabel: zoneMoment.zoneAbbreviationLabel,
         utcOffsetLabel: zoneMoment.utcOffsetLabel,
         zoneLabelParts: context.zoneLabelParts,

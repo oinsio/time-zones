@@ -48,15 +48,14 @@ export function formatLocalTimeParts(
     DateTimeLabelKind.LOCAL_TIME,
     hourFormat,
   ).formatToParts(localDateTime.epochMilliseconds);
-  const isDayPeriod = (part: Intl.DateTimeFormatPart) =>
-    part.type === DAY_PERIOD_PART_TYPE;
+  const dayPeriodPart = parts.find(({ type }) => type === DAY_PERIOD_PART_TYPE);
   return {
     digits: parts
-      .filter((part) => !isDayPeriod(part))
-      .map((part) => part.value)
+      .filter((part) => part !== dayPeriodPart)
+      .map(({ value }) => value)
       .join("")
       .trim(),
-    dayPeriodMarker: parts.find(isDayPeriod)?.value ?? "",
+    dayPeriodMarker: dayPeriodPart?.value ?? "",
   };
 }
 

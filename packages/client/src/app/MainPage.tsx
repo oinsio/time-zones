@@ -13,8 +13,7 @@ interface MainPageProps {
   meetingBar?: ReactNode;
 }
 
-const COLUMN_CLASS_NAMES = "mx-auto w-full max-w-content px-column";
-const HEADER_ROW_CLASS_NAMES = `${COLUMN_CLASS_NAMES} flex items-center justify-between gap-2 pt-6 pb-4`;
+const COLUMN_CLASS_NAME = "content-column";
 // Below 360 px the title cannot stay centred beside the 92 px of buttons.
 const MEETING_HEADER_CLASS_NAMES =
   "grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-meeting bg-meeting-bar px-4 pt-6 pb-4 min-[360px]:grid-cols-[1fr_auto_1fr]";
@@ -53,7 +52,9 @@ export function MainPage({
         }
       >
         {meetingBar ?? (
-          <div className={HEADER_ROW_CLASS_NAMES}>
+          <div
+            className={`${COLUMN_CLASS_NAME} flex items-center justify-between gap-2 pt-6 pb-4`}
+          >
             <h1 className="text-header-title-narrow font-bold min-[361px]:text-header-title">
               {t("app.title")}
             </h1>
@@ -61,7 +62,7 @@ export function MainPage({
           </div>
         )}
       </header>
-      <main className={`${COLUMN_CLASS_NAMES} flex-1`}>
+      <main className={`${COLUMN_CLASS_NAME} flex-1`}>
         <ViewHost />
       </main>
       <footer
@@ -75,7 +76,7 @@ export function MainPage({
         >
           {notices}
         </div>
-        <div className={COLUMN_CLASS_NAMES}>{bottomBar}</div>
+        <div className={COLUMN_CLASS_NAME}>{bottomBar}</div>
       </footer>
     </div>
   );

@@ -100,7 +100,7 @@ describe("MainPage", () => {
   it("should keep the content in a centred column and the bottom bar on the page background", () => {
     renderMainPage(null);
 
-    expect(screen.getByRole("main")).toHaveClass("max-w-content", "mx-auto");
+    expect(screen.getByRole("main")).toHaveClass("content-column");
     expect(screen.getByRole("contentinfo")).toHaveClass("bg-background");
     expect(screen.getByRole("contentinfo").className).not.toMatch(
       /\bborder-t\b/,
