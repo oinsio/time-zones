@@ -90,3 +90,32 @@ Feature: Zone line on location rows
       | the country and the zone abbreviation                 | Время устройства, МСК        |
       | the country only                                      | Время устройства             |
       | nothing                                               | Время устройства             |
+
+  @redesign-cards-grid-and-day-palettes @FR19
+  Scenario Outline: Universal Time on the UTC row
+    Given the interface language is "<language>"
+    And the current instant is "2026-07-15T12:00:00Z"
+    And the list contains "Almaty" and "UTC"
+    And the zone label shows "<parts>"
+    When the user opens the app
+    Then the "Almaty" zone line elements are "<almaty>"
+    And the "UTC" zone line elements are "<utc>"
+
+    Examples:
+      | language | parts                                                 | almaty            | utc                  |
+      | en       | the country, the zone abbreviation and the UTC offset | Kazakhstan, UTC+5 | Universal Time, UTC  |
+      | ru       | the country, the zone abbreviation and the UTC offset | Казахстан, UTC+5  | Всемирное время, UTC |
+      | en       | the zone abbreviation and the UTC offset              | UTC+5             | UTC                  |
+      | en       | the country only                                      | Kazakhstan        | Universal Time       |
+      | en       | nothing                                               | no element        | no element           |
+
+  @redesign-cards-grid-and-day-palettes @FR19
+  Scenario: Hiding the country applies to every row at once
+    Given the interface language is "en"
+    And the device time zone is "Europe/Moscow"
+    And the list is "the device time location, Moscow, Kolkata, UTC"
+    When the user opens the app
+    And the user turns the country off in the settings and goes back
+    Then no row shows "Russia", "India" or "Universal Time"
+    And the "UTC" zone line elements are "UTC"
+    And the device time location still shows "Device time"

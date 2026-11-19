@@ -2,7 +2,7 @@ Feature: Locked row controls and the meeting range input in a real browser
   Implements change fix-grid-meeting-range-lock-and-layering.
   While a meeting range is set the grab areas, the location menus and the wall-time inputs are locked, the keyboard alone can type the meeting, and the input is accessible and fits a phone.
 
-  @fix-grid-meeting-range-lock-and-layering @FR1 @FR2 @NFR-A2
+  @fix-grid-meeting-range-lock-and-layering @FR1 @FR2 @NFR-A2 @redesign-cards-grid-and-day-palettes @FR15 @FR17
   Scenario: Tab order skips the locked controls
     Given the locations interface language is English
     And the view mode is Grid

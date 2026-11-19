@@ -65,3 +65,10 @@ Feature: Local time and date on location rows
     Given the list contains Kolkata, Kathmandu and New York
     When their rows are presented at "2026-07-15T12:00:00Z" in English and then in Russian
     Then each row shows the same time and date labels as the platform's own date formatting gives for that zone
+
+  @redesign-cards-grid-and-day-palettes @NFR-P1
+  Scenario: Presenting 50 rows again in the 12-hour format builds no formatter
+    Given the interface language is English, the hour format is 12-hour and 50 location rows have been presented once
+    When the same 50 rows are presented again in the same language and reference day
+    Then every row's local time has its day period marker split from the digits
+    And no date, time or region name formatter is built

@@ -3,6 +3,7 @@ import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen, within } from "@testing-library/react/pure";
 import i18n from "i18next";
 import { expect } from "vitest";
+import { HourFormat } from "@/preferences";
 import { buildLocation } from "@/test/factories/buildLocation";
 import { createLocalTimeLabelsCheck } from "./localTimeLabelsCheck";
 import {
@@ -10,6 +11,7 @@ import {
   ENGLISH_LANGUAGE,
   RUSSIAN_LANGUAGE,
 } from "./localTimeWorld";
+
 import { createWarmRowsCheck } from "./rowBudgetWorld";
 
 const feature = await loadFeature("../locations_local_time_unit.feature");
@@ -20,9 +22,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createLocalTimeWorld();
   let labelsCheck: ReturnType<typeof createLocalTimeLabelsCheck>;
   const warmRowsCheck = createWarmRowsCheck();
+  const twelveHourRowsCheck = createWarmRowsCheck(HourFormat.H12);
 
   f.BeforeEachScenario(world.reset);
-  f.AfterEachScenario(warmRowsCheck.stop);
+  f.AfterEachScenario(() => {
+    warmRowsCheck.stop();
+    twelveHourRowsCheck.stop();
+  });
   f.AfterAllScenarios(world.finish);
 
   const givenInstant = (_ctx: unknown, timestamp: string) => {
@@ -194,6 +200,28 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       Then(
         "each row shows the same time and date labels as the platform's own date formatting gives for that zone",
         () => labelsCheck.expectPlatformLabels(),
+      );
+    },
+  );
+
+  // @redesign-cards-grid-and-day-palettes @NFR-P1
+  f.Scenario(
+    "Presenting 50 rows again in the 12-hour format builds no formatter",
+    ({ Given, When, Then, And }) => {
+      Given(
+        "the interface language is English, the hour format is 12-hour and {int} location rows have been presented once",
+        (_ctx, count: number) => twelveHourRowsCheck.presentOnce(count),
+      );
+      When(
+        "the same 50 rows are presented again in the same language and reference day",
+        () => twelveHourRowsCheck.presentAgain(),
+      );
+      Then(
+        "every row's local time has its day period marker split from the digits",
+        () => twelveHourRowsCheck.expectDayPeriodMarkersSplit(),
+      );
+      And("no date, time or region name formatter is built", () =>
+        twelveHourRowsCheck.expectNoWarmWork(),
       );
     },
   );

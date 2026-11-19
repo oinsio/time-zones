@@ -46,7 +46,7 @@ Feature: Grid layers under the page bars and dialogs in a real browser
     Then every menu item over the date bar has that menu item on top
     And at least one menu item lies over the date bar
 
-  @fix-grid-meeting-range-lock-and-layering @FR8 @UX3
+  @fix-grid-meeting-range-lock-and-layering @FR8 @UX3 @redesign-cards-grid-and-day-palettes @FR17
   Scenario Outline: The frame border runs through the empty parts of the header at <width> px with <frame>
     Given the locations interface language is English
     And the view mode is Grid

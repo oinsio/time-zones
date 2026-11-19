@@ -18,7 +18,7 @@ Feature: Hour frame and hour strip keys of the Grid view in a real browser
       | light |
       | dark  |
 
-  @add-grid-hour-cells-and-hour-frame @FR10
+  @add-grid-hour-cells-and-hour-frame @FR10 @redesign-cards-grid-and-day-palettes @FR17
   Scenario: Notes and header texts cover the frame
     Given the view mode is Grid
     And the current time is "2026-03-08T07:30:00Z"
