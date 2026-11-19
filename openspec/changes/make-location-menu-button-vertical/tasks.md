@@ -1,0 +1,52 @@
+Paths are relative to `packages/client/` unless they start with `docs/`, `openspec/`, `temporary-docs/` or `README`. Run tests strictly one command at a time and never in the background (`CLAUDE.md`). Every touched production file gets the JSDoc line `Implements <ids> of make-location-menu-button-vertical (D<n>).`; every touched test file `// Verifies <ids> of make-location-menu-button-vertical.`; every new Gherkin scenario the tags `@make-location-menu-button-vertical @<id>`; every e2e step `// Verifies <id> of make-location-menu-button-vertical`. Glossary term: **Location menu** (owner `LocationMenu`); no new term. Implementation tasks are TDD: RED (failing test shown) then GREEN. E2E for one feature: `pnpm run build`, then `npx bddgen -c playwright.bdd.config.ts && npx playwright test -c playwright.bdd.config.ts <generated spec path or --grep "<scenario>">`. Handoff folder: `temporary-docs/gnomish/github-oinsio-time-zones-151/handoff/`.
+
+## 1. Glossary and architecture docs (FR6)
+
+- [ ] 1.1 In `docs/glossary/locations.md`, change the **Location menu** entry from «⋯» to «⋮» (vertical dots). In `docs/architecture/views.md`, change the two row sketches (lines with `15:30  ⋯` and `10:30  ⋯`) and the "Location menu" row of the building blocks table («⋯» button → «⋮» button; keep "hit area of 44 px"). Verify: `grep -c "⋯" docs/glossary/locations.md docs/architecture/views.md` prints `0` for both, and `grep -c "⋮" docs/glossary/locations.md docs/architecture/views.md` prints at least `1` for each.
+
+## 2. Vertical dots icon (FR1, NFR-A1; design D1)
+
+- [ ] 2.1 RED: new `src/views/shared/LocationMenu.trigger.test.tsx`. It renders `LocationMenu` and asserts three things. (a) The trigger's text content is empty. (b) The trigger holds exactly one `svg` with `aria-hidden="true"`, `width` and `height` equal to `LOCATION_MENU_ICON_SIZE_PX`. (c) Its three `circle` elements share one `cx` and have three different `cy` values (dots one above the other). Update the existing expectations that read the glyph: `src/views/shared/LocationMenu.test.tsx:33` (`toHaveTextContent("⋯")` → no text) and `src/views/shared/LocationRow.test.tsx:59` and `:99` (drop `⋯` from the expected text). Verify: `npx vitest run src/views/shared/LocationMenu.trigger.test.tsx` fails.
+- [ ] 2.2 GREEN: in `src/constants/locations.ts`, replace `LOCATION_MENU_TRIGGER_GLYPH` with `LOCATION_MENU_ICON_SIZE_PX = 20` and update the export in `src/constants/index.ts`. In `src/views/shared/LocationMenu.tsx`, render `<EllipsisVertical aria-hidden="true" size={LOCATION_MENU_ICON_SIZE_PX} />` from `lucide-react` in the trigger, drop `text-xl font-bold`, and update the JSDoc ("⋯" → vertical dots, add the Implements line). Verify: `npx vitest run src/views/shared/LocationMenu` then `npx vitest run src/views/shared/LocationRow` pass, and `grep -rn "LOCATION_MENU_TRIGGER_GLYPH\|⋯" src --include=*.ts --include=*.tsx` prints nothing.
+
+## 3. Compact geometry (FR2, FR3, UX1; design D2)
+
+- [ ] 3.1 RED: in `src/views/shared/locationRowVariant.test.ts`, assert that the `timeGroup` class names of both variants contain no `gap-x-` class. In `src/views/shared/LocationMenu.trigger.test.tsx`, assert that the menu root (the trigger's parent) has the class `-mr-3` and the trigger keeps `min-h-11 min-w-11`. Verify: `npx vitest run src/views/shared/locationRowVariant.test.ts` fails.
+- [ ] 3.2 GREEN: remove `gap-x-3.5` from `TIME_GROUP_CLASS_NAMES` in `src/views/shared/locationRowVariant.ts` and add `-mr-3` to the root span of `LocationMenu`. Verify: `npx vitest run src/views/shared/locationRowVariant.test.ts` then `npx vitest run src/views/shared/LocationMenu.trigger.test.tsx` pass.
+- [ ] 3.3 New `src/test/features/locations/locations_menu_button_e2e.feature` with the scenarios of the `locations` delta: "Vertical dots on the button" (@FR1 @NFR-A1), "Compact button in Cards" (@FR2 @FR3 @NFR-R1, widths 320, 390, 411, 768, 1024, 1440), "Compact button in Grid" (@FR2 @FR3 @NFR-R1, widths 390, 844, 1180, 1440), "Compact button next to a meeting time" (@FR2 @FR3), "Long city at 320 px" (@FR3 @NFR-R1) and "Open menu inside the screen" (@FR3). Add two more scenarios. "Even spacing around the dots" (@UX1) runs Cards at 390 and 1024 and Grid at 390 and 1440. It asserts that, from the centre of the button, the distance to the time's right edge and the distance to the row's right border differ by at most 10 px. "No accessibility violations with the vertical dots" (@NFR-A1) runs Cards and Grid at 390 and reuses "the locations screen has no accessibility violations".
+  - Steps go in `src/test/features/locations/steps/locations_menu_button_e2e.steps.ts`, with a helper `locationsMenuButtonHelpers.ts` if the file would pass 200 lines. They use the `test` fixture of `locations_ui_e2e.fixtures` and reuse "the view mode is Grid", "the screen is {int} px wide for the locations", "the user sets the meeting range 09:00–11:00 in Almaty", "the user opens the location menu of {string}" and the language steps.
+  - Measurement rules come from design D2. Content edge of a card: its box minus the computed `border-right-width` and `padding-right`. Of a Grid row: the right edge of the row's sticky header box. Containment: inside the card box, or inside the Grid list (`ul`) box. Overlap: two boxes overlap when they intersect by more than `LAYOUT_TOLERANCE_PX` (`locationsCardLayoutHelpers.ts`). Constants: `MAX_MENU_FOOTPRINT_PX = 32`, `MIN_HIT_AREA_PX = 44`, `MAX_SPACING_DIFFERENCE_PX = 10`.
+  - Verify: the feature passes; then temporarily restore `gap-x-3.5` and confirm "Compact button in Cards" fails, then remove it again.
+
+## 4. Regressions in a real browser (FR1–FR3)
+
+- [ ] 4.1 Run these features without `--update-snapshots`, one at a time, and fix any step that measured the old geometry, keeping its intent: `locations_card_layout_e2e.feature`, `grid_view_meeting_lock_e2e.feature`, `grid_view_hour_frame_e2e.feature`, `grid_view_redesign_e2e.feature`, `locations_reorder_e2e.feature`, `locations_view_contract_e2e.feature`, `src/test/features/home_location/*_e2e.feature`. Verify: each run passes.
+
+## 5. Screenshot baselines (FR4)
+
+- [ ] 5.1 Run every feature listed by `grep -rl "screenshot" src/test/features --include=*_e2e.feature` (11 features), one at a time, without `--update-snapshots`. For each that fails only because of the row header, re-run it with `--update-snapshots` for the `chromium` and `mobile-chrome` projects. Then run it again without the flag. Verify: every one of the 11 features passes without `--update-snapshots`, and `git status --short src/test/features/__screenshots__` lists only re-taken PNGs of features that show a row header.
+
+## 6. Design screens and README images (FR5; design D3)
+
+- [ ] 6.1 New `scripts/designScreens/renderDesignScreens.ts` and the script `"design:screens": "node scripts/designScreens/renderDesignScreens.ts"` in `package.json`.
+  - It renders the named `docs/design/screens/*.html` files (all of them when none is named) with Playwright Chromium, `deviceScaleFactor: 2`, and writes the `#screen` element to the PNG of the same name.
+  - It serves the Google Fonts stylesheet request from `@fontsource-variable/manrope` as family `Manrope`, and aborts every other network request.
+  - It exits non-zero, without writing, when the new PNG's pixel size differs from the existing PNG's.
+  - Constants are named, no magic numbers (`code-style.md`).
+  - Verify: `pnpm design:screens ../../docs/design/screens/settings-phone-light.html` exits 0 offline, and `git diff --stat ../../docs/design/screens/settings-phone-light.png` shows at most a binary change of the same file (restore it afterwards with `git checkout`).
+- [ ] 6.2 In the 29 HTML files under `docs/design/screens/` that contain `data-lucide="ellipsis"`, replace that icon with the Lucide `ellipsis-vertical` SVG (20 × 20, circles at `cx="12"`, `cy` 5 / 12 / 19, `data-lucide="ellipsis-vertical"`). Adjust the `.menu-button` rules so the dots' centre sits 22 px right of the time and 10 px left of the content edge. Re-render those 29 PNGs with `pnpm design:screens <files>`. Verify: `grep -l 'data-lucide="ellipsis"' ../../docs/design/screens/*.html | wc -l` prints `0`; `grep -l 'data-lucide="ellipsis-vertical"' ../../docs/design/screens/*.html | wc -l` prints `29`; `git status --short ../../docs/design/screens` lists the 5 README images (`cards-phone-light.png`, `cards-phone-dark.png`, `cards-tablet-light.png`, `grid-desktop-light.png`, `grid-desktop-meeting-dark.png`) as modified; `npx vitest run src/test/readme` passes.
+
+## 7. Quality gates (M6)
+
+- [ ] 7.1 Scoped Stryker, one run: `npx stryker run --mutate 'src/views/shared/LocationMenu.tsx,src/views/shared/locationRowVariant.ts,src/constants/locations.ts'`. Read `reports/mutation/mutation-report.json` and kill survivors that this change introduced. Verify: score ≥ 95% (minimum 90%) for the mutants on the changed lines.
+- [ ] 7.2 Run `pnpm run lint`, then `pnpm run typecheck`, then `pnpm test`, then `pnpm run build`, one at a time. Verify: all pass, and `grep -rln "make-location-menu-button-vertical" src scripts` lists the changed production, test and feature files.
+
+## 8. Handoff
+
+- [ ] 8.1 Handoff H1: write the `## H1: Look at the compact button in the re-approved screenshots` section of `temporary-docs/gnomish/github-oinsio-time-zones-151/handoff/README.md`. Serves: UX1, FR4, FR5. Files: none. Verify: the steps of the H1 bullet below. Copy Why manual and Automated part from below. No patch: the item changes no file. Verify: `grep -c "^## H1:" temporary-docs/gnomish/github-oinsio-time-zones-151/handoff/README.md` prints 1.
+
+## Human follow-up
+
+- H1 (UX1, FR4, FR5): look at the compact button in the re-approved screenshots. Open the five README images in `docs/design/screens/` and two re-taken baselines under `packages/client/src/test/features/__screenshots__/chromium/`: one Cards at 375 px and one Grid at 1440 px. Confirm that the vertical dots sit evenly between the time and the row border, and that nothing looks crowded. Report any mismatch as a new task.
+  Why manual: whether the spacing looks harmonious is a judgement only a human can make. The numbers behind it are checked automatically.
+  Automated part: the `@UX1` scenario checks that the two distances differ by at most 10 px. The geometry, overlap and containment scenarios of `locations_menu_button_e2e.feature` and every screenshot scenario run in `pnpm test:bdd`.
