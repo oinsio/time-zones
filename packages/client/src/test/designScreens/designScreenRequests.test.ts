@@ -39,6 +39,14 @@ describe("buildManropeStylesheet", () => {
     );
   });
 
+  it("should join the faces with nothing between them", () => {
+    const joinedFaces = subsetFonts
+      .map((subsetFont) => buildManropeStylesheet([subsetFont]))
+      .join("");
+
+    expect(buildManropeStylesheet(subsetFonts)).toBe(joinedFaces);
+  });
+
   it("should cover Cyrillic", () => {
     expect(
       MANROPE_FONT_SUBSETS.some((subset) =>
