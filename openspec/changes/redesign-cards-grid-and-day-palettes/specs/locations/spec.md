@@ -704,7 +704,7 @@ The device time location SHALL use the card layout of every location row ("Narro
 - **THEN** it matches the approved screenshot, re-taken once for the redesign
 
 ### Requirement: UTC offset on location rows
-Every location row SHALL show the location's UTC offset as the last element of its zone line, after the country name and the zone abbreviation, while the zone label shows the UTC offset (see the `settings` capability); while it does not, the row MUST show no offset and MUST leave no gap for it. A city location in the zone `UTC` is the one exception: its zone line is the Universal Time label alone (see "Zone line on location rows"). The offset MUST be derived from the location's canonical IANA identifier for the reference moment — the current instant while the moment is live, the pinned instant while it is pinned (see the `date-selection` capability) — so daylight saving time is respected for the shown date; a raw offset MUST NOT be stored or used to identify a location. The offset MUST be computed when the list is presented (the app opens, a location is added or removed, the list changes in another tab, the interface language changes, the reference moment changes), at the start of every minute while the page is visible, and when the page becomes visible again; it MUST NOT be refreshed while the page is hidden. Inputs: the location's IANA identifier, the reference moment (ISO 8601 with `Z`), the interface language. Output: the offset text. Errors: when the offset cannot be computed for the identifier, the row MUST be shown without the offset and the rest of the list MUST be unaffected. The offset needs no network and behaves the same offline. <!-- implements FR1, FR2, FR4, FR6, UX1 of show-utc-offset-on-location-rows; FR4 of show-local-time-and-date-on-location-cards; FR5 of select-date-with-calendar-and-now; FR5, FR13 of show-zone-abbreviations-and-zone-label-setting; FR19 of redesign-cards-grid-and-day-palettes -->
+Every location row SHALL show the location's UTC offset as the last element of its zone line, after the country name and the zone abbreviation, while the zone label shows the UTC offset (see the `settings` capability); while it does not, the row MUST show no offset and MUST leave no gap for it. A city location in the zone `UTC` shows the Universal Time label in place of its country name (see "Zone line on location rows"); its zone abbreviation and UTC offset follow the zone label as on every row. The offset MUST be derived from the location's canonical IANA identifier for the reference moment — the current instant while the moment is live, the pinned instant while it is pinned (see the `date-selection` capability) — so daylight saving time is respected for the shown date; a raw offset MUST NOT be stored or used to identify a location. The offset MUST be computed when the list is presented (the app opens, a location is added or removed, the list changes in another tab, the interface language changes, the reference moment changes), at the start of every minute while the page is visible, and when the page becomes visible again; it MUST NOT be refreshed while the page is hidden. Inputs: the location's IANA identifier, the reference moment (ISO 8601 with `Z`), the interface language. Output: the offset text. Errors: when the offset cannot be computed for the identifier, the row MUST be shown without the offset and the rest of the list MUST be unaffected. The offset needs no network and behaves the same offline. <!-- implements FR1, FR2, FR4, FR6, UX1 of show-utc-offset-on-location-rows; FR4 of show-local-time-and-date-on-location-cards; FR5 of select-date-with-calendar-and-now; FR5, FR13 of show-zone-abbreviations-and-zone-label-setting; FR19 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: Whole-hour zone
 - **GIVEN** the current instant is `2026-07-15T12:00:00Z`
@@ -765,7 +765,7 @@ Every location row SHALL show the location's UTC offset as the last element of i
 - **THEN** the Moscow row shows `Russia` and `MSK` and no offset
 
 ### Requirement: Zone line on location rows
-The line of every city location row after its city, its zone line, SHALL consist of separate elements in this order: the country name in the interface language, the zone abbreviation at the effective instant (see the `zone-abbreviations` capability) and the UTC offset. The country name MUST be shown only while the zone label shows the country, the zone abbreviation only while it shows the zone abbreviation, and the UTC offset only while it shows the UTC offset (see the `settings` capability). An element that is hidden or unknown — a hidden part, a zone without a country, a zone without a zone abbreviation, an offset that cannot be computed — MUST leave no element, no empty space and no separator behind; when no element is left, the row MUST show no zone line and no empty line. While the UTC offset is shown, a zone abbreviation that reads the same as the UTC offset text MUST NOT be shown. A city location in the zone `UTC` MUST show the Universal Time label — "Universal Time" in English, «Всемирное время» in Russian — in place of the country name, as its only element: its zone abbreviation and UTC offset, which only repeat its city label `UTC`, MUST NOT be shown; the label MUST be shown only while the zone label shows the country, so with the country hidden the UTC row shows no zone line. A change of the zone label MUST apply to every row in the same render, without a reload and without a loading state; it MUST NOT change the city label, the local time, the offset difference, the day track or any accessible name. Inputs: the location, the effective instant, the interface language, the zone label. Output: the zone line elements. Errors: none beyond the existing rule for an unknown zone. <!-- implements FR5, FR13, UX1, UX2 of show-zone-abbreviations-and-zone-label-setting; FR3, UX2 of add-country-to-zone-label; FR19 of redesign-cards-grid-and-day-palettes -->
+The line of every city location row after its city, its zone line, SHALL consist of separate elements in this order: the country name in the interface language, the zone abbreviation at the effective instant (see the `zone-abbreviations` capability) and the UTC offset. The country name MUST be shown only while the zone label shows the country, the zone abbreviation only while it shows the zone abbreviation, and the UTC offset only while it shows the UTC offset (see the `settings` capability). An element that is hidden or unknown — a hidden part, a zone without a country, a zone without a zone abbreviation, an offset that cannot be computed — MUST leave no element, no empty space and no separator behind; when no element is left, the row MUST show no zone line and no empty line. While the UTC offset is shown, a zone abbreviation that reads the same as the UTC offset text MUST NOT be shown, so the `UTC` zone reads `UTC` once; while the UTC offset is hidden, that zone abbreviation MUST be shown, so the `UTC` zone still reads `UTC`. A city location in the zone `UTC` MUST show the Universal Time label — "Universal Time" in English, «Всемирное время» in Russian — in place of the country name; the label MUST be shown only while the zone label shows the country, and the zone abbreviation and UTC offset of that row MUST follow the zone label unchanged. A change of the zone label MUST apply to every row in the same render, without a reload and without a loading state; it MUST NOT change the city label, the local time, the offset difference, the day track or any accessible name. Inputs: the location, the effective instant, the interface language, the zone label. Output: the zone line elements. Errors: none beyond the existing rule for an unknown zone. <!-- implements FR5, FR13, UX1, UX2 of show-zone-abbreviations-and-zone-label-setting; FR3, UX2 of add-country-to-zone-label; FR19 of redesign-cards-grid-and-day-palettes -->
 
 #### Scenario: Country, abbreviation and offset
 - **GIVEN** the interface language is Russian
@@ -819,7 +819,7 @@ The line of every city location row after its city, its zone line, SHALL consist
 - **AND** the current instant is `2026-07-15T12:00:00Z`
 - **AND** the list contains UTC
 - **WHEN** the user opens the app
-- **THEN** the UTC row shows no zone line
+- **THEN** the UTC row's zone line elements are `UTC`
 
 #### Scenario: Universal Time on the UTC row
 - **GIVEN** the interface language is `<language>`
@@ -831,10 +831,11 @@ The line of every city location row after its city, its zone line, SHALL consist
 
 | language | parts | almaty | utc |
 |---|---|---|---|
-| English | the country, the zone abbreviation and the UTC offset | Kazakhstan, UTC+5 | Universal Time |
-| Russian | the country, the zone abbreviation and the UTC offset | Казахстан, UTC+5 | Всемирное время |
-| English | the zone abbreviation and the UTC offset | UTC+5 | no element |
+| English | the country, the zone abbreviation and the UTC offset | Kazakhstan, UTC+5 | Universal Time, UTC |
+| Russian | the country, the zone abbreviation and the UTC offset | Казахстан, UTC+5 | Всемирное время, UTC |
+| English | the zone abbreviation and the UTC offset | UTC+5 | UTC |
 | English | the country only | Kazakhstan | Universal Time |
+| English | nothing | no element | no element |
 
 #### Scenario: A change applies to every row at once
 - **GIVEN** the list contains Moscow, Kolkata and the device time location
@@ -847,6 +848,7 @@ The line of every city location row after its city, its zone line, SHALL consist
 - **AND** the list contains Moscow, Kolkata, UTC and the device time location
 - **WHEN** the user turns the country off in the settings and goes back
 - **THEN** no row shows `Russia`, `India` or `Universal Time`
+- **AND** the UTC row's zone line elements are `UTC`
 - **AND** the device time location still shows `Device time`
 - **AND** the city labels, local times and offset differences are unchanged
 

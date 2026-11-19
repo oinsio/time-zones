@@ -173,3 +173,24 @@ When the hour strip's width divided by its cell count is at least 32 px, every c
 - **GIVEN** the Grid view at 390 by 844 px at `2026-03-08T07:30:00Z`
 - **WHEN** the user focuses Almaty's hour strip and presses End
 - **THEN** the hour frame is on column 23 and fully visible
+
+### Requirement: Hour frame lies behind texts
+The hour frame SHALL lie above the hour cells and behind the row header texts and the row notes, and MUST NOT receive pointer events. It MUST be hidden only behind the glyphs of the row header texts — the city, the offset difference, each zone line part, the date, the day shift mark and the time or span — behind the row notes and behind an open wall-time input or meeting range input: these keep their background and stay fully visible where the frame passes. Every other point of the frame's border inside a row header MUST be drawn: between and beside zone line parts, inside a time button around its digits, beside the leading mark and beside the location menu button. No row header holds a drag handle or a visible Here caption (see the `locations` capability). <!-- implements FR10 of add-grid-hour-cells-and-hour-frame; FR8, UX3 of fix-grid-meeting-range-lock-and-layering; FR15, FR17 of redesign-cards-grid-and-day-palettes -->
+
+#### Scenario: Notes and header texts cover the frame
+- **GIVEN** the view mode is Grid, the stored locations are Almaty and New York and the current time is `2026-03-08T07:30:00Z`
+- **WHEN** the main page is 390 by 844 px
+- **THEN** where the hour frame crosses New York's clock change note, the topmost element is the note, not the frame
+- **AND** where the frame's border crosses a row header text (city, zone line, date, time), the topmost element is that text
+
+#### Scenario: The frame border runs through the empty parts of the header
+- **GIVEN** the Grid view at `<width>` by `<height>` px with Almaty, Moscow, Kolkata and New York at `2026-03-08T07:30:00Z` and `<frame>`
+- **WHEN** the main page is shown
+- **THEN** no point of the frame's left and right borders inside a row is covered by an element with a background, except inside the box of a text glyph, a row note or an open input field
+
+| width | height | frame |
+|---|---|---|
+| 390 | 844 | the hour frame |
+| 390 | 844 | the meeting frame of 09:00–11:00 |
+| 1440 | 900 | the hour frame |
+| 1440 | 900 | the meeting frame of 09:00–11:00 |

@@ -31,14 +31,16 @@ _None._ The day palette is a part of the existing `day-colouring` and `settings`
 
 ### Modified Capabilities
 
-- `main-page`: header actions; Grid view rows; new content column.
-- `locations`: list in the Cards view, reorder (dragging, keyboard path, transitions, accessibility, strings), Here mark, leading mark, offset difference text, local time and date layout, location menu, device time location, zone line and its layout, UTC offset on rows, card layout.
-- `home-location`: home mark, home over Here mark, home actions in the menu.
-- `time-selection`: local hour labels, day track layout, wall-time input layout.
-- `date-selection`: date bar layout.
-- `day-colouring`: the day palette, readable colours, approved screenshots.
-- `settings`: the Colours group, option group, preferences storage, settings page layout, strings.
-- `grid-view`: hour cell colour and look, locked controls, approved screenshots.
+Each line names exactly the requirements its delta file adds, modifies or removes.
+
+- `main-page`: ADDED "Content column"; MODIFIED "Header actions", "Grid view rows".
+- `locations`: ADDED "Narrow card layout", "Wide card layout", "Card growth", "Move a location from its location menu"; MODIFIED "List in the Cards view", "Reorder cards by dragging", "Smooth reorder transitions", "Reorder is accessible and fits every screen", "Reorder strings are localized", "Here mark on location rows", "Here mark text", "Here mark is accessible and fits every screen", "One leading mark per row", "Offset difference text", "Local time and date layout", "Location menu", "Device time location", "Device time location has the controls of every card", "Accessible device time location", "Device time location layout", "UTC offset on location rows", "Zone line on location rows", "Zone line layout"; REMOVED "Reorder cards with the keyboard".
+- `home-location`: MODIFIED "Home mark", "Home mark takes precedence over the Here mark", "Home actions in the location menu".
+- `time-selection`: ADDED "Earlier layout defects stay fixed"; MODIFIED "Day track layout".
+- `date-selection`: MODIFIED "Date bar layout".
+- `day-colouring`: ADDED "Day palette"; MODIFIED "Day colouring", "Day colours are readable", "Approved screenshots of the colourings".
+- `settings`: ADDED "Colours group", "Accessible Colours group", "Day palette is kept on the device"; MODIFIED "Option group", "Settings page layout", "Colouring settings layout", "Colouring strings are localized".
+- `grid-view`: ADDED "Hour cell look"; MODIFIED "Hour cell colour", "Row controls are locked while a meeting range is set", "Accessible meeting state", "Approved screenshots of the meeting state", "Hour strip width", "Hour frame lies behind texts".
 
 ## Goals
 
@@ -61,7 +63,7 @@ _None._ The day palette is a part of the existing `day-colouring` and `settings`
 - U2: A desktop user at 1440 px sees the content in a 1120 px column; each card has its header on one line and a full-width track with hour labels.
 - U3: A user switches «Цвета» to «Приглушённые» and both views go back to the soft colours of today.
 - U4: A touch user holds the city of Moscow for a quarter of a second, the card lifts and is dropped above Almaty; a keyboard user opens Moscow's menu and picks «Поднять выше».
-- U5: A user with UTC in the list reads «Всемирное время» under it; a user without home reads «Время устройства · CET · UTC+1» on the device time location.
+- U5: A user with UTC in the list reads «Всемирное время · UTC» under it; a user without home reads «Время устройства · CET · UTC+1» on the device time location.
 
 ## Requirements
 
@@ -85,7 +87,7 @@ _None._ The day palette is a part of the existing `day-colouring` and `settings`
 - FR16: The location menu SHALL offer, in this order, the home action, «Поднять выше» / "Move up", «Опустить ниже» / "Move down" and «Удалить» / "Remove". Move up is disabled on the first row and Move down on the last; each moves the location by one position, and the move is announced politely ("Moscow moved to position 1 of 3"). The keyboard reorder through a handle is removed.
 - FR17: The Grid view SHALL be one panel with the surface, the card border, radius 14 px and dividers in the card border colour, inside the 1120 px column from 768 px. The row header from 768 px: mark (20 px), city 22 px / 700, offset difference, zone line (14 px); at the right the date (14 px), the time 26 px / 700 and the menu button. Below 768 px: city 20 px with the zone line under it; time 24 px with the date under it. Hour cells: radius 5 px, 3 px apart, 15 px / 500 digits, 48 px high from 768 px and 38 × 44 px below. Hour frame, midnight cell, offset edge, meeting frame, meeting handles and dimming work as built.
 - FR18: The device time location SHALL show the Here mark (Home mark while home) without a caption and the zone line «Время устройства · CET · UTC+1» / "Device time · CET · UTC+1"; the device-time text stays whatever the zone label says.
-- FR19: A city location in the zone `UTC` SHALL show «Всемирное время» / "Universal Time" in place of the country as its zone line, hidden by the country toggle of the zone label.
+- FR19: A city location in the zone `UTC` SHALL show «Всемирное время» / "Universal Time" in place of the country in its zone line, hidden by the country toggle of the zone label; the zone abbreviation and UTC offset of that row stay as built (`UTC` once), so the full zone line reads «Всемирное время · UTC».
 - FR20 (§12.1): The visible day track handle SHALL NOT cover the time or the location menu button at any position of the reference day, at every width; in the wide card the track has its own line.
 - FR21 (§12.2): All day tracks of a list SHALL have the same width, within 1 px, in the 12-hour and the 24-hour format.
 - FR22 (§12.3): Every hour label SHALL be on one line and no two hour labels SHALL touch.
@@ -155,5 +157,5 @@ No changes: the pages, regions and navigation stay; only the header's order and 
 
 ## Open Questions
 
-- Q1 (closed): `spec.md` §11 gives the UTC zone line as «Всемирное время» alone, and the UTC screens show no `UTC` after it. Resolved in design D9: the Universal Time label takes the country's place, and the zone abbreviation and UTC offset of `UTC`, which only repeat the city label `UTC`, are not shown; with the country toggle off the UTC row shows no zone line.
+- Q1 (closed by the task's rules, design D7): the UTC screens show «Всемирное время» with nothing after it, while `spec.md` §11 only puts the label "in place of the country". The document wins over a screen and what it does not say stays as built, so the label replaces the country and the zone abbreviation and UTC offset stay as built: «Всемирное время · UTC», and `UTC` with the country hidden. Dropping the repeated `UTC` is left to the owner as a later change.
 - Q2 (out of scope, §13): a truly vivid light palette — the owner tunes the Vivid light values later in `tokens.css`.
