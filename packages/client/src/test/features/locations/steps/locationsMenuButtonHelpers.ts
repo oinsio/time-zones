@@ -92,15 +92,15 @@ export const overlapsBy = (first: Box, second: Box) =>
 export const centreOfBoxY = (box: Box) => box.y + box.height / HALF;
 export const centreOfBoxX = (box: Box) => box.x + box.width / HALF;
 
-/** The row's neighbours of the button: time, meeting time, date, city, offset difference and zone line. */
+/** The row's neighbours of the button: time, date, city, offset difference, zone line and meeting time. */
 export const neighboursOf = (page: Page, city: string): Locator[] => {
   const row = listRow(page, city);
   return [
     timeButtonOf(row),
-    meetingTimeOf(row),
     dateOf(page, city),
     cityOf(page, city),
     row.locator(OFFSET_DIFFERENCE_SELECTOR).first(),
     zoneLineOf(page, city),
+    meetingTimeOf(row),
   ];
 };

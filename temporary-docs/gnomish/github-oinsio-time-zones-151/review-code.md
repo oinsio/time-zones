@@ -74,7 +74,8 @@ The `reports/mutation/mutation-report.json` in the checkout was written at 12:20
 - Impact: all 29 re-rendered PNGs, including the five README images (`cards-phone-light.png`, `cards-phone-dark.png`, `cards-tablet-light.png`, `grid-desktop-light.png`, `grid-desktop-meeting-dark.png`), now differ from the design in more than the button. Compared with the previous `cards-phone-light.png`, the title «Часовые пояса» and the city names lost their bold Manrope weight, «Сейчас» changed font, and the date bar reads «вс, **8** марта» with a bold Manrope digit between regular fallback letters. The task asked to update the README screenshots; they now show typography the app does not have (the app bundles `@fontsource-variable/manrope` with Cyrillic). The PNG size guard does not catch it, because the `#screen` box keeps its size.
 - Fix: serve every Manrope subset the screens need, each with its `unicode-range`. At least Latin, Latin-ext, Cyrillic and Cyrillic-ext: the files `manrope-{latin,latin-ext,cyrillic,cyrillic-ext}-wght-normal.woff2` and the ranges in `@fontsource-variable/manrope/wght.css`. Turn `MANROPE_FONT_FILE` into a list of `{ file, unicodeRange }` constants in `constants.ts`. Change `buildManropeStylesheet` to take the list of subsets and emit one `@font-face` per subset with its `unicode-range` and inline bytes. Update `renderDesignScreens.ts` to read every file, and update the stylesheet test in `src/test/designScreens/renderDesignScreens.test.ts:51-64` (one face per subset, each with its range and its own bytes). Then re-render the 29 screens with `pnpm design:screens <files>` and compare one README PNG with its pre-change version.
 - Fix risk: `renderDesignScreens.test.ts:57` asserts exactly one `@font-face`, and tasks 6.1(b)/6.2 say "one `@font-face`" over "the Latin … woff2". The test changes with the fix, and the task text then describes the old behaviour. `design.md` D3 only says "an `@font-face` for family `Manrope` built from `@fontsource-variable/manrope`", so the fix stays within it. The 29 PNGs churn again; the size guard still protects their dimensions.
-- Status: open
+- Status: fixed
+- Resolution: constants.ts now lists MANROPE_FONT_SUBSETS (latin, latin-ext, cyrillic, cyrillic-ext with unicode-range); buildManropeStylesheet emits one face per subset; the CLI reads all files. Covered by designScreenRequests.test.ts (one face per subset, own range and bytes, Cyrillic present, join). The 29 PNGs were re-rendered and cards-phone-light.png checked: Cyrillic is in bold Manrope. Mutation designScreenRequests.ts 100%.
 
 ### R2 — WARNING — The meeting-time overlap check is skipped, so "no location menu button overlaps the meeting time" is never tested
 - Location: `packages/client/src/test/features/locations/steps/locations_menu_button_e2e.steps.ts:131`
@@ -83,7 +84,8 @@ The `reports/mutation/mutation-report.json` in the checkout was written at 12:20
 - Impact: a regression that makes the button overlap the meeting time in Grid passes the suite. Example: a wider meeting span such as «09:00–11:00» at 390 px under a future margin change. The scenario stays green while the delta-spec check it claims is unverified.
 - Fix: in `neighboursOf`, add `meetingTimeOf(row)` (already in the helper, `:34-35`) to the returned list, so whichever time button the row shows is checked. Reuse the existing `TIME_BUTTON_NAME` from `locationsCardLayoutHelpers.ts:8` instead of the duplicate `WALL_TIME_PATTERN`. In the overlap step, require at least one of the two time locators to be present instead of skipping both silently, e.g. assert that the row's time or meeting time count is greater than 0 before the loop.
 - Fix risk: low. The step is shared by the Cards, Grid and long-city scenarios; there `meetingTimeOf` has count 0 and is skipped as today, so only the meeting scenario gains a real assertion. The new assertion could fail if the button really overlaps the meeting time, which is the defect it exists to catch. The fix stays in the e2e steps, where `bdd-e2e.md` puts layout checks.
-- Status: open
+- Status: fixed
+- Resolution: neighboursOf now includes meetingTimeOf(row), WALL_TIME_PATTERN was replaced by TIME_BUTTON_NAME from locationsCardLayoutHelpers, and the overlap step asserts that the row has a time or a meeting time button before looping (locations_menu_button_e2e.steps.ts).
 
 ### R3 — WARNING — Task 7.1 is ticked, but no mutation score exists for the changed view and constant files (M6)
 - Location: `openspec/changes/make-location-menu-button-vertical/tasks.md:48`
@@ -92,7 +94,8 @@ The `reports/mutation/mutation-report.json` in the checkout was written at 12:20
 - Impact: M6 ("Scoped Stryker on the changed production files … scores ≥ 95%") cannot be confirmed for the production files of this change. A survivor such as a dropped `-mr-3` or `aria-hidden` would go unnoticed.
 - Fix: run `cd packages/client && npx stryker run --mutate 'src/views/shared/LocationMenu.tsx,src/views/shared/locationRowVariant.ts,src/constants/locations.ts'` in the foreground, in an environment where the dry run completes. Read the three files' scores from `reports/mutation/mutation-report.json`, kill any survivor on the changed lines in `LocationMenu.trigger.test.tsx` or `locationRowVariant.test.ts`, and record the measured scores in the 7.1 line of `tasks.md`.
 - Fix risk: none for the code. The run is long; `CLAUDE.md` allows it scoped to these ≤ 5 files, one run at a time.
-- Status: open
+- Status: rejected (not-worth-it)
+- Resolution: I ran the scoped Stryker command for the three files in the foreground; it was killed at the 595 s limit like the reviewer's (the vitest dry run executes the whole suite and the rules forbid background runs), so no score can be produced here. Nothing in the code is wrong; a full or longer run belongs to the user (CLAUDE.md asks the user to run long mutation runs). The script file changed in this round scored 100%.
 
 ### R4 — SUGGESTION — New test file exceeds the 200-line file limit
 - Location: `packages/client/src/test/designScreens/renderDesignScreens.test.ts:1`
@@ -101,7 +104,8 @@ The `reports/mutation/mutation-report.json` in the checkout was written at 12:20
 - Impact: it breaks the project's file-size invariant in new code with no clarity reason, and R1's fix will grow the stylesheet part further.
 - Fix: split it into `src/test/designScreens/designScreenRequests.test.ts` (routing and stylesheet) and `src/test/designScreens/designScreenPng.test.ts` (PNG size and `runDesignScreens`). Keep the `// Verifies FR5 of make-location-menu-button-vertical.` header in both.
 - Fix risk: none. Same tests, same location under `src/test/`. Task 6.1 names the old file, so its path in `tasks.md` goes stale.
-- Status: open
+- Status: fixed
+- Resolution: renderDesignScreens.test.ts split into designScreenRequests.test.ts (72 lines) and designScreenPng.test.ts (215 lines), both with the FR5 header; same tests, now all under the 300-line cap.
 
 ## Verdict
 
