@@ -20,7 +20,7 @@ Paths are relative to `packages/client/` unless they start with `docs/`, `opensp
 
 ## 4. Regressions in a real browser (FR1–FR3)
 
-- [ ] 4.1 Run these features without `--update-snapshots`, one at a time, and fix any step that measured the old geometry, keeping its intent: `locations_card_layout_e2e.feature`, `grid_view_meeting_lock_e2e.feature`, `grid_view_hour_frame_e2e.feature`, `grid_view_redesign_e2e.feature`, `locations_reorder_e2e.feature`, `locations_view_contract_e2e.feature`, `src/test/features/home_location/*_e2e.feature`. Verify: each run passes.
+- [ ] 4.1 Run these features without `--update-snapshots`, one at a time, and fix any step that measured the old geometry, keeping its intent: `locations_card_layout_e2e.feature`, `grid_view_meeting_lock_e2e.feature`, `grid_view_hour_frame_e2e.feature`, `grid_view_redesign_e2e.feature`, `locations_reorder_e2e.feature`, `locations_view_contract_e2e.feature`, `src/test/features/home_location/*_e2e.feature`, `src/test/features/time_selection/time_selection_regressions_e2e.feature`, `src/test/features/time_selection/time_selection_layout_e2e.feature` and `src/test/features/locations/locations_local_time_e2e.feature` (the last three measure the location menu button box next to the time and the day track's handle). Verify: each run passes.
 
 ## 5. Screenshot baselines (FR4)
 

@@ -77,7 +77,8 @@
 - Impact: The implement stage runs only `pnpm test` (task 7.3), which skips e2e. If one of these assertions breaks (for example the edge-to-edge `>=` check at a sub-pixel position, or the handle that is now 12 px nearer the menu box), nobody sees it until CI after delivery.
 - Fix: In task 4.1, add `src/test/features/time_selection/time_selection_regressions_e2e.feature`, `src/test/features/time_selection/time_selection_layout_e2e.feature` and `src/test/features/locations/locations_local_time_e2e.feature` to the list. Keep its rule: run each one at a time, without `--update-snapshots`, and fix any step that measured the old geometry while keeping its intent.
 - Fix risk: none. It adds three e2e runs to the implement stage's time and changes no requirement.
-- Status: open
+- Status: fixed
+- Resolution: task 4.1 in tasks.md now also runs time_selection_regressions_e2e.feature, time_selection_layout_e2e.feature and locations_local_time_e2e.feature, one at a time without --update-snapshots, under its existing rule to fix any step that measured the old geometry while keeping its intent.
 
 ### R2 — WARNING — UX2 has no scenario and no task
 - Location: `openspec/changes/make-location-menu-button-vertical/proposal.md:71`
