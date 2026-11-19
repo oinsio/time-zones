@@ -60,6 +60,8 @@ const SUN_SUPPORT_CHUNK_PREFIX = "sunSupport-";
 const SUN_SUPPORT_CHUNK_EXTENSION = ".js";
 const SERVICE_WORKER_FILE = "sw.js";
 const SCRIPT_EXTENSION = ".js";
+// A string inside dnd-kit core: present in the chunk that holds drag-and-drop.
+const DRAG_AND_DROP_MARKER = "DndDescribedBy";
 
 const buildDirectory = join(import.meta.dirname, "..", BUILD_OUT_DIR);
 
@@ -218,6 +220,24 @@ const precachedZoneRulesFiles = findPrecachedZoneRulesFiles(
 if (precachedZoneRulesFiles.length > 0) {
   console.error(
     `${SERVICE_WORKER_FILE} precaches ${precachedZoneRulesFiles.join(", ")} — the served zone rules files must be fetched fresh`,
+  );
+  process.exit(EXIT_CODE_CHECK_FAILED);
+}
+
+const builtScriptTexts = readdirSync(join(buildDirectory, ASSETS_DIRECTORY))
+  .filter((fileName) => fileName.endsWith(SCRIPT_EXTENSION))
+  .map((fileName) =>
+    readFileSync(join(buildDirectory, ASSETS_DIRECTORY, fileName), "utf8"),
+  );
+const initialScriptTexts = initialScriptUrls.map((scriptUrl) =>
+  readFileSync(resolveBuildFilePath(buildDirectory, scriptUrl), "utf8"),
+);
+if (
+  initialScriptTexts.some((text) => text.includes(DRAG_AND_DROP_MARKER)) ||
+  !builtScriptTexts.some((text) => text.includes(DRAG_AND_DROP_MARKER))
+) {
+  console.error(
+    `Drag-and-drop code (${DRAG_AND_DROP_MARKER}) must be in a lazy chunk and absent from the initial JavaScript (NFR-P2 of redesign-cards-grid-and-day-palettes)`,
   );
   process.exit(EXIT_CODE_CHECK_FAILED);
 }

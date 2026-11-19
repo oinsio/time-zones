@@ -31,4 +31,36 @@ describe("DayTrack", () => {
     );
     expect(labels[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
   });
+
+  // Verifies FR6 of redesign-cards-grid-and-day-palettes: bar 12 px, handle 23 px in the card colour.
+  it("should draw a 12 px bar on every width", () => {
+    const { container } = renderTrack();
+
+    const bar = container.querySelector<HTMLElement>("[data-day-track-bar]");
+    expect(bar?.className).toContain("h-3");
+    expect(bar?.className).not.toContain("md:");
+  });
+
+  it("should not inset the track on wide screens", () => {
+    const { container } = renderTrack();
+
+    const inset = container.querySelector<HTMLElement>(
+      "[data-day-track-inset]",
+    );
+    expect(inset?.className).not.toContain("md:inset-x");
+  });
+
+  it("should draw the visible handle at the handle size with the surface fill and handle border", () => {
+    const { container } = renderTrack();
+
+    const visibleHandle = container.querySelector<HTMLElement>(
+      "[data-day-track-handle] > span",
+    );
+    expect(visibleHandle?.className).toContain("h-handle w-handle");
+    expect(visibleHandle?.className).toContain("bg-surface");
+    expect(visibleHandle?.className).toContain("border-handle-border");
+    expect(visibleHandle?.className).toContain(
+      "border-[length:var(--handle-border-width)]",
+    );
+  });
 });

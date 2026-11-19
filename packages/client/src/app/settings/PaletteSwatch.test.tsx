@@ -29,5 +29,8 @@ describe("PaletteSwatch", () => {
     );
 
     expect(container.firstElementChild?.className).toContain("outline-surface");
+    expect(container.firstElementChild?.className).not.toContain(
+      "outline-offset",
+    );
   });
 });

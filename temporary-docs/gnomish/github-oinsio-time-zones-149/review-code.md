@@ -405,7 +405,8 @@ Not measured: `src/presenter/presentLocationRows.ts` (the run with `parseStoredP
 - Impact: on an iPhone 6 / 5s or iPad Air 2 (iOS 12.5, a supported engine), the title and every card touch the screen edges: the 13 px list side padding of FR7 / §5 is lost, and on screens wider than 1120 px the column is not centred (FR12). Editing the column width in `tailwind.config.ts` would leave the header and list at the old width while the date bar group follows.
 - Fix: write the class with physical properties from the Tailwind theme, e.g. `@apply mx-auto w-full max-w-content px-column;` (Tailwind 3.4 emits `margin-left/right` and `padding-left/right`), or plain CSS `margin-left: auto; margin-right: auto; padding-left: theme("spacing.column"); padding-right: theme("spacing.column"); max-width: theme("maxWidth.content");`. Optionally extend `scripts/legacyBuild/findLegacySyntaxIssues.ts` to flag `margin-inline` / `padding-inline` declarations like it flags `inset:`.
 - Fix risk: commit 03cada3 replaced an `@apply` of the same classes with plain CSS without stating why; if `@apply` caused a build problem, the `theme()` variant avoids it. Modern-browser rendering is identical, so the re-taken screenshots should not change; run the content-column and header E2E features once to confirm.
-- Status: open
+- Status: fixed
+- Resolution: The content column no longer uses logical shorthands: the `.content-column` class is gone and MainPage.tsx uses the Tailwind utilities `mx-auto w-full max-w-content px-column` (physical margin/padding from the theme, so the width has one source in tailwind.config.ts). Biome rejects `theme()` and `@apply` in CSS, hence utilities; MainPage.test.tsx asserts the classes.
 
 ### R2 — WARNING — Palette swatch outline is drawn inside the 24 px square
 - Location: `packages/client/src/app/settings/PaletteSwatch.tsx:29`
@@ -414,7 +415,8 @@ Not measured: `src/presenter/presentLocationRows.ts` (the run with `parseStoredP
 - Impact: the swatches render a sixth smaller than specified in both themes on the settings page, with the colours framed by a wide surface ring; the re-approved settings screenshots now lock in this look.
 - Fix: drop `-outline-offset-2` so the outline sits outside the square as on the screen; re-take the settings screenshots of task 13.4 that show the Colours group (`settings_e2e.feature`, `settings_language_e2e.feature`) and add an assertion in the swatch E2E step that `outline-offset` is `0px`.
 - Fix risk: the ring then extends 2 px beyond the 24 px square inside the option button; the button is at least 44 × 44 px, so nothing is clipped. Re-taken baselines change only in the swatch.
-- Status: open
+- Status: fixed
+- Resolution: Removed `-outline-offset-2` from PaletteSwatch.tsx so the ring sits outside the 24 px stripes; PaletteSwatch.test.tsx asserts no `outline-offset` class and the E2E swatch step asserts `outline-offset: 0px`. Screenshot baselines are re-taken by the test-planning pipeline, not in this stage.
 
 ### R3 — WARNING — Task 9.1 ticked without its DayTrack RED test
 - Location: `packages/client/src/views/shared/DayTrack.tsx:106-118`
@@ -423,7 +425,8 @@ Not measured: `src/presenter/presentLocationRows.ts` (the run with `parseStoredP
 - Impact: the task record claims a unit test that does not exist; `DayTrack.tsx` was not in any mutation run of tasks 9.5 / M5, and a class regression (e.g. the handle border token) is caught only by the slow E2E project. Severity kept at WARNING because the user-visible behaviour is implemented and E2E-tested.
 - Fix: extend `src/views/shared/DayTrack.test.tsx` with the assertions task 9.1 lists (bar `h-3` without `md:` classes, inset without `md:inset-x`, handle `h-handle w-handle`, `bg-surface`, `border-handle-border`, `border-[length:var(--handle-border-width)]`), and either add `DAY_TRACK_HANDLE_SIZE_PX = 23` to `src/constants/` for the tests or amend task 9.1/9.2 to say the size is the `handle` spacing token.
 - Fix risk: none — tests only; amending `tasks.md` text is allowed in an active change.
-- Status: open
+- Status: fixed
+- Resolution: Added the task 9.1 assertions to DayTrack.test.tsx (h-3 bar without md:, no md:inset-x, handle h-handle w-handle, bg-surface, border-handle-border, handle border width). The size is the `handle` spacing token, not a constant, so no `DAY_TRACK_HANDLE_SIZE_PX` was added.
 
 ### R4 — WARNING — "No drag-and-drop code in the initial JavaScript" has no automated check
 - Location: `packages/client/scripts/check-bundle-size.mjs:1-50`
@@ -432,7 +435,8 @@ Not measured: `src/presenter/presentLocationRows.ts` (the run with `parseStoredP
 - Impact: a later import of `@dnd-kit/*` (or of `LocationList`) from the entry or main chunk passes CI as long as the total stays under 150 KB, silently breaking NFR-P2 and slowing the first paint on the iOS 12 devices this budget protects.
 - Fix: in `check-bundle-size.mjs`, read the files returned by `collectInitialScriptUrls` (already imported there) and fail when any contains `DndDescribedBy`; also fail when no built chunk contains it, so the check cannot pass vacuously after a dnd-kit upgrade renames the marker.
 - Fix risk: the marker is a dnd-kit implementation string; the "must appear somewhere" guard turns a rename into a visible failure rather than a silent pass. No runtime change.
-- Status: open
+- Status: fixed
+- Resolution: check-bundle-size.mjs now fails when an initial script contains `DndDescribedBy` or when no built chunk contains it; verified green on the current build (`pnpm --filter @time-zones/client check:bundle-size`).
 
 ## Verdict
 

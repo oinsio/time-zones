@@ -3,13 +3,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* The page content column: at most 1120 px, centred. Implements FR12 of redesign-cards-grid-and-day-palettes (D4). */
-@layer components {
-  .content-column {
-    width: 100%;
-    max-width: 70rem;
-    margin-inline: auto;
-    padding-inline: 13px;
-  }
-}

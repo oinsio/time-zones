@@ -13,7 +13,8 @@ interface MainPageProps {
   meetingBar?: ReactNode;
 }
 
-const COLUMN_CLASS_NAME = "content-column";
+// Physical-property utilities: iOS Safari 12.5 ignores the logical shorthands.
+const COLUMN_CLASS_NAME = "mx-auto w-full max-w-content px-column";
 // Below 360 px the title cannot stay centred beside the 92 px of buttons.
 const MEETING_HEADER_CLASS_NAMES =
   "grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-meeting bg-meeting-bar px-4 pt-6 pb-4 min-[360px]:grid-cols-[1fr_auto_1fr]";

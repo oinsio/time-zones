@@ -23,7 +23,7 @@ const STRIPE_CLASS_NAMES: Record<DayPalette, readonly string[]> = {
  */
 export function PaletteSwatch({ dayPalette }: { dayPalette: DayPalette }) {
   return (
-    <span className="flex h-6 w-6 overflow-hidden rounded-[5px] outline outline-2 -outline-offset-2 outline-surface">
+    <span className="flex h-6 w-6 overflow-hidden rounded-[5px] outline outline-2 outline-surface">
       {STRIPE_CLASS_NAMES[dayPalette].map((stripeClassName) => (
         <span key={stripeClassName} className={`flex-1 ${stripeClassName}`} />
       ))}

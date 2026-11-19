@@ -127,6 +127,10 @@ Then(
       const swatchBox = await label.locator(SWATCH_SELECTOR).boundingBox();
       expect(swatchBox?.width).toBe(SWATCH_SIZE_PX);
       expect(swatchBox?.height).toBe(SWATCH_SIZE_PX);
+      await expect(label.locator(SWATCH_SELECTOR)).toHaveCSS(
+        "outline-offset",
+        "0px",
+      );
       const stripes = label.locator(STRIPE_SELECTOR);
       await expect(stripes).toHaveCount(STRIPE_COUNT);
       for (const stripe of await stripes.all()) {
