@@ -2,7 +2,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DESIGN_SCREEN_DEVICE_SCALE_FACTOR,
   DESIGN_SCREEN_SELECTOR,
@@ -71,6 +71,25 @@ describe("readPngPixelSize", () => {
       width: 780,
       height: 1560,
     });
+  });
+
+  it("should read a PNG that is only its header", () => {
+    expect(
+      readPngPixelSize(buildPng(3, 4).subarray(0, PNG_HEADER_BYTES)),
+    ).toEqual({ width: 3, height: 4 });
+  });
+
+  it("should refuse a long enough header with a wrong signature", () => {
+    const bytes = buildPng(3, 4);
+    bytes[PNG_SIGNATURE.length - 1] = 0;
+
+    expect(() => readPngPixelSize(bytes)).toThrow("not a PNG");
+  });
+
+  it("should refuse a valid signature with a cut header", () => {
+    const bytes = buildPng(3, 4).subarray(0, PNG_HEADER_BYTES - 1);
+
+    expect(() => readPngPixelSize(bytes)).toThrow("not a PNG");
   });
 
   it("should refuse bytes that are not a PNG", () => {
@@ -154,6 +173,7 @@ describe("runDesignScreens", () => {
     await seedScreen("a", buildPng(1, 1));
     await seedScreen("b", buildPng(1, 1));
     await mkdir(join(screensFolder, "nested"));
+    await mkdir(join(screensFolder, "folder.html"));
     await writeFile(join(screensFolder, "notes.txt"), "x");
     const renderedPaths: string[] = [];
 
@@ -168,10 +188,42 @@ describe("runDesignScreens", () => {
       },
     });
 
-    expect(renderedPaths.map((path) => path.split("/").pop()).sort()).toEqual([
+    expect(renderedPaths.map((path) => path.split("/").pop())).toEqual([
       "a.html",
       "b.html",
     ]);
+  });
+
+  it("should render only the named screens", async () => {
+    const namedPath = await seedScreen("named", buildPng(1, 1));
+    await seedScreen("other", buildPng(1, 1));
+    const renderedPaths: string[] = [];
+
+    await runDesignScreens([namedPath], {
+      screensFolder,
+      renderScreens: async (htmlPaths) => {
+        renderedPaths.push(...htmlPaths);
+        return [];
+      },
+    });
+
+    expect(renderedPaths).toEqual([namedPath]);
+  });
+
+  it("should name both sizes when only the width differs", async () => {
+    const htmlPath = await seedScreen("a", buildPng(100, 200, 1));
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const exitCode = await runDesignScreens(
+      [htmlPath],
+      dependenciesFor(buildPng(120, 200, 2)),
+    );
+
+    expect(exitCode).not.toBe(0);
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("120x200 px replaces 100x200 px"),
+    );
+    errorSpy.mockRestore();
   });
 
   it("should fail when a screen has no PNG to compare with", async () => {

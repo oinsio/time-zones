@@ -51,7 +51,7 @@ try {
         const renderedScreens = [];
         for (const htmlPath of htmlPaths) {
           await page.goto(pathToFileURL(htmlPath).href);
-          await page.evaluate(() => document.fonts.ready);
+          await page.evaluate("document.fonts.ready");
           renderedScreens.push({
             htmlPath,
             png: await page.locator(selector).screenshot(),

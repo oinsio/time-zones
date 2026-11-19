@@ -45,13 +45,13 @@ Paths are relative to `packages/client/` unless they start with `docs/`, `opensp
 
 ## 7. Quality gates (M6)
 
-- [ ] 7.1 Scoped Stryker, first run: `npx stryker run --mutate 'src/views/shared/LocationMenu.tsx,src/views/shared/locationRowVariant.ts,src/constants/locations.ts'`. Read `reports/mutation/mutation-report.json` and kill survivors that this change introduced. Verify: score ≥ 95% (minimum 90%) for the mutants on the changed lines.
-- [ ] 7.2 Scoped Stryker, second run, started only after 7.1 has finished: `npx stryker run --mutate 'scripts/designScreens/designScreenRequests.ts,scripts/designScreens/designScreenPng.ts'`. Kill survivors in `src/test/designScreens/renderDesignScreens.test.ts`. Verify: score ≥ 95% (minimum 90%) in `reports/mutation/mutation-report.json`. The CLI `renderDesignScreens.ts` only wires real dependencies and is proven by the 6.2 run.
-- [ ] 7.3 Run `pnpm run lint`, then `pnpm run typecheck`, then `pnpm test`, then `pnpm run build`, one at a time. Verify: all pass, and `grep -rln "make-location-menu-button-vertical" src scripts` lists the changed production, test and feature files.
+- [x] 7.1 Scoped Stryker, first run: `npx stryker run --mutate 'src/views/shared/LocationMenu.tsx,src/views/shared/locationRowVariant.ts,src/constants/locations.ts'`. Read `reports/mutation/mutation-report.json` and kill survivors that this change introduced. Verify: score ≥ 95% (minimum 90%) for the mutants on the changed lines.
+- [x] 7.2 Scoped Stryker, second run, started only after 7.1 has finished: `npx stryker run --mutate 'scripts/designScreens/designScreenRequests.ts,scripts/designScreens/designScreenPng.ts'`. Kill survivors in `src/test/designScreens/renderDesignScreens.test.ts`. Verify: score ≥ 95% (minimum 90%) in `reports/mutation/mutation-report.json`. The CLI `renderDesignScreens.ts` only wires real dependencies and is proven by the 6.2 run.
+- [x] 7.3 Run `pnpm run lint`, then `pnpm run typecheck`, then `pnpm test`, then `pnpm run build`, one at a time. Verify: all pass, and `grep -rln "make-location-menu-button-vertical" src scripts` lists the changed production, test and feature files.
 
 ## 8. Handoff
 
-- [ ] 8.1 Handoff H1: write the `## H1: Look at the compact button in the re-approved screenshots` section of `temporary-docs/gnomish/github-oinsio-time-zones-151/handoff/README.md`. Serves: UX1, FR4, FR5. Files: none. Verify: the steps of the H1 bullet below. Copy Why manual and Automated part from below. No patch: the item changes no file. Verify: `grep -c "^## H1:" temporary-docs/gnomish/github-oinsio-time-zones-151/handoff/README.md` prints 1.
+- [x] 8.1 Handoff H1: write the `## H1: Look at the compact button in the re-approved screenshots` section of `temporary-docs/gnomish/github-oinsio-time-zones-151/handoff/README.md`. Serves: UX1, FR4, FR5. Files: none. Verify: the steps of the H1 bullet below. Copy Why manual and Automated part from below. No patch: the item changes no file. Verify: `grep -c "^## H1:" temporary-docs/gnomish/github-oinsio-time-zones-151/handoff/README.md` prints 1.
 
 ## Human follow-up
 
