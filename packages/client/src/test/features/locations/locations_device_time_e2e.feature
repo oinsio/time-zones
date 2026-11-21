@@ -32,7 +32,9 @@ Feature: Device time location in a real browser
 
   @add-settings-page-and-device-time-location @NFR-R1 @UX3
   Scenario: Narrow and wide screens
-    Given the stored locations are "the device time location", "Moscow"
+    # Almaty and Moscow share the date at this moment, so their date labels have one width.
+    Given the current time is "2026-03-08T07:30:00Z"
+    And the stored locations are "the device time location", "Moscow"
     And the user opens the locations app
     When the viewport is 320 px and then 2560 px wide
     Then the page did not scroll horizontally
