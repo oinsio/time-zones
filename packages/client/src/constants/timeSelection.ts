@@ -25,6 +25,13 @@ export enum TrackTouchEvent {
   END = "touchend",
   CANCEL = "touchcancel",
 }
+// Implements FR1 of move-meeting-range-and-extend-past-midnight.
+export enum TrackPointerEvent {
+  DOWN = "pointerdown",
+  MOVE = "pointermove",
+  UP = "pointerup",
+  CANCEL = "pointercancel",
+}
 /** A touchstart listener that never cancels the browser's scroll. */
 export const TRACK_TOUCH_START_LISTENER_OPTIONS: AddEventListenerOptions = {
   passive: true,

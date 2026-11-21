@@ -6,6 +6,7 @@ import {
   TOUCH_POINTER_TYPE,
   TRACK_TOUCH_MOVE_LISTENER_OPTIONS,
   TRACK_TOUCH_START_LISTENER_OPTIONS,
+  TrackPointerEvent,
   TrackTouchEvent,
 } from "@/constants";
 import {
@@ -109,7 +110,8 @@ export function useMeetingFrameMove(options: FrameMoveOptions) {
     };
     const handlePointerEnd = (event: PointerEvent) => {
       if (pressX === undefined) return;
-      if (isPointerMoving) coreRef.current.endDrag(event.type === "pointerup");
+      if (isPointerMoving)
+        coreRef.current.endDrag(event.type === TrackPointerEvent.UP);
       pressX = undefined;
       isPointerMoving = false;
       pressedStrip = undefined;
@@ -162,10 +164,10 @@ export function useMeetingFrameMove(options: FrameMoveOptions) {
       coreRef.current.endDrag(event.type === TrackTouchEvent.END);
     };
 
-    panel.addEventListener("pointerdown", handlePointerDown);
-    panel.addEventListener("pointermove", handlePointerMove);
-    panel.addEventListener("pointerup", handlePointerEnd);
-    panel.addEventListener("pointercancel", handlePointerEnd);
+    panel.addEventListener(TrackPointerEvent.DOWN, handlePointerDown);
+    panel.addEventListener(TrackPointerEvent.MOVE, handlePointerMove);
+    panel.addEventListener(TrackPointerEvent.UP, handlePointerEnd);
+    panel.addEventListener(TrackPointerEvent.CANCEL, handlePointerEnd);
     panel.addEventListener(
       TrackTouchEvent.START,
       handleTouchStart,
@@ -185,10 +187,10 @@ export function useMeetingFrameMove(options: FrameMoveOptions) {
     return () => {
       clearHold();
       if (isPointerMoving || isHeld) coreRef.current.endDrag(false);
-      panel.removeEventListener("pointerdown", handlePointerDown);
-      panel.removeEventListener("pointermove", handlePointerMove);
-      panel.removeEventListener("pointerup", handlePointerEnd);
-      panel.removeEventListener("pointercancel", handlePointerEnd);
+      panel.removeEventListener(TrackPointerEvent.DOWN, handlePointerDown);
+      panel.removeEventListener(TrackPointerEvent.MOVE, handlePointerMove);
+      panel.removeEventListener(TrackPointerEvent.UP, handlePointerEnd);
+      panel.removeEventListener(TrackPointerEvent.CANCEL, handlePointerEnd);
       panel.removeEventListener(TrackTouchEvent.START, handleTouchStart);
       panel.removeEventListener(
         TrackTouchEvent.MOVE,
