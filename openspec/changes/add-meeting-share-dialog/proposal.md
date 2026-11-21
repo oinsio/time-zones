@@ -165,5 +165,5 @@ No changes: the project has no `docs/ia/` documents.
 - Controller: `useMeetingShare` opens the dialog and shares from it.
 - Views: a new share dialog; the language list and the toggle group of the settings are reused.
 - Translations: `ru.json`, `en.json` — dialog texts and the heading by weekday.
-- Docs: glossary (`time-selection.md`, `settings.md`, `architecture.md`), `docs/architecture/views.md`, `docs/architecture/domain-model.md`.
+- Docs: glossary (`time-selection.md`, `settings.md`, `architecture.md`, `time.md`), `docs/architecture/views.md`, `docs/architecture/domain-model.md`.
 - No new dependency.
