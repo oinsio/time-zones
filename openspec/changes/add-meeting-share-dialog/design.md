@@ -101,11 +101,14 @@ ShareDestination  = { id; isAvailable(): boolean; share(meetingShare): Promise<S
 
 `adapters/textShareDestination.ts` exports `createTextShareDestination(textSharing)` (`share` calls `shareText(meetingShare.text)`, `isAvailable` is always true because the clipboard is its fallback). `adapters/shareDestinations.ts` exports `createShareDestinations(textSharing): readonly ShareDestination[]`, the ordered registry, like `viewRegistry` in shape but built from its port so that the `textSharing` that `AppShell` receives (`AppShellDependencies.textSharing`, injected by `AppShell.meeting.test.tsx`) reaches the destination; with no argument it uses `browserTextSharing`. `TextSharing`, `browserTextSharing` and `createInMemoryTextSharing` are unchanged.
 
-A destination receives both the invitation and the text: a calendar needs the instants and may put the text in the description. The dialog renders one button per available destination and knows none by name; labels and icons come from a presenter map keyed by `ShareDestinationId`.
+A destination receives both the invitation and the text: a calendar needs the instants and may put the text in the description. The dialog renders one button per available destination and knows none by name. Each button takes its label and its icon from one owner per layer, both keyed by `ShareDestinationId` as a `Record`, so adding an id without a label or an icon fails the typecheck:
+
+- the label is presenter output (`architecture.md`: the presenter "applies i18n"): `presentShareDestinationLabel(destinationId, translate)` in `presenter/shareDestinationLabel.ts` maps `TEXT` to the key `meeting.shareDialog.share` («Поделиться» / "Share");
+- the icon is a React component and stays in the views, as the view registry in `views/index.ts` already keeps its Lucide icons beside the views: `SHARE_DESTINATION_ICONS` in `views/shared/shareDestinationIcons.ts` maps `TEXT` to Lucide `Share2`.
 
 ### D6. Controller: `useMeetingShare` owns the dialog session (FR1, FR8–FR10)
 
-`useMeetingShare(textSharing = browserTextSharing)` keeps its signature and builds `createShareDestinations(textSharing)` once per `textSharing` (`useMemo`). It becomes the owner of: whether the dialog is open, the excluded ids, the share language of this opening, the built text (memoised on invitation, language, parts, hour format), the dialog rows (D7), the available destinations, `openShareDialog()`, `closeShareDialog()` and `share(destinationId)`; `shareMeeting` is removed. `openShareDialog` also dismisses the notice, as Share meeting does today. Opening resets the excluded ids and resolves the language (D4). An effect closes the dialog when the meeting range becomes undefined (FR10). Outcomes map to today's `MeetingShareNotice`; cancelled keeps the session.
+`useMeetingShare(textSharing = browserTextSharing)` keeps its signature and builds `createShareDestinations(textSharing)` once per `textSharing` (`useMemo`). It becomes the owner of: whether the dialog is open, the excluded ids, the share language of this opening, the built text (memoised on invitation, language, parts, hour format), the dialog rows (D7), the available destinations (each its id and its `presentShareDestinationLabel` label, D5), `openShareDialog()`, `closeShareDialog()` and `share(destinationId)`; `shareMeeting` is removed. `openShareDialog` also dismisses the notice, as Share meeting does today. Opening resets the excluded ids and resolves the language (D4). An effect closes the dialog when the meeting range becomes undefined (FR10). Outcomes map to today's `MeetingShareNotice`; cancelled keeps the session.
 
 City labels in another language: `useCityLabels(locations, load)` already asks `CitySearch.getCityLabel` with the `cityNameLanguage` of `useActiveInterfaceLanguage`; it gains an optional `CityNameLanguage` argument (default: the interface one) so the same owner serves the share language, resolved by the existing `resolveCityNameLanguage(code)`. `translate` is `i18n.getFixedT(language)`, as `useCitySearch` already does for English.
 
@@ -125,7 +128,7 @@ New small components: `MeetingShareLocationRow`, `ShareLanguagePin`, `MeetingSha
 
 ### D8. Where each test lives
 
-- Unit (Vitest, TDD): `meetingInvitation`, `meetingShareText` / `meetingShareLine`, preferences reducer, parser and migration, `resolveShareLanguage`, `useMeetingShare`.
+- Unit (Vitest, TDD): `meetingInvitation`, `meetingShareText` / `meetingShareLine`, preferences reducer, parser and migration, `resolveShareLanguage`, `presentShareDestinationLabel`, `SHARE_DESTINATION_ICONS`, `useMeetingShare`.
 - Contract: `shareDestination.contract.ts` run against the text destination over the in-memory and the browser text sharing.
 - Unit BDD: the scenarios of `meeting-range` → "Share meeting text", `settings` and the non-layout scenarios of `meeting-share-dialog`.
 - BDD E2E: focus, keyboard, axe-core, layout, screenshots.
