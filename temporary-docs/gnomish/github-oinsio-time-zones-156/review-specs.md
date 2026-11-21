@@ -95,7 +95,7 @@
 
 ## Consistency
 
-- The unreadable pinned share language differs: `specs/settings/spec.md:137` makes a document unreadable when "its pinned share language is not a string or none" (so `""` is readable), while `design.md:86` makes `parseStoredPreferences` reject "a `shareLanguage` that is neither `null` nor a non-empty string" (so `""` is unreadable).
+- The unreadable pinned share language differs: `specs/settings/spec.md:4` makes a document unreadable when "its pinned share language is not a string or none" (so `""` is readable), while `design.md:86` makes `parseStoredPreferences` reject "a `shareLanguage` that is neither `null` nor a non-empty string" (so `""` is unreadable).
 
 ## Findings
 
@@ -136,7 +136,7 @@
 - Status: open
 
 ### R5 — SUGGESTION — Spec and design disagree on an empty pinned share language
-- Location: `openspec/changes/add-meeting-share-dialog/specs/settings/spec.md:137`
+- Location: `openspec/changes/add-meeting-share-dialog/specs/settings/spec.md:4`
 - Rule: —
 - Problem: the spec makes a document unreadable when "its pinned share language is not a string or none". `design.md:86` and task 2.3 reject "a `shareLanguage` that is neither `null` nor a non-empty string". So the two disagree on `""`.
 - Impact: low. The implementation follows D4, which matches the existing `interfaceLanguage` check, but the archived spec would then describe a rule the parser does not apply.
