@@ -13,6 +13,7 @@ import {
   getMinutesAfterMove,
   getMinutesFromDayStart,
 } from "./meetingRangeMove";
+import { getNextReferenceDay } from "./nextReferenceDay";
 
 /**
  * The meeting range: a start inside one reference day and an end at most 24
@@ -88,11 +89,7 @@ export function getMeetingRangeOfCells(
   const highDayEnd =
     highColumn < getHourCellCount(day)
       ? day.end
-      : day.end
-          .toZonedDateTimeISO(referenceZoneId)
-          .add({ days: 1 })
-          .startOfDay()
-          .toInstant();
+      : getNextReferenceDay(day, referenceZoneId).end;
   const longestEnd = start.add({ minutes: MEETING_RANGE_MAX_MINUTES });
   const [end] = [highCellEnd, highDayEnd, longestEnd].sort(
     Temporal.Instant.compare,
