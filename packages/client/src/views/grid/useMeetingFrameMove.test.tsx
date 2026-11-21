@@ -195,6 +195,22 @@ describe("useMeetingFrameMove", () => {
       expect(holdCallbacks).toHaveLength(0);
     });
 
+    // FR16, D6: the column is counted from the left edge of the pressed strip
+    it("should cancel the hold of a finger that enters another cell of a strip that starts off the screen edge", () => {
+      const stripLeftPx = 100;
+      vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+        () => ({ left: stripLeftPx, right: 490, top: 0 }) as DOMRect,
+      );
+      const { getByTestId } = render(<Harness />);
+      const strip = getByTestId("strip");
+      const nearCellEdgeX = stripLeftPx + 14 * PITCH_PX - 2;
+
+      fireEvent.touchStart(strip, touch(nearCellEdgeX));
+      fireEvent.touchMove(strip, touch(nearCellEdgeX + 3));
+
+      expect(holdCallbacks).toHaveLength(0);
+    });
+
     it("should keep the hold of a finger that stays within the tolerance", () => {
       const { getByTestId } = render(<Harness />);
       const strip = getByTestId("strip");
