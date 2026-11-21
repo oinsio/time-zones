@@ -183,6 +183,18 @@ describe("useMeetingFrameMove", () => {
       expect(holdCallbacks).toHaveLength(0);
     });
 
+    // FR16, D6: a finger that enters another cell is a cell drag, not a hold
+    it("should cancel the hold of a finger that enters another cell within the tolerance", () => {
+      const { getByTestId } = render(<Harness />);
+      const strip = getByTestId("strip");
+      const nearCellEdgeX = 14 * PITCH_PX - 2;
+
+      fireEvent.touchStart(strip, touch(nearCellEdgeX));
+      fireEvent.touchMove(strip, touch(nearCellEdgeX + 3));
+
+      expect(holdCallbacks).toHaveLength(0);
+    });
+
     it("should keep the hold of a finger that stays within the tolerance", () => {
       const { getByTestId } = render(<Harness />);
       const strip = getByTestId("strip");

@@ -39,6 +39,7 @@ const NO_TOUCH_ELEMENT = { current: null };
  * `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX`. A finger runs on touch events on
  * every engine: before the hold nothing is cancelled, so a swipe scrolls; after
  * it every `touchmove` is default-prevented, so the browser does not pan. The
+ * finger that enters another cell is a cell drag and loses the hold. The
  * travel, scroll and release rules are those of the drag core.
  * Implements FR15, FR16, FR19, FR20 of move-meeting-range-and-extend-past-midnight (D5, D6).
  */
@@ -123,6 +124,10 @@ export function useMeetingFrameMove(options: FrameMoveOptions) {
     let touchStartX = 0;
     let touchStartY = 0;
     let lastTouchX = 0;
+    let touchStripLeft = 0;
+    let touchPressedColumn = 0;
+    const getColumnAt = (clientX: number) =>
+      Math.floor((clientX - touchStripLeft) / latest.current.cellPitchPx);
     const clearHold = () => {
       window.clearTimeout(holdTimer);
       holdTimer = undefined;
@@ -130,7 +135,10 @@ export function useMeetingFrameMove(options: FrameMoveOptions) {
     const handleTouchStart = (event: TouchEvent) => {
       const touch = event.changedTouches[0];
       clearHold();
-      if (!findPressedStrip(event.target, touch.clientX)) return;
+      const pressedTouchStrip = findPressedStrip(event.target, touch.clientX);
+      if (!pressedTouchStrip) return;
+      touchStripLeft = pressedTouchStrip.getBoundingClientRect().left;
+      touchPressedColumn = getColumnAt(touch.clientX);
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       lastTouchX = touch.clientX;
@@ -150,8 +158,9 @@ export function useMeetingFrameMove(options: FrameMoveOptions) {
       }
       if (
         holdTimer !== undefined &&
-        Math.hypot(touch.clientX - touchStartX, touch.clientY - touchStartY) >
-          REORDER_TOUCH_ACTIVATION_TOLERANCE_PX
+        (Math.hypot(touch.clientX - touchStartX, touch.clientY - touchStartY) >
+          REORDER_TOUCH_ACTIVATION_TOLERANCE_PX ||
+          getColumnAt(touch.clientX) !== touchPressedColumn)
       ) {
         clearHold();
       }
