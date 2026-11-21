@@ -487,6 +487,7 @@ While a meeting range is set and the list has rows, the Grid view SHALL show a t
 - **WHEN** the page is scrolled down by `<scroll>` px
 - **THEN** the vertical centre of the move handle is `<where>`
 - **AND** its horizontal centre is the horizontal centre of the meeting frame
+- **AND** the topmost element at the centre of the move handle is the move handle
 
 | scroll | where |
 |---|---|
