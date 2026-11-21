@@ -59,7 +59,7 @@ The length is kept in absolute minutes, so a move across a clock change keeps th
 
 `model/hourCells.ts` gains `getStripTailCellCount(meetingRange, referenceDay)`: zero without a range; otherwise the index of the last cell the range overlaps, plus two, minus the cell count of the day, clamped to `[0, cells of the next reference day]`. `getHourCells` takes that count and appends the first cells of the next reference day, computed by the same code path as today's cells, so labels, colours, offset edges and day periods need no second implementation. The midnight rule changes in one place: "the reference zone's row has no midnight cell" becomes "column 0 of the reference zone's row is a plain cell".
 
-`useHourGrid` sets `HourGridCssVariable.CELL_COUNT` to the full count and derives the pitch from it with the existing rule (`MIN_FITTING_HOUR_CELL_PX`, `HOUR_CELL_SCROLL_WIDTH_PX`). The frame and the handles already place themselves by minutes × pitch, so they follow.
+`useHourGrid` (controller) returns `cellCount` as the cell count of the day plus the tail; today it returns `getHourCellCount(day)`. Nothing else changes in the width rule: `useHourStripScroll` already passes `cellCount` to `getHourCellLayout` (`views/grid/hourCellLayout.ts`, the owner of `MIN_FITTING_HOUR_CELL_PX` / `HOUR_CELL_SCROLL_WIDTH_PX`) and writes `HourGridCssVariable.CELL_COUNT` and `CELL_PITCH`. The frame and the handles already place themselves by minutes × pitch, so they follow.
 
 Presentation is incremental (NFR-P1): `presentHourStrip` keeps the cells of the reference day by identity when only the tail count changes.
 
@@ -103,7 +103,7 @@ Risk: an ancestor with a transform would make `fixed` relative to it. The sortab
 
 `MainPage` gives its header `sticky top-0` and the page-bar layer (`z-page-bar`, the layer of the date bar) while it shows the meeting bar. A new `MEETING_BAR_SELECTOR` beside `DATE_BAR_SELECTOR` lets `useVisibleStripRows` treat the bar's bottom as the top of the visible area (FR13) and `useMoveHandlePlacement` read its rectangle.
 
-Focus under the bar (NFR-A3): while the bar is sticky, the scrolling element gets `scroll-padding-top` equal to the bar's measured height, so the browser's own focus scrolling stops below it. One effect in `useMeetingBar` sets and clears it.
+Focus under the bar (NFR-A3): while the bar is sticky, the scrolling element gets `scroll-padding-top` equal to the bar's measured height, so the browser's own focus scrolling stops below it. This is layout state of the page, so it stays out of the controller: `useMeetingRange`/`useMeetingBar` only decide whether there is a bar. One effect in `MainPage` (`src/app/`), the component that owns the header, measures the header with the `ResizeObserver` pattern of `useHourStripScroll`. It sets the padding while `meetingBar` is given and clears it when it is not.
 
 ### D10. Taps and drags on the tail (FR9)
 
@@ -115,13 +115,15 @@ Focus under the bar (NFR-A3): while the bar is sticky, the scrolling element get
 
 ### D12. A new ADR refines ADR-0011
 
-`docs/adr/0019-meeting-range-past-the-reference-day-and-moved-whole.md`, status Proposed until the owner accepts it: the start inside the reference day, the 24-hour limit, the strip tail as the bounded alternative to a multi-day grid, the move as a command every view with a meeting range offers, and the rejected alternatives of this design. ADR-0011 gets a "Refined by" line.
+`docs/adr/0019-meeting-range-past-the-reference-day-and-moved-whole.md`, in the format of `.claude/rules/adr.md`: the start inside the reference day, the 24-hour limit, the strip tail as the bounded alternative to a multi-day grid, the move as a command every view with a meeting range offers, and the rejected alternatives of this design. ADR-0011 gets a "Refined by ADR-0019" line under its status, as it already has one for ADR-0013, and the ADR list of `CLAUDE.md` gains "0019 meeting range past the reference day".
+
+This design does not settle the global decision; the ADR does. The implement stage may not write `docs/adr/` or `CLAUDE.md`, so it writes the three edits as a patch (handoff H1, `tasks.md`). The ADR is `Accepted` in the patch, because the owner applies the patch to the branch before the merge, and that application is the acceptance. Until then the code on the branch and ADR-0011 disagree, and the pull request names that. The ADR table of `docs/architecture/overview.md` is an architecture doc, so it is an ordinary task, not part of the patch.
 
 ### D13. Where each test lives
 
 - Unit (Vitest, TDD): `meetingRange`, `meetingRangeMove`, both reducers, `hourCells` (tail count and cells), `moveHandlePlacement`, `meetingHandles` presenter.
-- Unit BDD: the model scenarios of `meeting-range`; the tail, sliders, messages, gestures and work bounds of `grid-view` that need no real layout.
-- BDD E2E: the sticky bar, handle positions at scroll offsets, real mouse and touch gestures, focus not obscured, axe-core, widths, screenshots.
+- Unit BDD: the model scenarios of `meeting-range`; the tail cells, typed messages, gestures that need no real layout, the moving state of the rows and the work bounds of `grid-view`.
+- BDD E2E (`bdd-unit.md`: keyboard, aria and focus need a real browser): the slider values, keys and Tab order of all three handles, as the start and end handle sliders already are in `grid_view_meeting_handles_e2e.feature`; the sticky bar, handle positions at scroll offsets, real mouse and touch gestures, focus not obscured, axe-core, widths, screenshots.
 
 ## Consequences
 

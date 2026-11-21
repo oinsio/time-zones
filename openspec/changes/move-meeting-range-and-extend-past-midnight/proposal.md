@@ -1,6 +1,6 @@
 # Move the whole meeting range, let it run past midnight, keep the meeting bar in view
 
-The decisions were taken with the owner on 20–21 November 2026 and are recorded in `docs/design/proposals/meeting-range/meeting-past-midnight.md` and `move-meeting.md` (commit `9184822`). This change builds both, because the move depends on the range past midnight: a moved range must be able to cross midnight. The sibling change `add-meeting-share-dialog` touches other requirements of the same capabilities and can be built before or after this one.
+The design was discussed with the owner on 20–21 November 2026 and is recorded in `docs/design/proposals/meeting-range/meeting-past-midnight.md` (part 2) and `move-meeting.md` (part 3). This change builds both parts, because the move depends on the range past midnight: a moved range must be able to cross midnight. Part 1, `add-meeting-share-dialog`, has already landed and is archived. It modified other requirements of the same capabilities ("Share meeting from the meeting bar", "Share meeting text"), so it does not overlap with this change.
 
 ## Why
 
@@ -21,7 +21,7 @@ Audience: everyone who plans a meeting in the Grid view; evening meetings and lo
 - **MODIFIED** the **meeting bar**: it stays at the top of the viewport while a meeting range is set; the move handle rests on its bottom line once the top of the frame has scrolled under it.
 - **MODIFIED** the rows on which the start and end handles stand: a row under the meeting bar is not a visible row.
 - New glossary terms: strip tail, meeting move, move handle. Changed terms: meeting range, reference day, hour strip, hour cell, meeting handle, meeting frame, meeting bar, meeting range input.
-- A new ADR refines ADR-0011: the range may end after the reference day and may be moved as a whole.
+- A new ADR refines ADR-0011: the range may end after the reference day and may be moved as a whole. The factory may not write `docs/adr/`, so the ADR reaches the branch as a patch that the owner applies before the merge (handoff H1 in `tasks.md`).
 
 No stored data changes: the meeting range is never stored.
 
@@ -140,9 +140,11 @@ There is no loading or error state: every state above is computed from data in m
 
 - `packages/client/src/test/features/meeting_range/meeting_range_past_midnight.feature` — invariants, instants, wall-clock times, handles, date change (`@move-meeting-range-and-extend-past-midnight @FR1`–`@FR5`, `@FR11`).
 - `packages/client/src/test/features/meeting_range/meeting_range_move.feature` — the move (`@FR14`, `@FR20`).
-- `packages/client/src/test/features/grid_view/grid_view_strip_tail_unit.feature` — the tail, its cells, the width rule, taps and drags, the messages (`@FR6`–`@FR10`).
-- `packages/client/src/test/features/grid_view/grid_view_meeting_move_unit.feature` — the move handle, its slider, the gestures, the moving state, the work bounds (`@FR15`–`@FR19`, `@NFR-P1`).
-- `packages/client/src/test/features/grid_view/grid_view_meeting_move_e2e.feature` — the sticky bar, handle positions, real gestures, focus, axe-core, widths, screenshots (`@FR12`, `@FR13`, `@FR17`, `@NFR-A1`–`@NFR-A3`, `@NFR-R1`, `@NFR-R2`, `@UX1`–`@UX4`).
+- `packages/client/src/test/features/grid_view/grid_view_strip_tail.feature` — the tail, its cells, the width rule, taps and drags, the messages (`@FR6`–`@FR10`).
+- `packages/client/src/test/features/grid_view/grid_view_meeting_move_unit.feature` — the gestures that need no real layout, the moving state, the work bounds (`@FR15`, `@FR16`, `@FR19`, `@NFR-P1`).
+- `packages/client/src/test/features/grid_view/grid_view_meeting_move_e2e.feature` — the sticky bar, handle positions, the move handle's slider values, keys and Tab order, real gestures, focus, axe-core, widths (`@FR12`, `@FR13`, `@FR17`, `@FR18`, `@NFR-A1`–`@NFR-A3`, `@NFR-R1`, `@NFR-R2`, `@UX1`–`@UX3`).
+- `packages/client/src/test/features/grid_view/grid_view_meeting_handles_e2e.feature` — slider values and keys of the start and end handles past midnight, the tail under a dragged end handle, drags and taps on the tail (`@FR4`, `@FR6`, `@FR9`).
+- `packages/client/src/test/features/grid_view/grid_view_meeting_screenshots_e2e.feature` — the approved screenshots (`@UX1`–`@UX4`, `@NFR-R1`).
 
 Existing features of `meeting_range` and `grid_view` are updated where their requirement is modified, keeping their tags.
 
@@ -175,8 +177,8 @@ No changes: the project has no `docs/ia/` documents.
 
 - Model: `meetingRange.ts` (invariants, handle limits, the move, the date change), `reduceMeetingRange.ts`, `reduceMeetingRangeWallTimes.ts`, `hourCells.ts` (the tail), a new command for the move.
 - Presenter: hour strip presentation with tail cells; `meetingHandles.ts` for the third slider; refusal messages.
-- Controller: `useMeetingRange` gains the move.
-- Views: `HourStrip`, `MeetingFrame`, `MeetingHandle`, `useMeetingHandleDrag`, `useHourCellSelection`, `useHourStripScroll`, `useVisibleStripRows`, `meetingHandleRow.ts`, `MeetingBar`, `MainPage` (sticky header while the meeting bar is shown).
+- Controller: `useMeetingRange` gains the move; `useHourGrid` counts the tail cells.
+- Views: `HourStrip`, `MeetingFrame`, `MeetingHandle`, `useMeetingHandleDrag`, `useHourCellSelection`, `useHourStripScroll`, `useVisibleStripRows`, `meetingHandleRow.ts`, `views/shared/MeetingRangeInput.tsx` (the messages), `MainPage` (sticky header while the meeting bar is shown).
 - Translations: `ru.json`, `en.json` — the move handle's name, the changed refusal message, the removed one.
-- Docs: a new ADR in `docs/adr/`, glossary (`time-selection.md`), `docs/architecture/views.md`, `docs/architecture/domain-model.md`, approved screens in `docs/design/screens`.
+- Docs: glossary (`time-selection.md`), `docs/architecture/overview.md`, `docs/architecture/views.md`, `docs/architecture/domain-model.md`, approved screens in `docs/design/screens`. Handed over as a patch (H1): the new ADR in `docs/adr/`, the "Refined by" line of ADR-0011 and the ADR list of `CLAUDE.md`.
 - No new dependency.
