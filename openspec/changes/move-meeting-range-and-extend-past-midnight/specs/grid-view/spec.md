@@ -561,6 +561,18 @@ While a meeting range is set and the list has rows, the Grid view SHALL show a t
 - **WHEN** the user scrolls the strips by two cells
 - **THEN** the horizontal centre of the move handle is again the horizontal centre of the meeting frame
 
+#### Scenario: The move handle stays in reach in a long list
+- **GIVEN** the Grid view at 390 by 844 px with 12 locations and the meeting range 09:00–11:00 in Almaty
+- **WHEN** the page is scrolled to its `<position>`
+- **THEN** the meeting bar and the move handle are fully inside the viewport
+- **AND** the topmost element at the centre of the move handle is the move handle
+
+| position |
+|---|
+| top |
+| middle |
+| bottom |
+
 ### Requirement: Move handle is a slider
 The move handle SHALL be a slider for assistive technology and the keyboard, named «Сдвиг встречи» ("Move meeting"). Its value MUST be the minutes from the start of the reference day to the start of the range, its minimum 0 and its maximum the last track step position of the reference day, and its value text the span of the range in the reference zone in the hour format setting. Each key MUST move the whole range as "Move the whole meeting range" of `meeting-range` says:
 - Arrow Right / Arrow Up and Arrow Left / Arrow Down: to the next or previous track step position;
