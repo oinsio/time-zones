@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { SCROLL_PADDING_TOP_PROPERTY } from "@/constants";
 import { ViewHost } from "./ViewHost";
 
 interface MainPageProps {
@@ -17,7 +18,7 @@ interface MainPageProps {
 const COLUMN_CLASS_NAME = "mx-auto w-full max-w-content px-column";
 // Below 360 px the title cannot stay centred beside the 92 px of buttons.
 const MEETING_HEADER_CLASS_NAMES =
-  "grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-meeting bg-meeting-bar px-4 pt-6 pb-4 min-[360px]:grid-cols-[1fr_auto_1fr]";
+  "sticky top-0 z-meeting-bar grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-meeting bg-meeting-bar px-4 pt-6 pb-4 min-[360px]:grid-cols-[1fr_auto_1fr]";
 
 /**
  * The main page: header with the title and a slot for future controls, the
@@ -34,6 +35,9 @@ const MEETING_HEADER_CLASS_NAMES =
  * Implements FR13, NFR-R1, UX1 of add-grid-meeting-range-and-share (D7): the meeting bar takes the header's place.
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5).
  * Implements FR7 of refine-meeting-range-entry-and-handles (D5): `data-date-bar` locates the date bar.
+ * Implements FR12 of move-meeting-range-and-extend-past-midnight (D9): the meeting bar is sticky
+ * at the top of the viewport, `data-meeting-bar` locates it and, as D9 says, the scrolling
+ * element's `scroll-padding-top` equals its height (NFR-A3).
  * Implements FR6, FR12, UX4 of redesign-cards-grid-and-day-palettes (D4): the title at the
  * left, Add location and Settings at the right, no line under the header; the content sits
  * in a centred column of at most 1120 px while the bars span the viewport.
@@ -45,9 +49,31 @@ export function MainPage({
   meetingBar,
 }: MainPageProps) {
   const { t } = useTranslation();
+  const headerRef = useRef<HTMLElement | null>(null);
+  const hasMeetingBar = meetingBar !== undefined;
+  // While the bar is sticky, the browser's own focus scrolling stops below it (NFR-A3).
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!hasMeetingBar || header === null) return;
+    const scrollingElement = document.documentElement;
+    const applyHeaderHeight = () =>
+      scrollingElement.style.setProperty(
+        SCROLL_PADDING_TOP_PROPERTY,
+        `${header.getBoundingClientRect().height}px`,
+      );
+    applyHeaderHeight();
+    const observer = new ResizeObserver(applyHeaderHeight);
+    observer.observe(header);
+    return () => {
+      observer.disconnect();
+      scrollingElement.style.removeProperty(SCROLL_PADDING_TOP_PROPERTY);
+    };
+  }, [hasMeetingBar]);
   return (
     <div className="flex min-h-dvh w-full flex-col">
       <header
+        ref={headerRef}
+        data-meeting-bar={meetingBar === undefined ? undefined : ""}
         className={
           meetingBar === undefined ? undefined : MEETING_HEADER_CLASS_NAMES
         }

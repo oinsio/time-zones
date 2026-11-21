@@ -1,5 +1,9 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { DATE_BAR_SELECTOR, MEETING_HANDLE_HEIGHT_PX } from "@/constants";
+import {
+  DATE_BAR_SELECTOR,
+  MEETING_BAR_SELECTOR,
+  MEETING_HANDLE_HEIGHT_PX,
+} from "@/constants";
 import type { MeetingHandleCandidateRows } from "./meetingHandleRow";
 import { HOUR_STRIP_SELECTOR } from "./useMeetingHandleDrag";
 
@@ -10,21 +14,30 @@ const getViewportBottomPx = (): number =>
   document.querySelector(DATE_BAR_SELECTOR)?.getBoundingClientRect().top ??
   window.innerHeight;
 
+/** The top edge of the space a handle may stand in: the meeting bar's bottom, else the window's top. */
+const getViewportTopPx = (): number =>
+  document.querySelector(MEETING_BAR_SELECTOR)?.getBoundingClientRect()
+    .bottom ?? 0;
+
 /**
  * The rows on which a handle centred on the strip lies fully inside the
- * viewport above the date bar; every row when there is none.
+ * viewport below the meeting bar and above the date bar; every row when there is none.
  */
 function measureCandidateRows(
   panel: HTMLElement,
   rowCount: number,
 ): MeetingHandleCandidateRows {
+  const topPx = getViewportTopPx();
   const bottomPx = getViewportBottomPx();
   const halfHandlePx = MEETING_HANDLE_HEIGHT_PX / HALF;
   const candidateRows: number[] = [];
   panel.querySelectorAll(HOUR_STRIP_SELECTOR).forEach((strip, index) => {
     const { top, height } = strip.getBoundingClientRect();
     const centrePx = top + height / HALF;
-    if (centrePx - halfHandlePx >= 0 && centrePx + halfHandlePx <= bottomPx) {
+    if (
+      centrePx - halfHandlePx >= topPx &&
+      centrePx + halfHandlePx <= bottomPx
+    ) {
       candidateRows.push(index + 1);
     }
   });
@@ -43,6 +56,7 @@ function measureCandidateRows(
  * published only when the run changed. While `isFrozen` (a handle drag) it keeps
  * the last value.
  * Implements FR7, NFR-P1, NFR-R1 of refine-meeting-range-entry-and-handles (D5).
+ * Implements FR13 of move-meeting-range-and-extend-past-midnight (D9): rows count as visible only below the meeting bar.
  */
 export function useVisibleStripRows(
   panel: HTMLElement | null,

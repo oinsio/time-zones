@@ -1,10 +1,10 @@
 Feature: Meeting handles stay in reach, in jsdom
-  Implements change refine-meeting-range-entry-and-handles.
+  Implements change refine-meeting-range-entry-and-handles and move-meeting-range-and-extend-past-midnight.
   As a user I always find both meeting handles on screen, grab them beside the grip, and a release never changes the meeting.
 
-  @refine-meeting-range-entry-and-handles @FR7
+  @refine-meeting-range-entry-and-handles @FR7 @move-meeting-range-and-extend-past-midnight @FR13
   Scenario Outline: Handle rows among the visible rows
-    Given the candidate rows are rows <first> to <last> of the list
+    Given the candidate rows, on which a centred meeting handle lies fully inside the viewport below the meeting bar and above the date bar, are rows <first> to <last> of the list
     When the handle rows are chosen
     Then the end handle stands on row <end> and the start handle on row <start>
 

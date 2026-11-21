@@ -1,4 +1,5 @@
 // Verifies FR7, NFR-P1 of refine-meeting-range-entry-and-handles.
+// Verifies FR13 of move-meeting-range-and-extend-past-midnight.
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useVisibleStripRows } from "./useVisibleStripRows";
@@ -20,6 +21,8 @@ let frameCallbacks: FrameRequestCallback[];
 let stripReads: number;
 let panel: HTMLElement;
 let dateBar: HTMLElement | undefined;
+let meetingBar: HTMLElement | undefined;
+let meetingBarBottomPx = 0;
 
 const flushFrame = () =>
   act(() => {
@@ -48,6 +51,8 @@ beforeEach(() => {
   dateBar = document.createElement("footer");
   dateBar.setAttribute("data-date-bar", "");
   document.body.append(panel, dateBar);
+  meetingBarBottomPx = 0;
+  meetingBar = undefined;
   vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
     frameCallbacks.push(callback);
     return frameCallbacks.length;
@@ -56,6 +61,7 @@ beforeEach(() => {
   vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
     function (this: Element) {
       if (this === dateBar) return { top: geometry.barTopPx } as DOMRect;
+      if (this === meetingBar) return { bottom: meetingBarBottomPx } as DOMRect;
       stripReads += 1;
       const row = Array.from(panel.children).indexOf(this);
       return {
@@ -69,6 +75,7 @@ beforeEach(() => {
 afterEach(() => {
   panel.remove();
   dateBar?.remove();
+  meetingBar?.remove();
   vi.restoreAllMocks();
 });
 
@@ -125,6 +132,26 @@ describe("useVisibleStripRows", () => {
     const { result } = renderRows();
     expect(result.current).toEqual({ firstRow: 1, lastRow: 1 });
   });
+
+  // FR13: a row counts as visible only below the meeting bar
+  it.each([
+    [0, 1],
+    [100, 2],
+    [150, 3],
+  ])(
+    "should start at row %#'s first row below a meeting bar ending at %i px",
+    (bottomPx, firstRow) => {
+      meetingBar = document.createElement("header");
+      meetingBar.setAttribute("data-meeting-bar", "");
+      document.body.append(meetingBar);
+      meetingBarBottomPx = bottomPx;
+      geometry.firstTopPx = 100;
+
+      const { result } = renderRows();
+
+      expect(result.current.firstRow).toBe(firstRow);
+    },
+  );
 
   it("should fall back to every row when no row is a candidate", () => {
     geometry.barTopPx = 10;

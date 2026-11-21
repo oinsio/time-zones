@@ -49,3 +49,9 @@ export const FIRST_DAY_OF_WEEK_BY_LANGUAGE: Readonly<Record<string, number>> & {
 // Implements FR7 of refine-meeting-range-entry-and-handles (D5).
 /** The locator of the date bar on the main page: the sticky bottom element that holds it. */
 export const DATE_BAR_SELECTOR = "[data-date-bar]";
+
+// Implements FR12, FR13 of move-meeting-range-and-extend-past-midnight (D9).
+/** The locator of the meeting bar on the main page: the sticky header while it shows the meeting bar. */
+export const MEETING_BAR_SELECTOR = "[data-meeting-bar]";
+/** The CSS property that keeps the browser's focus scrolling below the sticky meeting bar. */
+export const SCROLL_PADDING_TOP_PROPERTY = "scroll-padding-top";

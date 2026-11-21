@@ -65,6 +65,7 @@ const config: Config = {
         "grid-box": "2",
         "meeting-handle": "3",
         "grid-box-focused": "4",
+        "meeting-bar": "5",
         "page-bar": "10",
         "dragged-row": "15",
         "location-menu": "20",
