@@ -57,7 +57,11 @@ The owner stays `presentMeetingShareText`; its input becomes:
   getCityLabel }      // (location) => label in `language`
 ```
 
-It computes per location, through the existing owners: the local span via `getLocationMeetingRange` + `presentLocationMeetingRange`'s formatter, the day shift via `getDayShift`, the zone abbreviation via `getZoneAbbreviation` + `formatZoneAbbreviation` with `translate`, the UTC offset text via the existing `formatUtcOffset` (`presenter/utcOffset.ts`). The zone parts and their order come from `presentZoneLine` called with an empty place and the share zone label as its `zoneLabelParts`, so its rule "the zone abbreviation yields to a UTC offset that reads the same" is reused, not copied. The share line then drops a part whose text equals the city label (the `UTC` location, whose city label is `UTC`) and wraps what is left in brackets joined by `, `. This zone-parts step is one exported function, `presentMeetingShareZoneParts`, which the share dialog rows reuse (D7). The file is split when it nears 200 lines: `meetingShareText.ts` (assembly) and `meetingShareLine.ts` (one line and its zone parts).
+It computes per location, through the existing owners: the local span via `getLocationMeetingRange` + `presentLocationMeetingRange`'s formatter, the day shift via `getDayShift`, the zone abbreviation via `getZoneAbbreviation` + `formatZoneAbbreviation` with `translate`, the UTC offset text via the existing `formatUtcOffset` (`presenter/utcOffset.ts`). The zone parts and their order come from `presentZoneLine` called with an empty place and the share zone label as its `zoneLabelParts`, so its rule "the zone abbreviation yields to a UTC offset that reads the same" is reused, not copied. The zone-parts step is one exported function, `presentMeetingShareZoneParts(...)`, that returns the ordered `ZoneLinePart[]` (the existing type of `presenter/zoneLine.ts`, no `PLACE` part) after dropping a part whose text equals the city label (the `UTC` location, whose city label is `UTC`). It returns a list and joins nothing. Two callers join the list, each by its own existing rule:
+- the share line (`presentMeetingShareLine`) wraps the part texts in brackets joined by `, ` — the bracket and the comma are the text's format and live only in the `meeting.shareLine` / `shareLineShifted` locale strings and the `zone` parameter built here;
+- the share dialog rows hand the same list to the existing `ZoneLine` view (`views/shared/ZoneLine.tsx`), which already puts `ZONE_LINE_SEPARATOR` (`·`, `constants/locations.ts`) between parts — that is why the rows read «МСК · UTC+3».
+
+So the parts of a location have one owner; the separator of the screen and the brackets of the text stay where they already are. The file is split when it nears 200 lines: `meetingShareText.ts` (assembly) and `meetingShareLine.ts` (one line and its zone parts).
 
 `MeetingShareRow` and the label-based input are removed; `useMeetingShare` is their only caller.
 
@@ -95,13 +99,13 @@ MeetingShare      = { invitation: MeetingInvitation; text: string }
 ShareDestination  = { id; isAvailable(): boolean; share(meetingShare): Promise<ShareOutcome> }
 ```
 
-`adapters/textShareDestination.ts` wraps a `TextSharing` (`share` calls `shareText(meetingShare.text)`, `isAvailable` is always true because the clipboard is its fallback). `adapters/shareDestinations.ts` exports the ordered registry, like `viewRegistry`. `TextSharing`, `browserTextSharing` and `createInMemoryTextSharing` are unchanged.
+`adapters/textShareDestination.ts` exports `createTextShareDestination(textSharing)` (`share` calls `shareText(meetingShare.text)`, `isAvailable` is always true because the clipboard is its fallback). `adapters/shareDestinations.ts` exports `createShareDestinations(textSharing): readonly ShareDestination[]`, the ordered registry, like `viewRegistry` in shape but built from its port so that the `textSharing` that `AppShell` receives (`AppShellDependencies.textSharing`, injected by `AppShell.meeting.test.tsx`) reaches the destination; with no argument it uses `browserTextSharing`. `TextSharing`, `browserTextSharing` and `createInMemoryTextSharing` are unchanged.
 
 A destination receives both the invitation and the text: a calendar needs the instants and may put the text in the description. The dialog renders one button per available destination and knows none by name; labels and icons come from a presenter map keyed by `ShareDestinationId`.
 
 ### D6. Controller: `useMeetingShare` owns the dialog session (FR1, FR8–FR10)
 
-`useMeetingShare` becomes the owner of: whether the dialog is open, the excluded ids, the share language of this opening, the built text (memoised on invitation, language, parts, hour format), and `share(destinationId)`. Opening resets the excluded ids and resolves the language (D4). An effect closes the dialog when the meeting range becomes undefined (FR10). Outcomes map to today's `MeetingShareNotice`; cancelled keeps the session.
+`useMeetingShare(textSharing = browserTextSharing)` keeps its signature and builds `createShareDestinations(textSharing)` once per `textSharing` (`useMemo`). It becomes the owner of: whether the dialog is open, the excluded ids, the share language of this opening, the built text (memoised on invitation, language, parts, hour format), the dialog rows (D7), the available destinations, `openShareDialog()`, `closeShareDialog()` and `share(destinationId)`; `shareMeeting` is removed. `openShareDialog` also dismisses the notice, as Share meeting does today. Opening resets the excluded ids and resolves the language (D4). An effect closes the dialog when the meeting range becomes undefined (FR10). Outcomes map to today's `MeetingShareNotice`; cancelled keeps the session.
 
 City labels in another language: `useCityLabels(locations, load)` already asks `CitySearch.getCityLabel` with the `cityNameLanguage` of `useActiveInterfaceLanguage`; it gains an optional `CityNameLanguage` argument (default: the interface one) so the same owner serves the share language, resolved by the existing `resolveCityNameLanguage(code)`. `translate` is `i18n.getFixedT(language)`, as `useCitySearch` already does for English.
 
@@ -109,12 +113,15 @@ If the file passes 200 lines, the session state moves to `useMeetingShareSession
 
 ### D7. Views: one lazy dialog built from existing blocks (UX1–UX5, NFR-P2)
 
-`views/shared/MeetingShareDialog.tsx`, loaded with `lazy` like `CalendarMonthGrid`, on `DialogContent`. It reuses:
-- `InterfaceLanguageList` for the language list. It moves from `app/settings/` to `views/shared/` with a neutral name (`LanguageList`) and takes the chosen code and a callback; `InterfaceLanguageGroup` keeps using it.
-- `SettingsToggleGroup` for the share zone label, moved the same way if it is imported from outside `app/settings/`.
-- the row texts: the city label and the local date from the `presentLocationRows` rows (`cityLabel`, `localDateLabel`), the span and the day shift from `meeting.rowRanges` (`spanLabel`, `dayShiftLabel`), and the zone parts from `presentMeetingShareZoneParts` (D2) with both parts in the interface language — not the row's zone line, which follows the zone label setting. The controller builds these texts; the dialog formats nothing itself.
+`views/shared/MeetingShareDialog.tsx` on `DialogContent`, loaded through `views/shared/LazyMeetingShareDialog.tsx` (`lazy` + `Suspense fallback={null}`, exactly like `LazyCalendarMonthGrid.tsx`), so its chunk loads on the first opening (NFR-P2). It takes the session of `useMeetingShare` as props and calls no hook of the model. It reuses:
+- `InterfaceLanguageList` for the language list. It moves from `app/settings/` to `views/shared/LanguageList.tsx` with a neutral name (`LanguageList`), because blocks shared by several screens live in `views/shared/` and no file under `views/` imports from `app/` today; `InterfaceLanguageGroup` imports it from `@/views/shared`. It has no test file of its own: the `InterfaceLanguageGroup` suites cover it and stay in `app/settings/`.
+- `SettingsToggleGroup` for the share zone label. It moves with `SettingsToggleGroup.test.tsx` to `views/shared/`; `ZoneLabelGroup` and `test/features/settings/steps/settings_zone_label_unit.steps.tsx` (which imports it from `@/app/settings` today) import it from `@/views/shared`, and `app/settings/index.ts` stops exporting it.
+- `ZoneLine` for the zone parts of a row (D2).
+- the row texts: the city label and the local date from the `presentLocationRows` rows (`cityLabel`, `localDateLabel`), the span and the day shift from `meeting.rowRanges` (`spanLabel`, `dayShiftLabel`), and the zone parts from `presentMeetingShareZoneParts` (D2), a list, with both parts in the interface language — not the row's zone line, which follows the zone label setting. The controller builds these rows; the dialog formats nothing itself and joins nothing: the separator is `ZoneLine`'s.
 
-New small components: `MeetingShareLocationRow`, `ShareLanguagePin`, `MeetingSharePreview`. The meeting bar's Share button calls `openShareDialog` instead of `shareMeeting`.
+New small components: `MeetingShareLocationRow`, `ShareLanguagePin`, `MeetingSharePreview`.
+
+**App shell wiring.** `AppShellContent` (`app/AppShell.tsx`) already calls `useMeetingShare(textSharing)` and renders `MeetingBar` with `onShare={shareMeeting}`. It now passes `onShare={openShareDialog}` and renders `<LazyMeetingShareDialog>` beside the meeting bar while the session is open, handing it the session and a ref to Share meeting for the returned focus. `AppShell.tsx` has 194 lines today; if the wiring takes it past 200, the meeting bar and the dialog move into `app/AppShellMeeting.tsx`, which `AppShell` renders in the `meetingBar` slot.
 
 ### D8. Where each test lives
 
