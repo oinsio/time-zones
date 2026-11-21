@@ -1,5 +1,4 @@
-// Verifies FR7, FR8, NFR-P1 of refine-meeting-range-entry-and-handles.
-// Verifies FR13 of move-meeting-range-and-extend-past-midnight: the meeting bar is stubbed by MEETING_BAR_SELECTOR.
+// Verifies FR7, FR8, NFR-P1 of refine-meeting-range-entry-and-handles; FR13 of move-meeting-range-and-extend-past-midnight.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, fireEvent, screen } from "@testing-library/react/pure";
@@ -35,8 +34,7 @@ const FIRST_STRIP_TOP_PX = 60;
 const STRIP_HEIGHT_PX = 38;
 const STRIP_PITCH_PX = 50;
 const DATE_BAR_TOP_PX = 400;
-// Flush with the top of the viewport, so the geometry of the scroll scenarios is unchanged.
-const MEETING_BAR_BOTTOM_PX = 0;
+const MEETING_BAR_RECT = { bottom: 0 } as DOMRect;
 const GRAB_X_PX = 500;
 const TAPPED_COLUMN = 14;
 const SCROLL_TO_FIRST_CANDIDATE_RUN_PX = 121;
@@ -54,9 +52,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const installGeometry = () => {
     vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
       function (this: Element) {
-        if (this.matches(MEETING_BAR_SELECTOR)) {
-          return { bottom: MEETING_BAR_BOTTOM_PX } as DOMRect;
-        }
+        if (this.matches(MEETING_BAR_SELECTOR)) return MEETING_BAR_RECT;
         if (this.hasAttribute("data-date-bar")) {
           dateBarReads += 1;
           return { top: DATE_BAR_TOP_PX } as DOMRect;
@@ -120,15 +116,12 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     ({ Given, When, Then }, variables) => {
       let endRow = 0;
       let startRow = 0;
-      Given(
-        "the candidate rows, on which a centred meeting handle lies fully inside the viewport below the meeting bar and above the date bar, are rows <first> to <last> of the list",
-        () => {
-          candidateRows = {
-            firstRow: Number(variables.first),
-            lastRow: Number(variables.last),
-          };
-        },
-      );
+      Given("candidate rows <first> to <last> below the meeting bar", () => {
+        candidateRows = {
+          firstRow: Number(variables.first),
+          lastRow: Number(variables.last),
+        };
+      });
       When("the handle rows are chosen", () => {
         endRow = getMeetingHandleRow(MeetingHandle.END, candidateRows);
         startRow = getMeetingHandleRow(MeetingHandle.START, candidateRows);

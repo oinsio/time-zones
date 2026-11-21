@@ -45,4 +45,4 @@ Feature: Approved screenshots of the Grid meeting state
       | list at the bottom              | 390   | 844    | light |
       | the range being moved           | 390   | 844    | light |
       | with its strip tail             | 390   | 844    | light |
-      | with its strip tail wide        | 1280  | 800    | dark  |
+      | with its strip tail wide        | 1280  | 800    | light |
