@@ -106,7 +106,8 @@
 - Impact: the device time location is in the first-launch list (ADR-0010), so most users have it. Built as written, its line either falls back to `location.label` / the zone id, or keeps the interface language. A Russian user who shares in English gets a Cyrillic city in an English text, and the scenario "no line contains a Cyrillic letter" does not catch it because its sample list has no device time location.
 - Fix: in D6 add that `useExemplarCity` gets the same optional `CityNameLanguage` argument as `useCityLabels` (default: the interface one), and that the `getCityLabel` callback uses it for the `DEVICE_TIME` location. Extend task 6.1 to both hooks (`useExemplarCity.test.tsx` included), and add a case to 4.3 and 6.2: with a device time location in the list, its line uses the share language's exemplar city.
 - Fix risk: low. `useLocations.ts:65` is the only other caller of `useExemplarCity` and keeps the default argument. The second call needs the loaded city data and falls back to the stored label while it loads, as D6's Consequences already accept for city labels.
-- Status: open
+- Status: fixed
+- Resolution: added to D6 (design.md) that useExemplarCity gains the optional CityNameLanguage argument and the session's getCityLabel uses it for the DEVICE_TIME location; spec meeting-share-dialog "Share language choice" now states it, with the scenario "The device time location in another share language"; tasks 6.1 (useExemplarCity.test.tsx), 4.3, 6.2 and 7.7 cover it.
 
 ### R2 — WARNING — The reference line names a "reference location" that has no owner and no rule without a home
 - Location: `openspec/changes/add-meeting-share-dialog/specs/meeting-share-dialog/spec.md:10`
@@ -115,7 +116,8 @@
 - Impact: the implementer has to invent the no-home case: the device time exemplar city, the first location, the zone id, or no city. They also have to choose a layer, and the dialog may end up formatting text itself, which D7 forbids ("the dialog formats nothing itself"). The unit BDD only proves the home case.
 - Fix: in the spec requirement "Share dialog opens and closes", state that `{city}` is the home location's city label or, with no home, the exemplar city of the device time zone (the label the device time location shows), and add a scenario with no home. In D6 add "the reference line" to the session's outputs, built in the presenter from `dateBar.fullDateLabel` and `meeting.shareDialogReference`. Add that case to task 6.2.
 - Fix risk: the device exemplar city needs the city data and shows the zone id until it loads, as `presentLocationRows.ts:71` already does. The new scenario must use the interface language, not the share language, as the other dialog captions do.
-- Status: open
+- Status: fixed
+- Resolution: spec "Share dialog opens and closes" now defines the reference line city (home city label, otherwise the exemplar city of the device time zone, in the interface language) with the scenario "The reference line without a home location"; D6 adds the reference line to the session outputs, owned by presentMeetingShareReference (presenter/meetingShareReference.ts); new task 4.6 and cases in 6.2, 7.7 and Stryker run 3. No new glossary term: it is the home city label or the exemplar city.
 
 ### R3 — WARNING — D7 reuses only the language list, not the language button and its keyboard handling
 - Location: `openspec/changes/add-meeting-share-dialog/design.md:120`
@@ -124,7 +126,8 @@
 - Impact: as written, `MeetingShareDialog` has to rebuild the button, `aria-expanded` / `aria-controls`, the arrow-key navigation and the Escape handling: a second copy of the settings language control that can drift from it. The Escape case also matters in the modal: `InterfaceLanguageGroup` stops Escape only when the list is expanded, so a copy that drops this closes the whole dialog on the Esc that should only collapse the list.
 - Fix: in D7 and task 7.1, move the whole group: the button, the list and the keyboard handling become `LanguageGroup` in `views/shared/` (caption text, button label, `activeCode`, `onChoose` as props). `InterfaceLanguageGroup` becomes a thin settings wrapper that passes `settings.languageLabel` / `settings.languageButton`, and the dialog passes `meeting.shareDialogLanguage`. Keep `InterfaceLanguageList` as the group's internal list. Task 7.1's verify command stays as it is (the `InterfaceLanguageGroup*.test.tsx` suites must pass unchanged). Add to 8.1 that Esc with the list open collapses the list and keeps the dialog open.
 - Fix risk: moderate. The settings suites and `settings_language_unit.steps.tsx` must stay green after the move. The dialog's button needs an accessible name of its own (a new two-level `meeting.*` key, so 7.2's count of 9 `"shareDialog` keys goes up by one).
-- Status: open
+- Status: fixed
+- Resolution: D7 and task 7.1 now move the whole InterfaceLanguageGroup body to views/shared/LanguageGroup.tsx (caption, button label, activeCode, onChoose, besideButton slot for the pin) with LanguageList as its internal list; InterfaceLanguageGroup stays a thin settings wrapper; new key meeting.shareDialogLanguageButton (7.2 count 10); spec adds the button name, Esc-collapses-list rule and the scenario "Esc in the open language list", run in task 8.1; glossary task 1.1 names LanguageGroup.
 
 ### R4 — WARNING — The new model file `weekday.ts` is in no scoped Stryker run
 - Location: `openspec/changes/add-meeting-share-dialog/tasks.md:72`
@@ -133,7 +136,8 @@
 - Impact: the mapping that picks the Russian heading form (FR7) is never mutation-tested. A mutant that swaps two weekdays survives unless the seven-heading test happens to kill it, and M6 is reported as met without measuring this file.
 - Fix: add `src/model/weekday.ts` to run 3 of task 9.1 (three files, under the five-file limit).
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: added src/model/weekday.ts to run 3 of task 9.1 (now four files with presenter/meetingShareReference.ts from R2, under the five-file limit).
 
 ### R5 — SUGGESTION — Spec and design disagree on an empty pinned share language
 - Location: `openspec/changes/add-meeting-share-dialog/specs/settings/spec.md:4`
@@ -142,7 +146,8 @@
 - Impact: low. The implementation follows D4, which matches the existing `interfaceLanguage` check, but the archived spec would then describe a rule the parser does not apply.
 - Fix: in the settings requirement write "whose pinned share language is neither a non-empty string nor none".
 - Fix risk: none. It matches `isNullOrNonEmptyString` in `preferences/parseStoredPreferences.ts:59`.
-- Status: open
+- Status: fixed
+- Resolution: specs/settings/spec.md now reads "neither a non-empty string nor none", matching D4 and task 2.3, and the "Unreadable share choices" table gains the row "pinned share language | an empty string".
 
 ### R6 — SUGGESTION — UX5 is claimed by a requirement that does not state it
 - Location: `openspec/changes/add-meeting-share-dialog/specs/meeting-share-dialog/spec.md:172`
@@ -151,7 +156,8 @@
 - Impact: the implementer tags a scenario with `@UX5` that checks nothing of it, so the criterion is traced but unverified.
 - Fix: add to "Share dialog layout": "A row offers its checkbox and no remove control; a share opens no confirmation". Tag "Outcomes of a share from the dialog" (whose dialog column already proves the dialog just closes) and "The dialog matches its approved screenshots" with `@UX5`.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: "Share dialog layout" now states that a row offers its checkbox and no remove control and that a share opens no confirmation dialog; "Share from the share dialog" and "Approved screenshots of the share dialog" now implement UX5, the outcomes scenario asserts no confirmation dialog is open; tasks 7.3 (row has no remove button), 7.7 (@UX5 on the outcomes scenario) and 8.2 (@UX5 on screenshots).
 
 ## Verdict
 
