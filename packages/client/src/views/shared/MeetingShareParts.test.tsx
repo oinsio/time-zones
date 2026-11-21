@@ -147,6 +147,17 @@ describe("MeetingSharePreview", () => {
     );
   });
 
+  it("should show two equal lines without a duplicate key warning", () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <MeetingSharePreview text={"Heading\nAlmaty: 09:00\nAlmaty: 09:00"} />,
+    );
+
+    expect(screen.getAllByText("Almaty: 09:00")).toHaveLength(2);
+    expect(errorSpy).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
   it("should be a region named by its caption and not a live region", () => {
     render(<MeetingSharePreview text="Heading" />);
 

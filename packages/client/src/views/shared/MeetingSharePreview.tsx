@@ -18,6 +18,12 @@ export function MeetingSharePreview({ text }: MeetingSharePreviewProps) {
   const captionId = useId();
   const [heading, ...locationLines] =
     text?.split(MEETING_SHARE_LINE_SEPARATOR) ?? [];
+  const lineOccurrences = new Map<string, number>();
+  const keyedLines = locationLines.map((line) => {
+    const occurrence = (lineOccurrences.get(line) ?? 0) + 1;
+    lineOccurrences.set(line, occurrence);
+    return { line, key: `${line}#${occurrence}` };
+  });
   return (
     <section aria-labelledby={captionId} className="flex flex-col gap-2">
       <h3
@@ -34,8 +40,8 @@ export function MeetingSharePreview({ text }: MeetingSharePreviewProps) {
         ) : (
           <>
             <p className="font-bold">{heading}</p>
-            {locationLines.map((line) => (
-              <p key={line}>{line}</p>
+            {keyedLines.map(({ line, key }) => (
+              <p key={key}>{line}</p>
             ))}
           </>
         )}
