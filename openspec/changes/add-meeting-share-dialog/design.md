@@ -130,6 +130,7 @@ New small components: `MeetingShareLocationRow`, `ShareLanguagePin`, `MeetingSha
 - Unit BDD: the scenarios of `meeting-range` → "Share meeting text", `settings` and the non-layout scenarios of `meeting-share-dialog`.
 - BDD E2E: focus, keyboard, axe-core, layout, screenshots.
 - Work bound (NFR-P1): a unit BDD that wraps the rebuild in `startWorkCount()` and asserts no formatter build, as `grid_view_meeting_budget.feature` does; the timing is a `src/test/benchmarks/meetingShareText.bench.ts` benchmark, never asserted (ADR-0008).
+- Lazy chunk (NFR-P2): `app/AppShell.shareDialogChunk.test.tsx` mocks `views/shared/MeetingShareDialog` as `AppShell.noticesChunk.test.tsx` mocks `./AppShellNotices`, and proves the module is not loaded until Share meeting is chosen; `pnpm check:bundle-size` keeps the budgets (M8).
 - Placement: a scenario that asserts focus, a key press, an inactive (`disabled`) state, an accessible name, an `aria-*` state or layout runs in `*_e2e.feature` only (`bdd-unit.md` puts "Keyboard accessibility", "aria-labels, focus management" and "Responsive layout" in E2E); the unit features check the rest through the controller output and the rendered text.
 
 ## Consequences

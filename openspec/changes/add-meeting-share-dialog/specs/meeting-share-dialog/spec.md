@@ -175,7 +175,7 @@ The share dialog SHALL use the dialog frame of the Add location dialog: below 64
 - **GIVEN** a viewport 320 px wide
 - **WHEN** the share dialog is open
 - **THEN** the dialog fills the screen and nothing scrolls horizontally
-- **AND** every checkbox, the language button, the pin, both toggles and «Поделиться» are at least 44 px high
+- **AND** the pointer target of every checkbox, the language button, the pin, both toggles, the close button and «Поделиться» is at least 44 px wide and at least 44 px high
 
 #### Scenario: Wide screen
 - **GIVEN** a viewport 1280 px wide
