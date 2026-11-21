@@ -1,4 +1,5 @@
 // Verifies FR5 of fix-grid-meeting-range-lock-and-layering.
+// Verifies FR3 of move-meeting-range-and-extend-past-midnight.
 // Verifies FR1, FR2 of refine-meeting-range-entry-and-handles.
 import { describe, expect, it } from "vitest";
 import { LocationKind } from "./locationKind";
@@ -112,6 +113,35 @@ describe("SET_MEETING_RANGE_WALL_TIMES", () => {
       "00:40",
       "2026-03-08T04:10:00Z/2026-03-08T05:40:00Z",
     ],
+    // FR3: an end time earlier than the start time ends after midnight
+    [
+      "Almaty",
+      "2026-03-08",
+      "22:00",
+      "02:00",
+      "2026-03-08T17:00:00Z/2026-03-08T21:00:00Z",
+    ],
+    [
+      "Almaty",
+      "2026-03-08",
+      "23:00",
+      "01:00",
+      "2026-03-08T18:00:00Z/2026-03-08T20:00:00Z",
+    ],
+    [
+      "Almaty",
+      "2026-03-08",
+      "12:00",
+      "10:00",
+      "2026-03-08T07:00:00Z/2026-03-09T05:00:00Z",
+    ],
+    [
+      "Moscow",
+      "2026-03-08",
+      "21:00",
+      "00:00",
+      "2026-03-08T18:00:00Z/2026-03-08T21:00:00Z",
+    ],
   ])(
     "should set the range from %s wall times",
     (cityLabel, date, start, end, range) => {
@@ -137,20 +167,6 @@ describe("SET_MEETING_RANGE_WALL_TIMES", () => {
       "10:00",
       "10:00",
       LocationErrorCode.MEETING_START_EQUALS_END,
-    ],
-    [
-      "Almaty",
-      "2026-03-08",
-      "12:00",
-      "10:00",
-      LocationErrorCode.MEETING_END_BEFORE_START,
-    ],
-    [
-      "Almaty",
-      "2026-03-08",
-      "22:00",
-      "02:00",
-      LocationErrorCode.MEETING_END_BEFORE_START,
     ],
     [
       "New York",

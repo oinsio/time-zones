@@ -31,9 +31,16 @@ export const clockTimeIn = (instant: Temporal.Instant, zone: string) =>
     .toPlainTime()
     .toString({ smallestUnit: "minute" });
 
-/** "09:00–11:00": the range's local start and end in a zone. */
-export const spanIn = (range: MeetingRange, zone: string) =>
-  `${clockTimeIn(range.start, zone)}–${clockTimeIn(range.end, zone)}`;
+/** The suffix of a span whose end lies on a later local date than its start. */
+export const NEXT_DAY_SUFFIX = " of the next day";
+
+/** "09:00–11:00": the range's local start and end in a zone; "of the next day" when it ends after midnight. */
+export const spanIn = (range: MeetingRange, zone: string) => {
+  const startDate = range.start.toZonedDateTimeISO(zone).toPlainDate();
+  const endDate = range.end.toZonedDateTimeISO(zone).toPlainDate();
+  const suffix = startDate.equals(endDate) ? "" : NEXT_DAY_SUFFIX;
+  return `${clockTimeIn(range.start, zone)}–${clockTimeIn(range.end, zone)}${suffix}`;
+};
 
 export type MeetingWorldOptions = {
   deviceZone?: string;

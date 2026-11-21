@@ -1,4 +1,5 @@
 // Verifies FR12 of add-grid-meeting-range-and-share.
+// Verifies FR4 of move-meeting-range-and-extend-past-midnight.
 import i18n from "i18next";
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
@@ -36,7 +37,7 @@ describe("presentMeetingHandles", () => {
       540, 0, 645,
     ]);
     expect([end.valueMinutes, end.minMinutes, end.maxMinutes]).toEqual([
-      660, 555, 1440,
+      660, 555, 1980,
     ]);
   });
 
@@ -47,5 +48,34 @@ describe("presentMeetingHandles", () => {
 
   it("should follow the hour format", () => {
     expect(present("en", HourFormat.H12).start.valueText).toMatch(/9:00/);
+  });
+});
+
+// FR4 of move-meeting-range-and-extend-past-midnight: the sliders of a meeting past midnight.
+describe("presentMeetingHandles of a meeting past midnight", () => {
+  const presentPastMidnight = () =>
+    presentMeetingHandles(
+      day,
+      {
+        start: Temporal.Instant.from("2026-03-08T18:00:00Z"),
+        end: Temporal.Instant.from("2026-03-08T21:00:00Z"),
+      },
+      "Asia/Almaty",
+      {
+        language: "en",
+        hourFormat: HourFormat.H24,
+        translate: i18n.getFixedT("en"),
+      },
+    );
+
+  it("should give the limits of both handles", () => {
+    const { start, end } = presentPastMidnight();
+    expect([
+      [start.valueMinutes, start.minMinutes, start.maxMinutes],
+      [end.valueMinutes, end.minMinutes, end.maxMinutes],
+    ]).toEqual([
+      [1380, 120, 1425],
+      [1560, 1395, 2820],
+    ]);
   });
 });

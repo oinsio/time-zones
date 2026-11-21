@@ -1,5 +1,6 @@
 // Verifies FR5 of fix-grid-meeting-range-lock-and-layering.
 // Verifies FR1, FR2 of refine-meeting-range-entry-and-handles.
+// Verifies FR3 of move-meeting-range-and-extend-past-midnight.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, cleanup } from "@testing-library/react/pure";
@@ -39,7 +40,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   };
 
-  // @fix-grid-meeting-range-lock-and-layering @FR5 @refine-meeting-range-entry-and-handles @FR1
+  // @fix-grid-meeting-range-lock-and-layering @FR5 @refine-meeting-range-entry-and-handles @FR1 @move-meeting-range-and-extend-past-midnight @FR3
   f.ScenarioOutline(
     "Wall-clock times of any location set the range",
     ({ Given, When, Then, And }, variables) => {

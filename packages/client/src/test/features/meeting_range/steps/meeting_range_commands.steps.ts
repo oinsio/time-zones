@@ -1,5 +1,6 @@
 // Verifies FR1, FR2, FR3, FR4 of add-grid-meeting-range-and-share.
 // Verifies FR1 of refine-meeting-range-entry-and-handles.
+// Verifies FR2, FR5 of move-meeting-range-and-extend-past-midnight.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, cleanup } from "@testing-library/react/pure";
@@ -187,8 +188,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     });
   });
 
-  // @add-grid-meeting-range-and-share @FR3
-  f.Scenario("A shorter day clamps the end", ({ Given, When, Then }) => {
+  // @add-grid-meeting-range-and-share @FR3 @move-meeting-range-and-extend-past-midnight @FR5
+  f.Scenario("A shorter day keeps the length", ({ Given, When, Then }) => {
     Given(
       "the reference zone is {string} and the meeting range is the whole reference day of 2026-03-07, 24 hours long",
       (_ctx, zone: string) => {
@@ -210,13 +211,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       });
     });
     Then(
-      "the meeting range starts at 00:00 on 2026-03-08 and ends at the end of that 23-hour day, 23 hours long",
+      "the meeting range starts at 00:00 on 2026-03-08 and ends at 01:00 on 2026-03-09, 24 hours long",
       () => {
         const meeting = world.state().meeting;
         expect(meeting?.start.toString()).toBe("2026-03-08T05:00:00Z");
-        expect(meeting?.end.toString()).toBe("2026-03-09T04:00:00Z");
+        expect(meeting?.end.toString()).toBe("2026-03-09T05:00:00Z");
         expect(meeting?.end.since(meeting.start).total({ unit: "hour" })).toBe(
-          23,
+          24,
         );
       },
     );

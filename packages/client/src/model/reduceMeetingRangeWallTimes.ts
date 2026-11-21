@@ -22,40 +22,34 @@ const fail = (error: LocationErrorCode): LocationsReduceResult => ({
 });
 
 /**
- * Why the range lies outside the reference day the grid shows, or `undefined`
- * when it lies inside. While the moment is live the model does not know that
- * day (it has no clock), so only `reduceSetMeetingRange` checks the range then.
- * An end time earlier than the start time that reaches past the day's end,
- * from a start inside the day, is `MEETING_END_BEFORE_START`.
+ * Whether the start lies outside the reference day the grid shows. While the
+ * moment is live the model does not know that day (it has no clock), so only
+ * `reduceSetMeetingRange` checks the range then. The end may lie after the
+ * day's end (ADR-0019).
  */
-function getShownDayRefusal(
+function isStartOutsideShownDay(
   state: WorldClockState,
   start: Temporal.Instant,
-  end: Temporal.Instant,
-  isEndTimeEarlier: boolean,
-): LocationErrorCode | undefined {
-  if (state.reference.mode !== ReferenceMode.PINNED) return undefined;
+): boolean {
+  if (state.reference.mode !== ReferenceMode.PINNED) return false;
   const day = getReferenceDay(state, state.reference.instant);
-  const isStartInside =
-    Temporal.Instant.compare(day.start, start) <= 0 &&
-    Temporal.Instant.compare(start, day.end) < 0;
-  if (Temporal.Instant.compare(end, day.end) <= 0 && isStartInside) {
-    return undefined;
-  }
-  return isStartInside && isEndTimeEarlier
-    ? LocationErrorCode.MEETING_END_BEFORE_START
-    : LocationErrorCode.INVALID_MEETING_RANGE;
+  return (
+    Temporal.Instant.compare(start, day.start) < 0 ||
+    Temporal.Instant.compare(day.end, start) <= 0
+  );
 }
 
 /**
  * Sets the meeting range from wall-clock times in a row's zone: the start on
  * the given date, the end on the first following moment with its wall time.
- * The range must lie in the reference day the grid shows. Equal start and end
- * times, and an end time earlier than the start time, have their own errors.
+ * The start must lie in the reference day the grid shows; an end time earlier
+ * than the start time ends the range on the next date, also after midnight of
+ * the reference zone. Equal start and end times are refused.
  * The instants are then set by `reduceSetMeetingRange`, which owns the
  * invariants and the pin.
  * Implements FR5 of fix-grid-meeting-range-lock-and-layering (D2).
  * Implements FR1, FR2 of refine-meeting-range-entry-and-handles (D2).
+ * Implements FR3 of move-meeting-range-and-extend-past-midnight (D2).
  */
 export function reduceMeetingRangeWallTimes(
   state: WorldClockState,
@@ -89,16 +83,14 @@ export function reduceMeetingRangeWallTimes(
     if (timeOrder === 0) {
       return fail(LocationErrorCode.MEETING_START_EQUALS_END);
     }
-    const isEndTimeEarlier = timeOrder < 0;
-    let end = resolveWallClock(zone, date.toPlainDateTime(endTime)).instant;
-    if (isEndTimeEarlier) {
-      end = resolveWallClock(
-        zone,
-        date.add({ days: 1 }).toPlainDateTime(endTime),
-      ).instant;
+    const endDate = timeOrder < 0 ? date.add({ days: 1 }) : date;
+    const end = resolveWallClock(
+      zone,
+      endDate.toPlainDateTime(endTime),
+    ).instant;
+    if (isStartOutsideShownDay(state, start)) {
+      return fail(LocationErrorCode.INVALID_MEETING_RANGE);
     }
-    const refusal = getShownDayRefusal(state, start, end, isEndTimeEarlier);
-    if (refusal !== undefined) return fail(refusal);
     return reduceSetMeetingRange(state, {
       type: LocationCommandType.SET_MEETING_RANGE,
       start: start.toString(),

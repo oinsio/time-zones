@@ -22,3 +22,7 @@ export const MEETING_HANDLE_RELEASE_CLICK_WINDOW_MS = 50;
 
 /** Joins the zone parts inside the brackets of a meeting share line. Implements FR6 of add-meeting-share-dialog (D2). */
 export const MEETING_SHARE_ZONE_PARTS_SEPARATOR = ", ";
+
+// Implements FR1, FR4 of move-meeting-range-and-extend-past-midnight (D1).
+/** The longest meeting range: 24 hours, which may end in the next reference day. */
+export const MEETING_RANGE_MAX_MINUTES = 1440;

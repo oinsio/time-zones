@@ -1,5 +1,6 @@
 // Verifies FR3, FR4 of fix-grid-meeting-range-lock-and-layering.
 // Verifies FR2, FR3, UX3 of refine-meeting-range-entry-and-handles.
+// Verifies FR3, FR10 of move-meeting-range-and-extend-past-midnight.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { screen, within } from "@testing-library/react/pure";
@@ -118,6 +119,40 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
+  // @move-meeting-range-and-extend-past-midnight @FR3 @FR10
+  f.ScenarioOutline(
+    "A meeting past midnight is typed",
+    ({ Given, When, Then, And }, variables) => {
+      Given(
+        "the Grid view with Almaty, Moscow, Kolkata and New York, Russian interface, 24-hour format and the meeting range 09:00–11:00 in Almaty on 2026-03-08",
+        async () => {
+          await openRussianGrid();
+          setSampleMeeting();
+        },
+      );
+      When(
+        'the user opens the meeting range input of "<city>" and enters "<start>" and "<end>"',
+        () =>
+          enterMeetingRange(
+            labelOf(variables.city),
+            variables.start,
+            variables.end,
+          ),
+      );
+      Then(
+        'the meeting range is "23:00–02:00" in Almaty, the title is "Встреча · 3 ч" and the input is closed',
+        () => {
+          expectFirstRowSpan("23:00–02:00");
+          expect(meetingTitle()).toHaveTextContent("Встреча · 3 ч");
+          expect(screen.queryByRole("textbox")).toBeNull();
+        },
+      );
+      And("the date bar still shows 8 March", () =>
+        expect(screen.getAllByText(/8 марта/).length).toBeGreaterThan(0),
+      );
+    },
+  );
+
   // @fix-grid-meeting-range-lock-and-layering @FR4
   f.Scenario("Twelve-hour texts", ({ Given, When, Then }) => {
     Given(
@@ -140,7 +175,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
-  // @fix-grid-meeting-range-lock-and-layering @FR4 @refine-meeting-range-entry-and-handles @FR3 @UX3
+  // @fix-grid-meeting-range-lock-and-layering @FR4 @refine-meeting-range-entry-and-handles @FR3 @UX3 @move-meeting-range-and-extend-past-midnight @FR3
   f.ScenarioOutline(
     "Wrong input keeps the input open",
     ({ Given, When, Then, And }, variables) => {

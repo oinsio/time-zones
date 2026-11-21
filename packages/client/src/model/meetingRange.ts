@@ -1,5 +1,6 @@
 import {
   HOUR_CELL_DURATION,
+  MEETING_RANGE_MAX_MINUTES,
   MILLISECONDS_PER_MINUTE,
   MINUTES_PER_HOUR,
   NANOSECONDS_PER_MINUTE,
@@ -15,11 +16,12 @@ import {
 import { getHourCellStart } from "./hourCells";
 
 /**
- * The meeting range: a start and an end instant inside one reference day, on
- * whole minutes (ADR-0011, refined by ADR-0013). Pure; lengths come from
+ * The meeting range: a start inside one reference day and an end at most 24
+ * hours later, on whole minutes (ADR-0011, refined by ADR-0013 and ADR-0019). Pure; lengths come from
  * absolute instants.
  * Implements FR1, FR3, FR5, FR8, FR10, FR12 of add-grid-meeting-range-and-share (D1, D2).
  * Implements FR1, FR4, FR5 of refine-meeting-range-entry-and-handles (D1).
+ * Implements FR1, FR2, FR4, FR5, FR11 of move-meeting-range-and-extend-past-midnight (D1).
  */
 export type MeetingRange = {
   start: Temporal.Instant;
@@ -50,7 +52,11 @@ const getInstantAtMinutes = (day: ReferenceDay, minutes: number) =>
 const isOnWholeMinute = (day: ReferenceDay, instant: Temporal.Instant) =>
   Number.isInteger(getMinutesFromDayStart(day, instant));
 
-/** Whether the range keeps the invariants of ADR-0011 inside `day`. */
+/** The last track step position of the day: the latest a start may stand. */
+const getLastStartMinutes = (day: ReferenceDay) =>
+  Math.floor((day.lengthMinutes - 1) / TRACK_STEP_MINUTES) * TRACK_STEP_MINUTES;
+
+/** Whether the range keeps the invariants of ADR-0011 and ADR-0019 for `day`. */
 export function isValidMeetingRange(
   day: ReferenceDay,
   start: Temporal.Instant,
@@ -59,7 +65,9 @@ export function isValidMeetingRange(
   return (
     start.epochMilliseconds < end.epochMilliseconds &&
     day.start.epochMilliseconds <= start.epochMilliseconds &&
-    end.epochMilliseconds <= day.end.epochMilliseconds &&
+    start.epochMilliseconds < day.end.epochMilliseconds &&
+    getMinutesFromDayStart(day, end) - getMinutesFromDayStart(day, start) <=
+      MEETING_RANGE_MAX_MINUTES &&
     isOnWholeMinute(day, start) &&
     isOnWholeMinute(day, end)
   );
@@ -97,13 +105,16 @@ export function getMeetingHandleLimits(
   );
   if (handle === MeetingHandle.START) {
     return {
-      minMinutes: 0,
-      maxMinutes: endMinutes - minimumLengthMinutes,
+      minMinutes: Math.max(0, endMinutes - MEETING_RANGE_MAX_MINUTES),
+      maxMinutes: Math.min(
+        endMinutes - minimumLengthMinutes,
+        getLastStartMinutes(day),
+      ),
     };
   }
   return {
     minMinutes: startMinutes + minimumLengthMinutes,
-    maxMinutes: day.lengthMinutes,
+    maxMinutes: startMinutes + MEETING_RANGE_MAX_MINUTES,
   };
 }
 
@@ -149,8 +160,9 @@ export function getMeetingRangeAfterHandleMove(
     ),
     [TrackMove.HOUR_FORWARD]: current + TRACK_HOUR_MOVE_MINUTES,
     [TrackMove.HOUR_BACK]: current - TRACK_HOUR_MOVE_MINUTES,
-    [TrackMove.DAY_START]: 0,
-    [TrackMove.DAY_END]: day.lengthMinutes,
+    // For a handle the day's ends are the limits of the handle (D1).
+    [TrackMove.DAY_START]: Number.NEGATIVE_INFINITY,
+    [TrackMove.DAY_END]: Number.POSITIVE_INFINITY,
   };
   return putHandleAtMinutes(day, meeting, handle, targetMinutes[move]);
 }
@@ -183,21 +195,17 @@ export function getMeetingSpan(
 }
 
 /**
- * The range for a date change: the new start as given, the duration kept, the end clamped to the new day's end.
+ * The range for a date change: the new start as given and the duration kept
+ * exactly; the end is never clamped to the new day's end (FR5).
  */
 export function moveMeetingRangeToDay(
   meeting: MeetingRange,
   newStart: Temporal.Instant,
-  newDay: ReferenceDay,
 ): MeetingRange {
   const start = newStart;
   const end = start.add({
     milliseconds:
       meeting.end.epochMilliseconds - meeting.start.epochMilliseconds,
   });
-  return {
-    start,
-    end:
-      end.epochMilliseconds < newDay.end.epochMilliseconds ? end : newDay.end,
-  };
+  return { start, end };
 }

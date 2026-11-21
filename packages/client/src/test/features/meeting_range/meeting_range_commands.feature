@@ -16,7 +16,7 @@ Feature: Meeting range commands
     Then the meeting range is 09:00–11:00 in Almaty
     And the reference moment is pinned at "2026-03-08T04:00:00Z"
 
-  @add-grid-meeting-range-and-share @FR2 @refine-meeting-range-entry-and-handles @FR1
+  @add-grid-meeting-range-and-share @FR2 @refine-meeting-range-entry-and-handles @FR1 @move-meeting-range-and-extend-past-midnight @FR2
   Scenario Outline: Invalid ranges are refused
     Given the reference zone is "Asia/Almaty", the current time is "2026-03-08T07:30:00Z" and no meeting range is set
     When the meeting range is set from "<start>" to "<end>"
@@ -28,7 +28,7 @@ Feature: Meeting range commands
       | 2026-03-08T06:00:00Z | 2026-03-08T04:00:00Z |
       | 2026-03-08T04:00:00Z | 2026-03-08T04:00:00Z |
       | 2026-03-08T04:10:30Z | 2026-03-08T06:00:00Z |
-      | 2026-03-08T17:00:00Z | 2026-03-08T19:15:00Z |
+      | 2026-03-08T04:00:00Z | 2026-03-09T04:01:00Z |
       | 2026-03-08 04:00     | 2026-03-08T06:00:00Z |
 
   @add-grid-meeting-range-and-share @FR2
@@ -56,11 +56,11 @@ Feature: Meeting range commands
     When the user selects the next day in the date bar
     Then the meeting range is 09:00–11:00 in Almaty on 2026-03-09
 
-  @add-grid-meeting-range-and-share @FR3
-  Scenario: A shorter day clamps the end
+  @add-grid-meeting-range-and-share @FR3 @move-meeting-range-and-extend-past-midnight @FR5
+  Scenario: A shorter day keeps the length
     Given the reference zone is "America/New_York" and the meeting range is the whole reference day of 2026-03-07, 24 hours long
     When the user selects the next day in the date bar
-    Then the meeting range starts at 00:00 on 2026-03-08 and ends at the end of that 23-hour day, 23 hours long
+    Then the meeting range starts at 00:00 on 2026-03-08 and ends at 01:00 on 2026-03-09, 24 hours long
 
   @add-grid-meeting-range-and-share @FR4
   Scenario: Another home removes the range

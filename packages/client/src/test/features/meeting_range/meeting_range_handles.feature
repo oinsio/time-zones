@@ -2,7 +2,7 @@ Feature: Meeting handle moves
   Implements change add-grid-meeting-range-and-share.
   As a user I move one end of the meeting range, never shorter than one track step and never out of the reference day.
 
-  @add-grid-meeting-range-and-share @FR12
+  @add-grid-meeting-range-and-share @FR12 @move-meeting-range-and-extend-past-midnight @FR4
   Scenario Outline: Keyboard moves of the handles
     Given the reference zone is "Asia/Almaty" and the meeting range is 09:00–11:00 on 2026-03-08
     When the <handle> handle makes the move <move>
@@ -16,7 +16,7 @@ Feature: Meeting handle moves
       | start  | day start     | 00:00–11:00                           |
       | end    | day start     | 09:00–09:15                           |
       | end    | an hour forward | 09:00–12:00                         |
-      | end    | day end       | 09:00 to the end of the reference day |
+      | end    | day end       | 09:00–09:00 of the next day           |
 
   @add-grid-meeting-range-and-share @FR10
   Scenario: A drag cannot cross the other end

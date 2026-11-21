@@ -25,8 +25,6 @@ type MeetingRangeInputProps = {
 const RANGE_ERROR_KEYS: Partial<Record<MeetingRangeInputOutcome, string>> = {
   [MeetingRangeInputOutcome.SAME_START_AND_END]:
     "meeting.rangeInputSameTimesError",
-  [MeetingRangeInputOutcome.END_BEFORE_START]:
-    "meeting.rangeInputEndBeforeStartError",
   [MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY]:
     "meeting.rangeInputOutsideDayError",
 };

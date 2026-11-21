@@ -1,4 +1,5 @@
 // Verifies FR10, FR12 of add-grid-meeting-range-and-share.
+// Verifies FR4 of move-meeting-range-and-extend-past-midnight.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect } from "vitest";
@@ -31,7 +32,6 @@ const MOVES: Record<string, TrackMove> = {
   "day start": TrackMove.DAY_START,
   "day end": TrackMove.DAY_END,
 };
-const TO_THE_DAY_END = "09:00 to the end of the reference day";
 const DRAGGED_MINUTES = 7 * 60 + 40;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
@@ -45,7 +45,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     range = world.state().meeting as MeetingRange;
   };
 
-  // @add-grid-meeting-range-and-share @FR12
+  // @add-grid-meeting-range-and-share @FR12 @move-meeting-range-and-extend-past-midnight @FR4
   f.ScenarioOutline(
     "Keyboard moves of the handles",
     ({ Given, When, Then }, variables) => {
@@ -62,11 +62,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         );
       });
       Then("the meeting range is <range>", () => {
-        if (variables.range === TO_THE_DAY_END) {
-          expect(range.start.toString()).toBe("2026-03-08T04:00:00Z");
-          expect(range.end.equals(referenceDay().end)).toBe(true);
-          return;
-        }
         expect(spanIn(range, ALMATY_ZONE)).toBe(variables.range);
       });
     },

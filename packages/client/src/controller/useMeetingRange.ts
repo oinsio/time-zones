@@ -42,9 +42,7 @@ export enum MeetingRangeInputOutcome {
   INVALID_END_TEXT = "INVALID_END_TEXT",
   /** The start and the end are the same time: the input stays open. */
   SAME_START_AND_END = "SAME_START_AND_END",
-  /** The end is earlier than the start: the input stays open. */
-  END_BEFORE_START = "END_BEFORE_START",
-  /** The range does not lie inside the reference day: the input stays open. */
+  /** The start does not lie inside the reference day: the input stays open. */
   OUTSIDE_REFERENCE_DAY = "OUTSIDE_REFERENCE_DAY",
   /** The store answered, with a change or another refusal: the input closes. */
   CLOSED = "CLOSED",
@@ -56,8 +54,6 @@ const OUTCOME_OF_REFUSAL: Partial<
 > = {
   [LocationErrorCode.MEETING_START_EQUALS_END]:
     MeetingRangeInputOutcome.SAME_START_AND_END,
-  [LocationErrorCode.MEETING_END_BEFORE_START]:
-    MeetingRangeInputOutcome.END_BEFORE_START,
   [LocationErrorCode.INVALID_MEETING_RANGE]:
     MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY,
 };
