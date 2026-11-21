@@ -1,4 +1,3 @@
-import { MEETING_SPAN_SEPARATOR } from "@/constants";
 import {
   getLastStartMinutes,
   getMeetingHandleLimits,
@@ -9,7 +8,10 @@ import {
   type ReferenceDay,
 } from "@/model";
 import { formatLocalTime } from "./localDateTime";
-import type { MeetingPresentationContext } from "./locationMeetingRange";
+import {
+  type MeetingPresentationContext,
+  presentLocationMeetingRange,
+} from "./locationMeetingRange";
 
 export type PresentedMeetingHandle<
   Handle extends MeetingHandle = MeetingEndHandle,
@@ -46,8 +48,9 @@ export function presentMeetingHandles(
   day: ReferenceDay,
   meeting: MeetingRange,
   referenceZoneId: string,
-  { language, hourFormat, translate }: MeetingPresentationContext,
+  presentationContext: MeetingPresentationContext,
 ): PresentedMeetingHandles {
+  const { language, hourFormat, translate } = presentationContext;
   const { startMinutes, endMinutes } = getMeetingSpan(day, meeting);
   const formatTime = (instant: MeetingRange["start"]) =>
     formatLocalTime(
@@ -75,7 +78,12 @@ export function presentMeetingHandles(
       valueMinutes: startMinutes,
       minMinutes: 0,
       maxMinutes: getLastStartMinutes(day),
-      valueText: `${formatTime(meeting.start)}${MEETING_SPAN_SEPARATOR}${formatTime(meeting.end)}`,
+      valueText: presentLocationMeetingRange(
+        referenceZoneId,
+        meeting,
+        referenceZoneId,
+        presentationContext,
+      ).spanLabel,
     },
   };
 }
