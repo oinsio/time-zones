@@ -7,12 +7,18 @@ The scenarios use the sample of `meeting-range`: the current time is `2026-03-08
 ## ADDED Requirements
 
 ### Requirement: Share dialog opens and closes
-While a meeting range is set, Share meeting SHALL open the share dialog: a modal dialog titled with the meeting bar's title («Встреча · 2 ч») and, under it, the full date of the start in the reference zone with the name of the reference location. The dialog MUST close on its close button «Закрыть», on Esc and on a share whose outcome is shared, copied or failed; closing changes neither the meeting range nor the location list. With no meeting range the dialog cannot be opened. Inputs: the meeting range, the location list, the preferences. Output: the open dialog with its defaults. <!-- implements FR1, FR9 of add-meeting-share-dialog -->
+While a meeting range is set, Share meeting SHALL open the share dialog: a modal dialog titled with the meeting bar's title («Встреча · 2 ч») and, under it, the reference line: the full date of the start in the reference zone and the city of the reference zone, in the interface language. That city is the city label of the home location when home is set; with no home it is the exemplar city of the device time zone, the label the device time location shows (the zone id while the city data loads). The dialog MUST close on its close button «Закрыть», on Esc and on a share whose outcome is shared, copied or failed; closing changes neither the meeting range nor the location list. With no meeting range the dialog cannot be opened. Inputs: the meeting range, the location list, the preferences. Output: the open dialog with its defaults. <!-- implements FR1, FR9 of add-meeting-share-dialog -->
 
 #### Scenario: The dialog opens with its defaults
 - **WHEN** the user chooses «Поделиться встречей»
 - **THEN** the share dialog is open with the title «Встреча · 2 ч» and the line «воскресенье, 8 марта 2026 г. · по времени Алматы»
 - **AND** every location is ticked, the share language is Русский, no share language is pinned, and the share zone label shows the zone abbreviation and the UTC offset
+
+#### Scenario: The reference line without a home location
+- **GIVEN** no home location is set and the list is Moscow, Kolkata and New York, so the reference zone is the device time zone `Asia/Almaty`
+- **WHEN** the user chooses «Поделиться встречей»
+- **THEN** the line under the title is «воскресенье, 8 марта 2026 г. · по времени Алматы»
+- **AND** it stays in Russian when the user chooses English as the share language
 
 #### Scenario: Closing keeps the meeting
 - **GIVEN** the share dialog is open
