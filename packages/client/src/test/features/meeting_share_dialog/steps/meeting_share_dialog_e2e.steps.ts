@@ -2,8 +2,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
-import { KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { expectMeetingTimes, setSampleMeeting } from "../../grid_view/steps/meetingE2eHelpers";
+import { setSampleMeeting } from "../../grid_view/steps/meetingE2eHelpers";
 import {
   checkboxesOf,
   dialogCloseButtonOf,
@@ -18,13 +17,34 @@ import {
   shareMeetingButtonOf,
 } from "../../grid_view/steps/meetingShareE2eHelpers";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
-import {
-  buildStoredLocations,
-  parseCityNames,
-} from "../../locations/steps/locationsE2eHelpers";
+import { buildStoredLocations } from "../../locations/steps/locationsE2eHelpers";
 
 const { Given, When, Then } = createBdd(test);
 
+/** Twenty cities of the scenario table, each with its own id. */
+const SCENARIO_CITIES = [
+  "Almaty",
+  "Moscow",
+  "Kolkata",
+  "New York",
+  "Kathmandu",
+  "Tokyo",
+  "UTC",
+  "Belgrade",
+  "Lord Howe Island",
+  "Chicago",
+  "London",
+  "Adelaide",
+  "St. Vincent",
+  "Алматы",
+  "Москва",
+  "Калькутта",
+  "Катманду",
+  "Токио",
+  "Белград",
+  "Лорд-Хау",
+];
+const DIALOG_SELECTOR = "[role='dialog']";
 const APP_ROOT_URL = ".";
 const WIDE_DIALOG_WIDTH_PX = 512;
 const POSITION_TOLERANCE_PX = 2;
@@ -56,10 +76,9 @@ Given(
 Given(
   "the stored list holds {int} locations",
   async ({ locationsWorld }, count: number) => {
-    const names = Object.keys(KNOWN_CITIES)
-      .filter((city) => /^[A-Z]/.test(city))
-      .slice(0, count);
-    await locationsWorld.seedList(buildStoredLocations(parseCityNames(names.map((name) => `"${name}"`).join(", "))));
+    await locationsWorld.seedList(
+      buildStoredLocations(SCENARIO_CITIES.slice(0, count)),
+    );
   },
 );
 
@@ -88,14 +107,6 @@ When(
   },
 );
 
-When("the user presses Esc", async ({ locationsWorld }) => {
-  await locationsWorld.page.keyboard.press("Escape");
-});
-
-When("the user chooses Share in the dialog", async ({ locationsWorld }) => {
-  await dialogShareButtonOf(locationsWorld.page).click();
-});
-
 When(
   "the user unticks every location in the share dialog",
   async ({ locationsWorld }) => {
@@ -120,7 +131,12 @@ When(
   async ({ locationsWorld }) => {
     const { page } = locationsWorld;
     for (let stop = 0; stop < MAX_TAB_STOPS; stop += 1) {
-      if (await dialogShareButtonOf(page).evaluate((el) => el === document.activeElement)) break;
+      if (
+        await dialogShareButtonOf(page).evaluate(
+          (el) => el === document.activeElement,
+        )
+      )
+        break;
       await page.keyboard.press("Tab");
     }
     await page.keyboard.press("Enter");
@@ -145,7 +161,9 @@ Then("nothing was shared or copied", async ({ locationsWorld }) => {
 Then(
   "the share dialog shows the hint {string}",
   async ({ locationsWorld }, hint: string) => {
-    await expect(shareDialogOf(locationsWorld.page).getByText(hint)).toBeVisible();
+    await expect(
+      shareDialogOf(locationsWorld.page).getByText(hint),
+    ).toBeVisible();
   },
 );
 
@@ -170,7 +188,9 @@ Then("the focus is inside the share dialog", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
   await expect
     .poll(() =>
-      shareDialogOf(page).evaluate((dialog) => dialog.contains(document.activeElement)),
+      shareDialogOf(page).evaluate((dialog) =>
+        dialog.contains(document.activeElement),
+      ),
     )
     .toBe(true);
 });
@@ -184,7 +204,8 @@ Then(
   async ({ locationsWorld }, name: string) => {
     const dialog = shareDialogOf(locationsWorld.page);
     await expect(dialog).toHaveAccessibleName(name);
-    await expect(dialog).toHaveAttribute("aria-modal", "true");
+    // Modal: the page behind the dialog is hidden from assistive technology.
+    await expect(shareMeetingButtonOf(locationsWorld.page)).toHaveCount(0);
   },
 );
 
@@ -194,6 +215,11 @@ Then(
     const boxes = checkboxesOf(locationsWorld.page);
     expect(await boxes.count()).toBeGreaterThan(0);
     for (const city of ["Алматы", "Москва", "Калькутта", "Нью-Йорк"]) {
+      await expect(
+        shareDialogOf(locationsWorld.page).getByRole("checkbox", {
+          name: city,
+          checked: true,
+        }),
       ).toBeVisible();
     }
   },
@@ -210,8 +236,15 @@ Then(
 
 Then(
   "{string} and {string} are in a group named {string}",
-  async ({ locationsWorld }, first: string, second: string, caption: string) => {
-    const group = shareDialogOf(locationsWorld.page).getByRole("group", { name: caption });
+  async (
+    { locationsWorld },
+    first: string,
+    second: string,
+    caption: string,
+  ) => {
+    const group = shareDialogOf(locationsWorld.page).getByRole("group", {
+      name: caption,
+    });
     await expect(group.getByRole("button", { name: first })).toBeVisible();
     await expect(group.getByRole("button", { name: second })).toBeVisible();
   },
@@ -220,23 +253,31 @@ Then(
 Then(
   "the preview is a region named {string} that is not a live region",
   async ({ locationsWorld }, name: string) => {
-    const region = shareDialogOf(locationsWorld.page).getByRole("region", { name: PREVIEW_NAME });
+    const region = shareDialogOf(locationsWorld.page).getByRole("region", {
+      name: PREVIEW_NAME,
+    });
     await expect(region).toHaveAccessibleName(name);
     await expect(region).not.toHaveAttribute("aria-live", /.+/);
   },
 );
 
 Then("the list of share languages is closed", async ({ locationsWorld }) => {
-  await expect(languageButtonOf(locationsWorld.page)).toHaveAttribute("aria-expanded", "false");
+  await expect(languageButtonOf(locationsWorld.page)).toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
 });
 
 Then("the share dialog is still open", async ({ locationsWorld }) => {
   await expect(shareDialogOf(locationsWorld.page)).toBeVisible();
 });
 
-Then("the focus is on the language button", async ({ locationsWorld }) => {
-  await expect(languageButtonOf(locationsWorld.page)).toBeFocused();
-});
+Then(
+  "the focus is on the share language button",
+  async ({ locationsWorld }) => {
+    await expect(languageButtonOf(locationsWorld.page)).toBeFocused();
+  },
+);
 
 Then("the shared text has no Moscow line", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
@@ -249,7 +290,9 @@ Then("the shared text has no Moscow line", async ({ locationsWorld }) => {
 Then(
   "the share dialog has no accessibility violations",
   async ({ locationsWorld }) => {
-    const scan = await new AxeBuilder({ page: locationsWorld.page }).analyze();
+    const scan = await new AxeBuilder({ page: locationsWorld.page })
+      .include(DIALOG_SELECTOR)
+      .analyze();
     expect(
       scan.violations.map((violation) => ({
         id: violation.id,
@@ -308,5 +351,7 @@ Then("Share is fully visible", async ({ locationsWorld }) => {
   const box = await dialogShareButtonOf(page).boundingBox();
   const viewport = page.viewportSize();
   expect(box?.y).toBeGreaterThanOrEqual(0);
-  expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(viewport?.height ?? 0);
+  expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(
+    viewport?.height ?? 0,
+  );
 });

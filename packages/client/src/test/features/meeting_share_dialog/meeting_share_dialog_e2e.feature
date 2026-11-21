@@ -65,7 +65,7 @@ Feature: Share dialog in a real browser
     When the user presses Esc
     Then the list of share languages is closed
     And the share dialog is still open
-    And the focus is on the language button
+    And the focus is on the share language button
 
   @add-meeting-share-dialog @NFR-A1
   Scenario: Keyboard only
