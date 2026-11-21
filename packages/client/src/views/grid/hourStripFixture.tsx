@@ -38,6 +38,8 @@ type StripOverrides = {
   meetingColumns?: { first: number; last: number };
   hourFrameIndex?: number;
   tailCellCount?: number;
+  meetingFrame?: { startMinutes: number; endMinutes: number };
+  isFrameMoving?: () => boolean;
 };
 
 export function renderStrip(overrides: StripOverrides = {}) {
@@ -57,6 +59,8 @@ export function renderStrip(overrides: StripOverrides = {}) {
       isScrollable={overrides.isScrollable ?? false}
       meetingColumns={overrides.meetingColumns}
       tailCellCount={overrides.tailCellCount}
+      meetingFrame={overrides.meetingFrame}
+      isFrameMoving={overrides.isFrameMoving}
       onSelectionActiveChange={onSelectionActiveChange}
       onMoveTrack={onMoveTrack}
       onSelectCells={onSelectCells}

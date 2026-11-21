@@ -9,6 +9,7 @@ import type { TrackMove } from "@/controller";
 import type { PresentedDayTrack, PresentedHourStrip } from "@/presenter";
 import { getTrackMoveForKey } from "@/views/shared";
 import { HourCellView } from "./HourCellView";
+import type { MeetingFrameMinutes } from "./meetingFrameHit";
 import { useHourCellSelection } from "./useHourCellSelection";
 
 type HourStripProps = {
@@ -22,6 +23,12 @@ type HourStripProps = {
   meetingColumns?: { first: number; last: number };
   /** The cells of the strip tail at the end of the strip; a gesture starts on none of them. */
   tailCellCount?: number;
+  /** The meeting frame, while a meeting range is set: the cells inside it show a grab cursor. */
+  meetingFrame?: MeetingFrameMinutes;
+  /** The whole range is being moved by a held finger. */
+  isFrameMoving?: () => boolean;
+  /** The range is being moved: the grabbing cursor. */
+  isMoving?: boolean;
   /** A press on a cell of the day begins (`true`) or ends (`false`) a gesture. */
   onSelectionActiveChange?: (isActive: boolean) => void;
   cellPitchPx: number;
@@ -44,6 +51,7 @@ const SELECT_KEYS: readonly string[] = [KeyboardKey.ENTER, KeyboardKey.SPACE];
  * add-grid-hour-cells-and-hour-frame (D4, D6).
  * Implements FR5, FR6, FR7, NFR-A2 of add-grid-meeting-range-and-share (D6).
  * Implements FR6, FR9 of move-meeting-range-and-extend-past-midnight (D4, D10): the tail cells.
+ * Implements FR15, FR16 of move-meeting-range-and-extend-past-midnight (D6): the grab cursor inside the frame and no text selection.
  */
 export function HourStrip({
   city,
@@ -52,6 +60,9 @@ export function HourStrip({
   hourFrameIndex,
   meetingColumns,
   tailCellCount = 0,
+  meetingFrame,
+  isFrameMoving,
+  isMoving = false,
   onSelectionActiveChange = noop,
   cellPitchPx,
   isScrollable,
@@ -64,6 +75,8 @@ export function HourStrip({
   const selection = useHourCellSelection({
     cellCount: strip.cells.length,
     tailCellCount,
+    meetingFrame,
+    isFrameMoving,
     onActiveChange: onSelectionActiveChange,
     cellPitchPx,
     isScrollable,
@@ -99,7 +112,7 @@ export function HourStrip({
         onPointerMove={selection.onPointerMove}
         onPointerUp={selection.onPointerUp}
         onPointerCancel={selection.onPointerCancel}
-        className={`grid rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${panClassName}`}
+        className={`grid rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${panClassName}${meetingFrame ? " select-none [-webkit-touch-callout:none]" : ""}`}
         style={{
           gridTemplateColumns: `repeat(var(${HourGridCssVariable.CELL_COUNT}), var(${HourGridCssVariable.CELL_PITCH}))`,
         }}
@@ -113,6 +126,12 @@ export function HourStrip({
               meetingColumns !== undefined &&
               (column < meetingColumns.first || column > meetingColumns.last)
             }
+            isInFrame={
+              meetingColumns !== undefined &&
+              column >= meetingColumns.first &&
+              column <= meetingColumns.last
+            }
+            isMoving={isMoving}
             onClick={() => selection.onCellClick(column)}
           />
         ))}
