@@ -23,7 +23,7 @@
 - **GIVEN** a browser without a system share and the share dialog open for the sample meeting
 - **WHEN** the user chooses «Поделиться» in the dialog
 - **THEN** the clipboard holds the meeting share text
-- **AND** the share dialog is closed, the notice «Текст встречи скопирован» is shown and the focus is on «Поделиться встречей»
+- **AND** the share dialog is closed and the notice «Текст встречи скопирован» is shown
 
 #### Scenario: Neither share nor clipboard
 - **GIVEN** a browser without a system share and without clipboard access and the share dialog open for the sample meeting

@@ -12,7 +12,7 @@ While a meeting range is set, Share meeting SHALL open the share dialog: a modal
 #### Scenario: The dialog opens with its defaults
 - **WHEN** the user chooses «Поделиться встречей»
 - **THEN** the share dialog is open with the title «Встреча · 2 ч» and the line «воскресенье, 8 марта 2026 г. · по времени Алматы»
-- **AND** every location is ticked, the share language is Русский and not pinned, and the share zone label shows the zone abbreviation and the UTC offset
+- **AND** every location is ticked, the share language is Русский, no share language is pinned, and the share zone label shows the zone abbreviation and the UTC offset
 
 #### Scenario: Closing keeps the meeting
 - **GIVEN** the share dialog is open
@@ -25,7 +25,7 @@ While a meeting range is set, Share meeting SHALL open the share dialog: a modal
 | Esc |
 
 ### Requirement: Locations in the share dialog
-The share dialog SHALL list every location of the list, in list order. A row has a checkbox, the city label, the zone abbreviation and the UTC offset of the location at the start of the meeting range joined by a middle dot (the Universal Time label for a `UTC` location), the local span of the meeting and the local date of its start, with the day shift mark when the date differs from the reference zone's. Every checkbox MUST be ticked each time the dialog opens, whatever was unticked before. Unticking a location leaves it out of the meeting invitation; ticking it puts it back. The rows are written in the interface language, not in the share language. <!-- implements FR2, FR3, NG3 of add-meeting-share-dialog -->
+The share dialog SHALL list every location of the list, in list order. A row has a checkbox, the city label, the zone abbreviation and the UTC offset of the location at the start of the meeting range joined by a middle dot, as the meeting share text writes them with both parts on (so a `UTC` location, whose city label already reads `UTC`, shows no zone part), the local span of the meeting and the local date of its start, with the day shift mark when the date differs from the reference zone's. Every checkbox MUST be ticked each time the dialog opens, whatever was unticked before. Unticking a location leaves it out of the meeting invitation; ticking it puts it back. The rows are written in the interface language, not in the share language. <!-- implements FR2, FR3, NG3 of add-meeting-share-dialog -->
 
 #### Scenario: Rows of the sample meeting
 - **WHEN** the share dialog is open
@@ -67,7 +67,7 @@ Next to the share language the dialog SHALL have the pin: a toggle button with t
 #### Scenario: A pinned language opens every time
 - **GIVEN** the user chose English as the share language and turned the pin on
 - **WHEN** the app is opened again, a meeting range is set and the share dialog is opened
-- **THEN** the share language is English and the pin is on
+- **THEN** the share language is English and English is the pinned share language
 - **AND** the interface language is Russian
 
 #### Scenario: Changing the language while pinned
@@ -140,6 +140,18 @@ The share dialog SHALL be a modal dialog with the accessible name «Подели
 - **WHEN** the user opens the share dialog with the keyboard and then presses Esc
 - **THEN** the focus was inside the dialog while it was open
 - **AND** after closing the focus is on «Поделиться встречей»
+
+#### Scenario: Focus returns after a share
+- **GIVEN** a browser without a system share and the share dialog open
+- **WHEN** the user chooses «Поделиться»
+- **THEN** the share dialog is closed and the focus is on «Поделиться встречей»
+
+#### Scenario: Controls announce their names and states
+- **WHEN** the share dialog is open
+- **THEN** it is a modal dialog named «Поделиться встречей»
+- **AND** each checkbox is named by its city label and is checked, the pin is a toggle button named «Запомнить язык приглашения» that is not pressed, «Аббревиатура» and «Смещение UTC» are in a group named «Обозначение часового пояса», and the preview is a region named «Текст приглашения» that is not a live region
+- **WHEN** the user unticks every location
+- **THEN** «Поделиться» is announced as unavailable
 
 #### Scenario: Keyboard only
 - **WHEN** the user opens the share dialog, unticks Moscow with Space, moves to «Поделиться» with Tab and presses Enter

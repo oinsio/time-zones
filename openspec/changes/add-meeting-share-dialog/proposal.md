@@ -22,7 +22,7 @@ Audience: everyone who plans a meeting in the Grid view and sends it to other pe
 - **MODIFIED** the **meeting share text**: one line per *included* location, the zone parts after the city label, every word in the share language, the heading with the weekday in the right grammatical form.
 - **MODIFIED** Share meeting on the meeting bar: it opens the share dialog.
 - **MODIFIED** the **preferences**: they gain the pinned share language and the share zone label.
-- New glossary terms: share dialog, share language, share zone label, meeting invitation, share destination. Changed terms: Share meeting, meeting share text, preferences, text sharing.
+- New glossary terms: share dialog, share language, share zone label, meeting invitation, share destination, weekday. Changed terms: Share meeting, meeting share text, preferences, text sharing.
 
 No breaking change for stored data: the preferences document is migrated.
 
@@ -128,7 +128,7 @@ The dialog has no loading state: it opens only while a meeting range is set and 
 
 ## Behavior
 
-- `packages/client/src/test/features/meeting_range/meeting_share_text_unit.feature` — the text rules (`@add-meeting-share-dialog @FR3 @FR4 @FR6 @FR7`).
+- `packages/client/src/test/features/meeting_range/meeting_range_share.feature` (existing, updated) — the text rules (`@add-meeting-share-dialog @FR3 @FR4 @FR6 @FR7`).
 - `packages/client/src/test/features/meeting_share_dialog/meeting_share_dialog_unit.feature` — the dialog (`@FR1`–`@FR5`, `@FR8`–`@FR12`).
 - `packages/client/src/test/features/meeting_share_dialog/meeting_share_dialog_e2e.feature` — focus, keyboard, axe-core, layout and screenshots (`@NFR-A1`–`@NFR-A3`, `@NFR-R1`, `@NFR-R2`).
 - `packages/client/src/test/features/settings/settings_share_preferences_unit.feature` — the stored choices (`@FR5 @FR6`).

@@ -17,12 +17,13 @@ Owners of the concepts this change touches (`docs/glossary/`):
 - **Share meeting**: `useMeetingShare`.
 - **Text sharing**: `TextSharing`, `ShareOutcome`, `browserTextSharing`, `createInMemoryTextSharing`.
 - **Meeting range**: `MeetingRange`, `getMeetingSpan`, `getLocationMeetingRange`.
-- **Zone abbreviation**: `getZoneAbbreviation`, `formatZoneAbbreviation`. **Zone line** and its UTC offset text: `presentZoneLine` (`presenter/zoneLine.ts`).
+- **Zone abbreviation**: `getZoneAbbreviation`, `formatZoneAbbreviation`. **Zone line**: `presentZoneLine` (`presenter/zoneLine.ts`). **UTC offset** text: `formatUtcOffset` (`presenter/utcOffset.ts`, already exported through `presenter/index.ts`).
 - **Zone label**: `ZoneLabelPart`, `Preferences.zoneLabelParts`, `SettingsToggleGroup`.
 - **Interface language** and the locale registry: `Preferences.interfaceLanguage`, `localeRegistry`, `findRegisteredLocale`, `InterfaceLanguageList`.
-- **City label**: `CitySearch.getCityLabel(timeZoneId, storedLabel, language)`, `useCityLabels`.
+- **City label**: `CitySearch.getCityLabel(timeZoneId, storedLabel, cityNameLanguage)`, `useCityLabels`, `resolveCityNameLanguage` (`locales/languageFallbacks.ts`).
 - **Day shift**: `getDayShift`. **Meeting bar** title and duration: `presentMeetingBar`, `formatMeetingDuration`.
-- **Preferences**: `Preferences`, `reducePreferences`, `parseStoredPreferences`, `PREFERENCES_SCHEMA_VERSION`.
+- **Preferences**: `Preferences`, `reducePreferences`, `parseStoredPreferences` (`preferences/`), the stored document and its migrations `createPreferencesMigrations` (`adapters/preferencesDocument.ts`), `PREFERENCES_SCHEMA_VERSION` (`constants/preferences.ts`, today 7).
+- **Work bounds**: `startWorkCount` (`src/test/workCounters.ts`, ADR-0008), as `grid_view_meeting_budget.feature` already uses it.
 
 Every decision below extends one of these owners or adds an owner for a new glossary term. None adds a second owner.
 
@@ -56,7 +57,7 @@ The owner stays `presentMeetingShareText`; its input becomes:
   getCityLabel }      // (location) => label in `language`
 ```
 
-It computes per location, through the existing owners: the local span via `getLocationMeetingRange` + `presentLocationMeetingRange`'s formatter, the day shift via `getDayShift`, the zone abbreviation via `getZoneAbbreviation` + `formatZoneAbbreviation` with `translate`, the UTC offset text via the offset formatter that `presentZoneLine` already uses (extracted and exported from `zoneLine.ts`, not copied). The file is split when it nears 200 lines: `meetingShareText.ts` (assembly) and `meetingShareLine.ts` (one line).
+It computes per location, through the existing owners: the local span via `getLocationMeetingRange` + `presentLocationMeetingRange`'s formatter, the day shift via `getDayShift`, the zone abbreviation via `getZoneAbbreviation` + `formatZoneAbbreviation` with `translate`, the UTC offset text via the existing `formatUtcOffset` (`presenter/utcOffset.ts`). The zone parts and their order come from `presentZoneLine` called with an empty place and the share zone label as its `zoneLabelParts`, so its rule "the zone abbreviation yields to a UTC offset that reads the same" is reused, not copied. The share line then drops a part whose text equals the city label (the `UTC` location, whose city label is `UTC`) and wraps what is left in brackets joined by `, `. This zone-parts step is one exported function, `presentMeetingShareZoneParts`, which the share dialog rows reuse (D7). The file is split when it nears 200 lines: `meetingShareText.ts` (assembly) and `meetingShareLine.ts` (one line and its zone parts).
 
 `MeetingShareRow` and the label-based input are removed; `useMeetingShare` is their only caller.
 
@@ -64,10 +65,10 @@ It computes per location, through the existing owners: the local span via `getLo
 
 `meeting.shareHeading` gets the parameters `weekday` (the full weekday name from `Intl` in the share language), `date` (the date without the weekday), `duration`, and is called with `context: <weekday key>`, where the key comes from a new enum `Weekday` mapped from `Temporal.PlainDate.dayOfWeek`.
 
-- `en.json`: only the base key — `Meeting on {{weekday}}, {{date}}, {{duration}}`.
-- `ru.json`: the base key as a fallback plus `shareHeading_monday` … `shareHeading_sunday` («Встреча в понедельник, {{date}}, {{duration}}», «Встреча во вторник, …»).
+- `ru.json`: the base key plus `shareHeading_monday` … `shareHeading_sunday` («Встреча в понедельник, {{date}}, {{duration}}», «Встреча во вторник, …»); the weekday is written in the key's text.
+- `en.json`: the base key and the same seven context keys, each `Meeting on {{weekday}}, {{date}}, {{duration}}`.
 
-i18next falls back to the base key when a context key is missing, so a language without cases adds nothing. `dateTimeFormatters.ts` gains a label kind for the date without a weekday and one for the weekday alone.
+Every locale file carries the same eight keys, because `locales.test.ts` ("should have identical key sets in every locale file") requires identical key sets — `en.json` already repeats `durationHours_few` / `_many` for the same reason. A language without cases repeats its one heading in the seven context keys. `dateTimeFormatters.ts` gains a label kind for the date without a weekday and one for the weekday alone.
 
 ### D4. Share language and share zone label live in the preferences (FR5, FR6)
 
@@ -75,12 +76,12 @@ i18next falls back to the base key when a context key is missing, so a language 
 
 ```
 shareLanguage: string | null            // the pinned share language; null = follow the interface language
-shareZoneLabelParts: readonly ZoneLabelPart[]   // subset of ABBREVIATION, UTC_OFFSET
+shareZoneLabelParts: readonly ZoneLabelPart[]   // subset of ZONE_ABBREVIATION, UTC_OFFSET
 ```
 
-`ZoneLabelPart` is reused, so the parts have one enum; `COUNTRY` in `shareZoneLabelParts` is invalid. New commands `SET_SHARE_LANGUAGE` and `TOGGLE_SHARE_ZONE_LABEL_PART` in `reducePreferences`. `PREFERENCES_SCHEMA_VERSION` goes from 7 to 8 with a migration that adds `null` and both parts. `parseStoredPreferences` rejects a malformed value and maps an unregistered language tag to `null`.
+`ZoneLabelPart` is reused, so the parts have one enum; `COUNTRY` in `shareZoneLabelParts` is invalid. New commands `SET_SHARE_LANGUAGE` and `TOGGLE_SHARE_ZONE_LABEL_PART` in `reducePreferences`. `PREFERENCES_SCHEMA_VERSION` goes from 7 to 8 with a step `7:` in `createPreferencesMigrations` (`adapters/preferencesDocument.ts`) that adds `null` and both parts. `parseStoredPreferences` rejects a `shareLanguage` that is neither `null` nor a non-empty string (the check `interfaceLanguage` already has) and a `shareZoneLabelParts` that is not an array of `ZONE_ABBREVIATION` / `UTC_OFFSET`. It does not consult the locale registry, exactly as for `interfaceLanguage` today.
 
-`resolveShareLanguage(preferences, interfaceLanguage)` in `locales/` returns the pinned language when it is registered, otherwise the interface language — one owner of "which language a new dialog opens with".
+`resolveShareLanguage(shareLanguage, interfaceLanguage)` in `locales/` returns `{ language, isPinned }`: the pinned language with `isPinned: true` when `findRegisteredLocale` finds it, otherwise the interface language with `isPinned: false`. It is the one owner of "which language a new dialog opens with" and of "an unregistered pin counts as none" (ADR-0004 load normalization: a reference that no longer resolves is cleared, not unreadable).
 
 The share language of an open dialog is controller state, not a preference: without the pin it must not survive the dialog (FR5).
 
@@ -102,7 +103,7 @@ A destination receives both the invitation and the text: a calendar needs the in
 
 `useMeetingShare` becomes the owner of: whether the dialog is open, the excluded ids, the share language of this opening, the built text (memoised on invitation, language, parts, hour format), and `share(destinationId)`. Opening resets the excluded ids and resolves the language (D4). An effect closes the dialog when the meeting range becomes undefined (FR10). Outcomes map to today's `MeetingShareNotice`; cancelled keeps the session.
 
-City labels in another language: `useCityLabels` already asks `CitySearch.getCityLabel` for the interface language; it gains a language argument so the same owner serves the share language. `translate` is `i18n.getFixedT(language)`, as `useCitySearch` already does for English.
+City labels in another language: `useCityLabels(locations, load)` already asks `CitySearch.getCityLabel` with the `cityNameLanguage` of `useActiveInterfaceLanguage`; it gains an optional `CityNameLanguage` argument (default: the interface one) so the same owner serves the share language, resolved by the existing `resolveCityNameLanguage(code)`. `translate` is `i18n.getFixedT(language)`, as `useCitySearch` already does for English.
 
 If the file passes 200 lines, the session state moves to `useMeetingShareSession.ts`.
 
@@ -111,7 +112,7 @@ If the file passes 200 lines, the session state moves to `useMeetingShareSession
 `views/shared/MeetingShareDialog.tsx`, loaded with `lazy` like `CalendarMonthGrid`, on `DialogContent`. It reuses:
 - `InterfaceLanguageList` for the language list. It moves from `app/settings/` to `views/shared/` with a neutral name (`LanguageList`) and takes the chosen code and a callback; `InterfaceLanguageGroup` keeps using it.
 - `SettingsToggleGroup` for the share zone label, moved the same way if it is imported from outside `app/settings/`.
-- the row texts from `presentLocationRows` (city label, zone line parts without the country, local date, day shift) and `meeting.rowRanges` — the dialog formats nothing itself.
+- the row texts: the city label and the local date from the `presentLocationRows` rows (`cityLabel`, `localDateLabel`), the span and the day shift from `meeting.rowRanges` (`spanLabel`, `dayShiftLabel`), and the zone parts from `presentMeetingShareZoneParts` (D2) with both parts in the interface language — not the row's zone line, which follows the zone label setting. The controller builds these texts; the dialog formats nothing itself.
 
 New small components: `MeetingShareLocationRow`, `ShareLanguagePin`, `MeetingSharePreview`. The meeting bar's Share button calls `openShareDialog` instead of `shareMeeting`.
 
@@ -121,7 +122,8 @@ New small components: `MeetingShareLocationRow`, `ShareLanguagePin`, `MeetingSha
 - Contract: `shareDestination.contract.ts` run against the text destination over the in-memory and the browser text sharing.
 - Unit BDD: the scenarios of `meeting-range` → "Share meeting text", `settings` and the non-layout scenarios of `meeting-share-dialog`.
 - BDD E2E: focus, keyboard, axe-core, layout, screenshots.
-- Work bound (NFR-P1): a unit BDD that counts `Intl` formatter constructions, as the existing "Hour strips are fast" scenarios do.
+- Work bound (NFR-P1): a unit BDD that wraps the rebuild in `startWorkCount()` and asserts no formatter build, as `grid_view_meeting_budget.feature` does; the timing is a `src/test/benchmarks/meetingShareText.bench.ts` benchmark, never asserted (ADR-0008).
+- Placement: a scenario that asserts focus, a key press, an inactive (`disabled`) state, an accessible name, an `aria-*` state or layout runs in `*_e2e.feature` only (`bdd-unit.md` puts "Keyboard accessibility", "aria-labels, focus management" and "Responsive layout" in E2E); the unit features check the rest through the controller output and the rendered text.
 
 ## Consequences
 
@@ -129,7 +131,7 @@ Positive:
 - The meeting share text is a pure function of data, language and choices: testable without rendering a row (FR3, FR4, FR6, FR7).
 - A calendar, email or web page destination is one adapter and one registry entry (G6).
 - The dialog holds no text rule and no destination name; the settings controls are reused, not copied (UX1).
-- A language without grammatical cases adds one heading string (FR7).
+- A language without grammatical cases repeats one heading string in its eight heading keys (FR7).
 
 Negative:
 - City labels in a second language need the city data. `getCityLabel` already falls back to the stored label while the data is not loaded; the preview then shows the stored label and updates when the data arrives.
