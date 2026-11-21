@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { deriveCityNameFromTimeZoneId } from "@/adapters";
+import type { CityNameLanguage } from "@/constants";
 import type { LoadCitySearch } from "@/ports";
 import { loadCitySearchOnce, readLoadedCitySearch } from "./cityDataCache";
 import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
@@ -11,12 +12,16 @@ import { useActiveInterfaceLanguage } from "./useActiveInterfaceLanguage";
  * `undefined` for an `undefined` zone, which never starts a load.
  * Implements FR8, NFR-P2 of show-here-entry-for-device-time (D4).
  * Implements FR5 of add-interface-language-selection (D5): the name follows the active language.
+ * The optional `cityNameLanguageOverride` serves the share language: FR4 of add-meeting-share-dialog (D6).
  */
 export function useExemplarCity(
   timeZoneId: string | undefined,
   load: LoadCitySearch,
+  cityNameLanguageOverride?: CityNameLanguage,
 ): string | undefined {
-  const { cityNameLanguage } = useActiveInterfaceLanguage();
+  const interfaceLanguage = useActiveInterfaceLanguage();
+  const cityNameLanguage =
+    cityNameLanguageOverride ?? interfaceLanguage.cityNameLanguage;
   const [loadedSearch, setLoadedSearch] = useState(() =>
     readLoadedCitySearch(load),
   );

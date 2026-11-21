@@ -59,6 +59,8 @@ export {
   createLocalStoragePreferencesRepository,
   localStoragePreferencesRepository,
 } from "./localStoragePreferencesRepository";
+// Implements FR9, FR11 of add-meeting-share-dialog.
+export { createShareDestinations } from "./shareDestinations";
 export {
   createInMemoryStoredReleaseRepository,
   createLocalStorageStoredReleaseRepository,
@@ -66,3 +68,4 @@ export {
   type LocalStorageStoredReleaseRepositoryOptions,
   localStorageStoredReleaseRepository,
 } from "./storedRelease";
+export { createTextShareDestination } from "./textShareDestination";

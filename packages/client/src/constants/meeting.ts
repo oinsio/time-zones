@@ -19,3 +19,6 @@ export const MEETING_HANDLE_ROW_DIVISOR = 2;
 export const MEETING_HANDLE_HEIGHT_PX = 48;
 /** After a handle drag ends, a click within this time is the release, not a tap. */
 export const MEETING_HANDLE_RELEASE_CLICK_WINDOW_MS = 50;
+
+/** Joins the zone parts inside the brackets of a meeting share line. Implements FR6 of add-meeting-share-dialog (D2). */
+export const MEETING_SHARE_ZONE_PARTS_SEPARATOR = ", ";

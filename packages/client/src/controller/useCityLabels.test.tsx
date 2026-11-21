@@ -165,3 +165,25 @@ describe("useCityLabels", () => {
     expect(deferred.load).toHaveBeenCalledTimes(1);
   });
 });
+
+// Verifies FR4 of add-meeting-share-dialog.
+const loadSearch: LoadCitySearch = async () => search;
+
+describe("useCityLabels in another language", () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("ru");
+    await loadCitySearchOnce(loadSearch);
+  });
+
+  it("should label the city locations in the given language", () => {
+    const { result } = renderHook(() =>
+      useCityLabels([moscow], loadSearch, "en"),
+    );
+    expect(result.current?.get(moscow.id)).toBe("Moscow");
+  });
+
+  it("should label them in the interface language without the argument", () => {
+    const { result } = renderHook(() => useCityLabels([moscow], loadSearch));
+    expect(result.current?.get(moscow.id)).toBe("Москва");
+  });
+});

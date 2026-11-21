@@ -18,6 +18,17 @@ export const FULL_DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   year: "numeric",
 };
 
+// Implements FR7 of add-meeting-share-dialog (D3).
+export const DATE_WITHOUT_WEEKDAY_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+};
+
+export const WEEKDAY_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  weekday: "long",
+};
+
 export const CALENDAR_MONTH_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   month: "long",
   year: "numeric",

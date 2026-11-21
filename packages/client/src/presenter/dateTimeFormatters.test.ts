@@ -195,3 +195,32 @@ describe("getDateTimeFormatter hour format", () => {
     expect(deployDate).toBe("March 8, 2026");
   });
 });
+
+// Verifies FR7 of add-meeting-share-dialog.
+describe("the share heading label kinds", () => {
+  const sunday = Temporal.Instant.from(
+    "2026-03-08T07:30:00Z",
+  ).epochMilliseconds;
+
+  it.each([
+    ["en", DateTimeLabelKind.DATE_WITHOUT_WEEKDAY, "March 8, 2026"],
+    ["ru", DateTimeLabelKind.DATE_WITHOUT_WEEKDAY, "8 марта 2026 г."],
+    ["en", DateTimeLabelKind.WEEKDAY, "Sunday"],
+    ["ru", DateTimeLabelKind.WEEKDAY, "воскресенье"],
+  ])("should format %s %s as %s", (language, kind, expected) => {
+    expect(
+      getDateTimeFormatter(language, "UTC", kind, HourFormat.H24).format(
+        sunday,
+      ),
+    ).toBe(expected);
+  });
+
+  it.each([DateTimeLabelKind.DATE_WITHOUT_WEEKDAY, DateTimeLabelKind.WEEKDAY])(
+    "should share the %s formatter between hour formats",
+    (kind) => {
+      expect(getDateTimeFormatter("en", ZONE, kind, HourFormat.H12)).toBe(
+        getDateTimeFormatter("en", ZONE, kind, HourFormat.H24),
+      );
+    },
+  );
+});
