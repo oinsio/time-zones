@@ -57,6 +57,12 @@ The sample: Sunday, 8 March 2026, 12:30 in Almaty, pinned; Almaty (home), Moscow
 
 The settings screens copy the built page with the new tokens. Only the Colours group is new.
 
+## Proposals
+
+Proposed changes that are not approved yet live apart from the approved screens:
+
+- [Sharing, moving and extending the meeting range](proposals/meeting-range/README.md) — the share window, a meeting range past midnight, moving the whole range (November 2026).
+
 ## Before the redesign
 
 Three Grid screens have no redesigned counterpart and still show the layout before the redesign (a drag handle, a "here" caption, the old header): [tablet, meeting](screens/grid-tablet-meeting-light.png), [phone in landscape](screens/grid-phone-landscape-light.png) and [phone in landscape, meeting](screens/grid-phone-landscape-meeting-light.png). Their sizes and colours are superseded by [views.md](../architecture/views.md).
