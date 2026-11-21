@@ -49,12 +49,18 @@ The share dialog SHALL list every location of the list, in list order. A row has
 - **AND** «Поделиться» is inactive and cannot be activated by pointer or keyboard
 
 ### Requirement: Share language choice
-The share dialog SHALL show the share language as a button with the flag and the native name of the language, as the language group of the settings page shows the interface language. Activating it opens the list of the languages of the locale registry; choosing one sets the share language of this dialog and closes the list. The share language MUST change only the meeting share text: the interface language, every text of the dialog and the settings stay as they were. <!-- implements FR4 of add-meeting-share-dialog -->
+The share dialog SHALL show the share language as a button with the flag and the native name of the language, as the language group of the settings page shows the interface language. Activating it opens the list of the languages of the locale registry; choosing one sets the share language of this dialog and closes the list. The share language MUST change only the meeting share text: the interface language, every text of the dialog and the settings stay as they were. Every city label of the text is in the share language, also the one of the device time location: its line names the exemplar city of the device time zone in the share language (the stored label, then the zone id, while the city data loads). <!-- implements FR4 of add-meeting-share-dialog -->
 
 #### Scenario: Another share language
 - **WHEN** the user chooses English as the share language
 - **THEN** the preview is the English text of the sample meeting
 - **AND** the dialog's captions and rows are still in Russian and the interface language is Russian
+
+#### Scenario: The device time location in another share language
+- **GIVEN** the list is the device time location, Moscow, Kolkata and New York, with no home location
+- **WHEN** the user chooses English as the share language
+- **THEN** the first line of the preview after the heading starts with "Almaty" and no line contains a Cyrillic letter
+- **AND** the first row of the dialog still reads «Алматы»
 
 ### Requirement: Share language pin
 Next to the share language the dialog SHALL have the pin: a toggle button with the accessible name «Запомнить язык приглашения» ("Remember the share language"). While the pin is off, every opening of the dialog MUST start in the interface language. Turning the pin on keeps the current share language in the preferences; while it is on, every opening starts in the pinned language, and choosing another language keeps the new one. Turning the pin off removes the pinned language and leaves the share language of this opening as it is. A pinned language that the locale registry no longer has is treated as no pin. Inputs: the pinned share language, the interface language. Output: the share language the dialog opens with. <!-- implements FR5 of add-meeting-share-dialog -->
