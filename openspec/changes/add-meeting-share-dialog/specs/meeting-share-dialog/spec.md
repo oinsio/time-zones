@@ -55,7 +55,7 @@ The share dialog SHALL list every location of the list, in list order. A row has
 - **AND** «Поделиться» is inactive and cannot be activated by pointer or keyboard
 
 ### Requirement: Share language choice
-The share dialog SHALL show the share language as a button with the flag and the native name of the language, as the language group of the settings page shows the interface language. Activating it opens the list of the languages of the locale registry; choosing one sets the share language of this dialog and closes the list. The share language MUST change only the meeting share text: the interface language, every text of the dialog and the settings stay as they were. Every city label of the text is in the share language, also the one of the device time location: its line names the exemplar city of the device time zone in the share language (the stored label, then the zone id, while the city data loads). <!-- implements FR4 of add-meeting-share-dialog -->
+The share dialog SHALL show the share language as a button with the flag and the native name of the language, as the language group of the settings page shows the interface language. It is the same control with the same keyboard behaviour, its button named «Язык приглашения: {language}» ("Language of the invitation: {language}"). Activating it opens the list of the languages of the locale registry; choosing one sets the share language of this dialog and closes the list. Esc while the list is open MUST collapse the list and keep the dialog open. The share language MUST change only the meeting share text: the interface language, every text of the dialog and the settings stay as they were. Every city label of the text is in the share language, also the one of the device time location: its line names the exemplar city of the device time zone in the share language (the stored label, then the zone id, while the city data loads). <!-- implements FR4 of add-meeting-share-dialog -->
 
 #### Scenario: Another share language
 - **WHEN** the user chooses English as the share language
@@ -146,7 +146,7 @@ While the share dialog is open, it SHALL follow the location list and the meetin
 - **THEN** the share dialog is closed and no meeting range is set
 
 ### Requirement: Accessible share dialog
-The share dialog SHALL be a modal dialog with the accessible name «Поделиться встречей». On opening the focus MUST move into the dialog; Tab and Shift+Tab stay inside it; on closing the focus returns to Share meeting. Each checkbox MUST be named by its city label and announce its state. The pin MUST be a toggle button that announces pressed or not pressed. The share zone label toggles MUST form a group named by their caption. The preview MUST be a region named by its caption that is not announced on every change. The inactive Share button MUST be announced as unavailable. Every pointer target MUST be at least 44 × 44 px, and text and control contrast MUST meet WCAG AA in the light and the dark theme. axe-core MUST report no violation. <!-- implements NFR-A1, NFR-A2, NFR-A3 of add-meeting-share-dialog -->
+The share dialog SHALL be a modal dialog with the accessible name «Поделиться встречей». On opening the focus MUST move into the dialog; Tab and Shift+Tab stay inside it; on closing the focus returns to Share meeting. Esc while the list of share languages is open closes only the list and returns the focus to the language button. Each checkbox MUST be named by its city label and announce its state. The pin MUST be a toggle button that announces pressed or not pressed. The share zone label toggles MUST form a group named by their caption. The preview MUST be a region named by its caption that is not announced on every change. The inactive Share button MUST be announced as unavailable. Every pointer target MUST be at least 44 × 44 px, and text and control contrast MUST meet WCAG AA in the light and the dark theme. axe-core MUST report no violation. <!-- implements NFR-A1, NFR-A2, NFR-A3 of add-meeting-share-dialog -->
 
 #### Scenario: Focus enters and returns
 - **WHEN** the user opens the share dialog with the keyboard and then presses Esc
@@ -164,6 +164,11 @@ The share dialog SHALL be a modal dialog with the accessible name «Подели
 - **AND** each checkbox is named by its city label and is checked, the pin is a toggle button named «Запомнить язык приглашения» that is not pressed, «Аббревиатура» and «Смещение UTC» are in a group named «Обозначение часового пояса», and the preview is a region named «Текст приглашения» that is not a live region
 - **WHEN** the user unticks every location
 - **THEN** «Поделиться» is announced as unavailable
+
+#### Scenario: Esc in the open language list
+- **GIVEN** the share dialog is open and the list of share languages is open
+- **WHEN** the user presses Esc
+- **THEN** the list is closed, the share dialog is still open and the focus is on the language button
 
 #### Scenario: Keyboard only
 - **WHEN** the user opens the share dialog, unticks Moscow with Space, moves to «Поделиться» with Tab and presses Enter
@@ -200,7 +205,7 @@ The share dialog SHALL use the dialog frame of the Add location dialog: below 64
 - **THEN** «Поделиться» is fully visible
 
 ### Requirement: Share dialog strings are localized
-Every text of the share dialog SHALL come from the locale files and exist in Russian and English: the accessible name, the captions «Кому отправляем» ("Send to"), «Язык приглашения» ("Language of the invitation"), «Обозначение часового пояса» ("Timezone label") and «Текст приглашения» ("Text of the invitation"), the reference line «{date} · по времени {city}» ("{date} · {city} time"), the pin's name, the hint «Отметьте хотя бы одно место» ("Tick at least one location") and the button «Поделиться» ("Share"). <!-- implements FR12 of add-meeting-share-dialog -->
+Every text of the share dialog SHALL come from the locale files and exist in Russian and English: the accessible name, the captions «Кому отправляем» ("Send to"), «Язык приглашения» ("Language of the invitation"), «Обозначение часового пояса» ("Timezone label") and «Текст приглашения» ("Text of the invitation"), the reference line «{date} · по времени {city}» ("{date} · {city} time"), the language button's name «Язык приглашения: {language}» ("Language of the invitation: {language}"), the pin's name, the hint «Отметьте хотя бы одно место» ("Tick at least one location") and the button «Поделиться» ("Share"). <!-- implements FR12 of add-meeting-share-dialog -->
 
 #### Scenario: English interface
 - **GIVEN** the interface language is English

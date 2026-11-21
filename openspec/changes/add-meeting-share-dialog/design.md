@@ -19,7 +19,7 @@ Owners of the concepts this change touches (`docs/glossary/`):
 - **Meeting range**: `MeetingRange`, `getMeetingSpan`, `getLocationMeetingRange`.
 - **Zone abbreviation**: `getZoneAbbreviation`, `formatZoneAbbreviation`. **Zone line**: `presentZoneLine` (`presenter/zoneLine.ts`). **UTC offset** text: `formatUtcOffset` (`presenter/utcOffset.ts`, already exported through `presenter/index.ts`).
 - **Zone label**: `ZoneLabelPart`, `Preferences.zoneLabelParts`, `SettingsToggleGroup`.
-- **Interface language** and the locale registry: `Preferences.interfaceLanguage`, `localeRegistry`, `findRegisteredLocale`, `InterfaceLanguageList`.
+- **Interface language** and the locale registry: `Preferences.interfaceLanguage`, `localeRegistry`, `findRegisteredLocale`, `InterfaceLanguageGroup` (with its list `InterfaceLanguageList`).
 - **City label**: `CitySearch.getCityLabel(timeZoneId, storedLabel, cityNameLanguage)`, `useCityLabels`, `resolveCityNameLanguage` (`locales/languageFallbacks.ts`); for the device time location `CitySearch.getExemplarCity` through `useExemplarCity`.
 - **Day shift**: `getDayShift`. **Meeting bar** title and duration: `presentMeetingBar`, `formatMeetingDuration`.
 - **Preferences**: `Preferences`, `reducePreferences`, `parseStoredPreferences` (`preferences/`), the stored document and its migrations `createPreferencesMigrations` (`adapters/preferencesDocument.ts`), `PREFERENCES_SCHEMA_VERSION` (`constants/preferences.ts`, today 7).
@@ -119,7 +119,7 @@ If the file passes 200 lines, the session state moves to `useMeetingShareSession
 ### D7. Views: one lazy dialog built from existing blocks (UX1–UX5, NFR-P2)
 
 `views/shared/MeetingShareDialog.tsx` on `DialogContent`, loaded through `views/shared/LazyMeetingShareDialog.tsx` (`lazy` + `Suspense fallback={null}`, exactly like `LazyCalendarMonthGrid.tsx`), so its chunk loads on the first opening (NFR-P2). It takes the session of `useMeetingShare` as props and calls no hook of the model. It reuses:
-- `InterfaceLanguageList` for the language list. It moves from `app/settings/` to `views/shared/LanguageList.tsx` with a neutral name (`LanguageList`), because blocks shared by several screens live in `views/shared/` and no file under `views/` imports from `app/` today; `InterfaceLanguageGroup` imports it from `@/views/shared`. It has no test file of its own: the `InterfaceLanguageGroup` suites cover it and stay in `app/settings/`.
+- the whole language group of the settings page for the share language, not only its list. Today `InterfaceLanguageGroup` (`app/settings/`) owns the button with the flag and the native name, `aria-expanded` / `aria-controls`, the expand state, the search threshold, the arrow-key focus moves and Escape, which collapses the expanded list and stops there (`event.stopPropagation()`), so in a modal it collapses the list without closing the dialog. That body moves to `views/shared/LanguageGroup.tsx` (`LanguageGroup`) with the props `caption`, `getButtonLabel(languageName)`, `activeCode`, `onChoose`, `locales` and an optional `besideButton` slot (where the dialog puts the pin), because blocks shared by several screens live in `views/shared/` and no file under `views/` imports from `app/` today. `InterfaceLanguageList` moves with it as its internal list, `views/shared/LanguageList.tsx` (`LanguageList`), not exported. `InterfaceLanguageGroup` stays in `app/settings/` as a thin wrapper that passes `settings.languageLabel` and `settings.languageButton`; the dialog passes `meeting.shareDialogLanguage` and `meeting.shareDialogLanguageButton`. The `InterfaceLanguageGroup*.test.tsx` suites stay in `app/settings/` and cover the moved body unchanged.
 - `SettingsToggleGroup` for the share zone label. It moves with `SettingsToggleGroup.test.tsx` to `views/shared/`; `ZoneLabelGroup` and `test/features/settings/steps/settings_zone_label_unit.steps.tsx` (which imports it from `@/app/settings` today) import it from `@/views/shared`, and `app/settings/index.ts` stops exporting it.
 - `ZoneLine` for the zone parts of a row (D2).
 - the row texts: the city label and the local date from the `presentLocationRows` rows (`cityLabel`, `localDateLabel`), the span and the day shift from `meeting.rowRanges` (`spanLabel`, `dayShiftLabel`), and the zone parts from `presentMeetingShareZoneParts` (D2), a list, with both parts in the interface language — not the row's zone line, which follows the zone label setting. The controller builds these rows; the dialog formats nothing itself and joins nothing: the separator is `ZoneLine`'s.
@@ -149,7 +149,7 @@ Positive:
 Negative:
 - City labels in a second language need the city data. `getCityLabel` already falls back to the stored label while the data is not loaded; the preview then shows the stored label and updates when the data arrives.
 - The preferences schema goes from 7 to 8 on every device. Covered by migration tests on stored documents of the earlier versions; unreadable documents keep the existing Reset note.
-- `InterfaceLanguageList` and `SettingsToggleGroup` move. Moves only, with their tests; the existing settings suites check that nothing changed.
+- The body of `InterfaceLanguageGroup` (with `InterfaceLanguageList`) and `SettingsToggleGroup` move to `views/shared/`; `InterfaceLanguageGroup` keeps only its captions. No behaviour changes; the existing settings suites check that nothing changed.
 - The dialog covers the notices region, so a notice appears only after the dialog closes (FR9; Q1 of the proposal records the alternative).
 - The parameters of `meeting.shareHeading` and `meeting.shareLine` change in both locale files at once; `locales.test.ts` already fails on a key missing in one language.
 
@@ -171,7 +171,7 @@ Preferences schema 8 is additive; an older build that reads a version 8 document
 
 **Destinations that take only the text (D5)**: the limit this change removes. **Destinations that format their own text**: a second owner of the meeting share text.
 
-**A second language list written for the dialog (D7)**: a copy of `InterfaceLanguageList`; the project rule is to reuse the existing component.
+**A second language list or button written for the dialog (D7)**: a copy of the settings language control whose keyboard and Escape handling could drift from it; the project rule is to reuse the existing component. **Moving only the list**: leaves the button and its keyboard handling to be rebuilt in the dialog.
 
 ## Open Questions
 
