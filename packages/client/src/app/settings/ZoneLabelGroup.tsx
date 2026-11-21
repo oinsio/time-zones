@@ -5,14 +5,11 @@ import {
   useZoneLabelExample,
   useZoneLabelParts,
 } from "@/controller";
-import { ZoneLabelPart } from "@/preferences";
-import { SettingsToggleGroup, ZoneLine } from "@/views/shared";
-
-const ZONE_LABEL_PART_LABEL_KEYS = {
-  [ZoneLabelPart.COUNTRY]: "settings.zoneLabelCountry",
-  [ZoneLabelPart.UTC_OFFSET]: "settings.zoneLabelUtcOffset",
-  [ZoneLabelPart.ZONE_ABBREVIATION]: "settings.zoneLabelAbbreviation",
-} as const;
+import {
+  SettingsToggleGroup,
+  ZONE_LABEL_PART_LABEL_KEYS,
+  ZoneLine,
+} from "@/views/shared";
 
 /**
  * The zone label group: a toggle for the country, one for the zone

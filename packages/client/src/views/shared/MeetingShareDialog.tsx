@@ -9,13 +9,15 @@ import {
 } from "@/components/ui";
 import type { MeetingShareSession } from "@/controller";
 import { localeRegistry } from "@/locales";
-import { ZoneLabelPart } from "@/preferences";
+import { ZONE_LABEL_PART_ORDER } from "@/constants";
+import { SHARE_ZONE_LABEL_PARTS } from "@/preferences";
 import { LanguageGroup } from "./LanguageGroup";
 import { MeetingShareLocationRow } from "./MeetingShareLocationRow";
 import { MeetingSharePreview } from "./MeetingSharePreview";
 import { SettingsToggleGroup } from "./SettingsToggleGroup";
 import { ShareLanguagePin } from "./ShareLanguagePin";
 import { SHARE_DESTINATION_ICONS } from "./shareDestinationIcons";
+import { ZONE_LABEL_PART_LABEL_KEYS } from "./zoneLabelPartLabelKeys";
 
 type MeetingShareDialogProps = {
   session: MeetingShareSession;
@@ -23,16 +25,9 @@ type MeetingShareDialogProps = {
   returnFocusRef: RefObject<HTMLButtonElement | null>;
 };
 
-const SHARE_ZONE_LABEL_TOGGLES: readonly {
-  part: ZoneLabelPart;
-  labelKey: string;
-}[] = [
-  {
-    part: ZoneLabelPart.ZONE_ABBREVIATION,
-    labelKey: "settings.zoneLabelAbbreviation",
-  },
-  { part: ZoneLabelPart.UTC_OFFSET, labelKey: "settings.zoneLabelUtcOffset" },
-];
+const SHARE_ZONE_LABEL_PARTS_IN_ORDER = ZONE_LABEL_PART_ORDER.filter((part) =>
+  SHARE_ZONE_LABEL_PARTS.includes(part),
+);
 
 const CAPTION_CLASS_NAME = "text-sm font-semibold text-muted-foreground";
 const OPEN_LANGUAGE_LIST_SELECTOR = "button[aria-expanded='true']";
@@ -123,9 +118,9 @@ export function MeetingShareDialog({
           />
           <SettingsToggleGroup
             caption={t("meeting.shareDialogZoneLabel")}
-            options={SHARE_ZONE_LABEL_TOGGLES.map(({ part, labelKey }) => ({
+            options={SHARE_ZONE_LABEL_PARTS_IN_ORDER.map((part) => ({
               value: part,
-              label: t(labelKey),
+              label: t(ZONE_LABEL_PART_LABEL_KEYS[part]),
             }))}
             selectedValues={session.shareZoneLabelParts}
             onToggle={(part) => session.toggleShareZoneLabelPart(part)}

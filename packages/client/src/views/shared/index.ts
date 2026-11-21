@@ -21,6 +21,7 @@ export {
 // Implements FR13 of add-grid-meeting-range-and-share (D7).
 export { MeetingBar } from "./MeetingBar";
 export { SettingsToggleGroup } from "./SettingsToggleGroup";
+export { ZONE_LABEL_PART_LABEL_KEYS } from "./zoneLabelPartLabelKeys";
 // Implements FR5, FR14 of add-day-colouring-setting: the typed time field helpers.
 export { getTypedTimeFieldText } from "./typedTimeFieldText";
 // Implements FR7 of add-view-mode-setting-and-grid-skeleton (D4).
