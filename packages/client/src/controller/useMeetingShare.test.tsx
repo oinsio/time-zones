@@ -1,122 +1,24 @@
 // Verifies FR14, FR15 of add-grid-meeting-range-and-share.
 // Verifies FR1, FR3, FR4, FR5, FR6, FR8, FR9, FR10, FR11 of add-meeting-share-dialog.
-import zoneCities from "virtual:zone-cities";
-import { act, renderHook, waitFor } from "@testing-library/react";
+
+import { act, waitFor } from "@testing-library/react";
 import i18n from "i18next";
-import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import {
-  createCompositeCitySearch,
-  createInMemoryLocationRepository,
-  createInMemoryPreferencesRepository,
-  createInMemoryTextSharing,
-  type InMemoryTextSharingOptions,
-} from "@/adapters";
-import { LocationsProvider, PreferencesProvider } from "@/controller";
-import { buildDeviceTimeLocation, type Location, LocationKind } from "@/model";
-import {
-  LocationsLoadStatus,
-  PreferencesLoadStatus,
-  ShareDestinationId,
-} from "@/ports";
-import {
-  DEFAULT_PREFERENCES,
-  type Preferences,
-  ZoneLabelPart,
-} from "@/preferences";
+import { buildDeviceTimeLocation, LocationKind } from "@/model";
+import { PreferencesLoadStatus, ShareDestinationId } from "@/ports";
+import { DEFAULT_PREFERENCES, ZoneLabelPart } from "@/preferences";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "@/test/deviceTimeZone";
-import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { createSwitchableClock } from "@/test/switchableClock";
-import { createManualTickScheduler } from "@/test/tickSchedulers";
-import { createManualWriteScheduler } from "@/test/writeSchedulers";
-import { useMeetingRange } from "./useMeetingRange";
-import { MeetingShareNotice, useMeetingShare } from "./useMeetingShare";
-import { useMeetingShareDialog } from "./useMeetingShareDialog";
-
-/** The light hook of the app shell with the session of the lazy dialog on top of it. */
-function useShare(textSharing: ReturnType<typeof createInMemoryTextSharing>) {
-  const shareMeeting = useMeetingShare(textSharing);
-  return { ...shareMeeting, ...useMeetingShareDialog(shareMeeting) };
-}
-
-const citySearch = createCompositeCitySearch(zoneCities);
-const loadCitySearch = async () => citySearch;
-
-const cityRow = (label: string) =>
-  buildLocation({ label, ...KNOWN_CITIES[label] });
-const almaty = cityRow("Almaty");
-const moscow = cityRow("Moscow");
-const kolkata = cityRow("Kolkata");
-const newYork = cityRow("New York");
-
-const ENGLISH_SAMPLE_LINES = [
-  "Meeting on Sunday, March 8, 2026, 2 h",
-  "Almaty (UTC+5): 09:00–11:00",
-  "Moscow (MSK, UTC+3): 07:00–09:00",
-  "New York (EST, UTC−5): 23:00–01:00 (a day earlier, Sat, Mar 7)",
-];
-
-type SetupOptions = {
-  sharing?: InMemoryTextSharingOptions;
-  locations?: readonly Location[];
-  homeLocationId?: string | null;
-  preferences?: Partial<Preferences>;
-};
-
-function setup({
-  sharing = { canShare: true, canCopy: true },
-  locations = [almaty, moscow, newYork],
-  homeLocationId = almaty.id,
-  preferences = {},
-}: SetupOptions = {}) {
-  const textSharing = createInMemoryTextSharing(sharing);
-  const clock = createSwitchableClock("2026-03-08T07:30:00Z", "Asia/Almaty");
-  const locationRepository = createInMemoryLocationRepository({
-    initialDocument: {
-      status: LocationsLoadStatus.LOADED,
-      locations,
-      homeLocationId,
-    },
-  });
-  const preferencesRepository = createInMemoryPreferencesRepository({
-    initialDocument: {
-      status: PreferencesLoadStatus.LOADED,
-      preferences: { ...DEFAULT_PREFERENCES, ...preferences },
-    },
-  });
-  const rendered = renderHook(
-    () => ({
-      range: useMeetingRange(),
-      share: useShare(textSharing),
-    }),
-    {
-      wrapper: ({ children }: { children: ReactNode }) => (
-        <PreferencesProvider
-          repository={preferencesRepository}
-          writeScheduler={createManualWriteScheduler()}
-        >
-          <LocationsProvider
-            repository={locationRepository}
-            writeScheduler={createManualWriteScheduler()}
-            clock={clock}
-            loadCitySearch={loadCitySearch}
-            tickScheduler={createManualTickScheduler()}
-          >
-            {children}
-          </LocationsProvider>
-        </PreferencesProvider>
-      ),
-    },
-  );
-  act(() => rendered.result.current.range.selectCells(9, 10));
-  return { ...rendered, textSharing, preferencesRepository };
-}
-
-type Harness = ReturnType<typeof setup>["result"];
-const openDialog = (result: Harness) =>
-  act(() => result.current.share.openShareDialog());
-const shareText = (result: Harness) =>
-  act(() => result.current.share.share(ShareDestinationId.TEXT));
+import { MeetingShareNotice } from "./useMeetingShare";
+import {
+  almaty,
+  ENGLISH_SAMPLE_LINES,
+  kolkata,
+  moscow,
+  newYork,
+  openDialog,
+  setup,
+  shareText,
+} from "./useMeetingShare.harness";
 
 describe("useMeetingShare", () => {
   beforeEach(() => i18n.changeLanguage("ru"));
@@ -330,94 +232,5 @@ describe("useMeetingShare", () => {
     expect(result.current.share.shareZoneLabelParts).toEqual(
       DEFAULT_PREFERENCES.shareZoneLabelParts,
     );
-  });
-
-  it("should hand the previewed text to the system share and close without a notice", async () => {
-    const { result, textSharing } = setup();
-    openDialog(result);
-    act(() => result.current.share.chooseShareLanguage("en"));
-    const previewedText = result.current.share.text;
-
-    await shareText(result);
-
-    expect(textSharing.sharedTexts).toEqual([previewedText]);
-    expect(result.current.share.isShareDialogOpen).toBe(false);
-    expect(result.current.share.notice).toBeUndefined();
-  });
-
-  it("should keep the session when the user closes the sheet", async () => {
-    const { result } = setup({
-      sharing: { canShare: true, isCancelled: true, canCopy: true },
-    });
-    openDialog(result);
-    act(() => result.current.share.toggleLocation(moscow.id));
-
-    await shareText(result);
-
-    expect(result.current.share.isShareDialogOpen).toBe(true);
-    expect(result.current.share.rows[1].isIncluded).toBe(false);
-    expect(result.current.share.notice).toBeUndefined();
-  });
-
-  it("should close with the copied notice when there is no system share", async () => {
-    const { result, textSharing } = setup({
-      sharing: { canShare: false, canCopy: true },
-    });
-    openDialog(result);
-
-    await shareText(result);
-
-    expect(textSharing.copiedTexts).toHaveLength(1);
-    expect(result.current.share.isShareDialogOpen).toBe(false);
-    expect(result.current.share.notice).toBe(MeetingShareNotice.COPIED);
-  });
-
-  it("should close with the failed notice when nothing works", async () => {
-    const { result } = setup({ sharing: { canShare: false, canCopy: false } });
-    openDialog(result);
-
-    await shareText(result);
-
-    expect(result.current.share.isShareDialogOpen).toBe(false);
-    expect(result.current.share.notice).toBe(MeetingShareNotice.FAILED);
-  });
-
-  it("should dismiss the notice", async () => {
-    const { result } = setup({ sharing: { canShare: false, canCopy: true } });
-    openDialog(result);
-    await shareText(result);
-
-    act(() => result.current.share.dismissNotice());
-
-    expect(result.current.share.notice).toBeUndefined();
-  });
-
-  it("should clear the notice when the range changes or is cleared", async () => {
-    const { result } = setup({ sharing: { canShare: false, canCopy: true } });
-    openDialog(result);
-    await shareText(result);
-
-    act(() => result.current.range.selectCells(8, 8));
-
-    expect(result.current.share.notice).toBeUndefined();
-  });
-
-  it("should close the dialog when the meeting range is removed", () => {
-    const { result } = setup();
-    openDialog(result);
-
-    act(() => result.current.range.clearMeetingRange());
-
-    expect(result.current.share.isShareDialogOpen).toBe(false);
-  });
-
-  it("should do nothing when sharing without a meeting range", async () => {
-    const { result, textSharing } = setup();
-    openDialog(result);
-    act(() => result.current.range.clearMeetingRange());
-
-    await shareText(result);
-
-    expect(textSharing.sharedTexts).toEqual([]);
   });
 });

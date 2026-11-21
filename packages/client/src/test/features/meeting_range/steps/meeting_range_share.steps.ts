@@ -2,37 +2,18 @@
 // Verifies FR3, FR4, FR6, FR7 of add-meeting-share-dialog.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { act, cleanup, renderHook } from "@testing-library/react/pure";
+import { cleanup } from "@testing-library/react/pure";
 import i18n from "i18next";
-import { createElement, type ReactNode } from "react";
 import { expect } from "vitest";
 import {
-  createInMemoryLocationRepository,
-  createInMemoryPreferencesRepository,
   createInMemoryTextSharing,
-  type InMemoryTextSharing,
   type InMemoryTextSharingOptions,
 } from "@/adapters";
-import {
-  LocationsProvider,
-  MeetingShareNotice,
-  PreferencesProvider,
-  useMeetingRange,
-  useMeetingShare,
-  useMeetingShareDialog,
-} from "@/controller";
+import { MeetingShareNotice } from "@/controller";
 import { Temporal } from "@/lib/temporal";
-import {
-  LocationsLoadStatus,
-  PreferencesLoadStatus,
-  ShareDestinationId,
-} from "@/ports";
-import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
-import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
-import { createSwitchableClock } from "@/test/switchableClock";
-import { createManualTickScheduler } from "@/test/tickSchedulers";
-import { immediateWriteScheduler } from "@/test/writeSchedulers";
-import { ALMATY_ZONE, idOf, SAMPLE_NOW } from "./meetingRangeWorld";
+import { HourFormat } from "@/preferences";
+import { ALMATY_ZONE } from "./meetingRangeWorld";
+import { renderShareApp, shareSampleRange } from "./meetingShareApp";
 import {
   buildShareTextLines,
   cityLocation,
@@ -42,15 +23,8 @@ import {
   UTC_LOCATION,
 } from "./meetingShareTextWorld";
 
-/** The light hook of the app shell with the session of the lazy dialog on top of it. */
-const useShareWithDialog = (textSharing: InMemoryTextSharing) => {
-  const shareMeeting = useMeetingShare(textSharing);
-  return { ...shareMeeting, ...useMeetingShareDialog(shareMeeting) };
-};
-
 const feature = await loadFeature("../meeting_range_share.feature");
 
-const CITIES = ["Almaty", "Moscow", "Kolkata", "New York"];
 const SHARED_BEHAVIOUR = "shares the text";
 const CLOSED_BEHAVIOUR = "reports that the user closed the sheet";
 const NO_SHARE_BEHAVIOUR = "has no system share";
@@ -70,54 +44,13 @@ const SHARING_BY_BEHAVIOUR: Record<string, InMemoryTextSharingOptions> = {
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   let hourFormat = HourFormat.H24;
   let sharing = createInMemoryTextSharing({ canShare: true, canCopy: true });
-  let app: ReturnType<typeof renderApp>;
+  let app: ReturnType<typeof renderShareApp>["app"];
   let world = createMeetingShareTextWorld();
   let textLines: string[] = [];
 
-  const renderApp = (options: InMemoryTextSharingOptions) => {
-    sharing = createInMemoryTextSharing(options);
-    return renderHook(
-      () => ({ range: useMeetingRange(), share: useShareWithDialog(sharing) }),
-      {
-        wrapper: ({ children }: { children?: ReactNode }) =>
-          createElement(
-            PreferencesProvider,
-            {
-              repository: createInMemoryPreferencesRepository({
-                initialDocument: {
-                  status: PreferencesLoadStatus.LOADED,
-                  preferences: { ...DEFAULT_PREFERENCES, hourFormat },
-                },
-              }),
-              writeScheduler: immediateWriteScheduler,
-            },
-            createElement(
-              LocationsProvider,
-              {
-                repository: createInMemoryLocationRepository({
-                  initialDocument: {
-                    status: LocationsLoadStatus.LOADED,
-                    locations: CITIES.map((label) =>
-                      buildLocation({ label, ...KNOWN_CITIES[label] }),
-                    ),
-                    homeLocationId: idOf("Almaty"),
-                  },
-                }),
-                writeScheduler: immediateWriteScheduler,
-                clock: createSwitchableClock(SAMPLE_NOW, ALMATY_ZONE),
-                tickScheduler: createManualTickScheduler(),
-              },
-              children,
-            ),
-          ),
-      },
-    );
-  };
   const buildOutcome = async (options: InMemoryTextSharingOptions) => {
-    app = renderApp(options);
-    act(() => app.result.current.range.selectCells(9, 10));
-    act(() => app.result.current.share.openShareDialog());
-    await act(() => app.result.current.share.share(ShareDestinationId.TEXT));
+    ({ app, sharing } = renderShareApp(options, hourFormat));
+    await shareSampleRange(app);
   };
 
   f.BeforeEachScenario(async () => {
