@@ -244,7 +244,8 @@ Not measured: `src/presenter/hourStrip.ts` and `src/model/hourCellBuilder.ts` (t
 - Impact: The approved screens of the meeting state show no move handle, so they no longer are the approved look of the build. A regression that hides, misplaces or restyles the move handle in the sample meeting state passes these eight scenarios. A task is ticked but not done.
 - Fix: Re-take the eight baselines in the CI container with `npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots of the meeting state" --update-snapshots` (both the `chromium` and `mobile-chrome` projects), check that each new image shows the move handle on the frame's top line, commit them, and run the same command without `--update-snapshots` twice to confirm they are stable.
 - Fix risk: baselines taken outside the CI image (other fonts or rendering) fail in CI; take them where the other baselines were taken. No code changes.
-- Status: open
+- Status: fixed
+- Resolution: re-took all eight meeting-state baselines in both projects with `--update-snapshots=all` (the default mode kept them because the grip is under the diff ratio); the 1440x900 image shows the move handle on the frame's top line, and a second run without the flag passed 16/16.
 
 ### R2 — WARNING — A cell drag near a cell edge on fitting strips does not cancel the finger hold
 - Location: `packages/client/src/views/grid/useMeetingFrameMove.ts:143`
@@ -253,7 +254,8 @@ Not measured: `src/presenter/hourStrip.ts` and `src/model/hourCellBuilder.ts` (t
 - Impact: On fitting strips (for example 1440 × 900 with touch), a finger pressed inside the frame 2 px left of a cell edge, slid 3 px right and then held still: the cell drag sets the range of the two cells (`onSelectCells`), and 250 ms later the hold fires (`startDrag`). The next finger movement then moves the whole range instead of extending the cell drag, and `useHourCellSelection` drops its anchor (`isFrameMoving`). FR16 says a finger that moves before the hold does what it did before. No test covers this case.
 - Fix: In `useMeetingFrameMove`, remember on `touchstart` the pressed strip's left edge and the pressed column (`Math.floor((clientX − stripLeft) / cellPitchPx)`), and in `handleTouchMove` also call `clearHold()` when the column under the finger differs from the pressed column. Add a test to `src/views/grid/useMeetingFrameMove.test.tsx`: a touch 2 px left of a cell edge, a move of 3 px into the next cell, then the hold callback must not have been scheduled or must not start a move.
 - Fix risk: low. On scrolling strips a column change by finger always comes with native scrolling of more than 5 px, which already cancels the hold, so nothing changes there. The column has to be measured from the strip under the finger, as `findPressedStrip` already does.
-- Status: open
+- Status: fixed
+- Resolution: useMeetingFrameMove.ts now remembers the pressed strip's left edge and column on touchstart and clears the hold when the finger enters another column; covered by useMeetingFrameMove.test.tsx 'should cancel the hold of a finger that enters another cell within the tolerance' (red first) and the offset-strip variant that kills the mutant on the edge subtraction.
 
 ### R3 — WARNING — The move handle's value text builds the span label a second time
 - Location: `packages/client/src/presenter/meetingHandles.ts:78`
@@ -262,7 +264,8 @@ Not measured: `src/presenter/hourStrip.ts` and `src/model/hourCellBuilder.ts` (t
 - Impact: Two places now decide how a span reads. A change to the span format (separator, 12-hour suffixes, a day mark) made in `presentLocationMeetingRange` leaves the move handle's screen-reader text out of step with the span in the reference zone's row.
 - Fix: In `presentMeetingHandles`, set the move handle's `valueText` to `presentLocationMeetingRange(referenceZoneId, meeting, referenceZoneId, { language, hourFormat, translate }).spanLabel`, and drop the local `formatTime` helper if no other line still uses it.
 - Fix risk: low. Both formatters come from the cached `formatLocalTime`, so NFR-P1 (no new `Intl` formatter) still holds. `getLocationMeetingRange` adds a day-shift computation for one zone per presentation. The tests in `src/presenter/meetingHandles.test.ts` keep `09:00–11:00`.
-- Status: open
+- Status: fixed
+- Resolution: presentMeetingHandles now takes valueText of the move handle from presentLocationMeetingRange(...).spanLabel for the reference zone and no longer imports the span separator; meetingHandles.test.ts stays green and the file scored 100% in Stryker.
 
 ### R4 — SUGGESTION — Never-words of "Meeting move" in new names and Gherkin
 - Location: `packages/client/src/views/grid/MoveHandle.tsx:18`
@@ -271,7 +274,8 @@ Not measured: `src/presenter/hourStrip.ts` and `src/model/hourCellBuilder.ts` (t
 - Impact: The concept gains a second vocabulary in code and specs, which the glossary rule calls a bug; later code searching for "move" misses these names.
 - Fix: Rename `onDragMeetingTo` to `onMoveMeetingTo` in `MoveHandle.tsx`, `GridView.tsx` and `MoveHandle.test.tsx` (and the test title to "should move the whole meeting by the pointer"), and reword the feature narrative to "As a user I move the whole meeting range and its length stays the same."
 - Fix risk: none; a pure rename inside the grid module and one Gherkin narrative line, which no step definition reads.
-- Status: open
+- Status: fixed
+- Resolution: renamed onDragMeetingTo to onMoveMeetingTo in MoveHandle.tsx, GridView.tsx and MoveHandle.test.tsx (title now 'should move the whole meeting by the pointer') and reworded the feature narrative to 'I move the whole meeting range'.
 
 ### R5 — SUGGESTION — `getStripTailCellCount` recomputes the last column of the meeting span
 - Location: `packages/client/src/model/stripTail.ts:22`
@@ -280,7 +284,8 @@ Not measured: `src/presenter/hourStrip.ts` and `src/model/hourCellBuilder.ts` (t
 - Impact: The rule "which column does the range end in" now has two copies in the model. A change to it (for example how an end on a cell edge counts) in `getMeetingSpan` would move the frame and the dimming but not the tail.
 - Fix: Replace lines 19–22 with `const { lastColumn } = getMeetingSpan(day, meeting);`, imported from `./meetingRange`, and drop the now unused `MILLISECONDS_PER_MINUTE`/`MINUTES_PER_HOUR` imports.
 - Fix risk: low. `meetingRange.ts` does not import `stripTail.ts`, so no import cycle appears. `hourCells.test.ts` and `grid_view_strip_tail.feature` cover the result, and the file scored 100 % in mutation.
-- Status: open
+- Status: fixed
+- Resolution: getStripTailCellCount now reads lastColumn from getMeetingSpan; hourCells and model tests stay green, and stripTail.ts scored 100% in Stryker.
 
 ## Verdict
 
