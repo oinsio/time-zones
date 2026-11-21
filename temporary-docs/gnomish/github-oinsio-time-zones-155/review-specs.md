@@ -109,7 +109,8 @@
 - Impact: built as written, the resting move handle is half hidden at scroll ≥ 7 px, so UX2, M4 and M5 fail in E2E, and the implementer has to make a layering choice the spec does not settle, either way risking the stable layering requirement.
 - Fix: in D9, give the sticky header a new layer `meeting-bar` (5) instead of `page-bar`: above the grid layers (1–4) and below `page-bar` (10), `location-menu` (20) and `dialog` (30). In D8, give the move handle a new layer `move-handle` (6). Add both tokens to the `zIndex` map in `tailwind.config.ts` in task 6.1 (header) and 8.3 (handle), and add a Then "the topmost element at the centre of the move handle is the move handle" to the rows of "The move handle sticks to the meeting bar" (`specs/grid-view/spec.md:485`).
 - Fix risk: low. 5 and 6 stay below the date bar, the location menu and the dialogs, so "Grid layers stay under the page bars and dialogs" and "Meeting bar stays at the top of the viewport" ("below an open dialog and an open location menu") still hold. The dragged-row layer (15) is above the bar, but rows cannot be reordered while a meeting range is set ("Row controls are locked while a meeting range is set"). The two new tokens need a line in the glossary or architecture note that lists the page layers.
-- Status: open
+- Status: fixed
+- Resolution: design.md D9 gives the sticky header a new layer `meeting-bar` (5) instead of `page-bar`, and D8 ("Layer") gives the move handle a new layer `move-handle` (6), both below `page-bar` (10), `location-menu` (20) and `dialog` (30), so "Grid layers stay under the page bars and dialogs" holds; tasks 6.1 and 8.3 add the two tokens to the `zIndex` map of `tailwind.config.ts` with component tests; "The move handle sticks to the meeting bar" (specs/grid-view/spec.md) gains the Then "the topmost element at the centre of the move handle is the move handle". No doc lists the page layers today (only the commented map in `tailwind.config.ts`), so no glossary line is needed.
 
 ### R2 — WARNING — Design does not say how a held finger stops native scrolling on scrolling strips
 - Location: `openspec/changes/move-meeting-range-and-extend-past-midnight/design.md:72-78` (D6); `specs/grid-view/spec.md:559`, scenario "Hold and drag with a finger" (`:576`)
@@ -118,7 +119,8 @@
 - Impact: built from D6 as written, the hold fires and the next move scrolls the strips and cancels the move. FR16 and the scenario "Hold and drag with a finger" ("the strips did not scroll by the finger's travel") then fail in E2E (task 8.7), and the implementer has to redesign the gesture during implementation.
 - Fix: in D6, add that once the hold has fired, `useMeetingFrameMove` cancels native panning with a non-passive `touchmove` listener on the strips that calls `preventDefault()` while the move lasts, and before the hold it calls nothing, so a swipe still scrolls. Name the touch path of the drag core as the one used for that finger, so no second copy of the touch handling is written. In task 8.4, add the jsdom tests "a touchmove after the hold is default-prevented" and "a touchmove before the hold is not".
 - Fix risk: medium. The listener must be non-passive only on the strips, or it costs page-scroll performance. The guard order with `useHourCellSelection` on fitting strips (D6) must still let a finger that changes cell before the hold set a range, which the existing task 8.4 guard test covers.
-- Status: open
+- Status: fixed
+- Resolution: design.md D6 gains "Stopping native panning after the hold": a finger move runs on the existing touch path of the drag core on every engine, `useMeetingFrameMove` registers its strip `touchmove` listener with `TRACK_TOUCH_MOVE_LISTENER_OPTIONS` (`passive: false`, `constants/timeSelection.ts`), calls nothing before the hold (a swipe still scrolls) and `preventDefault()` after it, and is non-passive only on the strips; task 8.4 adds the jsdom tests "a touchmove after the hold is default-prevented" and "a touchmove before the hold is not".
 
 ### R3 — WARNING — "Meeting state is fast" is left unmodified though the tail changes the strips
 - Location: `openspec/specs/grid-view/spec.md:638`; `openspec/changes/move-meeting-range-and-extend-past-midnight/specs/grid-view/spec.md:629`; `design.md:64`
@@ -127,7 +129,8 @@
 - Impact: after archive the stable grid-view spec holds two requirements that disagree for every tail-changing move. An implementer who keeps the strip object identical to satisfy the stable rule cannot show the tail. A later change that tests the stable rule with a range near midnight gets a failing test.
 - Fix: add "Meeting state is fast" to the grid-view delta's MODIFIED requirements with its full stable text and scenario. Change "every hour strip MUST stay the same object" to "every hour strip MUST stay the same object while the strip tail keeps its cell count; when the tail grows or shrinks, only the added cells are presented ("Moves and the strip tail are fast")". Append `NFR-P1 of move-meeting-range-and-extend-past-midnight` to its implements comment and list it in proposal → Capabilities.
 - Fix risk: none. The stable scenario (09:00–11:00, one step) and its test in `grid_view_meeting_budget.feature` stay unchanged.
-- Status: open
+- Status: fixed
+- Resolution: specs/grid-view/spec.md adds MODIFIED "Meeting state is fast" with its full stable text and scenario; the hour strips stay the same object only while the strip tail keeps its cell count, otherwise only the added cells are presented; its implements comment gains NFR-P1 of this change; proposal → Modified Capabilities lists it; task 3.5 names the unchanged `grid_view_meeting_budget.steps.ts` run.
 
 ### R4 — WARNING — NFR-P1 has no benchmark task
 - Location: `openspec/changes/move-meeting-range-and-extend-past-midnight/tasks.md:48,85,89` (tasks 3.5, 8.2, 8.6)
@@ -136,7 +139,8 @@
 - Impact: the real cost of a move step over 50 rows and of a growing tail is never reported, so a timing regression of the new hot path goes unseen in the CI `benchmark` job, against the rule's required test types.
 - Fix: add a task to group 8: "extend `src/test/benchmarks/meetingRange.bench.ts` with a move step and a tail growth over 50 rows (`// Verifies NFR-P1 of move-meeting-range-and-extend-past-midnight`). Verify: `npx vitest bench --run --mode test src/test/benchmarks/meetingRange.bench.ts` exits 0", with no timing assertion.
 - Fix risk: low. If `benchBudgets` expects a budget for each benchmark name, the task must add the budget entry in the same file that holds the existing ones.
-- Status: open
+- Status: fixed
+- Resolution: new task 8.8 extends `src/test/benchmarks/meetingRange.bench.ts` with a move step over 50 rows and `src/test/benchmarks/hourStrip.bench.ts` with a growing tail over 50 strips, with the NFR-P1 Verifies line and `npx vitest bench --run --mode test <file>` commands; design.md D13 lists the benchmark. `scripts/benchBudgets.ts` holds one global 50 ms budget, so no per-name budget entry is needed.
 
 ### R5 — WARNING — M4 is measured by no scenario
 - Location: `openspec/changes/move-meeting-range-and-extend-past-midnight/proposal.md:165`; `specs/grid-view/spec.md:453-464,485-496`
@@ -145,7 +149,8 @@
 - Impact: the metric G3 rests on is never measured. A move handle that is clipped or covered at the bottom of the list (see R1) passes every task.
 - Fix: add to "Move handle on the frame" the Scenario Outline "The move handle stays in reach in a long list". GIVEN the Grid view at 390 by 844 px with 12 locations and the sample meeting; WHEN the page is scrolled to its `<position>` (top, middle, bottom); THEN the meeting bar and the move handle are fully inside the viewport, AND the topmost element at the centre of the move handle is the move handle. List it in task 8.7 with `@M4`, not in 6.5, because group 6 runs before the handle exists.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: specs/grid-view/spec.md → "Move handle on the frame" gains the Scenario Outline "The move handle stays in reach in a long list" (390 × 844, 12 locations, top / middle / bottom; meeting bar and move handle fully inside the viewport, the move handle topmost at its centre); task 8.7 lists it with `@FR17 @UX2 @M4`.
 
 ### R6 — WARNING — Stable Tab order of the meeting state contradicts the added move handle Tab stop
 - Location: `openspec/specs/grid-view/spec.md:588`; `openspec/changes/move-meeting-range-and-extend-past-midnight/specs/grid-view/spec.md:509,533`
@@ -154,7 +159,8 @@
 - Impact: after archive the stable grid-view spec holds two MUSTs that disagree about the Tab order of the meeting state: one ends the order at «Конец встречи», the other requires «Сдвиг встречи» after it. An implementer or a later change that tests the stable Tab order as written fails against the built move handle, or drops the move handle from the Tab order to satisfy it and breaks NFR-A1.
 - Fix: add "Accessible meeting state" to the grid-view delta's MODIFIED requirements with its full stable text and every stable scenario. Change the order to "…then the meeting handles «Начало встречи», «Конец встречи», «Сдвиг встречи»", append `NFR-A1 of move-meeting-range-and-extend-past-midnight` to its implements comment, and list the requirement in proposal → Capabilities beside "Meeting state is fast" (R3).
 - Fix risk: none. The delta's own Tab-order scenario (`:533`) and task 8.7 already test the new order, and the existing Tab-order steps stop at the end handle (`grid_view_meeting_share_e2e.steps.ts:143-146`, `grid_view_meeting_lock_e2e.steps.ts:92`), so they keep passing.
-- Status: open
+- Status: fixed
+- Resolution: specs/grid-view/spec.md adds MODIFIED "Accessible meeting state" with its full stable text and all six scenarios; the Tab order and the scenario "Tab order skips the locked controls" end with «Сдвиг встречи»; its implements comment gains NFR-A1 of this change; proposal → Modified Capabilities lists it; task 8.7 updates that scenario in place in `grid_view_meeting_lock_e2e.feature` (its step tabs until «Сдвиг встречи») with the tag `@move-meeting-range-and-extend-past-midnight @NFR-A1`.
 
 ## Verdict
 
