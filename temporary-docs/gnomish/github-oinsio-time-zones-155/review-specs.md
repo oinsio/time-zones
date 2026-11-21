@@ -6,10 +6,10 @@
 |---|---|
 | Stale claims | 0 |
 | Requirements fully covered | 53/54 |
-| Contradictions | 1 |
+| Contradictions | 2 |
 | CRITICAL | 0 |
-| WARNING | 5 |
-| SUGGESTION | 1 |
+| WARNING | 6 |
+| SUGGESTION | 0 |
 
 ## Freshness
 
@@ -98,6 +98,7 @@
 ## Consistency
 
 - Stable `openspec/specs/grid-view/spec.md:638` ("Meeting state is fast": after a meeting handle move within the same reference day "every hour strip MUST stay the same object") is not modified, while the delta `specs/grid-view/spec.md:629` ("Growing or shrinking the strip tail MUST present only the cells that are added") and design D4 (`design.md:64`, the cells of the day kept by identity, so the strip itself changes) make a handle move that changes the tail count produce new strips.
+- Stable `openspec/specs/grid-view/spec.md:588` ("Accessible meeting state": "The Tab order MUST be: «Поделиться встречей», «Сбросить выбор встречи», then for each row its span button and its hour strip, then the meeting handles «Начало встречи», «Конец встречи»") is not modified, while the delta's ADDED "Move handle is a slider" (`specs/grid-view/spec.md:509`, "The move handle MUST be one Tab stop, after the end handle") and its scenario (`specs/grid-view/spec.md:533`, the focus visits «Начало встречи», «Конец встречи» and «Сдвиг встречи») add a third handle Tab stop that the stable closed list does not allow.
 
 ## Findings
 
@@ -146,15 +147,15 @@
 - Fix risk: none.
 - Status: open
 
-### R6 — SUGGESTION — Stable Tab order of the meeting state does not name the move handle
-- Location: `openspec/specs/grid-view/spec.md:587`; `openspec/changes/move-meeting-range-and-extend-past-midnight/specs/grid-view/spec.md:509`
+### R6 — WARNING — Stable Tab order of the meeting state contradicts the added move handle Tab stop
+- Location: `openspec/specs/grid-view/spec.md:588`; `openspec/changes/move-meeting-range-and-extend-past-midnight/specs/grid-view/spec.md:509,533`
 - Rule: `.claude/rules/delta-specs.md`
-- Problem: "Accessible meeting state" spells out the whole Tab order of the meeting state, ending with "then the meeting handles «Начало встречи», «Конец встречи»". The ADDED "Move handle is a slider" adds «Сдвиг встречи» as one more Tab stop after the end handle, and "Accessible meeting state" is not modified.
-- Impact: after archive the one place that lists the full Tab order is incomplete, and a later change reading it would build or test a Tab order without the move handle.
-- Fix: add "Accessible meeting state" to the grid-view delta's MODIFIED requirements with its full text and scenarios. Change the order to "…then the meeting handles «Начало встречи», «Конец встречи», «Сдвиг встречи»" and append `NFR-A1 of move-meeting-range-and-extend-past-midnight` to its implements comment.
-- Fix risk: none. The existing Tab-order steps stop at the end handle (`grid_view_meeting_share_e2e.steps.ts:143-146`, `grid_view_meeting_lock_e2e.steps.ts:92`), so they keep passing.
+- Problem: the stable "Accessible meeting state" says "The Tab order MUST be: «Поделиться встречей», «Сбросить выбор встречи», then for each row its span button and its hour strip, then the meeting handles «Начало встречи», «Конец встречи»" — a closed list. The ADDED "Move handle is a slider" says "The move handle MUST be one Tab stop, after the end handle" (`:509`), and its scenario checks that the focus visits «Начало встречи», «Конец встречи» and «Сдвиг встречи» (`:533`). "Accessible meeting state" is neither MODIFIED in the delta nor listed in the proposal's Capabilities. This is the same class of contradiction as R3.
+- Impact: after archive the stable grid-view spec holds two MUSTs that disagree about the Tab order of the meeting state: one ends the order at «Конец встречи», the other requires «Сдвиг встречи» after it. An implementer or a later change that tests the stable Tab order as written fails against the built move handle, or drops the move handle from the Tab order to satisfy it and breaks NFR-A1.
+- Fix: add "Accessible meeting state" to the grid-view delta's MODIFIED requirements with its full stable text and every stable scenario. Change the order to "…then the meeting handles «Начало встречи», «Конец встречи», «Сдвиг встречи»", append `NFR-A1 of move-meeting-range-and-extend-past-midnight` to its implements comment, and list the requirement in proposal → Capabilities beside "Meeting state is fast" (R3).
+- Fix risk: none. The delta's own Tab-order scenario (`:533`) and task 8.7 already test the new order, and the existing Tab-order steps stop at the end handle (`grid_view_meeting_share_e2e.steps.ts:143-146`, `grid_view_meeting_lock_e2e.steps.ts:92`), so they keep passing.
 - Status: open
 
 ## Verdict
 
-Needs revision. No CRITICAL finding: the change is faithful to the task, its model rules, tables and numbers check out against the code, and every task stays inside the implement stage's limits, with the one handoff item (H1, the ADR) properly justified. Blocking: R1, R2, R3, R4, R5 (WARNING). R6 is optional polish.
+Needs revision. No CRITICAL finding: the change is faithful to the task, its model rules, tables and numbers check out against the code, and every task stays inside the implement stage's limits, with the one handoff item (H1, the ADR) properly justified. Blocking: R1, R2, R3, R4, R5, R6 (all WARNING). R3 and R6 are the two contradictions with stable grid-view MUSTs ("Meeting state is fast", "Accessible meeting state") that the delta must MODIFY before archive.
