@@ -76,7 +76,7 @@ None.
 - **FR6** While the meeting range overlaps the last cell of the reference day or runs past it, every hour strip shows the strip tail: the cells of the next reference day through the cell after the last one the range overlaps.
 - **FR7** A tail cell is an hour cell in every respect — label, colour, midnight marker, offset edge, dimming — and the first tail cell of the reference zone's row is a midnight cell.
 - **FR8** The strip width rule counts the tail cells: the cells shrink while the strip width divided by the cell count stays at least 32 px, otherwise the strips scroll.
-- **FR9** A drag across cells that starts in the reference day may run onto the tail shown at the press; a tap or a drag that starts on a tail cell changes nothing.
+- **FR9** A drag across cells that starts in the reference day may run onto the tail shown at the press, and the range it sets ends at most 24 hours after its start; a tap or a drag that starts on a tail cell changes nothing.
 - **FR10** The meeting range input no longer shows «Окончание встречи должно быть позже начала»; for a start outside the reference day it shows «Начало встречи должно быть внутри дня» ("The meeting must start within the day").
 - **FR11** A range past midnight does not change the date: the reference day, the date bar and the day shift marks follow the start.
 
@@ -89,7 +89,7 @@ None.
 
 - **FR14** A move shifts the start and the end by the same amount and pins the reference moment to the new start. Moves: next and previous track step, an hour forward and back, the earliest and the latest position, and a pointer position. The start lands on the track step (an hour move keeps its minute) and stays inside the reference day.
 - **FR15** A mouse or pen press on an hour cell inside the meeting frame, followed by a movement, moves the whole range; a press outside the frame sets a new range as before; a click without movement stays a tap.
-- **FR16** A finger held for 250 ms on an hour cell inside the frame starts a move; a swipe without the hold scrolls as before.
+- **FR16** A finger held for 250 ms on an hour cell inside the frame starts a move, on scrolling and on fitting strips alike. A finger that moves before the hold does what it did before: it scrolls where the strips scroll and sets a range from the cells touched where all cells fit.
 - **FR17** The move handle stands on the top line of the meeting frame and moves the whole range at once by mouse, pen and finger. When the top of the frame is under the meeting bar, it stands on the bar's bottom line.
 - **FR18** The move handle is a slider named «Сдвиг встречи» ("Move meeting") with the keys of FR14, one Tab stop after the end handle.
 - **FR19** While the range is moved, the frame looks lifted, every row's span and day shift mark, the dimming, the other handles and the date bar follow at each step, the strips scroll near their edges, and the release is not a tap.
@@ -142,7 +142,7 @@ There is no loading or error state: every state above is computed from data in m
 - `packages/client/src/test/features/meeting_range/meeting_range_move.feature` — the move (`@FR14`, `@FR20`).
 - `packages/client/src/test/features/grid_view/grid_view_strip_tail.feature` — the tail, its cells, the width rule, taps and drags, the messages (`@FR6`–`@FR10`).
 - `packages/client/src/test/features/grid_view/grid_view_meeting_move_unit.feature` — the gestures that need no real layout, the moving state, the work bounds (`@FR15`, `@FR16`, `@FR19`, `@NFR-P1`).
-- `packages/client/src/test/features/grid_view/grid_view_meeting_move_e2e.feature` — the sticky bar, handle positions, the move handle's slider values, keys and Tab order, real gestures, focus, axe-core, widths (`@FR12`, `@FR13`, `@FR17`, `@FR18`, `@NFR-A1`–`@NFR-A3`, `@NFR-R1`, `@NFR-R2`, `@UX1`–`@UX3`).
+- `packages/client/src/test/features/grid_view/grid_view_meeting_move_e2e.feature` — the sticky bar, handle positions, the move handle's slider values, keys and Tab order, real gestures, finger holds on scrolling and fitting strips, focus, axe-core, widths (`@FR12`, `@FR13`, `@FR15`, `@FR16`, `@FR17`, `@FR18`, `@NFR-A1`–`@NFR-A3`, `@NFR-R1`, `@NFR-R2`, `@UX1`–`@UX3`).
 - `packages/client/src/test/features/grid_view/grid_view_meeting_handles_e2e.feature` — slider values and keys of the start and end handles past midnight, the tail under a dragged end handle, drags and taps on the tail (`@FR4`, `@FR6`, `@FR9`).
 - `packages/client/src/test/features/grid_view/grid_view_meeting_screenshots_e2e.feature` — the approved screenshots (`@UX1`–`@UX4`, `@NFR-R1`).
 

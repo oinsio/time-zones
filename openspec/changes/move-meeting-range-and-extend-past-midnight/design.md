@@ -57,7 +57,7 @@ The length is kept in absolute minutes, so a move across a clock change keeps th
 
 ### D4. The strip tail is more cells of the same kind (FR6–FR8)
 
-`model/hourCells.ts` gains `getStripTailCellCount(meetingRange, referenceDay)`: zero without a range; otherwise the index of the last cell the range overlaps, plus two, minus the cell count of the day, clamped to `[0, cells of the next reference day]`. `getHourCells` takes that count and appends the first cells of the next reference day, computed by the same code path as today's cells, so labels, colours, offset edges and day periods need no second implementation. The midnight rule changes in one place: "the reference zone's row has no midnight cell" becomes "column 0 of the reference zone's row is a plain cell".
+`model/hourCells.ts` gains `getStripTailCellCount(meetingRange, referenceDay)`: zero without a range; otherwise the index of the last cell the range overlaps, plus two, minus the cell count of the day, clamped to `[0, cells of the next reference day]`. `getHourCells` takes that count and appends the first cells of the next reference day, computed by the same code path as today's cells (`getHourCellStart` places a tail column at the next day's start, D10), so labels, colours, offset edges and day periods need no second implementation. The midnight rule changes in one place: "the reference zone's row has no midnight cell" becomes "column 0 of the reference zone's row is a plain cell".
 
 `useHourGrid` (controller) returns `cellCount` as the cell count of the day plus the tail; today it returns `getHourCellCount(day)`. Nothing else changes in the width rule: `useHourStripScroll` already passes `cellCount` to `getHourCellLayout` (`views/grid/hourCellLayout.ts`, the owner of `MIN_FITTING_HOUR_CELL_PX` / `HOUR_CELL_SCROLL_WIDTH_PX`) and writes `HourGridCssVariable.CELL_COUNT` and `CELL_PITCH`. The frame and the handles already place themselves by minutes × pitch, so they follow.
 
@@ -73,9 +73,9 @@ Presentation is incremental (NFR-P1): `presentHourStrip` keeps the cells of the 
 
 `useMeetingFrameMove` listens on the hour strips, like `useHourCellSelection`, and decides by the pointer's column whether a press is inside the frame:
 - mouse or pen: a movement of `REORDER_POINTER_ACTIVATION_DISTANCE_PX` starts a move; without it the release is a click and `useHourCellSelection` handles the tap as today;
-- finger: `REORDER_TOUCH_ACTIVATION_DELAY_MS` within `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX` starts a move; earlier movement is left to native scrolling.
+- finger: `REORDER_TOUCH_ACTIVATION_DELAY_MS` within `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX` starts a move, on scrolling and on fitting strips alike; earlier movement keeps today's meaning: native scrolling where the strips scroll, a cell drag where all cells fit.
 
-The reorder constants are reused because the owner asked for "the same gesture as the cards"; one value for both. `useHourCellSelection` gets one new guard: a mouse or pen press inside the frame does not begin a cell drag. The hold disables text selection and the iOS callout on the strips with the classes the grab area already uses.
+The reorder constants are reused because the owner asked for "the same gesture as the cards"; one value for both. `useHourCellSelection` gets two new guards: a mouse or pen press inside the frame does not begin a cell drag; and on fitting strips a finger press inside the frame stays a candidate cell drag until either the finger enters another cell (a cell drag, as today, and the pending hold is cancelled) or the hold fires (the move starts and the cell selection drops its anchor, so it sets nothing for that press). The cells are at least 32 px wide where they fit, so the 5 px tolerance never reaches another cell; a finger that moves more than 5 px inside its cell cancels the hold and only a later cell change starts a cell drag. The hold disables text selection and the iOS callout on the strips with the classes the grab area already uses.
 
 The frame itself keeps `pointer-events: none` on its border; the cells under it receive the events, so nothing new can block a row control.
 
@@ -105,9 +105,15 @@ Risk: an ancestor with a transform would make `fixed` relative to it. The sortab
 
 Focus under the bar (NFR-A3): while the bar is sticky, the scrolling element gets `scroll-padding-top` equal to the bar's measured height, so the browser's own focus scrolling stops below it. This is layout state of the page, so it stays out of the controller: `useMeetingRange`/`useMeetingBar` only decide whether there is a bar. One effect in `MainPage` (`src/app/`), the component that owns the header, measures the header with the `ResizeObserver` pattern of `useHourStripScroll`. It sets the padding while `meetingBar` is given and clears it when it is not.
 
-### D10. Taps and drags on the tail (FR9)
+### D10. Taps and drags on the tail (FR1, FR9)
 
 `useHourCellSelection` ignores a press that starts on a tail cell and, during a cell drag, freezes the tail count of the press (a view-state override passed to `useHourGrid`), so cells never disappear under the pointer. The freeze ends with the drag.
+
+The range of a cell drag is built in the model, not in the view. Today `getMeetingRangeOfCells` in `model/meetingRange.ts` clamps the end to `day.end`, and `useMeetingRange` (`selectCells`) builds every cell-drag range through it, so a drag onto the tail would end at 24:00. It changes in two ways:
+- the end of the highest cell is clamped to the end of the day that cell belongs to: the reference day for its own columns, the next reference day for tail columns (column ≥ `getHourCellCount(day)`); `getHourCellStart` places a tail column at the next day's start plus its hours into the tail, so a reference day that is not a whole number of hours (Lord Howe) still starts its tail at midnight;
+- the end is limited to `start + MEETING_RANGE_MAX_MINUTES` (D1), so a drag from column 0 to 26 gives 00:00–24:00 instead of an invalid range.
+
+The low column is always a column of the reference day, because the press is (the guard above). The other reader of `getHourCellStart` past the last column, `buildFlags` in `model/workingTime.ts`, clamps that value to `day.end`, so it keeps its results.
 
 ### D11. The lifted look (FR19, UX3)
 

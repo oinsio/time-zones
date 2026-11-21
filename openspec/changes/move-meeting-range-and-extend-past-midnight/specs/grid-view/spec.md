@@ -145,7 +145,7 @@ A tap or click on an hour cell SHALL set a one-hour meeting range starting at th
 - **THEN** the meeting range is unchanged and the date bar still shows 8 March
 
 ### Requirement: Drag across hour cells sets a meeting range
-Dragging across hour cells with a mouse or a pen SHALL set a meeting range from the start of the first cell to the end of the last cell touched, in either direction, and MUST update it each time the pointer enters another cell. While all cells of the reference day fit without scrolling, a finger drag MUST do the same. Where the strips scroll horizontally, a finger swipe MUST scroll the strips and set no meeting range. A drag that starts on a cell of the reference day MAY run onto the cells of the strip tail shown at the press; that tail MUST stay until the drag ends. A drag that starts on a tail cell MUST change nothing. A mouse or pen press on an hour cell inside the meeting frame does not start such a drag: it follows "Move the meeting range by its frame". <!-- implements FR6 of add-grid-meeting-range-and-share; FR9, FR15 of move-meeting-range-and-extend-past-midnight -->
+Dragging across hour cells with a mouse or a pen SHALL set a meeting range from the start of the first cell to the end of the last cell touched, in either direction, and MUST update it each time the pointer enters another cell. While all cells of the strips, the strip tail included, fit without scrolling, a finger drag MUST do the same, also when it starts inside the meeting frame, as long as the finger enters another cell before it has been held for 250 ms; a finger held for 250 ms inside the frame without moving more than 5 px starts a move instead ("Move the meeting range by its frame") and sets no range from the cells it then touches. Where the strips scroll horizontally, a finger swipe MUST scroll the strips and set no meeting range. A drag that starts on a cell of the reference day MAY run onto the cells of the strip tail shown at the press; that tail MUST stay until the drag ends. The end of a range set by a drag MUST NOT lie more than 24 hours after its start: a drag that touches more cells ends the range 24 hours after its start. A drag that starts on a tail cell MUST change nothing. A mouse or pen press on an hour cell inside the meeting frame does not start such a drag: it follows "Move the meeting range by its frame". <!-- implements FR6 of add-grid-meeting-range-and-share; FR9, FR15 of move-meeting-range-and-extend-past-midnight -->
 
 #### Scenario: Drag from column 9 to column 10
 - **GIVEN** the Grid view at 1440 by 900 px at `2026-03-08T07:30:00Z` with Almaty, Moscow, Kolkata and New York
@@ -166,6 +166,16 @@ Dragging across hour cells with a mouse or a pen SHALL set a meeting range from 
 - **GIVEN** the Grid view at 1440 by 900 px with the meeting range 23:00 on 2026-03-08 to 02:00 on 2026-03-09 in Almaty
 - **WHEN** the user drags with the mouse from column 21 of Almaty to column 24 of Almaty
 - **THEN** the meeting range is 21:00 on 2026-03-08 to 01:00 on 2026-03-09 in Almaty
+
+#### Scenario: A drag across more than 24 hours
+- **GIVEN** the Grid view at 1440 by 900 px with the meeting range 23:00 on 2026-03-08 to 02:00 on 2026-03-09 in Almaty
+- **WHEN** the user drags with the mouse from column 0 of Almaty to column 26 of Almaty
+- **THEN** the meeting range is 00:00 on 2026-03-08 to 00:00 on 2026-03-09 in Almaty and the title is «Встреча · 24 ч»
+
+#### Scenario: A finger drag inside the frame on fitting strips
+- **GIVEN** the Grid view at 1440 by 900 px on a touch screen with the meeting range 13:00–15:00 in Almaty on 2026-03-08
+- **WHEN** the user drags a finger from column 14 to column 17 of Almaty without holding it first
+- **THEN** the meeting range is 14:00–18:00 in Almaty
 
 ### Requirement: Meeting frame and dimmed cells
 While a meeting range is set, a meeting frame SHALL surround the range across all rows of the panel, from its start to its end, in the meeting colour of the active theme (`#00AA00` light, `#3DD13D` dark), and no hour frame MUST be shown. Hour cells that do not overlap the range MUST be dimmed to opacity 0.4; a cell that overlaps it even in part is not dimmed. Cells of the strip tail are dimmed by the same rule. The meeting frame MUST lie above the hour cells and behind the row header texts and row notes; its border MUST NOT take pointer events, and a press on the hour cells inside it follows "Move the meeting range by its frame"; like the hour frame ("Hour frame lies behind texts") it MUST be hidden only behind text glyphs, the row notes and an open input, and drawn at every other point of its border inside a row header. With no rows, no frame is shown. <!-- implements FR7, UX1 of add-grid-meeting-range-and-share; FR8, UX3 of fix-grid-meeting-range-lock-and-layering; FR7, FR15 of move-meeting-range-and-extend-past-midnight -->
@@ -546,7 +556,7 @@ The move handle MUST be one Tab stop, after the end handle. It MUST have a visib
 | dark | middle |
 
 ### Requirement: Move the meeting range by its frame
-A press on the move handle SHALL move the whole meeting range at once, by mouse, pen and finger. A mouse or pen press on an hour cell inside the meeting frame, followed by a movement of at least 4 px, MUST move the whole range too, and the pointer over those cells MUST be a grab cursor. A finger held for 250 ms on an hour cell inside the frame, without moving more than 5 px, MUST start a move; a finger that moves earlier scrolls the strips or the page as before. While the pointer moves, the start of the range goes to its position at the press plus the pointer's horizontal travel along the strips since the press (the strips' scroll included), rounded and limited as "Move the whole meeting range" of `meeting-range` says. A press and release without movement on a cell inside the frame stays a tap ("Tap or Enter sets a one-hour meeting range"); a press and release without movement on the move handle changes nothing. A press outside the frame behaves as before. A move MUST work by finger also on an engine without Pointer Events. During a finger hold inside the frame the browser MUST NOT start a text selection or open its callout. <!-- implements FR15, FR16, FR17 of move-meeting-range-and-extend-past-midnight -->
+A press on the move handle SHALL move the whole meeting range at once, by mouse, pen and finger. A mouse or pen press on an hour cell inside the meeting frame, followed by a movement of at least 4 px, MUST move the whole range too, and the pointer over those cells MUST be a grab cursor. A finger held for 250 ms on an hour cell inside the frame, without moving more than 5 px, MUST start a move, whether the strips scroll or fit, and from then on the finger sets no range from the cells it touches. A finger that moves earlier does what it did before this change: where the strips scroll it scrolls the strips or the page, and where all cells fit it sets a range from the cells it touches ("Drag across hour cells sets a meeting range"). While the pointer moves, the start of the range goes to its position at the press plus the pointer's horizontal travel along the strips since the press (the strips' scroll included), rounded and limited as "Move the whole meeting range" of `meeting-range` says. A press and release without movement on a cell inside the frame stays a tap ("Tap or Enter sets a one-hour meeting range"); a press and release without movement on the move handle changes nothing. A press outside the frame behaves as before. A move MUST work by finger also on an engine without Pointer Events. During a finger hold inside the frame the browser MUST NOT start a text selection or open its callout. <!-- implements FR15, FR16, FR17 of move-meeting-range-and-extend-past-midnight -->
 
 #### Scenario: Drag the frame with the mouse
 - **GIVEN** the Grid view at 1440 by 900 px with Almaty, Moscow, Kolkata and New York and the meeting range 13:00–15:00 in Almaty on 2026-03-08
@@ -567,6 +577,11 @@ A press on the move handle SHALL move the whole meeting range at once, by mouse,
 - **GIVEN** the Grid view at 390 by 844 px with the meeting range 13:00–15:00 in Almaty
 - **WHEN** the user holds a finger on column 13 of Almaty for 250 ms and then moves it one cell to the right
 - **THEN** the meeting range is 14:00–16:00 and the strips did not scroll by the finger's travel
+
+#### Scenario: Hold and drag with a finger on fitting strips
+- **GIVEN** the Grid view at 1440 by 900 px on a touch screen with the meeting range 13:00–15:00 in Almaty
+- **WHEN** the user holds a finger on column 13 of Almaty for 250 ms and then moves it two cells to the right
+- **THEN** the meeting range is 15:00–17:00 and the title is «Встреча · 2 ч»
 
 #### Scenario: A swipe inside the frame still scrolls
 - **GIVEN** the Grid view at 390 by 844 px with the meeting range 13:00–15:00 in Almaty
