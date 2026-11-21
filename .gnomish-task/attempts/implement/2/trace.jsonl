@@ -1,0 +1,5 @@
+{"seq":0,"tool":"Bash","start":"2026-11-21T13:28:47.230810Z","durationMillis":35}
+{"seq":1,"tool":"Bash","start":"2026-11-21T13:28:48.813722Z","durationMillis":600170}
+{"seq":2,"tool":"Bash","start":"2026-11-21T13:38:50.899288Z","durationMillis":255183}
+{"seq":3,"tool":"Bash","start":"2026-11-21T13:43:09.111595Z","durationMillis":149}
+{"seq":4,"tool":"Bash","start":"2026-11-21T13:43:10.852948Z","durationMillis":17}
