@@ -61,7 +61,7 @@ The settings screens copy the built page with the new tokens. Only the Colours g
 
 Proposed changes that are not approved yet live apart from the approved screens:
 
-- [Sharing, moving and extending the meeting range](proposals/meeting-range/README.md) — the share window, a meeting range past midnight, moving the whole range (November 2026). Part 1, the share window, is in change `add-meeting-share-dialog`.
+- [Sharing, moving and extending the meeting range](proposals/meeting-range/README.md) — the share window, a meeting range past midnight, moving the whole range (November 2026). Part 1, the share window, is in change `add-meeting-share-dialog`; parts 2 and 3, the range past midnight and the move of the whole range, are in change `move-meeting-range-and-extend-past-midnight`.
 
 ## Before the redesign
 
