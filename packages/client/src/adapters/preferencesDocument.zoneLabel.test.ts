@@ -8,6 +8,7 @@ import {
   DayPalette,
   HourFormat,
   type Preferences,
+  SHARE_ZONE_LABEL_PARTS,
   ThemePreference,
   ZoneLabelPart,
 } from "@/preferences";
@@ -36,6 +37,8 @@ describe("the zone label in the preferences document", () => {
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
         dayPalette: DayPalette.VIVID,
+        shareLanguage: null,
+        shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
       },
     });
   });
@@ -60,6 +63,8 @@ describe("the zone label in the preferences document", () => {
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
       dayPalette: DayPalette.VIVID,
+      shareLanguage: null,
+      shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
     };
     expect(
       deserializePreferencesDocument(
@@ -79,8 +84,8 @@ describe("the zone label in the preferences document", () => {
     });
   });
 
-  it("should be at schema version 7", () => {
-    expect(PREFERENCES_SCHEMA_VERSION).toBe(7);
+  it("should be at schema version 8", () => {
+    expect(PREFERENCES_SCHEMA_VERSION).toBe(8);
   });
 
   it.each([
@@ -101,6 +106,8 @@ describe("the zone label in the preferences document", () => {
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
           dayPalette: DayPalette.VIVID,
+          shareLanguage: null,
+          shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
         },
       });
       expect(deserializePreferencesDocument(rawDocument, null)).toEqual({
@@ -114,6 +121,8 @@ describe("the zone label in the preferences document", () => {
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
           dayPalette: DayPalette.VIVID,
+          shareLanguage: null,
+          shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
         },
       });
     },
@@ -149,6 +158,8 @@ describe("the zone label in the preferences document", () => {
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
       dayPalette: DayPalette.VIVID,
+      shareLanguage: null,
+      shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
     };
     expect(
       deserializePreferencesDocument(
@@ -176,6 +187,8 @@ describe("the zone label in the preferences document", () => {
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
         dayPalette: DayPalette.VIVID,
+        shareLanguage: null,
+        shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
       },
     });
     expect(deserializePreferencesDocument(rawDocument, null)).toEqual({

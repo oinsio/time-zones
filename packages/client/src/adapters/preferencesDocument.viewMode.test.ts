@@ -7,6 +7,7 @@ import {
   DayPalette,
   DEFAULT_PREFERENCES,
   HourFormat,
+  SHARE_ZONE_LABEL_PARTS,
   ThemePreference,
   ZoneLabelPart,
 } from "@/preferences";
@@ -44,6 +45,8 @@ describe("the view mode in the preferences document", () => {
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
         dayPalette: DayPalette.VIVID,
+        shareLanguage: null,
+        shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
       },
     });
   });
@@ -72,6 +75,8 @@ describe("the view mode in the preferences document", () => {
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
         dayPalette: DayPalette.VIVID,
+        shareLanguage: null,
+        shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
       }),
     );
     expect(written.schemaVersion).toBe(PREFERENCES_SCHEMA_VERSION);

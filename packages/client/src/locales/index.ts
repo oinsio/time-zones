@@ -15,3 +15,7 @@ export {
   SUPPORTED_LANGUAGES,
 } from "./localeRegistry";
 export { resolveInterfaceLanguage } from "./resolveInterfaceLanguage";
+export {
+  type ResolvedShareLanguage,
+  resolveShareLanguage,
+} from "./resolveShareLanguage";

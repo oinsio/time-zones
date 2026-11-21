@@ -13,6 +13,7 @@ import {
   DEFAULT_PREFERENCES,
   DEFAULT_WORKING_HOURS,
   HourFormat,
+  SHARE_ZONE_LABEL_PARTS,
   ThemePreference,
 } from "@/preferences";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
@@ -30,6 +31,8 @@ const storedDarkTwelveHour = {
     dayColouring: DayColouring.TIME_OF_DAY,
     workingHours: DEFAULT_WORKING_HOURS,
     dayPalette: DayPalette.VIVID,
+    shareLanguage: null,
+    shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
   },
 } as const;
 

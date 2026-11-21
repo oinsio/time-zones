@@ -7,6 +7,7 @@ import {
   DayPalette,
   DEFAULT_PREFERENCES,
   HourFormat,
+  SHARE_ZONE_LABEL_PARTS,
   ThemePreference,
   ZoneLabelPart,
 } from "@/preferences";
@@ -39,6 +40,8 @@ describe("deserializePreferencesDocument", () => {
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
         dayPalette: DayPalette.VIVID,
+        shareLanguage: null,
+        shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
       },
     });
   });
@@ -114,10 +117,12 @@ describe("serializePreferencesDocument", () => {
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
           dayPalette: DayPalette.VIVID,
+          shareLanguage: null,
+          shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
         }),
       ),
     ).toEqual({
-      schemaVersion: 7,
+      schemaVersion: 8,
       payload: {
         theme: "DARK",
         hourFormat: "H12",
@@ -127,6 +132,8 @@ describe("serializePreferencesDocument", () => {
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
         dayPalette: DayPalette.VIVID,
+        shareLanguage: null,
+        shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
       },
     });
   });
