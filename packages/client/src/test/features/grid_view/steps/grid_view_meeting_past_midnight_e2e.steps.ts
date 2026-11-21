@@ -1,4 +1,4 @@
-// Verifies FR4, FR6, FR9, FR10 of move-meeting-range-and-extend-past-midnight: the strip tail and the range past midnight in a real browser.
+// Verifies FR4, FR6, FR9, FR19 of move-meeting-range-and-extend-past-midnight: the strip tail and the range past midnight in a real browser.
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";

@@ -158,7 +158,7 @@ Feature: Meeting handles of the Grid view in a real browser
     Then the meeting range is from "00:00" to "00:00"
     And the meeting title reads "Meeting · 24 h"
 
-  @move-meeting-range-and-extend-past-midnight @FR10
+  @move-meeting-range-and-extend-past-midnight @FR6 @FR19
   Scenario: The tail grows under a dragged end handle
     Given the stored locations are "Almaty", "Moscow", "Kolkata", "New York"
     And the screen is 1440 by 900 px for the locations

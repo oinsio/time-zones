@@ -1,4 +1,4 @@
-// Verifies FR10 of move-meeting-range-and-extend-past-midnight (D5): the drag core re-bases when the strip tail changes.
+// Verifies FR6, FR19 of move-meeting-range-and-extend-past-midnight (D5): the drag core re-bases when the strip tail changes.
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { MeetingHandleSlider } from "./MeetingHandle";
