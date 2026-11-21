@@ -20,7 +20,7 @@ Audience: everyone who plans a meeting in the Grid view; evening meetings and lo
 - **ADDED** the **meeting move**: moving the whole meeting range without changing its length — by dragging the meeting frame, by a finger hold inside it, and by a third meeting handle, the **move handle**, which is also a slider for the keyboard.
 - **MODIFIED** the **meeting bar**: it stays at the top of the viewport while a meeting range is set; the move handle rests on its bottom line once the top of the frame has scrolled under it.
 - **MODIFIED** the rows on which the start and end handles stand: a row under the meeting bar is not a visible row.
-- New glossary terms: strip tail, meeting move, move handle. Changed terms: meeting range, reference day, hour strip, hour cell, meeting handle, meeting frame, meeting bar, meeting range input.
+- New glossary terms: strip tail, meeting move, move handle. Changed terms: meeting range, reference day, hour strip, hour cell, midnight marker (the first tail cell of the reference zone's row is a midnight cell, so that row no longer shows only a plain `0`), meeting handle, meeting frame, meeting bar, meeting range input, grab area (its *Code:* gains the hold and drag thresholds that the meeting move reuses).
 - A new ADR refines ADR-0011: the range may end after the reference day and may be moved as a whole. The factory may not write `docs/adr/`, so the ADR reaches the branch as a patch that the owner applies before the merge (handoff H1 in `tasks.md`).
 
 No stored data changes: the meeting range is never stored.
@@ -144,6 +144,7 @@ There is no loading or error state: every state above is computed from data in m
 - `packages/client/src/test/features/grid_view/grid_view_meeting_move_unit.feature` — the gestures that need no real layout, the moving state, the work bounds (`@FR15`, `@FR16`, `@FR19`, `@NFR-P1`).
 - `packages/client/src/test/features/grid_view/grid_view_meeting_move_e2e.feature` — the sticky bar, handle positions, the move handle's slider values, keys and Tab order, real gestures, finger holds on scrolling and fitting strips, focus, axe-core, widths (`@FR12`, `@FR13`, `@FR15`, `@FR16`, `@FR17`, `@FR18`, `@NFR-A1`–`@NFR-A3`, `@NFR-R1`, `@NFR-R2`, `@UX1`–`@UX3`).
 - `packages/client/src/test/features/grid_view/grid_view_meeting_handles_e2e.feature` — slider values and keys of the start and end handles past midnight, the tail under a dragged end handle, drags and taps on the tail (`@FR4`, `@FR6`, `@FR9`).
+- `packages/client/src/test/features/grid_view/grid_view_meeting_handle_reach_e2e.feature` — its existing scenarios "Slider values off the track step" (`@FR4`) and "Handles stay on screen in a long list" (`@FR13`, below the meeting bar) are updated in place.
 - `packages/client/src/test/features/grid_view/grid_view_meeting_screenshots_e2e.feature` — the approved screenshots (`@UX1`–`@UX4`, `@NFR-R1`).
 
 Existing features of `meeting_range` and `grid_view` are updated where their requirement is modified, keeping their tags.

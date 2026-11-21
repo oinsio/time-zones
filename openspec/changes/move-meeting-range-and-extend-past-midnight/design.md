@@ -15,14 +15,14 @@ ADRs that bind this change, all read for it:
 
 One global decision changes. ADR-0011 says the range lies inside the reference day and rejects "a range across days" because it needs a multi-day grid. FR1 and FR6 lift that with a bounded tail instead of a multi-day grid, and FR14 adds a way to change the range that every future view must offer. That is a decision beyond this change, so it gets a new ADR that refines ADR-0011 (D12).
 
-Owners of the concepts this change touches (`docs/glossary/time-selection.md`):
+Owners of the concepts this change touches (`docs/glossary/time-selection.md` unless noted):
 - **Meeting range**: `MeetingRange`, `isValidMeetingRange`, `getMeetingHandleLimits`, `getMeetingRangeAfterHandleMove`, `getMeetingRangeAtHandleMinutes`, `moveMeetingRangeToDay` in `model/meetingRange.ts`; `reduceSetMeetingRange`, `followMeetingRange` in `model/reduceMeetingRange.ts`; `reduceMeetingRangeWallTimes.ts`; `useMeetingRange`.
 - **Reference day**: `ReferenceDay`, `getReferenceDay`. **Hour cell** / **hour strip**: `HourCell`, `getHourCells`, `getHourCellCount` in `model/hourCells.ts`; `presentHourStrip`; `HourStrip`, `useHourGrid`, `useHourStripScroll`, `HourGridCssVariable`.
 - **Track step** / **track move**: `TRACK_STEP_MINUTES`, `TrackMove`, `getMinutesAfterTrackStep`.
 - **Meeting frame**: `MeetingFrame`. **Meeting handle**: `MeetingHandle` (model enum), `MeetingHandleSlider`, `useMeetingHandleDrag`, `getMeetingHandleRow`, `useVisibleStripRows`.
 - **Meeting bar**: `MeetingBar`, `presentMeetingBar`, `useMeetingBar`; the header of `MainPage`.
 - **Meeting range input**: `confirmMeetingRangeInput`, `MeetingRangeInput`.
-- **Grab area** gesture constants: `REORDER_POINTER_ACTIVATION_DISTANCE_PX`, `REORDER_TOUCH_ACTIVATION_DELAY_MS`, `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX`.
+- **Grab area** (`docs/glossary/locations.md`, not `time-selection.md`): its *Code:* today names only "the place and zone line elements of `ZoneRowContent`". The thresholds the entry describes ("touch after a 250 ms hold, mouse after 4 px") live in `src/constants/reorder.ts` as `REORDER_POINTER_ACTIVATION_DISTANCE_PX`, `REORDER_TOUCH_ACTIVATION_DELAY_MS`, `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX`. D6 reuses them for the hold of a move, so task 1.3 adds them to the grab area's *Code:* as the one owner of the hold and drag thresholds.
 
 Every decision below extends one of these owners or adds an owner for a new glossary term (strip tail, meeting move, move handle).
 
