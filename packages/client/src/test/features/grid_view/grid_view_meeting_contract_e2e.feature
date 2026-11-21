@@ -10,13 +10,14 @@ Feature: Meeting range in every view that shows it
     And the current time is "2026-03-08T07:30:00Z"
     And the stored locations are "Almaty", "Moscow"
 
-  @add-grid-meeting-range-and-share @view-contract @meeting-range @FR17
+  @add-grid-meeting-range-and-share @view-contract @meeting-range @FR17 @add-meeting-share-dialog @FR9
   Scenario: Set, resize, share and clear
     When the user taps column 9 of "Almaty"
     Then the meeting range is from "09:00" to "10:00"
     When the user presses "PageUp" on the end handle
     Then the meeting range is from "09:00" to "11:00"
     When the user chooses Share meeting
+    And the user chooses Share in the dialog
     Then the clipboard holds the meeting share text
     When the user clears the meeting
     Then no meeting range is set
