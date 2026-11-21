@@ -103,7 +103,7 @@ ShareDestination  = { id; isAvailable(): boolean; share(meetingShare): Promise<S
 
 A destination receives both the invitation and the text: a calendar needs the instants and may put the text in the description. The dialog renders one button per available destination and knows none by name. Each button takes its label and its icon from one owner per layer, both keyed by `ShareDestinationId` as a `Record`, so adding an id without a label or an icon fails the typecheck:
 
-- the label is presenter output (`architecture.md`: the presenter "applies i18n"): `presentShareDestinationLabel(destinationId, translate)` in `presenter/shareDestinationLabel.ts` maps `TEXT` to the key `meeting.shareDialog.share` («Поделиться» / "Share");
+- the label is presenter output (`architecture.md`: the presenter "applies i18n"): `presentShareDestinationLabel(destinationId, translate)` in `presenter/shareDestinationLabel.ts` maps `TEXT` to the key `meeting.shareDialogShare` («Поделиться» / "Share"). Every share dialog string is a two-level key `meeting.shareDialog<Name>` of the existing `meeting` domain (`.claude/rules/i18n.md`: "Use flat two-level namespacing: `domain.specificKey`"); task 7.2 lists them;
 - the icon is a React component and stays in the views, as the view registry in `views/index.ts` already keeps its Lucide icons beside the views: `SHARE_DESTINATION_ICONS` in `views/shared/shareDestinationIcons.ts` maps `TEXT` to Lucide `Share2`.
 
 ### D6. Controller: `useMeetingShare` owns the dialog session (FR1, FR8–FR10)
