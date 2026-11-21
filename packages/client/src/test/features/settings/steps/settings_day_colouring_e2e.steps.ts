@@ -53,6 +53,8 @@ Given(
         dayColouring: COLOURING_VALUES[name],
         workingHours: DEFAULT_WORKING_HOURS,
         dayPalette: "VIVID",
+        shareLanguage: null,
+        shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
       },
       locationsWorld.seededInterfaceLanguage,
     );
@@ -68,6 +70,8 @@ Given(
         dayColouring: COLOURING_VALUES[name],
         workingHours: DEFAULT_WORKING_HOURS,
         dayPalette: "VIVID",
+        shareLanguage: null,
+        shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
         hourFormat,
       },
       locationsWorld.seededInterfaceLanguage,

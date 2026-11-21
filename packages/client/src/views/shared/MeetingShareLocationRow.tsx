@@ -57,10 +57,15 @@ export function MeetingShareLocationRow({
           )}
         </span>
         <span className="flex flex-col items-end text-right">
-          <span className={cn("text-meeting-text", mutedClassName)}>
+          <span
+            data-share-row-span
+            className={cn("text-meeting-text", mutedClassName)}
+          >
             {row.spanLabel}
           </span>
-          <span className="text-sm text-muted-foreground">{dateLabel}</span>
+          <span data-share-row-date className="text-sm text-muted-foreground">
+            {dateLabel}
+          </span>
         </span>
       </label>
     </li>

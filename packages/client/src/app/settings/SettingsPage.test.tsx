@@ -137,6 +137,8 @@ describe("SettingsPage", () => {
         dayColouring: DEFAULT_PREFERENCES.dayColouring,
         workingHours: DEFAULT_PREFERENCES.workingHours,
         dayPalette: DEFAULT_PREFERENCES.dayPalette,
+        shareLanguage: DEFAULT_PREFERENCES.shareLanguage,
+        shareZoneLabelParts: DEFAULT_PREFERENCES.shareZoneLabelParts,
         zoneLabelParts: [
           ZoneLabelPart.UTC_OFFSET,
           ZoneLabelPart.ZONE_ABBREVIATION,
