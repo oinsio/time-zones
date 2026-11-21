@@ -15,7 +15,7 @@ type MoveHandleSliderProps = {
   /** The whole range is being moved, by the handle or by the frame: the lifted look. */
   isMoving: boolean;
   onMoveMeeting: (move: TrackMove) => void;
-  onDragMeetingTo: (startMinutes: number) => void;
+  onMoveMeetingTo: (startMinutes: number) => void;
   /** Called with `true` when a drag by the handle starts and with `false` when it ends. */
   onDragActiveChange: (isDragging: boolean) => void;
 };
@@ -35,7 +35,7 @@ export function MoveHandleSlider({
   tailCellCount,
   isMoving,
   onMoveMeeting,
-  onDragMeetingTo,
+  onMoveMeetingTo,
   onDragActiveChange,
 }: MoveHandleSliderProps) {
   const itemElement = useRef<HTMLLIElement | null>(null);
@@ -46,7 +46,7 @@ export function MoveHandleSlider({
     isScrollable,
     tailCellCount,
     valueMinutes: presented.valueMinutes,
-    onDragTo: onDragMeetingTo,
+    onDragTo: onMoveMeetingTo,
     onDragActiveChange,
   });
   useMoveHandlePlacement(itemElement, presented.valueText);

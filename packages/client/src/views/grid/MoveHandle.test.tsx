@@ -17,7 +17,7 @@ const MOVE_HANDLE: PresentedMeetingHandle<MeetingHandle.MOVE> = {
 
 const renderHandle = (isMoving = false) => {
   const onMoveMeeting = vi.fn();
-  const onDragMeetingTo = vi.fn();
+  const onMoveMeetingTo = vi.fn();
   render(
     <ul>
       <li>
@@ -30,12 +30,12 @@ const renderHandle = (isMoving = false) => {
         tailCellCount={0}
         isMoving={isMoving}
         onMoveMeeting={onMoveMeeting}
-        onDragMeetingTo={onDragMeetingTo}
+        onMoveMeetingTo={onMoveMeetingTo}
         onDragActiveChange={vi.fn()}
       />
     </ul>,
   );
-  return { onMoveMeeting, onDragMeetingTo, slider: screen.getByRole("slider") };
+  return { onMoveMeeting, onMoveMeetingTo, slider: screen.getByRole("slider") };
 };
 
 describe("MoveHandleSlider", () => {
@@ -114,12 +114,12 @@ describe("MoveHandleSlider", () => {
     );
   });
 
-  it("should drag the whole meeting by the pointer", () => {
-    const { slider, onDragMeetingTo } = renderHandle();
+  it("should move the whole meeting by the pointer", () => {
+    const { slider, onMoveMeetingTo } = renderHandle();
 
     fireEvent.pointerDown(slider, { pointerType: "mouse", clientX: 100 });
     fireEvent.pointerMove(slider, { pointerType: "mouse", clientX: 140 });
 
-    expect(onDragMeetingTo).toHaveBeenLastCalledWith(540 + 60);
+    expect(onMoveMeetingTo).toHaveBeenLastCalledWith(540 + 60);
   });
 });

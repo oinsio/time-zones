@@ -1,6 +1,6 @@
 Feature: Move the whole meeting range
   Implements change move-meeting-range-and-extend-past-midnight.
-  As a user I shift the whole meeting range and its length stays the same.
+  As a user I move the whole meeting range and its length stays the same.
 
   @move-meeting-range-and-extend-past-midnight @FR14
   Scenario Outline: Moves of the sample meeting

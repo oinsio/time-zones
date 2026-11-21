@@ -135,7 +135,7 @@ export default function GridView() {
           tailCellCount={tailCellCount}
           isMoving={isMoving}
           onMoveMeeting={moveMeeting}
-          onDragMeetingTo={moveMeetingToStartMinutes}
+          onMoveMeetingTo={moveMeetingToStartMinutes}
           onDragActiveChange={onMoveActiveChange}
         />
       </>
