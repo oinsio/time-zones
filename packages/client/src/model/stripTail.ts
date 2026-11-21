@@ -1,7 +1,6 @@
-import { MILLISECONDS_PER_MINUTE, MINUTES_PER_HOUR } from "@/constants";
 import type { ReferenceDay } from "./dayTrack";
 import { getHourCellCount } from "./hourCellColumns";
-import type { MeetingRange } from "./meetingRange";
+import { getMeetingSpan, type MeetingRange } from "./meetingRange";
 import { getNextReferenceDay } from "./nextReferenceDay";
 
 /**
@@ -16,10 +15,7 @@ export function getStripTailCellCount(
   referenceZoneId: string,
 ): number {
   if (meeting === undefined) return 0;
-  const endMinutes =
-    (meeting.end.epochMilliseconds - day.start.epochMilliseconds) /
-    MILLISECONDS_PER_MINUTE;
-  const lastColumn = Math.ceil(endMinutes / MINUTES_PER_HOUR) - 1;
+  const { lastColumn } = getMeetingSpan(day, meeting);
   const tailCount = lastColumn + 2 - getHourCellCount(day);
   return Math.min(
     Math.max(tailCount, 0),
