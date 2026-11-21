@@ -92,8 +92,8 @@ The handoff folder of this task is `temporary-docs/gnomish/github-oinsio-time-zo
 
 ## 9. Screenshots and view contract (UX1–UX4, NFR-R1)
 
-- [ ] 9.1 Re-take the eight baselines of "Approved screenshots of the meeting state" (they gain the move handle) and add the six of "Approved screenshots of the moved and extended meeting" in `grid_view_meeting_screenshots_e2e.feature`; copy the approved PNGs and their HTML to `docs/design/screens` and list them in `docs/design/README.md`. Verify: `npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots"` passes twice in a row, and `pnpm design:screens` exits 0.
-- [ ] 9.2 View contract: add "move a meeting range" to the meeting scenarios of `grid_view_meeting_contract_e2e.feature` (ADR-0019: every view with a meeting range offers the move). Verify: `npx playwright test -c playwright.bdd.config.ts --grep "@view-contract"` passes.
+- [x] 9.1 Re-take the eight baselines of "Approved screenshots of the meeting state" (they gain the move handle) and add the six of "Approved screenshots of the moved and extended meeting" in `grid_view_meeting_screenshots_e2e.feature`; copy the approved PNGs and their HTML to `docs/design/screens` and list them in `docs/design/README.md`. Verify: `npx playwright test -c playwright.bdd.config.ts --grep "Approved screenshots"` passes twice in a row, and `pnpm design:screens` exits 0.
+- [x] 9.2 View contract: add "move a meeting range" to the meeting scenarios of `grid_view_meeting_contract_e2e.feature` (ADR-0019: every view with a meeting range offers the move). Verify: `npx playwright test -c playwright.bdd.config.ts --grep "@view-contract"` passes.
 
 ## 10. Verification (all)
 

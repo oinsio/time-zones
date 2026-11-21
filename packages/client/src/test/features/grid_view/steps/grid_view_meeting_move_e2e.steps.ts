@@ -14,11 +14,12 @@ import { sliderOf } from "../../time_selection/steps/timeSelectionE2eHelpers";
 import {
   cellOf,
   centreOf,
+  HOUR_CELL_SELECTOR,
   isTopmostAt,
   panelOf,
   requireBox,
 } from "./hourGridE2eHelpers";
-import { meetingFrameOf } from "./meetingE2eHelpers";
+import { meetingFrameOf, stripOfRow } from "./meetingE2eHelpers";
 
 const { Given, When, Then } = createBdd(test);
 
@@ -44,9 +45,13 @@ const moveHandleOf = (page: Page) =>
   page.locator('[data-meeting-handle="MOVE"]');
 const moveSliderOf = (page: Page) => moveHandleOf(page).getByRole("slider");
 const gripOf = (page: Page) => moveSliderOf(page).locator("span");
-const pitchOf = async (page: Page) =>
-  (await requireBox(cellOf(page, SAMPLE_CITY, 1))).x -
-  (await requireBox(cellOf(page, SAMPLE_CITY, 0))).x;
+/** The pitch of the cells of the first row, whatever language its city is written in. */
+const pitchOf = async (page: Page) => {
+  const cells = stripOfRow(page, 0).locator(HOUR_CELL_SELECTOR);
+  return (
+    (await requireBox(cells.nth(1))).x - (await requireBox(cells.nth(0))).x
+  );
+};
 const centreOfLocator = async (locator: ReturnType<typeof gripOf>) =>
   centreOf(await requireBox(locator));
 /** The placement of the fixed move handle follows a scroll one animation frame later. */
@@ -405,6 +410,54 @@ When(
       },
       frame.x - panelBox.x - FRAME_MARGIN_PX,
     );
+    await waitForTwoFrames(page);
+  },
+);
+
+// Verifies UX1-UX4 of move-meeting-range-and-extend-past-midnight: the states of the approved screenshots.
+const PAST_MIDNIGHT_STATES = [
+  "with its strip tail",
+  "with its strip tail wide",
+];
+const PAGE_FRACTIONS: Record<string, number> = {
+  "list at the top": 0,
+  "list in the middle": 0.5,
+  "list at the bottom": 1,
+};
+
+When(
+  /^the meeting is shown in the state "([^"]+)"$/,
+  async ({ locationsWorld }, state: string) => {
+    const { page } = locationsWorld;
+    if (PAST_MIDNIGHT_STATES.includes(state)) {
+      await page
+        .getByRole("button", {
+          name: /^(Enter meeting time|Ввести время встречи)/,
+        })
+        .first()
+        .click();
+      await page.keyboard.type("23");
+      await page.keyboard.press("Tab");
+      await page.keyboard.type("2");
+      await page.keyboard.press("Enter");
+      await waitForTwoFrames(page);
+      return;
+    }
+    if (state === "the range being moved") {
+      const grip = centreOf(await requireBox(gripOf(page)));
+      await page.mouse.move(grip.x, grip.y);
+      await page.mouse.down();
+      await page.mouse.move(grip.x + (await pitchOf(page)), grip.y, {
+        steps: DRAG_STEP_COUNT,
+      });
+      await waitForTwoFrames(page);
+      return;
+    }
+    await page.evaluate((fraction) => {
+      const scrollRange =
+        document.documentElement.scrollHeight - window.innerHeight;
+      window.scrollTo(0, scrollRange * fraction);
+    }, PAGE_FRACTIONS[state]);
     await waitForTwoFrames(page);
   },
 );
