@@ -1,3 +1,4 @@
+// Verifies FR8, NFR-R1 of move-meeting-range-and-extend-past-midnight (strip width with a tail).
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
@@ -127,5 +128,42 @@ When(
   async ({ locationsWorld }, city: string) => {
     await sliderOf(locationsWorld.page, city).focus();
     await locationsWorld.page.keyboard.press("End");
+  },
+);
+
+// Verifies FR8, NFR-R1 of move-meeting-range-and-extend-past-midnight: the strip width with a tail of three cells.
+const CELLS_WITH_TAIL = 27;
+const SCROLLING_CELL_WIDTH_PX = 38;
+
+Then(
+  /^the 27 cells of every row (are inside the panel and the strips do not scroll|are 38 px wide and the strips scroll together)$/,
+  async ({ locationsWorld }, fit: string) => {
+    const { page } = locationsWorld;
+    const panelBox = await requireBox(panelOf(page));
+    const isFitting = fit.includes("do not scroll");
+    for (const city of ALL_CITIES) {
+      await expect(cellsOf(page, city)).toHaveCount(CELLS_WITH_TAIL);
+      const firstBox = await requireBox(cellOf(page, city, 0));
+      const lastBox = await requireBox(cellOf(page, city, CELLS_WITH_TAIL - 1));
+      if (isFitting) {
+        expect(firstBox.x).toBeGreaterThanOrEqual(panelBox.x);
+        expect(lastBox.x + lastBox.width).toBeLessThanOrEqual(
+          panelBox.x + panelBox.width + PIXEL_TOLERANCE,
+        );
+      } else {
+        expect(firstBox.width).toBeCloseTo(SCROLLING_CELL_WIDTH_PX, 0);
+      }
+    }
+    const scrollSizes = await panelOf(page).evaluate((panel) => ({
+      scrollWidth: panel.scrollWidth,
+      clientWidth: panel.clientWidth,
+    }));
+    if (isFitting) {
+      expect(scrollSizes.scrollWidth).toBeLessThanOrEqual(
+        scrollSizes.clientWidth,
+      );
+    } else {
+      expect(scrollSizes.scrollWidth).toBeGreaterThan(scrollSizes.clientWidth);
+    }
   },
 );

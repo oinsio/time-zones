@@ -1,4 +1,10 @@
-import { type PointerEvent, type RefObject, useEffect, useRef } from "react";
+import {
+  type PointerEvent,
+  type RefObject,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import {
   MEETING_HANDLE_AUTO_SCROLL_EDGE_PX,
   MEETING_HANDLE_AUTO_SCROLL_STEP_PX,
@@ -201,9 +207,10 @@ export function useMeetingRangeDrag(options: MeetingRangeDragOptions) {
 
   useEffect(() => () => disarmReleaseClickGuard.current?.(), []);
 
-  // The pitch or the tail changed under a drag: keep the target where it is.
+  // The pitch or the tail changed under a drag: keep the target where it is. A layout
+  // effect, so the next pointer event already reads the re-based press.
   // biome-ignore lint/correctness/useExhaustiveDependencies: only a change of the pitch or the tail re-bases the press
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isDragging.current) return;
     const strip = getPanel()?.querySelector(HOUR_STRIP_SELECTOR);
     pressMinutes.current = latest.current.valueMinutes;

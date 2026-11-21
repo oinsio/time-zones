@@ -17,7 +17,7 @@ const RUSSIAN_CITY_NAMES: Record<string, string> = {
   Moscow: "Москва",
 };
 const SHARE_BUTTON_NAME = "Share meeting";
-const MEETING_END_NAME = "Meeting end";
+const MEETING_MOVE_NAME = "Move meeting";
 const MENU_BUTTON_PREFIX = "Actions for ";
 const SAMPLE_COLUMN = 9;
 const SAMPLE_END_KEY = "PageUp";
@@ -89,7 +89,7 @@ When(
     await page.getByRole("button", { name: SHARE_BUTTON_NAME }).focus();
     visitedByPage.set(
       page,
-      await tabUntil(page, (name) => name === MEETING_END_NAME, [
+      await tabUntil(page, (name) => name === MEETING_MOVE_NAME, [
         SHARE_BUTTON_NAME,
       ]),
     );
