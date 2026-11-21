@@ -10,6 +10,7 @@ import {
   createInMemoryLocationRepository,
   createInMemoryPreferencesRepository,
   createInMemoryTextSharing,
+  type InMemoryTextSharing,
   type InMemoryTextSharingOptions,
 } from "@/adapters";
 import {
@@ -18,6 +19,7 @@ import {
   PreferencesProvider,
   useMeetingRange,
   useMeetingShare,
+  useMeetingShareDialog,
 } from "@/controller";
 import { Temporal } from "@/lib/temporal";
 import {
@@ -39,6 +41,12 @@ import {
   SHARE_ZONE_LABEL_PARTS_BY_NAME,
   UTC_LOCATION,
 } from "./meetingShareTextWorld";
+
+/** The light hook of the app shell with the session of the lazy dialog on top of it. */
+const useShareWithDialog = (textSharing: InMemoryTextSharing) => {
+  const shareMeeting = useMeetingShare(textSharing);
+  return { ...shareMeeting, ...useMeetingShareDialog(shareMeeting) };
+};
 
 const feature = await loadFeature("../meeting_range_share.feature");
 
@@ -69,7 +77,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const renderApp = (options: InMemoryTextSharingOptions) => {
     sharing = createInMemoryTextSharing(options);
     return renderHook(
-      () => ({ range: useMeetingRange(), share: useMeetingShare(sharing) }),
+      () => ({ range: useMeetingRange(), share: useShareWithDialog(sharing) }),
       {
         wrapper: ({ children }: { children?: ReactNode }) =>
           createElement(

@@ -31,6 +31,13 @@ import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { createManualWriteScheduler } from "@/test/writeSchedulers";
 import { useMeetingRange } from "./useMeetingRange";
 import { MeetingShareNotice, useMeetingShare } from "./useMeetingShare";
+import { useMeetingShareDialog } from "./useMeetingShareDialog";
+
+/** The light hook of the app shell with the session of the lazy dialog on top of it. */
+function useShare(textSharing: ReturnType<typeof createInMemoryTextSharing>) {
+  const shareMeeting = useMeetingShare(textSharing);
+  return { ...shareMeeting, ...useMeetingShareDialog(shareMeeting) };
+}
 
 const citySearch = createCompositeCitySearch(zoneCities);
 const loadCitySearch = async () => citySearch;
@@ -80,7 +87,7 @@ function setup({
   const rendered = renderHook(
     () => ({
       range: useMeetingRange(),
-      share: useMeetingShare(textSharing),
+      share: useShare(textSharing),
     }),
     {
       wrapper: ({ children }: { children: ReactNode }) => (

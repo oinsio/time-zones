@@ -1,11 +1,16 @@
-import { useRef } from "react";
-import type { MeetingShareSession } from "@/controller";
+import { lazy, Suspense, useRef } from "react";
+import type { MeetingShare } from "@/controller";
 import type { PresentedMeetingBar } from "@/presenter";
-import { LazyMeetingShareDialog, MeetingBar } from "@/views/shared";
+import { MeetingBar } from "@/views/shared";
+
+/** Loaded when Share meeting is first chosen: the dialog and its session stay out of the initial JavaScript (NFR-P2). */
+const AppShellShareDialog = lazy(async () => ({
+  default: (await import("./AppShellShareDialog")).AppShellShareDialog,
+}));
 
 type AppShellMeetingProps = {
   bar: PresentedMeetingBar;
-  share: MeetingShareSession;
+  share: MeetingShare;
   onClear: () => void;
 };
 
@@ -25,10 +30,12 @@ export function AppShellMeeting({ bar, share, onClear }: AppShellMeetingProps) {
         shareButtonRef={shareButtonRef}
       />
       {share.isShareDialogOpen && (
-        <LazyMeetingShareDialog
-          session={share}
-          returnFocusRef={shareButtonRef}
-        />
+        <Suspense fallback={null}>
+          <AppShellShareDialog
+            shareMeeting={share}
+            returnFocusRef={shareButtonRef}
+          />
+        </Suspense>
       )}
     </>
   );

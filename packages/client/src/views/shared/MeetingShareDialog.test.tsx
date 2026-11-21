@@ -38,15 +38,12 @@ const SESSION: MeetingShareSession = {
     ZoneLabelPart.ZONE_ABBREVIATION,
   ],
   destinations: [{ id: ShareDestinationId.TEXT, label: "Share" }],
-  openShareDialog: vi.fn(),
   closeShareDialog: vi.fn(),
   toggleLocation: vi.fn(),
   chooseShareLanguage: vi.fn(),
   toggleShareLanguagePin: vi.fn(),
   toggleShareZoneLabelPart: vi.fn(),
   share: vi.fn(),
-  notice: undefined,
-  dismissNotice: vi.fn(),
 };
 
 const renderDialog = (overrides: Partial<MeetingShareSession> = {}) => {
