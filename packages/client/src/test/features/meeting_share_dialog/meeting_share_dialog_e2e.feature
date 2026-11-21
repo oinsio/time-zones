@@ -85,8 +85,11 @@ Feature: Share dialog in a real browser
     Examples:
       | theme | width |
       | light | 320   |
+      | dark  | 320   |
+      | light | 390   |
       | dark  | 390   |
       | light | 1280  |
+      | dark  | 1280  |
 
   @add-meeting-share-dialog @UX3 @NFR-R2
   Scenario: Narrow phone
