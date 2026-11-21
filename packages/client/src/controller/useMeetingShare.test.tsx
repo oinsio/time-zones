@@ -170,6 +170,31 @@ describe("useMeetingShare", () => {
     ]);
   });
 
+  // FR2: ticking an unticked location puts it back, the other ticks stay
+  it("should put a re-ticked location back while another one stays unticked", () => {
+    const { result } = setup({ locations: [almaty, moscow, kolkata, newYork] });
+    openDialog(result);
+    act(() => result.current.share.chooseShareLanguage("en"));
+    act(() => result.current.share.toggleLocation(moscow.id));
+    act(() => result.current.share.toggleLocation(kolkata.id));
+
+    act(() => result.current.share.toggleLocation(moscow.id));
+
+    const inclusionByLocationId = Object.fromEntries(
+      result.current.share.rows.map((row) => [row.id, row.isIncluded]),
+    );
+    expect(inclusionByLocationId).toEqual({
+      [almaty.id]: true,
+      [moscow.id]: true,
+      [kolkata.id]: false,
+      [newYork.id]: true,
+    });
+    const textLines = result.current.share.text?.split("\n") ?? [];
+    expect(textLines).toHaveLength(ENGLISH_SAMPLE_LINES.length);
+    expect(textLines).toContain(ENGLISH_SAMPLE_LINES[2]);
+    expect(textLines.join("\n")).not.toContain("Kolkata");
+  });
+
   it("should give no text when every location is unticked", () => {
     const { result } = setup({ locations: [almaty] });
     openDialog(result);
