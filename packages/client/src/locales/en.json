@@ -120,6 +120,7 @@
     "clear": "Clear meeting",
     "startHandle": "Meeting start",
     "endHandle": "Meeting end",
+    "moveHandle": "Move meeting",
     "rangeInputLabel": "Enter meeting time — {{city}}, {{span}}",
     "rangeInputStartLabel": "Start time — {{city}}",
     "rangeInputEndLabel": "End time — {{city}}",

@@ -120,6 +120,7 @@
     "clear": "Сбросить выбор встречи",
     "startHandle": "Начало встречи",
     "endHandle": "Конец встречи",
+    "moveHandle": "Сдвиг встречи",
     "rangeInputLabel": "Ввести время встречи — {{city}}, {{span}}",
     "rangeInputStartLabel": "Время начала — {{city}}",
     "rangeInputEndLabel": "Время окончания — {{city}}",

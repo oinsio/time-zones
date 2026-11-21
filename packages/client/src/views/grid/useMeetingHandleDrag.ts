@@ -1,11 +1,11 @@
 import type { PointerEvent, RefObject } from "react";
-import type { MeetingHandle } from "@/model";
+import type { MeetingEndHandle } from "@/model";
 import { useMeetingRangeDrag } from "./useMeetingRangeDrag";
 
 export { HOUR_STRIP_SELECTOR } from "./useMeetingRangeDrag";
 
 type HandleDragOptions = {
-  handle: MeetingHandle;
+  handle: MeetingEndHandle;
   handleElement: RefObject<HTMLElement | null>;
   /** The pitch of one hour cell in pixels, gap included. */
   cellPitchPx: number;
@@ -15,7 +15,7 @@ type HandleDragOptions = {
   tailCellCount?: number;
   /** The minutes the handle stands at; a drag moves it from there by the pointer's travel. */
   valueMinutes: number;
-  onDragHandleTo: (handle: MeetingHandle, minutes: number) => void;
+  onDragHandleTo: (handle: MeetingEndHandle, minutes: number) => void;
   onDragActiveChange: (isDragging: boolean) => void;
 };
 

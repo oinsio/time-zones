@@ -11,7 +11,7 @@ import {
   getReferenceZone,
   LocationCommandType,
   LocationErrorCode,
-  type MeetingHandle,
+  type MeetingEndHandle,
   type MeetingRange,
   type MeetingSpan,
   type TrackMove,
@@ -75,6 +75,7 @@ export type PresentedMeeting = {
  * Implements FR2, FR5, FR6, FR10, FR12, FR13 of add-grid-meeting-range-and-share (D5).
  * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D3): `confirmMeetingRangeInput`.
  * Implements FR2, FR3 of refine-meeting-range-entry-and-handles (D3): the refusal outcomes.
+ * Implements FR3, FR14, FR20 of move-meeting-range-and-extend-past-midnight (D2, D3): `moveMeeting`, `moveMeetingToStartMinutes`.
  */
 export function useMeetingRange() {
   const context = useContext(LocationsContext);
@@ -150,14 +151,26 @@ export function useMeetingRange() {
         );
         selectCells(column, column);
       },
-      moveHandle: (handle: MeetingHandle, move: TrackMove) => {
+      moveHandle: (handle: MeetingEndHandle, move: TrackMove) => {
         const current = store.getSnapshot().meeting;
         if (current === undefined) return;
         setRange(
           getMeetingRangeAfterHandleMove(getDay(), current, handle, move),
         );
       },
-      dragHandleTo: (handle: MeetingHandle, minutes: number) => {
+      moveMeeting: (move: TrackMove) => {
+        store.dispatch({
+          type: LocationCommandType.MOVE_MEETING_RANGE,
+          target: { move },
+        });
+      },
+      moveMeetingToStartMinutes: (startMinutes: number) => {
+        store.dispatch({
+          type: LocationCommandType.MOVE_MEETING_RANGE,
+          target: { startMinutes },
+        });
+      },
+      dragHandleTo: (handle: MeetingEndHandle, minutes: number) => {
         const current = store.getSnapshot().meeting;
         if (current === undefined) return;
         const next = getMeetingRangeAtHandleMinutes(

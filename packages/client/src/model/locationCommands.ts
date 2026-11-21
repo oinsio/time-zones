@@ -1,5 +1,6 @@
 import type { Coordinates } from "./coordinates";
 import type { Location } from "./locations";
+import type { MeetingRangeMove } from "./meetingRangeMove";
 import type { WallTimeTarget } from "./referenceMoment";
 
 /**
@@ -30,6 +31,7 @@ export enum LocationCommandType {
   SET_MEETING_RANGE = "SET_MEETING_RANGE",
   SET_MEETING_RANGE_WALL_TIMES = "SET_MEETING_RANGE_WALL_TIMES",
   CLEAR_MEETING_RANGE = "CLEAR_MEETING_RANGE",
+  MOVE_MEETING_RANGE = "MOVE_MEETING_RANGE",
 }
 
 export enum LocationErrorCode {
@@ -104,4 +106,6 @@ export type LocationCommand =
       /** "HH:MM", 24-hour. */
       end: string;
     }
-  | { type: LocationCommandType.CLEAR_MEETING_RANGE };
+  | { type: LocationCommandType.CLEAR_MEETING_RANGE }
+  /** Implements FR14, FR20 of move-meeting-range-and-extend-past-midnight (D3): moves the whole range. */
+  | { type: LocationCommandType.MOVE_MEETING_RANGE; target: MeetingRangeMove };

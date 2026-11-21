@@ -13,6 +13,7 @@ import {
   getMeetingRangeAtHandleMinutes,
   getReferenceDay,
   LocationCommandType,
+  type MeetingEndHandle,
   MeetingHandle,
   type MeetingRange,
   TrackMove,
@@ -27,7 +28,7 @@ import {
 
 const feature = await loadFeature("../meeting_range_past_midnight.feature");
 
-const HANDLES: Record<string, MeetingHandle> = {
+const HANDLES: Record<string, MeetingEndHandle> = {
   start: MeetingHandle.START,
   end: MeetingHandle.END,
 };

@@ -1,5 +1,5 @@
 import { MEETING_HANDLE_ROW_DIVISOR } from "@/constants";
-import { MeetingHandle } from "@/model";
+import { type MeetingEndHandle, MeetingHandle } from "@/model";
 
 /** The rows, counted from 1 and inclusive, on which a handle can stand. */
 export type MeetingHandleCandidateRows = {
@@ -16,7 +16,7 @@ export type MeetingHandleCandidateRows = {
  * Implements FR7 of refine-meeting-range-entry-and-handles (D5).
  */
 export function getMeetingHandleRow(
-  handle: MeetingHandle,
+  handle: MeetingEndHandle,
   { firstRow, lastRow }: MeetingHandleCandidateRows,
 ): number {
   const candidateCount = lastRow - firstRow + 1;

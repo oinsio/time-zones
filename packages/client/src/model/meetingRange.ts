@@ -14,6 +14,7 @@ import {
   TrackMove,
 } from "./dayTrack";
 import { getHourCellCount, getHourCellStart } from "./hourCells";
+import { getLastStartMinutes } from "./meetingRangeMove";
 import { getNextReferenceDay } from "./nextReferenceDay";
 
 /**
@@ -32,7 +33,12 @@ export type MeetingRange = {
 export enum MeetingHandle {
   START = "START",
   END = "END",
+  /** Moves the whole range (FR17); it has no limits of its own end. */
+  MOVE = "MOVE",
 }
+
+/** The handles that move one end of the range. */
+export type MeetingEndHandle = MeetingHandle.START | MeetingHandle.END;
 
 export type MeetingHandleLimits = { minMinutes: number; maxMinutes: number };
 
@@ -52,10 +58,6 @@ const getInstantAtMinutes = (day: ReferenceDay, minutes: number) =>
 
 const isOnWholeMinute = (day: ReferenceDay, instant: Temporal.Instant) =>
   Number.isInteger(getMinutesFromDayStart(day, instant));
-
-/** The last track step position of the day: the latest a start may stand. */
-const getLastStartMinutes = (day: ReferenceDay) =>
-  Math.floor((day.lengthMinutes - 1) / TRACK_STEP_MINUTES) * TRACK_STEP_MINUTES;
 
 /** Whether the range keeps the invariants of ADR-0011 and ADR-0019 for `day`. */
 export function isValidMeetingRange(
@@ -108,7 +110,7 @@ export function getMeetingRangeOfCells(
 export function getMeetingHandleLimits(
   day: ReferenceDay,
   meeting: MeetingRange,
-  handle: MeetingHandle,
+  handle: MeetingEndHandle,
 ): MeetingHandleLimits {
   const startMinutes = getMinutesFromDayStart(day, meeting.start);
   const endMinutes = getMinutesFromDayStart(day, meeting.end);
@@ -134,7 +136,7 @@ export function getMeetingHandleLimits(
 function putHandleAtMinutes(
   day: ReferenceDay,
   meeting: MeetingRange,
-  handle: MeetingHandle,
+  handle: MeetingEndHandle,
   minutes: number,
 ): MeetingRange {
   const { minMinutes, maxMinutes } = getMeetingHandleLimits(
@@ -155,7 +157,7 @@ function putHandleAtMinutes(
 export function getMeetingRangeAfterHandleMove(
   day: ReferenceDay,
   meeting: MeetingRange,
-  handle: MeetingHandle,
+  handle: MeetingEndHandle,
   move: TrackMove,
 ): MeetingRange {
   const current = getMinutesFromDayStart(
@@ -184,7 +186,7 @@ export function getMeetingRangeAfterHandleMove(
 export function getMeetingRangeAtHandleMinutes(
   day: ReferenceDay,
   meeting: MeetingRange,
-  handle: MeetingHandle,
+  handle: MeetingEndHandle,
   minutes: number,
 ): MeetingRange {
   const steppedMinutes =

@@ -79,3 +79,26 @@ describe("presentMeetingHandles of a meeting past midnight", () => {
     ]);
   });
 });
+
+// FR18 of move-meeting-range-and-extend-past-midnight (D7): the move handle slider.
+describe("presentMeetingHandles move handle", () => {
+  it("should give the values of the move handle of the sample meeting", () => {
+    const { move } = present("en");
+
+    expect([
+      move.label,
+      move.valueMinutes,
+      move.minMinutes,
+      move.maxMinutes,
+      move.valueText,
+    ]).toEqual(["Move meeting", 540, 0, 1425, "09:00–11:00"]);
+  });
+
+  it("should name the move handle in Russian", () => {
+    expect(present("ru").move.label).toBe("Сдвиг встречи");
+  });
+
+  it("should follow the hour format in the value text", () => {
+    expect(present("en", HourFormat.H12).move.valueText).toMatch(/9:00.*11:00/);
+  });
+});

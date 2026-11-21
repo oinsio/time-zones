@@ -74,10 +74,10 @@ The handoff folder of this task is `temporary-docs/gnomish/github-oinsio-time-zo
 
 ## 7. Model, presenter and controller: the move (FR14, FR18, FR20, M2, M3; D3, D7)
 
-- [ ] 7.1 RED: `src/model/meetingRangeMove.test.ts` (`it.each`) — every row of "Moves of the sample meeting", "Moves of a meeting off the track step", "A pointer position lands the start on the track step", "A move stops at the limits"; the length in absolute minutes on a clock-change day; no range. Verify: the file fails.
-- [ ] 7.2 GREEN: `src/model/meetingRangeMove.ts`, the command `MOVE_MEETING_RANGE` in `reduceMeetingRange.ts`, exports through `src/model/index.ts`. Verify: `npx vitest run src/model/meetingRangeMove.test.ts src/model/reduceMeetingRange.test.ts` passes.
-- [ ] 7.3 `MeetingHandle.MOVE`; slider values of the move handle in `src/presenter/meetingHandles.ts` (value 540, min 0, max 1425, value text `09:00–11:00`); `meeting.moveHandle` «Сдвиг встречи» / "Move meeting" in both locale files; `moveMeeting` and `moveMeetingToStartMinutes` in `useMeetingRange`. Verify: `npx vitest run src/presenter/meetingHandles.test.ts src/controller/useMeetingRange.test.tsx` passes.
-- [ ] 7.4 Unit BDD: `src/test/features/meeting_range/meeting_range_move.feature` with steps — all six scenarios of "Move the whole meeting range" (`@FR14 @FR20`). Verify: `npx vitest run src/test/features/meeting_range/steps/meeting_range_move.steps.ts` passes.
+- [x] 7.1 RED: `src/model/meetingRangeMove.test.ts` (`it.each`) — every row of "Moves of the sample meeting", "Moves of a meeting off the track step", "A pointer position lands the start on the track step", "A move stops at the limits"; the length in absolute minutes on a clock-change day; no range. Verify: the file fails.
+- [x] 7.2 GREEN: `src/model/meetingRangeMove.ts`, the command `MOVE_MEETING_RANGE` in `reduceMeetingRange.ts`, exports through `src/model/index.ts`. Verify: `npx vitest run src/model/meetingRangeMove.test.ts src/model/reduceMeetingRange.test.ts` passes.
+- [x] 7.3 `MeetingHandle.MOVE`; slider values of the move handle in `src/presenter/meetingHandles.ts` (value 540, min 0, max 1425, value text `09:00–11:00`); `meeting.moveHandle` «Сдвиг встречи» / "Move meeting" in both locale files; `moveMeeting` and `moveMeetingToStartMinutes` in `useMeetingRange`. Verify: `npx vitest run src/presenter/meetingHandles.test.ts src/controller/useMeetingRange.test.tsx` passes.
+- [x] 7.4 Unit BDD: `src/test/features/meeting_range/meeting_range_move.feature` with steps — all six scenarios of "Move the whole meeting range" (`@FR14 @FR20`). Verify: `npx vitest run src/test/features/meeting_range/steps/meeting_range_move.steps.ts` passes.
 
 ## 8. Views: the move handle and the gestures (FR15–FR19, NFR-A1, NFR-A2, NFR-P1, UX1–UX3; D5–D8, D11)
 

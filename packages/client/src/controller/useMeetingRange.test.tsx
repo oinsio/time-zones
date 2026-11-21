@@ -1,3 +1,4 @@
+// Verifies FR14, FR20 of move-meeting-range-and-extend-past-midnight.
 // Verifies FR2, FR5, FR6, FR10, FR12, FR13 of add-grid-meeting-range-and-share.
 import { act, renderHook } from "@testing-library/react";
 import i18n from "i18next";
@@ -87,6 +88,48 @@ describe("useMeetingRange", () => {
       result.current.moveHandle(MeetingHandle.END, TrackMove.NEXT_STEP),
     );
     act(() => result.current.dragHandleTo(MeetingHandle.END, 700));
+
+    expect(result.current.meeting).toBeUndefined();
+  });
+
+  // FR14: the move of the whole range
+  it("should move the whole meeting by a step", () => {
+    const { result, span } = setup();
+    act(() => result.current.selectCells(9, 10));
+
+    act(() => result.current.moveMeeting(TrackMove.HOUR_FORWARD));
+
+    expect(span()).toEqual([600, 720]);
+  });
+
+  // FR20: the pointer position of the start
+  it("should move the whole meeting to a dragged start", () => {
+    const { result, span } = setup();
+    act(() => result.current.selectCells(9, 10));
+
+    act(() => result.current.moveMeetingToStartMinutes(877));
+
+    expect(span()).toEqual([870, 870 + 120]);
+  });
+
+  it("should expose the move handle as a slider of the start", () => {
+    const { result } = setup();
+    act(() => result.current.selectCells(9, 10));
+
+    expect(result.current.meeting?.handles.move).toMatchObject({
+      handle: MeetingHandle.MOVE,
+      label: "Move meeting",
+      valueMinutes: 540,
+      minMinutes: 0,
+      maxMinutes: 1425,
+      valueText: "09:00–11:00",
+    });
+  });
+
+  it("should do nothing when moving without a meeting", () => {
+    const { result } = setup();
+
+    act(() => result.current.moveMeeting(TrackMove.NEXT_STEP));
 
     expect(result.current.meeting).toBeUndefined();
   });

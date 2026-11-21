@@ -102,12 +102,19 @@ export {
   getMeetingRangeOfCells,
   getMeetingSpan,
   isValidMeetingRange,
+  type MeetingEndHandle,
   MeetingHandle,
   type MeetingHandleLimits,
   type MeetingRange,
   type MeetingSpan,
   moveMeetingRangeToDay,
 } from "./meetingRange";
+export {
+  getLastStartMinutes,
+  getMeetingRangeAfterMove,
+  getMeetingRangeAtStartMinutes,
+  type MeetingRangeMove,
+} from "./meetingRangeMove";
 export { moveLocationInList } from "./moveLocation";
 export { getNextReferenceDay } from "./nextReferenceDay";
 export {

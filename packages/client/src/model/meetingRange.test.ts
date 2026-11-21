@@ -11,6 +11,7 @@ import {
   getMeetingRangeOfCells,
   getMeetingSpan,
   isValidMeetingRange,
+  type MeetingEndHandle,
   MeetingHandle,
   type MeetingRange,
   moveMeetingRangeToDay,
@@ -165,7 +166,12 @@ describe("getMeetingRangeAfterHandleMove", () => {
     [MeetingHandle.END, TrackMove.HOUR_FORWARD, "04:00", "07:00"],
     [MeetingHandle.END, TrackMove.DAY_END, "04:00", "04:00+24h"],
   ])("should move %s by %s", (handle, move, start, end) => {
-    const range = getMeetingRangeAfterHandleMove(day, SAMPLE, handle, move);
+    const range = getMeetingRangeAfterHandleMove(
+      day,
+      SAMPLE,
+      handle as MeetingEndHandle,
+      move,
+    );
     expect(range.start.equals(start === "-" ? day.start : at(start))).toBe(
       true,
     );
@@ -194,7 +200,7 @@ describe("getMeetingRangeAfterHandleMove of a meeting past midnight", () => {
     const range = getMeetingRangeAfterHandleMove(
       day,
       PAST_MIDNIGHT,
-      handle,
+      handle as MeetingEndHandle,
       move,
     );
     expect([minutesOf(range.start), minutesOf(range.end)]).toEqual([
@@ -287,7 +293,7 @@ describe("getMeetingRangeAfterHandleMove from an end off the track step", () => 
       const range = getMeetingRangeAfterHandleMove(
         day,
         { start: almatyAt(rangeStart), end: almatyAt(rangeEnd) },
-        handle,
+        handle as MeetingEndHandle,
         move,
       );
       expect(show(range)).toBe(
@@ -305,7 +311,12 @@ describe("getMeetingRangeAtHandleMinutes", () => {
     [MeetingHandle.START, 547, "04:00", "06:00"],
     [MeetingHandle.START, 548, "04:15", "06:00"],
   ])("should put %s at %i minutes", (handle, minutes, start, end) => {
-    const range = getMeetingRangeAtHandleMinutes(day, SAMPLE, handle, minutes);
+    const range = getMeetingRangeAtHandleMinutes(
+      day,
+      SAMPLE,
+      handle as MeetingEndHandle,
+      minutes,
+    );
     expect(show(range)).toBe(show({ start: at(start), end: at(end) }));
   });
 });
