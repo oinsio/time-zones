@@ -6,8 +6,7 @@ import {
   useZoneLabelParts,
 } from "@/controller";
 import { ZoneLabelPart } from "@/preferences";
-import { ZoneLine } from "@/views/shared";
-import { SettingsToggleGroup } from "./SettingsToggleGroup";
+import { SettingsToggleGroup, ZoneLine } from "@/views/shared";
 
 const ZONE_LABEL_PART_LABEL_KEYS = {
   [ZoneLabelPart.COUNTRY]: "settings.zoneLabelCountry",

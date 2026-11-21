@@ -31,7 +31,8 @@ import type {
   ZoneRulesVersionSource,
 } from "@/ports";
 import { resolveActiveView, viewRegistry } from "@/views";
-import { DateBar, LocationSearch, MeetingBar } from "@/views/shared";
+import { DateBar, LocationSearch } from "@/views/shared";
+import { AppShellMeeting } from "./AppShellMeeting";
 import { AppPage } from "./appPage";
 import { LazyAppShellNotices } from "./LazyAppShellNotices";
 import { MainPage } from "./MainPage";
@@ -112,7 +113,7 @@ function AppShellContent({
   const activeView = resolveActiveView(viewRegistry, useViewMode());
   const meetingBar = useMeetingBar(activeView?.showsMeetingRange === true);
   const { clearMeetingRange } = useMeetingRange();
-  const { shareMeeting, notice, dismissNotice } = useMeetingShare(textSharing);
+  const share = useMeetingShare(textSharing);
   const isFocusAfterClearDue = useRef(false);
 
   useEffect(() => {
@@ -145,8 +146,8 @@ function AppShellContent({
       zoneRulesUpdate={zoneRulesUpdate}
       reloadPage={reloadPage}
       hasStorageWarning={hasStorageWarning}
-      shareNotice={notice}
-      onDismissShareNotice={dismissNotice}
+      shareNotice={share.notice}
+      onDismissShareNotice={share.dismissNotice}
     />
   );
 
@@ -170,9 +171,9 @@ function AppShellContent({
       notices={notices}
       meetingBar={
         meetingBar && (
-          <MeetingBar
+          <AppShellMeeting
             bar={meetingBar}
-            onShare={shareMeeting}
+            share={share}
             onClear={() => {
               isFocusAfterClearDue.current = true;
               clearMeetingRange();

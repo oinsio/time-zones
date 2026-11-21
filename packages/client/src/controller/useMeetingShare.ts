@@ -57,6 +57,9 @@ const NOTICE_BY_OUTCOME: Partial<Record<ShareOutcome, MeetingShareNotice>> = {
   [ShareOutcome.FAILED]: MeetingShareNotice.FAILED,
 };
 
+/** What the share dialog takes: the session `useMeetingShare` returns. */
+export type MeetingShareSession = ReturnType<typeof useMeetingShare>;
+
 /** One row of the share dialog, written in the interface language. */
 export type MeetingShareDialogRow = {
   id: string;
