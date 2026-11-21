@@ -10,6 +10,7 @@ import {
   DayPalette,
   DEFAULT_PREFERENCES,
   HourFormat,
+  SHARE_ZONE_LABEL_PARTS,
   ThemePreference,
 } from "@/preferences";
 import { createInMemoryChannelHub } from "@/test/inMemoryChannel";
@@ -96,6 +97,8 @@ describe("localStorage preferences repository", () => {
         dayColouring: DayColouring.TIME_OF_DAY,
         workingHours: { start: "10:00", end: "18:00" },
         dayPalette: DayPalette.VIVID,
+        shareLanguage: null,
+        shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
       }),
     ).toBe(SaveOutcome.FAILED);
   });
@@ -120,10 +123,12 @@ describe("localStorage preferences repository", () => {
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
       dayPalette: DayPalette.VIVID,
+      shareLanguage: null,
+      shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
     });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
-        schemaVersion: 7,
+        schemaVersion: 8,
         payload: {
           theme: "DARK",
           hourFormat: "H12",
@@ -133,6 +138,8 @@ describe("localStorage preferences repository", () => {
           dayColouring: DayColouring.TIME_OF_DAY,
           workingHours: { start: "10:00", end: "18:00" },
           dayPalette: DayPalette.VIVID,
+          shareLanguage: null,
+          shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
         },
       },
     );
@@ -203,6 +210,8 @@ describe("in-memory preferences repository", () => {
       dayColouring: DayColouring.TIME_OF_DAY,
       workingHours: { start: "10:00", end: "18:00" },
       dayPalette: DayPalette.VIVID,
+      shareLanguage: null,
+      shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
     });
     expect(outcome).toBe(SaveOutcome.FAILED);
     expect(repository.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });

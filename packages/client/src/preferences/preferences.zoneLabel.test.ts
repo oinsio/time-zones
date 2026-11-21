@@ -31,6 +31,8 @@ function parseParts(zoneLabelParts: unknown) {
     dayColouring: "TIME_OF_DAY",
     workingHours: { start: "10:00", end: "18:00" },
     dayPalette: "VIVID",
+    shareLanguage: null,
+    shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
     zoneLabelParts,
   });
 }

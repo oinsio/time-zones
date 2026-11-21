@@ -69,7 +69,18 @@ export {
   presentMeetingHandles,
 } from "./meetingHandles";
 export {
-  type MeetingShareRow,
+  type MeetingShareLineInput,
+  type MeetingShareZonePartsInput,
+  presentMeetingShareLine,
+  presentMeetingShareZoneParts,
+} from "./meetingShareLine";
+// Implements FR1, FR3, FR4, FR6, FR7, FR11 of add-meeting-share-dialog.
+export {
+  type MeetingShareReferenceInput,
+  presentMeetingShareReference,
+} from "./meetingShareReference";
+export {
+  type MeetingShareTextInput,
   presentMeetingShareText,
 } from "./meetingShareText";
 // Implements FR5-FR7 of set-home-location-and-show-differences.
@@ -86,6 +97,7 @@ export {
   presentSearchResults,
 } from "./presentSearchResults";
 export type { LocationRowsContext } from "./presentZoneMoment";
+export { presentShareDestinationLabel } from "./shareDestinationLabel";
 // Implements FR3 of show-utc-offset-on-location-rows.
 export { formatUtcOffset } from "./utcOffset";
 // Implements FR5 of add-day-colouring-setting.

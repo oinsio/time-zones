@@ -23,6 +23,12 @@ export {
   PreferencesLoadStatus,
   type PreferencesRepository,
 } from "./preferencesRepository";
+// Implements FR9, FR11 of add-meeting-share-dialog.
+export {
+  type MeetingShare,
+  type ShareDestination,
+  ShareDestinationId,
+} from "./shareDestination";
 export type { StorageAvailability } from "./storageAvailability";
 export {
   type StoredReleaseLoadResult,

@@ -33,6 +33,10 @@ export type PreferencesContextValue = {
   setDayPalette: (dayPalette: DayPalette) => void;
   /** Implements FR6, FR7 of add-day-colouring-setting (D1). */
   setWorkingHours: (workingHours: WorkingHours) => void;
+  /** Implements FR5 of add-meeting-share-dialog (D4): `null` removes the pin. */
+  setShareLanguage: (shareLanguage: string | null) => void;
+  /** Implements FR6 of add-meeting-share-dialog (D4). */
+  toggleShareZoneLabelPart: (part: ZoneLabelPart) => void;
   /** Clears the stored document and returns to the defaults. */
   resetPreferences: () => void;
 };

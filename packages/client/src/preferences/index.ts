@@ -11,6 +11,7 @@ export {
   DEFAULT_PREFERENCES,
   HourFormat,
   type Preferences,
+  SHARE_ZONE_LABEL_PARTS,
   ThemePreference,
   ZoneLabelPart,
 } from "./preferences";

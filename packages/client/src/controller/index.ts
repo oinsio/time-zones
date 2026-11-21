@@ -29,7 +29,16 @@ export {
   type PresentedMeeting,
   useMeetingRange,
 } from "./useMeetingRange";
-export { MeetingShareNotice, useMeetingShare } from "./useMeetingShare";
+export {
+  type MeetingShare,
+  MeetingShareNotice,
+  useMeetingShare,
+} from "./useMeetingShare";
+export {
+  type MeetingShareSession,
+  useMeetingShareDialog,
+} from "./useMeetingShareDialog";
+export type { MeetingShareDialogRow } from "./useMeetingShareDialogRows";
 export { PreferencesStatus, usePreferences } from "./usePreferences";
 export { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 export type { PwaUpdateStatus } from "./usePwaUpdateStatus";

@@ -18,6 +18,8 @@ const storedPayload = (dayPalette: unknown) => ({
   dayColouring: "TIME_OF_DAY",
   workingHours: { start: "09:00", end: "18:00" },
   dayPalette,
+  shareLanguage: null,
+  shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
 });
 
 describe("the day palette defaults", () => {

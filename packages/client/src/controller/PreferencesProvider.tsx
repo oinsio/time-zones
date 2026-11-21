@@ -165,6 +165,17 @@ export function PreferencesProvider({
           type: PreferencesCommandType.SET_DAY_PALETTE,
           dayPalette,
         }),
+      // Implements FR5, FR6 of add-meeting-share-dialog (D4).
+      setShareLanguage: (shareLanguage: string | null) =>
+        applyChange({
+          type: PreferencesCommandType.SET_SHARE_LANGUAGE,
+          shareLanguage,
+        }),
+      toggleShareZoneLabelPart: (part: ZoneLabelPart) =>
+        applyChange({
+          type: PreferencesCommandType.TOGGLE_SHARE_ZONE_LABEL_PART,
+          part,
+        }),
       setWorkingHours: (workingHours: WorkingHours) =>
         applyChange({
           type: PreferencesCommandType.SET_WORKING_HOURS,

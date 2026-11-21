@@ -4,7 +4,7 @@ import { LANGUAGE_BUTTON_CLASS_NAME } from "@/constants";
 import type { RegisteredLocale } from "@/locales";
 import { cn } from "@/shared/lib/cn";
 
-type InterfaceLanguageListProps = {
+type LanguageListProps = {
   listId: string;
   caption: string;
   locales: readonly RegisteredLocale[];
@@ -19,8 +19,9 @@ type InterfaceLanguageListProps = {
  * The expanded part of the language group: an optional search field, one row
  * per language (emoji and native name) and a note when the search finds none.
  * Implements FR3, FR4, FR6, NFR-A1, NFR-A2 of add-interface-language-selection (D6).
+ * Implements FR4 of add-meeting-share-dialog (D7): moved to `views/shared`, internal to `LanguageGroup`.
  */
-export function InterfaceLanguageList({
+export function LanguageList({
   listId,
   caption,
   locales,
@@ -29,7 +30,7 @@ export function InterfaceLanguageList({
   query,
   onQueryChange,
   onChoose,
-}: InterfaceLanguageListProps) {
+}: LanguageListProps) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-2">

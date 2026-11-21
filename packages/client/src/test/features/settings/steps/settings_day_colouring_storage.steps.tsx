@@ -205,6 +205,8 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           dayColouring: "PLAIN",
           workingHours: parseHours("18:00-10:00"),
           dayPalette: "VIVID",
+          shareLanguage: null,
+          shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
         }),
       );
       When("the settings page is shown", showSettings);

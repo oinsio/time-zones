@@ -47,7 +47,8 @@ classDiagram
 - `reference` and `meeting` are not persisted; the app always starts in `LIVE` without a meeting range.
 - `homeLocationId` is optional; the app never assigns it.
 - `deviceTimeZoneId` is environment state: the controller reads it from the `Clock` port and sends `SET_DEVICE_TIME_ZONE`; it is not persisted.
-- `Preferences` is a separate model with its own repository.
+- `Preferences` is a separate model with its own repository. It holds the pinned share language (`shareLanguage`, `null` follows the interface language; command `SET_SHARE_LANGUAGE`) and the share zone label (`shareZoneLabelParts`, the zone abbreviation and the UTC offset, never the country; command `TOGGLE_SHARE_ZONE_LABEL_PART`); the preferences schema is 8.
+- `getMeetingInvitation(state, excludedLocationIds)` gives the meeting invitation: the meeting range and the locations it is shared with, in list order. It holds no language and no text; the share dialog keeps the excluded ids, so a location added while it is open is included.
 - Commands: `ADD_DEVICE_TIME_LOCATION` (locations), `SET_THEME`, `SET_HOUR_FORMAT`, `SET_INTERFACE_LANGUAGE`, `SET_ZONE_LABEL_PART`, `SET_VIEW_MODE`, `SET_DAY_COLOURING`, `SET_WORKING_HOURS` (preferences). `getRows` derives no extra entry.
 - `viewMode` is `string | null`: a registered view id or none chosen (Cards); an unregistered id shows Cards ([ADR-0012](../adr/0012-user-chosen-view.md)). `SET_VIEW_MODE` sets it.
 

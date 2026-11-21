@@ -1,10 +1,13 @@
 import { Share2, X } from "lucide-react";
+import type { Ref } from "react";
 import type { PresentedMeetingBar } from "@/presenter";
 
 type MeetingBarProps = {
   bar: PresentedMeetingBar;
   onShare: () => void;
   onClear: () => void;
+  /** Share meeting: the share dialog returns the focus here. Implements FR9 of add-meeting-share-dialog (D7). */
+  shareButtonRef?: Ref<HTMLButtonElement>;
 };
 
 const ICON_BUTTON_CLASS_NAMES =
@@ -16,7 +19,12 @@ const ICON_BUTTON_CLASS_NAMES =
  * icon buttons at the right. Renders into the header's three-column grid.
  * Implements FR13, NFR-A1, NFR-R1, UX1 of add-grid-meeting-range-and-share (D7).
  */
-export function MeetingBar({ bar, onShare, onClear }: MeetingBarProps) {
+export function MeetingBar({
+  bar,
+  onShare,
+  onClear,
+  shareButtonRef,
+}: MeetingBarProps) {
   return (
     <>
       <span />
@@ -25,6 +33,7 @@ export function MeetingBar({ bar, onShare, onClear }: MeetingBarProps) {
       </h1>
       <div className="flex justify-self-end gap-1">
         <button
+          ref={shareButtonRef}
           type="button"
           onClick={onShare}
           aria-label={bar.shareLabel}

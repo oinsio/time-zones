@@ -5,6 +5,7 @@
  * The view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1).
  * The day colouring implements FR1, FR2 of add-day-colouring-setting (D1).
  * The day palette implements FR3 of redesign-cards-grid-and-day-palettes (D2).
+ * The share language and the share zone label implement FR5, FR6 of add-meeting-share-dialog (D4).
  */
 import { DEFAULT_WORKING_HOURS, type WorkingHours } from "./workingHours";
 
@@ -41,6 +42,12 @@ export enum DayPalette {
   MUTED = "MUTED",
 }
 
+/** The zone label parts the meeting share text can show, in stored order; the country is not one of them. Implements FR6 of add-meeting-share-dialog (D4). */
+export const SHARE_ZONE_LABEL_PARTS: readonly ZoneLabelPart[] = [
+  ZoneLabelPart.UTC_OFFSET,
+  ZoneLabelPart.ZONE_ABBREVIATION,
+];
+
 export type Preferences = {
   theme: ThemePreference;
   hourFormat: HourFormat;
@@ -56,6 +63,10 @@ export type Preferences = {
   workingHours: WorkingHours;
   /** The colours of the day periods in the Time of day colouring. Implements FR3 of redesign-cards-grid-and-day-palettes (D2). */
   dayPalette: DayPalette;
+  /** The pinned share language (a registered locale code); `null` = follow the interface language. Implements FR5 of add-meeting-share-dialog (D4). */
+  shareLanguage: string | null;
+  /** Parts of the share zone label, in enum order; never the country. Implements FR6 of add-meeting-share-dialog (D4). */
+  shareZoneLabelParts: readonly ZoneLabelPart[];
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -67,4 +78,6 @@ export const DEFAULT_PREFERENCES: Preferences = {
   dayColouring: DayColouring.TIME_OF_DAY,
   workingHours: DEFAULT_WORKING_HOURS,
   dayPalette: DayPalette.VIVID,
+  shareLanguage: null,
+  shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
 };

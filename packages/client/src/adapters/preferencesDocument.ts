@@ -6,6 +6,7 @@ import {
   DEFAULT_WORKING_HOURS,
   type Preferences,
   parseStoredPreferences,
+  SHARE_ZONE_LABEL_PARTS,
   ZoneLabelPart,
 } from "@/preferences";
 import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
@@ -25,6 +26,8 @@ import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
  * working hours. Implements FR2, FR7 of add-day-colouring-setting (D2).
  * Version 6 had no day palette: step 6 adds Vivid.
  * Implements FR3 of redesign-cards-grid-and-day-palettes (D2).
+ * Version 7 had no share choices: step 7 pins no share language and shows both
+ * share zone label parts. Implements FR5, FR6 of add-meeting-share-dialog (D4).
  */
 export const createPreferencesMigrations = (
   legacyInterfaceLanguage: string | null,
@@ -54,6 +57,11 @@ export const createPreferencesMigrations = (
     workingHours: DEFAULT_WORKING_HOURS,
   }),
   6: (payload) => ({ ...(payload as object), dayPalette: DayPalette.VIVID }),
+  7: (payload) => ({
+    ...(payload as object),
+    shareLanguage: null,
+    shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+  }),
 });
 
 export const serializePreferencesDocument = (
@@ -70,6 +78,8 @@ export const serializePreferencesDocument = (
       dayColouring: preferences.dayColouring,
       workingHours: preferences.workingHours,
       dayPalette: preferences.dayPalette,
+      shareLanguage: preferences.shareLanguage,
+      shareZoneLabelParts: preferences.shareZoneLabelParts,
     },
   });
 

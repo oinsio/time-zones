@@ -3,6 +3,7 @@ import {
   type DayPalette,
   type HourFormat,
   type Preferences,
+  SHARE_ZONE_LABEL_PARTS,
   type ThemePreference,
   ZoneLabelPart,
 } from "./preferences";
@@ -16,6 +17,7 @@ import { checkWorkingHours, type WorkingHours } from "./workingHours";
  * SET_VIEW_MODE implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1);
  * SET_DAY_COLOURING and SET_WORKING_HOURS implement FR1, FR6, FR7 of add-day-colouring-setting (D1).
  * SET_DAY_PALETTE implements FR3 of redesign-cards-grid-and-day-palettes (D2).
+ * SET_SHARE_LANGUAGE and TOGGLE_SHARE_ZONE_LABEL_PART implement FR5, FR6 of add-meeting-share-dialog (D4).
  */
 export enum PreferencesCommandType {
   SET_THEME = "SET_THEME",
@@ -26,6 +28,8 @@ export enum PreferencesCommandType {
   SET_DAY_COLOURING = "SET_DAY_COLOURING",
   SET_DAY_PALETTE = "SET_DAY_PALETTE",
   SET_WORKING_HOURS = "SET_WORKING_HOURS",
+  SET_SHARE_LANGUAGE = "SET_SHARE_LANGUAGE",
+  TOGGLE_SHARE_ZONE_LABEL_PART = "TOGGLE_SHARE_ZONE_LABEL_PART",
 }
 
 export type PreferencesCommand =
@@ -49,7 +53,31 @@ export type PreferencesCommand =
   | {
       type: PreferencesCommandType.SET_WORKING_HOURS;
       workingHours: WorkingHours;
+    }
+  | {
+      type: PreferencesCommandType.SET_SHARE_LANGUAGE;
+      shareLanguage: string | null;
+    }
+  | {
+      type: PreferencesCommandType.TOGGLE_SHARE_ZONE_LABEL_PART;
+      part: ZoneLabelPart;
     };
+
+/** The country is not a share zone label part: toggling it returns the same object. */
+function reduceShareZoneLabelPart(
+  preferences: Preferences,
+  part: ZoneLabelPart,
+): Preferences {
+  if (!SHARE_ZONE_LABEL_PARTS.includes(part)) return preferences;
+  return {
+    ...preferences,
+    shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS.filter((candidate) =>
+      candidate === part
+        ? !preferences.shareZoneLabelParts.includes(candidate)
+        : preferences.shareZoneLabelParts.includes(candidate),
+    ),
+  };
+}
 
 /** An invalid range never enters the state: it returns the same object. */
 function reduceWorkingHours(
@@ -116,5 +144,11 @@ export function reducePreferences(
         : { ...preferences, dayPalette: command.dayPalette };
     case PreferencesCommandType.SET_WORKING_HOURS:
       return reduceWorkingHours(preferences, command.workingHours);
+    case PreferencesCommandType.SET_SHARE_LANGUAGE:
+      return preferences.shareLanguage === command.shareLanguage
+        ? preferences
+        : { ...preferences, shareLanguage: command.shareLanguage };
+    case PreferencesCommandType.TOGGLE_SHARE_ZONE_LABEL_PART:
+      return reduceShareZoneLabelPart(preferences, command.part);
   }
 }

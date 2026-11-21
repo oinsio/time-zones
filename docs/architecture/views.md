@@ -9,7 +9,7 @@ Views are interchangeable interfaces over the same model ([ADR-0002](../adr/0002
 | View | Best for | Screens | Status |
 |---|---|---|---|
 | **Cards** | converting: large exact time per location | phone in portrait, any | first release |
-| **Grid** | planning a meeting: see where working hours overlap and pick a meeting range ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)) | any; all 24 hours fit from about 830 px | complete: hour cells, hour frame, meeting range, handles and Share meeting |
+| **Grid** | planning a meeting: see where working hours overlap and pick a meeting range ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)) | any; all 24 hours fit from about 830 px | complete: hour cells, hour frame, meeting range, handles and Share meeting, which opens the share dialog |
 
 Future views reuse the same model, e.g. a compact world-clock list.
 
@@ -40,10 +40,14 @@ All rows sit in one panel with dividers, so a frame can cross every row. Each ro
 - **Hour frame:** a blue (accent) frame across all rows around the hour cell of the effective instant; its text in the cell is bold. While live it follows the current hour.
 - **Meeting:** tapping a cell sets a one-hour meeting range, dragging across cells stretches it ([ADR-0011](../adr/0011-meeting-range-in-grid-view.md)). The frame turns green and spans the range, cells outside it are dimmed, and every row shows its local range in green (`23:00–01:00`).
 - **Meeting handles:** green grips on the left and right side of the meeting frame, placed on different rows so both are easy to grab. They move the start and the end onto the 15-minute track step, while a typed meeting may start and end at any minute ([ADR-0013](../adr/0013-meeting-range-at-any-minute.md)); they stand on the rows visible on screen and have a 44 × 44 px hit area; for assistive technology they are sliders (arrows ±15 min, Page Up / Page Down ±1 h, Home / End the day's ends).
-- **Meeting bar:** while a meeting range is set the header turns green: the title «Встреча · 2 ч», then «Поделиться встречей» (Lucide `Share2`) and «Сбросить выбор встречи» (Lucide `X`). Clear returns the hour frame; the Now button also clears the range. Share sends text only (Q8): the date and duration, then every location's city and local span in list order, with its day shift where its date differs, by the system share where the browser has it and by the clipboard otherwise; a closed share sheet is silent.
+- **Meeting bar:** while a meeting range is set the header turns green: the title «Встреча · 2 ч», then «Поделиться встречей» (Lucide `Share2`) and «Сбросить выбор встречи» (Lucide `X`). Clear returns the hour frame; the Now button also clears the range. Share meeting opens the share dialog and shares nothing by itself; the dialog sends text only (Q8), by the system share where the browser has it and by the clipboard otherwise; a closed share sheet is silent.
 - **Locked controls:** while a meeting range is set, the grab areas, location menus and wall-time inputs of every row are locked; they work again when the range is cleared.
 - **Meeting range input:** while a meeting range is set, the span opens start and end fields in the row's local time; Enter or leaving both fields confirms, Esc closes.
 - **Layers:** page order, lowest first: hour cells, then the frame, then the row header texts and notes, then the meeting handles, then the focused header, then the date bar with its notices, then a dragged row, then the location menu with the header box that holds it, then dialogs. Text and notes have the surface background behind their glyphs only, so the frame breaks only behind words and numbers.
+
+### Share dialog
+
+A lazy modal (`LazyMeetingShareDialog`, `MeetingShareDialog`) on the Add location dialog frame: full screen below 640 px, centred and at most 512 px wide from 640 px, padding 16 px. Blocks, top to bottom: the title («Встреча · 2 ч») with the close button 44 × 44 px and the reference line; the locations (a checkbox row each, no remove control); the share language (`LanguageGroup` with the pin 44 × 44 px beside it); the share zone label (`SettingsToggleGroup`: abbreviation, UTC offset); the preview of the meeting share text with the heading in bold; one button per share destination, kept in view while the content scrolls. Captions use the settings caption style (14 px, weight 600, muted foreground). Share dialog states: no location ticked shows the hint and makes Share inactive; the city data not loaded yet shows the stored labels; offline needs nothing, because sharing falls back to the clipboard.
 
 ## Cards
 

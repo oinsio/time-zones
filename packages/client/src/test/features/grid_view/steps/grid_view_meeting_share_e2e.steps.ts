@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import { englishLocale } from "../../main_page/steps/englishTexts";
@@ -9,43 +9,19 @@ import {
   shareButtonOf,
   startHandleOf,
 } from "./meetingE2eHelpers";
+import {
+  dialogShareButtonOf,
+  readShared,
+  shareDialogOf,
+  stubBrowser,
+} from "./meetingShareE2eHelpers";
 
 const { Given, When, Then } = createBdd(test);
 
-const SHARED_TEXT_KEY = "sharedMeetingData";
 const MAX_TAB_STOPS = 80;
 const NOTICE_SELECTOR = "[role='status']";
 const COLOR_CONTRAST_RULE = "color-contrast";
 const DIMMED_CELL_SELECTOR = "[data-hour-cell].opacity-40";
-
-/** Replaces `navigator.share` and `navigator.clipboard` before the app starts. */
-const stubBrowser = (
-  page: Page,
-  behaviour: { share: "works" | "closed" | "missing"; hasClipboard: boolean },
-) =>
-  page.addInitScript(
-    ({ stubbed, key }) => {
-      const define = (name: string, value: unknown) =>
-        Object.defineProperty(navigator, name, { value, configurable: true });
-      if (stubbed.share === "missing") define("share", undefined);
-      else {
-        define("share", async (data: unknown) => {
-          Reflect.set(window, key, data);
-          if (stubbed.share === "closed") {
-            throw new DOMException("closed", "AbortError");
-          }
-        });
-      }
-      if (!stubbed.hasClipboard) define("clipboard", undefined);
-    },
-    { stubbed: behaviour, key: SHARED_TEXT_KEY },
-  );
-
-const readShared = (page: Page) =>
-  page.evaluate(
-    (key) => Reflect.get(window, key) as Record<string, unknown> | undefined,
-    SHARED_TEXT_KEY,
-  );
 
 // Verifies FR15 of add-grid-meeting-range-and-share: browser stubs of D10.
 Given("a browser with a system share", async ({ locationsWorld }) => {
@@ -85,6 +61,19 @@ When("the user chooses Share meeting", async ({ locationsWorld }) => {
   await shareButtonOf(locationsWorld.page).click();
 });
 
+// Verifies FR9 of add-meeting-share-dialog: a share is made in the dialog.
+When("the user chooses Share in the dialog", async ({ locationsWorld }) => {
+  await dialogShareButtonOf(locationsWorld.page).click();
+});
+
+Then("the share dialog stays open", async ({ locationsWorld }) => {
+  await expect(shareDialogOf(locationsWorld.page)).toBeVisible();
+});
+
+Then("the share dialog is closed", async ({ locationsWorld }) => {
+  await expect(shareDialogOf(locationsWorld.page)).toHaveCount(0);
+});
+
 Then(
   "the system share received a text without a link, exactly these lines:",
   async ({ locationsWorld }, table) => {
@@ -102,7 +91,6 @@ Then(
 
 Then("no share notice is shown", async ({ locationsWorld }) => {
   const { page } = locationsWorld;
-  await expect(shareButtonOf(page)).toBeVisible();
   for (const message of [
     englishLocale.meeting.copiedNotice,
     englishLocale.meeting.shareFailedNotice,
@@ -117,7 +105,9 @@ Then(
     const { page } = locationsWorld;
     await expect
       .poll(() => page.evaluate(() => navigator.clipboard.readText()))
-      .toMatch(/^Meeting on Sunday, March 8, 2026, 2 h\nAlmaty: 09:00–11:00\n/);
+      .toMatch(
+        /^Meeting on Sunday, March 8, 2026, 2 h\nAlmaty \(UTC\+5\): 09:00–11:00\n/,
+      );
   },
 );
 
@@ -130,7 +120,7 @@ Then(
   },
 );
 
-Then("the focus stays on Share meeting", async ({ locationsWorld }) => {
+Then("the focus returns to Share meeting", async ({ locationsWorld }) => {
   await expect(shareButtonOf(locationsWorld.page)).toBeFocused();
 });
 

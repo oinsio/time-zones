@@ -88,6 +88,12 @@ export {
   reduceLocations,
   type WorldClockState,
 } from "./locations";
+// Implements FR3, FR10 of add-meeting-share-dialog.
+export {
+  getMeetingInvitation,
+  type InvitedLocation,
+  type MeetingInvitation,
+} from "./meetingInvitation";
 export {
   getMeetingHandleLimits,
   getMeetingRangeAfterHandleMove,
@@ -154,6 +160,8 @@ export {
 } from "./wallClockNote";
 // Implements FR9 of apply-data-updates-silently.
 export { getWatchedZoneIds } from "./watchedZones";
+// Implements FR7 of add-meeting-share-dialog.
+export { getWeekday, Weekday } from "./weekday";
 // Implements FR8, FR10, FR11 of add-day-colouring-setting.
 export {
   getHourCellWorkingFlags,

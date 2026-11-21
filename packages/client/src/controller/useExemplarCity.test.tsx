@@ -125,3 +125,27 @@ describe("useExemplarCity", () => {
     expect(result.current).toBe("Алматы");
   });
 });
+
+// Verifies FR4 of add-meeting-share-dialog.
+const loadSearch: LoadCitySearch = async () => search;
+
+describe("useExemplarCity in another language", () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("ru");
+    await loadCitySearchOnce(loadSearch);
+  });
+
+  it("should give the name in the given language under a Russian interface", () => {
+    const { result } = renderHook(() =>
+      useExemplarCity("Asia/Almaty", loadSearch, "en"),
+    );
+    expect(result.current).toBe("Almaty");
+  });
+
+  it("should give the interface language name without the argument", () => {
+    const { result } = renderHook(() =>
+      useExemplarCity("Asia/Almaty", loadSearch),
+    );
+    expect(result.current).toBe("Алматы");
+  });
+});

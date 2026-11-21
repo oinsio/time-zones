@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { CityNameLanguage } from "@/constants";
 import { type Location, LocationKind } from "@/model";
 import type { LoadCitySearch } from "@/ports";
 import { loadCitySearchOnce, readLoadedCitySearch } from "./cityDataCache";
@@ -15,12 +16,16 @@ const isCityLocation = (location: Location): boolean =>
  * state, no retry. A minute tick looks up no label, a language switch looks up
  * one per city location.
  * Implements FR1, FR2, FR4, NFR-P1 of show-city-labels-in-interface-language (D3).
+ * The optional `cityNameLanguageOverride` serves the share language: FR4 of add-meeting-share-dialog (D6).
  */
 export function useCityLabels(
   locations: readonly Location[],
   load: LoadCitySearch,
+  cityNameLanguageOverride?: CityNameLanguage,
 ): ReadonlyMap<string, string> | undefined {
-  const { cityNameLanguage } = useActiveInterfaceLanguage();
+  const interfaceLanguage = useActiveInterfaceLanguage();
+  const cityNameLanguage =
+    cityNameLanguageOverride ?? interfaceLanguage.cityNameLanguage;
   const [loadedSearch, setLoadedSearch] = useState(() =>
     readLoadedCitySearch(load),
   );

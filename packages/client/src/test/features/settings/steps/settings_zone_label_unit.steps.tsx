@@ -6,7 +6,7 @@ import { cleanup, render, screen } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { expect, vi } from "vitest";
-import { SettingsToggleGroup } from "@/app/settings";
+import { SettingsToggleGroup } from "@/views/shared";
 import type { ZONE_LABEL_PART_NAMES } from "../../locations/steps/zoneLineWorld";
 import { createZoneLabelWorld } from "./zoneLabelWorld";
 

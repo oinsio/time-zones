@@ -3,6 +3,7 @@ import {
   DayPalette,
   HourFormat,
   type Preferences,
+  SHARE_ZONE_LABEL_PARTS,
   ThemePreference,
   ZoneLabelPart,
 } from "./preferences";
@@ -26,6 +27,10 @@ const isZoneLabelParts = (value: unknown): value is ZoneLabelPart[] =>
   value.every((part) => ZONE_LABEL_PART_VALUES.includes(part)) &&
   new Set(value).size === value.length;
 
+const isShareZoneLabelParts = (value: unknown): value is ZoneLabelPart[] =>
+  isZoneLabelParts(value) &&
+  value.every((part) => SHARE_ZONE_LABEL_PARTS.includes(part));
+
 const isNullOrNonEmptyString = (value: unknown): value is string | null =>
   value === null || (typeof value === "string" && value !== "");
 
@@ -37,7 +42,8 @@ const isNullOrNonEmptyString = (value: unknown): value is string | null =>
  * the zone label implements FR13, FR15 of show-zone-abbreviations-and-zone-label-setting (D4);
  * the view mode implements FR3, FR4 of add-view-mode-setting-and-grid-skeleton (D1);
  * the day colouring and working hours implement FR3, FR7 of add-day-colouring-setting (D1, D2);
- * the day palette implements FR3 of redesign-cards-grid-and-day-palettes (D2).
+ * the day palette implements FR3 of redesign-cards-grid-and-day-palettes (D2);
+ * the share choices implement FR5, FR6 of add-meeting-share-dialog (D4).
  */
 export function parseStoredPreferences(
   payload: unknown,
@@ -52,6 +58,8 @@ export function parseStoredPreferences(
     dayColouring,
     workingHours,
     dayPalette,
+    shareLanguage,
+    shareZoneLabelParts,
   } = payload as Record<string, unknown>;
   if (
     !THEME_VALUES.includes(theme) ||
@@ -61,7 +69,9 @@ export function parseStoredPreferences(
     !isNullOrNonEmptyString(viewMode) ||
     !DAY_COLOURING_VALUES.includes(dayColouring) ||
     !isWorkingHours(workingHours) ||
-    !DAY_PALETTE_VALUES.includes(dayPalette)
+    !DAY_PALETTE_VALUES.includes(dayPalette) ||
+    !isNullOrNonEmptyString(shareLanguage) ||
+    !isShareZoneLabelParts(shareZoneLabelParts)
   ) {
     return { ok: false };
   }
@@ -74,6 +84,10 @@ export function parseStoredPreferences(
       viewMode,
       dayColouring: dayColouring as DayColouring,
       dayPalette: dayPalette as DayPalette,
+      shareLanguage,
+      shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS.filter((part) =>
+        shareZoneLabelParts.includes(part),
+      ),
       workingHours: { start: workingHours.start, end: workingHours.end },
       zoneLabelParts: Object.values(ZoneLabelPart).filter((part) =>
         zoneLabelParts.includes(part),

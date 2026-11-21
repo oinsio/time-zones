@@ -1,5 +1,6 @@
 // Verifies FR13, FR15, NFR-A2 of add-grid-meeting-range-and-share (D7).
-import { fireEvent, render, screen } from "@testing-library/react";
+// Verifies FR1, FR9, NFR-A1 of add-meeting-share-dialog (D7).
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createInMemoryTextSharing } from "@/adapters";
@@ -34,6 +35,13 @@ async function openWithMeeting(
   const cells = firstStrip.querySelectorAll("[data-hour-cell]");
   fireEvent.click(cells[9]);
   return textSharing;
+}
+
+/** Chooses Share meeting, then Share in the dialog it opens. */
+async function shareThroughDialog() {
+  await userEvent.click(screen.getByRole("button", { name: "Share meeting" }));
+  const dialog = await screen.findByRole("dialog", { name: "Share meeting" });
+  await userEvent.click(within(dialog).getByRole("button", { name: "Share" }));
 }
 
 describe("AppShell with a meeting range", () => {
@@ -84,24 +92,46 @@ describe("AppShell with a meeting range", () => {
     );
   });
 
-  it("should show the copied notice in the notices region without taking the focus", async () => {
-    await openWithMeeting();
+  it("should open the share dialog and copy nothing on Share meeting", async () => {
+    const textSharing = await openWithMeeting();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share meeting" }),
+    );
+
+    expect(
+      await screen.findByRole("dialog", { name: "Share meeting" }),
+    ).toBeInTheDocument();
+    expect(textSharing.copiedTexts).toEqual([]);
+    expect(textSharing.sharedTexts).toEqual([]);
+  });
+
+  it("should close the dialog, copy the text and return the focus on Share", async () => {
+    const textSharing = await openWithMeeting();
     const shareButton = screen.getByRole("button", { name: "Share meeting" });
 
-    await userEvent.click(shareButton);
+    await shareThroughDialog();
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(textSharing.copiedTexts).toHaveLength(1);
+    expect(textSharing.copiedTexts[0]).toMatch(/^Meeting on /);
+    await vi.waitFor(() => expect(document.activeElement).toBe(shareButton));
+  });
+
+  it("should show the copied notice in the notices region", async () => {
+    await openWithMeeting();
+
+    await shareThroughDialog();
 
     const notice = await screen.findByText("Meeting text copied");
     expect(
       screen.getAllByRole("status").find((region) => region.contains(notice)),
     ).toHaveAttribute("aria-live", "polite");
-    expect(document.activeElement).toBe(shareButton);
   });
 
   it("should dismiss the notice with Escape", async () => {
     await openWithMeeting();
-    await userEvent.click(
-      screen.getByRole("button", { name: "Share meeting" }),
-    );
+    await shareThroughDialog();
     await screen.findByText("Meeting text copied");
 
     await userEvent.keyboard("{Escape}");
@@ -109,11 +139,22 @@ describe("AppShell with a meeting range", () => {
     expect(screen.queryByText("Meeting text copied")).toBeNull();
   });
 
-  it("should dismiss the notice when the meeting is cleared", async () => {
+  it("should remove the notice when the dialog opens again", async () => {
     await openWithMeeting();
+    await shareThroughDialog();
+    await screen.findByText("Meeting text copied");
+
     await userEvent.click(
       screen.getByRole("button", { name: "Share meeting" }),
     );
+    await screen.findByRole("dialog", { name: "Share meeting" });
+
+    expect(screen.queryByText("Meeting text copied")).toBeNull();
+  });
+
+  it("should dismiss the notice when the meeting is cleared", async () => {
+    await openWithMeeting();
+    await shareThroughDialog();
     await screen.findByText("Meeting text copied");
 
     await userEvent.click(
