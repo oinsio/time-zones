@@ -454,6 +454,57 @@ After the rows of 50 locations in 10 zones were presented with a meeting range, 
 - **THEN** no formatter is built and no time zone transition is looked up
 - **AND** every row gets the same hour strip as before
 
+### Requirement: Accessible meeting state
+With a meeting range set, axe-core SHALL report no violations on the Grid view in the light and the dark theme, with and without a share notice, with a meeting range input open and with its error shown. The Tab order MUST be: «Поделиться встречей», «Сбросить выбор встречи», then for each row its span button and its hour strip, then the meeting handles «Начало встречи», «Конец встречи», «Сдвиг встречи»; no location menu button MUST be a Tab stop, and the grab area is never one. While a row's meeting range input is open, its fields «Время начала — {city}» and «Время окончания — {city}» MUST take the place of that row's span button in the Tab order, start before end, followed by that row's hour strip and so before the meeting handles. After Clear meeting the location menu buttons MUST be Tab stops again. The fields of the meeting range input MUST have accessible names, and a field with an error MUST be `aria-invalid` and described by its error. <!-- implements NFR-A1, NFR-A2 of add-grid-meeting-range-and-share; NFR-A1, NFR-A2 of fix-grid-meeting-range-lock-and-layering; FR15, NFR-A3 of redesign-cards-grid-and-day-palettes; NFR-A1 of move-meeting-range-and-extend-past-midnight -->
+
+#### Scenario: No accessibility violations in the meeting state
+- **GIVEN** the Grid view with Almaty, Moscow, Kolkata and New York and the sample meeting in the `<theme>` theme
+- **WHEN** axe-core checks the page, before and after the copied notice appears
+- **THEN** it reports no violations
+
+| theme |
+|---|
+| light |
+| dark |
+
+#### Scenario: No accessibility violations with the meeting range input
+- **GIVEN** the sample meeting in the `<theme>` theme and Moscow's meeting range input open
+- **WHEN** axe-core checks the page, before and after the text error appears
+- **THEN** it reports no violations
+
+| theme |
+|---|
+| light |
+| dark |
+
+#### Scenario: Tab order skips the locked controls
+- **GIVEN** the Grid view with Almaty and Moscow and the sample meeting
+- **WHEN** the user presses Tab from the page start through the panel
+- **THEN** the focus visits «Поделиться встречей», «Сбросить выбор встречи», Almaty's span, Almaty's hour strip, Moscow's span, Moscow's hour strip, the meeting handles «Начало встречи», «Конец встречи» and «Сдвиг встречи» in this order
+- **WHEN** the user clears the meeting range and presses Tab through the panel
+- **THEN** each row's location menu button is a Tab stop again
+
+#### Scenario: The open input's fields sit in place of the span in the Tab order
+- **GIVEN** the Grid view with Almaty and Moscow, the sample meeting and Almaty's meeting range input open with the focus in «Время начала — Almaty»
+- **WHEN** the user presses Tab three times without changing a text
+- **THEN** the focus visits «Время окончания — Almaty», Almaty's hour strip and Moscow's span in this order
+- **AND** Almaty's input is closed and the meeting range is still 09:00–11:00
+
+#### Scenario: The keyboard alone sets the meeting
+- **GIVEN** the Grid view with Almaty and Moscow, Russian interface, and the sample meeting
+- **WHEN** the user tabs to Moscow's span, presses Enter, types `8`, presses Tab, types `10:30` and presses Enter
+- **THEN** the title is «Встреча · 2 ч 30 мин» and the focus is on Moscow's span
+
+#### Scenario: The open input fits on a phone
+- **GIVEN** the sample meeting at `<width>` by `<height>` px
+- **WHEN** the user opens Moscow's meeting range input
+- **THEN** both fields are fully inside the viewport and the page does not scroll horizontally
+
+| width | height |
+|---|---|
+| 320 | 640 |
+| 390 | 844 |
+
 ## ADDED Requirements
 
 ### Requirement: Meeting bar stays at the top of the viewport

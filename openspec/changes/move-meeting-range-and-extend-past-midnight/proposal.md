@@ -34,7 +34,7 @@ None.
 ### Modified Capabilities
 
 - `meeting-range`: "Meeting range invariants", "Set and clear a meeting range", "Meeting handle moves", "Set a meeting range from wall-clock times"; "Commands that remove or move the meeting range" is replaced by "Commands that remove the meeting range or carry it to another date" (its clamping rule and scenario go); new "Move the whole meeting range".
-- `grid-view`: "Hour cells of the reference day", "Midnight marker in the hour strip", "Hour strip width", "Tap or Enter sets a one-hour meeting range", "Drag across hour cells sets a meeting range", "Meeting frame and dimmed cells", "Meeting handles on the frame", "Meeting handles are sliders", "Handle drag scrolls the strips", "Meeting range input", "Approved screenshots of the meeting state", "Meeting state is fast" (hour strips stay the same object only while the strip tail keeps its cell count); new requirements for the sticky meeting bar, the move handle, the move gestures, the moving state, their work bounds and their screenshots.
+- `grid-view`: "Hour cells of the reference day", "Midnight marker in the hour strip", "Hour strip width", "Tap or Enter sets a one-hour meeting range", "Drag across hour cells sets a meeting range", "Meeting frame and dimmed cells", "Meeting handles on the frame", "Meeting handles are sliders", "Handle drag scrolls the strips", "Meeting range input", "Approved screenshots of the meeting state", "Meeting state is fast" (hour strips stay the same object only while the strip tail keeps its cell count), "Accessible meeting state" (the Tab order ends with the move handle); new requirements for the sticky meeting bar, the move handle, the move gestures, the moving state, their work bounds and their screenshots.
 
 ## Goals
 
