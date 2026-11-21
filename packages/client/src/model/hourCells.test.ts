@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { DayPeriod } from "./dayPeriods";
 import { getReferenceDay } from "./dayTrack";
-import { getHourCells, getStripTailCellCount } from "./hourCells";
+import { getStripTailCellCount } from "./hourCellColumns";
+import { getHourCells } from "./hourCells";
 import { INITIAL_WORLD_CLOCK_STATE } from "./locations";
 
 const ALMATY = "Asia/Almaty";

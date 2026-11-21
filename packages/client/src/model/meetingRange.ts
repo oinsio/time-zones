@@ -1,21 +1,18 @@
 import {
   HOUR_CELL_DURATION,
   MEETING_RANGE_MAX_MINUTES,
-  MILLISECONDS_PER_MINUTE,
   MINUTES_PER_HOUR,
   NANOSECONDS_PER_MINUTE,
-  TRACK_HOUR_MOVE_MINUTES,
   TRACK_STEP_MINUTES,
 } from "@/constants";
-import type { Temporal } from "@/lib/temporal";
+import { Temporal } from "@/lib/temporal";
+import type { ReferenceDay, TrackMove } from "./dayTrack";
+import { getHourCellCount, getHourCellStart } from "./hourCellColumns";
 import {
-  getMinutesAfterTrackStep,
-  type ReferenceDay,
-  TrackMove,
-} from "./dayTrack";
-import { getHourCellCount, getHourCellStart } from "./hourCells";
-import { getLastStartMinutes } from "./meetingRangeMove";
-import { getNextReferenceDay } from "./nextReferenceDay";
+  getLastStartMinutes,
+  getMinutesAfterMove,
+  getMinutesFromDayStart,
+} from "./meetingRangeMove";
 
 /**
  * The meeting range: a start inside one reference day and an end at most 24
@@ -48,10 +45,6 @@ export type MeetingSpan = {
   firstColumn: number;
   lastColumn: number;
 };
-
-const getMinutesFromDayStart = (day: ReferenceDay, instant: Temporal.Instant) =>
-  (instant.epochMilliseconds - day.start.epochMilliseconds) /
-  MILLISECONDS_PER_MINUTE;
 
 const getInstantAtMinutes = (day: ReferenceDay, minutes: number) =>
   day.start.add({ nanoseconds: minutes * NANOSECONDS_PER_MINUTE });
@@ -95,13 +88,14 @@ export function getMeetingRangeOfCells(
   const highDayEnd =
     highColumn < getHourCellCount(day)
       ? day.end
-      : getNextReferenceDay(day, referenceZoneId).end;
+      : day.end
+          .toZonedDateTimeISO(referenceZoneId)
+          .add({ days: 1 })
+          .startOfDay()
+          .toInstant();
   const longestEnd = start.add({ minutes: MEETING_RANGE_MAX_MINUTES });
-  const end = [highCellEnd, highDayEnd, longestEnd].reduce(
-    (earliest, instant) =>
-      instant.epochMilliseconds < earliest.epochMilliseconds
-        ? instant
-        : earliest,
+  const [end] = [highCellEnd, highDayEnd, longestEnd].sort(
+    Temporal.Instant.compare,
   );
   return { start, end };
 }
@@ -164,22 +158,13 @@ export function getMeetingRangeAfterHandleMove(
     day,
     handle === MeetingHandle.START ? meeting.start : meeting.end,
   );
-  const targetMinutes: Record<TrackMove, number> = {
-    [TrackMove.NEXT_STEP]: getMinutesAfterTrackStep(
-      current,
-      TrackMove.NEXT_STEP,
-    ),
-    [TrackMove.PREVIOUS_STEP]: getMinutesAfterTrackStep(
-      current,
-      TrackMove.PREVIOUS_STEP,
-    ),
-    [TrackMove.HOUR_FORWARD]: current + TRACK_HOUR_MOVE_MINUTES,
-    [TrackMove.HOUR_BACK]: current - TRACK_HOUR_MOVE_MINUTES,
-    // For a handle the day's ends are the limits of the handle (D1).
-    [TrackMove.DAY_START]: Number.NEGATIVE_INFINITY,
-    [TrackMove.DAY_END]: Number.POSITIVE_INFINITY,
-  };
-  return putHandleAtMinutes(day, meeting, handle, targetMinutes[move]);
+  // For a handle the day's ends are the limits of the handle (D1).
+  return putHandleAtMinutes(
+    day,
+    meeting,
+    handle,
+    getMinutesAfterMove(current, move, -Infinity, Infinity),
+  );
 }
 
 /** The range after a pointer drag: the handle at the nearest track step, limited. */

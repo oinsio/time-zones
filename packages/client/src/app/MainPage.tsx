@@ -1,6 +1,5 @@
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { SCROLL_PADDING_TOP_PROPERTY } from "@/constants";
 import { ViewHost } from "./ViewHost";
 
 interface MainPageProps {
@@ -55,28 +54,24 @@ export function MainPage({
   useLayoutEffect(() => {
     const header = headerRef.current;
     if (!hasMeetingBar || header === null) return;
-    const scrollingElement = document.documentElement;
-    const applyHeaderHeight = () =>
-      scrollingElement.style.setProperty(
-        SCROLL_PADDING_TOP_PROPERTY,
-        `${header.getBoundingClientRect().height}px`,
-      );
+    const { style } = document.documentElement;
+    const applyHeaderHeight = () => {
+      style.scrollPaddingTop = `${header.getBoundingClientRect().height}px`;
+    };
     applyHeaderHeight();
     const observer = new ResizeObserver(applyHeaderHeight);
     observer.observe(header);
     return () => {
       observer.disconnect();
-      scrollingElement.style.removeProperty(SCROLL_PADDING_TOP_PROPERTY);
+      style.scrollPaddingTop = "";
     };
   }, [hasMeetingBar]);
   return (
     <div className="flex min-h-dvh w-full flex-col">
       <header
         ref={headerRef}
-        data-meeting-bar={meetingBar === undefined ? undefined : ""}
-        className={
-          meetingBar === undefined ? undefined : MEETING_HEADER_CLASS_NAMES
-        }
+        data-meeting-bar={hasMeetingBar ? "" : undefined}
+        className={hasMeetingBar ? MEETING_HEADER_CLASS_NAMES : undefined}
       >
         {meetingBar ?? (
           <div

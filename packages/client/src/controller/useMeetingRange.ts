@@ -13,6 +13,7 @@ import {
   LocationErrorCode,
   type MeetingEndHandle,
   type MeetingRange,
+  type MeetingRangeMove,
   type MeetingSpan,
   type TrackMove,
   WallTimeTargetKind,
@@ -132,6 +133,12 @@ export function useMeetingRange() {
 
   const actions = useMemo(() => {
     const getDay = () => getReferenceDay(store.getSnapshot(), clock.instant());
+    const moveWhole = (target: MeetingRangeMove) => {
+      store.dispatch({
+        type: LocationCommandType.MOVE_MEETING_RANGE,
+        target,
+      });
+    };
     const selectCells = (firstColumn: number, lastColumn: number) => {
       setRange(
         getMeetingRangeOfCells(
@@ -158,18 +165,9 @@ export function useMeetingRange() {
           getMeetingRangeAfterHandleMove(getDay(), current, handle, move),
         );
       },
-      moveMeeting: (move: TrackMove) => {
-        store.dispatch({
-          type: LocationCommandType.MOVE_MEETING_RANGE,
-          target: { move },
-        });
-      },
-      moveMeetingToStartMinutes: (startMinutes: number) => {
-        store.dispatch({
-          type: LocationCommandType.MOVE_MEETING_RANGE,
-          target: { startMinutes },
-        });
-      },
+      moveMeeting: (move: TrackMove) => moveWhole({ move }),
+      moveMeetingToStartMinutes: (startMinutes: number) =>
+        moveWhole({ startMinutes }),
       dragHandleTo: (handle: MeetingEndHandle, minutes: number) => {
         const current = store.getSnapshot().meeting;
         if (current === undefined) return;

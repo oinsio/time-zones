@@ -3,7 +3,7 @@ import type { Temporal } from "@/lib/temporal";
 import type { WorkingHours } from "@/preferences";
 import { getClockChangesAround } from "./clockChange";
 import type { ReferenceDay } from "./dayTrack";
-import { getHourCellCount, getHourCellStart } from "./hourCells";
+import { getHourCellCount, getHourCellStart } from "./hourCellColumns";
 import { isWorkingDay, isWorkingTime } from "./workingDay";
 import {
   compareInstants,

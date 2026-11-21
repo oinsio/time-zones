@@ -18,7 +18,8 @@ export type MeetingRangeMove = { move: TrackMove } | { startMinutes: number };
 export const getLastStartMinutes = (day: ReferenceDay) =>
   Math.floor((day.lengthMinutes - 1) / TRACK_STEP_MINUTES) * TRACK_STEP_MINUTES;
 
-const getMinutesFromDayStart = (
+/** The minutes from the start of the reference day to an instant. */
+export const getMinutesFromDayStart = (
   day: ReferenceDay,
   instant: MeetingRange["start"],
 ) =>
@@ -44,17 +45,17 @@ function putStartAtMinutes(
 }
 
 /**
- * The range after a keyboard move of the whole range: the start goes to the
- * next or previous track step, an hour on, or to the earliest or latest
- * position; the length never changes.
- * Implements FR14 of move-meeting-range-and-extend-past-midnight (D3).
+ * The minutes a keyboard move leads to from `current`: the next or previous
+ * track step, an hour on, or the earliest or the latest position given. The
+ * one table of keyboard moves for a handle and for the whole range.
+ * Implements FR4, FR14 of move-meeting-range-and-extend-past-midnight (D1, D3).
  */
-export function getMeetingRangeAfterMove(
-  meeting: MeetingRange,
-  day: ReferenceDay,
+export function getMinutesAfterMove(
+  current: number,
   move: TrackMove,
-): MeetingRange {
-  const current = getMinutesFromDayStart(day, meeting.start);
+  earliestMinutes: number,
+  latestMinutes: number,
+): number {
   const targetMinutes: Record<TrackMove, number> = {
     [TrackMove.NEXT_STEP]: getMinutesAfterTrackStep(
       current,
@@ -66,10 +67,29 @@ export function getMeetingRangeAfterMove(
     ),
     [TrackMove.HOUR_FORWARD]: current + TRACK_HOUR_MOVE_MINUTES,
     [TrackMove.HOUR_BACK]: current - TRACK_HOUR_MOVE_MINUTES,
-    [TrackMove.DAY_START]: 0,
-    [TrackMove.DAY_END]: getLastStartMinutes(day),
+    [TrackMove.DAY_START]: earliestMinutes,
+    [TrackMove.DAY_END]: latestMinutes,
   };
-  return putStartAtMinutes(day, meeting, targetMinutes[move]);
+  return targetMinutes[move];
+}
+
+/**
+ * The range after a keyboard move of the whole range: the start goes to the
+ * next or previous track step, an hour on, or to the earliest or latest
+ * position; the length never changes.
+ * Implements FR14 of move-meeting-range-and-extend-past-midnight (D3).
+ */
+export function getMeetingRangeAfterMove(
+  meeting: MeetingRange,
+  day: ReferenceDay,
+  move: TrackMove,
+): MeetingRange {
+  const current = getMinutesFromDayStart(day, meeting.start);
+  return putStartAtMinutes(
+    day,
+    meeting,
+    getMinutesAfterMove(current, move, 0, getLastStartMinutes(day)),
+  );
 }
 
 /**

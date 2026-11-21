@@ -49,8 +49,8 @@ export type PresentedHourStrip = { cells: readonly PresentedHourCell[] };
 /** A strip's presented cells, kept so that a longer tail presents only the cells it adds. */
 type CachedStrip = {
   presentedCells: PresentedHourCell[];
-  tailWorkingFlags: readonly boolean[] | undefined;
-  stripsByTail: Map<number, PresentedHourStrip>;
+  lastTailCellCount: number;
+  lastStrip: PresentedHourStrip | undefined;
 };
 
 export type HourStripContext = {
@@ -148,12 +148,16 @@ export function presentHourStrip(
   const stripKey = `${timeZoneId}|${getCoordinatesKey(context.coordinates)}`;
   const tailCellCount = context.tailCellCount ?? 0;
   const cachedStrip = cachedStripsByZone.get(stripKey);
-  const cachedByTail = cachedStrip?.stripsByTail.get(tailCellCount);
-  if (cachedByTail !== undefined) return cachedByTail;
+  if (
+    cachedStrip?.lastStrip &&
+    cachedStrip.lastTailCellCount === tailCellCount
+  ) {
+    return cachedStrip.lastStrip;
+  }
   const entry: CachedStrip = cachedStrip ?? {
     presentedCells: [],
-    tailWorkingFlags: undefined,
-    stripsByTail: new Map(),
+    lastTailCellCount: 0,
+    lastStrip: undefined,
   };
   const cells = getHourCells(
     timeZoneId,
@@ -167,13 +171,14 @@ export function presentHourStrip(
   const dayFlags = isWorking
     ? getHourCellWorkingFlags(timeZoneId, context.day, context.workingHours)
     : undefined;
-  if (tailCellCount > 0 && isWorking && entry.tailWorkingFlags === undefined) {
-    entry.tailWorkingFlags = getHourCellWorkingFlags(
-      timeZoneId,
-      getNextReferenceDay(context.day, context.referenceZoneId),
-      context.workingHours,
-    );
-  }
+  const tailFlags =
+    tailCellCount > 0 && isWorking
+      ? getHourCellWorkingFlags(
+          timeZoneId,
+          getNextReferenceDay(context.day, context.referenceZoneId),
+          context.workingHours,
+        )
+      : undefined;
   for (
     let column = entry.presentedCells.length;
     column < cells.length;
@@ -182,13 +187,14 @@ export function presentHourStrip(
     const isWorkingCell =
       column < dayCellCount
         ? (dayFlags?.[column] ?? false)
-        : (entry.tailWorkingFlags?.[column - dayCellCount] ?? false);
+        : (tailFlags?.[column - dayCellCount] ?? false);
     entry.presentedCells.push(
       presentHourCell(cells[column], isWorkingCell, timeZoneId, context),
     );
   }
   const strip = { cells: entry.presentedCells.slice(0, cells.length) };
-  entry.stripsByTail.set(tailCellCount, strip);
+  entry.lastTailCellCount = tailCellCount;
+  entry.lastStrip = strip;
   cachedStripsByZone.set(stripKey, entry);
   return strip;
 }

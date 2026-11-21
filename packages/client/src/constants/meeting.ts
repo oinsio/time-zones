@@ -35,7 +35,7 @@ export const MEETING_BAR_LINE_PX = 1;
 /** The locator of the meeting frame in the panel. */
 export const MEETING_FRAME_SELECTOR = "[data-meeting-frame-columns]";
 /** The CSS variables that carry the centre of the fixed move handle. */
-export enum MoveHandleCssVariable {
-  CENTRE_X = "--move-handle-x",
-  CENTRE_Y = "--move-handle-y",
-}
+export const MoveHandleCssVariable = {
+  CENTRE_X: "--move-handle-x",
+  CENTRE_Y: "--move-handle-y",
+} as const;
