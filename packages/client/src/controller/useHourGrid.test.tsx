@@ -1,5 +1,6 @@
 // Verifies FR8, FR9 of add-grid-hour-cells-and-hour-frame (D3).
 // Verifies FR7 of add-grid-meeting-range-and-share.
+// Verifies FR6, FR7 of move-meeting-range-and-extend-past-midnight.
 import { act, renderHook } from "@testing-library/react";
 import { type ReactNode, useContext } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -192,5 +193,46 @@ describe("useHourGrid", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     expect(() => setup([cityRow("Almaty"), malformedRow])).toThrow(TypeError);
+  });
+});
+
+describe("useHourGrid with a meeting range past midnight", () => {
+  const PAST_MIDNIGHT = {
+    type: LocationCommandType.SET_MEETING_RANGE,
+    start: "2026-03-08T18:00:00Z",
+    end: "2026-03-08T21:00:00Z",
+  } as const;
+
+  it("should count 24 cells without a meeting range", () => {
+    const { result } = setup();
+
+    expect(result.current.grid.cellCount).toBe(24);
+  });
+
+  it("should count the day's cells and the strip tail with the past-midnight sample", () => {
+    const { result, dispatch } = setup();
+
+    dispatch(PAST_MIDNIGHT);
+
+    expect(result.current.grid.cellCount).toBe(27);
+  });
+
+  it("should present every strip with the tail", () => {
+    const { result, dispatch } = setup();
+
+    dispatch(PAST_MIDNIGHT);
+
+    expect(
+      result.current.grid.strips.get(cityRow("Moscow").id)?.cells,
+    ).toHaveLength(27);
+  });
+
+  it("should drop the tail with the meeting range", () => {
+    const { result, dispatch } = setup();
+    dispatch(PAST_MIDNIGHT);
+
+    dispatch({ type: LocationCommandType.CLEAR_MEETING_RANGE });
+
+    expect(result.current.grid.cellCount).toBe(24);
   });
 });

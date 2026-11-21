@@ -132,7 +132,14 @@ export function useMeetingRange() {
   const actions = useMemo(() => {
     const getDay = () => getReferenceDay(store.getSnapshot(), clock.instant());
     const selectCells = (firstColumn: number, lastColumn: number) => {
-      setRange(getMeetingRangeOfCells(getDay(), firstColumn, lastColumn));
+      setRange(
+        getMeetingRangeOfCells(
+          getDay(),
+          getReferenceZone(store.getSnapshot()),
+          firstColumn,
+          lastColumn,
+        ),
+      );
     };
     return {
       selectCells,

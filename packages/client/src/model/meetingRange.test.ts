@@ -98,8 +98,39 @@ describe("getMeetingRangeOfCells", () => {
     [9, 10, "04:00", "06:00"],
     [10, 8, "03:00", "06:00"],
   ])("should span columns %i to %i", (first, last, start, end) => {
-    const range = getMeetingRangeOfCells(day, first, last);
+    const range = getMeetingRangeOfCells(day, ALMATY, first, last);
     expect(show(range)).toBe(show({ start: at(start), end: at(end) }));
+  });
+
+  // FR9: cell drags onto the strip tail
+  it.each([
+    [21, 24, "2026-03-08T16:00:00Z", "2026-03-08T20:00:00Z"],
+    [24, 21, "2026-03-08T16:00:00Z", "2026-03-08T20:00:00Z"],
+    [23, 26, "2026-03-08T18:00:00Z", "2026-03-08T22:00:00Z"],
+    [0, 26, "2026-03-07T19:00:00Z", "2026-03-08T19:00:00Z"],
+  ])(
+    "should span columns %i to %i onto the tail",
+    (first, last, start, end) => {
+      const range = getMeetingRangeOfCells(day, ALMATY, first, last);
+      expect(show(range)).toBe(`${start}/${end}`);
+    },
+  );
+
+  it("should start the first tail column of a 24.5-hour day at the day's end", () => {
+    const lordHoweDay = buildReferenceDay(
+      Temporal.Instant.from("2026-04-04T14:00:00Z"),
+      "Australia/Lord_Howe",
+    );
+    const tailColumn = Math.ceil(lordHoweDay.lengthMinutes / 60);
+
+    const range = getMeetingRangeOfCells(
+      lordHoweDay,
+      "Australia/Lord_Howe",
+      tailColumn - 1,
+      tailColumn,
+    );
+
+    expect(range.end.since(lordHoweDay.end).total({ unit: "minute" })).toBe(60);
   });
 
   it("should end the last short cell at the day's end", () => {
@@ -109,7 +140,12 @@ describe("getMeetingRangeOfCells", () => {
     );
     const lastColumn = Math.ceil(lordHoweDay.lengthMinutes / 60) - 1;
 
-    const range = getMeetingRangeOfCells(lordHoweDay, lastColumn, lastColumn);
+    const range = getMeetingRangeOfCells(
+      lordHoweDay,
+      "Australia/Lord_Howe",
+      lastColumn,
+      lastColumn,
+    );
 
     expect(range.end.equals(lordHoweDay.end)).toBe(true);
     expect(range.end.since(range.start).total({ unit: "minute" })).toBe(

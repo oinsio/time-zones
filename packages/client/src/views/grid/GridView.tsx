@@ -25,15 +25,20 @@ import { useVisibleStripRows } from "./useVisibleStripRows";
  * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D4): binds the meeting range input.
  * Implements FR7, NFR-P1 of refine-meeting-range-entry-and-handles (D5): the handles stand on the visible rows.
  * Implements FR13 of add-day-colouring-setting (D7): colours the hour frame.
+ * Implements FR6, FR9 of move-meeting-range-and-extend-past-midnight (D4, D10): the strip tail, frozen during a cell gesture.
  */
 export default function GridView() {
+  const [frozenTailCellCount, setFrozenTailCellCount] = useState<
+    number | undefined
+  >(undefined);
   const {
     strips,
     hourFrameIndex,
     cellCount,
+    tailCellCount,
     hasMeetingRange,
     hourFrameColour,
-  } = useHourGrid();
+  } = useHourGrid(frozenTailCellCount);
   const { moveTrack } = useTimeSelection();
   const {
     meeting,
@@ -76,6 +81,10 @@ export default function GridView() {
           strip={strip}
           hourFrameIndex={meeting ? undefined : hourFrameIndex}
           meetingColumns={meetingColumns}
+          tailCellCount={tailCellCount}
+          onSelectionActiveChange={(isActive) =>
+            setFrozenTailCellCount(isActive ? tailCellCount : undefined)
+          }
           cellPitchPx={layout.cellPitchPx}
           isScrollable={layout.isScrollable}
           onMoveTrack={moveTrack}

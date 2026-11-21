@@ -20,6 +20,10 @@ type HourStripProps = {
   hourFrameIndex?: number;
   /** The columns the meeting range overlaps; the other cells are dimmed. */
   meetingColumns?: { first: number; last: number };
+  /** The cells of the strip tail at the end of the strip; a gesture starts on none of them. */
+  tailCellCount?: number;
+  /** A press on a cell of the day begins (`true`) or ends (`false`) a gesture. */
+  onSelectionActiveChange?: (isActive: boolean) => void;
   cellPitchPx: number;
   /** The strips scroll horizontally. */
   isScrollable: boolean;
@@ -28,6 +32,7 @@ type HourStripProps = {
   onSelectFramedHour: () => void;
 };
 
+const noop = () => undefined;
 const SELECT_KEYS: readonly string[] = [KeyboardKey.ENTER, KeyboardKey.SPACE];
 
 /**
@@ -38,6 +43,7 @@ const SELECT_KEYS: readonly string[] = [KeyboardKey.ENTER, KeyboardKey.SPACE];
  * Implements FR1, FR3, FR4, FR5, FR6, FR8, FR11, FR12, NFR-A1, NFR-A2 of
  * add-grid-hour-cells-and-hour-frame (D4, D6).
  * Implements FR5, FR6, FR7, NFR-A2 of add-grid-meeting-range-and-share (D6).
+ * Implements FR6, FR9 of move-meeting-range-and-extend-past-midnight (D4, D10): the tail cells.
  */
 export function HourStrip({
   city,
@@ -45,6 +51,8 @@ export function HourStrip({
   strip,
   hourFrameIndex,
   meetingColumns,
+  tailCellCount = 0,
+  onSelectionActiveChange = noop,
   cellPitchPx,
   isScrollable,
   onMoveTrack,
@@ -55,6 +63,8 @@ export function HourStrip({
   const hintId = useId();
   const selection = useHourCellSelection({
     cellCount: strip.cells.length,
+    tailCellCount,
+    onActiveChange: onSelectionActiveChange,
     cellPitchPx,
     isScrollable,
     onSelectCells,

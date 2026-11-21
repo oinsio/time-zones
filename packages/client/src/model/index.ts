@@ -66,6 +66,7 @@ export {
   getHourCellStart,
   getHourCells,
   getHourFrameIndex,
+  getStripTailCellCount,
   type HourCell,
 } from "./hourCells";
 // Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards.
@@ -108,6 +109,7 @@ export {
   moveMeetingRangeToDay,
 } from "./meetingRange";
 export { moveLocationInList } from "./moveLocation";
+export { getNextReferenceDay } from "./nextReferenceDay";
 export {
   getOffsetDifferenceMinutes,
   getReferenceOffsetMinutes,

@@ -8,8 +8,10 @@ import type { InterfaceLanguageCode } from "@/locales";
 import {
   type Coordinates,
   getCoordinatesKey,
+  getHourCellCount,
   getHourCells,
   getHourCellWorkingFlags,
+  getNextReferenceDay,
   type HourCell,
   type ReferenceDay,
 } from "@/model";
@@ -25,6 +27,8 @@ import { getDayPeriodMarkers } from "./dayPeriodMarkers";
  * Implements FR3, FR4, FR5, NFR-P1 of add-grid-hour-cells-and-hour-frame (D2).
  * Implements FR11, FR12, NFR-P1 of add-day-colouring-setting (D4).
  * Implements FR6, FR7, NFR-P1 of bind-day-periods-to-sun (D5): cached per zone and coordinates.
+ * Implements FR6, FR7, NFR-P1 of move-meeting-range-and-extend-past-midnight (D4): the strip tail,
+ * presented cell by cell so a growing tail presents only its new cells.
  */
 
 export type PresentedHourCell = {
@@ -42,6 +46,13 @@ export type PresentedHourCell = {
 
 export type PresentedHourStrip = { cells: readonly PresentedHourCell[] };
 
+/** A strip's presented cells, kept so that a longer tail presents only the cells it adds. */
+type CachedStrip = {
+  presentedCells: PresentedHourCell[];
+  tailWorkingFlags: readonly boolean[] | undefined;
+  stripsByTail: Map<number, PresentedHourStrip>;
+};
+
 export type HourStripContext = {
   day: ReferenceDay;
   /** The coordinates of the location's sun; `undefined` for a location without day periods. */
@@ -51,6 +62,8 @@ export type HourStripContext = {
   hourFormat: HourFormat;
   dayColouring: DayColouring;
   workingHours: WorkingHours;
+  /** The cells of the strip tail after the reference day's cells; none when omitted. */
+  tailCellCount?: number;
 };
 
 const MONTH_PART_TYPE = "month";
@@ -58,7 +71,7 @@ const DAY_PART_TYPE = "day";
 const NO_TEXT = "";
 
 let cachedStripsKey: string | undefined;
-let cachedStripsByZone = new Map<string, PresentedHourStrip>();
+let cachedStripsByZone = new Map<string, CachedStrip>();
 
 function readDatePart(parts: Intl.DateTimeFormatPart[], type: string): string {
   return parts.find((part) => part.type === type)?.value ?? NO_TEXT;
@@ -133,27 +146,49 @@ export function presentHourStrip(
     cachedStripsByZone = new Map();
   }
   const stripKey = `${timeZoneId}|${getCoordinatesKey(context.coordinates)}`;
+  const tailCellCount = context.tailCellCount ?? 0;
   const cachedStrip = cachedStripsByZone.get(stripKey);
-  if (cachedStrip !== undefined) return cachedStrip;
-  const workingFlags =
-    context.dayColouring === DayColouring.WORKING_HOURS
-      ? getHourCellWorkingFlags(timeZoneId, context.day, context.workingHours)
-      : undefined;
-  const strip = {
-    cells: getHourCells(
-      timeZoneId,
-      context.day,
-      context.referenceZoneId,
-      context.coordinates,
-    ).map((cell, column) =>
-      presentHourCell(
-        cell,
-        workingFlags?.[column] ?? false,
-        timeZoneId,
-        context,
-      ),
-    ),
+  const cachedByTail = cachedStrip?.stripsByTail.get(tailCellCount);
+  if (cachedByTail !== undefined) return cachedByTail;
+  const entry: CachedStrip = cachedStrip ?? {
+    presentedCells: [],
+    tailWorkingFlags: undefined,
+    stripsByTail: new Map(),
   };
-  cachedStripsByZone.set(stripKey, strip);
+  const cells = getHourCells(
+    timeZoneId,
+    context.day,
+    context.referenceZoneId,
+    context.coordinates,
+    tailCellCount,
+  );
+  const dayCellCount = getHourCellCount(context.day);
+  const isWorking = context.dayColouring === DayColouring.WORKING_HOURS;
+  const dayFlags = isWorking
+    ? getHourCellWorkingFlags(timeZoneId, context.day, context.workingHours)
+    : undefined;
+  if (tailCellCount > 0 && isWorking && entry.tailWorkingFlags === undefined) {
+    entry.tailWorkingFlags = getHourCellWorkingFlags(
+      timeZoneId,
+      getNextReferenceDay(context.day, context.referenceZoneId),
+      context.workingHours,
+    );
+  }
+  for (
+    let column = entry.presentedCells.length;
+    column < cells.length;
+    column++
+  ) {
+    const isWorkingCell =
+      column < dayCellCount
+        ? (dayFlags?.[column] ?? false)
+        : (entry.tailWorkingFlags?.[column - dayCellCount] ?? false);
+    entry.presentedCells.push(
+      presentHourCell(cells[column], isWorkingCell, timeZoneId, context),
+    );
+  }
+  const strip = { cells: entry.presentedCells.slice(0, cells.length) };
+  entry.stripsByTail.set(tailCellCount, strip);
+  cachedStripsByZone.set(stripKey, entry);
   return strip;
 }

@@ -17,6 +17,18 @@ const cells = Array.from({ length: 24 }, (_, column) => ({
 }));
 export const STRIP: PresentedHourStrip = { cells };
 
+export const TAIL_CELL_COUNT = 3;
+/** The strip of the past-midnight sample: 24 cells of the day and 3 of the tail. */
+export const STRIP_WITH_TAIL: PresentedHourStrip = {
+  cells: [
+    ...cells,
+    ...Array.from({ length: TAIL_CELL_COUNT }, (_, column) => ({
+      ...cells[column],
+      key: `tail-cell-${column}`,
+    })),
+  ],
+};
+
 export const PITCH_PX = 40;
 
 type StripOverrides = {
@@ -25,12 +37,14 @@ type StripOverrides = {
   isScrollable?: boolean;
   meetingColumns?: { first: number; last: number };
   hourFrameIndex?: number;
+  tailCellCount?: number;
 };
 
 export function renderStrip(overrides: StripOverrides = {}) {
   const onMoveTrack = overrides.onMoveTrack ?? vi.fn();
   const onSelectCells = vi.fn();
   const onSelectFramedHour = vi.fn();
+  const onSelectionActiveChange = vi.fn();
   render(
     <HourStrip
       city="Almaty"
@@ -42,6 +56,8 @@ export function renderStrip(overrides: StripOverrides = {}) {
       cellPitchPx={PITCH_PX}
       isScrollable={overrides.isScrollable ?? false}
       meetingColumns={overrides.meetingColumns}
+      tailCellCount={overrides.tailCellCount}
+      onSelectionActiveChange={onSelectionActiveChange}
       onMoveTrack={onMoveTrack}
       onSelectCells={onSelectCells}
       onSelectFramedHour={onSelectFramedHour}
@@ -49,7 +65,13 @@ export function renderStrip(overrides: StripOverrides = {}) {
   );
   const slider = screen.getByRole("slider");
   slider.getBoundingClientRect = () => ({ left: 100 }) as DOMRect;
-  return { onMoveTrack, onSelectCells, onSelectFramedHour, slider };
+  return {
+    onMoveTrack,
+    onSelectCells,
+    onSelectFramedHour,
+    onSelectionActiveChange,
+    slider,
+  };
 }
 
 /** The x position inside the given column of the stubbed strip. */

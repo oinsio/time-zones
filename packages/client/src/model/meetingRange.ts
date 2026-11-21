@@ -13,7 +13,8 @@ import {
   type ReferenceDay,
   TrackMove,
 } from "./dayTrack";
-import { getHourCellStart } from "./hourCells";
+import { getHourCellCount, getHourCellStart } from "./hourCells";
+import { getNextReferenceDay } from "./nextReferenceDay";
 
 /**
  * The meeting range: a start inside one reference day and an end at most 24
@@ -73,22 +74,34 @@ export function isValidMeetingRange(
   );
 }
 
-/** The range from the first touched cell's start to the last one's end, in either direction. */
+/**
+ * The range from the first touched cell's start to the last one's end, in
+ * either direction. A column past the day's cells is a tail column: its end is
+ * limited to the end of the next reference day, and the range to 24 hours.
+ * Implements FR9 of move-meeting-range-and-extend-past-midnight (D10).
+ */
 export function getMeetingRangeOfCells(
   day: ReferenceDay,
+  referenceZoneId: string,
   firstColumn: number,
   lastColumn: number,
 ): MeetingRange {
   const lowColumn = Math.min(firstColumn, lastColumn);
   const highColumn = Math.max(firstColumn, lastColumn);
+  const start = getHourCellStart(day, lowColumn);
   const highCellEnd = getHourCellStart(day, highColumn).add(HOUR_CELL_DURATION);
-  return {
-    start: getHourCellStart(day, lowColumn),
-    end:
-      highCellEnd.epochMilliseconds < day.end.epochMilliseconds
-        ? highCellEnd
-        : day.end,
-  };
+  const highDayEnd =
+    highColumn < getHourCellCount(day)
+      ? day.end
+      : getNextReferenceDay(day, referenceZoneId).end;
+  const longestEnd = start.add({ minutes: MEETING_RANGE_MAX_MINUTES });
+  const end = [highCellEnd, highDayEnd, longestEnd].reduce(
+    (earliest, instant) =>
+      instant.epochMilliseconds < earliest.epochMilliseconds
+        ? instant
+        : earliest,
+  );
+  return { start, end };
 }
 
 /** The minutes from the day's start between which a handle may stand. */
