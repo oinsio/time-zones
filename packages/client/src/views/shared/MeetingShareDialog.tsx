@@ -7,9 +7,9 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui";
+import { ZONE_LABEL_PART_ORDER } from "@/constants";
 import type { MeetingShareSession } from "@/controller";
 import { localeRegistry } from "@/locales";
-import { ZONE_LABEL_PART_ORDER } from "@/constants";
 import { SHARE_ZONE_LABEL_PARTS } from "@/preferences";
 import { LanguageGroup } from "./LanguageGroup";
 import { MeetingShareLocationRow } from "./MeetingShareLocationRow";
