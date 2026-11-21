@@ -39,7 +39,6 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     await ensureOpen();
     await world.openDialog();
   };
-  void [dialogIsOpen, whenChoosesShareMeeting, closeDialog, choose];
 
   f.BeforeEachScenario(world.reset);
   f.AfterAllScenarios(world.finish);

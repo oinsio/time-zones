@@ -1,4 +1,4 @@
-// Verifies FR1, FR2, FR3, FR4, FR5, FR6, FR8, FR9, FR10, FR12, UX5, NFR-P1 of add-meeting-share-dialog.
+// Verifies NFR-P1 of add-meeting-share-dialog.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { expect, vi } from "vitest";
@@ -19,13 +19,7 @@ const TWENTY_LOCATIONS_COUNT = 20;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createMeetingShareDialogWorld();
-  const { ensureOpen, openTheDialog, choose, closeDialog } = world;
-  const dialogIsOpen = () => openTheDialog();
-  const whenChoosesShareMeeting = async () => {
-    await ensureOpen();
-    await world.openDialog();
-  };
-  void [dialogIsOpen, whenChoosesShareMeeting, closeDialog, choose];
+  const { ensureOpen, openTheDialog, choose } = world;
 
   f.BeforeEachScenario(world.reset);
   f.AfterAllScenarios(world.finish);

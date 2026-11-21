@@ -17,21 +17,10 @@ const feature = await loadFeature(
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createMeetingShareDialogWorld();
-  const { ensureOpen, openTheDialog, choose, closeDialog } = world;
+  const { openTheDialog, choose, closeDialog } = world;
   const dialogIsOpen = () => openTheDialog();
-  const whenChoosesShareMeeting = async () => {
-    await ensureOpen();
-    await world.openDialog();
-  };
   const previewLineOf = (city: string) =>
     world.previewLines().find((line) => line.startsWith(city));
-  void [
-    previewLineOf,
-    dialogIsOpen,
-    whenChoosesShareMeeting,
-    closeDialog,
-    choose,
-  ];
 
   f.BeforeEachScenario(world.reset);
   f.AfterAllScenarios(world.finish);

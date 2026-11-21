@@ -30,13 +30,7 @@ const CYRILLIC_LETTER = /[Ѐ-ӿ]/;
 
 describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const world = createMeetingShareDialogWorld();
-  const { ensureOpen, openTheDialog, choose, closeDialog } = world;
-  const dialogIsOpen = () => openTheDialog();
-  const whenChoosesShareMeeting = async () => {
-    await ensureOpen();
-    await world.openDialog();
-  };
-  void [dialogIsOpen, whenChoosesShareMeeting, closeDialog, choose];
+  const { openTheDialog, choose, closeDialog } = world;
 
   f.BeforeEachScenario(world.reset);
   f.AfterAllScenarios(world.finish);

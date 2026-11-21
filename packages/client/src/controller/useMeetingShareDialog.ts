@@ -11,22 +11,14 @@ import { resolveCityNameLanguage, resolveShareLanguage } from "@/locales";
 import {
   getMeetingInvitation,
   getReferenceZone,
-  type InvitedLocation,
   isDeviceTimeLocation,
   type Location,
 } from "@/model";
 import type { ShareDestinationId } from "@/ports";
-import {
-  DEFAULT_PREFERENCES,
-  SHARE_ZONE_LABEL_PARTS,
-  type ZoneLabelPart,
-} from "@/preferences";
+import { DEFAULT_PREFERENCES } from "@/preferences";
 import {
   presentMeetingShareReference,
-  presentMeetingShareText,
-  presentMeetingShareZoneParts,
   presentShareDestinationLabel,
-  type ZoneLinePart,
 } from "@/presenter";
 import { LocationsContext } from "./locationsContext";
 import { PreferencesContext } from "./preferencesContext";
@@ -37,7 +29,10 @@ import { useHourFormat } from "./useHourFormat";
 import { useLocations } from "./useLocations";
 import { useMeetingRange } from "./useMeetingRange";
 import type { MeetingShare } from "./useMeetingShare";
+import { useMeetingShareCommands } from "./useMeetingShareCommands";
+import { useMeetingShareDialogRows } from "./useMeetingShareDialogRows";
 import { useMeetingShareSession } from "./useMeetingShareSession";
+import { useMeetingShareText } from "./useMeetingShareText";
 import { useReferenceMoment } from "./useReferenceMoment";
 
 const NO_LOCATIONS: readonly Location[] = [];
@@ -46,17 +41,6 @@ const MISSING_PROVIDER_MESSAGE =
 
 /** What the share dialog takes: the session `useMeetingShare` returns. */
 export type MeetingShareSession = ReturnType<typeof useMeetingShareDialog>;
-
-/** One row of the share dialog, written in the interface language. */
-export type MeetingShareDialogRow = {
-  id: string;
-  cityLabel: string;
-  isIncluded: boolean;
-  zoneParts: readonly ZoneLinePart[];
-  spanLabel: string;
-  dayShiftLabel?: string;
-  localDateLabel: string;
-};
 
 export type MeetingShareDestinationButton = {
   id: ShareDestinationId;
@@ -82,7 +66,8 @@ export function useMeetingShareDialog(shareMeeting: MeetingShare) {
   const { t, i18n } = useTranslation();
   const { code: interfaceLanguage } = useActiveInterfaceLanguage();
   const hourFormat = useHourFormat();
-  const { rows, locations } = useLocations();
+  const locationsView = useLocations();
+  const { rows, locations } = locationsView;
   const { meeting } = useMeetingRange();
   const { dateBar } = useReferenceMoment();
   const session = useMeetingShareSession(meeting !== undefined);
@@ -137,59 +122,23 @@ export function useMeetingShareDialog(shareMeeting: MeetingShare) {
   );
   const referenceZoneId = getReferenceZone(state);
 
-  const text = useMemo(() => {
-    if (invitation === undefined || invitation.locations.length === 0) {
-      return undefined;
-    }
-    const getCityLabel = (location: InvitedLocation) =>
-      isDeviceTimeLocation(location)
-        ? (shareDeviceTimeCity ?? location.timeZoneId)
-        : (shareCityLabels?.get(location.id) ?? location.label);
-    return presentMeetingShareText({
-      invitation,
-      referenceZoneId,
-      hourFormat,
-      shareZoneLabelParts: preferences.shareZoneLabelParts,
-      language: shareLanguage,
-      translate: shareTranslate,
-      getCityLabel,
-    });
-  }, [
+  const text = useMeetingShareText({
     invitation,
     referenceZoneId,
     hourFormat,
-    preferences.shareZoneLabelParts,
+    shareZoneLabelParts: preferences.shareZoneLabelParts,
     shareLanguage,
     shareTranslate,
     shareCityLabels,
     shareDeviceTimeCity,
-  ]);
+  });
 
-  const dialogRows = useMemo((): MeetingShareDialogRow[] => {
-    if (meeting === undefined) return [];
-    return locations.flatMap((location) => {
-      const row = rows.find(({ id }) => id === location.id);
-      const rowRange = meeting.rowRanges.get(location.id);
-      if (row === undefined || rowRange === undefined) return [];
-      return [
-        {
-          id: location.id,
-          cityLabel: row.cityLabel,
-          isIncluded: !session.excludedLocationIds.includes(location.id),
-          zoneParts: presentMeetingShareZoneParts({
-            timeZoneId: location.timeZoneId,
-            instant: meeting.range.start,
-            cityLabel: row.cityLabel,
-            shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
-            translate: t,
-          }),
-          spanLabel: rowRange.spanLabel,
-          dayShiftLabel: rowRange.dayShiftLabel,
-          localDateLabel: row.localDateLabel,
-        },
-      ];
-    });
-  }, [meeting, locations, rows, session.excludedLocationIds, t]);
+  const dialogRows = useMeetingShareDialogRows(
+    meeting,
+    locationsView,
+    session.excludedLocationIds,
+    t,
+  );
 
   const homeRow = rows.find(({ id }) => id === state.homeLocationId);
   const referenceLine = presentMeetingShareReference(
@@ -211,25 +160,15 @@ export function useMeetingShareDialog(shareMeeting: MeetingShare) {
     [destinations, invitation, text, finishShare],
   );
 
-  const chooseShareLanguage = useCallback(
-    (language: string) => {
-      session.setShareLanguage(language);
-      if (resolvedLanguage.isPinned)
-        preferencesContext?.setShareLanguage(language);
-    },
-    [session, resolvedLanguage.isPinned, preferencesContext],
-  );
-  const toggleShareLanguagePin = useCallback(
-    () =>
-      preferencesContext?.setShareLanguage(
-        resolvedLanguage.isPinned ? null : shareLanguage,
-      ),
-    [preferencesContext, resolvedLanguage.isPinned, shareLanguage],
-  );
-  const toggleShareZoneLabelPart = useCallback(
-    (part: ZoneLabelPart) => preferencesContext?.toggleShareZoneLabelPart(part),
-    [preferencesContext],
-  );
+  const {
+    chooseShareLanguage,
+    toggleShareLanguagePin,
+    toggleShareZoneLabelPart,
+  } = useMeetingShareCommands({
+    session,
+    isShareLanguagePinned: resolvedLanguage.isPinned,
+    shareLanguage,
+  });
 
   return {
     isShareDialogOpen,
