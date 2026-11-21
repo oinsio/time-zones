@@ -59,7 +59,7 @@ classDiagram
 2. No two locations share the same canonical `timeZoneId` and `label`.
 3. Every `timeZoneId` is a valid, canonical IANA identifier.
 4. `reference.instant` is present if and only if `reference.mode` is `PINNED`.
-5. When `meeting` is set, `reference` is `PINNED` at `meeting.start`, `start < end`, both ends lie on whole minutes, the start lies inside the reference day and the end at most 24 hours after the start, so it may lie in the next day ([ADR-0019](../adr/0019-meeting-range-past-the-reference-day-and-moved-whole.md)).
+5. When `meeting` is set, `reference` is `PINNED` at `meeting.start`, `start < end`, both ends lie on whole minutes, the start lies inside the reference day and the end at most 24 hours after the start, so it may lie in the next day, which the grid shows as the strip tail ([ADR-0019](../adr/0019-meeting-range-past-the-reference-day-and-moved-whole.md)).
 
 ## Commands
 
