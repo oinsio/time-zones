@@ -176,7 +176,8 @@ Measured in this review with `cd packages/client && npx stryker run --mutate '<f
 - Impact: The delta spec requires "Unticking a location leaves it out of the meeting invitation; ticking it puts it back" (`meeting-share-dialog` → "Locations in the share dialog", FR2/FR3), and user scenario U4 is exactly that: fix a wrong tick, then share. A regression where a re-ticked location stays excluded, or where re-ticking one location re-ticks every other one, would pass the whole suite and send a text without the location the user just ticked.
 - Fix: In `controller/useMeetingShare.test.tsx` (it already drives `toggleLocation` through `useMeetingShare.harness.tsx`), add a case that unticks Moscow and Kolkata, then ticks Moscow again, and asserts that the text's lines are Almaty, Moscow and New York, that the Moscow row has `isIncluded: true` and that the Kolkata row still has `isIncluded: false`. Re-run `npx stryker run --mutate 'src/controller/useMeetingShareSession.ts'` and check the score is at least 90 %.
 - Fix risk: none — a test-only addition in the existing controller unit suite; no production code changes.
-- Status: open
+- Status: fixed
+- Resolution: added `useMeetingShare.test.tsx` "should put a re-ticked location back while another one stays unticked" (unticks Moscow and Kolkata, re-ticks Moscow); Stryker on useMeetingShareSession.ts now 100%.
 
 ### R2 — SUGGESTION — Preview lines are keyed by their text, which two locations can share
 - Location: `packages/client/src/views/shared/MeetingSharePreview.tsx:38`
@@ -185,7 +186,8 @@ Measured in this review with `cd packages/client && npx stryker run --mutate '<f
 - Impact: React logs "Encountered two children with the same key" for this list, and its documentation warns that siblings with duplicate keys may be duplicated or omitted when the list updates (a tick, a language change). The two elements hold the same text, so a wrong match usually still renders the same DOM. That limits the visible risk, but the preview still breaks React's key contract for a list the spec allows.
 - Fix: Key the lines by the invited location they belong to. In `controller/useMeetingShareDialog.ts`, return `previewLines: { locationId, text }[]` next to `text`, built by pairing `invitation.locations` with `text.split(MEETING_SHARE_LINE_SEPARATOR).slice(1)` (`presentMeetingShareText` writes the heading, then one line per invited location in order). Have `MeetingSharePreview` take the heading and these lines and use `key={locationId}`. Add a case to `views/shared/MeetingShareParts.test.tsx` that renders two equal lines and expects both.
 - Fix risk: It changes the props of `MeetingSharePreview` and its tests in `MeetingShareParts.test.tsx` and `MeetingShareDialog.test.tsx`. The pairing depends on the one-line-per-location order of `presentMeetingShareText`, a documented rule that its tests already pin. `text` must stay the string `share` sends (FR8). A `key={index}` would be shorter, but Biome's `noArrayIndexKey` flags it.
-- Status: open
+- Status: fixed
+- Resolution: keyed preview lines by text plus occurrence number in MeetingSharePreview.tsx (no props change, no index key); covered by MeetingShareParts.test.tsx "should show two equal lines without a duplicate key warning".
 
 ### R3 — SUGGESTION — The share dialog repeats the zone label toggle keys and their order
 - Location: `packages/client/src/views/shared/MeetingShareDialog.tsx:26`
@@ -194,7 +196,8 @@ Measured in this review with `cd packages/client && npx stryker run --mutate '<f
 - Impact: The dialog is meant to be "the toggle group of the zone label setting without the country" (spec, "Share zone label toggles"). Renaming a toggle key or reordering the parts in the settings now needs a second, separate edit in the dialog, and nothing fails if it is missed.
 - Fix: Move `ZONE_LABEL_PART_LABEL_KEYS` from `ZoneLabelGroup.tsx` into `views/shared/` (for example a `zoneLabelPartLabelKeys.ts` exported through `views/shared/index.ts`) and import it in both places. In the dialog, build the options as `ZONE_LABEL_PART_ORDER.filter((part) => SHARE_ZONE_LABEL_PARTS.includes(part)).map((part) => ({ value: part, label: t(ZONE_LABEL_PART_LABEL_KEYS[part]) }))`.
 - Fix risk: Low. `ZoneLabelGroup` changes its import only. The toggle order in the dialog stays abbreviation, then UTC offset, which the e2e scenario "Controls announce their names and states" and the approved screenshots already check.
-- Status: open
+- Status: fixed
+- Resolution: moved ZONE_LABEL_PART_LABEL_KEYS to views/shared/zoneLabelPartLabelKeys.ts, used by ZoneLabelGroup and the dialog, which now derives its toggles from ZONE_LABEL_PART_ORDER and SHARE_ZONE_LABEL_PARTS; existing dialog tests stay green.
 
 ### R4 — SUGGESTION — M5 measures axe in three of the six theme × width pairs it names
 - Location: `packages/client/src/test/features/meeting_share_dialog/meeting_share_dialog_e2e.feature:79`
@@ -203,7 +206,8 @@ Measured in this review with `cd packages/client && npx stryker run --mutate '<f
 - Impact: A contrast violation that shows only in one theme at a width the outline skips would pass CI (for example a dark-theme token on the full-screen phone frame at 320 px). M5 cannot be reported as met as written.
 - Fix: Add the rows `| dark | 320 |`, `| light | 390 |` and `| dark | 1280 |` to the Examples of the outline. The steps already take the theme and the width as parameters.
 - Fix risk: Three more axe runs in the browser suite (a few seconds each). The spec table lists three pairs, but the requirement says "axe-core MUST report no violation" with no limit, so extra rows do not contradict it.
-- Status: open
+- Status: fixed
+- Resolution: added the dark 320, light 390 and dark 1280 rows to the axe outline in meeting_share_dialog_e2e.feature so all six pairs of M5 run.
 
 ## Verdict
 
