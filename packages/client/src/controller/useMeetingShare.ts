@@ -14,6 +14,7 @@ import {
   getReferenceZone,
   type InvitedLocation,
   isDeviceTimeLocation,
+  type Location,
 } from "@/model";
 import {
   type ShareDestinationId,
@@ -43,6 +44,7 @@ import { useMeetingRange } from "./useMeetingRange";
 import { useMeetingShareSession } from "./useMeetingShareSession";
 import { useReferenceMoment } from "./useReferenceMoment";
 
+const NO_LOCATIONS: readonly Location[] = [];
 const MISSING_PROVIDER_MESSAGE =
   "useMeetingShare must be used inside a LocationsProvider";
 
@@ -117,18 +119,19 @@ export function useMeetingShare(textSharing: TextSharing = browserTextSharing) {
     [i18n, shareLanguage],
   );
   const deviceTimeLocation = locations.find(isDeviceTimeLocation);
+  // Closed, the session starts no city data load: only the dialog needs these labels.
   const shareCityLabels = useCityLabels(
-    locations,
+    session.isOpen ? locations : NO_LOCATIONS,
     loadCitySearch,
     cityNameLanguage,
   );
   const shareDeviceTimeCity = useExemplarCity(
-    deviceTimeLocation?.timeZoneId,
+    session.isOpen ? deviceTimeLocation?.timeZoneId : undefined,
     loadCitySearch,
     cityNameLanguage,
   );
   const referenceDeviceTimeCity = useExemplarCity(
-    state.deviceTimeZoneId,
+    session.isOpen ? state.deviceTimeZoneId : undefined,
     loadCitySearch,
   );
 
