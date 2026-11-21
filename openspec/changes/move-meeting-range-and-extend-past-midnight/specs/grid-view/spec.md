@@ -445,6 +445,15 @@ Screenshots of the Grid view in the meeting state with the design's sample data 
 | 390 × 844 | light |
 | 390 × 844 | dark |
 
+### Requirement: Meeting state is fast
+After the rows of 50 locations in 10 zones were presented with a meeting range, a meeting handle move within the same reference day, interface language and hour format SHALL re-present every row's span and day shift without building a formatter and without a time zone transition lookup, and every hour strip MUST stay the same object while the strip tail keeps its cell count; when the strip tail grows or shrinks, only the added cells are presented ("Moves and the strip tail are fast"). Real timings are reported by a benchmark and never asserted by a test. <!-- implements NFR-P1 of add-grid-meeting-range-and-share; NFR-P1 of move-meeting-range-and-extend-past-midnight -->
+
+#### Scenario: A handle move re-presents the spans cheaply
+- **GIVEN** the rows and hour strips of 50 locations in 10 zones were presented with the meeting range 09:00–11:00 on 2026-03-08
+- **WHEN** the end handle moves one track step and the rows are presented again
+- **THEN** no formatter is built and no time zone transition is looked up
+- **AND** every row gets the same hour strip as before
+
 ## ADDED Requirements
 
 ### Requirement: Meeting bar stays at the top of the viewport
