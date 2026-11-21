@@ -133,6 +133,7 @@ This design does not settle the global decision; the ADR does. The implement sta
 
 - Unit (Vitest, TDD): `meetingRange`, `meetingRangeMove`, both reducers, `hourCells` (tail count and cells), `moveHandlePlacement`, `meetingHandles` presenter.
 - Unit BDD: the model scenarios of `meeting-range`; the tail cells, typed messages, gestures that need no real layout, the moving state of the rows and the work bounds of `grid-view`.
+- Benchmark (`vitest bench`, non-blocking CI `benchmark` job, ADR-0008): a move step over 50 rows in `meetingRange.bench.ts` and a growing tail over 50 strips in `hourStrip.bench.ts` (NFR-P1); never a timing assertion.
 - BDD E2E (`bdd-unit.md`: keyboard, aria and focus need a real browser): the slider values, keys and Tab order of all three handles, as the start and end handle sliders already are in `grid_view_meeting_handles_e2e.feature`; the sticky bar, handle positions at scroll offsets, real mouse and touch gestures, focus not obscured, axe-core, widths, screenshots.
 
 ## Consequences
