@@ -63,7 +63,6 @@ export {
   getHourCellCount,
   getHourCellStart,
   getHourFrameIndex,
-  getStripTailCellCount,
 } from "./hourCellColumns";
 // Implements FR1, FR2, FR5, FR6, FR8 of add-grid-hour-cells-and-hour-frame.
 export { getLargestSharePeriod } from "./hourCellPeriod";
@@ -142,6 +141,7 @@ export {
   type RowWallClockNote,
 } from "./rowNote";
 export { createStore, type ReduceResult, type Store } from "./store";
+export { getStripTailCellCount } from "./stripTail";
 // Implements FR1-FR4 of bind-day-periods-to-sun.
 export {
   getSolarDay,

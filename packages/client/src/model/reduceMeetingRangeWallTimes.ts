@@ -22,24 +22,6 @@ const fail = (error: LocationErrorCode): LocationsReduceResult => ({
 });
 
 /**
- * Whether the start lies outside the reference day the grid shows. While the
- * moment is live the model does not know that day (it has no clock), so only
- * `reduceSetMeetingRange` checks the range then. The end may lie after the
- * day's end (ADR-0019).
- */
-function isStartOutsideShownDay(
-  state: WorldClockState,
-  start: Temporal.Instant,
-): boolean {
-  if (state.reference.mode !== ReferenceMode.PINNED) return false;
-  const day = getReferenceDay(state, state.reference.instant);
-  return (
-    Temporal.Instant.compare(start, day.start) < 0 ||
-    Temporal.Instant.compare(day.end, start) <= 0
-  );
-}
-
-/**
  * Sets the meeting range from wall-clock times in a row's zone: the start on
  * the given date, the end on the first following moment with its wall time.
  * The start must lie in the reference day the grid shows; an end time earlier
@@ -88,8 +70,16 @@ export function reduceMeetingRangeWallTimes(
       zone,
       endDate.toPlainDateTime(endTime),
     ).instant;
-    if (isStartOutsideShownDay(state, start)) {
-      return fail(LocationErrorCode.INVALID_MEETING_RANGE);
+    // While the moment is live the model knows no reference day (it has no clock):
+    // only `reduceSetMeetingRange` checks the range then. The end may pass the day's end (ADR-0019).
+    if (state.reference.mode === ReferenceMode.PINNED) {
+      const day = getReferenceDay(state, state.reference.instant);
+      if (
+        start.epochMilliseconds < day.start.epochMilliseconds ||
+        start.epochMilliseconds >= day.end.epochMilliseconds
+      ) {
+        return fail(LocationErrorCode.INVALID_MEETING_RANGE);
+      }
     }
     return reduceSetMeetingRange(state, {
       type: LocationCommandType.SET_MEETING_RANGE,

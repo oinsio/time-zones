@@ -5,8 +5,6 @@ import {
 } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
 import type { ReferenceDay } from "./dayTrack";
-import type { MeetingRange } from "./meetingRange";
-import { getNextReferenceDay } from "./nextReferenceDay";
 
 /**
  * The column arithmetic of the hour cells: how many cells the reference day
@@ -18,29 +16,6 @@ import { getNextReferenceDay } from "./nextReferenceDay";
 /** The number of hour cells of the reference day: 23, 24 or 25, one more when it ends with a shorter cell. */
 export function getHourCellCount(day: ReferenceDay): number {
   return Math.ceil(day.lengthMinutes / MINUTES_PER_HOUR);
-}
-
-/**
- * The number of cells of the strip tail: from the cell after the last one the
- * range overlaps, one spare cell more, as far as the next reference day has
- * cells. Zero without a meeting range.
- * Implements FR6 of move-meeting-range-and-extend-past-midnight (D4).
- */
-export function getStripTailCellCount(
-  meeting: MeetingRange | undefined,
-  day: ReferenceDay,
-  referenceZoneId: string,
-): number {
-  if (meeting === undefined) return 0;
-  const endMinutes =
-    (meeting.end.epochMilliseconds - day.start.epochMilliseconds) /
-    MILLISECONDS_PER_MINUTE;
-  const lastColumn = Math.ceil(endMinutes / MINUTES_PER_HOUR) - 1;
-  const tailCount = lastColumn + 2 - getHourCellCount(day);
-  return Math.min(
-    Math.max(tailCount, 0),
-    getHourCellCount(getNextReferenceDay(day, referenceZoneId)),
-  );
 }
 
 /**

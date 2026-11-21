@@ -32,10 +32,9 @@ export type PresentedMeetingHandles = {
   move: PresentedMeetingHandle<MeetingHandle.MOVE>;
 };
 
-const HANDLE_LABEL_KEYS: Record<MeetingHandle, string> = {
+const HANDLE_LABEL_KEYS: Record<MeetingEndHandle, string> = {
   [MeetingHandle.START]: "meeting.startHandle",
   [MeetingHandle.END]: "meeting.endHandle",
-  [MeetingHandle.MOVE]: "meeting.moveHandle",
 };
 
 /**
@@ -72,7 +71,7 @@ export function presentMeetingHandles(
     end: present(MeetingHandle.END, endMinutes, meeting.end),
     move: {
       handle: MeetingHandle.MOVE,
-      label: translate(HANDLE_LABEL_KEYS[MeetingHandle.MOVE]),
+      label: translate("meeting.moveHandle"),
       valueMinutes: startMinutes,
       minMinutes: 0,
       maxMinutes: getLastStartMinutes(day),
