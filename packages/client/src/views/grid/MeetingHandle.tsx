@@ -25,6 +25,8 @@ type MeetingHandleViewProps = {
   rowNumber: number;
   cellPitchPx: number;
   isScrollable: boolean;
+  /** The cells of the strip tail; a change during a drag keeps the dragged end in place. */
+  tailCellCount?: number;
   onMoveHandle: (handle: MeetingHandle, move: TrackMove) => void;
   onDragHandleTo: (handle: MeetingHandle, minutes: number) => void;
   /** Called with `true` when a drag starts and with `false` when it ends. */
@@ -78,6 +80,7 @@ const MeetingHandleView = memo(function MeetingHandleView({
   rowNumber,
   cellPitchPx,
   isScrollable,
+  tailCellCount,
   onMoveHandle,
   onDragHandleTo,
   onDragActiveChange,
@@ -90,6 +93,7 @@ const MeetingHandleView = memo(function MeetingHandleView({
     handleElement: itemElement,
     cellPitchPx,
     isScrollable,
+    tailCellCount,
     valueMinutes: presented.valueMinutes,
     onDragHandleTo,
     onDragActiveChange,

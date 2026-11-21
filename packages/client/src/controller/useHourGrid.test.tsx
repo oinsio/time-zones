@@ -24,7 +24,10 @@ const BROKEN_ZONE_ROW = buildLocation({
   timeZoneId: "Not/AZone",
 });
 
-function setup(locations = [cityRow("Almaty"), cityRow("Moscow")]) {
+function setup(
+  locations = [cityRow("Almaty"), cityRow("Moscow")],
+  frozenTailCellCount?: number,
+) {
   const clock = createSwitchableClock(SAMPLE_TIMESTAMP, "Asia/Almaty");
   const tickScheduler = createManualTickScheduler();
   const repository = createInMemoryLocationRepository({
@@ -36,7 +39,7 @@ function setup(locations = [cityRow("Almaty"), cityRow("Moscow")]) {
   });
   const rendered = renderHook(
     () => ({
-      grid: useHourGrid(),
+      grid: useHourGrid(frozenTailCellCount),
       time: useTimeSelection(),
       store: useContext(LocationsContext)?.store,
     }),
@@ -234,5 +237,23 @@ describe("useHourGrid with a meeting range past midnight", () => {
     dispatch({ type: LocationCommandType.CLEAR_MEETING_RANGE });
 
     expect(result.current.grid.cellCount).toBe(24);
+  });
+});
+
+const setupWithFrozenTail = (frozenTailCellCount: number) =>
+  setup([cityRow("Almaty"), cityRow("Moscow")], frozenTailCellCount);
+
+describe("useHourGrid with a frozen strip tail", () => {
+  it("should keep the frozen tail while the meeting range needs another", () => {
+    const { result, dispatch, rerender } = setupWithFrozenTail(1);
+
+    dispatch({
+      type: LocationCommandType.SET_MEETING_RANGE,
+      start: "2026-03-08T18:00:00Z",
+      end: "2026-03-08T21:00:00Z",
+    });
+    rerender();
+
+    expect(result.current.grid.cellCount).toBe(25);
   });
 });

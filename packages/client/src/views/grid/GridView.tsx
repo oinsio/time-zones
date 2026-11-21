@@ -67,6 +67,7 @@ export default function GridView() {
     candidateRows,
     cellPitchPx: layout.cellPitchPx,
     isScrollable: layout.isScrollable,
+    tailCellCount,
     onMoveHandle: moveHandle,
     onDragHandleTo: dragHandleTo,
     onDragActiveChange: setIsHandleDragging,

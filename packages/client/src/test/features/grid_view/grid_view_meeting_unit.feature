@@ -76,3 +76,10 @@ Feature: Meeting range in the Grid view
     Then no hour frame is shown
     When the user clears the meeting range
     Then the hour frame is on column 9
+
+  @move-meeting-range-and-extend-past-midnight @FR9
+  Scenario: A tap on a tail cell changes nothing
+    Given the Grid view with the meeting range 22:00–23:30 in Almaty on 2026-03-08, one tail cell
+    When the user taps column 24 of Moscow
+    Then the meeting range is 22:00–23:30 in Almaty
+    And every row has 25 hour cells
