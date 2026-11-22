@@ -39,3 +39,24 @@ Feature: Sharing the meeting from the Grid view
     Given the notice "Meeting text copied" is shown
     When the user chooses "Share meeting"
     Then the notice is gone and the share dialog is open
+
+  @keep-location-menu-in-view-and-clear-range-after-share @FR5 @FR7 @M3
+  Scenario Outline: The ways out of the share dialog
+    Given the Grid view with the meeting range 09:00–11:00 in Almaty and the share dialog open
+    When the user leaves the dialog by <way>
+    Then the share dialog is <dialog> and the meeting range is <range>
+
+    Examples:
+      | way                                         | dialog | range       |
+      | "Share" with the outcome shared             | closed | none        |
+      | the close button                            | closed | 09:00–11:00 |
+      | Esc                                         | closed | 09:00–11:00 |
+      | "Share" with the outcome cancelled          | open   | 09:00–11:00 |
+      | "Share" with the outcome copied             | closed | 09:00–11:00 |
+      | "Share" with the outcome failed             | closed | 09:00–11:00 |
+
+  @keep-location-menu-in-view-and-clear-range-after-share @FR5
+  Scenario: A shared meeting stores nothing
+    Given the meeting range 09:00–11:00 in Almaty and the share dialog open
+    When the share ends with the outcome shared
+    Then the location list and the preferences are unchanged

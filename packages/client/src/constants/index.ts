@@ -37,12 +37,13 @@ export {
   HOUR_CELL_MINUTE_SEPARATOR,
   HOUR_CELL_SCROLL_WIDTH_PX,
   HourGridCssVariable,
-  LOCATION_MENU_OFFSET_PX,
-  MIDNIGHT_SHADE_SPREAD_PX,
   MIN_FITTING_HOUR_CELL_PX,
-  OFFSET_EDGE_WIDTH_PX,
   SHORT_MONTH_TRAILING_STOP,
 } from "./grid";
+export {
+  MIDNIGHT_SHADE_SPREAD_PX,
+  OFFSET_EDGE_WIDTH_PX,
+} from "./gridShades";
 export { HEADER_ICON_SIZE_PX } from "./header";
 export { KeyboardKey } from "./keyboard";
 export {
@@ -55,6 +56,10 @@ export {
   LOCAL_TIME_FORMAT_OPTIONS_BY_HOUR_FORMAT,
 } from "./localDateTime";
 export { DEFAULT_LANGUAGE } from "./locales";
+export {
+  LOCATION_MENU_OFFSET_PX,
+  LOCATION_MENU_VIEWPORT_MARGIN_PX,
+} from "./locationMenu";
 export {
   DEVICE_TIME_LOCATION_ID,
   GRID_MARK_ICON_SIZE_PX,

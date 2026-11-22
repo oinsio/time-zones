@@ -1,9 +1,10 @@
 // Verifies FR14, FR15 of add-grid-meeting-range-and-share.
+// Verifies FR5, FR7 of keep-location-menu-in-view-and-clear-range-after-share.
 // Verifies FR1, FR3, FR4, FR5, FR6, FR8, FR9, FR10, FR11 of add-meeting-share-dialog.
 
 import { act } from "@testing-library/react";
 import i18n from "i18next";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MeetingShareNotice } from "./useMeetingShare";
 import {
   moscow,
@@ -103,5 +104,45 @@ describe("useMeetingShare sending", () => {
     await shareText(result);
 
     expect(textSharing.sharedTexts).toEqual([]);
+  });
+
+  it.each([
+    { outcome: "SHARED", sharing: { canShare: true, canCopy: true }, calls: 1 },
+    {
+      outcome: "CANCELLED",
+      sharing: { canShare: true, isCancelled: true, canCopy: true },
+      calls: 0,
+    },
+    {
+      outcome: "COPIED",
+      sharing: { canShare: false, canCopy: true },
+      calls: 0,
+    },
+    {
+      outcome: "FAILED",
+      sharing: { canShare: false, canCopy: false },
+      calls: 0,
+    },
+  ])(
+    "should call onMeetingShared $calls times for the outcome $outcome",
+    async ({ sharing, calls }) => {
+      const onMeetingShared = vi.fn();
+      const { result } = setup({ sharing, onMeetingShared });
+      openDialog(result);
+
+      await shareText(result);
+
+      expect(onMeetingShared).toHaveBeenCalledTimes(calls);
+    },
+  );
+
+  it("should not call onMeetingShared when the dialog is closed", () => {
+    const onMeetingShared = vi.fn();
+    const { result } = setup({ onMeetingShared });
+    openDialog(result);
+
+    act(() => result.current.share.closeShareDialog());
+
+    expect(onMeetingShared).not.toHaveBeenCalled();
   });
 });

@@ -35,18 +35,18 @@ Feature: Share dialog opening, rows and outcomes
     When the user chooses "Поделиться встречей"
     Then every location is ticked
 
-  @add-meeting-share-dialog @FR9 @UX5
+  @add-meeting-share-dialog @FR9 @UX5 @keep-location-menu-in-view-and-clear-range-after-share @FR5 @FR7
   Scenario Outline: Outcomes of a share from the dialog
     Given the share dialog is open with "Калькутта" unticked
     When the user chooses "Поделиться" and the browser <behaves>
-    Then the dialog is <dialog>, the notice is <notice> and no confirmation dialog is open
+    Then the dialog is <dialog>, the notice is <notice>, the meeting range is <range> and no confirmation dialog is open
 
     Examples:
-      | behaves                                | dialog                           | notice                           |
-      | shares the text                        | closed                           | none                             |
-      | reports that the user closed the sheet | open, Калькутта still unticked   | none                             |
-      | has no system share                    | closed                           | Текст встречи скопирован         |
-      | has neither share nor clipboard        | closed                           | Не удалось поделиться встречей   |
+      | behaves                                | dialog                           | notice                           | range       |
+      | shares the text                        | closed                           | none                             | none        |
+      | reports that the user closed the sheet | open, Калькутта still unticked   | none                             | 09:00–11:00 |
+      | has no system share                    | closed                           | Текст встречи скопирован         | 09:00–11:00 |
+      | has neither share nor clipboard        | closed                           | Не удалось поделиться встречей   | 09:00–11:00 |
 
   @add-meeting-share-dialog @FR10
   Scenario: A location is removed in another tab

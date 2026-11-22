@@ -155,7 +155,8 @@ export function useMeetingShareDialog(shareMeeting: MeetingShare) {
       const destination = destinations.find(({ id }) => id === destinationId);
       if (destination === undefined) return;
       if (invitation === undefined || text === undefined) return;
-      finishShare(await destination.share({ invitation, text }));
+      const outcome = await destination.share({ invitation, text });
+      finishShare(outcome);
     },
     [destinations, invitation, text, finishShare],
   );

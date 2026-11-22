@@ -21,10 +21,13 @@ const OFFLINE_NOTICE_WAIT_MS = 1500;
  * which sits over the bottom of the screen where a mouse drag would start.
  * Implements FR4 of show-city-labels-in-interface-language: the city data request at load shifts when the notice appears.
  */
-export async function dismissOfflineReadyNotice(page: Page) {
+export async function dismissOfflineReadyNotice(
+  page: Page,
+  dismissName: string = englishLocale.app.dismiss,
+) {
   await page.evaluate(() => navigator.serviceWorker?.ready.then(() => null));
   const dismissButton = page.getByRole("button", {
-    name: englishLocale.app.dismiss,
+    name: dismissName,
   });
   await dismissButton
     .click({ timeout: OFFLINE_NOTICE_WAIT_MS })

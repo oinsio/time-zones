@@ -9,7 +9,7 @@ Feature: Share meeting from the Grid view in a real browser
     And the stored locations are "Almaty", "Moscow", "Kolkata", "New York"
     And the screen is 1440 by 900 px for the locations
 
-  @add-grid-meeting-range-and-share @FR15 @add-meeting-share-dialog @FR9
+  @add-grid-meeting-range-and-share @FR15 @add-meeting-share-dialog @FR9 @keep-location-menu-in-view-and-clear-range-after-share @FR5 @FR6 @NFR-A3
   Scenario: Share where the browser can share
     Given a browser with a system share
     When the user opens the locations app
@@ -24,6 +24,30 @@ Feature: Share meeting from the Grid view in a real browser
       | Kolkata (IST, UTC+5:30): 09:30–11:30                           |
       | New York (EST, UTC−5): 23:00–01:00 (a day earlier, Sat, Mar 7) |
     And no share notice is shown
+    And no meeting range is set
+    And focus is on the "Add location" action
+
+  @keep-location-menu-in-view-and-clear-range-after-share @FR5 @UX3
+  Scenario: After a shared meeting the Grid view is back to normal
+    Given a browser with a system share
+    When the user opens the locations app
+    And the user sets the sample meeting
+    And the user chooses Share meeting
+    And the user chooses Share in the dialog
+    Then the page header shows the app title again
+    And no meeting range is set
+    And every location menu button is enabled
+    And no share notice is shown
+
+  @keep-location-menu-in-view-and-clear-range-after-share @FR7
+  Scenario: Closing with the close button keeps the meeting
+    Given a browser with a system share
+    When the user opens the locations app
+    And the user sets the sample meeting
+    And the user chooses Share meeting
+    And the user closes the share dialog with the close button
+    Then the share dialog is closed
+    And the meeting range is from "09:00" to "11:00"
 
   @add-grid-meeting-range-and-share @FR15 @add-meeting-share-dialog @FR9
   Scenario: Closing the share sheet

@@ -160,6 +160,12 @@ export const createMeetingShareDialogWorld = () => {
     /** Twenty distinct sample cities, the sample four first. */
     manyCities: (count: number) =>
       [...SAMPLE_CITIES, ...MORE_CITIES].slice(0, count),
+    /** The meeting bar, with its Clear meeting button, is shown while a meeting range is set. */
+    isMeetingBarShown: () =>
+      screen.queryByRole("button", {
+        name: i18n.t("meeting.clear"),
+        hidden: true,
+      }) !== null,
     isDialogOpen: () => screen.queryByRole("dialog") !== null,
     closeDialogWithButton: () =>
       userEvent.click(

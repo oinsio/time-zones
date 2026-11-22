@@ -61,6 +61,8 @@ const SettingsPage = lazy(async () => ({
  * and Share, and the share notice; `textSharing` is the port Share meeting uses.
  * Implements FR7 of add-remote-zone-rules-updates (D5): the zone rules update notice;
  * `zoneRulesVersionSource`, `storedReleases` and `reloadPage` are its ports and its Reload.
+ * Implements FR5, FR6, NFR-A3 of keep-location-menu-in-view-and-clear-range-after-share (D3): one
+ * clearMeetingAndFocusAddLocation for Clear meeting and a shared outcome.
  * Implements FR3, FR5 of apply-data-updates-silently (D3): `appRevisionSource` is the port of the update notice; the notices region is `AppShellNotices`.
  */
 export type AppShellDependencies = {
@@ -113,8 +115,12 @@ function AppShellContent({
   const activeView = resolveActiveView(viewRegistry, useViewMode());
   const meetingBar = useMeetingBar(activeView?.showsMeetingRange === true);
   const { clearMeetingRange } = useMeetingRange();
-  const share = useMeetingShare(textSharing);
   const isFocusAfterClearDue = useRef(false);
+  const clearMeetingAndFocusAddLocation = () => {
+    isFocusAfterClearDue.current = true;
+    clearMeetingRange();
+  };
+  const share = useMeetingShare(textSharing, clearMeetingAndFocusAddLocation);
 
   useEffect(() => {
     if (meetingBar !== undefined || !isFocusAfterClearDue.current) return;
@@ -174,10 +180,7 @@ function AppShellContent({
           <AppShellMeeting
             bar={meetingBar}
             share={share}
-            onClear={() => {
-              isFocusAfterClearDue.current = true;
-              clearMeetingRange();
-            }}
+            onClear={clearMeetingAndFocusAddLocation}
           />
         )
       }

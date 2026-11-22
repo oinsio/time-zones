@@ -2,7 +2,11 @@
 // Verifies FR7 of refine-meeting-range-entry-and-handles: the date bar is located by DATE_BAR_SELECTOR.
 import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
-import { DATE_BAR_SELECTOR } from "@/constants";
+import {
+  DATE_BAR_SELECTOR,
+  LOCATION_MENU_OFFSET_PX,
+  LOCATION_MENU_VIEWPORT_MARGIN_PX,
+} from "@/constants";
 import {
   dateButton,
   nowButton,
@@ -34,7 +38,8 @@ const GRID_ELEMENT_SELECTORS = [
   "time",
   "li .sticky span",
 ];
-const GAP_ABOVE_DATE_BAR_PX = 4;
+const ESCAPE_KEY = "Escape";
+const MENU_ROLE = "menu";
 const DATE_BAR_SAMPLE_STEP_PX = 8;
 const SCROLL_UNDER_DATE_BAR_PX = 400;
 const MENU_ITEM_ROLE = "menuitem";
@@ -134,16 +139,36 @@ Then(
   },
 );
 
+// Verifies NFR-A1 of keep-location-menu-in-view-and-clear-range-after-share: the menu opens under its button and reaches over the date bar.
 When(
-  "the page is scrolled so that the menu button of {string} lies just above the date bar",
+  "the page is scrolled so that the menu of {string} opens under its button and reaches over the date bar",
+  async ({ locationsWorld }, city: string) => {
+    const { page } = locationsWorld;
+    await menuButton(page, city).click();
+    const menuHeight = (await requireBox(page.getByRole(MENU_ROLE))).height;
+    await page.keyboard.press(ESCAPE_KEY);
+    const buttonBox = await requireBox(menuButton(page, city));
+    const barBox = await requireBox(page.locator(DATE_BAR_SELECTOR));
+    const viewportHeight = page.viewportSize()?.height ?? 0;
+    const buttonBottomTarget =
+      viewportHeight -
+      (menuHeight + LOCATION_MENU_OFFSET_PX + LOCATION_MENU_VIEWPORT_MARGIN_PX);
+    expect(buttonBottomTarget).toBeLessThan(barBox.y);
+    await page.evaluate(
+      (distance) => window.scrollBy(0, distance),
+      buttonBox.y + buttonBox.height - buttonBottomTarget,
+    );
+  },
+);
+
+// Verifies FR1 of keep-location-menu-in-view-and-clear-range-after-share.
+Then(
+  "the menu of {string} lies under its button",
   async ({ locationsWorld }, city: string) => {
     const { page } = locationsWorld;
     const buttonBox = await requireBox(menuButton(page, city));
-    const barBox = await requireBox(page.locator(DATE_BAR_SELECTOR));
-    await page.evaluate(
-      (distance) => window.scrollBy(0, distance),
-      buttonBox.y + buttonBox.height - (barBox.y - GAP_ABOVE_DATE_BAR_PX),
-    );
+    const menuBox = await requireBox(page.getByRole(MENU_ROLE));
+    expect(menuBox.y).toBeGreaterThanOrEqual(buttonBox.y + buttonBox.height);
   },
 );
 
