@@ -72,7 +72,12 @@ export function useLocationMenuPlacement(
           };
       setPlacement({
         side,
-        style: { ...fixedStyle, maxHeight: maxHeightPx, overflowY: "auto" },
+        style: {
+          ...fixedStyle,
+          ...(maxHeightPx === undefined
+            ? {}
+            : { maxHeight: maxHeightPx, overflowY: "auto" as const }),
+        },
       });
     };
     readPlacement();
