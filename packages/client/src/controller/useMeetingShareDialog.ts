@@ -14,7 +14,7 @@ import {
   isDeviceTimeLocation,
   type Location,
 } from "@/model";
-import type { ShareDestinationId } from "@/ports";
+import { type ShareDestinationId, ShareOutcome } from "@/ports";
 import { DEFAULT_PREFERENCES } from "@/preferences";
 import {
   presentMeetingShareReference,
@@ -53,8 +53,12 @@ export type MeetingShareDestinationButton = {
  * text. Sharing hands the invitation and the text to a share destination and
  * reports the outcome to `useMeetingShare`. Loaded with the dialog (NFR-P2).
  * Implements FR1–FR6, FR8–FR11 of add-meeting-share-dialog (D6).
+ * Implements FR5, FR7 of keep-location-menu-in-view-and-clear-range-after-share (D3): `onMeetingShared` is called after a share with the outcome shared, and only then.
  */
-export function useMeetingShareDialog(shareMeeting: MeetingShare) {
+export function useMeetingShareDialog(
+  shareMeeting: MeetingShare,
+  onMeetingShared?: () => void,
+) {
   const { isShareDialogOpen, closeShareDialog, finishShare, textSharing } =
     shareMeeting;
   const locationsContext = useContext(LocationsContext);
@@ -155,9 +159,11 @@ export function useMeetingShareDialog(shareMeeting: MeetingShare) {
       const destination = destinations.find(({ id }) => id === destinationId);
       if (destination === undefined) return;
       if (invitation === undefined || text === undefined) return;
-      finishShare(await destination.share({ invitation, text }));
+      const outcome = await destination.share({ invitation, text });
+      finishShare(outcome);
+      if (outcome === ShareOutcome.SHARED) onMeetingShared?.();
     },
-    [destinations, invitation, text, finishShare],
+    [destinations, invitation, text, finishShare, onMeetingShared],
   );
 
   const {

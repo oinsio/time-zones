@@ -9,18 +9,15 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { LOCATION_MENU_ICON_SIZE_PX } from "@/constants";
-import { useCloseOnOutsidePress } from "./useCloseOnOutsidePress";
+import { LOCATION_MENU_ICON_SIZE_PX, OutsidePressEvent } from "@/constants";
+import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
 import { getMenuKeyAction, MenuKeyAction } from "./locationMenuKeys";
 import {
   getEnabledMenuIndex,
   MenuStepDirection,
 } from "./locationMenuNavigation";
-import { getLocationMenuPositionClass } from "./locationMenuPlacement";
-import {
-  getLocationMenuStyle,
-  useLocationMenuPlacement,
-} from "./useLocationMenuPlacement";
+import { LocationMenuSide } from "./locationMenuPlacement";
+import { useLocationMenuPlacement } from "./useLocationMenuPlacement";
 
 export type LocationMenuItem = {
   label: string;
@@ -39,6 +36,11 @@ type LocationMenuProps = {
   /** Called whenever the menu opens or closes. */
   onOpenChange?: (isOpen: boolean) => void;
 };
+
+// `pointerdown` does not exist before iOS Safari 13; there a press is a touch or a mouse event.
+const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
+  ? [OutsidePressEvent.POINTER_DOWN]
+  : [OutsidePressEvent.TOUCH_START, OutsidePressEvent.MOUSE_DOWN];
 
 /**
  * The vertical-dots menu of a location card, a WAI-ARIA menu button driven by `click`, so
@@ -92,7 +94,20 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
       if (isOpen) itemRefs.current[focusedIndex]?.focus();
     }, [isOpen, focusedIndex]);
 
-    useCloseOnOutsidePress(isOpen, rootRef, () => setIsOpen(false));
+    useEffect(() => {
+      if (!isOpen) return;
+      const closeOnOutsidePress = (event: Event) => {
+        if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
+      };
+      for (const eventType of OUTSIDE_PRESS_EVENTS) {
+        document.addEventListener(eventType, closeOnOutsidePress);
+      }
+      return () => {
+        for (const eventType of OUTSIDE_PRESS_EVENTS) {
+          document.removeEventListener(eventType, closeOnOutsidePress);
+        }
+      };
+    }, [isOpen]);
 
     const openAt = (index: number) => {
       setFocusedIndex(index);
@@ -123,22 +138,17 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
     };
 
     const handleMenuKeyDown = (event: KeyboardEvent) => {
-      switch (getMenuKeyAction(event.key)) {
+      const action = getMenuKeyAction(event.key);
+      switch (action) {
         case MenuKeyAction.NEXT:
-          setFocusedIndex(
-            getEnabledMenuIndex(
-              disabledFlags,
-              focusedIndex,
-              MenuStepDirection.NEXT,
-            ),
-          );
-          break;
         case MenuKeyAction.PREVIOUS:
           setFocusedIndex(
             getEnabledMenuIndex(
               disabledFlags,
               focusedIndex,
-              MenuStepDirection.PREVIOUS,
+              action === MenuKeyAction.NEXT
+                ? MenuStepDirection.NEXT
+                : MenuStepDirection.PREVIOUS,
             ),
           );
           break;
@@ -210,8 +220,8 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
             tabIndex={-1}
             aria-label={t("locations.locationMenu", { city })}
             ref={menuRef}
-            style={getLocationMenuStyle(placement)}
-            className={`${getLocationMenuPositionClass(isMenuFixedToViewport, placement.side)} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-control-border bg-surface py-1 shadow-lg`}
+            style={placement.style}
+            className={`${isMenuFixedToViewport ? "fixed" : placement.side === LocationMenuSide.BELOW ? "absolute right-0 top-full mt-1" : "absolute right-0 bottom-full mb-1"} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-control-border bg-surface py-1 shadow-lg`}
           >
             {items.map((item, index) => (
               <button

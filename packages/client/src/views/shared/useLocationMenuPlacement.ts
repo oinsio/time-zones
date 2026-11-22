@@ -15,16 +15,8 @@ const RESIZE_EVENT = "resize";
 
 export type LocationMenuPlacementState = {
   side: LocationMenuSide;
-  /** Set when the menu fits on neither side; the menu then scrolls inside it. */
-  maxHeightPx: number | undefined;
-  /** The `position: fixed` place of the menu; `undefined` when the menu is not fixed. */
-  fixedStyle: CSSProperties | undefined;
-};
-
-const DEFAULT_PLACEMENT: LocationMenuPlacementState = {
-  side: LocationMenuSide.BELOW,
-  maxHeightPx: undefined,
-  fixedStyle: undefined,
+  /** The inline style of the open menu: its fixed place (fixed variant) and its limited height with scrolling items, when it fits on neither side. */
+  style: CSSProperties;
 };
 
 /**
@@ -42,38 +34,39 @@ export function useLocationMenuPlacement(
   isOpen: boolean,
   isMenuFixedToViewport: boolean,
 ): LocationMenuPlacementState {
-  const [placement, setPlacement] = useState(DEFAULT_PLACEMENT);
+  const [placement, setPlacement] = useState<LocationMenuPlacementState>({
+    side: LocationMenuSide.BELOW,
+    style: {},
+  });
   useLayoutEffect(() => {
-    if (!isOpen) {
-      setPlacement(DEFAULT_PLACEMENT);
-      return;
-    }
+    if (!isOpen) return;
     const readPlacement = () => {
       const triggerBox = triggerRef.current?.getBoundingClientRect();
       if (triggerBox === undefined) return;
       const root = document.documentElement;
-      const { side, maxHeightPx } = getLocationMenuPlacement({
-        buttonTopPx: triggerBox.top,
-        buttonBottomPx: triggerBox.bottom,
-        menuHeightPx: menuRef.current?.scrollHeight ?? 0,
-        viewportHeightPx: root.clientHeight,
+      const { side, maxHeightPx } = getLocationMenuPlacement(
+        triggerBox,
+        menuRef.current?.scrollHeight ?? 0,
+        root.clientHeight,
+      );
+      const fixedStyle: CSSProperties = !isMenuFixedToViewport
+        ? {}
+        : {
+            position: "fixed",
+            right: root.clientWidth - triggerBox.right,
+            ...(side === LocationMenuSide.BELOW
+              ? { top: triggerBox.bottom + LOCATION_MENU_OFFSET_PX }
+              : {
+                  bottom:
+                    root.clientHeight -
+                    triggerBox.top +
+                    LOCATION_MENU_OFFSET_PX,
+                }),
+          };
+      setPlacement({
+        side,
+        style: { ...fixedStyle, maxHeight: maxHeightPx, overflowY: "auto" },
       });
-      const right = root.clientWidth - triggerBox.right;
-      const fixedStyle: CSSProperties | undefined = isMenuFixedToViewport
-        ? side === LocationMenuSide.BELOW
-          ? {
-              position: "fixed",
-              top: triggerBox.bottom + LOCATION_MENU_OFFSET_PX,
-              right,
-            }
-          : {
-              position: "fixed",
-              bottom:
-                root.clientHeight - triggerBox.top + LOCATION_MENU_OFFSET_PX,
-              right,
-            }
-        : undefined;
-      setPlacement({ side, maxHeightPx, fixedStyle });
     };
     readPlacement();
     window.addEventListener(SCROLL_EVENT, readPlacement, true);
@@ -84,16 +77,4 @@ export function useLocationMenuPlacement(
     };
   }, [isOpen, isMenuFixedToViewport, triggerRef, menuRef]);
   return placement;
-}
-
-/** The inline style of an open menu: its fixed place and, when limited, its height with a scrolling overflow. */
-export function getLocationMenuStyle({
-  maxHeightPx,
-  fixedStyle,
-}: LocationMenuPlacementState): CSSProperties {
-  return {
-    ...fixedStyle,
-    maxHeight: maxHeightPx,
-    overflowY: maxHeightPx === undefined ? undefined : "auto",
-  };
 }

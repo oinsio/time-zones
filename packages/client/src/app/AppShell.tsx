@@ -1,11 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   fetchAppRevisionSource,
   fetchZoneRulesVersionSource,
@@ -120,12 +113,8 @@ function AppShellContent({
   const activeView = resolveActiveView(viewRegistry, useViewMode());
   const meetingBar = useMeetingBar(activeView?.showsMeetingRange === true);
   const { clearMeetingRange } = useMeetingRange();
+  const share = useMeetingShare(textSharing);
   const isFocusAfterClearDue = useRef(false);
-  const clearMeetingAndFocusAddLocation = useCallback(() => {
-    isFocusAfterClearDue.current = true;
-    clearMeetingRange();
-  }, [clearMeetingRange]);
-  const share = useMeetingShare(textSharing, clearMeetingAndFocusAddLocation);
 
   useEffect(() => {
     if (meetingBar !== undefined || !isFocusAfterClearDue.current) return;
@@ -185,7 +174,10 @@ function AppShellContent({
           <AppShellMeeting
             bar={meetingBar}
             share={share}
-            onClear={clearMeetingAndFocusAddLocation}
+            onClear={() => {
+              isFocusAfterClearDue.current = true;
+              clearMeetingRange();
+            }}
           />
         )
       }

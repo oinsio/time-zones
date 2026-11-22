@@ -30,8 +30,11 @@ export function useShare(
   textSharing: ReturnType<typeof createInMemoryTextSharing>,
   onMeetingShared?: () => void,
 ) {
-  const shareMeeting = useMeetingShare(textSharing, onMeetingShared);
-  return { ...shareMeeting, ...useMeetingShareDialog(shareMeeting) };
+  const shareMeeting = useMeetingShare(textSharing);
+  return {
+    ...shareMeeting,
+    ...useMeetingShareDialog(shareMeeting, onMeetingShared),
+  };
 }
 
 export const citySearch = createCompositeCitySearch(zoneCities);

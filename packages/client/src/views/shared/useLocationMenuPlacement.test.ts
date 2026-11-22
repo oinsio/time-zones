@@ -55,8 +55,7 @@ describe("useLocationMenuPlacement", () => {
 
     expect(result.current).toEqual({
       side: LocationMenuSide.BELOW,
-      maxHeightPx: undefined,
-      fixedStyle: undefined,
+      style: {},
     });
   });
 
@@ -65,7 +64,7 @@ describe("useLocationMenuPlacement", () => {
 
     const { result } = renderHook(() => useFixedPlacement(refs, true));
 
-    expect(result.current.fixedStyle).toEqual({
+    expect(result.current.style).toMatchObject({
       position: "fixed",
       top: BUTTON_BOTTOM_PX + LOCATION_MENU_OFFSET_PX,
       right: document.documentElement.clientWidth - BUTTON_RIGHT_PX,
@@ -79,7 +78,7 @@ describe("useLocationMenuPlacement", () => {
       useLocationMenuPlacement(refs.triggerRef, refs.menuRef, true, false),
     );
 
-    expect(result.current.fixedStyle).toBeUndefined();
+    expect(result.current.style.position).toBeUndefined();
     expect(result.current.side).toBe(LocationMenuSide.BELOW);
   });
 
@@ -90,19 +89,7 @@ describe("useLocationMenuPlacement", () => {
       useLocationMenuPlacement({ current: null }, refs.menuRef, true, true),
     );
 
-    expect(result.current.fixedStyle).toBeUndefined();
-  });
-
-  it("should forget the placement when it closes", () => {
-    const refs = buildButtonAndMenu();
-    const { result, rerender } = renderHook(
-      ({ isOpen }) => useFixedPlacement(refs, isOpen),
-      { initialProps: { isOpen: true } },
-    );
-
-    rerender({ isOpen: false });
-
-    expect(result.current.fixedStyle).toBeUndefined();
+    expect(result.current.style.position).toBeUndefined();
   });
 
   describe("near the bottom of the viewport", () => {
@@ -125,7 +112,7 @@ describe("useLocationMenuPlacement", () => {
 
       const { result } = renderHook(() => useFixedPlacement(refs, true));
 
-      expect(result.current.fixedStyle).toEqual({
+      expect(result.current.style).toMatchObject({
         position: "fixed",
         bottom:
           VIEWPORT_HEIGHT_PX - NEAR_BOTTOM_TOP_PX + LOCATION_MENU_OFFSET_PX,
