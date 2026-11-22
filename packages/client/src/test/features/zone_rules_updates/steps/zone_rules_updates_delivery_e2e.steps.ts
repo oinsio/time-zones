@@ -6,6 +6,7 @@ import {
   countVersionFileRequests,
   publishNewerRelease,
   readBundledReleaseName,
+  type VersionFileRequests,
 } from "./zoneRulesPublishedFiles";
 
 const { Given, When, Then } = createBdd(test);
@@ -24,8 +25,14 @@ const ALMATY_STORED_LOCATION = {
 const ALMATY_PUBLISHED_OFFSET_TEXT = "UTC+4";
 
 let publishedRelease = "";
-let readVersionFileRequestCount: () => number = () => 0;
+let versionFileRequests: VersionFileRequests | undefined;
 let versionFileRequestsBeforeOffline = 0;
+
+const requireVersionFileRequests = () => {
+  if (!versionFileRequests)
+    throw new Error("Version file requests are not counted");
+  return versionFileRequests;
+};
 
 // Verifies FR2, NFR-P1 of add-remote-zone-rules-updates: the built site serves both files.
 Then(
@@ -118,13 +125,16 @@ Then("the Almaty location shows UTC+4", async ({ smokeWorld }) => {
 Given(
   "the zone rules version file requests are counted",
   async ({ smokeWorld }) => {
-    readVersionFileRequestCount = countVersionFileRequests(smokeWorld.page);
+    versionFileRequests = countVersionFileRequests(smokeWorld.page);
   },
 );
 
 When("the user goes offline and reloads the app", async ({ smokeWorld }) => {
   const { page } = smokeWorld;
-  versionFileRequestsBeforeOffline = readVersionFileRequestCount();
+  const requests = requireVersionFileRequests();
+  // The open page asks for the version file once it mounts, online; count only after it has asked.
+  await requests.waitForCurrentPageRequest();
+  versionFileRequestsBeforeOffline = requests.readCount();
   await page.context().setOffline(true);
   await page.reload();
 });
@@ -133,7 +143,7 @@ When("the user goes offline and reloads the app", async ({ smokeWorld }) => {
 Then(
   "no zone rules version file was requested after going offline",
   async () => {
-    expect(readVersionFileRequestCount()).toBe(
+    expect(requireVersionFileRequests().readCount()).toBe(
       versionFileRequestsBeforeOffline,
     );
   },

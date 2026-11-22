@@ -9,7 +9,8 @@ import { Temporal } from "@/lib/temporal";
 import { ZONE_RULES_RELEASE_FILE } from "../../../../../app.config";
 
 const JSON_CONTENT_TYPE = "application/json";
-const VERSION_FILE_URL_PATTERN = "**/zone-rules/version.json";
+const VERSION_FILE_URL_SUFFIX = "/zone-rules/version.json";
+const VERSION_FILE_URL_PATTERN = `**${VERSION_FILE_URL_SUFFIX}`;
 /** A longer letter sequence follows every shorter one of the same year (FR5). */
 const NEWER_RELEASE_SUFFIX = "a";
 const ALMATY_ZONE_ID = "Asia/Almaty";
@@ -82,11 +83,38 @@ export async function publishNewerRelease(page: Page): Promise<string> {
   return release;
 }
 
-/** Counts the requests the page makes for the version file. */
-export function countVersionFileRequests(page: Page): () => number {
+export type VersionFileRequests = {
+  /** Every version file request the page made since counting began. */
+  readCount: () => number;
+  /** Resolves once the page's current document has made its start-up request. */
+  waitForCurrentPageRequest: () => Promise<void>;
+};
+
+/**
+ * Counts the requests the page makes for the version file, and knows whether
+ * the current document has made its own: the start-up check runs after the
+ * app mounts, so a count read right after a reload can miss it.
+ */
+export function countVersionFileRequests(page: Page): VersionFileRequests {
   let requestCount = 0;
-  page.on("request", (request) => {
-    if (request.url().endsWith("/zone-rules/version.json")) requestCount += 1;
+  let isRequestedByCurrentPage = false;
+  let onCurrentPageRequest = () => {};
+  page.on("framenavigated", (frame) => {
+    if (frame === page.mainFrame()) isRequestedByCurrentPage = false;
   });
-  return () => requestCount;
+  page.on("request", (request) => {
+    if (!request.url().endsWith(VERSION_FILE_URL_SUFFIX)) return;
+    requestCount += 1;
+    isRequestedByCurrentPage = true;
+    onCurrentPageRequest();
+  });
+  return {
+    readCount: () => requestCount,
+    waitForCurrentPageRequest: () =>
+      isRequestedByCurrentPage
+        ? Promise.resolve()
+        : new Promise((resolve) => {
+            onCurrentPageRequest = resolve;
+          }),
+  };
 }
