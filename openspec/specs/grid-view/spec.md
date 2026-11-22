@@ -883,9 +883,10 @@ Everything of the grid panel — the row header texts, the hour strips, the row 
 
 #### Scenario: An open location menu lies above the date bar
 - **GIVEN** the Grid view at 390 by 844 px with 12 locations and no meeting range
-- **AND** the page is scrolled so that a row's location menu button lies just above the date bar
+- **AND** the page is scrolled so that a row's location menu opens under its button and reaches over the date bar
 - **WHEN** the user opens that row's location menu
-- **THEN** at the centre of every menu item that lies over the date bar, the topmost element is that menu item
+- **THEN** the menu lies under its button and at least one menu item lies over the date bar
+- **AND** at the centre of every menu item that lies over the date bar, the topmost element is that menu item <!-- implements NFR-A1 of keep-location-menu-in-view-and-clear-range-after-share -->
 
 ### Requirement: Approved screenshots with dialogs over the grid
 Screenshots of the Grid view with the design's sample data (8 March 2026, home Almaty, Almaty, Moscow, Kolkata, New York, Russian interface, light theme) SHALL match their approved baselines on every run: with the hour frame and the search dialog open at 390 × 844, and with the meeting range 09:00–11:00 in Almaty and the calendar dialog open at 1440 × 900. <!-- implements NFR-R2 of fix-grid-meeting-range-lock-and-layering -->
