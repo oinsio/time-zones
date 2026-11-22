@@ -2,7 +2,7 @@ Feature: Meeting range from wall-clock times
   Implements change fix-grid-meeting-range-lock-and-layering.
   As a user I type the meeting in the wall-clock time of any location and the range is set exactly as a drag sets it.
 
-  @fix-grid-meeting-range-lock-and-layering @FR5 @refine-meeting-range-entry-and-handles @FR1
+  @fix-grid-meeting-range-lock-and-layering @FR5 @refine-meeting-range-entry-and-handles @FR1 @move-meeting-range-and-extend-past-midnight @FR3
   Scenario Outline: Wall-clock times of any location set the range
     Given the reference zone is "Asia/Almaty", the current time is "2026-03-08T07:30:00Z" and the list holds Almaty, Moscow, Kolkata and New York
     When the meeting range is set from "<start>" to "<end>" in "<city>" on "<date>"
@@ -20,6 +20,10 @@ Feature: Meeting range from wall-clock times
       | Moscow   | 2026-03-08 | 07:05 | 09:28 | 09:05–11:28 |
       | Kolkata  | 2026-03-08 | 09:37 | 10:00 | 09:07–09:30 |
       | New York | 2026-03-07 | 23:10 | 00:40 | 09:10–10:40 |
+      | Almaty   | 2026-03-08 | 22:00 | 02:00 | 22:00–02:00 of the next day |
+      | Almaty   | 2026-03-08 | 23:00 | 01:00 | 23:00–01:00 of the next day |
+      | Almaty   | 2026-03-08 | 12:00 | 10:00 | 12:00–10:00 of the next day |
+      | Moscow   | 2026-03-08 | 21:00 | 00:00 | 23:00–02:00 of the next day |
 
   @fix-grid-meeting-range-lock-and-layering @FR5 @refine-meeting-range-entry-and-handles @FR2
   Scenario Outline: Times that break the invariants are refused
@@ -31,8 +35,6 @@ Feature: Meeting range from wall-clock times
     Examples:
       | city     | date       | start | end   | error                 |
       | Almaty   | 2026-03-08 | 10:00 | 10:00 | MEETING_START_EQUALS_END |
-      | Almaty   | 2026-03-08 | 12:00 | 10:00 | MEETING_END_BEFORE_START |
-      | Almaty   | 2026-03-08 | 22:00 | 02:00 | MEETING_END_BEFORE_START |
       | New York | 2026-03-07 | 13:00 | 14:00 | INVALID_MEETING_RANGE |
       | New York | 2026-03-07 | 13:00 | 01:00 | INVALID_MEETING_RANGE |
       | Almaty   | 2026-03-08 | 25:00 | 11:00 | INVALID_TIME          |

@@ -48,6 +48,9 @@ const { STORAGE_KEYS, PREFERENCES_SCHEMA_VERSION } = await import(
 );
 const { DEFAULT_PREFERENCES } = await import(PREFERENCES_MODULE_PATH);
 const VIEW_CONTRACT_TAG_PATTERN = /@view-contract/;
+
+/** A scenario whose screenshot is a wide desktop baseline: the phone project leaves it out. */
+const DESKTOP_ONLY_TAG_PATTERN = /@desktop-only/;
 /**
  * A contract scenario of a capability: it runs for the views whose registry
  * entry shows the meeting range and for no other view.
@@ -144,7 +147,7 @@ export default defineConfig<ContractViewOptions>({
     },
     {
       name: "mobile-chrome",
-      grepInvert: VIEW_CONTRACT_TAG_PATTERN,
+      grepInvert: [VIEW_CONTRACT_TAG_PATTERN, DESKTOP_ONLY_TAG_PATTERN],
       use: { ...devices["Pixel 5"] },
     },
     ...viewContractProjects,

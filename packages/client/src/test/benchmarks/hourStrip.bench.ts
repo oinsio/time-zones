@@ -1,5 +1,6 @@
 // Verifies NFR-P1 of add-grid-hour-cells-and-hour-frame.
 // Verifies NFR-P1 of add-day-colouring-setting: the Working hours colouring.
+// Verifies NFR-P1 of move-meeting-range-and-extend-past-midnight.
 
 import { bench, describe } from "vitest";
 import { Temporal } from "@/lib/temporal";
@@ -80,6 +81,34 @@ describe("hour strip", () => {
     "present 50 hour strips again at the same day",
     () => {
       presentFiftyStrips(FIRST_DAY);
+    },
+    options,
+  );
+  // The tail grows from 0 to 1 cell: 21:00–23:00 to 21:00–23:30 in Almaty.
+  const presentFiftyStripsWithTail = (tailCellCount: number) => {
+    const day = getReferenceDay(
+      { ...INITIAL_WORLD_CLOCK_STATE, deviceTimeZoneId: REFERENCE_ZONE },
+      Temporal.Instant.from(FIRST_DAY),
+    );
+    for (let row = 0; row < HOUR_STRIP_BUDGET_ROW_COUNT; row++) {
+      const zone =
+        HOUR_STRIP_BUDGET_ZONES[row % HOUR_STRIP_BUDGET_ZONES.length];
+      presentHourStrip(zone, {
+        day,
+        coordinates: getZoneCoordinates(zone),
+        referenceZoneId: REFERENCE_ZONE,
+        language: "en",
+        hourFormat: HourFormat.H24,
+        ...TIME_OF_DAY_CONTEXT,
+        tailCellCount,
+      });
+    }
+  };
+  bench(
+    "present 50 hour strips when the strip tail grows",
+    () => {
+      presentFiftyStripsWithTail(0);
+      presentFiftyStripsWithTail(1);
     },
     options,
   );

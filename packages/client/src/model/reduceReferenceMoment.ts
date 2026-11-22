@@ -1,5 +1,4 @@
 import { Temporal } from "@/lib/temporal";
-import { getReferenceDay } from "./dayTrack";
 import {
   type LocationCommand,
   LocationCommandType,
@@ -65,11 +64,7 @@ function moveToDate(
         ...(meeting === undefined
           ? {}
           : {
-              meeting: moveMeetingRangeToDay(
-                meeting,
-                instant,
-                getReferenceDay({ ...state, reference }, now),
-              ),
+              meeting: moveMeetingRangeToDay(meeting, instant),
             }),
       },
     };

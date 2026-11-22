@@ -5,6 +5,7 @@ import {
   getHourFrameIndex,
   getReferenceDay,
   getReferenceZone,
+  getStripTailCellCount,
   getSunCoordinates,
 } from "@/model";
 import {
@@ -28,8 +29,10 @@ const MISSING_PROVIDER_MESSAGE =
  * Implements FR8, FR9, NFR-P1 of add-grid-hour-cells-and-hour-frame (D3).
  * Implements FR7 of add-grid-meeting-range-and-share (D5): `hasMeetingRange` ends the hour frame.
  * Implements FR12, FR13 of add-day-colouring-setting (D4): the day colouring and the hour frame colour.
+ * Implements FR6, FR9, NFR-P1 of move-meeting-range-and-extend-past-midnight (D4, D10): the strip tail
+ * counts in `cellCount`; `frozenTailCellCount` keeps the tail of a drag's press until the drag ends.
  */
-export function useHourGrid() {
+export function useHourGrid(frozenTailCellCount?: number) {
   const context = useContext(LocationsContext);
   if (context === null) throw new Error(MISSING_PROVIDER_MESSAGE);
   const { store, clock, minuteTick } = context;
@@ -42,6 +45,9 @@ export function useHourGrid() {
     const now = clock.instant();
     const day = getReferenceDay(state, now);
     const referenceZoneId = getReferenceZone(state);
+    const tailCellCount =
+      frozenTailCellCount ??
+      getStripTailCellCount(state.meeting, day, referenceZoneId);
     const strips = new Map<string, PresentedHourStrip>();
     for (const location of state.locations) {
       try {
@@ -55,6 +61,7 @@ export function useHourGrid() {
             hourFormat,
             dayColouring,
             workingHours,
+            tailCellCount,
           }),
         );
       } catch (error) {
@@ -64,12 +71,14 @@ export function useHourGrid() {
     return {
       strips,
       hourFrameIndex: getHourFrameIndex(day, getEffectiveInstant(state, now)),
-      cellCount: getHourCellCount(day),
+      cellCount: getHourCellCount(day) + tailCellCount,
+      tailCellCount,
       hasMeetingRange: state.meeting !== undefined,
       hourFrameColour: getHourFrameColour(dayColouring),
     };
   }, [
     state,
+    frozenTailCellCount,
     language,
     hourFormat,
     dayColouring,

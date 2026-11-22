@@ -35,7 +35,7 @@ Feature: The meeting range input in the Grid view
     When the user opens the meeting range input of "Almaty" and enters "10 am" and "12:30 pm"
     Then the meeting range is "10:00 AM–12:30 PM" in Almaty and the input is closed
 
-  @fix-grid-meeting-range-lock-and-layering @FR4 @refine-meeting-range-entry-and-handles @FR3 @UX3
+  @fix-grid-meeting-range-lock-and-layering @FR4 @refine-meeting-range-entry-and-handles @FR3 @UX3 @move-meeting-range-and-extend-past-midnight @FR3
   Scenario Outline: Wrong input keeps the input open
     Given the sample meeting in the Grid view, Russian interface
     When the user opens the meeting range input of "<city>" and enters "<start>" and "<end>"
@@ -46,9 +46,19 @@ Feature: The meeting range input in the Grid view
       | city     | start | end | error                                  |
       | Almaty   | abc   | 11  | Введите время в формате ЧЧ:ММ          |
       | Almaty   | 10    | 10  | Начало и окончание встречи совпадают   |
-      | Almaty   | 12    | 10  | Окончание встречи должно быть позже начала |
-      | Almaty   | 22    | 2   | Окончание встречи должно быть позже начала |
-      | New York | 13    | 14  | Встреча должна быть внутри дня         |
+      | New York | 13    | 14  | Начало встречи должно быть внутри дня |
+
+  @move-meeting-range-and-extend-past-midnight @FR3 @FR10
+  Scenario Outline: A meeting past midnight is typed
+    Given the Grid view with Almaty, Moscow, Kolkata and New York, Russian interface, 24-hour format and the meeting range 09:00–11:00 in Almaty on 2026-03-08
+    When the user opens the meeting range input of "<city>" and enters "<start>" and "<end>"
+    Then the meeting range is "23:00–02:00" in Almaty, the title is "Встреча · 3 ч" and the input is closed
+    And the date bar still shows 8 March
+
+    Examples:
+      | city   | start | end |
+      | Almaty | 23    | 2   |
+      | Moscow | 21    | 0   |
 
   @fix-grid-meeting-range-lock-and-layering @FR4
   Scenario: Esc closes the input without a change

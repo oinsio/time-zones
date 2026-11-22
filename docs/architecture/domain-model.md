@@ -59,7 +59,7 @@ classDiagram
 2. No two locations share the same canonical `timeZoneId` and `label`.
 3. Every `timeZoneId` is a valid, canonical IANA identifier.
 4. `reference.instant` is present if and only if `reference.mode` is `PINNED`.
-5. When `meeting` is set, `reference` is `PINNED` at `meeting.start`, `start < end`, and both ends lie on whole minutes inside the reference day.
+5. When `meeting` is set, `reference` is `PINNED` at `meeting.start`, `start < end`, both ends lie on whole minutes, the start lies inside the reference day and the end at most 24 hours after the start, so it may lie in the next day, which the grid shows as the strip tail ([ADR-0019](../adr/0019-meeting-range-past-the-reference-day-and-moved-whole.md)).
 
 ## Commands
 
@@ -76,8 +76,9 @@ Commands are serializable objects with a `type` enum. The reducer returns either
 | `SET_WALL_TIME(target, time, date)` | pins the moment for a wall-clock time in a location (`target`) on the local date the row showed | `LOCATION_NOT_FOUND`, `INVALID_TIME`, `INVALID_DATE`, `DATE_OUT_OF_RANGE` |
 | `SHIFT_TIME(duration)` | moves the moment by a duration (keyboard: ±1 h, ±15 min) | — |
 | `SET_MEETING_RANGE(start, end)` | sets or replaces the meeting range (grid cell tap or drag, meeting handles) and pins the moment to `start` | `INVALID_MEETING_RANGE` |
-| `SET_MEETING_RANGE_WALL_TIMES(target, date, start, end)` | sets the meeting range from wall-clock times in a location (`target`) on a local date and pins the moment to the start | `INVALID_TIME`, `INVALID_DATE`, `LOCATION_NOT_FOUND`, `INVALID_MEETING_RANGE`, `MEETING_START_EQUALS_END`, `MEETING_END_BEFORE_START` |
+| `SET_MEETING_RANGE_WALL_TIMES(target, date, start, end)` | sets the meeting range from wall-clock times in a location (`target`) on a local date and pins the moment to the start | `INVALID_TIME`, `INVALID_DATE`, `LOCATION_NOT_FOUND`, `INVALID_MEETING_RANGE`, `MEETING_START_EQUALS_END`; an end time earlier than the start time ends on the next date |
 | `CLEAR_MEETING_RANGE()` | removes the meeting range; the moment stays pinned | — |
+| `MOVE_MEETING_RANGE(move or start minutes)` | moves the whole range: start and end shift together, the length never changes, only the start is limited to the reference day; pins the moment to the new start; with no range it changes nothing | — |
 | `SET_DATE(date)` | changes the date, keeping the wall-clock time of the reference zone; moves a meeting range with it | — |
 | `SHIFT_DATE(days)` | previous / next day; moves a meeting range with it | — |
 | `RESET_TO_NOW()` | switches to `LIVE` and removes the meeting range | — |

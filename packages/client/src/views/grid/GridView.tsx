@@ -9,7 +9,9 @@ import { HourFrame } from "./HourFrame";
 import { HourStrip } from "./HourStrip";
 import { MeetingFrame } from "./MeetingFrame";
 import { MeetingHandleSlider } from "./MeetingHandle";
+import { MoveHandleSlider } from "./MoveHandle";
 import { useHourStripScroll } from "./useHourStripScroll";
+import { useMeetingFrameMove } from "./useMeetingFrameMove";
 import { useVisibleStripRows } from "./useVisibleStripRows";
 
 /**
@@ -25,21 +27,29 @@ import { useVisibleStripRows } from "./useVisibleStripRows";
  * Implements FR4 of fix-grid-meeting-range-lock-and-layering (D4): binds the meeting range input.
  * Implements FR7, NFR-P1 of refine-meeting-range-entry-and-handles (D5): the handles stand on the visible rows.
  * Implements FR13 of add-day-colouring-setting (D7): colours the hour frame.
+ * Implements FR6, FR9 of move-meeting-range-and-extend-past-midnight (D4, D10): the strip tail, frozen during a cell gesture.
+ * Implements FR15-FR19 of move-meeting-range-and-extend-past-midnight (D5-D8, D11): the move handle and the move by the frame.
  */
 export default function GridView() {
+  const [frozenTailCellCount, setFrozenTailCellCount] = useState<
+    number | undefined
+  >(undefined);
   const {
     strips,
     hourFrameIndex,
     cellCount,
+    tailCellCount,
     hasMeetingRange,
     hourFrameColour,
-  } = useHourGrid();
+  } = useHourGrid(frozenTailCellCount);
   const { moveTrack } = useTimeSelection();
   const {
     meeting,
     selectCells,
     selectFramedHour,
     moveHandle,
+    moveMeeting,
+    moveMeetingToStartMinutes,
     dragHandleTo,
     confirmMeetingRangeInput,
   } = useMeetingRange();
@@ -49,6 +59,24 @@ export default function GridView() {
     !hasMeetingRange,
   );
   const [isHandleDragging, setIsHandleDragging] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
+  const onMoveActiveChange = (isActive: boolean) => {
+    setIsMoving(isActive);
+    setIsHandleDragging(isActive);
+  };
+  const frameMinutes = meeting && {
+    startMinutes: meeting.span.startMinutes,
+    endMinutes: meeting.span.endMinutes,
+  };
+  const { isMovingRef } = useMeetingFrameMove({
+    panelElement,
+    frame: frameMinutes,
+    cellPitchPx: layout.cellPitchPx,
+    isScrollable: layout.isScrollable,
+    tailCellCount,
+    onMoveTo: moveMeetingToStartMinutes,
+    onActiveChange: onMoveActiveChange,
+  });
   const candidateRows = useVisibleStripRows(
     panelElement,
     strips.size,
@@ -62,6 +90,7 @@ export default function GridView() {
     candidateRows,
     cellPitchPx: layout.cellPitchPx,
     isScrollable: layout.isScrollable,
+    tailCellCount,
     onMoveHandle: moveHandle,
     onDragHandleTo: dragHandleTo,
     onDragActiveChange: setIsHandleDragging,
@@ -76,6 +105,13 @@ export default function GridView() {
           strip={strip}
           hourFrameIndex={meeting ? undefined : hourFrameIndex}
           meetingColumns={meetingColumns}
+          tailCellCount={tailCellCount}
+          meetingFrame={frameMinutes}
+          isFrameMoving={() => isMovingRef.current}
+          isMoving={isMoving}
+          onSelectionActiveChange={(isActive) =>
+            setFrozenTailCellCount(isActive ? tailCellCount : undefined)
+          }
           cellPitchPx={layout.cellPitchPx}
           isScrollable={layout.isScrollable}
           onMoveTrack={moveTrack}
@@ -86,12 +122,22 @@ export default function GridView() {
     },
     frame: meeting ? (
       <>
-        <MeetingFrame span={meeting.span} />
+        <MeetingFrame span={meeting.span} isMoving={isMoving} />
         <MeetingHandleSlider
           presented={meeting.handles.start}
           {...handleProps}
         />
         <MeetingHandleSlider presented={meeting.handles.end} {...handleProps} />
+        <MoveHandleSlider
+          presented={meeting.handles.move}
+          cellPitchPx={layout.cellPitchPx}
+          isScrollable={layout.isScrollable}
+          tailCellCount={tailCellCount}
+          isMoving={isMoving}
+          onMoveMeeting={moveMeeting}
+          onMoveMeetingTo={moveMeetingToStartMinutes}
+          onDragActiveChange={onMoveActiveChange}
+        />
       </>
     ) : (
       <HourFrame hourFrameIndex={hourFrameIndex} colour={hourFrameColour} />

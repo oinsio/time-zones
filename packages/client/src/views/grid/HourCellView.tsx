@@ -27,6 +27,10 @@ type HourCellViewProps = {
   isFramed: boolean;
   /** The cell lies outside the meeting range. */
   isDimmed: boolean;
+  /** The cell lies inside the meeting frame: a press moves the range. */
+  isInFrame?: boolean;
+  /** The range is being moved. */
+  isMoving?: boolean;
   onClick: () => void;
 };
 
@@ -37,11 +41,14 @@ type HourCellViewProps = {
  * Implements FR3, FR5, FR6 of add-grid-hour-cells-and-hour-frame (D6), moved from `HourStrip`.
  * Implements FR5, FR7 of add-grid-meeting-range-and-share (D6): click and dimming.
  * Implements FR12, NFR-A3 of add-day-colouring-setting (D4): the day colour and its digit class.
+ * Implements FR15 of move-meeting-range-and-extend-past-midnight (D6): the grab cursor inside the meeting frame.
  */
 export function HourCellView({
   cell,
   isFramed,
   isDimmed,
+  isInFrame = false,
+  isMoving = false,
   onClick,
 }: HourCellViewProps) {
   const digitClassName = `text-grid-cell leading-[1.1] ${isFramed ? "font-bold" : "font-medium"}`;
@@ -49,6 +56,9 @@ export function HourCellView({
     .filter((text) => text !== "")
     .join(" ");
   const dimmedClassName = isDimmed ? ` ${MEETING_DIMMED_OPACITY_CLASS}` : "";
+  const grabClassName = isInFrame
+    ? ` ${isMoving ? "cursor-grabbing" : "cursor-grab"}`
+    : "";
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: the strip is the keyboard control; its Enter key selects the framed hour
     <div
@@ -56,7 +66,7 @@ export function HourCellView({
       onClick={onClick}
       className={`flex h-11 flex-col items-center justify-center gap-px rounded-cell tabular-nums md:h-12 ${
         DAY_COLOUR_FOREGROUND_CLASS_NAMES[cell.dayColour]
-      }${dimmedClassName}`}
+      }${dimmedClassName}${grabClassName}`}
       style={{
         backgroundColor: `var(${DAY_COLOUR_VARIABLES[cell.dayColour]})`,
         boxShadow: getCellShadow(cell),

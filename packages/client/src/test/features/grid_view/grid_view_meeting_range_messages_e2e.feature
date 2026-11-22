@@ -1,5 +1,5 @@
 Feature: Refusal messages of the meeting range input in a real browser
-  Implements change refine-meeting-range-entry-and-handles.
+  Implements changes refine-meeting-range-entry-and-handles and move-meeting-range-and-extend-past-midnight.
   Each refusal of a typed meeting range is named in a message the page keeps accessible.
 
   Background:
@@ -9,7 +9,7 @@ Feature: Refusal messages of the meeting range input in a real browser
     And the stored locations are "Almaty", "Moscow", "Kolkata", "New York"
     And the screen is 1440 by 900 px for the locations
 
-  @refine-meeting-range-entry-and-handles @NFR-A1 @FR3
+  @refine-meeting-range-entry-and-handles @NFR-A1 @FR3 @move-meeting-range-and-extend-past-midnight @FR3
   Scenario Outline: No accessibility violations with each range message in the <theme> theme, <start> to <end> in <city>
     Given the locations screen uses the <theme> theme
     When the user opens the locations app
@@ -22,8 +22,6 @@ Feature: Refusal messages of the meeting range input in a real browser
     Examples:
       | theme | city     | start | end | message                                |
       | light | Almaty   | 10:00 | 10:00 | The meeting start and end are the same |
-      | light | Almaty   | 12:00 | 10:00 | The meeting must end after it starts   |
-      | light | New York | 13:00 | 14:00 | The meeting must lie within the day    |
+      | light | New York | 13:00 | 14:00 | The meeting must start within the day |
       | dark  | Almaty   | 10:00 | 10:00 | The meeting start and end are the same |
-      | dark  | Almaty   | 12:00 | 10:00 | The meeting must end after it starts   |
-      | dark  | New York | 13:00 | 14:00 | The meeting must lie within the day    |
+      | dark  | New York | 13:00 | 14:00 | The meeting must start within the day |

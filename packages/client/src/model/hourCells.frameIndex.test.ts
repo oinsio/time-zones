@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import { getReferenceDay } from "./dayTrack";
-import { getHourFrameIndex } from "./hourCells";
+import { getHourFrameIndex } from "./hourCellColumns";
 import { INITIAL_WORLD_CLOCK_STATE } from "./locations";
 
 const ALMATY = "Asia/Almaty";

@@ -19,6 +19,7 @@ Time Zones is a client-only, offline-first PWA. The architecture separates a vie
 | [ADR-0010](../adr/0010-device-time-location.md) | Device time location: a removable, stored kind of location |
 | [ADR-0012](../adr/0012-user-chosen-view.md) | User-chosen view: no automatic view by width, Cards by default |
 | [ADR-0013](../adr/0013-meeting-range-at-any-minute.md) | Meeting range at any minute: typed ends on any whole minute, handles keep the track step |
+| [ADR-0019](../adr/0019-meeting-range-past-the-reference-day-and-moved-whole.md) | Meeting range past the reference day, the strip tail, the move of the whole range |
 | [ADR-0014](../adr/0014-zone-rules-from-iana.md) | Zone rules compiled from IANA, POSIX future rules, `Intl.DateTimeFormat` wrapper, daily remote updates |
 
 ## Updates

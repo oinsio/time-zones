@@ -245,3 +245,54 @@ describe("presentHourStrip by the sun", () => {
     },
   );
 });
+
+// Verifies FR6, FR7, NFR-P1 of move-meeting-range-and-extend-past-midnight.
+describe("presentHourStrip with a strip tail", () => {
+  const presentWithTail = (zone: string, tailCellCount: number) =>
+    presentHourStrip(zone, {
+      ...CONTEXT,
+      language: "ru",
+      tailCellCount,
+    });
+
+  it("should present the cells of the day and of the tail", () => {
+    expect(presentWithTail("Asia/Almaty", 3).cells).toHaveLength(27);
+  });
+
+  it.each([
+    ["Asia/Almaty", 24],
+    ["Asia/Kolkata", 24],
+    ["Europe/Moscow", 26],
+  ])(
+    "should show the midnight cell of %s at column %i as МАР over 9",
+    (zone, column) => {
+      expect(presentWithTail(zone, 3).cells[column].midnightMarker).toEqual({
+        monthText: "МАР",
+        dayText: "9",
+      });
+    },
+  );
+
+  it("should label the first cell of the reference zone's row 0 and not mark it midnight", () => {
+    const [firstCell] = presentWithTail("Asia/Almaty", 3).cells;
+    expect([firstCell.hourText, firstCell.midnightMarker]).toEqual([
+      "0",
+      undefined,
+    ]);
+  });
+
+  it("should keep the presented cells of the day by identity when only the tail count changes", () => {
+    const shorter = presentWithTail("America/New_York", 1);
+    const longer = presentWithTail("America/New_York", 3);
+
+    expect(
+      shorter.cells.every((cell, column) => cell === longer.cells[column]),
+    ).toBe(true);
+  });
+
+  it("should return the same strip on a repeated call", () => {
+    expect(presentWithTail("Asia/Almaty", 3)).toBe(
+      presentWithTail("Asia/Almaty", 3),
+    );
+  });
+});

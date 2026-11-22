@@ -1,5 +1,6 @@
 // Verifies FR4 of fix-grid-meeting-range-lock-and-layering.
 // Verifies FR2, FR3 of refine-meeting-range-entry-and-handles.
+// Verifies FR3 of move-meeting-range-and-extend-past-midnight.
 import { act } from "@testing-library/react";
 import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -66,8 +67,6 @@ describe("useMeetingRange confirmMeetingRangeInput", () => {
     ["abc", "11", MeetingRangeInputOutcome.INVALID_START_TEXT, DATE, "Almaty"],
     ["9", "xyz", MeetingRangeInputOutcome.INVALID_END_TEXT, DATE, "Almaty"],
     ["10", "10", MeetingRangeInputOutcome.SAME_START_AND_END, DATE, "Almaty"],
-    ["12", "10", MeetingRangeInputOutcome.END_BEFORE_START, DATE, "Almaty"],
-    ["22", "2", MeetingRangeInputOutcome.END_BEFORE_START, DATE, "Almaty"],
     [
       "13",
       "14",
@@ -93,6 +92,31 @@ describe("useMeetingRange confirmMeetingRangeInput", () => {
 
       expect(outcome).toBe(expected);
       expect(span()).toEqual([540, 660]);
+    },
+  );
+
+  // FR3: an end earlier than the start ends the next day
+  it.each([
+    ["12", "10", [720, 2040]],
+    ["22", "2", [1320, 1560]],
+  ])(
+    "should confirm %s / %s as a range past midnight",
+    (startText, endText, expected) => {
+      const { result, span } = setup();
+      act(() => result.current.selectCells(9, 10));
+
+      let outcome: MeetingRangeInputOutcome | undefined;
+      act(() => {
+        outcome = result.current.confirmMeetingRangeInput(
+          almaty.id,
+          startText,
+          endText,
+          DATE,
+        );
+      });
+
+      expect(outcome).toBe(MeetingRangeInputOutcome.CLOSED);
+      expect(span()).toEqual(expected);
     },
   );
 

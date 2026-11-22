@@ -1,7 +1,8 @@
+// Verifies FR13 of move-meeting-range-and-extend-past-midnight: the handles lie below the meeting bar.
 // Verifies FR4, FR7, FR8, NFR-A2, NFR-R1 of refine-meeting-range-entry-and-handles: the handles in reach, in a real browser.
 import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
-import { DATE_BAR_SELECTOR } from "@/constants";
+import { DATE_BAR_SELECTOR, MEETING_BAR_SELECTOR } from "@/constants";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import { dismissOfflineReadyNotice } from "../../time_selection/steps/timeSelectionE2eHelpers";
 import { cellOf, centreOf, requireBox } from "./hourGridE2eHelpers";
@@ -39,18 +40,19 @@ When(
 );
 
 Then(
-  "both meeting handles lie fully inside the viewport and above the date bar",
+  "both meeting handles lie fully inside the viewport, below the meeting bar and above the date bar",
   async ({ locationsWorld }) => {
     const { page } = locationsWorld;
     const viewport = page.viewportSize();
     const barBox = await requireBox(page.locator(DATE_BAR_SELECTOR));
+    const meetingBarBox = await requireBox(page.locator(MEETING_BAR_SELECTOR));
     for (const which of ["start", "end"] as const) {
       await expect
         .poll(
           async () => {
             const box = await requireBox(handleItemOf(page, which));
             return (
-              box.y >= 0 &&
+              box.y >= meetingBarBox.y + meetingBarBox.height &&
               box.y + box.height <= barBox.y &&
               box.x >= 0 &&
               box.x + box.width <= (viewport?.width ?? 0)

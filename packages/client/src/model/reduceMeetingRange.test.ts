@@ -1,4 +1,5 @@
 // Verifies FR1, FR2, FR3, FR4 of add-grid-meeting-range-and-share.
+// Verifies FR5 of move-meeting-range-and-extend-past-midnight.
 import { describe, expect, it } from "vitest";
 import { LocationKind } from "./locationKind";
 import {
@@ -111,7 +112,7 @@ describe("SET_MEETING_RANGE", () => {
     ["2026-03-08 04:00", "2026-03-08T06:00:00Z"],
     ["2026-13-45T04:00:00Z", "2026-03-08T06:00:00Z"],
     ["2026-03-08T04:00:00Z", "not an instant Z"],
-    ["2026-03-08T17:00:00Z", "2026-03-08T19:15:00Z"],
+    ["2026-03-08T04:00:00Z", "2026-03-09T04:01:00Z"],
     ["2026-03-08 04:00", "2026-03-08T06:00:00Z"],
   ])("should refuse %s to %s", (start, end) => {
     expect(reduceLocations(baseState, setRange(start, end))).toEqual({
@@ -181,7 +182,7 @@ describe("date change", () => {
     expect(show(next)).toBe("2026-03-09T04:00:00Z/2026-03-09T06:00:00Z");
   });
 
-  it("should clamp the end of a whole day to the shorter next day", () => {
+  it("should keep the length of a whole day on the shorter next day", () => {
     const newYork = city("America/New_York", "New York");
     const state: WorldClockState = {
       ...baseState,
@@ -199,7 +200,21 @@ describe("date change", () => {
       now: NOW,
     });
 
-    expect(show(next)).toBe("2026-03-08T05:00:00Z/2026-03-09T04:00:00Z");
+    expect(show(next)).toBe("2026-03-08T05:00:00Z/2026-03-09T05:00:00Z");
+  });
+
+  // FR5: a meeting past midnight follows the date
+  it("should carry a meeting past midnight to the next day", () => {
+    const pastMidnight = reduceOk(
+      baseState,
+      setRange("2026-03-08T18:00:00Z", "2026-03-08T21:00:00Z"),
+    );
+    const next = reduceOk(pastMidnight, {
+      type: LocationCommandType.SHIFT_DATE,
+      days: 1,
+      now: NOW,
+    });
+    expect(show(next)).toBe("2026-03-09T18:00:00Z/2026-03-09T21:00:00Z");
   });
 
   it("should move it with SET_DATE", () => {

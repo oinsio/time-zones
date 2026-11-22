@@ -1,4 +1,5 @@
 // Verifies FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5): the date bar layer.
+// Verifies FR12, NFR-A3 of move-meeting-range-and-extend-past-midnight (D9): the sticky meeting bar.
 // Verifies FR13 of add-grid-meeting-range-and-share (D7): the meeting bar replaces the header.
 // Verifies FR1, UX3 of add-main-page-scaffold: fixed page regions.
 // Verifies FR8 of select-date-with-calendar-and-now (D7): the bottom bar.
@@ -7,8 +8,13 @@ import { render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import type { ReactNode } from "react";
 import { createInMemoryLocationRepository } from "@/adapters";
-import { DATE_BAR_SELECTOR } from "@/constants";
+import {
+  DATE_BAR_SELECTOR,
+  MEETING_BAR_SELECTOR,
+  SCROLL_PADDING_TOP_PROPERTY,
+} from "@/constants";
 import { LocationsProvider } from "@/controller";
+import { installResizeObserverFake } from "@/test/resizeObserverFake";
 import { MainPage } from "./MainPage";
 
 const NOTICE_TEXT = "a notice";
@@ -168,5 +174,87 @@ describe("MainPage with a meeting bar", () => {
       "bg-meeting-bar",
       "border-meeting",
     );
+  });
+});
+
+// FR12: the meeting bar stays at the top; NFR-A3: focus scrolling stops below it
+describe("MainPage with a sticky meeting bar", () => {
+  const HEADER_HEIGHT_PX = 85;
+  const TALLER_HEADER_HEIGHT_PX = 120;
+  let headerHeightPx = HEADER_HEIGHT_PX;
+  const renderBar = (meetingBar?: ReactNode) =>
+    render(
+      <LocationsProvider repository={createInMemoryLocationRepository()}>
+        <MainPage
+          notices={null}
+          bottomBar={<p>{BOTTOM_BAR_TEXT}</p>}
+          meetingBar={meetingBar}
+        />
+      </LocationsProvider>,
+    );
+  const readScrollPaddingTop = () =>
+    document.documentElement.style.getPropertyValue(
+      SCROLL_PADDING_TOP_PROPERTY,
+    );
+
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
+    headerHeightPx = HEADER_HEIGHT_PX;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      () => ({ height: headerHeightPx }) as DOMRect,
+    );
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("should make the header sticky on the meeting bar layer", () => {
+    renderBar(<h1>the meeting bar</h1>);
+
+    expect(screen.getByRole("banner")).toHaveClass("sticky", "z-meeting-bar");
+  });
+
+  it("should not make the normal header sticky", () => {
+    renderBar();
+
+    expect(screen.getByRole("banner").className).not.toMatch(
+      /sticky|z-meeting-bar/,
+    );
+  });
+
+  it("should locate the meeting bar by its selector only while it is shown", () => {
+    const { unmount } = renderBar(<h1>the meeting bar</h1>);
+    expect(document.querySelector(MEETING_BAR_SELECTOR)).toBe(
+      screen.getByRole("banner"),
+    );
+    unmount();
+
+    renderBar();
+
+    expect(document.querySelector(MEETING_BAR_SELECTOR)).toBeNull();
+  });
+
+  it("should set the scroll padding to the header height and follow its size", () => {
+    const fake = installResizeObserverFake();
+    renderBar(<h1>the meeting bar</h1>);
+    expect(readScrollPaddingTop()).toBe(`${HEADER_HEIGHT_PX}px`);
+
+    headerHeightPx = TALLER_HEADER_HEIGHT_PX;
+    fake.reportWidth(1);
+
+    expect(readScrollPaddingTop()).toBe(`${TALLER_HEADER_HEIGHT_PX}px`);
+  });
+
+  it("should clear the scroll padding when the meeting bar goes away", () => {
+    const { rerender } = renderBar(<h1>the meeting bar</h1>);
+
+    rerender(
+      <LocationsProvider repository={createInMemoryLocationRepository()}>
+        <MainPage notices={null} bottomBar={<p>{BOTTOM_BAR_TEXT}</p>} />
+      </LocationsProvider>,
+    );
+
+    expect(readScrollPaddingTop()).toBe("");
   });
 });

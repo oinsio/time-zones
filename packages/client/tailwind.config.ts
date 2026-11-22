@@ -18,7 +18,10 @@ const config: Config = {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
-      boxShadow: { lift: "var(--lift-shadow)" },
+      boxShadow: {
+        lift: "var(--lift-shadow)",
+        "meeting-lift": "var(--meeting-lift-shadow)",
+      },
       /** The content column of the page: 1120 px. Implements FR12 of redesign-cards-grid-and-day-palettes (D4). */
       maxWidth: { content: "70rem" },
       fontSize: {
@@ -65,6 +68,8 @@ const config: Config = {
         "grid-box": "2",
         "meeting-handle": "3",
         "grid-box-focused": "4",
+        "meeting-bar": "5",
+        "move-handle": "6",
         "page-bar": "10",
         "dragged-row": "15",
         "location-menu": "20",

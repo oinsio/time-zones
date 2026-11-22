@@ -59,15 +59,14 @@ export {
   withDeviceTimeZone,
 } from "./deviceTimeLocation";
 export { isLocationInDeviceTimeZone } from "./deviceTimeZone";
-// Implements FR1, FR2, FR5, FR6, FR8 of add-grid-hour-cells-and-hour-frame.
-export { getLargestSharePeriod } from "./hourCellPeriod";
 export {
   getHourCellCount,
   getHourCellStart,
-  getHourCells,
   getHourFrameIndex,
-  type HourCell,
-} from "./hourCells";
+} from "./hourCellColumns";
+// Implements FR1, FR2, FR5, FR6, FR8 of add-grid-hour-cells-and-hour-frame.
+export { getLargestSharePeriod } from "./hourCellPeriod";
+export { getHourCells, type HourCell } from "./hourCells";
 // Implements FR1, FR2, FR6 of show-local-time-and-date-on-location-cards.
 export { getLocalDateTime } from "./localDateTime";
 export { LocationKind } from "./locationKind";
@@ -101,13 +100,21 @@ export {
   getMeetingRangeOfCells,
   getMeetingSpan,
   isValidMeetingRange,
+  type MeetingEndHandle,
   MeetingHandle,
   type MeetingHandleLimits,
   type MeetingRange,
   type MeetingSpan,
   moveMeetingRangeToDay,
 } from "./meetingRange";
+export {
+  getLastStartMinutes,
+  getMeetingRangeAfterMove,
+  getMeetingRangeAtStartMinutes,
+  type MeetingRangeMove,
+} from "./meetingRangeMove";
 export { moveLocationInList } from "./moveLocation";
+export { getNextReferenceDay } from "./nextReferenceDay";
 export {
   getOffsetDifferenceMinutes,
   getReferenceOffsetMinutes,
@@ -134,6 +141,7 @@ export {
   type RowWallClockNote,
 } from "./rowNote";
 export { createStore, type ReduceResult, type Store } from "./store";
+export { getStripTailCellCount } from "./stripTail";
 // Implements FR1-FR4 of bind-day-periods-to-sun.
 export {
   getSolarDay,

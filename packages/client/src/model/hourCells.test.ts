@@ -6,6 +6,7 @@ import { DayPeriod } from "./dayPeriods";
 import { getReferenceDay } from "./dayTrack";
 import { getHourCells } from "./hourCells";
 import { INITIAL_WORLD_CLOCK_STATE } from "./locations";
+import { getStripTailCellCount } from "./stripTail";
 
 const ALMATY = "Asia/Almaty";
 const ALMATY_COORDINATES = { latitude: 43.3, longitude: 76.9 };
@@ -170,5 +171,92 @@ describe("getHourCells", () => {
 
     expect(fromMoscow).not.toBe(cellsOf(ALMATY));
     expect(fromMoscow.some((cell) => cell.midnightDate)).toBe(true);
+  });
+});
+
+// Verifies FR6, FR7, NFR-P1 of move-meeting-range-and-extend-past-midnight.
+describe("getStripTailCellCount", () => {
+  const at = (time: string, date = "2026-03-08") =>
+    Temporal.Instant.from(`${date}T${time}:00Z`);
+  // The sample day starts at 2026-03-07T19:00Z; Almaty 22:00 is 17:00Z.
+  it.each([
+    ["no range", undefined, 0],
+    ["09:00–11:00", [at("04:00"), at("06:00")], 0],
+    ["21:00–23:00", [at("16:00"), at("18:00")], 0],
+    ["22:00–23:30", [at("17:00"), at("18:30")], 1],
+    ["22:00–24:00", [at("17:00"), at("19:00")], 1],
+    ["22:00–00:15 of the next day", [at("17:00"), at("19:15")], 2],
+    ["23:00–02:00 of the next day", [at("18:00"), at("21:00")], 3],
+  ] as const)(
+    "should give the range %s a tail of %i cells",
+    (_name, range, count) => {
+      const meeting =
+        range === undefined ? undefined : { start: range[0], end: range[1] };
+      expect(getStripTailCellCount(meeting, ALMATY_DAY, ALMATY)).toBe(count);
+    },
+  );
+
+  it.each([
+    ["2026-03-07T12:00:00Z", "2026-03-08", 23],
+    ["2026-10-31T12:00:00Z", "2026-11-01", 25],
+  ])("should never exceed the %s next day's cells", (instant, _date, cells) => {
+    const day = getDayIn(NEW_YORK, instant);
+    const start = day.end.subtract({ minutes: 15 });
+    const meeting = { start, end: start.add({ hours: 24 }) };
+
+    expect(getStripTailCellCount(meeting, day, NEW_YORK)).toBeLessThanOrEqual(
+      cells,
+    );
+  });
+});
+
+describe("getHourCells with a strip tail", () => {
+  const withTail = (zone: string, tail: number) =>
+    getHourCells(zone, ALMATY_DAY, ALMATY, ALMATY_COORDINATES, tail);
+
+  it("should add the tail cells after the cells of the day", () => {
+    expect(withTail(ALMATY, 3)).toHaveLength(27);
+  });
+
+  it("should start the first tail cell at the end of the reference day", () => {
+    expect(withTail("Asia/Kolkata", 3)[24].start.equals(ALMATY_DAY.end)).toBe(
+      true,
+    );
+  });
+
+  it.each([
+    [ALMATY, 24],
+    ["Asia/Kolkata", 24],
+    ["Europe/Moscow", 26],
+  ])(
+    "should put the midnight cell of the tail of %s at column %i",
+    (zone, column) => {
+      const midnightColumns = withTail(zone, 3)
+        .map((cell, index) => (cell.midnightDate ? index : -1))
+        .filter((index) => index >= 0 && index >= 24);
+
+      expect(midnightColumns).toEqual([column]);
+      expect(withTail(zone, 3)[column].midnightDate?.toString()).toBe(
+        "2026-03-09",
+      );
+    },
+  );
+
+  it("should keep the cells of the day by identity when the tail grows", () => {
+    const shorter = withTail(NEW_YORK, 1);
+    const longer = withTail(NEW_YORK, 3);
+
+    expect(longer.slice(0, 25)).toEqual(shorter);
+    expect(
+      longer.slice(0, 25).every((cell, index) => cell === shorter[index]),
+    ).toBe(true);
+  });
+
+  it("should give the cells of the day the array of no tail when the tail is zero", () => {
+    expect(withTail(NEW_YORK, 0)).toBe(cellsOf(NEW_YORK));
+  });
+
+  it("should colour the tail cells by the day periods of the next day", () => {
+    expect(withTail(ALMATY, 3)[24].dayPeriod).toBe(DayPeriod.NIGHT);
   });
 });

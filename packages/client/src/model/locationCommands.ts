@@ -1,5 +1,6 @@
 import type { Coordinates } from "./coordinates";
 import type { Location } from "./locations";
+import type { MeetingRangeMove } from "./meetingRangeMove";
 import type { WallTimeTarget } from "./referenceMoment";
 
 /**
@@ -9,7 +10,7 @@ import type { WallTimeTarget } from "./referenceMoment";
  * Implements FR3, FR8 of add-time-sliders-to-location-cards (D1): SELECT_INSTANT.
  * Implements FR1, FR2, FR3, FR10 of set-home-location-and-show-differences (D1).
  * Implements FR2 of add-grid-meeting-range-and-share (D1): the meeting range commands.
- * Implements FR2 of refine-meeting-range-entry-and-handles (D2): MEETING_START_EQUALS_END, MEETING_END_BEFORE_START.
+ * Implements FR2 of refine-meeting-range-entry-and-handles (D2): MEETING_START_EQUALS_END.
  * Implements FR6, FR8 of add-city-coordinates-to-locations (D6, D7): ADD_LOCATION coordinates, FILL_LOCATION_COORDINATES.
  */
 
@@ -30,6 +31,7 @@ export enum LocationCommandType {
   SET_MEETING_RANGE = "SET_MEETING_RANGE",
   SET_MEETING_RANGE_WALL_TIMES = "SET_MEETING_RANGE_WALL_TIMES",
   CLEAR_MEETING_RANGE = "CLEAR_MEETING_RANGE",
+  MOVE_MEETING_RANGE = "MOVE_MEETING_RANGE",
 }
 
 export enum LocationErrorCode {
@@ -43,7 +45,6 @@ export enum LocationErrorCode {
   INVALID_TIME = "INVALID_TIME",
   INVALID_MEETING_RANGE = "INVALID_MEETING_RANGE",
   MEETING_START_EQUALS_END = "MEETING_START_EQUALS_END",
-  MEETING_END_BEFORE_START = "MEETING_END_BEFORE_START",
 }
 
 export type LocationCommand =
@@ -105,4 +106,6 @@ export type LocationCommand =
       /** "HH:MM", 24-hour. */
       end: string;
     }
-  | { type: LocationCommandType.CLEAR_MEETING_RANGE };
+  | { type: LocationCommandType.CLEAR_MEETING_RANGE }
+  /** Implements FR14, FR20 of move-meeting-range-and-extend-past-midnight (D3): moves the whole range. */
+  | { type: LocationCommandType.MOVE_MEETING_RANGE; target: MeetingRangeMove };

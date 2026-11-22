@@ -1,4 +1,5 @@
 // Verifies FR3, FR4, NFR-A1, UX2 of fix-grid-meeting-range-lock-and-layering.
+// Verifies FR3 of move-meeting-range-and-extend-past-midnight.
 // Verifies M3, FR6 of refine-meeting-range-entry-and-handles.
 // Verifies FR3, UX3 of refine-meeting-range-entry-and-handles.
 import { render, screen } from "@testing-library/react";
@@ -181,12 +182,8 @@ describe("MeetingRangeInput", () => {
       "Начало и окончание встречи совпадают",
     ],
     [
-      MeetingRangeInputOutcome.END_BEFORE_START,
-      "Окончание встречи должно быть позже начала",
-    ],
-    [
       MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY,
-      "Встреча должна быть внутри дня",
+      "Начало встречи должно быть внутри дня",
     ],
   ])(
     "should mark both fields for %s and keep the input open",
@@ -234,12 +231,8 @@ describe("MeetingRangeInput in English", () => {
       "The meeting start and end are the same",
     ],
     [
-      MeetingRangeInputOutcome.END_BEFORE_START,
-      "The meeting must end after it starts",
-    ],
-    [
       MeetingRangeInputOutcome.OUTSIDE_REFERENCE_DAY,
-      "The meeting must lie within the day",
+      "The meeting must start within the day",
     ],
   ])("should explain %s in English", async (outcome, text) => {
     render(

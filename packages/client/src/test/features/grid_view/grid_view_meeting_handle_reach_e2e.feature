@@ -7,14 +7,14 @@ Feature: Meeting handles stay in reach in a real browser
     And the view mode is Grid
     And the current time is "2026-03-08T07:30:00Z"
 
-  @refine-meeting-range-entry-and-handles @FR7 @NFR-R1
+  @refine-meeting-range-entry-and-handles @FR7 @NFR-R1 @move-meeting-range-and-extend-past-midnight @FR13
   Scenario Outline: Handles stay on screen in a long list at <width> by <height> px, <position>
     Given the stored locations are "Almaty", "Moscow", "Kolkata", "Kathmandu", "Tokyo", "New York", "Belgrade", "Lord Howe Island", "Chicago", "Adelaide", "St. Vincent", "London"
     And the screen is <width> by <height> px for the locations
     When the user opens the locations app
     And the user sets the sample meeting
     And the page is scrolled to its <position>
-    Then both meeting handles lie fully inside the viewport and above the date bar
+    Then both meeting handles lie fully inside the viewport, below the meeting bar and above the date bar
     And the topmost element at the centre of each handle is that handle
 
     Examples:
@@ -58,7 +58,7 @@ Feature: Meeting handles stay in reach in a real browser
       | start  |
       | end    |
 
-  @refine-meeting-range-entry-and-handles @FR4 @NFR-A2
+  @refine-meeting-range-entry-and-handles @FR4 @NFR-A2 @move-meeting-range-and-extend-past-midnight @FR4
   Scenario: Slider values off the track step
     Given the stored locations are "Almaty", "Moscow", "Kolkata", "New York"
     And the screen is 1440 by 900 px for the locations
@@ -67,7 +67,7 @@ Feature: Meeting handles stay in reach in a real browser
     And the user opens the meeting range input of "Almaty"
     And the user confirms "09:05" and "09:28" in the meeting range input of "Almaty"
     Then the start handle has the value 545 minutes, shown as "09:05", between 0 and 553
-    And the end handle has the value 568 minutes, shown as "09:28", between 560 and 1440
+    And the end handle has the value 568 minutes, shown as "09:28", between 560 and 1985
 
   @refine-meeting-range-entry-and-handles @FR4
   Scenario: Arrow keys bring an off-step end onto the track step

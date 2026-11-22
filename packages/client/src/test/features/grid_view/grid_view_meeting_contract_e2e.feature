@@ -22,3 +22,10 @@ Feature: Meeting range in every view that shows it
     When the user clears the meeting
     Then no meeting range is set
     And the hour frame is on column 9
+
+  @move-meeting-range-and-extend-past-midnight @view-contract @meeting-range @FR14
+  Scenario: Move a meeting range
+    When the user taps column 9 of "Almaty"
+    And the user presses "PageUp" on the end handle
+    And the user presses "PageUp" on the move handle
+    Then the meeting range is from "10:00" to "12:00"

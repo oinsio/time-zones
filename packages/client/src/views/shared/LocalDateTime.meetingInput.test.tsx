@@ -89,7 +89,7 @@ describe("LocalDateTime with a meeting range", () => {
     await userEvent.keyboard("{Enter}");
 
     expect(
-      screen.getByText("Встреча должна быть внутри дня"),
+      screen.getByText("Начало встречи должно быть внутри дня"),
     ).toBeInTheDocument();
   });
 

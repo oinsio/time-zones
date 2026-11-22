@@ -15,14 +15,14 @@ ADRs that bind this change, all read for it:
 
 One global decision changes. ADR-0011 says the range lies inside the reference day and rejects "a range across days" because it needs a multi-day grid. FR1 and FR6 lift that with a bounded tail instead of a multi-day grid, and FR14 adds a way to change the range that every future view must offer. That is a decision beyond this change, so it gets a new ADR that refines ADR-0011 (D12).
 
-Owners of the concepts this change touches (`docs/glossary/time-selection.md`):
+Owners of the concepts this change touches (`docs/glossary/time-selection.md` unless noted):
 - **Meeting range**: `MeetingRange`, `isValidMeetingRange`, `getMeetingHandleLimits`, `getMeetingRangeAfterHandleMove`, `getMeetingRangeAtHandleMinutes`, `moveMeetingRangeToDay` in `model/meetingRange.ts`; `reduceSetMeetingRange`, `followMeetingRange` in `model/reduceMeetingRange.ts`; `reduceMeetingRangeWallTimes.ts`; `useMeetingRange`.
 - **Reference day**: `ReferenceDay`, `getReferenceDay`. **Hour cell** / **hour strip**: `HourCell`, `getHourCells`, `getHourCellCount` in `model/hourCells.ts`; `presentHourStrip`; `HourStrip`, `useHourGrid`, `useHourStripScroll`, `HourGridCssVariable`.
 - **Track step** / **track move**: `TRACK_STEP_MINUTES`, `TrackMove`, `getMinutesAfterTrackStep`.
 - **Meeting frame**: `MeetingFrame`. **Meeting handle**: `MeetingHandle` (model enum), `MeetingHandleSlider`, `useMeetingHandleDrag`, `getMeetingHandleRow`, `useVisibleStripRows`.
 - **Meeting bar**: `MeetingBar`, `presentMeetingBar`, `useMeetingBar`; the header of `MainPage`.
 - **Meeting range input**: `confirmMeetingRangeInput`, `MeetingRangeInput`.
-- **Grab area** gesture constants: `REORDER_POINTER_ACTIVATION_DISTANCE_PX`, `REORDER_TOUCH_ACTIVATION_DELAY_MS`, `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX`.
+- **Grab area** (`docs/glossary/locations.md`, not `time-selection.md`): its *Code:* today names only "the place and zone line elements of `ZoneRowContent`". The thresholds the entry describes ("touch after a 250 ms hold, mouse after 4 px") live in `src/constants/reorder.ts` as `REORDER_POINTER_ACTIVATION_DISTANCE_PX`, `REORDER_TOUCH_ACTIVATION_DELAY_MS`, `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX`. D6 reuses them for the hold of a move, so task 1.3 adds them to the grab area's *Code:* as the one owner of the hold and drag thresholds.
 
 Every decision below extends one of these owners or adds an owner for a new glossary term (strip tail, meeting move, move handle).
 
@@ -57,9 +57,9 @@ The length is kept in absolute minutes, so a move across a clock change keeps th
 
 ### D4. The strip tail is more cells of the same kind (FR6–FR8)
 
-`model/hourCells.ts` gains `getStripTailCellCount(meetingRange, referenceDay)`: zero without a range; otherwise the index of the last cell the range overlaps, plus two, minus the cell count of the day, clamped to `[0, cells of the next reference day]`. `getHourCells` takes that count and appends the first cells of the next reference day, computed by the same code path as today's cells, so labels, colours, offset edges and day periods need no second implementation. The midnight rule changes in one place: "the reference zone's row has no midnight cell" becomes "column 0 of the reference zone's row is a plain cell".
+`model/hourCells.ts` gains `getStripTailCellCount(meetingRange, referenceDay)`: zero without a range; otherwise the index of the last cell the range overlaps, plus two, minus the cell count of the day, clamped to `[0, cells of the next reference day]`. `getHourCells` takes that count and appends the first cells of the next reference day, computed by the same code path as today's cells (`getHourCellStart` places a tail column at the next day's start, D10), so labels, colours, offset edges and day periods need no second implementation. The midnight rule changes in one place: "the reference zone's row has no midnight cell" becomes "column 0 of the reference zone's row is a plain cell".
 
-`useHourGrid` sets `HourGridCssVariable.CELL_COUNT` to the full count and derives the pitch from it with the existing rule (`MIN_FITTING_HOUR_CELL_PX`, `HOUR_CELL_SCROLL_WIDTH_PX`). The frame and the handles already place themselves by minutes × pitch, so they follow.
+`useHourGrid` (controller) returns `cellCount` as the cell count of the day plus the tail; today it returns `getHourCellCount(day)`. Nothing else changes in the width rule: `useHourStripScroll` already passes `cellCount` to `getHourCellLayout` (`views/grid/hourCellLayout.ts`, the owner of `MIN_FITTING_HOUR_CELL_PX` / `HOUR_CELL_SCROLL_WIDTH_PX`) and writes `HourGridCssVariable.CELL_COUNT` and `CELL_PITCH`. The frame and the handles already place themselves by minutes × pitch, so they follow.
 
 Presentation is incremental (NFR-P1): `presentHourStrip` keeps the cells of the reference day by identity when only the tail count changes.
 
@@ -73,9 +73,11 @@ Presentation is incremental (NFR-P1): `presentHourStrip` keeps the cells of the 
 
 `useMeetingFrameMove` listens on the hour strips, like `useHourCellSelection`, and decides by the pointer's column whether a press is inside the frame:
 - mouse or pen: a movement of `REORDER_POINTER_ACTIVATION_DISTANCE_PX` starts a move; without it the release is a click and `useHourCellSelection` handles the tap as today;
-- finger: `REORDER_TOUCH_ACTIVATION_DELAY_MS` within `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX` starts a move; earlier movement is left to native scrolling.
+- finger: `REORDER_TOUCH_ACTIVATION_DELAY_MS` within `REORDER_TOUCH_ACTIVATION_TOLERANCE_PX` starts a move, on scrolling and on fitting strips alike; earlier movement keeps today's meaning: native scrolling where the strips scroll, a cell drag where all cells fit.
 
-The reorder constants are reused because the owner asked for "the same gesture as the cards"; one value for both. `useHourCellSelection` gets one new guard: a mouse or pen press inside the frame does not begin a cell drag. The hold disables text selection and the iOS callout on the strips with the classes the grab area already uses.
+The reorder constants are reused because the owner asked for "the same gesture as the cards"; one value for both. `useHourCellSelection` gets two new guards: a mouse or pen press inside the frame does not begin a cell drag; and on fitting strips a finger press inside the frame stays a candidate cell drag until either the finger enters another cell (a cell drag, as today, and the pending hold is cancelled) or the hold fires (the move starts and the cell selection drops its anchor, so it sets nothing for that press). The cells are at least 32 px wide where they fit, so the 5 px tolerance never reaches another cell; a finger that moves more than 5 px inside its cell cancels the hold and only a later cell change starts a cell drag. The hold disables text selection and the iOS callout on the strips with the classes the grab area already uses.
+
+**Stopping native panning after the hold.** On scrolling strips the cells carry `touch-pan-x touch-pan-y` (`HourStrip.tsx`), so a Pointer Events drag alone would lose the finger: the first horizontal move after the hold is claimed as a scroll and ends in `pointercancel`. The handles avoid this with `touch-none`, which the strips cannot take without losing the swipe. So a finger move runs on the touch path of the drag core (D5) on every engine — the same `touchstart` / `touchmove` / `touchend` handlers the core already has as its fallback without Pointer Events, not a second copy. `useMeetingFrameMove` registers its `touchmove` listener on the strips with `{ passive: false }` (the existing `TRACK_TOUCH_MOVE_LISTENER_OPTIONS`); before the hold fires it calls nothing, so a swipe still scrolls natively; once the hold has fired it calls `preventDefault()` on every `touchmove` until the move ends, so the browser does not pan and no `pointercancel` arrives. The listener is non-passive only on the strips while a meeting range is set, never on the page, so page scrolling keeps its passive listeners. The order with the cell selection on fitting strips stays as above: a cell change before the hold is a cell drag and cancels the hold.
 
 The frame itself keeps `pointer-events: none` on its border; the cells under it receive the events, so nothing new can block a row control.
 
@@ -97,17 +99,25 @@ in `views/grid/moveHandlePlacement.ts`. `useMoveHandlePlacement` measures the tw
 
 With today's sizes (bar 85 px, panel border 1 px, frame inset 4 px, frame line 3 px) the two axes are 7 px apart and the resting handle ends 0.5 px above the first row header: the numbers of `docs/design/proposals/meeting-range/move-meeting.md`. They are consequences, not constants: the code holds only the grip size.
 
+**Layer.** The move handle takes a new page layer `move-handle` (6) in the `zIndex` map of `tailwind.config.ts`, one above the meeting bar's `meeting-bar` (5, D9): its half that reaches over the bar is painted on top of the bar. 6 stays below `page-bar` (10), `location-menu` (20) and `dialog` (30), so "Grid layers stay under the page bars and dialogs" holds; `dragged-row` (15) lies above it, but rows cannot be dragged while a meeting range is set ("Row controls are locked while a meeting range is set"). The start and end handles keep `meeting-handle` (3) and so pass under the bar, which is why FR13 places them only on rows below it. No ancestor of the handle forms a stacking context (the panel has no z-index, transform or `isolate`), so the fixed handle competes at the page level.
+
 Risk: an ancestor with a transform would make `fixed` relative to it. The sortable list applies transforms to rows, not to the panel; the E2E position scenarios (M5) guard this.
 
 ### D9. The sticky meeting bar (FR12, FR13, NFR-A3, NFR-R2)
 
-`MainPage` gives its header `sticky top-0` and the page-bar layer (`z-page-bar`, the layer of the date bar) while it shows the meeting bar. A new `MEETING_BAR_SELECTOR` beside `DATE_BAR_SELECTOR` lets `useVisibleStripRows` treat the bar's bottom as the top of the visible area (FR13) and `useMoveHandlePlacement` read its rectangle.
+`MainPage` gives its header `sticky top-0` and a new page layer `meeting-bar` (`z-meeting-bar`, 5, added to the `zIndex` map of `tailwind.config.ts`) while it shows the meeting bar: above every grid layer (1–4), below the move handle (6, D8), the date bar (`page-bar`, 10), an open location menu (20) and a dialog (30). It does not take `page-bar`, because then the move handle would have to lie above the date bar's layer to rest on the bar's line. A new `MEETING_BAR_SELECTOR` beside `DATE_BAR_SELECTOR` lets `useVisibleStripRows` treat the bar's bottom as the top of the visible area (FR13) and `useMoveHandlePlacement` read its rectangle.
 
-Focus under the bar (NFR-A3): while the bar is sticky, the scrolling element gets `scroll-padding-top` equal to the bar's measured height, so the browser's own focus scrolling stops below it. One effect in `useMeetingBar` sets and clears it.
+Focus under the bar (NFR-A3): while the bar is sticky, the scrolling element gets `scroll-padding-top` equal to the bar's measured height, so the browser's own focus scrolling stops below it. This is layout state of the page, so it stays out of the controller: `useMeetingRange`/`useMeetingBar` only decide whether there is a bar. One effect in `MainPage` (`src/app/`), the component that owns the header, measures the header with the `ResizeObserver` pattern of `useHourStripScroll`. It sets the padding while `meetingBar` is given and clears it when it is not.
 
-### D10. Taps and drags on the tail (FR9)
+### D10. Taps and drags on the tail (FR1, FR9)
 
 `useHourCellSelection` ignores a press that starts on a tail cell and, during a cell drag, freezes the tail count of the press (a view-state override passed to `useHourGrid`), so cells never disappear under the pointer. The freeze ends with the drag.
+
+The range of a cell drag is built in the model, not in the view. Today `getMeetingRangeOfCells` in `model/meetingRange.ts` clamps the end to `day.end`, and `useMeetingRange` (`selectCells`) builds every cell-drag range through it, so a drag onto the tail would end at 24:00. It changes in two ways:
+- the end of the highest cell is clamped to the end of the day that cell belongs to: the reference day for its own columns, the next reference day for tail columns (column ≥ `getHourCellCount(day)`); `getHourCellStart` places a tail column at the next day's start plus its hours into the tail, so a reference day that is not a whole number of hours (Lord Howe) still starts its tail at midnight;
+- the end is limited to `start + MEETING_RANGE_MAX_MINUTES` (D1), so a drag from column 0 to 26 gives 00:00–24:00 instead of an invalid range.
+
+The low column is always a column of the reference day, because the press is (the guard above). The other reader of `getHourCellStart` past the last column, `buildFlags` in `model/workingTime.ts`, clamps that value to `day.end`, so it keeps its results.
 
 ### D11. The lifted look (FR19, UX3)
 
@@ -115,13 +125,16 @@ Focus under the bar (NFR-A3): while the bar is sticky, the scrolling element get
 
 ### D12. A new ADR refines ADR-0011
 
-`docs/adr/0019-meeting-range-past-the-reference-day-and-moved-whole.md`, status Proposed until the owner accepts it: the start inside the reference day, the 24-hour limit, the strip tail as the bounded alternative to a multi-day grid, the move as a command every view with a meeting range offers, and the rejected alternatives of this design. ADR-0011 gets a "Refined by" line.
+`docs/adr/0019-meeting-range-past-the-reference-day-and-moved-whole.md`, in the format of `.claude/rules/adr.md`: the start inside the reference day, the 24-hour limit, the strip tail as the bounded alternative to a multi-day grid, the move as a command every view with a meeting range offers, and the rejected alternatives of this design. ADR-0011 gets a "Refined by ADR-0019" line under its status, as it already has one for ADR-0013, and the ADR list of `CLAUDE.md` gains "0019 meeting range past the reference day".
+
+This design does not settle the global decision; the ADR does. The implement stage may not write `docs/adr/` or `CLAUDE.md`, so it writes the three edits as a patch (handoff H1, `tasks.md`). The ADR is `Accepted` in the patch, because the owner applies the patch to the branch before the merge, and that application is the acceptance. Until then the code on the branch and ADR-0011 disagree, and the pull request names that. The ADR table of `docs/architecture/overview.md` is an architecture doc, so it is an ordinary task, not part of the patch.
 
 ### D13. Where each test lives
 
 - Unit (Vitest, TDD): `meetingRange`, `meetingRangeMove`, both reducers, `hourCells` (tail count and cells), `moveHandlePlacement`, `meetingHandles` presenter.
-- Unit BDD: the model scenarios of `meeting-range`; the tail, sliders, messages, gestures and work bounds of `grid-view` that need no real layout.
-- BDD E2E: the sticky bar, handle positions at scroll offsets, real mouse and touch gestures, focus not obscured, axe-core, widths, screenshots.
+- Unit BDD: the model scenarios of `meeting-range`; the tail cells, typed messages, gestures that need no real layout, the moving state of the rows and the work bounds of `grid-view`.
+- Benchmark (`vitest bench`, non-blocking CI `benchmark` job, ADR-0008): a move step over 50 rows in `meetingRange.bench.ts` and a growing tail over 50 strips in `hourStrip.bench.ts` (NFR-P1); never a timing assertion.
+- BDD E2E (`bdd-unit.md`: keyboard, aria and focus need a real browser): the slider values, keys and Tab order of all three handles, as the start and end handle sliders already are in `grid_view_meeting_handles_e2e.feature`; the sticky bar, handle positions at scroll offsets, real mouse and touch gestures, focus not obscured, axe-core, widths, screenshots.
 
 ## Consequences
 

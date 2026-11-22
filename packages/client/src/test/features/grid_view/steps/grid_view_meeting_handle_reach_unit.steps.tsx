@@ -1,9 +1,9 @@
-// Verifies FR7, FR8, NFR-P1 of refine-meeting-range-entry-and-handles.
+// Verifies FR7, FR8, NFR-P1 of refine-meeting-range-entry-and-handles; FR13 of move-meeting-range-and-extend-past-midnight.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { act, fireEvent, screen } from "@testing-library/react/pure";
 import { expect, vi } from "vitest";
-import { HourGridCssVariable } from "@/constants";
+import { HourGridCssVariable, MEETING_BAR_SELECTOR } from "@/constants";
 import { MeetingHandle } from "@/model";
 import { KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { getMeetingHandleRow } from "@/views/grid";
@@ -34,6 +34,7 @@ const FIRST_STRIP_TOP_PX = 60;
 const STRIP_HEIGHT_PX = 38;
 const STRIP_PITCH_PX = 50;
 const DATE_BAR_TOP_PX = 400;
+const MEETING_BAR_RECT = { bottom: 0 } as DOMRect;
 const GRAB_X_PX = 500;
 const TAPPED_COLUMN = 14;
 const SCROLL_TO_FIRST_CANDIDATE_RUN_PX = 121;
@@ -51,6 +52,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const installGeometry = () => {
     vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
       function (this: Element) {
+        if (this.matches(MEETING_BAR_SELECTOR)) return MEETING_BAR_RECT;
         if (this.hasAttribute("data-date-bar")) {
           dateBarReads += 1;
           return { top: DATE_BAR_TOP_PX } as DOMRect;
@@ -108,13 +110,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     vi.restoreAllMocks();
   });
 
-  // @refine-meeting-range-entry-and-handles @FR7
+  // @refine-meeting-range-entry-and-handles @FR7 @move-meeting-range-and-extend-past-midnight @FR13
   f.ScenarioOutline(
     "Handle rows among the visible rows",
     ({ Given, When, Then }, variables) => {
       let endRow = 0;
       let startRow = 0;
-      Given("the candidate rows are rows <first> to <last> of the list", () => {
+      Given("candidate rows <first> to <last> below the meeting bar", () => {
         candidateRows = {
           firstRow: Number(variables.first),
           lastRow: Number(variables.last),

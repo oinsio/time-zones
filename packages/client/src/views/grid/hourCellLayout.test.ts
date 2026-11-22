@@ -1,5 +1,6 @@
 // Verifies NFR-R1, NFR-R2 of add-grid-hour-cells-and-hour-frame (D5).
 // Verifies FR17 of redesign-cards-grid-and-day-palettes: 3 px between cells, 38 px cells when the strip scrolls.
+// Verifies FR6 of move-meeting-range-and-extend-past-midnight.
 import { describe, expect, it } from "vitest";
 import { HOUR_CELL_GAP_PX, HOUR_CELL_SCROLL_WIDTH_PX } from "@/constants";
 import { getHourCellLayout } from "./hourCellLayout";
@@ -14,6 +15,9 @@ describe("getHourCellLayout", () => {
     [262, 24, 41, true],
     [400, 24, 41, true],
     [0, 24, 41, true],
+    // FR6: a strip tail makes 27 cells (the sample of move-meeting-range-and-extend-past-midnight)
+    [864, 27, 32, false],
+    [863, 27, 41, true],
   ])(
     "should give a strip of %i px with %i cells the pitch %f, scrollable %s",
     (stripWidthPx, cellCount, pitch, isScrollable) => {

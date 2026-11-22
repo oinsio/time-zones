@@ -1,9 +1,11 @@
 // Verifies NFR-P1 of add-grid-meeting-range-and-share.
+// Verifies NFR-P1 of move-meeting-range-and-extend-past-midnight.
 import i18n from "i18next";
 import { bench, describe } from "vitest";
 import { Temporal } from "@/lib/temporal";
 import {
   getMeetingRangeAfterHandleMove,
+  getMeetingRangeAfterMove,
   getReferenceDay,
   INITIAL_WORLD_CLOCK_STATE,
   MeetingHandle,
@@ -49,6 +51,21 @@ describe("meeting range", () => {
         MeetingHandle.END,
         TrackMove.NEXT_STEP,
       );
+      for (let row = 0; row < HOUR_STRIP_BUDGET_ROW_COUNT; row++) {
+        presentLocationMeetingRange(
+          HOUR_STRIP_BUDGET_ZONES[row % HOUR_STRIP_BUDGET_ZONES.length],
+          moved,
+          REFERENCE_ZONE,
+          presentation,
+        );
+      }
+    },
+    options,
+  );
+  bench(
+    "present the spans of 50 rows after a move step",
+    () => {
+      const moved = getMeetingRangeAfterMove(MEETING, day, TrackMove.NEXT_STEP);
       for (let row = 0; row < HOUR_STRIP_BUDGET_ROW_COUNT; row++) {
         presentLocationMeetingRange(
           HOUR_STRIP_BUDGET_ZONES[row % HOUR_STRIP_BUDGET_ZONES.length],

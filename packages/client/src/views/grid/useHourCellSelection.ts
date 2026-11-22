@@ -1,8 +1,20 @@
 import { type PointerEvent, useRef } from "react";
 import { TOUCH_POINTER_TYPE } from "@/constants";
+import {
+  isInsideMeetingFrame,
+  type MeetingFrameMinutes,
+} from "./meetingFrameHit";
 
 type HourCellSelectionOptions = {
   cellCount: number;
+  /** The cells that follow the reference day's cells: the strip tail, where no gesture starts. */
+  tailCellCount: number;
+  /** The meeting frame: a mouse or pen press inside it starts no cell drag (it moves the range). */
+  meetingFrame?: MeetingFrameMinutes;
+  /** The whole range is being moved by a held finger: the cells it touches set nothing. */
+  isFrameMoving?: () => boolean;
+  /** Called with `true` when a press on a cell of the day begins a gesture and with `false` when it ends. */
+  onActiveChange: (isActive: boolean) => void;
   cellPitchPx: number;
   /** The strips scroll horizontally: a finger swipe scrolls and selects nothing. */
   isScrollable: boolean;
@@ -16,9 +28,17 @@ type HourCellSelectionOptions = {
  * drag starts, so a plain click still lands on its cell. A click that ends a
  * drag is ignored.
  * Implements FR5, FR6 of add-grid-meeting-range-and-share (D6).
+ * Implements FR9 of move-meeting-range-and-extend-past-midnight (D10): a press or tap on a tail cell
+ * changes nothing, and `onActiveChange` lets the grid freeze the tail while a gesture lasts.
+ * Implements FR15, FR16 of move-meeting-range-and-extend-past-midnight (D6): a mouse or pen press inside
+ * the frame starts no cell drag, and a finger held inside it starts the move and sets no range.
  */
 export function useHourCellSelection({
   cellCount,
+  tailCellCount,
+  meetingFrame,
+  isFrameMoving,
+  onActiveChange,
   cellPitchPx,
   isScrollable,
   onSelectCells,
@@ -33,7 +53,9 @@ export function useHourCellSelection({
     const column = Math.floor((clientX - stripLeftPx) / cellPitchPx);
     return Math.min(Math.max(column, 0), cellCount - 1);
   };
+  const dayCellCount = cellCount - tailCellCount;
   const endGesture = () => {
+    if (anchorColumn.current !== undefined) onActiveChange(false);
     anchorColumn.current = undefined;
   };
 
@@ -44,12 +66,32 @@ export function useHourCellSelection({
       const isScrollingFinger =
         event.pointerType === TOUCH_POINTER_TYPE && isScrollable;
       if (isScrollingFinger) return;
-      anchorColumn.current = getColumnAt(event.clientX);
-      lastColumn.current = anchorColumn.current;
+      const stripLeftPx = stripRef.current?.getBoundingClientRect().left ?? 0;
+      const isMousePress = event.pointerType !== TOUCH_POINTER_TYPE;
+      if (
+        isMousePress &&
+        isInsideMeetingFrame(
+          meetingFrame,
+          stripLeftPx,
+          cellPitchPx,
+          event.clientX,
+        )
+      ) {
+        return;
+      }
+      const pressedColumn = getColumnAt(event.clientX);
+      if (pressedColumn >= dayCellCount) return;
+      anchorColumn.current = pressedColumn;
+      lastColumn.current = pressedColumn;
+      onActiveChange(true);
     },
     onPointerMove: (event: PointerEvent<HTMLElement>) => {
       const anchor = anchorColumn.current;
       if (anchor === undefined) return;
+      if (isFrameMoving?.()) {
+        endGesture();
+        return;
+      }
       const column = getColumnAt(event.clientX);
       if (column === lastColumn.current) return;
       if (!hasDragged.current) {
@@ -62,6 +104,7 @@ export function useHourCellSelection({
     onPointerUp: endGesture,
     onPointerCancel: endGesture,
     onCellClick: (column: number) => {
+      if (column >= dayCellCount) return;
       if (hasDragged.current) {
         hasDragged.current = false;
         return;

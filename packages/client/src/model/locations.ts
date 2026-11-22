@@ -19,6 +19,7 @@ import { reduceLocationCoordinates } from "./reduceLocationCoordinates";
 import {
   followMeetingRange,
   reduceClearMeetingRange,
+  reduceMoveMeetingRange,
   reduceSetMeetingRange,
 } from "./reduceMeetingRange";
 import { reduceMeetingRangeWallTimes } from "./reduceMeetingRangeWallTimes";
@@ -186,5 +187,7 @@ function reduceCommand(
       return reduceMeetingRangeWallTimes(state, command);
     case LocationCommandType.CLEAR_MEETING_RANGE:
       return reduceClearMeetingRange(state);
+    case LocationCommandType.MOVE_MEETING_RANGE:
+      return reduceMoveMeetingRange(state, command);
   }
 }

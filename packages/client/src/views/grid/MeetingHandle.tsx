@@ -7,7 +7,7 @@ import {
 } from "react";
 import { HourGridCssVariable, MINUTES_PER_HOUR } from "@/constants";
 import type { TrackMove } from "@/controller";
-import type { MeetingHandle } from "@/model";
+import type { MeetingEndHandle } from "@/model";
 import type { PresentedMeetingHandle } from "@/presenter";
 import { getTrackMoveForKey } from "@/views/shared";
 import {
@@ -25,8 +25,10 @@ type MeetingHandleViewProps = {
   rowNumber: number;
   cellPitchPx: number;
   isScrollable: boolean;
-  onMoveHandle: (handle: MeetingHandle, move: TrackMove) => void;
-  onDragHandleTo: (handle: MeetingHandle, minutes: number) => void;
+  /** The cells of the strip tail; a change during a drag keeps the dragged end in place. */
+  tailCellCount?: number;
+  onMoveHandle: (handle: MeetingEndHandle, move: TrackMove) => void;
+  onDragHandleTo: (handle: MeetingEndHandle, minutes: number) => void;
   /** Called with `true` when a drag starts and with `false` when it ends. */
   onDragActiveChange: (isDragging: boolean) => void;
 };
@@ -78,6 +80,7 @@ const MeetingHandleView = memo(function MeetingHandleView({
   rowNumber,
   cellPitchPx,
   isScrollable,
+  tailCellCount,
   onMoveHandle,
   onDragHandleTo,
   onDragActiveChange,
@@ -90,6 +93,7 @@ const MeetingHandleView = memo(function MeetingHandleView({
     handleElement: itemElement,
     cellPitchPx,
     isScrollable,
+    tailCellCount,
     valueMinutes: presented.valueMinutes,
     onDragHandleTo,
     onDragActiveChange,

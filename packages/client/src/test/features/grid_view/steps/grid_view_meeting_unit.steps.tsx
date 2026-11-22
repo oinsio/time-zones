@@ -1,4 +1,5 @@
 // Verifies FR5, FR7, FR8, FR13, FR15 of add-grid-meeting-range-and-share.
+// Verifies FR9 of move-meeting-range-and-extend-past-midnight.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
 import { fireEvent, screen } from "@testing-library/react/pure";
@@ -36,6 +37,10 @@ const RUSSIAN_CITY_NAMES: Record<string, string> = {
   Kolkata: "Калькутта",
   "New York": "Нью-Йорк",
 };
+const TAIL_RANGE_COLUMN = 22;
+const TAIL_RANGE_END_PRESSES = 2;
+const TAIL_COLUMN = 24;
+const TAIL_ROW_CELL_COUNT = 25;
 const NO_MARK = "no day shift mark";
 const CLEAR_BUTTON = "Clear meeting";
 const FIRST_FRAME_COLUMNS = "9-10";
@@ -240,4 +245,30 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(hourFrameColumn()).toBe(9),
     );
   });
+
+  // @move-meeting-range-and-extend-past-midnight @FR9
+  f.Scenario(
+    "A tap on a tail cell changes nothing",
+    ({ Given, When, Then, And }) => {
+      Given(
+        "the Grid view with the meeting range 22:00–23:30 in Almaty on 2026-03-08, one tail cell",
+        async () => {
+          await openGrid();
+          tapColumn("Almaty", TAIL_RANGE_COLUMN);
+          pressOnHandle("endHandle", "ArrowRight", TAIL_RANGE_END_PRESSES);
+        },
+      );
+      When("the user taps column 24 of Moscow", () => {
+        tapColumn("Moscow", TAIL_COLUMN);
+      });
+      Then("the meeting range is 22:00–23:30 in Almaty", () =>
+        expect(spanOf("Almaty")).toBe("22:00–23:30"),
+      );
+      And("every row has 25 hour cells", () =>
+        expect(
+          stripOf("Moscow").querySelectorAll("[data-hour-cell]"),
+        ).toHaveLength(TAIL_ROW_CELL_COUNT),
+      );
+    },
+  );
 });
