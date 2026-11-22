@@ -115,7 +115,7 @@ Each run used `npx stryker run --mutate …` from `packages/client`, one at a ti
 - Fix: Add a step to `main_page/steps/` (for example `When the offline-ready notice is dismissed`) that calls the existing `dismissOfflineReadyNotice(page)` from `packages/client/src/test/features/time_selection/steps/timeSelectionE2eHelpers.ts:24`. Put it after "When the user opens the locations app" in the first outline, and after "the user sets the sample meeting" in the second. Then re-approve the ten `README-screenshot-*` baselines with `--update-snapshots`. The H1 patch's paths do not change.
 - Fix risk: The ten baselines must be regenerated, and each scenario may wait up to `OFFLINE_NOTICE_WAIT_MS` (1.5 s, `timeSelectionE2eHelpers.ts:17`). The helper first awaits `navigator.serviceWorker.ready` and ignores a missing button, so it cannot fail a run where the notice does not appear. No other baseline is affected.
 - Status: fixed
-- Resolution: added step "the offline-ready notice is dismissed" (main_page_readme_screenshots_e2e.steps.ts, English and Russian button) to both outlines, deleted and regenerated the ten README-screenshot baselines without the toast.
+- Resolution: added step "the offline-ready notice is dismissed" (main_page_readme_screenshots_e2e.steps.ts, passing the seeded language's `app.dismiss` to the shared dismissOfflineReadyNotice helper, no second copy of the wait or the text) to both outlines, deleted and regenerated the ten README-screenshot baselines without the toast.
 
 ### R3 — WARNING — "The menu lies over the date bar" can pass without any item over the date bar
 - Location: `packages/client/src/test/features/locations/locations_menu_placement_e2e.feature:90`
