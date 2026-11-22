@@ -15,6 +15,8 @@ import {
 
 const HOUR_FORMAT_GROUP_NAME = /^(Hour format|Формат времени)$/;
 const COLLAPSED = "collapsed";
+/** Centered whatever the click scrolled before: one position for the approved screenshots. */
+const LANGUAGE_LIST_SCROLL_BLOCK: ScrollLogicalPosition = "center";
 const CURRENT_LANGUAGE_NAME = "English";
 /** Text without spacing: the gap between emoji and name comes from CSS, not from the text. */
 const compactText = (text: string | null) => (text ?? "").replace(/\s+/g, "");
@@ -68,6 +70,12 @@ When(
     if (state !== COLLAPSED) {
       await languageButton(locationsWorld.page).click();
       await expect(languageList(locationsWorld.page)).toBeVisible();
+      // Verifies NFR-R2 of add-interface-language-selection: the list is scrolled into view by the
+      // step, not by the click, whose scroll depends on whether the offline notice already covers the button.
+      await languageList(locationsWorld.page).evaluate(
+        (list, block) => list.scrollIntoView({ block }),
+        LANGUAGE_LIST_SCROLL_BLOCK,
+      );
     }
   },
 );
