@@ -108,7 +108,7 @@ Each run used `npx stryker run --mutate …` from `packages/client`, one at a ti
 
 ### R2 — WARNING — The date-bar layering scenario seeds a duplicate Tokyo and runs with 11 locations
 - Location: `packages/client/src/test/features/grid_view/grid_view_layers_e2e.feature:41`
-- Rule: `.claude/rules/gherkin.md` / the change's `grid-view` delta ("GIVEN the Grid view at 390 by 844 px with 12 locations"); tasks.md 3.4 ("keeps London and its title")
+- Rule: the change's `grid-view` delta ("GIVEN the Grid view at 390 by 844 px with 12 locations"); tasks.md 3.4 ("keeps London and its title")
 - Problem: The branch replaced the twelfth stored location "London" with a second "Tokyo". `buildStoredLocations` gives both entries the same id, and `parseStoredLocations.ts:78` (`if (knownIds.has(id)) continue;`) drops the duplicate. The scenario therefore runs with 11 locations, while its feature text claims 12 and the modified spec scenario requires 12. Task 3.4 is ticked although it says London is kept.
 - Impact: The Gherkin no longer describes the state it tests. Its seed line reads as twelve locations, but the page has eleven, and a reader cannot tell that one entry is discarded. The spec's "with 12 locations" GIVEN is not what is verified, and the ticked task 3.4 does not match the code.
 - Fix: Replace the trailing `"Tokyo"` at line 41 with `"London"`, so the list is the same twelve-city list that `locations_menu_placement_e2e.feature`'s "The menu lies over the date bar" seeds. Keep "Tokyo" as the row whose menu is opened, as that scenario already does and passes.
