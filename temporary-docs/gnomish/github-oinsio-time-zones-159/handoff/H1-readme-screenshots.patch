@@ -1,0 +1,52 @@
+diff --git a/README.md b/README.md
+index 2531ca6..2ac110c 100644
+--- a/README.md
++++ b/README.md
+@@ -41,16 +41,16 @@ Cards view on phone and tablet, Grid view on desktop. Details: [docs/design](doc
+ 
+ <table>
+   <tr>
+-    <td align="center"><img src="docs/design/screens/cards-phone-light.png" alt="Cards view on a phone, light theme" width="300"></td>
+-    <td align="center"><img src="docs/design/screens/cards-phone-dark.png" alt="Cards view on a phone, dark theme" width="300"></td>
++    <td align="center"><img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-cards-phone-light-en.png" alt="Cards view on a phone, light theme" width="300"></td>
++    <td align="center"><img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-cards-phone-dark-en.png" alt="Cards view on a phone, dark theme" width="300"></td>
+   </tr>
+ </table>
+ 
+-<img src="docs/design/screens/cards-tablet-light.png" alt="Cards view on a tablet, light theme" width="720">
++<img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-cards-tablet-light-en.png" alt="Cards view on a tablet, light theme" width="720">
+ 
+-<img src="docs/design/screens/grid-desktop-light.png" alt="Grid view on a desktop, light theme" width="720">
++<img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-grid-desktop-light-en.png" alt="Grid view on a desktop, light theme" width="720">
+ 
+-<img src="docs/design/screens/grid-desktop-meeting-dark.png" alt="Grid view on a desktop with a meeting range, dark theme" width="720">
++<img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-grid-desktop-meeting-dark-en.png" alt="Grid view on a desktop with the meeting range 09:00–11:00 in Almaty, dark theme" width="720">
+ 
+ ## Localization
+ 
+diff --git a/README.ru.md b/README.ru.md
+index 38cc899..b639368 100644
+--- a/README.ru.md
++++ b/README.ru.md
+@@ -41,16 +41,16 @@
+ 
+ <table>
+   <tr>
+-    <td align="center"><img src="docs/design/screens/cards-phone-light.png" alt="Вид «Карточки» на телефоне, светлая тема" width="300"></td>
+-    <td align="center"><img src="docs/design/screens/cards-phone-dark.png" alt="Вид «Карточки» на телефоне, тёмная тема" width="300"></td>
++    <td align="center"><img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-cards-phone-light-ru.png" alt="Вид «Карточки» на телефоне, светлая тема" width="300"></td>
++    <td align="center"><img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-cards-phone-dark-ru.png" alt="Вид «Карточки» на телефоне, тёмная тема" width="300"></td>
+   </tr>
+ </table>
+ 
+-<img src="docs/design/screens/cards-tablet-light.png" alt="Вид «Карточки» на планшете, светлая тема" width="720">
++<img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-cards-tablet-light-ru.png" alt="Вид «Карточки» на планшете, светлая тема" width="720">
+ 
+-<img src="docs/design/screens/grid-desktop-light.png" alt="Вид «Сетка» на десктопе, светлая тема" width="720">
++<img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-grid-desktop-light-ru.png" alt="Вид «Сетка» на десктопе, светлая тема" width="720">
+ 
+-<img src="docs/design/screens/grid-desktop-meeting-dark.png" alt="Вид «Сетка» на десктопе со встречей, тёмная тема" width="720">
++<img src="packages/client/src/test/features/__screenshots__/chromium/README-screenshot-grid-desktop-meeting-dark-ru.png" alt="Вид «Сетка» на десктопе со встречей 09:00–11:00 по Алматы, тёмная тема" width="720">
+ 
+ ## Локализация
+ 
