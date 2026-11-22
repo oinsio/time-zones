@@ -9,7 +9,7 @@ In the Cards view and the Grid view, an open location menu SHALL lie wholly insi
 - **WHEN** the user opens the location menu of the last row
 - **THEN** the menu lies above its button and wholly inside the viewport
 - **AND** "Move up", "Move down" and "Remove" are visible
-- **AND** the page has not scrolled
+- **AND** the page scroll offset is the same as before the menu opened
 
 | view | size |
 |---|---|
@@ -24,7 +24,7 @@ In the Cards view and the Grid view, an open location menu SHALL lie wholly insi
 - **GIVEN** the `<view>` view at `<size>` px with 12 locations and the page at its top
 - **WHEN** the user opens the location menu of the first row
 - **THEN** the menu lies under its button and wholly inside the viewport
-- **AND** the page has not scrolled
+- **AND** the page scroll offset is the same as before the menu opened
 
 | view | size |
 |---|---|
@@ -70,9 +70,11 @@ In the Cards view and the Grid view, an open location menu SHALL lie wholly insi
 - **AND** the focus is on "Remove" and "Remove" lies inside the menu's visible box
 
 #### Scenario: The menu lies over the date bar
-- **GIVEN** the `<view>` view at 390 × 844 px with 12 locations and the page scrolled to the end
-- **WHEN** the user opens the location menu of the last row
-- **THEN** at the centre of every item of the menu the topmost element is that item
+- **GIVEN** the `<view>` view at 390 × 844 px with 12 locations
+- **AND** the page is scrolled so that a row's location menu opens under its button and reaches over the date bar
+- **WHEN** the user opens that row's location menu
+- **THEN** the menu lies under its button and at least one menu item lies over the date bar
+- **AND** at the centre of every item of the menu the topmost element is that item
 
 | view |
 |---|
