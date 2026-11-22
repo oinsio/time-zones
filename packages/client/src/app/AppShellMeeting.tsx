@@ -34,7 +34,6 @@ export function AppShellMeeting({ bar, share, onClear }: AppShellMeetingProps) {
           <AppShellShareDialog
             shareMeeting={share}
             returnFocusRef={shareButtonRef}
-            onClear={onClear}
           />
         </Suspense>
       )}

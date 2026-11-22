@@ -25,8 +25,12 @@ export type MeetingShare = ReturnType<typeof useMeetingShare>;
  * so that the initial bundle stays within its budget (NFR-P2).
  * Implements FR14, FR15 of add-grid-meeting-range-and-share (D5).
  * Implements FR1, FR9, FR10, NFR-P2 of add-meeting-share-dialog (D6).
+ * Implements FR5, FR7 of keep-location-menu-in-view-and-clear-range-after-share (D3): `onMeetingShared` is called after the dialog closes on the outcome shared, and only then.
  */
-export function useMeetingShare(textSharing: TextSharing = browserTextSharing) {
+export function useMeetingShare(
+  textSharing: TextSharing = browserTextSharing,
+  onMeetingShared?: () => void,
+) {
   const { meeting } = useMeetingRange();
   const [isOpen, setIsOpen] = useState(false);
   const [notice, setNotice] = useState<MeetingShareNotice | undefined>();
@@ -45,11 +49,15 @@ export function useMeetingShare(textSharing: TextSharing = browserTextSharing) {
   }, []);
   const closeShareDialog = useCallback(() => setIsOpen(false), []);
   /** Closes the dialog and shows the notice of the outcome; a cancelled share keeps the dialog. */
-  const finishShare = useCallback((outcome: ShareOutcome) => {
-    if (outcome === ShareOutcome.CANCELLED) return;
-    setIsOpen(false);
-    setNotice(NOTICE_BY_OUTCOME[outcome]);
-  }, []);
+  const finishShare = useCallback(
+    (outcome: ShareOutcome) => {
+      if (outcome === ShareOutcome.CANCELLED) return;
+      setIsOpen(false);
+      setNotice(NOTICE_BY_OUTCOME[outcome]);
+      if (outcome === ShareOutcome.SHARED) onMeetingShared?.();
+    },
+    [onMeetingShared],
+  );
   const dismissNotice = useCallback(() => setNotice(undefined), []);
 
   return {

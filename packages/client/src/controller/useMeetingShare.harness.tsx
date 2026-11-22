@@ -30,10 +30,10 @@ export function useShare(
   textSharing: ReturnType<typeof createInMemoryTextSharing>,
   onMeetingShared?: () => void,
 ) {
-  const shareMeeting = useMeetingShare(textSharing);
+  const shareMeeting = useMeetingShare(textSharing, onMeetingShared);
   return {
     ...shareMeeting,
-    ...useMeetingShareDialog(shareMeeting, onMeetingShared),
+    ...useMeetingShareDialog(shareMeeting),
   };
 }
 

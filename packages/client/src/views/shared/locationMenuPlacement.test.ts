@@ -13,11 +13,12 @@ function place(
   viewportHeightPx: number,
   menuHeightPx = MENU_HEIGHT_PX,
 ) {
-  return getLocationMenuPlacement(
-    { top: buttonTopPx, bottom: buttonBottomPx },
+  return getLocationMenuPlacement({
+    buttonTopPx,
+    buttonBottomPx,
     menuHeightPx,
     viewportHeightPx,
-  );
+  });
 }
 
 describe("getLocationMenuPlacement", () => {

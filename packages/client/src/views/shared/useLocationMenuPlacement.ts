@@ -19,6 +19,11 @@ export type LocationMenuPlacementState = {
   style: CSSProperties;
 };
 
+const CLOSED_PLACEMENT: LocationMenuPlacementState = {
+  side: LocationMenuSide.BELOW,
+  style: {},
+};
+
 /**
  * The place of an open location menu, from its button and its own height:
  * under the button when it fits, otherwise above it, otherwise on the larger
@@ -34,21 +39,23 @@ export function useLocationMenuPlacement(
   isOpen: boolean,
   isMenuFixedToViewport: boolean,
 ): LocationMenuPlacementState {
-  const [placement, setPlacement] = useState<LocationMenuPlacementState>({
-    side: LocationMenuSide.BELOW,
-    style: {},
-  });
+  const [placement, setPlacement] =
+    useState<LocationMenuPlacementState>(CLOSED_PLACEMENT);
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setPlacement(CLOSED_PLACEMENT);
+      return;
+    }
     const readPlacement = () => {
       const triggerBox = triggerRef.current?.getBoundingClientRect();
       if (triggerBox === undefined) return;
       const root = document.documentElement;
-      const { side, maxHeightPx } = getLocationMenuPlacement(
-        triggerBox,
-        menuRef.current?.scrollHeight ?? 0,
-        root.clientHeight,
-      );
+      const { side, maxHeightPx } = getLocationMenuPlacement({
+        buttonTopPx: triggerBox.top,
+        buttonBottomPx: triggerBox.bottom,
+        menuHeightPx: menuRef.current?.scrollHeight ?? 0,
+        viewportHeightPx: root.clientHeight,
+      });
       const fixedStyle: CSSProperties = !isMenuFixedToViewport
         ? {}
         : {

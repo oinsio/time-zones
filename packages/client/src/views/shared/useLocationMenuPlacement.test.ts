@@ -21,11 +21,13 @@ function buildButtonAndMenu() {
     .spyOn(trigger, "getBoundingClientRect")
     .mockImplementation(() => ({ ...box, right: BUTTON_RIGHT_PX }) as DOMRect);
   const menu = document.createElement("div");
-  Object.defineProperty(menu, "scrollHeight", { value: MENU_HEIGHT_PX });
+  const readScrollHeight = vi.fn(() => MENU_HEIGHT_PX);
+  Object.defineProperty(menu, "scrollHeight", { get: readScrollHeight });
   return {
     triggerRef: { current: trigger },
     menuRef: { current: menu },
     getBoundingClientRect,
+    readScrollHeight,
     moveButton: (top: number, bottom: number) => {
       box.top = top;
       box.bottom = bottom;
@@ -150,6 +152,30 @@ describe("useLocationMenuPlacement", () => {
     act(() => void scrolledPanel.dispatchEvent(new Event("scroll")));
 
     expect(refs.getBoundingClientRect).toHaveBeenCalledTimes(1);
+  });
+
+  it("should read the menu height once per opening and once per event", () => {
+    const refs = buildButtonAndMenu();
+    renderHook(() => useFixedPlacement(refs, true));
+    expect(refs.readScrollHeight).toHaveBeenCalledTimes(1);
+
+    act(() => void window.dispatchEvent(new Event("scroll")));
+
+    expect(refs.readScrollHeight).toHaveBeenCalledTimes(2);
+  });
+
+  it("should forget the placement when the menu closes", () => {
+    const refs = buildButtonAndMenu();
+    refs.moveButton(NEAR_BOTTOM_TOP_PX, NEAR_BOTTOM_BOTTOM_PX);
+    const { result, rerender } = renderHook(
+      ({ isOpen }) => useFixedPlacement(refs, isOpen),
+      { initialProps: { isOpen: true } },
+    );
+    expect(result.current.side).toBe(LocationMenuSide.ABOVE);
+
+    rerender({ isOpen: false });
+
+    expect(result.current).toEqual({ side: LocationMenuSide.BELOW, style: {} });
   });
 
   it("should re-read the button on a resize", () => {
