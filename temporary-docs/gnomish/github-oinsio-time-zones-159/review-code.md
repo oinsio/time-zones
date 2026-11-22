@@ -134,8 +134,8 @@ Each run used `npx stryker run --mutate …` from `packages/client`, one at a ti
 - Impact: Suppose a later change gives a Cards row a stacking context (the sortable `transform`) or changes the sticky header layering of the Grid rows. An opened-above menu could then be partly covered by the row above it, and no test would fail. Today's code layers correctly (`z-location-menu` on the menu, `LocationMenu.tsx:223`), so this is a coverage gap, not a live defect.
 - Fix: In `locations/steps/locations_menu_placement_e2e.steps.ts`, add a step "every menu item has that menu item on top" that uses `isTopmostAt` from `grid_view/steps/hourGridE2eHelpers.ts:37`. Run it at the centre of each `menuitem` inside the menu's box, and add it to the "No accessibility violations with the menu opened above" outline after "the menu lies above its button".
 - Fix risk: Adds one new step. The outline must stay in the e2e feature (`bdd-e2e.md`: layering needs a real browser). It costs a few element lookups per row.
-- Status: rejected (not-worth-it)
-- Resolution: coverage gap only, no live defect (menu has z-location-menu); the extra topmost step for opened-above menus costs a new step and e2e time for a hypothetical future regression and is optional per the review verdict.
+- Status: fixed
+- Resolution: added step "every menu item inside the visible menu has that menu item on top" (locations_menu_placement_e2e.steps.ts, using isTopmostAt at each item centre inside the visible menu box); used in the opened-above, limited-height, axe-opened-above and date-bar outlines of locations_menu_placement_e2e.feature; all pass.
 
 ## Verdict
 

@@ -1,6 +1,7 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import { LOCATION_MENU_OFFSET_PX } from "@/constants";
+import { isTopmostAt } from "../../grid_view/steps/hourGridE2eHelpers";
 import { requireBox } from "../../time_selection/steps/timeSelectionE2eHelpers";
 import { test } from "./locations_ui_e2e.fixtures";
 import {
@@ -135,3 +136,28 @@ Then("the menu lies under its button", async ({ locationsWorld }) => {
   const menuBox = await requireBox(page.getByRole(MENU_ROLE));
   expect(menuBox.y).toBeGreaterThanOrEqual(bottomOf(buttonBox));
 });
+
+// Verifies NFR-A1 of keep-location-menu-in-view-and-clear-range-after-share.
+Then(
+  "every menu item inside the visible menu has that menu item on top",
+  async ({ locationsWorld }) => {
+    const { page } = locationsWorld;
+    const menuBox = await requireBox(page.getByRole(MENU_ROLE));
+    const items = await page.getByRole(MENU_ITEM_ROLE).all();
+    let checkedCount = 0;
+    for (const item of items) {
+      const itemBox = await requireBox(item);
+      const centre = {
+        x: itemBox.x + itemBox.width / HALF,
+        y: itemBox.y + itemBox.height / HALF,
+      };
+      const isInsideVisibleBox =
+        centre.y >= Math.max(menuBox.y, 0) &&
+        centre.y <= Math.min(bottomOf(menuBox), viewportHeightOf(page));
+      if (!isInsideVisibleBox) continue;
+      checkedCount += 1;
+      expect(await isTopmostAt(item, centre)).toBe(true);
+    }
+    expect(checkedCount).toBeGreaterThan(0);
+  },
+);

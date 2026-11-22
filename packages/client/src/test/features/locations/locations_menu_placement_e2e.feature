@@ -13,6 +13,7 @@ Feature: The location menu stays in view in a real browser
     And the page scroll offset is noted
     And the user opens the location menu of the last row
     Then the menu lies above its button
+    And every menu item inside the visible menu has that menu item on top
     And the open menu lies inside the screen
     And the page scroll offset is the same as before the menu opened
 
@@ -69,6 +70,7 @@ Feature: The location menu stays in view in a real browser
     And the page is scrolled so that a row's location menu button is in the middle of the viewport
     And the user opens the location menu of the middle row
     Then the open menu lies inside the screen
+    And every menu item inside the visible menu has that menu item on top
     And the menu items can be reached one by one with the arrow keys inside the screen
 
     Examples:
@@ -88,6 +90,7 @@ Feature: The location menu stays in view in a real browser
     And the user opens the location menu of "Tokyo"
     Then the menu of "Tokyo" lies under its button
     And every menu item over the date bar has that menu item on top
+    And every menu item inside the visible menu has that menu item on top
     And at least one menu item lies over the date bar
 
     Examples:
@@ -106,6 +109,7 @@ Feature: The location menu stays in view in a real browser
     And the user scrolls to the end
     And the user opens the location menu of the last row
     Then the menu lies above its button
+    And every menu item inside the visible menu has that menu item on top
     And the locations screen has no accessibility violations
 
     Examples:
