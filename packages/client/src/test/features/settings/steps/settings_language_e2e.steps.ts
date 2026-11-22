@@ -11,6 +11,7 @@ import {
   languageGroup,
   languageList,
   requireBox,
+  waitForOfflineReadyNotice,
 } from "./settingsLanguageE2eHelpers";
 
 const HOUR_FORMAT_GROUP_NAME = /^(Hour format|Формат времени)$/;
@@ -68,6 +69,9 @@ When(
   "the language group is {word}",
   async ({ locationsWorld }, state: string) => {
     if (state !== COLLAPSED) {
+      // Verifies NFR-R2 of add-interface-language-selection: the approved screenshots show the
+      // offline-ready notice; waiting for it keeps the page height, and so the scroll, the same on every run.
+      await waitForOfflineReadyNotice(locationsWorld.page);
       await languageButton(locationsWorld.page).click();
       await expect(languageList(locationsWorld.page)).toBeVisible();
       // Verifies NFR-R2 of add-interface-language-selection: the list is scrolled into view by the
