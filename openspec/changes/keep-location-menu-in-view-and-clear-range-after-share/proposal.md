@@ -14,7 +14,7 @@ Audience: everyone who uses the location menu on a phone or in a long list, and 
 
 - **ADDED** to `locations`: the open location menu opens where it fits. It opens under its button when it fits there, above the button when it fits there and not below, and otherwise on the side with more room, its height limited to that room and its items scrolling inside it. It stays inside the viewport while the page scrolls, and opening it does not scroll the page.
 - **ADDED** to `meeting-share-dialog`: a share whose outcome is "shared" clears the meeting range, the same as Clear meeting. The focus goes to Add location, as after Clear meeting.
-- **MODIFIED** in `meeting-share-dialog`: "Share dialog opens and closes" (closing with the close button or Esc keeps the meeting range; a shared outcome clears it) and "Share from the share dialog" (where the focus goes after each outcome).
+- **MODIFIED** in `meeting-share-dialog`: "Share dialog opens and closes" (closing with the close button or Esc keeps the meeting range; a shared outcome clears it), "Share from the share dialog" (where the focus goes after each outcome) and "Accessible share dialog" (after the outcome "shared" the focus goes to Add location; new scenario "Focus after a shared meeting").
 - **MODIFIED** in `grid-view`: "Grid layers stay under the page bars and dialogs" (its scenario "An open location menu lies above the date bar" now scrolls the page so that the menu opens under its button and reaches over the date bar, because a button just above the date bar now opens its menu above it).
 - **ADDED** to `main-page`: the README screenshots are approved screenshots of the running app, in the README's language.
 - Changed glossary terms (`docs/glossary/`): **Location menu** (where it opens, its new *Code:* owner of the placement) and **Share meeting** (a shared outcome clears the meeting range). No new term.
@@ -30,7 +30,7 @@ None.
 ### Modified Capabilities
 
 - `locations`: new requirement "Location menu opens where it fits".
-- `meeting-share-dialog`: "Share dialog opens and closes" and "Share from the share dialog" are modified. New requirement "A shared meeting clears the meeting range".
+- `meeting-share-dialog`: "Share dialog opens and closes", "Share from the share dialog" and "Accessible share dialog" are modified. New requirement "A shared meeting clears the meeting range".
 - `grid-view`: "Grid layers stay under the page bars and dialogs" is modified (the scroll position of its open-menu scenario).
 - `main-page`: new requirement "README screenshots of the running app".
 
