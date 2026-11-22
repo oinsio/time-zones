@@ -11,6 +11,7 @@ Feature: Approved screenshots shown in the README
     And the locations screen uses the <theme> theme
     And the screen is <width> by <height> px for the locations
     When the user opens the locations app
+    And the offline-ready notice is dismissed
     Then the locations screen matches the approved screenshot
 
     Examples:
@@ -33,6 +34,7 @@ Feature: Approved screenshots shown in the README
     And the locations screen uses the dark theme
     And the screen is 1440 by 900 px for the locations
     When the user opens the locations app
+    And the offline-ready notice is dismissed
     And the user sets the sample meeting
     Then the locations screen matches the approved screenshot
 

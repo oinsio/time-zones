@@ -38,7 +38,7 @@ Feature: Grid layers under the page bars and dialogs in a real browser
     Given the locations interface language is English
     And the view mode is Grid
     And the current time is "2026-03-08T07:30:00Z"
-    And the stored locations are "Almaty", "Moscow", "Kolkata", "Kathmandu", "Tokyo", "New York", "Belgrade", "Lord Howe Island", "Chicago", "Adelaide", "St. Vincent", "Tokyo"
+    And the stored locations are "Almaty", "Moscow", "Kolkata", "Kathmandu", "Tokyo", "New York", "Belgrade", "Lord Howe Island", "Chicago", "Adelaide", "St. Vincent", "London"
     And the screen is 390 by 844 px for the locations
     When the user opens the locations app
     And the page is scrolled so that the menu of "Tokyo" opens under its button and reaches over the date bar

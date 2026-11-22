@@ -88,6 +88,7 @@ Feature: The location menu stays in view in a real browser
     And the user opens the location menu of "Tokyo"
     Then the menu of "Tokyo" lies under its button
     And every menu item over the date bar has that menu item on top
+    And at least one menu item lies over the date bar
 
     Examples:
       | view  |
