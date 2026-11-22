@@ -47,6 +47,14 @@ Feature: Share dialog in a real browser
     Then the share dialog is closed
     And the focus is on Share meeting
 
+  @keep-location-menu-in-view-and-clear-range-after-share @FR6 @NFR-A3
+  Scenario: Focus after a shared meeting
+    Given the user opened the locations app with the sample meeting and the share dialog
+    When the user chooses Share in the dialog
+    Then the share dialog is closed
+    And no meeting range is set
+    And focus is on the "Add location" action
+
   @add-meeting-share-dialog @NFR-A2 @NFR-A3
   Scenario: Controls announce their names and states
     Given the user opened the locations app with the sample meeting and the share dialog

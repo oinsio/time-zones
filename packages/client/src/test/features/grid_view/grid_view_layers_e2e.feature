@@ -33,17 +33,18 @@ Feature: Grid layers under the page bars and dialogs in a real browser
     Then the topmost element at the centre of the calendar button and of the Now button is that button
     And no point of the date bar has a grid element on top
 
-  @fix-grid-meeting-range-lock-and-layering @FR7
+  @fix-grid-meeting-range-lock-and-layering @FR7 @keep-location-menu-in-view-and-clear-range-after-share @NFR-A1
   Scenario: An open location menu lies above the date bar
     Given the locations interface language is English
     And the view mode is Grid
     And the current time is "2026-03-08T07:30:00Z"
-    And the stored locations are "Almaty", "Moscow", "Kolkata", "Kathmandu", "Tokyo", "New York", "Belgrade", "Lord Howe Island", "Chicago", "Adelaide", "St. Vincent", "London"
+    And the stored locations are "Almaty", "Moscow", "Kolkata", "Kathmandu", "Tokyo", "New York", "Belgrade", "Lord Howe Island", "Chicago", "Adelaide", "St. Vincent", "Tokyo"
     And the screen is 390 by 844 px for the locations
     When the user opens the locations app
-    And the page is scrolled so that the menu button of "London" lies just above the date bar
-    And the user opens the location menu of "London"
-    Then every menu item over the date bar has that menu item on top
+    And the page is scrolled so that the menu of "Tokyo" opens under its button and reaches over the date bar
+    And the user opens the location menu of "Tokyo"
+    Then the menu of "Tokyo" lies under its button
+    And every menu item over the date bar has that menu item on top
     And at least one menu item lies over the date bar
 
   @fix-grid-meeting-range-lock-and-layering @FR8 @UX3 @redesign-cards-grid-and-day-palettes @FR17
