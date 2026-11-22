@@ -55,7 +55,7 @@ describe("useLocationMenuPlacement", () => {
 
     const { result } = renderHook(() => useFixedPlacement(refs, false));
 
-    expect(result.current).toEqual({
+    expect(result.current).toMatchObject({
       side: LocationMenuSide.BELOW,
       style: {},
     });
@@ -175,7 +175,10 @@ describe("useLocationMenuPlacement", () => {
 
     rerender({ isOpen: false });
 
-    expect(result.current).toEqual({ side: LocationMenuSide.BELOW, style: {} });
+    expect(result.current).toMatchObject({
+      side: LocationMenuSide.BELOW,
+      style: {},
+    });
   });
 
   it("should re-read the button on a resize", () => {

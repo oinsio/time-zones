@@ -16,7 +16,6 @@ import {
   getEnabledMenuIndex,
   MenuStepDirection,
 } from "./locationMenuNavigation";
-import { LocationMenuSide } from "./locationMenuPlacement";
 import { useLocationMenuPlacement } from "./useLocationMenuPlacement";
 
 export type LocationMenuItem = {
@@ -221,7 +220,7 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
             aria-label={t("locations.locationMenu", { city })}
             ref={menuRef}
             style={placement.style}
-            className={`${isMenuFixedToViewport ? "fixed" : placement.side === LocationMenuSide.BELOW ? "absolute right-0 top-full mt-1" : "absolute right-0 bottom-full mb-1"} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-control-border bg-surface py-1 shadow-lg`}
+            className={`${placement.positionClassName} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-control-border bg-surface py-1 shadow-lg`}
           >
             {items.map((item, index) => (
               <button

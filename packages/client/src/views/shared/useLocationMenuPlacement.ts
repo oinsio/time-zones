@@ -17,12 +17,28 @@ export type LocationMenuPlacementState = {
   side: LocationMenuSide;
   /** The inline style of the open menu: its fixed place (fixed variant) and its limited height with scrolling items, when it fits on neither side. */
   style: CSSProperties;
+  /** The position classes of the open menu for its side and variant. */
+  positionClassName?: string;
 };
 
 const CLOSED_PLACEMENT: LocationMenuPlacementState = {
   side: LocationMenuSide.BELOW,
   style: {},
 };
+
+/**
+ * Implements FR1 of keep-location-menu-in-view-and-clear-range-after-share (D2):
+ * the position classes of the menu for its side and variant.
+ */
+function getLocationMenuPositionClasses(
+  isMenuFixedToViewport: boolean,
+  side: LocationMenuSide,
+): string {
+  if (isMenuFixedToViewport) return "fixed";
+  return side === LocationMenuSide.BELOW
+    ? "absolute right-0 top-full mt-1"
+    : "absolute right-0 bottom-full mb-1";
+}
 
 /**
  * The place of an open location menu, from its button and its own height:
@@ -88,5 +104,11 @@ export function useLocationMenuPlacement(
       window.removeEventListener(RESIZE_EVENT, readPlacement);
     };
   }, [isOpen, isMenuFixedToViewport, triggerRef, menuRef]);
-  return placement;
+  return {
+    ...placement,
+    positionClassName: getLocationMenuPositionClasses(
+      isMenuFixedToViewport,
+      placement.side,
+    ),
+  };
 }
