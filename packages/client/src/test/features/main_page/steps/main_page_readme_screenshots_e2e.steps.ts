@@ -12,15 +12,11 @@ const RUSSIAN_DISMISS_NAME = "Закрыть";
  * a README screenshot shows the screen of a returning user, without the
  * one-time Offline-ready notice, in either interface language.
  */
-When(
-  "the offline-ready notice is dismissed",
-  async ({ locationsWorld }) => {
-    const { page } = locationsWorld;
-    await dismissOfflineReadyNotice(page);
-    await page
-      .getByRole("button", { name: RUSSIAN_DISMISS_NAME, exact: true })
-      .click({ timeout: OFFLINE_NOTICE_WAIT_MS })
-      .catch(() => undefined);
-  },
-);
-
+When("the offline-ready notice is dismissed", async ({ locationsWorld }) => {
+  const { page } = locationsWorld;
+  await dismissOfflineReadyNotice(page);
+  await page
+    .getByRole("button", { name: RUSSIAN_DISMISS_NAME, exact: true })
+    .click({ timeout: OFFLINE_NOTICE_WAIT_MS })
+    .catch(() => undefined);
+});
