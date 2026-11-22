@@ -1,7 +1,7 @@
-import {
-  LOCATION_MENU_OFFSET_PX,
-  LOCATION_MENU_VIEWPORT_MARGIN_PX,
-} from "@/constants";
+import { LOCATION_MENU_OFFSET_PX } from "@/constants";
+
+/** The menu keeps the same gap from the edge of the viewport as from its button. */
+const VIEWPORT_MARGIN_PX = LOCATION_MENU_OFFSET_PX;
 
 /** Where an open location menu lies relative to its button. */
 export enum LocationMenuSide {
@@ -27,7 +27,7 @@ export function getLocationMenuPlacement(
   menuHeightPx: number,
   viewportHeightPx: number,
 ): LocationMenuPlacement {
-  const spacingPx = LOCATION_MENU_OFFSET_PX + LOCATION_MENU_VIEWPORT_MARGIN_PX;
+  const spacingPx = LOCATION_MENU_OFFSET_PX + VIEWPORT_MARGIN_PX;
   const roomBelowPx = viewportHeightPx - buttonBox.bottom - spacingPx;
   const roomAbovePx = buttonBox.top - spacingPx;
   // Below wins when the menu fits there or when below is the larger room.

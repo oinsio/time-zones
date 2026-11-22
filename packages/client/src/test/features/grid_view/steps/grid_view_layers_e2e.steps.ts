@@ -2,11 +2,7 @@
 // Verifies FR7 of refine-meeting-range-entry-and-handles: the date bar is located by DATE_BAR_SELECTOR.
 import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
-import {
-  DATE_BAR_SELECTOR,
-  LOCATION_MENU_OFFSET_PX,
-  LOCATION_MENU_VIEWPORT_MARGIN_PX,
-} from "@/constants";
+import { DATE_BAR_SELECTOR, LOCATION_MENU_OFFSET_PX } from "@/constants";
 import {
   dateButton,
   nowButton,
@@ -38,6 +34,8 @@ const GRID_ELEMENT_SELECTORS = [
   "time",
   "li .sticky span",
 ];
+/** The menu keeps the same gap from the viewport edge as from its button. */
+const VIEWPORT_MARGIN_PX = LOCATION_MENU_OFFSET_PX;
 const ESCAPE_KEY = "Escape";
 const MENU_ROLE = "menu";
 const DATE_BAR_SAMPLE_STEP_PX = 8;
@@ -152,7 +150,7 @@ When(
     const viewportHeight = page.viewportSize()?.height ?? 0;
     const buttonBottomTarget =
       viewportHeight -
-      (menuHeight + LOCATION_MENU_OFFSET_PX + LOCATION_MENU_VIEWPORT_MARGIN_PX);
+      (menuHeight + LOCATION_MENU_OFFSET_PX + VIEWPORT_MARGIN_PX);
     expect(buttonBottomTarget).toBeLessThan(barBox.y);
     await page.evaluate(
       (distance) => window.scrollBy(0, distance),
