@@ -104,7 +104,8 @@ Each run used `npx stryker run --mutate …` from `packages/client`, one at a ti
 - Impact: A ticked task is not done: the scenario does not keep London, and the spec's "with 12 locations" GIVEN is not what is verified. The Gherkin also misstates its own state: a reader sees twelve names and cannot tell that one is silently discarded.
 - Fix: Replace the trailing `"Tokyo"` at line 41 with `"London"`, so the seed is the twelve distinct cities that `locations_menu_placement_e2e.feature`'s "The menu lies over the date bar" also uses. Keep "Tokyo" as the row whose menu is opened (lines 44-46); task 3.4 asks to keep London in the scenario, not to open London's menu, and the delta scenario names no city.
 - Fix risk: Low. The new scroll step (`grid_view_layers_e2e.steps.ts:142-163`) positions any row from its measured menu height, and the identical twelve-city seed with Tokyo as the target already passes in `locations_menu_placement_e2e.feature` for the Grid view. With London back as the last row, Tokyo moves no further from the end of the page, so the scroll target stays reachable.
-- Status: open
+- Status: fixed
+- Resolution: restored "London" as the twelfth stored location at grid_view_layers_e2e.feature:41, so the scenario runs with 12 distinct locations; the scenario passes in the BDD e2e run.
 
 ### R2 — WARNING — README screenshots show the one-time offline-ready notice over the app
 - Location: `packages/client/src/test/features/main_page/main_page_readme_screenshots_e2e.feature:14`
@@ -113,7 +114,8 @@ Each run used `npx stryker run --mutate …` from `packages/client`, one at a ti
 - Impact: The phone images in both READMEs have the toast covering the lower part of the New York card. The desktop images show it floating above the date bar. Every reader of the README sees a one-time first-run notice as if it were part of the main screen, and the phone shots hide the content they should show. The user asked for up-to-date screenshots of the app, and these show something a returning user never sees.
 - Fix: Add a step to `main_page/steps/` (for example `When the offline-ready notice is dismissed`) that calls the existing `dismissOfflineReadyNotice(page)` from `packages/client/src/test/features/time_selection/steps/timeSelectionE2eHelpers.ts:24`. Put it after "When the user opens the locations app" in the first outline, and after "the user sets the sample meeting" in the second. Then re-approve the ten `README-screenshot-*` baselines with `--update-snapshots`. The H1 patch's paths do not change.
 - Fix risk: The ten baselines must be regenerated, and each scenario may wait up to `OFFLINE_NOTICE_WAIT_MS` (1.5 s, `timeSelectionE2eHelpers.ts:17`). The helper first awaits `navigator.serviceWorker.ready` and ignores a missing button, so it cannot fail a run where the notice does not appear. No other baseline is affected.
-- Status: open
+- Status: fixed
+- Resolution: added step "the offline-ready notice is dismissed" (main_page_readme_screenshots_e2e.steps.ts, English and Russian button) to both outlines, deleted and regenerated the ten README-screenshot baselines without the toast.
 
 ### R3 — WARNING — "The menu lies over the date bar" can pass without any item over the date bar
 - Location: `packages/client/src/test/features/locations/locations_menu_placement_e2e.feature:90`
@@ -122,7 +124,8 @@ Each run used `npx stryker run --mutate …` from `packages/client`, one at a ti
 - Impact: If no item centre lands inside the bar, the topmost loop runs zero times and the scenario passes. For example, a layout change could make the date bar shorter or move it, or the scroll step could land off target in the Cards view. A regression where the date bar covers the menu (the NFR-A1 defect this scenario exists to catch) then goes unnoticed in both views.
 - Fix: Add `And at least one menu item lies over the date bar` after line 90, as `grid_view_layers_e2e.feature:48` does.
 - Fix risk: The step already exists and passes in the Grid layers scenario with the same scroll step. If it fails in the Cards row, that exposes a real gap between the scroll target and the Cards date bar, which is what the scenario is meant to prove.
-- Status: open
+- Status: fixed
+- Resolution: added "And at least one menu item lies over the date bar" to the Cards/Grid outline in locations_menu_placement_e2e.feature; both rows pass.
 
 ### R4 — SUGGESTION — No topmost check for a menu opened above its button
 - Location: `packages/client/src/test/features/locations/locations_menu_placement_e2e.feature:98`
@@ -131,7 +134,8 @@ Each run used `npx stryker run --mutate …` from `packages/client`, one at a ti
 - Impact: Suppose a later change gives a Cards row a stacking context (the sortable `transform`) or changes the sticky header layering of the Grid rows. An opened-above menu could then be partly covered by the row above it, and no test would fail. Today's code layers correctly (`z-location-menu` on the menu, `LocationMenu.tsx:223`), so this is a coverage gap, not a live defect.
 - Fix: In `locations/steps/locations_menu_placement_e2e.steps.ts`, add a step "every menu item has that menu item on top" that uses `isTopmostAt` from `grid_view/steps/hourGridE2eHelpers.ts:37`. Run it at the centre of each `menuitem` inside the menu's box, and add it to the "No accessibility violations with the menu opened above" outline after "the menu lies above its button".
 - Fix risk: Adds one new step. The outline must stay in the e2e feature (`bdd-e2e.md`: layering needs a real browser). It costs a few element lookups per row.
-- Status: open
+- Status: rejected (not-worth-it)
+- Resolution: coverage gap only, no live defect (menu has z-location-menu); the extra topmost step for opened-above menus costs a new step and e2e time for a hypothetical future regression and is optional per the review verdict.
 
 ## Verdict
 
