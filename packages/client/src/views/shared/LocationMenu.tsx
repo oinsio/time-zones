@@ -9,14 +9,18 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { LOCATION_MENU_ICON_SIZE_PX, OutsidePressEvent } from "@/constants";
-import { IS_POINTER_EVENTS_SUPPORTED } from "@/lib/legacy";
+import { LOCATION_MENU_ICON_SIZE_PX } from "@/constants";
+import { useCloseOnOutsidePress } from "./useCloseOnOutsidePress";
 import { getMenuKeyAction, MenuKeyAction } from "./locationMenuKeys";
 import {
   getEnabledMenuIndex,
   MenuStepDirection,
 } from "./locationMenuNavigation";
-import { useFixedMenuPosition } from "./useFixedMenuPosition";
+import { getLocationMenuPositionClass } from "./locationMenuPlacement";
+import {
+  getLocationMenuStyle,
+  useLocationMenuPlacement,
+} from "./useLocationMenuPlacement";
 
 export type LocationMenuItem = {
   label: string;
@@ -36,11 +40,6 @@ type LocationMenuProps = {
   onOpenChange?: (isOpen: boolean) => void;
 };
 
-// `pointerdown` does not exist before iOS Safari 13; there a press is a touch or a mouse event.
-const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
-  ? [OutsidePressEvent.POINTER_DOWN]
-  : [OutsidePressEvent.TOUCH_START, OutsidePressEvent.MOUSE_DOWN];
-
 /**
  * The vertical-dots menu of a location card, a WAI-ARIA menu button driven by `click`, so
  * it works on engines without Pointer Events. Escape returns focus to the
@@ -51,6 +50,7 @@ const OUTSIDE_PRESS_EVENTS = IS_POINTER_EVENTS_SUPPORTED
  * Implements FR6, FR7 of fix-grid-meeting-range-lock-and-layering (D5): `onOpenChange`.
  * Implements FR16, NFR-A3 of redesign-cards-grid-and-day-palettes (D6): disabled items.
  * Implements FR1, FR2, FR3, NFR-A1, UX2 of make-location-menu-button-vertical (D1, D2).
+ * Implements FR1-FR4, NFR-A2, UX1, UX2 of keep-location-menu-in-view-and-clear-range-after-share (D2).
  */
 export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
   function LocationMenu(
@@ -67,12 +67,15 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
     const menuId = useId();
     const rootRef = useRef<HTMLSpanElement | null>(null);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
+    const menuRef = useRef<HTMLDivElement | null>(null);
     const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [focusedIndex, setFocusedIndex] = useState(0);
-    const fixedPosition = useFixedMenuPosition(
+    const placement = useLocationMenuPlacement(
       triggerRef,
-      isOpen && isMenuFixedToViewport,
+      menuRef,
+      isOpen,
+      isMenuFixedToViewport,
     );
 
     const onOpenChangeRef = useRef(onOpenChange);
@@ -89,20 +92,7 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
       if (isOpen) itemRefs.current[focusedIndex]?.focus();
     }, [isOpen, focusedIndex]);
 
-    useEffect(() => {
-      if (!isOpen) return;
-      const closeOnOutsidePress = (event: Event) => {
-        if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
-      };
-      for (const eventType of OUTSIDE_PRESS_EVENTS) {
-        document.addEventListener(eventType, closeOnOutsidePress);
-      }
-      return () => {
-        for (const eventType of OUTSIDE_PRESS_EVENTS) {
-          document.removeEventListener(eventType, closeOnOutsidePress);
-        }
-      };
-    }, [isOpen]);
+    useCloseOnOutsidePress(isOpen, rootRef, () => setIsOpen(false));
 
     const openAt = (index: number) => {
       setFocusedIndex(index);
@@ -219,8 +209,9 @@ export const LocationMenu = forwardRef<HTMLButtonElement, LocationMenuProps>(
             role="menu"
             tabIndex={-1}
             aria-label={t("locations.locationMenu", { city })}
-            style={fixedPosition}
-            className={`${isMenuFixedToViewport ? "fixed" : "absolute right-0 top-full mt-1"} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-control-border bg-surface py-1 shadow-lg`}
+            ref={menuRef}
+            style={getLocationMenuStyle(placement)}
+            className={`${getLocationMenuPositionClass(isMenuFixedToViewport, placement.side)} z-location-menu flex w-max max-w-full min-w-44 flex-col rounded-md border border-control-border bg-surface py-1 shadow-lg`}
           >
             {items.map((item, index) => (
               <button

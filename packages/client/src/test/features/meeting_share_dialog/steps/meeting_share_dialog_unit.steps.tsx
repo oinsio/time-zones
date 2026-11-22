@@ -1,3 +1,4 @@
+// Verifies FR5, FR7 of keep-location-menu-in-view-and-clear-range-after-share.
 // Verifies FR1, FR2, FR3, FR4, FR5, FR6, FR8, FR9, FR10, FR12, UX5, NFR-P1 of add-meeting-share-dialog.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
@@ -149,7 +150,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @add-meeting-share-dialog @FR9 @UX5
+  // @add-meeting-share-dialog @FR9 @UX5 @keep-location-menu-in-view-and-clear-range-after-share @FR5 @FR7
   f.ScenarioOutline(
     "Outcomes of a share from the dialog",
     ({ Given, When, Then }, variables) => {
@@ -170,12 +171,13 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
         },
       );
       Then(
-        "the dialog is <dialog>, the notice is <notice> and no confirmation dialog is open",
+        "the dialog is <dialog>, the notice is <notice>, the meeting range is <range> and no confirmation dialog is open",
         async () => {
           const isOpenAfter = variables.dialog.startsWith("open");
           await waitFor(() => expect(world.isDialogOpen()).toBe(isOpenAfter));
           expect(screen.queryAllByRole("alertdialog")).toHaveLength(0);
           if (isOpenAfter) expect(world.rows()[2].isTicked).toBe(false);
+          expect(world.isMeetingBarShown()).toBe(variables.range !== "none");
           const notice = variables.notice;
           if (notice === "none") {
             expect(

@@ -28,8 +28,9 @@ import { useMeetingShareDialog } from "./useMeetingShareDialog";
 /** The light hook of the app shell with the session of the lazy dialog on top of it. */
 export function useShare(
   textSharing: ReturnType<typeof createInMemoryTextSharing>,
+  onMeetingShared?: () => void,
 ) {
-  const shareMeeting = useMeetingShare(textSharing);
+  const shareMeeting = useMeetingShare(textSharing, onMeetingShared);
   return { ...shareMeeting, ...useMeetingShareDialog(shareMeeting) };
 }
 
@@ -55,6 +56,8 @@ export type SetupOptions = {
   locations?: readonly Location[];
   homeLocationId?: string | null;
   preferences?: Partial<Preferences>;
+  /** Called when a share ends with the outcome shared. */
+  onMeetingShared?: () => void;
 };
 
 export function setup({
@@ -62,6 +65,7 @@ export function setup({
   locations = [almaty, moscow, newYork],
   homeLocationId = almaty.id,
   preferences = {},
+  onMeetingShared,
 }: SetupOptions = {}) {
   const textSharing = createInMemoryTextSharing(sharing);
   const clock = createSwitchableClock("2026-03-08T07:30:00Z", "Asia/Almaty");
@@ -81,7 +85,7 @@ export function setup({
   const rendered = renderHook(
     () => ({
       range: useMeetingRange(),
-      share: useShare(textSharing),
+      share: useShare(textSharing, onMeetingShared),
     }),
     {
       wrapper: ({ children }: { children: ReactNode }) => (

@@ -1,3 +1,4 @@
+// Verifies FR5, FR7, M3 of keep-location-menu-in-view-and-clear-range-after-share.
 // Verifies FR15 of add-grid-meeting-range-and-share.
 // Verifies FR1, FR9 of add-meeting-share-dialog.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
@@ -6,6 +7,7 @@ import { screen, waitFor, within } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { expect } from "vitest";
+import { STORAGE_KEYS } from "@/constants";
 import { clickButton } from "./meetingGridQueries";
 import { createMeetingGridSession } from "./meetingGridSession";
 
@@ -160,4 +162,99 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       });
     },
   );
+
+  const WAYS_OUT = {
+    '"Share" with the outcome shared': {
+      sharing: { canShare: true, canCopy: true },
+      leave: chooseShareInDialog,
+    },
+    "the close button": {
+      sharing: { canShare: true, canCopy: true },
+      leave: () =>
+        userEvent.click(
+          within(screen.getByRole("dialog")).getByRole("button", {
+            name: i18n.t("locations.close"),
+          }),
+        ),
+    },
+    Esc: {
+      sharing: { canShare: true, canCopy: true },
+      leave: () => userEvent.keyboard("{Escape}"),
+    },
+    '"Share" with the outcome cancelled': {
+      sharing: { canShare: true, isCancelled: true, canCopy: true },
+      leave: chooseShareInDialog,
+    },
+    '"Share" with the outcome copied': {
+      sharing: { canShare: false, canCopy: true },
+      leave: chooseShareInDialog,
+    },
+    '"Share" with the outcome failed': {
+      sharing: { canShare: false, canCopy: false },
+      leave: chooseShareInDialog,
+    },
+  };
+  const isMeetingBarShown = () =>
+    screen.queryByRole("button", {
+      name: i18n.t("meeting.clear"),
+      hidden: true,
+    }) !== null;
+
+  // @keep-location-menu-in-view-and-clear-range-after-share @FR5 @FR7 @M3
+  f.ScenarioOutline(
+    "The ways out of the share dialog",
+    ({ Given, When, Then }, variables) => {
+      const way = WAYS_OUT[variables.way as keyof typeof WAYS_OUT];
+      Given(
+        "the Grid view with the meeting range 09:00–11:00 in Almaty and the share dialog open",
+        () => givenDialogOpen(way.sharing),
+      );
+      When("the user leaves the dialog by <way>", async () => {
+        await way.leave();
+      });
+      Then(
+        "the share dialog is <dialog> and the meeting range is <range>",
+        async () => {
+          const isOpenAfter = variables.dialog === "open";
+          await waitFor(() =>
+            expect(screen.queryByRole("dialog") !== null).toBe(isOpenAfter),
+          );
+          expect(isMeetingBarShown()).toBe(variables.range !== "none");
+          if (variables.range !== "none") {
+            expect(
+              screen.getByRole("heading", {
+                name: /^Meeting · 2 h/,
+                hidden: true,
+              }),
+            ).toBeInTheDocument();
+          }
+        },
+      );
+    },
+  );
+
+  // @keep-location-menu-in-view-and-clear-range-after-share @FR5
+  f.Scenario("A shared meeting stores nothing", ({ Given, When, Then }) => {
+    const readStored = () => [
+      localStorage.getItem(STORAGE_KEYS.LOCATIONS),
+      localStorage.getItem(STORAGE_KEYS.PREFERENCES),
+    ];
+    let storedBefore: (string | null)[] = [];
+    Given(
+      "the meeting range 09:00–11:00 in Almaty and the share dialog open",
+      async () => {
+        await givenDialogOpen({ canShare: true, canCopy: true });
+        window.dispatchEvent(new Event("pagehide"));
+        storedBefore = readStored();
+      },
+    );
+    When("the share ends with the outcome shared", async () => {
+      await chooseShareInDialog();
+      await expectDialogClosed();
+      window.dispatchEvent(new Event("pagehide"));
+    });
+    Then("the location list and the preferences are unchanged", () => {
+      expect(readStored()).toEqual(storedBefore);
+    });
+  });
 });

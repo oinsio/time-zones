@@ -177,8 +177,11 @@ describe("LocationMenu fixed to the viewport", () => {
     vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(box as DOMRect);
 
   it("should place the open menu under its button and follow a scroll", async () => {
+    vi.spyOn(document.documentElement, "clientHeight", "get").mockReturnValue(
+      800,
+    );
     const trigger = renderFixedMenu(true);
-    stubTriggerBox(trigger, { bottom: 100, right: 300 });
+    stubTriggerBox(trigger, { top: 56, bottom: 100, right: 300 });
     const viewportWidth = document.documentElement.clientWidth;
 
     await userEvent.click(trigger);
@@ -189,7 +192,7 @@ describe("LocationMenu fixed to the viewport", () => {
     expect(menu.style.position).toBe("fixed");
     expect(menu.style.top).toBe("104px");
     expect(menu.style.right).toBe(`${viewportWidth - 300}px`);
-    stubTriggerBox(trigger, { bottom: 80, right: 300 });
+    stubTriggerBox(trigger, { top: 36, bottom: 80, right: 300 });
     fireEvent.scroll(document.body);
     expect(menu.style.top).toBe("84px");
   });
