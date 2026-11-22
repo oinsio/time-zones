@@ -84,7 +84,8 @@
 - Impact: task 3.4's verification fails as written, and the implementer either stops or edits an existing test with no task telling them how. Even after a fix of the old test, the layer order of a menu over the date bar is left untested by the change, which the stable `grid-view` requirement relies on.
 - Fix: in task 3.4, replace the plain re-run with an edit of `grid_view_layers_e2e.feature` "An open location menu lies above the date bar" and its step. The scroll step becomes "the page is scrolled so that the menu of {string} opens under its button and reaches over the date bar": it places the button's bottom at `viewport height − (menu height + 2 × 4 px)`, which is still above the date bar's top. Tag the scenario `@keep-location-menu-in-view-and-clear-range-after-share @NFR-A1`. Add `## MODIFIED Requirements` → "Grid layers stay under the page bars and dialogs" to a new `specs/grid-view/spec.md`, with the requirement text restated verbatim and the scenario GIVEN "the page is scrolled so that a row's location menu opens under its button and reaches over the date bar". List `grid-view` under "Modified Capabilities" and "What Changes". Give the locations scenario "The menu lies over the date bar" the same GIVEN, so the Cards view is covered too.
 - Fix risk: the MODIFIED block must copy the stable requirement text in full, or the archive merge drops lines. The new scroll position depends on the menu being taller than the date bar, which holds today (four 44 px items against one bar). The step file `grid_view_layers_e2e.steps.ts` gains a `// Verifies` line.
-- Status: open
+- Status: fixed
+- Resolution: added specs/grid-view/spec.md (MODIFIED "Grid layers stay under the page bars and dialogs", text copied in full) whose scenario "An open location menu lies above the date bar" now scrolls so the menu opens under its button and reaches over the date bar and asserts at least one item over it; the locations scenario "The menu lies over the date bar" uses the same GIVEN; task 3.4 rewrites the grid_view_layers step (button bottom at viewport height − (menu height + offset + margin)) and tags it @NFR-A1; design D1, proposal What Changes, Capabilities and Behavior list grid-view.
 
 ### R2 — WARNING — "the page has not scrolled" cannot verify FR4/M2 on a scrolled page
 - Location: `openspec/changes/keep-location-menu-in-view-and-clear-range-after-share/tasks.md` task 3.3; `specs/locations/spec.md:6-12`
@@ -93,7 +94,8 @@
 - Impact: as written, the six last-row cases of the outline always fail, even with a correct implementation. Or the implementer drops the assertion, and FR4/M2 go untested exactly in the case the task is about: a menu at the bottom of a scrolled page.
 - Fix: in task 3.3, add the missing steps "the page scroll offset is noted" (before the menu opens) and "the page scroll offset is unchanged", which compare `window.scrollX/scrollY` with the noted values. Use them in both outlines in place of "the page has not scrolled", and change the delta scenario line to "the page scroll offset is the same as before the menu opened".
 - Fix risk: none. The existing step stays as it is for its own scenarios in `time_selection`.
-- Status: open
+- Status: fixed
+- Resolution: task 3.3 no longer reuses "the page has not scrolled" and adds the steps "the page scroll offset is noted" and "the page scroll offset is the same as before the menu opened"; both outlines in specs/locations/spec.md now end with "the page scroll offset is the same as before the menu opened".
 
 ### R3 — SUGGESTION — The proposal does not list the third MODIFIED requirement
 - Location: `openspec/changes/keep-location-menu-in-view-and-clear-range-after-share/proposal.md:17,32`
@@ -102,7 +104,8 @@
 - Impact: a reader of the proposal misses that the accessibility requirement's focus rule changes, so the archive review can't trace that edit back to the proposal.
 - Fix: in `proposal.md:17` and `proposal.md:32`, add "Accessible share dialog" (the focus after the outcome shared goes to Add location) to the MODIFIED list.
 - Fix risk: none.
-- Status: open
+- Status: fixed
+- Resolution: proposal.md "What Changes" and "Modified Capabilities" now list "Accessible share dialog" as MODIFIED (focus to Add location after the outcome shared, new scenario "Focus after a shared meeting").
 
 ## Verdict
 
