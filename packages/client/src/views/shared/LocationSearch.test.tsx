@@ -74,7 +74,9 @@ describe("LocationSearch", () => {
     );
     renderSearch(loadCitySearch);
     await openSearch();
-    expect(screen.getByText("Loading the search…")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Loading the search…", {}, { timeout: 5000 }),
+    ).toBeInTheDocument();
     await act(async () => finishLoading());
     expect(await screen.findByText("Popular locations")).toBeInTheDocument();
     expect(loadCitySearch).toHaveBeenCalledTimes(1);

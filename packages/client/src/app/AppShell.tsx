@@ -43,12 +43,16 @@ import { AppShellMeeting } from "./AppShellMeeting";
 import { AppPage } from "./appPage";
 import { LazyAppShellNotices } from "./LazyAppShellNotices";
 import { MainPage } from "./MainPage";
-import { ToolHost } from "./ToolHost";
 import { useAppPage } from "./useAppPage";
 import { useToolSessions } from "./useToolSessions";
 import { ViewSkeleton } from "./ViewSkeleton";
 
 const reloadWindow = () => window.location.reload();
+
+/** Loaded on demand so the tool page host stays out of the initial JavaScript (NFR-P1 budget). */
+const ToolHost = lazy(async () => ({
+  default: (await import("./ToolHost")).ToolHost,
+}));
 
 /** Loaded on demand so the settings page stays out of the initial JavaScript (NFR-P1 budget). */
 const SettingsPage = lazy(async () => ({
@@ -171,13 +175,15 @@ function AppShellContent({
   const openedTool = enabledTools.find((tool) => tool.id === toolId);
   if (page === AppPage.TOOL && openedTool !== undefined) {
     return (
-      <ToolHost
-        tool={openedTool}
-        notices={notices}
-        onBack={leave}
-        session={getToolSession(openedTool.id)}
-        services={{ tickScheduler, textCopying }}
-      />
+      <Suspense fallback={<ViewSkeleton />}>
+        <ToolHost
+          tool={openedTool}
+          notices={notices}
+          onBack={leave}
+          session={getToolSession(openedTool.id)}
+          services={{ tickScheduler, textCopying }}
+        />
+      </Suspense>
     );
   }
 

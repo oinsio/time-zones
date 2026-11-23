@@ -20,9 +20,9 @@ const unixTimeConverterTool: ToolDefinition = {
   id: ToolId.UNIX_TIME_CONVERTER,
   titleKey: "tools.unixTimeConverter",
   icon: Binary,
-  page: createRetryableLazyView<ToolPageProps>(async () => ({
-    default: (await import("./unixTimeConverter")).UnixTimeConverterPage,
-  })),
+  page: createRetryableLazyView<ToolPageProps>(async () =>
+    (await import("./unixTimeConverter")).loadUnixTimeConverterPage(),
+  ),
 };
 
 /**

@@ -13,7 +13,11 @@ const { toolChunkLoads } = vi.hoisted(() => ({ toolChunkLoads: vi.fn() }));
 vi.mock("virtual:pwa-register/react", () => ({ useRegisterSW: vi.fn() }));
 vi.mock("@/tools/unixTimeConverter", () => {
   toolChunkLoads();
-  return { UnixTimeConverterPage: () => <h1>converter page</h1> };
+  const UnixTimeConverterPage = () => <h1>converter page</h1>;
+  return {
+    UnixTimeConverterPage,
+    loadUnixTimeConverterPage: async () => ({ default: UnixTimeConverterPage }),
+  };
 });
 
 const storeEnabledTools = (enabledTools: string[]) =>
