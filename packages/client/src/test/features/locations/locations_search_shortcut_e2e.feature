@@ -40,6 +40,7 @@ Feature: Open the location search with the slash key
   @open-location-search-with-slash-shortcut @view-contract @FR3 @M2
   Scenario: The slash key is typed into the open search's query
     When the user presses "/" on the main page
+    And the search has opened
     And the user presses "/"
     Then exactly one search is open
     And the query field holds "/"

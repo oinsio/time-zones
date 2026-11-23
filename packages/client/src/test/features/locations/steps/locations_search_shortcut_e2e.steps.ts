@@ -37,6 +37,11 @@ When(/^the user presses "\/" on the main page$/, async ({ locationsWorld }) => {
   await page.keyboard.press(SHORTCUT_KEY);
 });
 
+// Verifies FR3 of open-location-search-with-slash-shortcut: the search loads on its first open, so a second key press waits for it.
+When("the search has opened", async ({ locationsWorld }) => {
+  await expect(queryField(locationsWorld.page)).toBeVisible();
+});
+
 // Verifies FR2, FR3 of open-location-search-with-slash-shortcut.
 When(/^the user presses "\/"$/, async ({ locationsWorld }) => {
   await locationsWorld.page.keyboard.press(SHORTCUT_KEY);
