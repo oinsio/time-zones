@@ -10,6 +10,9 @@ export const UNIX_TIME_MICROSECONDS_MAX_DIGITS = 17;
 /** The range of `Temporal.Instant`, in whole seconds from 1970 either way. Implements FR15 of add-unix-time-converter-tool (D4). */
 export const MAX_UNIX_SECONDS = 8_640_000_000_000;
 
+/** The furthest epoch time, in milliseconds, that `Intl.DateTimeFormat` formats: a local clock reading past it cannot be written. Implements FR15 of add-unix-time-converter-tool (D4). */
+export const MAX_FORMATTABLE_EPOCH_MILLISECONDS = 8_640_000_000_000_000;
+
 /** Fraction digits of an exact instant: nanoseconds are the finest unit. */
 export const MAX_UNIX_TIME_FRACTION_DIGITS = 9;
 

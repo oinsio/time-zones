@@ -54,6 +54,16 @@ const timeOf = (state: ConverterState, id: string, options = {}) =>
 afterEach(() => i18n.changeLanguage("ru"));
 
 describe("presentConverter rows", () => {
+  it("should leave out a row whose local clock reading Intl cannot format, at the end of the range", () => {
+    const lastSecond = reduceConverter(typeInput("8640000000000"), {
+      type: ConverterCommandType.CHOOSE_UNIT,
+      unitChoice: UnixTimeUnitChoice.SECONDS,
+    });
+    expect(present(lastSecond).rows.map(({ cityLabel }) => cityLabel)).toEqual([
+      "New York",
+    ]);
+  });
+
   it("should list one row per location with date and time in list order", () => {
     const { rows } = present(typeInput("1795432987123"));
     expect(

@@ -1,5 +1,9 @@
 import type { TFunction } from "i18next";
-import { UTC_ZONE_ID } from "@/constants";
+import {
+  MAX_FORMATTABLE_EPOCH_MILLISECONDS,
+  NANOSECONDS_PER_MILLISECOND,
+  UTC_ZONE_ID,
+} from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
 import {
@@ -64,6 +68,20 @@ export type PresentedConverterRow = {
 };
 
 /**
+ * Whether the local clock reading of a row is inside what `Intl` formats: at
+ * the very end of the range of a Unix time, a zone ahead of UTC reads past it.
+ * Implements FR15 of add-unix-time-converter-tool (D4).
+ */
+function isLocalTimeFormattable(
+  localDateTime: Temporal.ZonedDateTime,
+): boolean {
+  const localClockMilliseconds =
+    localDateTime.epochMilliseconds +
+    localDateTime.offsetNanoseconds / NANOSECONDS_PER_MILLISECOND;
+  return Math.abs(localClockMilliseconds) <= MAX_FORMATTABLE_EPOCH_MILLISECONDS;
+}
+
+/**
  * One row per location of the list, in list order; an empty list gives one row
  * for the device time zone. Built on the row presenters of the main page, and
  * not on `presentZoneMoment`, which also builds the day track and the notes of
@@ -86,7 +104,8 @@ export function presentConverterRows(
   const fractionDigitCount = UNIX_TIME_UNIT_FRACTION_DIGITS[state.precision];
   return rowLocations.flatMap((location) => {
     const localDateTime = getLocalDateTime(location.timeZoneId, instant);
-    if (localDateTime === undefined) return [];
+    if (localDateTime === undefined || !isLocalTimeFormattable(localDateTime))
+      return [];
     const isDeviceTime = isDeviceTimeLocation(location);
     const isUniversalTime =
       !isDeviceTime &&
