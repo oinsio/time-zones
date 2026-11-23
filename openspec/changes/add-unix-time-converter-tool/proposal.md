@@ -167,7 +167,7 @@ No changes: the project has no `docs/ia/` documents.
 
 - **M1** With no tool enabled the header shows exactly 2 buttons and the initial JavaScript is within today's budget.
 - **M2** `1795432987123` shows «14:23:07.123» for Moscow and `1795432987123456789` shows «14:23:07.123456789», in 3 of 3 checks: the unit scenarios, the unit scenario with `BigInt` removed (the iOS Safari 12.5 case) and the Chromium end-to-end scenario "Fraction digits follow the precision"; `pnpm check:legacy-build` passes with the converter chunk.
-- **M3** 100 % of the detection cases of the delta spec pass (the 13 rows of "Detection by digit count": digit counts 1, 11, 12, 13, 14, 15, 16, 17, 18, 19 and 22, and a negative value; plus the decimal fractions of "Texts the input reads").
+- **M3** 100 % of the detection cases of the delta spec pass (the 12 rows of "Detection by digit count": digit counts 1, 11, 12, 13, 14, 15, 16, 17, 18, 19 and 22, and a negative value; plus the decimal fractions of "Texts the input reads").
 - **M4** A round trip — a row time typed with 9 fraction digits, then the nanoseconds notation typed back into the converter input — gives the same row text in 100 % of the scenario's examples.
 - **M5** From the main page the main scenario takes 2 actions with a mouse and 3 on a touch device.
 - **M6** axe-core reports 0 violations of the converter page in both themes at 320, 390 and 1280 px.
