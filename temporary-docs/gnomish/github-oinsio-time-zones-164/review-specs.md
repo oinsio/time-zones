@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | Stale claims | 1 |
-| Requirements fully covered | 48/48 |
+| Requirements fully covered | 59/59 |
 | Contradictions | 2 |
 | CRITICAL | 0 |
 | WARNING | 2 |
