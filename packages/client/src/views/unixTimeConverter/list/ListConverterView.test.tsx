@@ -174,6 +174,16 @@ describe("ListConverterView", () => {
     expect(inputField()).toHaveValue("1795432987");
   });
 
+  it("should let Esc from the converter input reach the page, which has nothing to restore", async () => {
+    renderList();
+    const onKeyDown = vi.fn();
+    document.addEventListener("keydown", onKeyDown);
+    await userEvent.click(inputField());
+    await userEvent.keyboard("{Escape}");
+    document.removeEventListener("keydown", onKeyDown);
+    expect(onKeyDown).toHaveBeenCalledOnce();
+  });
+
   it("should restore the row field with Esc without leaving the page", async () => {
     renderList();
     await userEvent.click(

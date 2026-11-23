@@ -1,5 +1,4 @@
 import { type ClipboardEvent, useEffect, useId, useRef } from "react";
-import { KeyboardKey } from "@/constants";
 import type { PresentedConverter } from "@/presenter/unixTime";
 
 type ConverterInputFieldProps = {
@@ -51,9 +50,6 @@ export function ConverterInputField({
         value={input.text}
         onChange={(event) => onTypeInput(event.target.value)}
         onPaste={handlePaste}
-        onKeyDown={(event) => {
-          if (event.key === KeyboardKey.ESCAPE) event.stopPropagation();
-        }}
         className="min-h-11 w-full min-w-0 rounded-md border border-control-border bg-surface px-3 text-base font-semibold tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent aria-[invalid=true]:border-danger"
       />
       <p
