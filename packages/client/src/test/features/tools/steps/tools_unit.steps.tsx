@@ -13,9 +13,9 @@ import { DEFAULT_PREFERENCES } from "@/preferences";
 import { stubZoneCitiesFetch } from "@/test/stubZoneCitiesFetch";
 import {
   type ToolDefinition,
-  type ToolPageProps,
-  ToolPageFrame,
   ToolId,
+  ToolPageFrame,
+  type ToolPageProps,
   toolRegistry,
 } from "@/tools";
 import { createRetryableLazyView } from "@/views";

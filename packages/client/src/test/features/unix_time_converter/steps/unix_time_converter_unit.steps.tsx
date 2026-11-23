@@ -331,7 +331,9 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
 
   // @add-unix-time-converter-tool @FR18
   f.Scenario("English interface", ({ Given, When, Then, And }) => {
-    Given("the interface language is English", () => i18n.changeLanguage("en"));
+    Given("the interface language is English", async () => {
+      await i18n.changeLanguage("en");
+    });
     When(
       "the user types {string} into the converter input",
       async (_ctx, text: string) => {
@@ -344,7 +346,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
     And(
       "the unit options are {string}, {string}, {string}, {string}, {string}",
-      (_ctx, ...expected: string[]) =>
+      (_ctx: unknown, ...expected: string[]) =>
         expect(
           within(screen.getByRole("combobox", { name: "Unix time unit" }))
             .getAllByRole("option")
