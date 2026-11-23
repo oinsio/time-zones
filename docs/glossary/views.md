@@ -3,7 +3,7 @@
 Interchangeable interfaces over the same model. Decisions: ADR-0002 (model, presenter, swappable views), ADR-0005 (view registry); catalog in `docs/architecture/views.md`. See [README](README.md) for the entry format.
 
 - **View** — one interchangeable interface over the model, such as Cards or Grid. A view reads presented data and dispatches commands, and owns only its UI state (scroll, focus, open panels). *Not:* a page or a screen. *Never:* layout, mode (for the view itself), skin.
-- **View registry** — the list of registered views, in display order; the settings list them and the view host shows one of them. *Code:* `views/index.ts`, `viewRegistry`, `resolveActiveView`.
+- **View registry** — the list of registered views, in display order; the settings list them and the view host shows one of them. *Code:* `views/index.ts`, `viewRegistry`, `resolveActiveView` (it also serves the converter view registry).
 - **View mode** — the user's choice of a registered view; Cards when none is chosen or the chosen view is not registered. The view never changes by itself, by width or orientation (ADR-0012). *RU:* «Вид». *Code:* `Preferences.viewMode`, `SET_VIEW_MODE`, `DEFAULT_VIEW_ID`, `resolveActiveView`, `useViewMode`, `ViewModeGroup`, `settings.viewModeLabel`. *Never:* auto, layout.
 - **Cards view** — the view with one card per location, the exact time in large digits and a day track. *Code:* `CardsView`, `ViewId.CARDS`, `views.cardsTitle`. *RU:* «Карточки».
 - **Grid view** — the view with hour cells aligned across all locations, for planning a meeting range. *Code:* `GridView`, `ViewId.GRID`, `views.gridTitle`. *RU:* «Сетка».

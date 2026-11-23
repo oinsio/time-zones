@@ -24,6 +24,8 @@ The normative dictionary of the project's ubiquitous language. If a term is here
 | Search | [search.md](search.md) | finding a city and adding it as a location |
 | Settings | [settings.md](settings.md) | the settings page, the theme preference, the hour format, the interface language, the locale registry |
 | Browser compatibility | [browser-compatibility.md](browser-compatibility.md) | supported engines, legacy engines, legacy support |
+| Tools | [tools.md](tools.md) | tools, the tool registry, tool buttons and tool pages |
+| Unix time | [unix-time.md](unix-time.md) | the Unix time converter, exact instants, notations, relative time |
 | Views | [views.md](views.md) | interchangeable interfaces over the model |
 | App shell | [app-shell.md](app-shell.md) | notices, recovery, storage and offline states |
 | Architecture | [architecture.md](architecture.md) | layers, ports, commands, test stand-ins |

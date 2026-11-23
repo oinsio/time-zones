@@ -128,6 +128,13 @@ The day colouring (change add-day-colouring-setting) is a second, separate rule:
 
 Hour cells and day tracks are spans of absolute time starting at the reference zone's local midnight, so 23- and 25-hour days and :30 / :45 offsets stay aligned.
 
+## Tools and the Unix time converter
+
+- `Preferences.enabledTools` — the ids of the tools the user turned on; `TOGGLE_TOOL` adds or removes one, never twice; an unregistered id is kept.
+- `ExactInstant { unixSeconds, nanoseconds }` — an instant that keeps nine fraction digits without BigInt; `toInstant` converts it, `isExactInstantInRange` checks the range of `Temporal.Instant`.
+- `ConverterState` — the converter moment (live at the clock's whole second, or pinned), the typed text, the unit choice and the input error; changed only by commands of `reduceConverter` (`TYPE_INPUT`, `CHOOSE_UNIT`, `SET_ROW_WALL_TIME`, `SET_ROW_DATE`, `NOW`, tick).
+- `getRelativeTime` — the largest non-zero unit of years, months, days, hours, minutes between the moment and now, rounded towards zero.
+
 ## Out of the model
 
 - Formatting and localized strings — presenter.

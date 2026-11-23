@@ -2,10 +2,10 @@
 
 How the app represents "when" and "where in time". Decisions: ADR-0003 (reference instant), ADR-0007 (reference zone and device time). See [README](README.md) for the entry format.
 
-- **Instant** — an exact point on the time line, independent of any zone. Stored and exchanged as ISO 8601 with `Z`. *Code:* `Temporal.Instant`. *Not:* a local date and time, which needs a zone to become an instant. *Never:* timestamp in the model (only in storage), epoch.
+- **Instant** — an exact point on the time line, independent of any zone. Stored and exchanged as ISO 8601 with `Z`. *Code:* `Temporal.Instant`. *Not:* a local date and time, which needs a zone to become an instant. *Never:* timestamp in the model (only in storage), epoch; for the count since 1970 use Unix time.
 - **Reference moment** — the one instant every location is shown at. It is in one of two modes, live or pinned, and it is never stored: the app always opens live. *Code:* `ReferenceMoment`. *Never:* selected time, current time (for the pinned case), cursor.
-- **Live** — the mode of the reference moment that follows the clock. *Code:* `ReferenceMode.LIVE`.
-- **Pinned** — the mode of the reference moment fixed by the user (a time or date selection). Only Now returns it to live. *Code:* `ReferenceMode.PINNED`. *Never:* frozen, paused, locked.
+- **Live** — the mode of the reference moment or the converter moment that follows the clock. *Code:* `ReferenceMode.LIVE`.
+- **Pinned** — the mode of the reference moment or the converter moment fixed by the user (a time or date selection). Only Now returns it to live. *Code:* `ReferenceMode.PINNED`. *Never:* frozen, paused, locked.
 - **Effective instant** — the instant the reference moment stands for right now: the clock's instant while live, the pinned instant otherwise. *Code:* `getEffectiveInstant`.
 - **Time zone ID** — a canonical IANA identifier such as `Europe/Moscow`. It is the only way a zone is stored or compared. *Code:* `timeZoneId`. *Not:* a UTC offset, an abbreviation or a legacy zone name. *Never:* raw offset as an identifier, tz string.
 - **Legacy zone name** — an older IANA name that CLDR maps to a canonical time zone ID (`Europe/Kiev` → `Europe/Kyiv`). Input with a legacy zone name is canonicalized before it is stored. *Code:* `virtual:time-zone-aliases`, `canonicalizeTimeZoneId`. *Never:* old zone, deprecated zone.
@@ -26,3 +26,4 @@ How the app represents "when" and "where in time". Decisions: ADR-0003 (referenc
 - **Clock** — the port that gives the current instant and the device time zone. Production uses `systemClock`. Tests use `fakeClock`. *Code:* `Clock` in `@/lib/temporal`. *Never:* `Date.now()` or `new Date()` in production code.
 - **Minute tick** — the controller's re-read of the clock at every minute boundary, paused while the page is hidden. *Code:* `useMinuteTick`, `TickScheduler`. *Never:* interval timer, polling.
 - **Weekday** — the day of the week of a date in a zone; it picks the grammatical form of the meeting share heading. *Code:* `Weekday`, `getWeekday` (from `Temporal.PlainDate.dayOfWeek`).
+- **Second tick** — the clock tick at every whole second, used while the converter moment is live. *Code:* `useSecondTick`, `getMillisecondsUntilNextSecond`.

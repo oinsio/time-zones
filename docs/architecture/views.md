@@ -81,6 +81,10 @@ Each row is a card with the exact time in large digits and a day track with a ha
 +----------------------------------------------------------------------------+
 ```
 
+## Unix time converter
+
+The tool page (a page of the tool registry) of the Unix time converter (`views/unixTimeConverter/`, registry `converterViewRegistry`). The header holds a tool button for each enabled tool, between the search and the settings button, each 44 × 44 px; they are hidden with the meeting bar. Blocks of the list view, top to bottom: the input field with the unit choice (44 px high controls) and its hint or message; the moment notations, each with a 44 × 44 px copy action; the relative time; the location rows with a time and a date field each; the Now and Show on main page actions. States: loading (skeleton while the page loads), error with Retry, empty (no locations), offline (nothing changes: the converter needs no network).
+
 ## Shared building blocks
 
 Used by every view, implemented once in `views/shared/`:
