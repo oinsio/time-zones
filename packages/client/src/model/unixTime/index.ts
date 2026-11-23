@@ -1,6 +1,20 @@
 // Public API of the Unix time model (ADR-0002, D11 of add-unix-time-converter-tool).
 // Not re-exported from `model/index.ts`: only the converter chunk imports it.
+
+export { parseConverterText, reduceConverter } from "./converter";
+export {
+  type ConverterCommand,
+  ConverterCommandType,
+  type ConverterRowTarget,
+  type ConverterRowWallTime,
+} from "./converterCommands";
 export { ConverterInputError } from "./converterInputError";
+export {
+  type ConverterRowNote,
+  type ConverterState,
+  createConverterState,
+  getWrittenUnit,
+} from "./converterState";
 export {
   type ExactInstant,
   getPrecisionOfFractionDigits,
