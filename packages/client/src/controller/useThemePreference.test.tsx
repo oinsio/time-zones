@@ -31,6 +31,7 @@ const storedTheme = (theme: ThemePreference) =>
       dayPalette: DayPalette.VIVID,
       shareLanguage: null,
       shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+      enabledTools: [],
     },
   }) as const;
 

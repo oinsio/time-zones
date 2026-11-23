@@ -207,6 +207,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
           dayPalette: "VIVID",
           shareLanguage: null,
           shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+          enabledTools: [],
         }),
       );
       When("the settings page is shown", showSettings);

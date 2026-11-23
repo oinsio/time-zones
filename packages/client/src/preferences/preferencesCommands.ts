@@ -18,6 +18,7 @@ import { checkWorkingHours, type WorkingHours } from "./workingHours";
  * SET_DAY_COLOURING and SET_WORKING_HOURS implement FR1, FR6, FR7 of add-day-colouring-setting (D1).
  * SET_DAY_PALETTE implements FR3 of redesign-cards-grid-and-day-palettes (D2).
  * SET_SHARE_LANGUAGE and TOGGLE_SHARE_ZONE_LABEL_PART implement FR5, FR6 of add-meeting-share-dialog (D4).
+ * TOGGLE_TOOL implements FR2, FR3 of add-unix-time-converter-tool (D1).
  */
 export enum PreferencesCommandType {
   SET_THEME = "SET_THEME",
@@ -30,6 +31,7 @@ export enum PreferencesCommandType {
   SET_WORKING_HOURS = "SET_WORKING_HOURS",
   SET_SHARE_LANGUAGE = "SET_SHARE_LANGUAGE",
   TOGGLE_SHARE_ZONE_LABEL_PART = "TOGGLE_SHARE_ZONE_LABEL_PART",
+  TOGGLE_TOOL = "TOGGLE_TOOL",
 }
 
 export type PreferencesCommand =
@@ -61,7 +63,29 @@ export type PreferencesCommand =
   | {
       type: PreferencesCommandType.TOGGLE_SHARE_ZONE_LABEL_PART;
       part: ZoneLabelPart;
+    }
+  | {
+      type: PreferencesCommandType.TOGGLE_TOOL;
+      toolId: string;
+      isEnabled: boolean;
     };
+
+/** A tool already in the wanted state returns the same object; other ids are kept. */
+function reduceToggleTool(
+  preferences: Preferences,
+  toolId: string,
+  isEnabled: boolean,
+): Preferences {
+  if (preferences.enabledTools.includes(toolId) === isEnabled) {
+    return preferences;
+  }
+  return {
+    ...preferences,
+    enabledTools: isEnabled
+      ? [...preferences.enabledTools, toolId]
+      : preferences.enabledTools.filter((enabledId) => enabledId !== toolId),
+  };
+}
 
 /** The country is not a share zone label part: toggling it returns the same object. */
 function reduceShareZoneLabelPart(
@@ -150,5 +174,7 @@ export function reducePreferences(
         : { ...preferences, shareLanguage: command.shareLanguage };
     case PreferencesCommandType.TOGGLE_SHARE_ZONE_LABEL_PART:
       return reduceShareZoneLabelPart(preferences, command.part);
+    case PreferencesCommandType.TOGGLE_TOOL:
+      return reduceToggleTool(preferences, command.toolId, command.isEnabled);
   }
 }

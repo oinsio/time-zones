@@ -28,6 +28,8 @@ import { migratePayload, type PayloadMigrations } from "./payloadMigrations";
  * Implements FR3 of redesign-cards-grid-and-day-palettes (D2).
  * Version 7 had no share choices: step 7 pins no share language and shows both
  * share zone label parts. Implements FR5, FR6 of add-meeting-share-dialog (D4).
+ * Version 8 had no enabled tools: step 8 turns none on.
+ * Implements FR3 of add-unix-time-converter-tool (D1).
  */
 export const createPreferencesMigrations = (
   legacyInterfaceLanguage: string | null,
@@ -62,6 +64,7 @@ export const createPreferencesMigrations = (
     shareLanguage: null,
     shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
   }),
+  8: (payload) => ({ ...(payload as object), enabledTools: [] }),
 });
 
 export const serializePreferencesDocument = (
@@ -80,6 +83,7 @@ export const serializePreferencesDocument = (
       dayPalette: preferences.dayPalette,
       shareLanguage: preferences.shareLanguage,
       shareZoneLabelParts: preferences.shareZoneLabelParts,
+      enabledTools: preferences.enabledTools,
     },
   });
 

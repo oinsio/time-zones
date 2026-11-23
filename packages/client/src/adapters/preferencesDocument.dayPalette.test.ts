@@ -21,8 +21,8 @@ const version6Payload = {
 };
 
 describe("the day palette in the preferences document", () => {
-  it("should be written at schema version 8", () => {
-    expect(PREFERENCES_SCHEMA_VERSION).toBe(8);
+  it("should be written at schema version 9", () => {
+    expect(PREFERENCES_SCHEMA_VERSION).toBe(9);
   });
 
   it("should write the palette", () => {

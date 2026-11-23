@@ -55,6 +55,7 @@ Given(
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
       },
       locationsWorld.seededInterfaceLanguage,
     );
@@ -72,6 +73,7 @@ Given(
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         hourFormat,
       },
       locationsWorld.seededInterfaceLanguage,

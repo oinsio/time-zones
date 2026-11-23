@@ -24,6 +24,7 @@ describe("DEFAULT_PREFERENCES", () => {
       dayPalette: "VIVID",
       shareLanguage: null,
       shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+      enabledTools: [],
       zoneLabelParts: [
         ZoneLabelPart.UTC_OFFSET,
         ZoneLabelPart.ZONE_ABBREVIATION,
@@ -83,6 +84,7 @@ describe("parseStoredPreferences", () => {
       dayPalette: "VIVID",
       shareLanguage: null,
       shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+      enabledTools: [],
     });
     expect(outcome).toEqual({
       ok: true,
@@ -96,6 +98,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });
@@ -116,6 +119,7 @@ describe("parseStoredPreferences", () => {
           dayPalette: "VIVID",
           shareLanguage: null,
           shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+          enabledTools: [],
         }).ok,
       ).toBe(true);
     },
@@ -135,6 +139,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -149,6 +154,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -172,6 +178,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -187,6 +194,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -202,6 +210,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -217,6 +226,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -232,6 +242,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -272,6 +283,7 @@ describe("SET_INTERFACE_LANGUAGE", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
       }),
     ).toEqual({
       ok: true,
@@ -285,6 +297,7 @@ describe("SET_INTERFACE_LANGUAGE", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });

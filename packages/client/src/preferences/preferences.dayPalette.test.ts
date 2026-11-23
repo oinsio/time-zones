@@ -20,6 +20,7 @@ const storedPayload = (dayPalette: unknown) => ({
   dayPalette,
   shareLanguage: null,
   shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+  enabledTools: [],
 });
 
 describe("the day palette defaults", () => {

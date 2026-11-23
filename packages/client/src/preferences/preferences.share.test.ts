@@ -34,6 +34,7 @@ function parseShare(overrides: Record<string, unknown>) {
     dayPalette: "VIVID",
     shareLanguage: null,
     shareZoneLabelParts: BOTH_PARTS,
+    enabledTools: [],
     ...overrides,
   });
 }

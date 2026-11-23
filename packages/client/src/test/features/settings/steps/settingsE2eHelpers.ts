@@ -62,6 +62,7 @@ const SEEDED_DEFAULT_PAYLOAD = {
   dayPalette: "VIVID",
   shareLanguage: null,
   shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+  enabledTools: [],
 };
 
 /**
@@ -154,6 +155,7 @@ export const seedZoneLabelParts = (
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
       },
     }),
   );
