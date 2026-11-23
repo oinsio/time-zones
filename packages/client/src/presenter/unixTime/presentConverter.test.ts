@@ -53,6 +53,45 @@ const timeOf = (state: ConverterState, id: string, options = {}) =>
 
 afterEach(() => i18n.changeLanguage("ru"));
 
+describe("presentConverter universal time", () => {
+  const zoneLineOf = (location: Location) =>
+    present(typeInput("1795432987"), { locations: [location] })
+      .rows[0].zoneLineParts.map((part) => part.text)
+      .join(" ");
+  const withoutCountry = (id: string, timeZoneId: string): Location => ({
+    id,
+    kind: LocationKind.CITY,
+    timeZoneId,
+    label: id,
+    countryCode: "",
+  });
+
+  it("should name the place of a UTC location without a country universal time", () => {
+    expect(zoneLineOf(withoutCountry("utc", "UTC"))).toContain(
+      "Всемирное время",
+    );
+  });
+
+  it("should not call a UTC location with a country universal time", () => {
+    expect(zoneLineOf(city("utc", "Greenwich", "UTC", "GB"))).not.toContain(
+      "Всемирное время",
+    );
+  });
+});
+
+describe("presentConverter notations", () => {
+  it("should give each notation its own id, the last being ISO 8601", () => {
+    const ids = present(typeInput("1795432987")).notations.map(({ id }) => id);
+    expect(ids).toEqual([
+      "SECONDS",
+      "MILLISECONDS",
+      "MICROSECONDS",
+      "NANOSECONDS",
+      "ISO_8601",
+    ]);
+  });
+});
+
 describe("presentConverter rows", () => {
   it("should leave out a row whose local clock reading Intl cannot format, at the end of the range", () => {
     const lastSecond = reduceConverter(typeInput("8640000000000"), {

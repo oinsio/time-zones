@@ -182,3 +182,11 @@ describe("a row command with no matching command type", () => {
     );
   });
 });
+
+describe("an error that is not a range error", () => {
+  it("should be thrown again, not taken for a value out of range", () => {
+    expect(() => setDate(SAMPLE, undefined as unknown as string)).toThrow(
+      TypeError,
+    );
+  });
+});

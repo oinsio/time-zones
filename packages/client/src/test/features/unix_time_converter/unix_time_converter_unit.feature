@@ -123,3 +123,17 @@ Feature: The Unix time converter
     Given the location list is empty
     When the user opens the converter
     Then exactly one row is shown, for the device time zone, with the time "16:23:07"
+
+  @add-unix-time-converter-tool @FR11
+  Scenario: Another day in one location
+    Given the user typed "1795432987123" into the converter input
+    When the user chooses 24 November 2026 in the calendar of the New York row
+    Then the New York row shows the date "вт, 24 нояб." and the time "06:23:07.123"
+    And the converter input shows "1795519387123"
+
+  @add-unix-time-converter-tool @FR18
+  Scenario: English interface
+    Given the interface language is English
+    When the user types "abc" into the converter input
+    Then the message "Enter a Unix time or an ISO 8601 date and time" is shown
+    And the unit options are "Auto", "Seconds", "Milliseconds", "Microseconds", "Nanoseconds"

@@ -37,7 +37,7 @@ Feature: Tools in a real browser
       | the back button |
       | Esc         |
 
-  @add-unix-time-converter-tool @FR5 @NFR-A1
+  @add-unix-time-converter-tool @FR5 @NFR-A1 @NFR-A4
   Scenario: Tab order of the header
     Given the tool is enabled
     When the user presses Tab until the Add location button is focused

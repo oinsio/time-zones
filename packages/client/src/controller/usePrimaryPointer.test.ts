@@ -22,7 +22,7 @@ function stubMatchMedia(initialMatches: boolean) {
     queryList.matches = matches;
     for (const listener of listeners) listener();
   };
-  return { matchMedia, change, listeners };
+  return { matchMedia, change, listeners, queryList };
 }
 
 describe("usePrimaryPointer", () => {
@@ -67,5 +67,36 @@ describe("usePrimaryPointer", () => {
     window.matchMedia = undefined;
     const { result } = renderHook(() => usePrimaryPointer());
     expect(result.current.isFineAndHovering).toBe(false);
+  });
+
+  it("should listen to the change event of the query", () => {
+    const { addEventListener } = stubMatchMedia(false).queryList;
+    renderHook(() => usePrimaryPointer());
+    expect(addEventListener).toHaveBeenCalledWith(
+      "change",
+      expect.any(Function),
+    );
+  });
+
+  it("should follow and release the query of an engine that only has addListener", () => {
+    const listeners = new Set<ChangeListener>();
+    const queryList = {
+      matches: false,
+      addListener: vi.fn((listener: ChangeListener) => listeners.add(listener)),
+      removeListener: vi.fn((listener: ChangeListener) =>
+        listeners.delete(listener),
+      ),
+    };
+    window.matchMedia = vi.fn(
+      () => queryList,
+    ) as unknown as typeof window.matchMedia;
+    const { result, unmount } = renderHook(() => usePrimaryPointer());
+    queryList.matches = true;
+    act(() => {
+      for (const listener of listeners) listener();
+    });
+    expect(result.current.isFineAndHovering).toBe(true);
+    unmount();
+    expect(listeners.size).toBe(0);
   });
 });

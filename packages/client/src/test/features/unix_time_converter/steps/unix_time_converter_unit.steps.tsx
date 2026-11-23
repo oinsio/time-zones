@@ -296,4 +296,60 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       },
     );
   });
+
+  // @add-unix-time-converter-tool @FR11
+  f.Scenario("Another day in one location", ({ Given, When, Then, And }) => {
+    Given(
+      "the user typed {string} into the converter input",
+      (_ctx, text: string) => typeText(text),
+    );
+    When(
+      "the user chooses 24 November 2026 in the calendar of the New York row",
+      async () => {
+        await userEvent.click(
+          screen.getByRole("button", { name: /^Выбрать дату — New York,/ }),
+        );
+        await userEvent.click(
+          await screen.findByRole("button", { name: /24/ }),
+        );
+      },
+    );
+    Then(
+      "the New York row shows the date {string} and the time {string}",
+      (_ctx, date: string, time: string) => {
+        expect(
+          screen.getByRole("button", { name: /^Выбрать дату — New York,/ })
+            .textContent,
+        ).toContain(date);
+        expect(world.timeOf("New York")).toBe(time);
+      },
+    );
+    And("the converter input shows {string}", (_ctx, text: string) =>
+      expect(world.input()).toHaveValue(text),
+    );
+  });
+
+  // @add-unix-time-converter-tool @FR18
+  f.Scenario("English interface", ({ Given, When, Then, And }) => {
+    Given("the interface language is English", () => i18n.changeLanguage("en"));
+    When(
+      "the user types {string} into the converter input",
+      async (_ctx, text: string) => {
+        await world.open();
+        await world.type(text);
+      },
+    );
+    Then("the message {string} is shown", (_ctx, message: string) =>
+      expect(readInputMessage(world.input())).toBe(message),
+    );
+    And(
+      "the unit options are {string}, {string}, {string}, {string}, {string}",
+      (_ctx, ...expected: string[]) =>
+        expect(
+          within(screen.getByRole("combobox", { name: "Unix time unit" }))
+            .getAllByRole("option")
+            .map((option) => option.textContent),
+        ).toEqual(expected.slice(0, 5)),
+    );
+  });
 });

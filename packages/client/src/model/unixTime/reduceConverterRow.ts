@@ -40,6 +40,16 @@ function toExactInstant(
   };
 }
 
+/** The nanoseconds and the precision of the fraction digits typed in a row time. */
+function readTypedFraction(fractionDigits: string) {
+  return {
+    nanoseconds: Number(
+      fractionDigits.padEnd(MAX_UNIX_TIME_FRACTION_DIGITS, "0"),
+    ),
+    precision: getPrecisionOfFractionDigits(fractionDigits.length),
+  };
+}
+
 function resolveRowCommand(
   state: ConverterState,
   command: RowCommand,
@@ -59,21 +69,17 @@ function resolveRowCommand(
     : local
         .toPlainTime()
         .with({ millisecond: 0, microsecond: 0, nanosecond: 0 });
-  const fractionDigits = isTime ? command.wallTime.fractionDigits : "";
   const { instant, status } = resolveWallClock(
     timeZoneId,
     date.toPlainDateTime(time),
   );
+  const { nanoseconds, precision } =
+    command.type === ConverterCommandType.SET_ROW_WALL_TIME
+      ? readTypedFraction(command.wallTime.fractionDigits)
+      : { nanoseconds: state.moment.nanoseconds, precision: state.precision };
   return {
-    instant: toExactInstant(
-      instant,
-      isTime
-        ? Number(fractionDigits.padEnd(MAX_UNIX_TIME_FRACTION_DIGITS, "0"))
-        : state.moment.nanoseconds,
-    ),
-    precision: isTime
-      ? getPrecisionOfFractionDigits(fractionDigits.length)
-      : state.precision,
+    instant: toExactInstant(instant, nanoseconds),
+    precision,
     rowNote: { locationId, status, requestedWallTime: time.toString() },
   };
 }

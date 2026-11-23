@@ -1,5 +1,4 @@
 import {
-  MAX_UNIX_SECONDS,
   MAX_UNIX_TIME_FRACTION_DIGITS,
   MILLISECONDS_PER_SECOND,
 } from "@/constants";
@@ -56,8 +55,7 @@ export function parseIsoInstantText(text: string): ParseMomentResult {
       fractionDigits.padEnd(MAX_UNIX_TIME_FRACTION_DIGITS, "0"),
     ),
   };
-  return isExactInstantInRange(instant) &&
-    Math.abs(unixSeconds) <= MAX_UNIX_SECONDS
+  return isExactInstantInRange(instant)
     ? {
         ok: true,
         instant,

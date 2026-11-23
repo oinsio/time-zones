@@ -1,5 +1,9 @@
 // Verifies FR12 of add-unix-time-converter-tool: one contract, every adapter.
-import { createBrowserTextCopying } from "./browserTextCopying";
+import { CopyOutcome } from "@/ports";
+import {
+  browserTextCopying,
+  createBrowserTextCopying,
+} from "./browserTextCopying";
 import { createInMemoryTextCopying } from "./inMemoryTextCopying";
 import {
   CopyingBehaviour,
@@ -30,4 +34,17 @@ describeTextCopyingContract("in memory", (behaviour) => {
     canCopy: behaviour === CopyingBehaviour.COPIES,
   });
   return { adapter, copiedTexts: () => adapter.copiedTexts };
+});
+
+describe("browserTextCopying", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("should copy through the clipboard of the running browser", async () => {
+    const writeText = vi.fn(async () => undefined);
+    vi.stubGlobal("navigator", { clipboard: { writeText } });
+    expect(await browserTextCopying.copyText("1795432987")).toBe(
+      CopyOutcome.COPIED,
+    );
+    expect(writeText).toHaveBeenCalledExactlyOnceWith("1795432987");
+  });
 });

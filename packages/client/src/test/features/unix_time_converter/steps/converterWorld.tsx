@@ -16,7 +16,8 @@ import { UnixTimeConverterPage } from "@/tools/unixTimeConverter";
 
 export const SAMPLE_NOW = "2026-11-23T11:23:07Z";
 export const DEVICE_ZONE = "Asia/Almaty";
-const INPUT_NAME = "Unix-время или дата ISO 8601";
+const INPUT_NAME =
+  /^(Unix-время или дата ISO 8601|Unix time or ISO 8601 date)$/;
 const SAMPLE_CITIES = ["Almaty", "Moscow", "Kolkata", "New York"] as const;
 
 /** Per-scenario state of the converter features: the page, its clock and its tick scheduler. */

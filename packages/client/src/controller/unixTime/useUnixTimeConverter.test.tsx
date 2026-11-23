@@ -217,6 +217,19 @@ describe("useUnixTimeConverter", () => {
     expect(onLeave).toHaveBeenCalledOnce();
   });
 
+  it("should present the relative time of a pinned moment again at each minute", () => {
+    const { rendered, clock, tickScheduler } = setup();
+    act(() => rendered.result.current.tool.commands.typeInput("1795432087"));
+    expect(rendered.result.current.tool.converter.relativeTime).toBe(
+      "15 минут назад",
+    );
+    clock.moveTo("2026-11-23T11:24:07Z", "Asia/Almaty");
+    act(() => tickScheduler.runPending());
+    expect(rendered.result.current.tool.converter.relativeTime).toBe(
+      "16 минут назад",
+    );
+  });
+
   it("should write its state to the session on every change", () => {
     const { rendered, written } = setup();
     act(() => rendered.result.current.tool.commands.typeInput("1700000000"));

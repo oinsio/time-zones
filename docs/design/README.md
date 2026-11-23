@@ -59,6 +59,15 @@ The sample: Sunday, 8 March 2026, 12:30 in Almaty, pinned; Almaty (home), Moscow
 
 The settings screens copy the built page with the new tokens. Only the Colours group is new.
 
+## Unix time converter
+
+The tools group of the settings, the tool buttons of the header and the converter page are specified in `docs/architecture/views.md` ("Unix time converter"). There are no HTML screens and no screenshot baselines yet: the converter shows the current time and a relative time, so a baseline would change with the clock. The layout is checked by assertions instead (no horizontal scroll at 320, 375 and 2560 px, 44 × 44 px targets, axe-core), which the table lists.
+
+| Check | Where | Shows |
+|---|---|---|
+| Tools group and tool button | `packages/client/src/test/features/tools/tools_e2e.feature` | toggle pressed state, targets of at least 44 × 44 px at 320, 375 and 1024 px, header at 320, 360 and 2560 px, tab order |
+| Converter page | `packages/client/src/test/features/unix_time_converter/unix_time_converter_e2e.feature` | focus on a desktop, a 19-digit value at 320, 375 and 2560 px without sideways scroll, axe-core |
+
 ## Proposals
 
 Proposed changes that are not approved yet live apart from the approved screens:

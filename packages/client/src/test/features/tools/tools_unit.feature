@@ -92,3 +92,11 @@ Feature: Tools
     Then the error fallback with "Повторить" and the back button is shown
     When the user chooses "Повторить" and the load succeeds
     Then the page heading is "Конвертер Unix-времени"
+
+  @add-unix-time-converter-tool @FR5 @NFR-P1
+  Scenario: The page is not loaded before its button is chosen
+    Given the Unix time converter is enabled and the load of its page is watched
+    When the main page is shown
+    Then the page of the tool was not loaded
+    When the user chooses the tool button
+    Then the page of the tool was loaded once

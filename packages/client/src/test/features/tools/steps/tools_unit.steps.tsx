@@ -338,4 +338,36 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
       expect(heading).toBe(TOOL_NAME);
     });
   });
+
+  // @add-unix-time-converter-tool @FR5 @NFR-P1
+  f.Scenario(
+    "The page is not loaded before its button is chosen",
+    ({ Given, When, Then }) => {
+      const loadPage = vi.fn(async () => ({ default: SamplePage }));
+      Given(
+        "the Unix time converter is enabled and the load of its page is watched",
+        () => {
+          loadPage.mockClear();
+          registry = [
+            {
+              ...makeTool("a", "tools.unixTimeConverter", Binary),
+              page: createRetryableLazyView<ToolPageProps>(loadPage),
+            },
+          ];
+          storePreferences(["a"]);
+        },
+      );
+      When("the main page is shown", showApp);
+      Then("the page of the tool was not loaded", () =>
+        expect(loadPage).not.toHaveBeenCalled(),
+      );
+      When("the user chooses the tool button", () =>
+        userEvent.click(toggleOf(TOOL_NAME)),
+      );
+      Then("the page of the tool was loaded once", async () => {
+        await screen.findByRole("heading", { name: "Tool page" });
+        expect(loadPage).toHaveBeenCalledOnce();
+      });
+    },
+  );
 });
