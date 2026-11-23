@@ -9,6 +9,8 @@ import { getFixedUnit, UnixTimeUnit, UnixTimeUnitChoice } from "./unixTimeUnit";
 export type ConverterRowNote = {
   locationId: string;
   status: WallClockStatus;
+  /** The wall time the user asked for, as `HH:MM:SS`, for the hint under the row. */
+  requestedWallTime: string;
 };
 
 /**

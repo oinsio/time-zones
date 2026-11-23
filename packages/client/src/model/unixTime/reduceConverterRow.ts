@@ -74,7 +74,7 @@ function resolveRowCommand(
     precision: isTime
       ? getPrecisionOfFractionDigits(fractionDigits.length)
       : state.precision,
-    rowNote: { locationId, status },
+    rowNote: { locationId, status, requestedWallTime: time.toString() },
   };
 }
 

@@ -26,3 +26,23 @@ describe("formatTypedWallTimeText", () => {
     expect(formatTypedWallTimeText(typedText)).toBe(expected);
   });
 });
+
+// Verifies FR10 of add-unix-time-converter-tool.
+describe("formatTypedWallTimeText with seconds", () => {
+  it.each([
+    ["9", "9"],
+    ["930", "9:30"],
+    ["9301", "9:30:1"],
+    ["93015", "9:30:15"],
+    ["093015", "09:30:15"],
+    ["abc", "abc"],
+  ])("should show typed %j as %j", (typedText, expected) => {
+    expect(formatTypedWallTimeText(typedText, { hasSeconds: true })).toBe(
+      expected,
+    );
+  });
+
+  it("should keep the main page's text with no option", () => {
+    expect(formatTypedWallTimeText("93015")).toBe("9:3015");
+  });
+});

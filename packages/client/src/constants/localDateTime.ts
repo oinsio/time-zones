@@ -31,6 +31,29 @@ export const LOCAL_TIME_FORMAT_OPTIONS_BY_HOUR_FORMAT: Record<
   [HourFormat.H12]: { hour: "numeric", minute: "2-digit", hourCycle: "h12" },
 };
 
+/**
+ * Options of the local time label with seconds per hour format: the time of a
+ * converter row, to which the fraction digits are added by hand.
+ * Implements FR9 of add-unix-time-converter-tool (D7).
+ */
+export const LOCAL_TIME_WITH_SECONDS_FORMAT_OPTIONS_BY_HOUR_FORMAT: Record<
+  HourFormat,
+  Intl.DateTimeFormatOptions
+> = {
+  [HourFormat.H24]: {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  },
+  [HourFormat.H12]: {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h12",
+  },
+};
+
 /** Options of the hour label of the day track per hour format. */
 export const HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT: Record<
   HourFormat,
