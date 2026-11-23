@@ -8,7 +8,7 @@ Today the shell has two pages, held as state and not as URLs (`AppPage.MAIN | SE
 
 ADRs that bind this change: 0002 (layers), 0003 (instants, wall-clock rules), 0004 (preferences document and migrations), 0005 (view registry), 0008 (work bounds), 0009 (no BigInt, legacy engine).
 
-Three decisions reach beyond this change and become ADRs written in task group 1: **ADR-0020** tools and the tool registry (D1, D2), **ADR-0021** exact instants without BigInt (D4), **ADR-0022** view registries of tool pages (D9). This file records them in short and holds the local decisions.
+Three decisions reach beyond this change and belong in ADRs: **ADR-0020** tools and the tool registry (D1, D2), **ADR-0021** exact instants without BigInt (D4), **ADR-0022** view registries of tool pages (D9). The implement stage may not write `docs/adr/` or `CLAUDE.md` (`.gnomish/stages/specify/handoff.md`), so it drafts them as the handoff patch H1 (`tasks.md` → Human follow-up), and no checkbox task depends on them. This file records them in short and holds the local decisions.
 
 Owners of the concepts this change touches (`docs/glossary/`), each extended, none duplicated:
 - **Preferences**: `Preferences`, `reducePreferences`, `parseStoredPreferences`, `createPreferencesMigrations`, `PREFERENCES_SCHEMA_VERSION` (today 8).
@@ -63,19 +63,19 @@ A new module `src/tools/` holds `ToolId` (`UNIX_TIME_CONVERTER = "unixTimeConver
 ### D4. An exact instant is two safe integers (FR8, NFR-P3, G4)
 
 ```ts
-type ExactInstant = { epochSeconds: number; nanoseconds: number }; // 0 ≤ nanoseconds ≤ 999_999_999
+type ExactInstant = { unixSeconds: number; nanoseconds: number }; // 0 ≤ nanoseconds ≤ 999_999_999
 ```
 
-`epochSeconds` is the floor of the Unix time in seconds, at most 8.64e12 in size; both fields stay far inside `Number.MAX_SAFE_INTEGER`. No value of the converter is ever one number of nanoseconds.
+`unixSeconds` is the floor of the Unix time in seconds, at most 8.64e12 in size; both fields stay far inside `Number.MAX_SAFE_INTEGER`. No value of the converter is ever one number of nanoseconds. The field is not named `epoch…`: "epoch" is a *Never:* word of **Instant** in `docs/glossary/time.md`, and the count since 1970 is the new glossary term **Unix time**.
 
 - **Separators**: before reading, spaces (the no-break and narrow ones included) and underscores are removed from the whole part, and commas when the whole part matches groups of three digits; the fraction takes no separator. Detection counts the digits that remain.
 - **Reading digits**: for a unit with `k` fraction digits (0, 3, 6, 9) the last `k` digits are the fraction, the rest the seconds. A negative value with a non-zero fraction `f` becomes `seconds − 1` and `10^k − f`, which is the floor ("towards the past").
-- **Writing digits**: `String(epochSeconds)` joined with the zero-padded leading digits of `nanoseconds`; for a negative instant the same rule in reverse.
-- **To a `Temporal.Instant`**: `Temporal.Instant.fromEpochMilliseconds(epochSeconds * 1000 + Math.floor(nanoseconds / 1e6))`. Zone math uses it; the digits below the millisecond never change a local time and are appended as text.
+- **Writing digits**: `String(unixSeconds)` joined with the zero-padded leading digits of `nanoseconds`; for a negative instant the same rule in reverse.
+- **To a `Temporal.Instant`**: `Temporal.Instant.fromEpochMilliseconds(unixSeconds * 1000 + Math.floor(nanoseconds / 1e6))`. Zone math uses it; the digits below the millisecond never change a local time and are appended as text.
 - **ISO 8601**: a pattern splits the fraction digits off; `Temporal.Instant.from` reads the rest to the whole second; the fraction becomes `nanoseconds`.
-- **Range**: |`epochSeconds`| ≤ 8.64e12, the range of `Temporal.Instant`.
+- **Range**: |`unixSeconds`| ≤ 8.64e12, the range of `Temporal.Instant`.
 
-Owners in `src/model/unixTime/`: `UnixTimeUnit`, `UNIX_TIME_UNIT_FRACTION_DIGITS`, `detectUnixTimeUnit`, `parseUnixTimeText`, `parseIsoInstantText`, `formatUnixTime`, `formatExactIsoInstant`, `toInstant`, `isExactInstantInRange`.
+Owners in `src/model/unixTime/`: `UnixTimeUnit`, `UNIX_TIME_UNIT_FRACTION_DIGITS`, `detectUnixTimeUnit`, `parseUnixTimeText`, `parseIsoInstantText`, `formatUnixTime`, `formatExactIsoInstant`, `toInstant`, `isExactInstantInRange`, `getRelativeTime` (D7). `formatUnixTime` and `formatExactIsoInstant` return digits and an ISO 8601 text — machine notations of the same kind as `Temporal.Instant#toString`, not localized text — so they stay in the model.
 
 - **BigInt behind feature detection, lower precision on iOS 12** — rejected: two code paths and two test sets, different results per device, a BigInt literal is a syntax error on the legacy engine, and the source scan would need an exception.
 - **`Temporal.Instant` as the holder** — rejected: reading nanoseconds back needs `epochNanoseconds`, a BigInt.
@@ -105,7 +105,7 @@ Owners in `src/model/unixTime/`: `UnixTimeUnit`, `UNIX_TIME_UNIT_FRACTION_DIGITS
 
 - **Rows**: at `toInstant(moment)` the mark comes from the location mark owner, the city label from `useCityLabels` / `useExemplarCity`, the zone line from `presentZoneLine` (with `formatUtcOffset` and `formatZoneAbbreviation`), the local date from the row date label kind of `getDateTimeFormatter`. The time is a new label kind `DateTimeLabelKind.TIME_WITH_SECONDS`; the fraction digits are inserted after the seconds part of `formatToParts`, before a day period marker.
 - **Work bound**: formatters come from the cache of `getDateTimeFormatter`, so a tick builds none. Each tick presents every row again; no per-minute cache, because 20 rows a second is cheap and a cache would have to handle zones whose offset has odd seconds.
-- **Relative time**: `Temporal.ZonedDateTime` in UTC, `since` with `largestUnit: "year"`, the first non-zero of years, months, days, hours, minutes; texts are i18next plural keys (`unixTime.relativePastDays_one` …), as `durationHours_*` already are. `Intl.RelativeTimeFormat` is not used: the legacy engine lacks it.
+- **Relative time**: the time math is the model's (`.claude/rules/architecture.md`: "Selectors return Temporal values, enums and numbers — never human-readable strings"). `getRelativeTime(moment, now)` in `src/model/unixTime/relativeTime.ts` takes `Temporal.ZonedDateTime` in UTC, `since` with `largestUnit: "year"`, and returns `{ unit: RelativeTimeUnit; count: number; direction: RelativeTimeDirection }` for the first non-zero of years, months, days, hours, minutes, rounded towards zero, or `RelativeTimeUnit.NOW` under one minute. `presentRelativeTime` in `src/presenter/unixTime/presentRelativeTime.ts` only picks the text: texts are i18next plural keys (`unixTime.relativePastDays_one` …), as `durationHours_*` already are. `Intl.RelativeTimeFormat` is not used: the legacy engine lacks it.
 - **Notations**: `formatUnixTime` for the four units, `formatExactIsoInstant` with the fraction digits of the precision.
 
 ### D8. Controller: one hook, a second tick, a session kept by the shell (FR14, FR16)
@@ -122,7 +122,9 @@ Owners in `src/model/unixTime/`: `UnixTimeUnit`, `UNIX_TIME_UNIT_FRACTION_DIGITS
 
 ### D9. Converter views have their own registry (FR17, G5)
 
-`tools/unixTimeConverter/`: `ConverterViewId` (`LIST = "list"`), `ConverterViewDefinition { id, titleKey, icon, component }`, `converterViewRegistry`, and the page `UnixTimeConverterPage`: `ToolPageFrame` + `useUnixTimeConverter` + the resolved view. A view receives `{ converter: PresentedConverter; commands: ConverterCommands }` and imports nothing from `model/`. `resolveActiveView` becomes generic over `{ id: string }` with the default id as an argument, so both registries share it. The first view lives in `tools/unixTimeConverter/list/`.
+Views stay in the views layer (`.claude/rules/architecture.md` → "Views (`src/views/`)"). `src/views/unixTimeConverter/index.ts` holds `ConverterViewId` (`LIST = "list"`), `ConverterViewDefinition { id, titleKey, icon, component }` and `converterViewRegistry`; the first view lives in `src/views/unixTimeConverter/list/`. `views/index.ts` does not re-export it (D11). A view receives `{ converter: PresentedConverter; commands: ConverterCommands }`, renders presenter output, emits commands and imports nothing from `model/`.
+
+`src/tools/` is a shell module, beside `app/` ("shell, not a view", `docs/architecture/overview.md`): it composes and decides nothing about time. The page `src/tools/unixTimeConverter/UnixTimeConverterPage.tsx` is `ToolPageFrame` + `useUnixTimeConverter` + the resolved converter view, as `ViewHost` composes a view. `resolveActiveView` becomes generic over `{ id: string }` with the default id as an argument, so both registries share it.
 
 The end-to-end feature of the converter addresses the page by accessible names only and is parameterised by `converterViewRegistry`, as the view contract is by `viewRegistry`.
 
@@ -135,11 +137,27 @@ The end-to-end feature of the converter addresses the page by accessible names o
 
 ### D11. Chunking and module boundaries (NFR-P1)
 
-`src/model/unixTime/`, `src/presenter/unixTime/` and `tools/unixTimeConverter/` are modules with their own `index.ts`; nothing in them is re-exported from `model/index.ts` or `presenter/index.ts`, and only the converter chunk imports them. `useUnixTimeConverter` and `useSecondTick` are exported from `controller/unixTime/index.ts` for the same reason. In the initial JavaScript stay: `tools/index.ts` (the registry with lazy pages and icons; the converter's icon is Lucide `Binary`, chosen by the owner), `ToolButtons`, `useEnabledTools`, `useAppPage`. A build test asserts that the entry chunk holds no converter symbol.
+`src/model/unixTime/`, `src/presenter/unixTime/`, `src/views/unixTimeConverter/` and `src/tools/unixTimeConverter/` are modules with their own `index.ts`; nothing in them is re-exported from `model/index.ts` or `presenter/index.ts`, and only the converter chunk imports them. `useUnixTimeConverter` and `useSecondTick` are exported from `controller/unixTime/index.ts` for the same reason. In the initial JavaScript stay: `tools/index.ts` (the registry with lazy pages and icons; the converter's icon is Lucide `Binary`, chosen by the owner), `ToolButtons`, `useEnabledTools`, `useAppPage`. A build test asserts that the entry chunk holds no converter symbol.
 
 ### D12. Focus, selection and paste belong to the view (NFR-A2)
 
-On mount the page focuses the converter input and selects its text when `(hover: hover) and (pointer: fine)` matches (the query is a constant in `src/constants/`, read through one `usePrimaryPointer` hook), and the heading of `ToolPageFrame` otherwise, as `SettingsPage` does. Autofocus is kept for the mouse case because the page is opened by the user's action and has one main field; on touch a keyboard would cover the rows. While `isInputTyped` is false, the view sends a pasted text as a whole `TYPE_INPUT`, so a tick that rewrote the text cannot leave a paste in the middle of it. Messages use `aria-describedby` and a polite live region; the ticking input is not a live region.
+On mount the page focuses the converter input and selects its text when `(hover: hover) and (pointer: fine)` matches (the query is a constant in `src/constants/`, read through one `usePrimaryPointer` hook in `controller/`, which reads `window.matchMedia` as `usePrefersReducedMotion` does), and the heading of `ToolPageFrame` otherwise, as `SettingsPage` does. The end-to-end scenarios check both: the fine-pointer one on the `chromium` project only (`@desktop-only`), the touch one in a context opened with the `Pixel 5` device options, as `app_shell_smoke_e2e.fixtures.ts` opens its own context. Autofocus is kept for the mouse case because the page is opened by the user's action and has one main field; on touch a keyboard would cover the rows. While `isInputTyped` is false, the view sends a pasted text as a whole `TYPE_INPUT`, so a tick that rewrote the text cannot leave a paste in the middle of it. Messages use `aria-describedby` and a polite live region; the ticking input is not a live region.
+
+## Consequences
+
+Positive:
+- A later tool is one registry entry and its folder; a later converter view is one registry entry and its folder (G5, M8).
+- One code path keeps every digit on every engine, and the no-BigInt source scan needs no exception (G4, NFR-P3).
+- A user who never turns a tool on downloads nothing new and sees the same header (G1, G6).
+
+Negative:
+- A third kind of shell page and a second view registry to learn.
+- `ExactInstant` is a second holder of instants beside `Temporal.Instant`, confined to `src/model/unixTime/`; zone math still goes through `Temporal.Instant` (`toInstant`).
+- The header is tighter at 320 px: the title shrinks while a tool button is shown.
+
+## Alternatives Considered
+
+Each decision lists its rejected alternatives under it: D1 a boolean per tool and `ToolId` in the preferences; D2 a dialog and URL routes; D3 a new control and the option group; D4 BigInt behind detection, `Temporal.Instant` as the holder and a decimal library; D5 the reference moment's reducer; D6 a second whole-text parser; D8 a module-level variable and a hidden mounted page; D9 the main view registry and no registry.
 
 ## Risks / Trade-offs
 
@@ -147,10 +165,11 @@ On mount the page focuses the converter input and selects its text when `(hover:
 - [A fixed unit coarser than the precision hides digits in the converter input] → the rows and the notations always show the full precision.
 - [The header refactor (`useAppPage`, `HeaderIconButton`) touches tested shell code] → it is a first task with no behaviour change, verified by the existing `AppShell*.test.tsx` suites before anything is added.
 - [`formatToParts` and plural forms on the legacy engine] → `formatToParts` is used by shipped code (`localTimeParts`). The project ships no stand-in for `Intl.PluralRules`, so the relative time picks its plural form there exactly as the shipped `durationHours_*` texts do; this change does not make it better or worse. `pnpm check:legacy-build` covers the converter chunk.
+- [The browser tests run on Chromium only] → `playwright.bdd.config.ts` has the projects `chromium`, `mobile-chrome` and the view contract projects, no Firefox or WebKit, and adding a browser would need a CI change. "The same digits on every engine" is therefore checked by the no-BigInt source scan, by a unit scenario that runs the converter with `BigInt` removed (as "Zone checks work without BigInt" of `browser_compatibility_legacy_zones.feature` does), by `pnpm check:legacy-build` and by the Chromium scenarios.
 - [The source scan of ADR-0009 matches text, comments included] → no file of this change writes a digit followed by `n`, `BigInt(` or the name of the nanosecond getter, also not in a comment.
 - [Icon-only toggles are hard to guess on touch screens] → accepted by the owner (NG2); the features page is a later change (Q2).
 
 ## Migration Plan
 
-The preferences document moves from schema version 8 to 9 by one migration step that adds `enabledTools: []`. By ADR-0004 a build that meets a document of a newer schema version treats it as unreadable: the app runs on default preferences and offers the reset. So a rollback to a version 8 build loses the user's preferences until the version 9 build returns; ADR-0020 records this. Nothing else is migrated: the converter stores no data.
+The preferences document moves from schema version 8 to 9 by one migration step that adds `enabledTools: []`. By ADR-0004 a build that meets a document of a newer schema version treats it as unreadable: the app runs on default preferences and offers the reset. So a rollback to a version 8 build loses the user's preferences until the version 9 build returns; the draft of ADR-0020 (handoff H1) records this. Nothing else is migrated: the converter stores no data.
 

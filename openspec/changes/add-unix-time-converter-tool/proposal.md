@@ -24,7 +24,7 @@ Audience: developers, testers and support engineers who read logs and already us
 - **MODIFIED** the **header**: it shows the tool buttons between its two buttons.
 - **MODIFIED** the **toggle group**: an option may be shown by an icon alone.
 - **MODIFIED** the **preferences**: they gain the enabled tools.
-- New glossary terms: tool, tool registry, tools group, tool button, tool page, tool session, Unix time, Unix time unit, unit detection, exact instant, converter moment, Unix time converter, converter input, converter row, exact wall-time input, moment notation, relative time, second tick, text copying, converter view, converter view registry. Changed terms: instant (its *Never:* list), live, pinned, toggle group, preferences, settings page, view registry.
+- New glossary terms: tool, tool registry, tools group, enabled tools, tool button, tool page, tool session, Unix time, Unix time unit, unit detection, unit choice, exact instant, converter moment, Unix time converter, converter input, converter row, exact wall-time input, moment notation, relative time, second tick, text copying, converter view, converter view registry. Changed terms: instant (its *Never:* list), live, pinned, toggle group, preferences, settings page, view registry.
 
 No breaking change for stored data: the preferences document is migrated.
 
@@ -145,16 +145,18 @@ No breaking change for stored data: the preferences document is migrated.
 
 ## Behavior
 
-- `packages/client/src/test/features/tools/tools_unit.feature` — registry, tools group, preferences, tool button, tool page (`@add-unix-time-converter-tool @FR1`–`@FR5`).
-- `packages/client/src/test/features/tools/tools_e2e.feature` — header, focus, keyboard, axe-core, layout (`@NFR-A1 @NFR-A4 @NFR-R1`).
-- `packages/client/src/test/features/unix_time_converter/unix_time_reading_unit.feature` — reading a text, unit detection, precision, range (`@FR6 @FR7 @FR8 @FR15`).
+- `packages/client/src/test/features/tools/tools_preferences_unit.feature` — enabled tools kept on the device (`@add-unix-time-converter-tool @FR3`).
+- `packages/client/src/test/features/tools/tools_unit.feature` — registry, tools group, tool buttons, loading a tool page, strings (`@FR1 @FR2 @FR4 @FR18 @NFR-P1`).
+- `packages/client/src/test/features/tools/tools_e2e.feature` — pressed toggles, opening and leaving a tool page (focus, Esc, notices, other tabs), loading on demand and offline, axe-core, layout (`@FR2 @FR3 @FR5 @NFR-P1 @NFR-A1 @NFR-A4 @NFR-R1`).
+- `packages/client/src/test/features/main_page/main_page_header_e2e.feature` — the header with a tool button (`@FR4 @NFR-R1`).
+- `packages/client/src/test/features/unix_time_converter/unix_time_reading_unit.feature` — reading a text, unit detection, precision with and without BigInt, range (`@FR6 @FR7 @FR8 @FR15`).
 - `packages/client/src/test/features/unix_time_converter/unix_time_converter_unit.feature` — rows, linked fields, notations, relative time, live, Show on main page (`@FR9`–`@FR14 @FR16 @FR17`).
 - `packages/client/src/test/features/unix_time_converter/unix_time_converter_budget.feature` — work bounds (`@NFR-P2`).
-- `packages/client/src/test/features/unix_time_converter/unix_time_converter_e2e.feature` — the converter view contract: focus, keyboard, copy, axe-core, layout, screenshots (`@NFR-A2`–`@NFR-A4 @NFR-R1 @NFR-R2`).
+- `packages/client/src/test/features/unix_time_converter/unix_time_converter_e2e.feature` — the converter view contract: focus, keyboard, announcements, copy, the moment kept across pages, Show on main page, axe-core, layout, screenshots (`@FR12 @FR14 @FR16 @NFR-A2`–`@NFR-A4 @NFR-R1 @NFR-R2`).
 
 ## Visual Reference
 
-No Figma file. The page is built in the current style from the tokens of `docs/architecture/views.md`; the approved screens of this change are produced by its screenshot tests and added to `docs/design/README.md`.
+No Figma file. The page is built in the current style from the tokens of `docs/architecture/views.md`; the approved screenshots of this change are produced by its screenshot tests and linked from `docs/design/README.md`.
 
 ## Affected IA
 
@@ -163,7 +165,7 @@ No changes: the project has no `docs/ia/` documents.
 ## Success Metrics
 
 - **M1** With no tool enabled the header shows exactly 2 buttons and the initial JavaScript is within today's budget.
-- **M2** `1795432987123` shows «14:23:07.123» for Moscow; `1795432987123456789` shows «14:23:07.123456789»; both on Chromium, Firefox, WebKit and the legacy engine check: 4 of 4.
+- **M2** `1795432987123` shows «14:23:07.123» for Moscow and `1795432987123456789` shows «14:23:07.123456789», in 3 of 3 checks: the unit scenarios, the unit scenario with `BigInt` removed (the iOS Safari 12.5 case) and the Chromium end-to-end scenario; `pnpm check:legacy-build` passes with the converter chunk.
 - **M3** 100 % of the detection cases of the delta spec pass (digit counts 1, 11, 12, 14, 15, 17, 18, 22; negative values; decimal fraction).
 - **M4** A round trip — a row time typed with 9 fraction digits, then the nanoseconds notation typed back into the converter input — gives the same row text in 100 % of the scenario's examples.
 - **M5** From the main page the main scenario takes 2 actions with a mouse and 3 on a touch device.
@@ -183,9 +185,9 @@ No changes: the project has no `docs/ia/` documents.
 - Presenter: converter rows, moment notations, relative time, messages; a time-with-seconds label kind.
 - Ports and adapters: a text copying port; the clipboard code of the text sharing adapter moves behind it.
 - Controller: the converter hook, the second tick, the enabled tools hook.
-- New module `src/tools/`: the tool registry, the tool page frame, the converter page with its view registry and first view.
+- New module `src/tools/`: the tool registry, the tool page frame, the converter page. New module `src/views/unixTimeConverter/`: the converter view registry and the first converter view.
 - App shell: page state gains the tool page; the header gains the tool buttons.
 - Settings: the tools group; the toggle group takes icon options.
 - Translations: `ru.json`, `en.json`.
-- Docs: three ADRs (tools and the tool registry; sub-millisecond precision without BigInt; view registries of tool pages), glossary, `docs/architecture/`, `docs/design/README.md`, both READMEs.
+- Docs: glossary, `docs/architecture/`, `docs/design/README.md`. Three ADRs (tools and the tool registry; exact instants without BigInt; view registries of tool pages), their line in `CLAUDE.md` and the end of the "in development" mark of both READMEs come as handoff patches for the owner to apply (`tasks.md` → Human follow-up); both READMEs already link the two new capabilities.
 - No new dependency.

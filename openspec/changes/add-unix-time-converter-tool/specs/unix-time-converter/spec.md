@@ -116,16 +116,11 @@ The converter moment SHALL keep every digit of the value it was given, down to t
 - **THEN** the ISO 8601 notation is `1969-12-31T23:59:59.999999999Z`
 - **AND** the seconds, milliseconds and microseconds notations are each `-1`
 
-#### Scenario: The same digits on every engine
-- **WHEN** the user types `1795432987123456789` on `<engine>`
+#### Scenario: The same digits without BigInt
+- **GIVEN** the engine has no BigInt, as iOS Safari 12.5
+- **WHEN** the user types `1795432987123456789`
 - **THEN** the Moscow row shows «14:23:07.123456789»
-
-| engine |
-|---|
-| Chromium |
-| Firefox |
-| WebKit |
-| the legacy engine check |
+- **AND** the nanoseconds notation is `1795432987123456789`
 
 ### Requirement: Converter rows
 The converter SHALL list one converter row per location of the list, in list order: the home or Here mark, the city label, the zone line at the converter moment, the local date and the local time with seconds and the fraction of the moment's precision, in the hour format of the settings. With an empty or unreadable list it MUST show one row for the device time zone. While the list loads it shows the row skeleton. Rows follow changes of the list at once. <!-- implements FR9, FR18, UX1 of add-unix-time-converter-tool -->
