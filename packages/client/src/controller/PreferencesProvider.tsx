@@ -176,6 +176,13 @@ export function PreferencesProvider({
           type: PreferencesCommandType.TOGGLE_SHARE_ZONE_LABEL_PART,
           part,
         }),
+      // Implements FR2, FR3 of add-unix-time-converter-tool (D1).
+      setToolEnabled: (toolId: string, isEnabled: boolean) =>
+        applyChange({
+          type: PreferencesCommandType.TOGGLE_TOOL,
+          toolId,
+          isEnabled,
+        }),
       setWorkingHours: (workingHours: WorkingHours) =>
         applyChange({
           type: PreferencesCommandType.SET_WORKING_HOURS,

@@ -55,7 +55,9 @@ describe("the enabled tools in the preferences document", () => {
       ...VERSION_8_PAYLOAD,
       enabledTools: ["folders"],
     });
-    expect(loaded).toMatchObject({ preferences: { enabledTools: ["folders"] } });
+    expect(loaded).toMatchObject({
+      preferences: { enabledTools: ["folders"] },
+    });
   });
 
   it("should drop duplicate ids", () => {
@@ -70,7 +72,10 @@ describe("the enabled tools in the preferences document", () => {
     "should read %j as unreadable",
     (enabledTools) => {
       expect(
-        load(PREFERENCES_SCHEMA_VERSION, { ...VERSION_8_PAYLOAD, enabledTools }),
+        load(PREFERENCES_SCHEMA_VERSION, {
+          ...VERSION_8_PAYLOAD,
+          enabledTools,
+        }),
       ).toEqual({ status: PreferencesLoadStatus.UNREADABLE });
     },
   );

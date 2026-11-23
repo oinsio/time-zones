@@ -1,8 +1,14 @@
 // Verifies FR2, FR3 of add-unix-time-converter-tool.
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PREFERENCES, type Preferences } from "./preferences";
-import { PreferencesCommandType, reducePreferences } from "./preferencesCommands";
-import { HourFormat } from "./preferences";
+import {
+  DEFAULT_PREFERENCES,
+  HourFormat,
+  type Preferences,
+} from "./preferences";
+import {
+  PreferencesCommandType,
+  reducePreferences,
+} from "./preferencesCommands";
 
 const withTools = (enabledTools: string[]): Preferences => ({
   ...DEFAULT_PREFERENCES,
@@ -18,7 +24,13 @@ describe("enabled tools", () => {
     ["turns a tool on", [], "a", true, ["a"]],
     ["turns a tool off", ["a", "b"], "a", false, ["b"]],
     ["keeps one entry when turned on twice", ["a"], "a", true, ["a"]],
-    ["keeps an unregistered id while turning another on", ["x"], "a", true, ["x", "a"]],
+    [
+      "keeps an unregistered id while turning another on",
+      ["x"],
+      "a",
+      true,
+      ["x", "a"],
+    ],
   ])("should (%s)", (_name, before, toolId, isEnabled, expected) => {
     const after = reducePreferences(withTools(before), {
       type: PreferencesCommandType.TOGGLE_TOOL,

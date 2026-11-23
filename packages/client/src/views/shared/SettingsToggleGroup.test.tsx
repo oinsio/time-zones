@@ -1,7 +1,10 @@
 // Verifies FR16, NFR-A1 of show-zone-abbreviations-and-zone-label-setting (D7).
+// Verifies FR2, NFR-A1 of add-unix-time-converter-tool.
 // Verifies NFR-R1 of add-country-to-zone-label.
+
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Binary } from "lucide-react";
 import { SettingsToggleGroup } from "./SettingsToggleGroup";
 
 const OPTIONS = [
@@ -120,5 +123,66 @@ describe("SettingsToggleGroup", () => {
       />,
     );
     expect(screen.getByRole("group", { name: "Sample" })).toBeInTheDocument();
+  });
+});
+
+// Verifies FR2, NFR-A1 of add-unix-time-converter-tool.
+describe("SettingsToggleGroup icon options", () => {
+  const renderIconGroup = (selectedValues: string[]) => {
+    const onToggle = vi.fn();
+    render(
+      <SettingsToggleGroup
+        caption="Sample"
+        options={[
+          { value: "A", label: "Tool A", icon: Binary },
+          { value: "B", label: "Tool B", icon: Binary },
+        ]}
+        selectedValues={selectedValues}
+        onToggle={onToggle}
+      />,
+    );
+    return { onToggle };
+  };
+
+  it("should name an icon toggle by its label and show no text", () => {
+    renderIconGroup([]);
+    const toggle = screen.getByRole("button", { name: "Tool A" });
+    expect(toggle).toHaveTextContent("");
+  });
+
+  it("should show the label as the pointer hint", () => {
+    renderIconGroup([]);
+    expect(screen.getByRole("button", { name: "Tool A" })).toHaveAttribute(
+      "title",
+      "Tool A",
+    );
+  });
+
+  it("should expose the pressed state", () => {
+    renderIconGroup(["A"]);
+    expect(screen.getByRole("button", { name: "Tool A" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Tool B" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
+
+  it("should report the toggle the user makes", async () => {
+    const { onToggle } = renderIconGroup(["A"]);
+    await userEvent.click(screen.getByRole("button", { name: "Tool B" }));
+    expect(onToggle).toHaveBeenCalledExactlyOnceWith("B", true);
+  });
+
+  it("should keep the box size of the toggle when it is on", () => {
+    renderIconGroup(["A"]);
+    const sizeClasses = (name: string) =>
+      screen
+        .getByRole("button", { name })
+        .className.split(" ")
+        .filter((className) => /^(min-[hw]|p[xy]?-|size)/.test(className));
+    expect(sizeClasses("Tool A")).toEqual(sizeClasses("Tool B"));
   });
 });

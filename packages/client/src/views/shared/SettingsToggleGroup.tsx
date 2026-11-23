@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import { Check } from "lucide-react";
 import { type ReactNode, useId } from "react";
 import {
@@ -9,6 +10,8 @@ import { cn } from "@/shared/lib/cn";
 export type SettingsToggleOption<Value extends string> = {
   value: Value;
   label: string;
+  /** The option is shown by this icon alone; the label is its name and pointer hint. */
+  icon?: LucideIcon;
 };
 
 type SettingsToggleGroupProps<Value extends string> = {
@@ -28,6 +31,7 @@ type SettingsToggleGroupProps<Value extends string> = {
  * Implements FR16, NFR-A1, NFR-R2, UX2 of show-zone-abbreviations-and-zone-label-setting (D7).
  * Implements FR6 of compact-settings-controls (D5).
  * Implements NFR-R1 of add-country-to-zone-label (D5): the toggles may wrap.
+ * Implements FR2, NFR-A1, UX2 of add-unix-time-converter-tool (D3): an option may be an icon alone.
  */
 export function SettingsToggleGroup<Value extends string>({
   caption,
@@ -50,8 +54,28 @@ export function SettingsToggleGroup<Value extends string>({
           {caption}
         </span>
         <div className="flex flex-wrap gap-2">
-          {options.map(({ value, label }) => {
+          {options.map(({ value, label, icon: Icon }) => {
             const isSelected = selectedValues.includes(value);
+            if (Icon !== undefined) {
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={isSelected}
+                  aria-label={label}
+                  title={label}
+                  onClick={() => onToggle(value, !isSelected)}
+                  className={cn(
+                    "flex min-h-11 min-w-11 items-center justify-center rounded-md border bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent",
+                    isSelected
+                      ? "border-accent text-accent"
+                      : "border-control-border",
+                  )}
+                >
+                  <Icon aria-hidden="true" className="size-5" />
+                </button>
+              );
+            }
             return (
               <button
                 key={value}

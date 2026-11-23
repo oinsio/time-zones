@@ -15,6 +15,7 @@ export { useDayColouring } from "./useDayColouring";
 export { useDayPalettePreference } from "./useDayPalettePreference";
 export { useDeployTime } from "./useDeployTime";
 export { useDocumentLanguage } from "./useDocumentLanguage";
+export { useEnabledTools } from "./useEnabledTools";
 export { useHourFormat } from "./useHourFormat";
 export { useHourGrid } from "./useHourGrid";
 export { useInterfaceLanguage } from "./useInterfaceLanguage";
