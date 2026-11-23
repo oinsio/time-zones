@@ -44,7 +44,11 @@ export {
   MIDNIGHT_SHADE_SPREAD_PX,
   OFFSET_EDGE_WIDTH_PX,
 } from "./gridShades";
-export { HEADER_ICON_SIZE_PX } from "./header";
+export {
+  HEADER_ICON_SIZE_PX,
+  HEADER_TITLE_CLASS_NAME,
+  HEADER_TITLE_WITH_TOOLS_CLASS_NAME,
+} from "./header";
 export { KeyboardKey } from "./keyboard";
 export {
   CLOCK_CHANGE_DATE_FORMAT_OPTIONS,
