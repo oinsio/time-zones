@@ -73,7 +73,7 @@ type ExactInstant = { unixSeconds: number; nanoseconds: number }; // 0 ≤ nanos
 - **Writing digits**: `String(unixSeconds)` joined with the zero-padded leading digits of `nanoseconds`; for a negative instant the same rule in reverse.
 - **To a `Temporal.Instant`**: `Temporal.Instant.fromEpochMilliseconds(unixSeconds * 1000 + Math.floor(nanoseconds / 1e6))`. Zone math uses it; the digits below the millisecond never change a local time and are appended as text.
 - **ISO 8601**: a pattern splits the fraction digits off; `Temporal.Instant.from` reads the rest to the whole second; the fraction becomes `nanoseconds`.
-- **Range**: |`unixSeconds`| ≤ 8.64e12, the range of `Temporal.Instant`.
+- **Range**: `-8.64e12 ≤ unixSeconds` and (`unixSeconds < 8.64e12`, or `unixSeconds = 8.64e12` with `nanoseconds = 0`) — exactly the range of `Temporal.Instant`, which ends at ±8.64e21 ns, so a fraction past the last whole second of the upper bound is out of range.
 
 Owners in `src/model/unixTime/`: `UnixTimeUnit`, `UNIX_TIME_UNIT_FRACTION_DIGITS`, `detectUnixTimeUnit`, `parseUnixTimeText`, `parseIsoInstantText`, `formatUnixTime`, `formatExactIsoInstant`, `toInstant`, `isExactInstantInRange`, `getRelativeTime` (D7). `formatUnixTime` and `formatExactIsoInstant` return digits and an ISO 8601 text — machine notations of the same kind as `Temporal.Instant#toString`, not localized text — so they stay in the model.
 

@@ -284,6 +284,8 @@ A text the converter input cannot read SHALL show «Введите Unix-врем
 - **THEN** no message is shown
 - **WHEN** the user types `8640000000001`
 - **THEN** the message «Значение вне поддерживаемого диапазона дат» is shown
+- **WHEN** the user types `8640000000000.5`
+- **THEN** the message «Значение вне поддерживаемого диапазона дат» is shown
 
 ### Requirement: Show on main page
 While the converter moment is pinned, «Показать на главной» ("Show on main page") SHALL pin the reference moment to the converter moment with the seconds and the fraction dropped, as a time selection does, and show the main page with the focus on the tool button. While live the action is inactive. No other data flows from the converter to the main page, and none flows back except the location list. <!-- implements FR16, NG6 of add-unix-time-converter-tool -->
