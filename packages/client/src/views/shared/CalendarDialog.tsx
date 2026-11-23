@@ -11,8 +11,12 @@ import {
 import type { PresentedDateBar } from "@/presenter";
 import { LazyCalendarMonthGrid } from "./LazyCalendarMonthGrid";
 
+/** What the dialog reads of a date: the date bar and a converter row both give it. */
 type CalendarDialogProps = {
-  dateBar: PresentedDateBar;
+  dateBar: Pick<
+    PresentedDateBar,
+    "chooseDateLabel" | "isoDate" | "shortLabel" | "longLabel"
+  >;
   onSelectDate: (isoDate: string) => void;
 };
 
@@ -27,6 +31,7 @@ const iconButtonClassName =
  * select-date-with-calendar-and-now (D6).
  * Implements NFR-R1, UX2 of keep-now-button-visible-when-live.
  * Implements NFR-P2 of redesign-cards-grid-and-day-palettes (D4): the month grid is a lazy chunk.
+ * Implements FR11 of add-unix-time-converter-tool (D6): the props narrow to what it reads.
  */
 export const CalendarDialog = forwardRef<
   HTMLButtonElement,

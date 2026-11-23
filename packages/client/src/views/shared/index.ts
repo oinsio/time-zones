@@ -1,4 +1,5 @@
 export { AddLocationButton } from "./AddLocationButton";
+export { CalendarDialog } from "./CalendarDialog";
 export { DateBar } from "./DateBar";
 // Implements FR9, FR10, NFR-A3 of add-day-colouring-setting (D4).
 export {

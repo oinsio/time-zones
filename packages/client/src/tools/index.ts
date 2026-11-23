@@ -11,6 +11,7 @@ export { ToolPageFrame } from "./ToolPageFrame";
 export type {
   ToolDefinition,
   ToolPageProps,
+  ToolServices,
   ToolSession,
 } from "./toolDefinition";
 export { ToolId } from "./toolDefinition";

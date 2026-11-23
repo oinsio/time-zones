@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import {
+  browserTextCopying,
   fetchAppRevisionSource,
   fetchZoneRulesVersionSource,
   localStorageStoredReleaseRepository,
@@ -9,6 +10,8 @@ import {
   LocationsProvider,
   LocationsStatus,
   PreferencesProvider,
+  type TickScheduler,
+  timeoutTickScheduler,
   useDayPalettePreference,
   useDocumentLanguage,
   useEnabledTools,
@@ -28,6 +31,7 @@ import { type Clock, systemClock } from "@/lib/temporal";
 import type {
   AppRevisionSource,
   StoredReleaseRepository,
+  TextCopying,
   TextSharing,
   ZoneRulesVersionSource,
 } from "@/ports";
@@ -80,6 +84,10 @@ export type AppShellDependencies = {
   reloadPage?: () => void;
   /** The tools the app offers; tests pass their own. Defaults to `toolRegistry`. */
   tools?: readonly ToolDefinition[];
+  /** Schedules the second tick of the Unix time converter. Defaults to timers. */
+  tickScheduler?: TickScheduler;
+  /** Puts a text on the clipboard for the converter. Defaults to the browser clipboard. */
+  textCopying?: TextCopying;
 };
 
 export function AppShell({
@@ -104,6 +112,8 @@ function AppShellContent({
   storedReleases = localStorageStoredReleaseRepository,
   reloadPage = reloadWindow,
   tools = toolRegistry,
+  tickScheduler = timeoutTickScheduler,
+  textCopying = browserTextCopying,
 }: AppShellDependencies & { clock: Clock }) {
   useDocumentLanguage();
   useThemePreference();
@@ -166,6 +176,7 @@ function AppShellContent({
         notices={notices}
         onBack={leave}
         session={getToolSession(openedTool.id)}
+        services={{ tickScheduler, textCopying }}
       />
     );
   }

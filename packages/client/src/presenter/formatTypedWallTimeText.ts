@@ -9,6 +9,8 @@ import {
 } from "@/constants";
 
 const MINUTE_DIGIT_COUNT = 2;
+/** `9:301`: a typed hour, its separator and the minutes, with seconds digits typed straight after. */
+const MINUTES_THEN_SECOND_DIGITS_PATTERN = /^\d{1,2}:\d{3,}$/;
 
 const getHourLength = (digits: string): number => {
   const firstDigit = Number(digits[0]);
@@ -34,6 +36,9 @@ export function formatTypedWallTimeText(
   text: string,
   { hasSeconds = false }: { hasSeconds?: boolean } = {},
 ): string {
+  if (hasSeconds && MINUTES_THEN_SECOND_DIGITS_PATTERN.test(text)) {
+    return `${text.slice(0, text.indexOf(WALL_TIME_SEPARATOR) + 1 + MINUTE_DIGIT_COUNT)}${WALL_TIME_SEPARATOR}${text.slice(text.indexOf(WALL_TIME_SEPARATOR) + 1 + MINUTE_DIGIT_COUNT)}`;
+  }
   if (!DIGITS_ONLY_PATTERN.test(text)) return text;
   const hourLength = getHourLength(text);
   if (text.length <= hourLength) return text;

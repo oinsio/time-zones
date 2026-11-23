@@ -66,6 +66,8 @@ export type PresentedNotation = {
 export type PresentedConverter = {
   input: {
     text: string;
+    /** The user typed the text; the view sends a paste as a whole text while it is not. */
+    isTyped: boolean;
     name: string;
     /** The first message text, shown as a hint when the input is empty. */
     hint: string;
@@ -125,6 +127,7 @@ export function presentConverter(
   return {
     input: {
       text: state.inputText,
+      isTyped: state.isInputTyped,
       name: translate("unixTime.inputLabel"),
       hint: translate("unixTime.inputHint"),
       message:

@@ -7,6 +7,10 @@ import { createRetryableLazyView } from "@/views";
 import { ToolHost } from "./ToolHost";
 
 const session = { read: vi.fn(), write: vi.fn() };
+const services = {
+  tickScheduler: { schedule: () => () => {} },
+  textCopying: { copyText: vi.fn() },
+};
 const LoadedPage = ({ onBack }: ToolPageProps) => (
   <button type="button" onClick={onBack}>
     loaded page
@@ -20,6 +24,7 @@ const renderHost = (tool: ToolDefinition, onBack = vi.fn()) =>
       notices={<p>a notice</p>}
       onBack={onBack}
       session={session}
+      services={services}
     />,
   );
 

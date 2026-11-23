@@ -260,6 +260,7 @@
     "notationIso": "ISO 8601",
     "copyNotation": "Copy: {{notation}}",
     "copied": "Copied",
-    "copyFailed": "Could not copy"
+    "copyFailed": "Could not copy",
+    "viewList": "List"
   }
 }

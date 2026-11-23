@@ -1,6 +1,11 @@
 import { type ReactNode, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type ToolDefinition, ToolPageFrame, type ToolSession } from "@/tools";
+import {
+  type ToolDefinition,
+  ToolPageFrame,
+  type ToolServices,
+  type ToolSession,
+} from "@/tools";
 import { resetLazyView } from "@/views";
 import { ViewErrorBoundary } from "./ViewErrorBoundary";
 import { ViewErrorFallback } from "./ViewErrorFallback";
@@ -11,6 +16,7 @@ type ToolHostProps = {
   notices: ReactNode;
   onBack: () => void;
   session: ToolSession;
+  services: ToolServices;
 };
 
 /**
@@ -19,7 +25,13 @@ type ToolHostProps = {
  * button are there while the page loads or after it failed.
  * Implements FR4, FR5, NFR-P1 of add-unix-time-converter-tool (D2).
  */
-export function ToolHost({ tool, notices, onBack, session }: ToolHostProps) {
+export function ToolHost({
+  tool,
+  notices,
+  onBack,
+  session,
+  services,
+}: ToolHostProps) {
   const { t } = useTranslation();
   const [retryCount, setRetryCount] = useState(0);
   const { page: ToolPage } = tool;
@@ -40,7 +52,12 @@ export function ToolHost({ tool, notices, onBack, session }: ToolHostProps) {
       renderFallback={() => frame(<ViewErrorFallback onRetry={retryPage} />)}
     >
       <Suspense fallback={frame(<ViewSkeleton />)}>
-        <ToolPage notices={notices} onBack={onBack} session={session} />
+        <ToolPage
+          notices={notices}
+          onBack={onBack}
+          session={session}
+          services={services}
+        />
       </Suspense>
     </ViewErrorBoundary>
   );

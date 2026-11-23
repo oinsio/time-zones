@@ -35,6 +35,11 @@ describe("formatTypedWallTimeText with seconds", () => {
     ["9301", "9:30:1"],
     ["93015", "9:30:15"],
     ["093015", "09:30:15"],
+    ["9:301", "9:30:1"],
+    ["9:3015", "9:30:15"],
+    ["09:3015", "09:30:15"],
+    ["9:30", "9:30"],
+    ["9:30:1", "9:30:1"],
     ["abc", "abc"],
   ])("should show typed %j as %j", (typedText, expected) => {
     expect(formatTypedWallTimeText(typedText, { hasSeconds: true })).toBe(

@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ComponentType, LazyExoticComponent, ReactNode } from "react";
+import type { TickScheduler } from "@/controller";
+import type { TextCopying } from "@/ports";
 
 /**
  * Ids of the tools of this build; a member is added with each new tool.
@@ -19,6 +21,12 @@ export type ToolSession = {
   write: (value: unknown) => void;
 };
 
+/** The ports a tool page may use; the shell owns them so tests can swap them. */
+export type ToolServices = {
+  tickScheduler: TickScheduler;
+  textCopying: TextCopying;
+};
+
 /** What the shell hands to a tool page. Implements FR4, FR5 of add-unix-time-converter-tool (D2). */
 export type ToolPageProps = {
   /** Contents of the polite notices region, as on the main page. */
@@ -26,6 +34,7 @@ export type ToolPageProps = {
   /** Leaves to the main page; the focus goes to the tool button. */
   onBack: () => void;
   session: ToolSession;
+  services: ToolServices;
 };
 
 /**

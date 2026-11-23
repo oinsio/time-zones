@@ -260,6 +260,7 @@
     "notationIso": "ISO 8601",
     "copyNotation": "Копировать: {{notation}}",
     "copied": "Скопировано",
-    "copyFailed": "Не удалось скопировать"
+    "copyFailed": "Не удалось скопировать",
+    "viewList": "Список"
   }
 }
