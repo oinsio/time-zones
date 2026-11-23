@@ -1,8 +1,9 @@
-// Verifies FR1, FR2, FR3, FR4 of add-unix-time-converter-tool.
+// Verifies FR1, FR2, FR3, FR4, FR18 of add-unix-time-converter-tool.
 import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
 import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
-import { screen } from "@testing-library/react/pure";
+import { screen, within } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
+import i18n from "i18next";
 import { Binary, Clock } from "lucide-react";
 import { expect, vi } from "vitest";
 import { toolRegistry } from "@/tools";
@@ -190,5 +191,89 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     Then("no tool button is shown", () =>
       expect(toolButtonNames()).toEqual([]),
     );
+  });
+
+  // @add-unix-time-converter-tool @FR4
+  f.Scenario("One enabled tool", ({ Given, When, Then }) => {
+    Given("the tool registry holds the Unix time converter, enabled", () =>
+      givenConverterRegistry(true),
+    );
+    When("the main page is shown", showApp);
+    Then(
+      "the header shows, from left to right, the title, {string}, {string} and {string}",
+      (_ctx, addName: string, toolName: string, settingsName: string) => {
+        const header = within(screen.getByRole("banner"));
+        expect(
+          header.getByRole("heading", { name: i18n.t("app.title") }),
+        ).toBeInTheDocument();
+        const buttonNames = header
+          .getAllByRole("button")
+          .map((button) => button.getAttribute("aria-label"));
+        expect(buttonNames).toEqual([addName, toolName, settingsName]);
+      },
+    );
+  });
+
+  // @add-unix-time-converter-tool @FR2 @NFR-R1
+  f.Scenario("Place of the tools group", ({ Given, When, Then }) => {
+    Given("the tool registry holds the Unix time converter", () =>
+      givenConverterRegistry(),
+    );
+    When("the user opens the settings page", openSettings);
+    Then(
+      "the group {string} stands after the zone label group and before the language group",
+      (_ctx, caption: string) => {
+        const zoneLabelGroup = screen.getByRole("group", {
+          name: i18n.t("settings.zoneLabelLabel"),
+        });
+        const toolsGroup = screen.getByRole("group", { name: caption });
+        const languageCaption = screen.getByText(
+          i18n.t("settings.languageLabel"),
+        );
+        expect(
+          zoneLabelGroup.compareDocumentPosition(toolsGroup) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+        expect(
+          toolsGroup.compareDocumentPosition(languageCaption) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+      },
+    );
+  });
+
+  // @add-unix-time-converter-tool @FR18
+  f.Scenario("English interface", ({ Given, When, Then }) => {
+    Given(
+      "the interface language is English and the tool is enabled",
+      async () => {
+        givenConverterRegistry(true);
+        await i18n.changeLanguage("en");
+      },
+    );
+    When("the user opens the settings page", async () => {
+      await showApp();
+      await userEvent.click(screen.getByRole("button", { name: "Settings" }));
+      await screen.findByRole("heading", { name: "Settings" });
+    });
+    Then(
+      "the group is captioned {string} and its toggle is named {string}",
+      (_ctx, caption: string, toggleName: string) => {
+        const group = screen.getByRole("group", { name: caption });
+        expect(
+          within(group).getByRole("button", { name: toggleName }),
+        ).toBeInTheDocument();
+      },
+    );
+    When(
+      "the user opens the tool page from the header button named {string}",
+      async (_ctx, name: string) => {
+        await userEvent.click(screen.getByRole("button", { name: "Back" }));
+        await userEvent.click(await screen.findByRole("button", { name }));
+      },
+    );
+    Then("the page heading is {string}", async (_ctx, name: string) => {
+      expect(await screen.findByRole("heading", { name })).toBeInTheDocument();
+    });
   });
 });

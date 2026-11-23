@@ -71,3 +71,23 @@ Feature: Tools
     Given a test registry with the enabled tool A, which has no page
     When the main page is shown
     Then no tool button is shown
+
+  @add-unix-time-converter-tool @FR4
+  Scenario: One enabled tool
+    Given the tool registry holds the Unix time converter, enabled
+    When the main page is shown
+    Then the header shows, from left to right, the title, "Добавить место", "Конвертер Unix-времени" and "Настройки"
+
+  @add-unix-time-converter-tool @FR2 @NFR-R1
+  Scenario: Place of the tools group
+    Given the tool registry holds the Unix time converter
+    When the user opens the settings page
+    Then the group "Инструменты" stands after the zone label group and before the language group
+
+  @add-unix-time-converter-tool @FR18
+  Scenario: English interface
+    Given the interface language is English and the tool is enabled
+    When the user opens the settings page
+    Then the group is captioned "Tools" and its toggle is named "Unix time converter"
+    When the user opens the tool page from the header button named "Unix time converter"
+    Then the page heading is "Unix time converter"
