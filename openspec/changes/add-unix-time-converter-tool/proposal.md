@@ -148,11 +148,12 @@ No breaking change for stored data: the preferences document is migrated.
 - `packages/client/src/test/features/tools/tools_preferences_unit.feature` — enabled tools kept on the device (`@add-unix-time-converter-tool @FR3`).
 - `packages/client/src/test/features/tools/tools_unit.feature` — registry, tools group, tool buttons, loading a tool page, strings (`@FR1 @FR2 @FR4 @FR18 @NFR-P1`).
 - `packages/client/src/test/features/tools/tools_e2e.feature` — pressed toggles, opening and leaving a tool page (focus, Esc, notices, other tabs), loading on demand and offline, axe-core, layout (`@FR2 @FR3 @FR5 @NFR-P1 @NFR-A1 @NFR-A4 @NFR-R1`).
+- `packages/client/src/test/features/settings/settings_option_group_e2e.feature` — the tools group on one row and at most 56 px high (`@FR2 @NFR-R1`).
 - `packages/client/src/test/features/main_page/main_page_header_e2e.feature` — the header with a tool button (`@FR4 @NFR-R1`).
 - `packages/client/src/test/features/unix_time_converter/unix_time_reading_unit.feature` — reading a text, unit detection, precision with and without BigInt, range (`@FR6 @FR7 @FR8 @FR15`).
 - `packages/client/src/test/features/unix_time_converter/unix_time_converter_unit.feature` — rows, linked fields, notations, relative time, live, Show on main page (`@FR9`–`@FR14 @FR16 @FR17`).
 - `packages/client/src/test/features/unix_time_converter/unix_time_converter_budget.feature` — work bounds (`@NFR-P2`).
-- `packages/client/src/test/features/unix_time_converter/unix_time_converter_e2e.feature` — the converter view contract: focus, keyboard, announcements, copy, the moment kept across pages, Show on main page, axe-core, layout, screenshots (`@FR12 @FR14 @FR16 @NFR-A2`–`@NFR-A4 @NFR-R1 @NFR-R2`).
+- `packages/client/src/test/features/unix_time_converter/unix_time_converter_e2e.feature` — the converter view contract: the fraction digits in Chromium, focus, keyboard, announcements, copy, the moment kept across pages, Show on main page, axe-core, layout, screenshots (`@FR8 @FR12 @FR14 @FR16 @NFR-A2`–`@NFR-A4 @NFR-R1 @NFR-R2`).
 
 ## Visual Reference
 
@@ -165,8 +166,8 @@ No changes: the project has no `docs/ia/` documents.
 ## Success Metrics
 
 - **M1** With no tool enabled the header shows exactly 2 buttons and the initial JavaScript is within today's budget.
-- **M2** `1795432987123` shows «14:23:07.123» for Moscow and `1795432987123456789` shows «14:23:07.123456789», in 3 of 3 checks: the unit scenarios, the unit scenario with `BigInt` removed (the iOS Safari 12.5 case) and the Chromium end-to-end scenario; `pnpm check:legacy-build` passes with the converter chunk.
-- **M3** 100 % of the detection cases of the delta spec pass (digit counts 1, 11, 12, 14, 15, 17, 18, 22; negative values; decimal fraction).
+- **M2** `1795432987123` shows «14:23:07.123» for Moscow and `1795432987123456789` shows «14:23:07.123456789», in 3 of 3 checks: the unit scenarios, the unit scenario with `BigInt` removed (the iOS Safari 12.5 case) and the Chromium end-to-end scenario "Fraction digits follow the precision"; `pnpm check:legacy-build` passes with the converter chunk.
+- **M3** 100 % of the detection cases of the delta spec pass (the 13 rows of "Detection by digit count": digit counts 1, 11, 12, 13, 14, 15, 16, 17, 18, 19 and 22, and a negative value; plus the decimal fractions of "Texts the input reads").
 - **M4** A round trip — a row time typed with 9 fraction digits, then the nanoseconds notation typed back into the converter input — gives the same row text in 100 % of the scenario's examples.
 - **M5** From the main page the main scenario takes 2 actions with a mouse and 3 on a touch device.
 - **M6** axe-core reports 0 violations of the converter page in both themes at 320, 390 and 1280 px.

@@ -74,8 +74,10 @@ The unit choice SHALL offer Auto and the four Unix time units: seconds, millisec
 | `17954329871234` (14 digits) | Миллисекунды | `2538-12-13T17:51:11.234Z` |
 | `179543298712345` (15 digits) | Микросекунды | `1975-09-10T01:08:18.712345Z` |
 | `1795432987123456` | Микросекунды | `2026-11-23T11:23:07.123456Z` |
+| `17954329871234567` (17 digits) | Микросекунды | `2538-12-13T17:51:11.234567Z` |
 | `179543298712345678` (18 digits) | Наносекунды | `1975-09-10T01:08:18.712345678Z` |
 | `1795432987123456789` | Наносекунды | `2026-11-23T11:23:07.123456789Z` |
+| `1795432987123456789012` (22 digits) | Наносекунды | `+058865-01-02T09:18:43.456789012Z` |
 | `-1795432987123` | Миллисекунды | `1913-02-08T12:36:52.877Z` |
 
 #### Scenario: A fixed unit reads a typed number again
@@ -194,7 +196,7 @@ Every field of the converter SHALL show the same converter moment. A change made
 - **AND** the seconds notation is `1795442400`
 
 ### Requirement: Moment notations
-The converter SHALL show the moment notations of the converter moment: seconds, milliseconds, microseconds, nanoseconds and ISO 8601 with `Z`, each with a copy action that copies exactly the shown text. A unit coarser than the precision drops the finer digits towards the past; a finer unit adds zeros. The ISO 8601 notation shows the fraction digits of the precision. A copy MUST confirm in place and be announced politely as «Скопировано»; a refused copy shows «Не удалось скопировать» beside the action. <!-- implements FR12, UX5 of add-unix-time-converter-tool -->
+The converter SHALL show the moment notations of the converter moment: seconds, milliseconds, microseconds, nanoseconds and ISO 8601 with `Z`, each with a copy action that copies exactly the shown text. A unit coarser than the precision drops the finer digits towards the past; a finer unit adds zeros. The ISO 8601 notation shows the fraction digits of the precision; a year after 9999 is written with a sign and six digits, as `Temporal.Instant` writes it (`+058865-01-02T09:18:43Z`). A copy MUST confirm in place and be announced politely as «Скопировано»; a refused copy shows «Не удалось скопировать» beside the action. <!-- implements FR12, UX5 of add-unix-time-converter-tool -->
 
 #### Scenario: Notations of the sample
 - **WHEN** the user types `1795432987123456`
@@ -331,8 +333,11 @@ Opening the converter SHALL move the focus to the converter input with its text 
 | width | theme |
 |---|---|
 | 320 | light |
+| 320 | dark |
+| 390 | light |
 | 390 | dark |
 | 1280 | light |
+| 1280 | dark |
 
 #### Scenario: Focus on a touch device
 - **GIVEN** the device has a coarse pointer that cannot hover
@@ -355,6 +360,9 @@ The converter SHALL use the content column and the design tokens of the main pag
 - **WHEN** the user types `1795432987123456789`
 - **THEN** the page does not scroll horizontally
 - **AND** the time «2:23:07.123456789 PM» and the notation `1795432987123456789` are fully visible
+- **WHEN** the user types `1795432987123456789012`
+- **THEN** the page does not scroll horizontally
+- **AND** the converter input text and the nanoseconds notation `1795432987123456789012` are fully visible
 
 #### Scenario: Approved screenshots
 - **GIVEN** the user typed `1795432987123`
