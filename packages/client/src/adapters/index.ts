@@ -1,5 +1,10 @@
 // Implements FR15 of add-grid-meeting-range-and-share.
 export {
+  browserTextCopying,
+  type CopyingNavigator,
+  createBrowserTextCopying,
+} from "./browserTextCopying";
+export {
   browserTextSharing,
   createBrowserTextSharing,
   type SharingNavigator,
@@ -35,6 +40,10 @@ export {
   createInMemoryPreferencesRepository,
 } from "./inMemoryPreferencesRepository";
 export { inMemoryStorageAvailability } from "./inMemoryStorageAvailability";
+export {
+  createInMemoryTextCopying,
+  type InMemoryTextCopying,
+} from "./inMemoryTextCopying";
 export {
   createInMemoryTextSharing,
   type InMemoryTextSharing,

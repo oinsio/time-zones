@@ -1,4 +1,5 @@
 import { useContext, useMemo } from "react";
+import type { Temporal } from "@/lib/temporal";
 import {
   getEffectiveInstant,
   getInstantAfterTrackMove,
@@ -17,6 +18,7 @@ const MISSING_PROVIDER_MESSAGE =
  * a key step. Actions dispatch straight to the store, never through the
  * write scheduler, so no time selection is stored.
  * Implements FR3, FR4, FR5, FR8 of add-time-sliders-to-location-cards (D6).
+ * Implements FR16 of add-unix-time-converter-tool (D8): `selectInstant`.
  */
 export function useTimeSelection() {
   const context = useContext(LocationsContext);
@@ -34,6 +36,9 @@ export function useTimeSelection() {
     const selectInstant = (instant: string) =>
       store.dispatch({ type: LocationCommandType.SELECT_INSTANT, instant });
     return {
+      /** Pins the reference moment to the instant; the converter's Show on main page. */
+      selectInstant: (instant: Temporal.Instant) =>
+        selectInstant(instant.toString()),
       selectTrackFraction: (fraction: number) => {
         const { day } = getReferenceContext();
         selectInstant(getInstantAtTrackFraction(day, fraction).toString());

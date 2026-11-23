@@ -35,6 +35,7 @@ export {
   StoredReleaseLoadStatus,
   type StoredReleaseRepository,
 } from "./storedReleaseRepository";
+export { CopyOutcome, type TextCopying } from "./textCopying";
 export { ShareOutcome, type TextSharing } from "./textSharing";
 export {
   isZoneRulesSourceFailure,

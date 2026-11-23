@@ -14,6 +14,7 @@ export {
   type ConverterState,
   createConverterState,
   getWrittenUnit,
+  isConverterState,
 } from "./converterState";
 export {
   type ExactInstant,

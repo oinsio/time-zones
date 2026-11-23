@@ -21,3 +21,7 @@ export const DECIMAL_BASE = 10;
 
 /** How long a copy confirmation shows its check icon. Implements FR12, UX5 of add-unix-time-converter-tool (D7). */
 export const COPY_CONFIRMATION_MS = 2000;
+
+/** The primary pointer is fine and can hover: a mouse, not a finger. Implements NFR-A2 of add-unix-time-converter-tool (D12). */
+export const PRIMARY_POINTER_FINE_HOVER_MEDIA_QUERY =
+  "(hover: hover) and (pointer: fine)";

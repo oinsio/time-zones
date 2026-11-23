@@ -1,4 +1,4 @@
-import { MILLISECONDS_PER_MINUTE } from "@/constants";
+import { MILLISECONDS_PER_MINUTE, MILLISECONDS_PER_SECOND } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
 
 /**
@@ -12,5 +12,19 @@ export function getMillisecondsUntilNextMinute(
   return (
     MILLISECONDS_PER_MINUTE -
     (instant.epochMilliseconds % MILLISECONDS_PER_MINUTE)
+  );
+}
+
+/**
+ * Milliseconds from an instant to the next second boundary; a full second when
+ * the instant is exactly on a boundary.
+ * Implements FR14 of add-unix-time-converter-tool (D8).
+ */
+export function getMillisecondsUntilNextSecond(
+  instant: Temporal.Instant,
+): number {
+  return (
+    MILLISECONDS_PER_SECOND -
+    (instant.epochMilliseconds % MILLISECONDS_PER_SECOND)
   );
 }

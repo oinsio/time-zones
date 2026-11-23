@@ -1,5 +1,6 @@
 import { SHARE_ABORT_ERROR_NAME } from "@/constants";
-import { ShareOutcome, type TextSharing } from "@/ports";
+import { CopyOutcome, ShareOutcome, type TextSharing } from "@/ports";
+import { createBrowserTextCopying } from "./browserTextCopying";
 
 /** The parts of `navigator` the adapter uses; each may be missing. */
 export type SharingNavigator = {
@@ -20,13 +21,10 @@ async function copyText(
   navigatorLike: SharingNavigator,
   text: string,
 ): Promise<ShareOutcome> {
-  try {
-    if (navigatorLike.clipboard === undefined) return ShareOutcome.FAILED;
-    await navigatorLike.clipboard.writeText(text);
-    return ShareOutcome.COPIED;
-  } catch {
-    return ShareOutcome.FAILED;
-  }
+  const outcome = await createBrowserTextCopying(navigatorLike).copyText(text);
+  return outcome === CopyOutcome.COPIED
+    ? ShareOutcome.COPIED
+    : ShareOutcome.FAILED;
 }
 
 /**

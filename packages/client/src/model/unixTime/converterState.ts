@@ -1,6 +1,7 @@
+import { NANOSECONDS_PER_SECOND } from "@/constants";
 import type { Temporal } from "@/lib/temporal";
-import { ReferenceMode, type WallClockStatus } from "@/model";
-import type { ConverterInputError } from "./converterInputError";
+import { ReferenceMode, WallClockStatus } from "@/model";
+import { ConverterInputError } from "./converterInputError";
 import { type ExactInstant, toWholeSecondExactInstant } from "./exactInstant";
 import { formatUnixTime } from "./formatUnixTime";
 import { getFixedUnit, UnixTimeUnit, UnixTimeUnitChoice } from "./unixTimeUnit";
@@ -62,4 +63,51 @@ export function createConverterState(now: Temporal.Instant): ConverterState {
     inputText: "",
     isInputTyped: false,
   });
+}
+
+const isEnumValue = (enumObject: object, value: unknown): boolean =>
+  Object.values(enumObject).includes(value);
+
+const isNanosecondsOfSecond = (value: unknown): boolean =>
+  Number.isInteger(value) &&
+  (value as number) >= 0 &&
+  (value as number) < NANOSECONDS_PER_SECOND;
+
+function isRowNote(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  const { locationId, status, requestedWallTime } = value as Record<
+    string,
+    unknown
+  >;
+  return (
+    typeof locationId === "string" &&
+    isEnumValue(WallClockStatus, status) &&
+    typeof requestedWallTime === "string"
+  );
+}
+
+/**
+ * Whether a value the shell kept for the tool is a converter state: a tool
+ * page validates what it reads, and an invalid value starts live.
+ * Implements FR14 of add-unix-time-converter-tool (D8).
+ */
+export function isConverterState(value: unknown): value is ConverterState {
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as Record<string, unknown>;
+  const { moment } = candidate;
+  return (
+    isEnumValue(ReferenceMode, candidate.mode) &&
+    typeof moment === "object" &&
+    moment !== null &&
+    Number.isInteger((moment as ExactInstant).unixSeconds) &&
+    isNanosecondsOfSecond((moment as ExactInstant).nanoseconds) &&
+    isEnumValue(UnixTimeUnit, candidate.precision) &&
+    isEnumValue(UnixTimeUnitChoice, candidate.unitChoice) &&
+    isEnumValue(UnixTimeUnit, candidate.unit) &&
+    typeof candidate.inputText === "string" &&
+    typeof candidate.isInputTyped === "boolean" &&
+    (candidate.inputError === undefined ||
+      isEnumValue(ConverterInputError, candidate.inputError)) &&
+    (candidate.rowNote === undefined || isRowNote(candidate.rowNote))
+  );
 }
