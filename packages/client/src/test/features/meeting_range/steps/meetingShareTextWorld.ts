@@ -91,7 +91,6 @@ export function buildShareTextLines(world: MeetingShareTextWorld): string[] {
     referenceZoneId: world.referenceZoneId,
     hourFormat: world.hourFormat,
     shareZoneLabelParts: world.zoneLabelParts,
-    enabledTools: [],
     language: world.language,
     translate: i18n.getFixedT(world.language),
     getCityLabel: ({ label }) =>
