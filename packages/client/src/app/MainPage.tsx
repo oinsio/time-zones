@@ -1,6 +1,8 @@
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  HEADER_GAP_CLASS_NAME,
+  HEADER_GAP_WITH_TOOLS_CLASS_NAME,
   HEADER_TITLE_CLASS_NAME,
   HEADER_TITLE_WITH_TOOLS_CLASS_NAME,
 } from "@/constants";
@@ -83,7 +85,7 @@ export function MainPage({
       >
         {meetingBar ?? (
           <div
-            className={`${COLUMN_CLASS_NAME} flex items-center justify-between gap-2 pt-6 pb-4`}
+            className={`${COLUMN_CLASS_NAME} flex items-center justify-between ${hasToolButtons ? HEADER_GAP_WITH_TOOLS_CLASS_NAME : HEADER_GAP_CLASS_NAME} pt-6 pb-4`}
           >
             <h1
               className={

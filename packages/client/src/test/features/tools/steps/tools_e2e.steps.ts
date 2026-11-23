@@ -191,3 +191,80 @@ Then(
     }
   },
 );
+
+When(
+  "the user turns on the tool toggle in the first tab",
+  async ({ locationsWorld }) => {
+    const { page } = locationsWorld;
+    await openSettings(page);
+    await toolButton(page).click();
+  },
+);
+
+Then(
+  "the header of the second tab shows the tool button",
+  async ({ locationsWorld }) => {
+    await expect(toolButton(locationsWorld.requireOtherTab())).toBeVisible();
+  },
+);
+
+When(
+  "the user turns the tool toggle off in the second tab",
+  async ({ locationsWorld }) => {
+    const otherTab = locationsWorld.requireOtherTab();
+    await openSettings(otherTab);
+    await toolButton(otherTab).click();
+  },
+);
+
+Then(
+  "the first tab shows the main page and no tool button",
+  async ({ locationsWorld }) => {
+    const { page } = locationsWorld;
+    await expect(
+      page.getByRole("group", { name: DATE_BAR_NAME }),
+    ).toBeVisible();
+    await expect(toolButton(page)).toHaveCount(0);
+  },
+);
+
+Then(
+  "the tool toggle shows an icon and no visible text and is named by its tool",
+  async ({ locationsWorld }) => {
+    const toggle = toolButton(locationsWorld.page);
+    await expect(toggle).toHaveText("");
+    await expect(toggle.locator("svg")).toHaveCount(1);
+  },
+);
+
+Then(
+  "the tool toggle has a pointer hint equal to its name",
+  async ({ locationsWorld }) => {
+    const toggle = toolButton(locationsWorld.page);
+    expect(await toggle.getAttribute("title")).toBe(
+      await toggle.getAttribute("aria-label"),
+    );
+  },
+);
+
+const toggleBoxes = new WeakMap<Page, unknown>();
+
+When(
+  "the user notes the place of the tool toggle and turns it on",
+  async ({ locationsWorld }) => {
+    const toggle = toolButton(locationsWorld.page);
+    toggleBoxes.set(locationsWorld.page, await toggle.boundingBox());
+    await toggle.click();
+  },
+);
+
+Then(
+  "the tool toggle is pressed and keeps its place and size",
+  async ({ locationsWorld }) => {
+    const toggle = toolButton(locationsWorld.page);
+    await expect(toggle).toHaveAttribute(PRESSED_ATTRIBUTE, "true");
+    expect(await toggle.boundingBox()).toEqual(
+      toggleBoxes.get(locationsWorld.page),
+    );
+  },
+);

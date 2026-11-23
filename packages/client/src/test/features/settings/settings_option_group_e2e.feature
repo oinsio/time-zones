@@ -51,7 +51,7 @@ Feature: Compact theme and hour format in a real browser
       | light |
       | dark  |
 
-  @compact-settings-controls @FR5 @NFR-R1 @UX1 @add-view-mode-setting-and-grid-skeleton @NFR-R1
+  @compact-settings-controls @FR5 @NFR-R1 @UX1 @add-view-mode-setting-and-grid-skeleton @NFR-R1 @add-unix-time-converter-tool @FR2
   Scenario Outline: Caption and options in one row at <width> px in <language>
     Given the screen is <width> px wide for the locations
     And the locations interface language is <language>
@@ -59,6 +59,7 @@ Feature: Compact theme and hour format in a real browser
     Then the caption and the options of the theme group share one row
     And the caption and the options of the hour format group share one row
     And the caption and the options of the view group share one row
+    And the caption and the toggles of the tools group share one row
     And the settings page needs no horizontal scrolling
 
     Examples:
@@ -68,12 +69,13 @@ Feature: Compact theme and hour format in a real browser
       | 1024  | Russian  |
       | 2560  | English  |
 
-  @compact-settings-controls @NFR-R1 @M1 @add-view-mode-setting-and-grid-skeleton @NFR-R1
+  @compact-settings-controls @NFR-R1 @M1 @add-view-mode-setting-and-grid-skeleton @NFR-R1 @add-unix-time-converter-tool @FR2
   Scenario Outline: Compact groups at 375 px in <language>
     Given the screen is 375 px wide for the locations
     And the locations interface language is <language>
     And the user opens the settings
     Then the theme group, the hour format group and the view group are at most 56 px high
+    And the tools group is at most 56 px high
 
     Examples:
       | language |

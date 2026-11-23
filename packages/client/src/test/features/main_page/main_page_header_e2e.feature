@@ -141,3 +141,52 @@ Feature: Main page header in a real browser
     And the user sets the sample meeting
     And the view mode becomes Cards in another tab
     Then the header shows, from left to right, the title "Time Zones", the button named "Add location" and the button named "Settings"
+
+  @add-unix-time-converter-tool @FR4 @NFR-R1
+  Scenario Outline: Header with a tool button at <width> px
+    Given the locations interface language is Russian
+    And the tool "Конвертер Unix-времени" is enabled
+    And the screen is <width> px wide for the locations
+    When the user opens the locations app
+    Then the header lists the title "Часовые пояса" and the three buttons "Добавить место", "Конвертер Unix-времени" and "Настройки" in this order
+    And the three header buttons show an icon in the accent colour and no visible text, each at least 44 by 44 px
+    And the locations screen does not scroll horizontally
+
+    Examples:
+      | width |
+      | 320   |
+      | 390   |
+      | 1024  |
+      | 2560  |
+
+  @add-unix-time-converter-tool @FR4 @NFR-R1
+  Scenario Outline: Title size with a tool button at <width> px
+    Given the locations interface language is Russian
+    And the tool "Конвертер Unix-времени" is enabled
+    And the screen is <width> px wide for the locations
+    When the user opens the locations app
+    Then the title font size is <size> px and its weight 700
+    And the title is on one line
+
+    Examples:
+      | width | size |
+      | 320   | 20   |
+      | 337   | 20   |
+      | 338   | 23   |
+      | 367   | 23   |
+      | 368   | 27   |
+      | 1024  | 27   |
+
+  @add-unix-time-converter-tool @FR4
+  Scenario: The meeting bar hides the tool buttons
+    Given the locations interface language is Russian
+    And the view mode is Grid
+    And the tool "Конвертер Unix-времени" is enabled
+    And the current time is "2026-03-08T07:30:00Z"
+    And the stored locations are "Almaty", "Moscow"
+    And the screen is 1440 by 900 px for the locations
+    When the user opens the locations app
+    And the user sets the sample meeting
+    Then the meeting bar is shown and no header button is named "Конвертер Unix-времени"
+    When the user clears the meeting
+    Then the header lists the button "Конвертер Unix-времени" between "Добавить место" and "Настройки"
