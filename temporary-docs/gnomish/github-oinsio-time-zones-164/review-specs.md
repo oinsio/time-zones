@@ -112,7 +112,8 @@
 - Impact: As written, the reducer accepts the text, then `toInstant` throws `RangeError` in the presenter or row reducer. The page falls into the view error fallback, or the app throws, instead of showing «Значение вне поддерживаемого диапазона дат» with every field unchanged (FR15).
 - Fix: In `design.md:76` replace the range line with "**Range**: `-8.64e12 ≤ unixSeconds` and (`unixSeconds < 8.64e12`, or `unixSeconds = 8.64e12` with `nanoseconds = 0`) — exactly the range of `Temporal.Instant`." In `specs/unix-time-converter/spec.md:285-286`, extend the "Range" scenario with one more step pair: "**WHEN** the user types `8640000000000.5` **THEN** the message «Значение вне поддерживаемого диапазона дат» is shown". In `tasks.md:228` (5.2), add "the upper bound with a non-zero fraction is out of range" to the `isExactInstantInRange` cases.
 - Fix risk: none — the spec already states the correct range; the edit only aligns D4 and adds one test row. `8640000000000.5` is a decimal-seconds text, which the spec reads under Auto and «Секунды» (`spec.md:62`), so the new row fits the scenario's `GIVEN` of «Секунды».
-- Status: open
+- Status: fixed
+- Resolution: `design.md` D4 Range now reads `-8.64e12 ≤ unixSeconds` and (`unixSeconds < 8.64e12`, or `= 8.64e12` with `nanoseconds = 0`); `specs/unix-time-converter/spec.md` scenario "Range" gains the step `8640000000000.5` → «Значение вне поддерживаемого диапазона дат»; task 5.2 adds `isExactInstantInRange` cases at both bounds, the upper bound with a non-zero fraction among them.
 
 ### R2 — WARNING — Unit BDD tasks 2.4 and 3.4 depend on header buttons and the tool page built later in 4.3–4.4
 - Location: `openspec/changes/add-unix-time-converter-tool/tasks.md:206`, `openspec/changes/add-unix-time-converter-tool/tasks.md:214`
@@ -121,7 +122,8 @@
 - Impact: The implementer cannot make 2.4 or 3.4 pass when they are reached. Each verify command (`npx vitest run …tools_preferences_unit.steps.tsx`, `…tools_unit.steps.tsx`) fails until group 4 is done. So either the boxes stay unticked out of order, or the implementer builds the header buttons early, outside the task that owns them.
 - Fix: In `tasks.md`, move task 2.4 to after 4.4 (for example as a new 4.5a, keeping its text). Cut task 3.4 down to the scenarios that need no header or page: "Toggles are independent", "A toggle shows no text", "A registered tool appears in the settings" and "Place of the tools group". Move "Two tools keep registry order", "Empty registry" and "Tools strings are localized" into task 4.5, next to "Tool buttons in the header". Keep their tags (`@FR1 @FR3 @FR18`).
 - Fix risk: none — only the order and grouping of tasks change. The scenarios, feature files and verify commands stay the same, and no scenario changes between unit BDD and E2E.
-- Status: open
+- Status: fixed
+- Resolution: in `tasks.md` the old 2.4 (`tools_preferences_unit.feature`, every "Enabled tools are kept on the device" scenario) moved into 4.5, after the 4.4 wiring, and the mutation task became 2.4; 3.4 keeps only "A registered tool appears in the settings", "Toggles are independent", "A toggle shows no text" and "Place of the tools group"; "Two tools keep registry order", "Empty registry" (`@FR1`) and "Tools strings are localized" (`@FR18`) moved into 4.5, whose verify command runs both steps files. Group 4 heading now lists FR1, FR3, FR18.
 
 ## Verdict
 
