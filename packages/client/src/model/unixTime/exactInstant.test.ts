@@ -54,7 +54,7 @@ describe("toInstant", () => {
   it("should convert before 1970", () => {
     expect(
       toInstant({ unixSeconds: -1, nanoseconds: 500_000_000 }).toString(),
-    ).toBe("1969-12-31T23:59:59.500Z");
+    ).toBe("1969-12-31T23:59:59.5Z");
   });
 });
 
