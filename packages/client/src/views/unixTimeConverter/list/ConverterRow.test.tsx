@@ -24,7 +24,7 @@ const buildRow = (
 });
 const renderRow = (
   row = buildRow(),
-  onConfirmTime = vi.fn(() => WallTimeInputOutcome.CLOSED),
+  onConfirmTime = vi.fn((_text: string) => WallTimeInputOutcome.CLOSED),
   onSelectDate = vi.fn(),
 ) => {
   render(

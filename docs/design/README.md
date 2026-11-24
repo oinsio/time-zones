@@ -61,7 +61,16 @@ The settings screens copy the built page with the new tokens. Only the Colours g
 
 ## Unix time converter
 
-The tools group of the settings, the tool buttons of the header and the converter page are specified in `docs/architecture/views.md` ("Unix time converter"). There are no HTML screens and no screenshot baselines yet: the converter shows the current time and a relative time, so a baseline would change with the clock. The layout is checked by assertions instead (no horizontal scroll at 320, 375 and 2560 px, 44 × 44 px targets, axe-core), which the table lists.
+The tools group of the settings, the tool buttons of the header and the converter page are specified in `docs/architecture/views.md` ("Unix time converter"). There are no HTML screens. The approved screenshots are test baselines, not HTML screens: the converter is taken with the current time fixed and the notices hidden, and the layout is also checked by assertions (no horizontal scroll at 320, 375 and 2560 px, 44 × 44 px targets, axe-core).
+
+| Baseline | Shows |
+|---|---|
+| [Converter, 390 px, light](../../packages/client/src/test/features/__screenshots__/chromium/Converter-Approved-screenshots-at-390-px-in-the-light-theme.png) | the converter with `1795432987123` typed |
+| [Converter, 390 px, dark](../../packages/client/src/test/features/__screenshots__/chromium/Converter-Approved-screenshots-at-390-px-in-the-dark-theme.png) | the same in the dark theme |
+| [Converter, 1280 px, light](../../packages/client/src/test/features/__screenshots__/chromium/Converter-Approved-screenshots-at-1280-px-in-the-light-theme.png) | the same in the wide layout |
+| [Converter, 1280 px, dark](../../packages/client/src/test/features/__screenshots__/chromium/Converter-Approved-screenshots-at-1280-px-in-the-dark-theme.png) | the same in the wide layout, dark |
+| [Settings, 375 px, light](../../packages/client/src/test/features/__screenshots__/chromium/Approved-screenshots-of-the-settings-at-375-px-in-the-light-theme.png) | the settings with the tools group, toggles off |
+| [Settings, 1024 px, dark](../../packages/client/src/test/features/__screenshots__/chromium/Approved-screenshots-of-the-settings-at-1024-px-in-the-dark-theme.png) | the same at 1024 px |
 
 | Check | Where | Shows |
 |---|---|---|
