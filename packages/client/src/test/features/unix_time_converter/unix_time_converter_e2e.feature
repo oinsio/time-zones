@@ -3,7 +3,7 @@ Feature: The Unix time converter in a real browser
   As a user I open the converter, type a Unix time and read it without
   scrolling sideways, with the keyboard or a pointer.
 
-  @add-unix-time-converter-tool @FR17 @NFR-A2 @desktop-only
+  @add-unix-time-converter-tool @NFR-A2 @desktop-only
   Scenario: Focus on a desktop
     Given the converter tool is enabled
     When the user opens the converter tool

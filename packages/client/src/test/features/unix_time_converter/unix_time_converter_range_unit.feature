@@ -3,7 +3,7 @@ Feature: The Unix time converter, range, places and language
   As a user I get a clear message for a value out of range, one row without a
   location list, another day in one location and an English interface.
 
-  @add-unix-time-converter-tool @FR16
+  @add-unix-time-converter-tool @FR15
   Scenario: Range
     Given the user chose the unit "Секунды"
     When the user types "8640000000000" into the converter input

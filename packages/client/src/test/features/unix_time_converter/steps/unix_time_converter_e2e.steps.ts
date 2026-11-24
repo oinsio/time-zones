@@ -1,4 +1,4 @@
-// Verifies FR17, NFR-A2, NFR-A3, NFR-R1, NFR-R2 of add-unix-time-converter-tool.
+// Verifies NFR-A2, NFR-A3, NFR-R1, NFR-R2 of add-unix-time-converter-tool.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";

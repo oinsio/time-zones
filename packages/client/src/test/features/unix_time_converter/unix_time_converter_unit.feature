@@ -88,7 +88,7 @@ Feature: The Unix time converter
     And the user chooses the unit "Миллисекунды"
     Then the converter input shows "1795432987000" and "Сейчас" is inactive
 
-  @add-unix-time-converter-tool @FR16
+  @add-unix-time-converter-tool @FR15
   Scenario Outline: Unreadable texts
     Given the user typed "1795432987" into the converter input
     When the user types "<text>" into the converter input
@@ -104,7 +104,7 @@ Feature: The Unix time converter
       | 2026-11-23T14:23:07       |
       | 2026-11-23                |
 
-  @add-unix-time-converter-tool @FR16
+  @add-unix-time-converter-tool @FR15
   Scenario: A fraction under a fixed unit
     Given the user chose the unit "Миллисекунды"
     When the user types "1795432987.5" into the converter input

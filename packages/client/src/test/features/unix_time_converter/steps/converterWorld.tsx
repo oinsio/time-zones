@@ -1,13 +1,21 @@
 // Implements FR6, FR7 of add-unix-time-converter-tool: the converter page over an in-memory location list.
+
 import { render, screen } from "@testing-library/react/pure";
 import userEvent from "@testing-library/user-event";
+import { useEffect } from "react";
 import {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
+  createInMemoryPreferencesRepository,
   createInMemoryTextCopying,
 } from "@/adapters";
-import { LocationsProvider } from "@/controller";
-import { LocationsLoadStatus } from "@/ports";
+import {
+  LocationsProvider,
+  PreferencesProvider,
+  useReferenceMoment,
+} from "@/controller";
+import { LocationsLoadStatus, PreferencesLoadStatus } from "@/ports";
+import { DEFAULT_PREFERENCES, HourFormat } from "@/preferences";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
@@ -19,6 +27,15 @@ export const DEVICE_ZONE = "Asia/Almaty";
 const INPUT_NAME =
   /^(Unix-время или дата ISO 8601|Unix time or ISO 8601 date)$/;
 const SAMPLE_CITIES = ["Almaty", "Moscow", "Kolkata", "New York"] as const;
+
+/** Pins the reference moment of the main page to a date: the converter must not follow it. */
+const ReferenceDatePinner = ({ isoDate }: { isoDate: string | undefined }) => {
+  const { selectDate } = useReferenceMoment();
+  useEffect(() => {
+    if (isoDate !== undefined) selectDate(isoDate);
+  }, [isoDate, selectDate]);
+  return null;
+};
 
 /** Per-scenario state of the converter features: the page, its clock and its tick scheduler. */
 /** Holds every scheduled tick until the scenario runs them: the page schedules more than one. */
@@ -44,6 +61,8 @@ export const createConverterWorld = () => {
   const textCopying = createInMemoryTextCopying();
   const clock = createSwitchableClock(SAMPLE_NOW, DEVICE_ZONE);
 
+  const hourFormat = { current: HourFormat.H24 };
+  const pinnedDate = { current: undefined as string | undefined };
   const openWith = async (cities: readonly string[]) => {
     const backend = createInMemoryLocationBackend({
       status: LocationsLoadStatus.LOADED,
@@ -53,19 +72,33 @@ export const createConverterWorld = () => {
       homeLocationId: null,
     });
     render(
-      <LocationsProvider
-        repository={createInMemoryLocationRepository({ backend })}
+      <PreferencesProvider
+        repository={createInMemoryPreferencesRepository({
+          initialDocument: {
+            status: PreferencesLoadStatus.LOADED,
+            preferences: {
+              ...DEFAULT_PREFERENCES,
+              hourFormat: hourFormat.current,
+            },
+          },
+        })}
         writeScheduler={immediateWriteScheduler}
-        clock={clock}
-        tickScheduler={createManualTickScheduler()}
       >
-        <UnixTimeConverterPage
-          notices={null}
-          onBack={() => undefined}
-          session={{ read: () => undefined, write: () => undefined }}
-          services={{ tickScheduler, textCopying }}
-        />
-      </LocationsProvider>,
+        <LocationsProvider
+          repository={createInMemoryLocationRepository({ backend })}
+          writeScheduler={immediateWriteScheduler}
+          clock={clock}
+          tickScheduler={createManualTickScheduler()}
+        >
+          <ReferenceDatePinner isoDate={pinnedDate.current} />
+          <UnixTimeConverterPage
+            notices={null}
+            onBack={() => undefined}
+            session={{ read: () => undefined, write: () => undefined }}
+            services={{ tickScheduler, textCopying }}
+          />
+        </LocationsProvider>
+      </PreferencesProvider>,
     );
     await screen.findByRole("textbox", { name: INPUT_NAME });
   };
@@ -97,6 +130,18 @@ export const createConverterWorld = () => {
     tickScheduler,
     textCopying,
     clock,
+    /** The hour format the next opened page shows. */
+    setHourFormat: (format: HourFormat) => {
+      hourFormat.current = format;
+    },
+    /** The reference moment the next opened page finds pinned to this date. */
+    pinReferenceDate: (isoDate: string) => {
+      pinnedDate.current = isoDate;
+    },
+    reset: () => {
+      hourFormat.current = HourFormat.H24;
+      pinnedDate.current = undefined;
+    },
   };
 };
 
