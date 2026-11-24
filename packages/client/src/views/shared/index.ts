@@ -15,6 +15,7 @@ export { LocationList } from "./LocationList";
 export { LocationMarkIcon } from "./LocationMarkIcon";
 export { LocationSearch } from "./LocationSearch";
 export { LocationsLoadError } from "./LocationsLoadError";
+export { NowButton } from "./NowButton";
 export {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
   LocationRowVariant,

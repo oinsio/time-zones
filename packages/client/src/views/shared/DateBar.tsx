@@ -1,10 +1,9 @@
-import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useReferenceMoment } from "@/controller";
 import { CalendarDialog } from "./CalendarDialog";
-
-const NOW_ICON_SIZE_PX = 18;
+import { NowButton } from "./NowButton";
 
 const arrowButtonClassName =
   // Stryker disable next-line StringLiteral: the arrow classes are checked by the "Touch targets" scenario of date_selection_layout_e2e.feature
@@ -65,15 +64,11 @@ export function DateBar() {
             <ChevronRight aria-hidden="true" />
           </button>
         </div>
-        <button
-          type="button"
-          disabled={!dateBar.isPinned}
-          className="flex h-11 items-center gap-1.5 rounded-now border border-control-border px-2.5 text-base font-semibold text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-default disabled:border-control-border-inactive disabled:text-muted-foreground"
-          onClick={handleReturnToNow}
-        >
-          <Clock aria-hidden="true" size={NOW_ICON_SIZE_PX} />
-          {t("date.now")}
-        </button>
+        <NowButton
+          isActive={dateBar.isPinned}
+          label={t("date.now")}
+          onReturnToNow={handleReturnToNow}
+        />
       </div>
       {dateBar.gapNote && (
         <p className="pt-1 text-center text-xs text-muted-foreground">

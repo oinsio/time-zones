@@ -1,12 +1,10 @@
-import { Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { NowButton } from "../../shared";
 import type { ConverterViewProps } from "../converterViewDefinition";
 import { ConverterInputField } from "./ConverterInputField";
 import { ConverterRow } from "./ConverterRow";
 import { MomentNotations } from "./MomentNotations";
 import { UnitChoice } from "./UnitChoice";
-
-const NOW_ICON_SIZE_PX = 18;
 
 /**
  * The first converter view: the input with the unit choice and Now, the
@@ -34,15 +32,11 @@ export function ListConverterView({
             unitInForceLabel={converter.unitInForceLabel}
             onChoose={commands.chooseUnit}
           />
-          <button
-            type="button"
-            disabled={!converter.isNowActive}
-            onClick={commands.returnToNow}
-            className="flex h-11 items-center gap-1.5 rounded-now border border-control-border px-2.5 text-base font-semibold text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-default disabled:border-control-border-inactive disabled:text-muted-foreground"
-          >
-            <Clock aria-hidden="true" size={NOW_ICON_SIZE_PX} />
-            {t("unixTime.now")}
-          </button>
+          <NowButton
+            isActive={converter.isNowActive}
+            label={t("unixTime.now")}
+            onReturnToNow={commands.returnToNow}
+          />
         </div>
         <p
           aria-label={t("unixTime.relativeLabel")}
