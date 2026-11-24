@@ -67,7 +67,8 @@ describe("MomentNotations", () => {
       ([, delay]) => delay === COPY_CONFIRMATION_MS,
     );
     expect(confirmation).toBeDefined();
-    act(() => (confirmation?.[0] as () => void)());
+    const runConfirmationTimeout = confirmation?.[0] as () => void;
+    act(() => runConfirmationTimeout());
     expect(copyButton("Секунды").querySelector(".lucide-copy")).not.toBeNull();
     expect(screen.queryByText("Скопировано")).toBeNull();
     setTimeoutSpy.mockRestore();

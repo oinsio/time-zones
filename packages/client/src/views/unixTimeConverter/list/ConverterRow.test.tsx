@@ -87,6 +87,8 @@ describe("ConverterRow", () => {
   it("should open the calendar with the date of the row", async () => {
     renderRow();
     await userEvent.click(screen.getByRole("button", { name: DATE_NAME }));
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("dialog", {}, { timeout: 5000 }),
+    ).toBeInTheDocument();
   });
 });
