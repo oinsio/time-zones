@@ -2,7 +2,6 @@ import type { TFunction } from "i18next";
 import {
   MAX_FORMATTABLE_EPOCH_MILLISECONDS,
   NANOSECONDS_PER_MILLISECOND,
-  UTC_ZONE_ID,
 } from "@/constants";
 import { Temporal } from "@/lib/temporal";
 import type { InterfaceLanguageCode } from "@/locales";
@@ -12,7 +11,6 @@ import {
   getLocationMarkKind,
   getUtcOffsetMinutes,
   getZoneAbbreviation,
-  isDeviceTimeLocation,
   type Location,
 } from "@/model";
 import {
@@ -21,12 +19,12 @@ import {
   UNIX_TIME_UNIT_FRACTION_DIGITS,
 } from "@/model/unixTime";
 import { type HourFormat, ZoneLabelPart } from "@/preferences";
-import { presentCountryName } from "../countryName";
 import { formatLocalDate } from "../localDateTime";
 import {
   type PresentedLocationMark,
   presentLocationMarks,
 } from "../locationMark";
+import { presentRowHeader } from "../presentRowHeader";
 import { formatUtcOffset } from "../utcOffset";
 import { presentWallTimeHint } from "../wallTimeHint";
 import { formatZoneAbbreviation } from "../zoneAbbreviation";
@@ -106,14 +104,10 @@ export function presentConverterRows(
     const localDateTime = getLocalDateTime(location.timeZoneId, instant);
     if (localDateTime === undefined || !isLocalTimeFormattable(localDateTime))
       return [];
-    const isDeviceTime = isDeviceTimeLocation(location);
-    const isUniversalTime =
-      !isDeviceTime &&
-      location.timeZoneId === UTC_ZONE_ID &&
-      !location.countryCode;
-    const cityLabel = isDeviceTime
-      ? (context.deviceTimeCityLabel ?? location.timeZoneId)
-      : (context.cityLabels?.get(location.id) ?? location.label);
+    const { isDeviceTime, cityLabel, placeText } = presentRowHeader(
+      location,
+      context,
+    );
     const markKind = getLocationMarkKind(
       location,
       deviceTimeZoneId,
@@ -151,11 +145,7 @@ export function presentConverterRows(
         cityLabel,
         mark: markKind === undefined ? undefined : marks[markKind],
         zoneLineParts: presentZoneLine({
-          placeText: isDeviceTime
-            ? translate("locations.deviceTimeMeta")
-            : isUniversalTime
-              ? translate("locations.universalTime")
-              : presentCountryName(location.countryCode, language),
+          placeText,
           zoneAbbreviationLabel,
           utcOffsetLabel,
           zoneLabelParts: context.zoneLabelParts,

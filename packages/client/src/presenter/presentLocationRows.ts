@@ -1,14 +1,12 @@
-import { UTC_ZONE_ID } from "@/constants";
 import {
   getLocationMarkKind,
-  isDeviceTimeLocation,
   type Location,
 } from "@/model";
-import { presentCountryName } from "./countryName";
 import {
   type PresentedLocationMark,
   presentLocationMarks,
 } from "./locationMark";
+import { presentRowHeader } from "./presentRowHeader";
 import {
   type LocationRowsContext,
   type PresentedZoneMoment,
@@ -62,16 +60,9 @@ export function presentLocationRows(
       homeLocationId,
     );
     const mark = markKind === undefined ? undefined : marks[markKind];
-    const isDeviceTime = isDeviceTimeLocation(location);
-    const isUniversalTime =
-      !isDeviceTime &&
-      location.timeZoneId === UTC_ZONE_ID &&
-      !location.countryCode;
-    const cityLabel = isDeviceTime
-      ? (context.deviceTimeCityLabel ?? location.timeZoneId)
-      : (context.cityLabels?.get(location.id) ?? location.label);
+    const { isDeviceTime, cityLabel, countryName, placeText } =
+      presentRowHeader(location, context);
     const zoneMoment = presentZoneMoment({ ...location, cityLabel }, context);
-    const countryName = presentCountryName(location.countryCode, language);
     return {
       id: location.id,
       cityLabel,
@@ -79,11 +70,7 @@ export function presentLocationRows(
       mark,
       ...zoneMoment,
       zoneLineParts: presentZoneLine({
-        placeText: isDeviceTime
-          ? translate("locations.deviceTimeMeta")
-          : isUniversalTime
-            ? translate("locations.universalTime")
-            : countryName,
+        placeText,
         zoneAbbreviationLabel: zoneMoment.zoneAbbreviationLabel,
         utcOffsetLabel: zoneMoment.utcOffsetLabel,
         zoneLabelParts: context.zoneLabelParts,

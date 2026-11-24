@@ -34,6 +34,12 @@ export { type DayPeriodMarkers, getDayPeriodMarkers } from "./dayPeriodMarkers";
 export type { HourLabel, PresentedDayTrack } from "./dayTrack";
 export { formatDeployTime } from "./deployTime";
 export { formatTypedWallTimeText } from "./formatTypedWallTimeText";
+// Implements FR9 of add-unix-time-converter-tool.
+export {
+  type PresentedRowHeader,
+  presentRowHeader,
+  type RowHeaderContext,
+} from "./presentRowHeader";
 // Implements FR3, FR4, FR5 of add-grid-hour-cells-and-hour-frame.
 export {
   type HourStripContext,
