@@ -51,7 +51,6 @@ export function UnixTimeConverterPage({
           converter={converter}
           commands={commands}
           shouldFocusInput={isFineAndHovering}
-          isListLoading={false}
         />
       )}
     </ToolPageFrame>

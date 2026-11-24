@@ -35,6 +35,7 @@ export function ConverterInputField({
   };
 
   const hasMessage = input.message !== undefined;
+  const hasHint = !hasMessage && input.text === "";
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
       <input
@@ -46,7 +47,7 @@ export function ConverterInputField({
         spellCheck={false}
         aria-label={input.name}
         aria-invalid={hasMessage}
-        aria-describedby={hasMessage ? messageId : undefined}
+        aria-describedby={hasMessage || hasHint ? messageId : undefined}
         value={input.text}
         onChange={(event) => onTypeInput(event.target.value)}
         onPaste={handlePaste}
@@ -56,9 +57,9 @@ export function ConverterInputField({
         id={messageId}
         role="status"
         aria-live="polite"
-        className="min-h-5 text-sm text-danger"
+        className={`min-h-5 text-sm ${hasHint ? "text-muted-foreground" : "text-danger"}`}
       >
-        {input.message}
+        {hasHint ? input.hint : input.message}
       </p>
     </div>
   );

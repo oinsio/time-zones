@@ -52,7 +52,6 @@ type RenderConverterViewOptions = {
   view: ConverterViewDefinition;
   locations?: ReturnType<typeof buildLocation>[];
   shouldFocusInput?: boolean;
-  isListLoading?: boolean;
 };
 
 function ConverterHarness({
@@ -60,13 +59,11 @@ function ConverterHarness({
   tickScheduler,
   textCopying,
   shouldFocusInput,
-  isListLoading,
 }: {
   view: ConverterViewDefinition;
   tickScheduler: ReturnType<typeof createCollectingTickScheduler>;
   textCopying: ReturnType<typeof createInMemoryTextCopying>;
   shouldFocusInput: boolean;
-  isListLoading?: boolean;
 }) {
   const { converter, commands } = useUnixTimeConverter({
     session: { read: () => undefined, write: () => {} },
@@ -80,7 +77,6 @@ function ConverterHarness({
       converter={converter}
       commands={commands}
       shouldFocusInput={shouldFocusInput}
-      isListLoading={isListLoading ?? false}
     />
   );
 }
@@ -90,7 +86,6 @@ export function renderConverterView({
   view,
   locations = [almaty, moscow, kolkata, newYork],
   shouldFocusInput = false,
-  isListLoading,
 }: RenderConverterViewOptions) {
   const clock = createSwitchableClock(SAMPLE_NOW, "Asia/Almaty");
   const tickScheduler = createCollectingTickScheduler();
@@ -112,7 +107,6 @@ export function renderConverterView({
         tickScheduler={tickScheduler}
         textCopying={textCopying}
         shouldFocusInput={shouldFocusInput}
-        isListLoading={isListLoading}
       />
     </LocationsProvider>,
   );

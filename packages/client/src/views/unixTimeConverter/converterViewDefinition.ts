@@ -25,8 +25,6 @@ export type ConverterViewProps = {
   commands: ConverterCommands;
   /** The view focuses its input and selects its text on mount: a fine, hovering pointer. */
   shouldFocusInput: boolean;
-  /** The location list is not ready yet: the view shows the row skeleton and keeps its input working. */
-  isListLoading: boolean;
 };
 
 /** Describes one swappable converter view. Implements FR17, G5 of add-unix-time-converter-tool (D9). */

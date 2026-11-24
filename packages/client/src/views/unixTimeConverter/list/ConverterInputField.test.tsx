@@ -32,6 +32,16 @@ const renderField = (
 const field = () => screen.getByRole("textbox", { name: INPUT_NAME });
 
 describe("ConverterInputField", () => {
+  it("should show the hint as the description of an empty input", () => {
+    renderField(buildInput({ text: "" }));
+    expect(field()).toHaveAccessibleDescription("hint");
+  });
+
+  it("should show no hint once the input has a text", () => {
+    renderField();
+    expect(screen.queryByText("hint")).toBeNull();
+  });
+
   it("should show the presented text under the presented name", () => {
     renderField();
     expect(field()).toHaveValue("1795432987");
