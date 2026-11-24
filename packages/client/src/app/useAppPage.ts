@@ -74,7 +74,11 @@ export function useAppPage(enabledToolIds: readonly string[]) {
   useEffect(() => {
     if (page === AppPage.MAIN) return;
     const onKeyDown = (keyboardEvent: KeyboardEvent) => {
-      if (keyboardEvent.key === KeyboardKey.ESCAPE && !keyboardEvent.defaultPrevented) leave();
+      if (
+        keyboardEvent.key === KeyboardKey.ESCAPE &&
+        !keyboardEvent.defaultPrevented
+      )
+        leave();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);

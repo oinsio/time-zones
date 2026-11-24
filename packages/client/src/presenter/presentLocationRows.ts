@@ -1,7 +1,4 @@
-import {
-  getLocationMarkKind,
-  type Location,
-} from "@/model";
+import { getLocationMarkKind, type Location } from "@/model";
 import {
   type PresentedLocationMark,
   presentLocationMarks,
@@ -51,7 +48,7 @@ export function presentLocationRows(
   locations: readonly Location[],
   context: LocationRowsContext,
 ): LocationRow[] {
-  const { language, translate, deviceTimeZoneId, homeLocationId } = context;
+  const { translate, deviceTimeZoneId, homeLocationId } = context;
   const marks = presentLocationMarks(translate);
   return locations.map((location) => {
     const markKind = getLocationMarkKind(

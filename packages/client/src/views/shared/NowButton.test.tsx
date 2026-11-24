@@ -5,7 +5,9 @@ import { NowButton } from "./NowButton";
 
 describe("NowButton", () => {
   it("should be disabled while the moment is live", () => {
-    render(<NowButton isActive={false} label="Сейчас" onReturnToNow={vi.fn()} />);
+    render(
+      <NowButton isActive={false} label="Сейчас" onReturnToNow={vi.fn()} />,
+    );
     expect(screen.getByRole("button", { name: "Сейчас" })).toBeDisabled();
   });
 

@@ -34,12 +34,6 @@ export { type DayPeriodMarkers, getDayPeriodMarkers } from "./dayPeriodMarkers";
 export type { HourLabel, PresentedDayTrack } from "./dayTrack";
 export { formatDeployTime } from "./deployTime";
 export { formatTypedWallTimeText } from "./formatTypedWallTimeText";
-// Implements FR9 of add-unix-time-converter-tool.
-export {
-  type PresentedRowHeader,
-  presentRowHeader,
-  type RowHeaderContext,
-} from "./presentRowHeader";
 // Implements FR3, FR4, FR5 of add-grid-hour-cells-and-hour-frame.
 export {
   type HourStripContext,
@@ -97,6 +91,12 @@ export {
 export { parseWallTimeInput } from "./parseWallTimeInput";
 export { presentDeviceTimeOptionLabels } from "./presentDeviceTimeOptionLabels";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";
+// Implements FR9 of add-unix-time-converter-tool.
+export {
+  type PresentedRowHeader,
+  presentRowHeader,
+  type RowHeaderContext,
+} from "./presentRowHeader";
 export {
   type PresentedAbbreviation,
   type PresentedSearchResult,

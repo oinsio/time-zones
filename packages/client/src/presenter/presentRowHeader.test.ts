@@ -1,7 +1,7 @@
 // Verifies FR9 of add-unix-time-converter-tool: one owner of the city label and the place text.
 import i18n from "i18next";
 import { DEVICE_TIME_LOCATION_ID, UTC_ZONE_ID } from "@/constants";
-import { LocationKind, type Location } from "@/model";
+import { type Location, LocationKind } from "@/model";
 import { presentRowHeader } from "./presentRowHeader";
 
 const translate = i18n.t.bind(i18n);

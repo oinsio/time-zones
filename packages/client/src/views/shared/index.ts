@@ -15,13 +15,13 @@ export { LocationList } from "./LocationList";
 export { LocationMarkIcon } from "./LocationMarkIcon";
 export { LocationSearch } from "./LocationSearch";
 export { LocationsLoadError } from "./LocationsLoadError";
-export { NowButton } from "./NowButton";
 export {
   LOCATION_ROW_VARIANT_CLASS_NAMES,
   LocationRowVariant,
 } from "./locationRowVariant";
 // Implements FR13 of add-grid-meeting-range-and-share (D7).
 export { MeetingBar } from "./MeetingBar";
+export { NowButton } from "./NowButton";
 export { RowSkeleton } from "./RowSkeleton";
 export { SettingsToggleGroup } from "./SettingsToggleGroup";
 // Implements FR5, FR14 of add-day-colouring-setting: the typed time field helpers.

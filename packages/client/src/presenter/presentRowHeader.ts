@@ -1,7 +1,7 @@
 import type { TFunction } from "i18next";
 import { UTC_ZONE_ID } from "@/constants";
-import { isDeviceTimeLocation, type Location } from "@/model";
 import type { InterfaceLanguageCode } from "@/locales";
+import { isDeviceTimeLocation, type Location } from "@/model";
 import { presentCountryName } from "./countryName";
 
 export type RowHeaderContext = {

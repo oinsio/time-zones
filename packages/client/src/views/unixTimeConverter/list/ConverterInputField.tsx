@@ -14,6 +14,15 @@ type ConverterInputFieldProps = {
   shouldFocusOnMount: boolean;
 };
 
+function isWholeTextSelected(field: HTMLInputElement | null): boolean {
+  return (
+    field !== null &&
+    field.value !== "" &&
+    field.selectionStart === 0 &&
+    field.selectionEnd === field.value.length
+  );
+}
+
 /**
  * The converter input: a text field named by the presenter, whose message is
  * its description and a polite live region; the ticking text is not one. While
@@ -28,31 +37,26 @@ export function ConverterInputField({
 }: ConverterInputFieldProps) {
   const messageId = useId();
   const fieldRef = useRef<HTMLInputElement | null>(null);
-  const isWholeTextSelected = useRef(false);
-  const noteSelection = (field: HTMLInputElement | null) => {
-    isWholeTextSelected.current =
-      field !== null &&
-      field.value !== "" &&
-      field.selectionStart === 0 &&
-      field.selectionEnd === field.value.length;
-  };
+  const wasWholeTextSelected = useRef(false);
 
   useEffect(() => {
     if (!shouldFocusOnMount) return;
     fieldRef.current?.focus();
     fieldRef.current?.select();
-    noteSelection(fieldRef.current);
+    wasWholeTextSelected.current = isWholeTextSelected(fieldRef.current);
   }, [shouldFocusOnMount]);
 
   // A rewritten value drops the selection; restore it while the user had all of the text selected.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: input.text is the trigger, the effect reads the DOM value
   useLayoutEffect(() => {
     const field = fieldRef.current;
-    if (input.isTyped || !isWholeTextSelected.current || !field) return;
+    if (input.isTyped || !wasWholeTextSelected.current || !field) return;
     if (document.activeElement === field) field.select();
   }, [input.text, input.isTyped]);
 
-  const handleSelect = (event: SyntheticEvent<HTMLInputElement>) =>
-    noteSelection(event.currentTarget);
+  const handleSelect = (event: SyntheticEvent<HTMLInputElement>) => {
+    wasWholeTextSelected.current = isWholeTextSelected(event.currentTarget);
+  };
 
   const handlePaste = (event: ClipboardEvent<HTMLInputElement>) => {
     if (input.isTyped) return;
