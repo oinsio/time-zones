@@ -1,5 +1,6 @@
 import { Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { RowSkeleton } from "../../shared";
 import type { ConverterViewProps } from "../converterViewDefinition";
 import { ConverterInputField } from "./ConverterInputField";
 import { ConverterRow } from "./ConverterRow";
@@ -18,6 +19,7 @@ export function ListConverterView({
   converter,
   commands,
   shouldFocusInput,
+  isListLoading,
 }: ConverterViewProps) {
   const { t } = useTranslation();
   return (
@@ -51,19 +53,26 @@ export function ListConverterView({
           {converter.relativeTime}
         </p>
       </div>
-      <ul
-        aria-label={t("unixTime.rowsLabel")}
-        className="flex min-w-0 flex-col gap-3"
-      >
-        {converter.rows.map((row) => (
-          <ConverterRow
-            key={row.id}
-            row={row}
-            onConfirmTime={(text) => commands.setRowWallTime(row.id, text)}
-            onSelectDate={(isoDate) => commands.setRowDate(row.id, isoDate)}
-          />
-        ))}
-      </ul>
+      {isListLoading ? (
+        <div aria-busy="true" className="flex min-w-0 flex-col gap-3">
+          <span className="sr-only">{t("mainPage.loading")}</span>
+          <RowSkeleton />
+        </div>
+      ) : (
+        <ul
+          aria-label={t("unixTime.rowsLabel")}
+          className="flex min-w-0 flex-col gap-3"
+        >
+          {converter.rows.map((row) => (
+            <ConverterRow
+              key={row.id}
+              row={row}
+              onConfirmTime={(text) => commands.setRowWallTime(row.id, text)}
+              onSelectDate={(isoDate) => commands.setRowDate(row.id, isoDate)}
+            />
+          ))}
+        </ul>
+      )}
       <MomentNotations
         notations={converter.notations}
         onCopy={commands.copyNotation}

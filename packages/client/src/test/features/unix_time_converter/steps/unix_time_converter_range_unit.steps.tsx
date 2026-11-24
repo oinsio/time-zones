@@ -25,7 +25,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
   const expectMessage = (message: string) =>
     expect(readInputMessage(world.input())).toBe(message);
 
-  // @add-unix-time-converter-tool @FR16
+  // @add-unix-time-converter-tool @FR15
   f.Scenario("Range", ({ Given, When, Then }) => {
     Given("the user chose the unit {string}", async (_ctx, unit: string) => {
       await world.open();

@@ -21,6 +21,7 @@ import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { UnixTimeConverterPage } from "@/tools/unixTimeConverter";
+import type { ConverterViewDefinition } from "@/views/unixTimeConverter";
 
 export const SAMPLE_NOW = "2026-11-23T11:23:07Z";
 export const DEVICE_ZONE = "Asia/Almaty";
@@ -63,7 +64,10 @@ export const createConverterWorld = () => {
 
   const hourFormat = { current: HourFormat.H24 };
   const pinnedDate = { current: undefined as string | undefined };
-  const openWith = async (cities: readonly string[]) => {
+  const openWith = async (
+    cities: readonly string[],
+    registry?: readonly ConverterViewDefinition[],
+  ) => {
     const backend = createInMemoryLocationBackend({
       status: LocationsLoadStatus.LOADED,
       locations: cities.map((label) =>
@@ -96,6 +100,7 @@ export const createConverterWorld = () => {
             onBack={() => undefined}
             session={{ read: () => undefined, write: () => undefined }}
             services={{ tickScheduler, textCopying }}
+            registry={registry}
           />
         </LocationsProvider>
       </PreferencesProvider>,

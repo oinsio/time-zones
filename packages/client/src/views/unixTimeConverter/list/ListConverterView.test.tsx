@@ -267,4 +267,16 @@ describe("createCollectingTickScheduler", () => {
     scheduler.runPending();
     expect(callback).toHaveBeenCalledOnce();
   });
+
+  it("should show the row skeleton instead of the rows while the list loads", () => {
+    renderConverterView({ view: listView, isListLoading: true });
+    expect(screen.queryByRole("list", { name: "Время в местах" })).toBeNull();
+    expect(screen.getByText("Загрузка…")).toBeInTheDocument();
+  });
+
+  it("should keep the input working while the list loads", async () => {
+    renderConverterView({ view: listView, isListLoading: true });
+    await typeInto("0");
+    expect(inputField()).toHaveValue("0");
+  });
 });

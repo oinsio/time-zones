@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { usePrimaryPointer } from "@/controller";
+import { LocationsStatus, usePrimaryPointer } from "@/controller";
 import { useUnixTimeConverter } from "@/controller/unixTime";
 import { resolveActiveView } from "@/views";
 import {
@@ -31,7 +31,7 @@ export function UnixTimeConverterPage({
 }: UnixTimeConverterPageProps) {
   const { t } = useTranslation();
   const { isFineAndHovering } = usePrimaryPointer();
-  const { converter, commands } = useUnixTimeConverter({
+  const { converter, commands, loadStatus } = useUnixTimeConverter({
     session,
     tickScheduler: services.tickScheduler,
     textCopying: services.textCopying,
@@ -51,6 +51,7 @@ export function UnixTimeConverterPage({
           converter={converter}
           commands={commands}
           shouldFocusInput={isFineAndHovering}
+          isListLoading={loadStatus !== LocationsStatus.READY}
         />
       )}
     </ToolPageFrame>

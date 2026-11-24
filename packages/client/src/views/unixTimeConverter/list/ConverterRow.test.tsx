@@ -1,8 +1,12 @@
 // Verifies FR9, FR10, FR11, NFR-A2, NFR-A3, UX1 of add-unix-time-converter-tool.
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { WallTimeInputOutcome } from "@/controller";
+import { createInMemoryLocationRepository } from "@/adapters";
+import { LocationsProvider, WallTimeInputOutcome } from "@/controller";
+import { fakeClock } from "@/lib/temporal";
 import type { PresentedConverterRow } from "@/presenter/unixTime";
+import { createManualTickScheduler } from "@/test/tickSchedulers";
+import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { ConverterRow } from "./ConverterRow";
 
 const TIME_NAME = "Время — Москва, 14:23:07";
@@ -28,13 +32,20 @@ const renderRow = (
   onSelectDate = vi.fn(),
 ) => {
   render(
-    <ul>
-      <ConverterRow
-        row={row}
-        onConfirmTime={onConfirmTime}
-        onSelectDate={onSelectDate}
-      />
-    </ul>,
+    <LocationsProvider
+      repository={createInMemoryLocationRepository()}
+      writeScheduler={immediateWriteScheduler}
+      clock={fakeClock("2026-11-23T11:23:07Z", "Asia/Almaty")}
+      tickScheduler={createManualTickScheduler()}
+    >
+      <ul>
+        <ConverterRow
+          row={row}
+          onConfirmTime={onConfirmTime}
+          onSelectDate={onSelectDate}
+        />
+      </ul>
+    </LocationsProvider>,
   );
   return { onConfirmTime, onSelectDate };
 };

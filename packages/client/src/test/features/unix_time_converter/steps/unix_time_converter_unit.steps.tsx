@@ -224,7 +224,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     );
   });
 
-  // @add-unix-time-converter-tool @FR16
+  // @add-unix-time-converter-tool @FR15
   f.ScenarioOutline(
     "Unreadable texts",
     ({ Given, When, Then, And }, variables) => {
@@ -244,7 +244,7 @@ describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
     },
   );
 
-  // @add-unix-time-converter-tool @FR16
+  // @add-unix-time-converter-tool @FR15
   f.Scenario("A fraction under a fixed unit", ({ Given, When, Then }) => {
     Given("the user chose the unit {string}", async (_ctx, unit: string) => {
       await world.open();

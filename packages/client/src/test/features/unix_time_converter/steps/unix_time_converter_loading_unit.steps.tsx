@@ -1,0 +1,47 @@
+// Verifies FR9 of add-unix-time-converter-tool.
+import type { FeatureDescriibeCallbackParams } from "@amiceli/vitest-cucumber";
+import { describeFeature, loadFeature } from "@amiceli/vitest-cucumber";
+import { cleanup, screen } from "@testing-library/react/pure";
+import i18n from "i18next";
+import { expect } from "vitest";
+import {
+  type ConverterViewProps,
+  converterViewRegistry,
+} from "@/views/unixTimeConverter";
+import { createConverterWorld } from "./converterWorld";
+
+const feature = await loadFeature(
+  "../unix_time_converter_loading_unit.feature",
+);
+
+describeFeature(feature, (f: FeatureDescriibeCallbackParams) => {
+  const world = createConverterWorld();
+
+  f.BeforeEachScenario(async () => {
+    cleanup();
+    world.clock.moveTo("2026-11-23T11:23:07Z", "Asia/Almaty");
+    await i18n.changeLanguage("ru");
+  });
+
+  // @add-unix-time-converter-tool @FR9
+  f.Scenario("The location list is loading", ({ Given, When, Then, And }) => {
+    const [listView] = converterViewRegistry;
+    const loadingView = {
+      ...listView,
+      component: (props: ConverterViewProps) => (
+        <listView.component {...props} isListLoading />
+      ),
+    };
+    Given("the location list is still loading", () => undefined);
+    When("the user opens the converter", () =>
+      world.openWith([], [loadingView]),
+    );
+    Then("the row skeleton is shown in place of the rows", () => {
+      expect(screen.getByText("Загрузка…")).toBeInTheDocument();
+      expect(screen.queryByRole("list", { name: "Время в местах" })).toBeNull();
+    });
+    And("the converter input still reads {string}", (_ctx, text: string) =>
+      expect(world.input()).toHaveValue(text),
+    );
+  });
+});

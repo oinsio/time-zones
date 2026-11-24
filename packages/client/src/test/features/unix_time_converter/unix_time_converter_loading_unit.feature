@@ -1,0 +1,10 @@
+Feature: The Unix time converter while the location list loads
+  Implements change add-unix-time-converter-tool.
+  As a user I can already type a Unix time while the places are not ready.
+
+  @add-unix-time-converter-tool @FR9
+  Scenario: The location list is loading
+    Given the location list is still loading
+    When the user opens the converter
+    Then the row skeleton is shown in place of the rows
+    And the converter input still reads "1795432987"

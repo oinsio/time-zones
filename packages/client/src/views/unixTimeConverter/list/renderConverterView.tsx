@@ -4,7 +4,7 @@ import {
   createInMemoryLocationRepository,
   createInMemoryTextCopying,
 } from "@/adapters";
-import { LocationsProvider } from "@/controller";
+import { LocationsProvider, LocationsStatus } from "@/controller";
 import { useUnixTimeConverter } from "@/controller/unixTime";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
@@ -52,6 +52,7 @@ type RenderConverterViewOptions = {
   view: ConverterViewDefinition;
   locations?: ReturnType<typeof buildLocation>[];
   shouldFocusInput?: boolean;
+  isListLoading?: boolean;
 };
 
 function ConverterHarness({
@@ -59,13 +60,15 @@ function ConverterHarness({
   tickScheduler,
   textCopying,
   shouldFocusInput,
+  isListLoading,
 }: {
   view: ConverterViewDefinition;
   tickScheduler: ReturnType<typeof createCollectingTickScheduler>;
   textCopying: ReturnType<typeof createInMemoryTextCopying>;
   shouldFocusInput: boolean;
+  isListLoading?: boolean;
 }) {
-  const { converter, commands } = useUnixTimeConverter({
+  const { converter, commands, loadStatus } = useUnixTimeConverter({
     session: { read: () => undefined, write: () => {} },
     tickScheduler,
     textCopying,
@@ -77,6 +80,7 @@ function ConverterHarness({
       converter={converter}
       commands={commands}
       shouldFocusInput={shouldFocusInput}
+      isListLoading={isListLoading ?? loadStatus !== LocationsStatus.READY}
     />
   );
 }
@@ -86,6 +90,7 @@ export function renderConverterView({
   view,
   locations = [almaty, moscow, kolkata, newYork],
   shouldFocusInput = false,
+  isListLoading,
 }: RenderConverterViewOptions) {
   const clock = createSwitchableClock(SAMPLE_NOW, "Asia/Almaty");
   const tickScheduler = createCollectingTickScheduler();
@@ -107,6 +112,7 @@ export function renderConverterView({
         tickScheduler={tickScheduler}
         textCopying={textCopying}
         shouldFocusInput={shouldFocusInput}
+        isListLoading={isListLoading}
       />
     </LocationsProvider>,
   );

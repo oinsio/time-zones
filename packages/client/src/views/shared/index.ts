@@ -21,6 +21,7 @@ export {
 } from "./locationRowVariant";
 // Implements FR13 of add-grid-meeting-range-and-share (D7).
 export { MeetingBar } from "./MeetingBar";
+export { RowSkeleton } from "./RowSkeleton";
 export { SettingsToggleGroup } from "./SettingsToggleGroup";
 // Implements FR5, FR14 of add-day-colouring-setting: the typed time field helpers.
 export { getTypedTimeFieldText } from "./typedTimeFieldText";
