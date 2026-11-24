@@ -1,4 +1,4 @@
-// Public API of the Unix time model (ADR-0002, D11 of add-unix-time-converter-tool).
+// Implements FR6, FR7, FR8, FR9 of add-unix-time-converter-tool (D11): public API of the Unix time model (ADR-0002).
 // Not re-exported from `model/index.ts`: only the converter chunk imports it.
 
 export { parseConverterText, reduceConverter } from "./converter";
