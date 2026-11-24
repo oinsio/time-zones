@@ -5,6 +5,7 @@ export { mountApp } from "./mountApp";
 export { OfflineReadyNotice } from "./OfflineReadyNotice";
 export { RecoveryScreen } from "./RecoveryScreen";
 export { StorageWarning } from "./StorageWarning";
+export { ToolHost } from "./ToolHost";
 export { UpdateNotice } from "./UpdateNotice";
 export { ViewErrorFallback } from "./ViewErrorFallback";
 export { ViewHost } from "./ViewHost";
