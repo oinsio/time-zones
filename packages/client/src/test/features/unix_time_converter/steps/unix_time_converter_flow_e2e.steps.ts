@@ -1,6 +1,7 @@
 // Verifies FR5, FR8, FR12, FR14, FR16, NFR-A2 of add-unix-time-converter-tool: the converter in a real browser.
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import { Temporal } from "@/lib/temporal";
 import { test } from "../../locations/steps/locations_ui_e2e.fixtures";
 import { listRow } from "../../locations/steps/locationsE2eHelpers";
 import {
@@ -94,7 +95,8 @@ Then(
     await expect(nowButton(page)).toBeDisabled();
     const shownText = await converterInput(page).inputValue();
     expect(shownText).toMatch(SECONDS_ONLY_TIME_PATTERN);
-    const currentSeconds = Date.now() / MILLISECONDS_PER_SECOND;
+    const currentSeconds =
+      Temporal.Now.instant().epochMilliseconds / MILLISECONDS_PER_SECOND;
     expect(Math.abs(Number(shownText) - currentSeconds)).toBeLessThan(
       LIVE_TOLERANCE_SECONDS,
     );
