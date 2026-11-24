@@ -1,10 +1,10 @@
 import { type Dispatch, useMemo } from "react";
 import type { Clock } from "@/lib/temporal";
-import { Temporal } from "@/lib/temporal";
 import {
   type ConverterCommand,
   ConverterCommandType,
   type ConverterState,
+  getMinuteStart,
   toInstant,
   type UnixTimeUnitChoice,
 } from "@/model/unixTime";
@@ -39,8 +39,6 @@ type ConverterCommandsInput = {
   textCopying: TextCopying;
   onLeave: () => void;
 };
-
-const MILLISECONDS_PER_MINUTE_START_FLOOR = 60_000;
 
 /**
  * The commands of the converter page: they turn what a view sends into model
@@ -104,13 +102,7 @@ export function useConverterCommands({
         return textCopying.copyText(notation?.text ?? "");
       },
       showOnMainPage: () => {
-        const { epochMilliseconds } = toInstant(state.moment);
-        const minuteStart =
-          epochMilliseconds -
-          (((epochMilliseconds % MILLISECONDS_PER_MINUTE_START_FLOOR) +
-            MILLISECONDS_PER_MINUTE_START_FLOOR) %
-            MILLISECONDS_PER_MINUTE_START_FLOOR);
-        selectInstant(Temporal.Instant.fromEpochMilliseconds(minuteStart));
+        selectInstant(getMinuteStart(toInstant(state.moment)));
         onLeave();
       },
     };

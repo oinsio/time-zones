@@ -24,6 +24,7 @@ export {
   toWholeSecondExactInstant,
 } from "./exactInstant";
 export { formatExactIsoInstant, formatUnixTime } from "./formatUnixTime";
+export { getMinuteStart } from "./minuteStart";
 export { parseIsoInstantText } from "./parseIsoInstantText";
 export {
   type ParsedMoment,
