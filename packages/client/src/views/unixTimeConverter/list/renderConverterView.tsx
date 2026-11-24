@@ -4,7 +4,7 @@ import {
   createInMemoryLocationRepository,
   createInMemoryTextCopying,
 } from "@/adapters";
-import { LocationsProvider, LocationsStatus } from "@/controller";
+import { LocationsProvider } from "@/controller";
 import { useUnixTimeConverter } from "@/controller/unixTime";
 import { LocationsLoadStatus } from "@/ports";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
@@ -68,7 +68,7 @@ function ConverterHarness({
   shouldFocusInput: boolean;
   isListLoading?: boolean;
 }) {
-  const { converter, commands, loadStatus } = useUnixTimeConverter({
+  const { converter, commands } = useUnixTimeConverter({
     session: { read: () => undefined, write: () => {} },
     tickScheduler,
     textCopying,
@@ -80,7 +80,7 @@ function ConverterHarness({
       converter={converter}
       commands={commands}
       shouldFocusInput={shouldFocusInput}
-      isListLoading={isListLoading ?? loadStatus !== LocationsStatus.READY}
+      isListLoading={isListLoading ?? false}
     />
   );
 }

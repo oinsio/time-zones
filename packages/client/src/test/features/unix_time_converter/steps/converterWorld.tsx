@@ -67,14 +67,19 @@ export const createConverterWorld = () => {
   const openWith = async (
     cities: readonly string[],
     registry?: readonly ConverterViewDefinition[],
+    isListReadable = true,
   ) => {
-    const backend = createInMemoryLocationBackend({
-      status: LocationsLoadStatus.LOADED,
-      locations: cities.map((label) =>
-        buildLocation({ label, ...KNOWN_CITIES[label] }),
-      ),
-      homeLocationId: null,
-    });
+    const backend = createInMemoryLocationBackend(
+      isListReadable
+        ? {
+            status: LocationsLoadStatus.LOADED,
+            locations: cities.map((label) =>
+              buildLocation({ label, ...KNOWN_CITIES[label] }),
+            ),
+            homeLocationId: null,
+          }
+        : { status: LocationsLoadStatus.UNREADABLE },
+    );
     render(
       <PreferencesProvider
         repository={createInMemoryPreferencesRepository({
@@ -109,6 +114,7 @@ export const createConverterWorld = () => {
   };
 
   const open = () => openWith(SAMPLE_CITIES);
+  const openWithUnreadableList = () => openWith([], undefined, false);
   const input = () => screen.getByRole("textbox", { name: INPUT_NAME });
   /** Replaces the text at once, as a paste of a whole text does, so no half-typed text is read on the way. */
   const type = async (text: string) => {
@@ -128,6 +134,7 @@ export const createConverterWorld = () => {
   return {
     open,
     openWith,
+    openWithUnreadableList,
     input,
     type,
     timeOf,
