@@ -91,6 +91,12 @@ export {
 export { parseWallTimeInput } from "./parseWallTimeInput";
 export { presentDeviceTimeOptionLabels } from "./presentDeviceTimeOptionLabels";
 export { type LocationRow, presentLocationRows } from "./presentLocationRows";
+// Implements FR9 of add-unix-time-converter-tool.
+export {
+  type PresentedRowHeader,
+  presentRowHeader,
+  type RowHeaderContext,
+} from "./presentRowHeader";
 export {
   type PresentedAbbreviation,
   type PresentedSearchResult,

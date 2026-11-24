@@ -5,14 +5,19 @@ import {
   lazy,
 } from "react";
 
-type ViewModule = { default: ComponentType };
-type LazyView = LazyExoticComponent<ComponentType>;
+// biome-ignore lint/complexity/noBannedTypes: a view takes no props by default.
+type NoProps = {};
+type ViewModule<Props extends object> = { default: ComponentType<Props> };
+type LazyView<Props extends object = NoProps> = LazyExoticComponent<
+  ComponentType<Props>
+>;
 
 const reloadBrowserPage = () => {
   if (navigator.onLine) window.location.reload();
 };
 
-const resetActions = new WeakMap<LazyView, () => void>();
+/** Any lazy view, whatever its props, is a key. */
+const resetActions = new WeakMap<object, () => void>();
 
 /**
  * `React.lazy` remembers a rejected import forever, so a plain lazy view can
@@ -23,19 +28,22 @@ const resetActions = new WeakMap<LazyView, () => void>();
  * retried load fails again the page is reloaded, which clears that memory —
  * but only online, so an offline retry shows the error again instead of the
  * browser's offline page.
- * Implements FR6 of add-main-page-scaffold (D4).
+
+ * Generic over the props of the view so a tool page can take props too.
+ * Implements FR6 of add-main-page-scaffold (D4); FR4 of add-unix-time-converter-tool (D2).
  */
-export function createRetryableLazyView(
-  loader: () => Promise<ViewModule>,
+export function createRetryableLazyView<Props extends object = NoProps>(
+  loader: () => Promise<ViewModule<Props>>,
   reloadPage: () => void = reloadBrowserPage,
-): LazyView {
+): LazyView<Props> {
   const loadAfterFailure = () =>
     loader().catch((failure: unknown) => {
       reloadPage();
       throw failure;
     });
   let currentInnerView = lazy(loader);
-  const RetryableView = () => createElement(currentInnerView);
+  const RetryableView = (props: Props) =>
+    createElement(currentInnerView as unknown as ComponentType<Props>, props);
   const retryableView = lazy(() => Promise.resolve({ default: RetryableView }));
   resetActions.set(retryableView, () => {
     currentInnerView = lazy(loadAfterFailure);
@@ -48,6 +56,6 @@ export function createRetryableLazyView(
  * Does nothing for any other component.
  * Implements FR6 of add-main-page-scaffold (D4).
  */
-export function resetLazyView(view: LazyView): void {
+export function resetLazyView(view: object): void {
   resetActions.get(view)?.();
 }

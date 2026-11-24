@@ -1,84 +1,29 @@
-import { useCallback, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { CitySearchStatus, useCitySearch, useLocations } from "@/controller";
+import {
+  type ComponentType,
+  lazy,
+  Suspense,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import type { LoadCitySearch } from "@/ports";
-import type { PresentedSearchResult } from "@/presenter";
 import { AddLocationButton } from "./AddLocationButton";
-import { LocationSearchDialog } from "./LocationSearchDialog";
+import type { OpenLocationSearchProps } from "./OpenLocationSearch";
 import { useSearchShortcut } from "./useSearchShortcut";
 
+/** The overlay with its search data and dialog loads when the search first opens: the initial JavaScript is budgeted (NFR-P1 of add-unix-time-converter-tool). */
+const LazyOpenLocationSearch = lazy(() =>
+  import("./OpenLocationSearch").then(({ OpenLocationSearch: overlay }) => ({
+    default: overlay,
+  })),
+);
+
 type LocationSearchProps = {
+  /** Only tests set this: an overlay already loaded, for a test that resets the module registry between scenarios. */
+  overlay?: ComponentType<OpenLocationSearchProps>;
   /** Only tests set this; production uses the loader of the `LocationsProvider`. */
   loadCitySearch?: LoadCitySearch;
 };
-
-type OpenLocationSearchProps = Pick<LocationSearchProps, "loadCitySearch"> & {
-  onAdded: (announcement: string) => void;
-  onClose: () => void;
-  onCloseAutoFocus: (event: Event) => void;
-};
-
-/** The part that owns the search data and exists only while the search is open. */
-function OpenLocationSearch({
-  loadCitySearch,
-  onAdded,
-  onClose,
-  onCloseAutoFocus,
-}: OpenLocationSearchProps) {
-  const { t } = useTranslation();
-  const {
-    locations,
-    addLocation,
-    addDeviceTimeLocation,
-    loadCitySearch: providerLoadCitySearch,
-  } = useLocations();
-  const { status, presentResults, retry, isDeviceTimeOptionShown } =
-    useCitySearch(loadCitySearch ?? providerLoadCitySearch);
-  const [query, setQuery] = useState("");
-
-  const handleChoose = (result: PresentedSearchResult) => {
-    addLocation({
-      timeZoneId: result.timeZoneId,
-      label: result.cityName,
-      countryCode: result.countryCode,
-      coordinates: result.coordinates,
-    });
-    onAdded(t("locations.addedAnnouncement", { city: result.cityName }));
-    onClose();
-  };
-
-  const handleChooseDeviceTime = () => {
-    addDeviceTimeLocation();
-    onAdded(t("locations.deviceTimeAddedAnnouncement"));
-    onClose();
-  };
-
-  return (
-    <LocationSearchDialog
-      isOpen
-      status={status}
-      presentedResults={
-        status === CitySearchStatus.READY
-          ? presentResults(query, locations)
-          : []
-      }
-      query={query}
-      onQueryChange={setQuery}
-      onChoose={handleChoose}
-      deviceTimeOption={
-        isDeviceTimeOptionShown(query, locations)
-          ? {
-              label: t("search.deviceTimeOption"),
-              onChoose: handleChooseDeviceTime,
-            }
-          : undefined
-      }
-      onRetry={retry}
-      onClose={onClose}
-      onCloseAutoFocus={onCloseAutoFocus}
-    />
-  );
-}
 
 /**
  * The "Add location" trigger and its search overlay, with the polite region
@@ -93,7 +38,10 @@ function OpenLocationSearch({
  * Implements FR2, FR11 of add-settings-page-and-device-time-location (D11,
  * D12): lives in the header and owns the "added" announcement.
  */
-export function LocationSearch({ loadCitySearch }: LocationSearchProps) {
+export function LocationSearch({
+  loadCitySearch,
+  overlay: Overlay = LazyOpenLocationSearch,
+}: LocationSearchProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [announcement, setAnnouncement] = useState("");
@@ -112,12 +60,14 @@ export function LocationSearch({ loadCitySearch }: LocationSearchProps) {
         {announcement}
       </p>
       {isOpen && (
-        <OpenLocationSearch
-          loadCitySearch={loadCitySearch}
-          onAdded={setAnnouncement}
-          onClose={() => setIsOpen(false)}
-          onCloseAutoFocus={handleCloseAutoFocus}
-        />
+        <Suspense fallback={null}>
+          <Overlay
+            loadCitySearch={loadCitySearch}
+            onAdded={setAnnouncement}
+            onClose={() => setIsOpen(false)}
+            onCloseAutoFocus={handleCloseAutoFocus}
+          />
+        </Suspense>
       )}
     </>
   );

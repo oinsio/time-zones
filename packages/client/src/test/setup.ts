@@ -6,7 +6,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { createI18nOptions } from "@/i18n";
 import { systemClock } from "@/lib/temporal";
-import { localeRegistry } from "@/locales";
+import { loadUnixTimeLocales, localeRegistry } from "@/locales";
 import { loadSunSupport } from "@/model/sunRegistry";
 import { UNIT_TEST_DEVICE_TIME_ZONE } from "./deviceTimeZone";
 import { FakePointerEvent } from "./fakePointerEvent";
@@ -41,6 +41,9 @@ void i18n.use(initReactI18next).init({
   lng: "ru",
   fallbackLng: "ru",
 });
+
+// The converter texts load with its page in the app; tests have them from the start.
+await loadUnixTimeLocales(i18n);
 
 // jsdom reports en-US. Pin the browser languages to the language a test set on i18next,
 // so a rendered AppShell with no chosen language switches nothing (FR7, D8).

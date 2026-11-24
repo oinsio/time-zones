@@ -113,6 +113,7 @@ export async function seedTwelveHourState(world: LocationsWorld) {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
       },
     }),
   );

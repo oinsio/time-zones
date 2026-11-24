@@ -1,16 +1,20 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import {
+  browserTextCopying,
   fetchAppRevisionSource,
   fetchZoneRulesVersionSource,
   localStorageStoredReleaseRepository,
 } from "@/adapters";
-import { ADD_LOCATION_BUTTON_ID, KeyboardKey } from "@/constants";
+import { ADD_LOCATION_BUTTON_ID } from "@/constants";
 import {
   LocationsProvider,
   LocationsStatus,
   PreferencesProvider,
+  type TickScheduler,
+  timeoutTickScheduler,
   useDayPalettePreference,
   useDocumentLanguage,
+  useEnabledTools,
   useInterfaceLanguage,
   useLocations,
   useMeetingBar,
@@ -27,19 +31,28 @@ import { type Clock, systemClock } from "@/lib/temporal";
 import type {
   AppRevisionSource,
   StoredReleaseRepository,
+  TextCopying,
   TextSharing,
   ZoneRulesVersionSource,
 } from "@/ports";
+import { type ToolDefinition, toolRegistry } from "@/tools";
 import { resolveActiveView, viewRegistry } from "@/views";
-import { DateBar, LocationSearch } from "@/views/shared";
+import { DateBar } from "@/views/shared";
+import { AppShellHeaderActions } from "./AppShellHeaderActions";
 import { AppShellMeeting } from "./AppShellMeeting";
 import { AppPage } from "./appPage";
 import { LazyAppShellNotices } from "./LazyAppShellNotices";
 import { MainPage } from "./MainPage";
-import { SettingsButton } from "./SettingsButton";
+import { useAppPage } from "./useAppPage";
+import { useToolSessions } from "./useToolSessions";
 import { ViewSkeleton } from "./ViewSkeleton";
 
 const reloadWindow = () => window.location.reload();
+
+/** Loaded on demand so the tool page host stays out of the initial JavaScript (NFR-P1 budget). */
+const ToolHost = lazy(async () => ({
+  default: (await import("./ToolHost")).ToolHost,
+}));
 
 /** Loaded on demand so the settings page stays out of the initial JavaScript (NFR-P1 budget). */
 const SettingsPage = lazy(async () => ({
@@ -63,6 +76,7 @@ const SettingsPage = lazy(async () => ({
  * `zoneRulesVersionSource`, `storedReleases` and `reloadPage` are its ports and its Reload.
  * Implements FR5, FR6, NFR-A3 of keep-location-menu-in-view-and-clear-range-after-share (D3): one
  * clearMeetingAndFocusAddLocation for Clear meeting and a shared outcome.
+ * Implements FR4, FR5 of add-unix-time-converter-tool (D2): the tool buttons, the tool page and the page state in `useAppPage`.
  * Implements FR3, FR5 of apply-data-updates-silently (D3): `appRevisionSource` is the port of the update notice; the notices region is `AppShellNotices`.
  */
 export type AppShellDependencies = {
@@ -72,6 +86,12 @@ export type AppShellDependencies = {
   zoneRulesVersionSource?: ZoneRulesVersionSource;
   storedReleases?: StoredReleaseRepository;
   reloadPage?: () => void;
+  /** The tools the app offers; tests pass their own. Defaults to `toolRegistry`. */
+  tools?: readonly ToolDefinition[];
+  /** Schedules the second tick of the Unix time converter. Defaults to timers. */
+  tickScheduler?: TickScheduler;
+  /** Puts a text on the clipboard for the converter. Defaults to the browser clipboard. */
+  textCopying?: TextCopying;
 };
 
 export function AppShell({
@@ -95,6 +115,9 @@ function AppShellContent({
   zoneRulesVersionSource = fetchZoneRulesVersionSource,
   storedReleases = localStorageStoredReleaseRepository,
   reloadPage = reloadWindow,
+  tools = toolRegistry,
+  tickScheduler = timeoutTickScheduler,
+  textCopying = browserTextCopying,
 }: AppShellDependencies & { clock: Clock }) {
   useDocumentLanguage();
   useThemePreference();
@@ -109,9 +132,10 @@ function AppShellContent({
     storedReleases,
   });
   const isStorageAvailable = useStorageAvailability();
-  const [page, setPage] = useState(AppPage.MAIN);
-  const settingsButtonRef = useRef<HTMLButtonElement>(null);
-  const isReturningFromSettings = useRef(false);
+  const enabledTools = useEnabledTools(tools);
+  const { page, toolId, openSettings, openTool, leave, getOpenerRef } =
+    useAppPage(enabledTools.map((tool) => tool.id));
+  const getToolSession = useToolSessions();
   const activeView = resolveActiveView(viewRegistry, useViewMode());
   const meetingBar = useMeetingBar(activeView?.showsMeetingRange === true);
   const { clearMeetingRange } = useMeetingRange();
@@ -128,23 +152,6 @@ function AppShellContent({
     document.getElementById(ADD_LOCATION_BUTTON_ID)?.focus();
   }, [meetingBar]);
 
-  useEffect(() => {
-    if (page !== AppPage.MAIN || !isReturningFromSettings.current) return;
-    isReturningFromSettings.current = false;
-    settingsButtonRef.current?.focus();
-  }, [page]);
-
-  useEffect(() => {
-    if (page !== AppPage.SETTINGS) return;
-    const onKeyDown = (keyboardEvent: KeyboardEvent) => {
-      if (keyboardEvent.key !== KeyboardKey.ESCAPE) return;
-      isReturningFromSettings.current = true;
-      setPage(AppPage.MAIN);
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [page]);
-
   const hasStorageWarning = !isStorageAvailable || hasSaveFailed;
   const notices = (
     <LazyAppShellNotices
@@ -160,12 +167,21 @@ function AppShellContent({
   if (page === AppPage.SETTINGS) {
     return (
       <Suspense fallback={<ViewSkeleton />}>
-        <SettingsPage
+        <SettingsPage notices={notices} onBack={leave} tools={tools} />
+      </Suspense>
+    );
+  }
+
+  const openedTool = enabledTools.find((tool) => tool.id === toolId);
+  if (page === AppPage.TOOL && openedTool !== undefined) {
+    return (
+      <Suspense fallback={<ViewSkeleton />}>
+        <ToolHost
+          tool={openedTool}
           notices={notices}
-          onBack={() => {
-            isReturningFromSettings.current = true;
-            setPage(AppPage.MAIN);
-          }}
+          onBack={leave}
+          session={getToolSession(openedTool.id)}
+          services={{ tickScheduler, textCopying }}
         />
       </Suspense>
     );
@@ -173,6 +189,7 @@ function AppShellContent({
 
   return (
     <MainPage
+      hasToolButtons={enabledTools.some((tool) => tool.page !== undefined)}
       bottomBar={<DateBar />}
       notices={notices}
       meetingBar={
@@ -185,13 +202,13 @@ function AppShellContent({
         )
       }
       headerActions={
-        <>
-          {loadStatus !== LocationsStatus.UNREADABLE && <LocationSearch />}
-          <SettingsButton
-            ref={settingsButtonRef}
-            onClick={() => setPage(AppPage.SETTINGS)}
-          />
-        </>
+        <AppShellHeaderActions
+          isLocationSearchShown={loadStatus !== LocationsStatus.UNREADABLE}
+          enabledTools={enabledTools}
+          onOpenTool={openTool}
+          onOpenSettings={openSettings}
+          getOpenerRef={getOpenerRef}
+        />
       }
     />
   );

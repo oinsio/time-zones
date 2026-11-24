@@ -42,6 +42,7 @@ describe("deserializePreferencesDocument", () => {
         dayPalette: DayPalette.VIVID,
         shareLanguage: null,
         shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+        enabledTools: [],
       },
     });
   });
@@ -119,10 +120,11 @@ describe("serializePreferencesDocument", () => {
           dayPalette: DayPalette.VIVID,
           shareLanguage: null,
           shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+          enabledTools: [],
         }),
       ),
     ).toEqual({
-      schemaVersion: 8,
+      schemaVersion: 9,
       payload: {
         theme: "DARK",
         hourFormat: "H12",
@@ -134,6 +136,7 @@ describe("serializePreferencesDocument", () => {
         dayPalette: DayPalette.VIVID,
         shareLanguage: null,
         shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+        enabledTools: [],
       },
     });
   });

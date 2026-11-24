@@ -5,6 +5,7 @@ import {
   HOUR_LABEL_FORMAT_OPTIONS_BY_HOUR_FORMAT,
   LOCAL_DATE_FORMAT_OPTIONS,
   LOCAL_TIME_FORMAT_OPTIONS_BY_HOUR_FORMAT,
+  LOCAL_TIME_WITH_SECONDS_FORMAT_OPTIONS_BY_HOUR_FORMAT,
   WEEKDAY_FORMAT_OPTIONS,
 } from "@/constants";
 import {
@@ -21,6 +22,8 @@ export enum DateTimeLabelKind {
   DEPLOY_DATE = "deployDate",
   DATE_WITHOUT_WEEKDAY = "dateWithoutWeekday",
   WEEKDAY = "weekday",
+  /** The time of a converter row, with seconds. Implements FR9 of add-unix-time-converter-tool (D7). */
+  TIME_WITH_SECONDS = "timeWithSeconds",
 }
 
 const FORMAT_OPTIONS_BY_KIND_AND_HOUR_FORMAT: Record<
@@ -49,6 +52,8 @@ const FORMAT_OPTIONS_BY_KIND_AND_HOUR_FORMAT: Record<
     [HourFormat.H24]: WEEKDAY_FORMAT_OPTIONS,
     [HourFormat.H12]: WEEKDAY_FORMAT_OPTIONS,
   },
+  [DateTimeLabelKind.TIME_WITH_SECONDS]:
+    LOCAL_TIME_WITH_SECONDS_FORMAT_OPTIONS_BY_HOUR_FORMAT,
 };
 
 const HOURLESS_KINDS: readonly DateTimeLabelKind[] = [

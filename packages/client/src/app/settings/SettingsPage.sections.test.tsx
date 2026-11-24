@@ -54,3 +54,31 @@ describe("SettingsPage day colouring", () => {
     expect(screen.queryByRole("group", { name: "Working hours" })).toBeNull();
   });
 });
+
+// Verifies FR1, FR2 of add-unix-time-converter-tool.
+describe("SettingsPage tools group", () => {
+  beforeEach(() => i18n.changeLanguage("en"));
+  afterEach(() => i18n.changeLanguage("ru"));
+
+  it("should stand after the zone label group and before the language group", () => {
+    renderSettingsPage();
+    const zoneLabelGroup = screen.getByRole("group", {
+      name: "Timezone label",
+    });
+    const toolsGroup = screen.getByRole("group", { name: "Tools" });
+    const languageCaption = screen.getByRole("button", { name: /^Language/ });
+    expect(zoneLabelGroup.compareDocumentPosition(toolsGroup)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(toolsGroup.compareDocumentPosition(languageCaption)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  it("should offer the Unix time converter, off at first", () => {
+    renderSettingsPage();
+    expect(
+      screen.getByRole("button", { name: "Unix time converter" }),
+    ).toHaveAttribute("aria-pressed", "false");
+  });
+});

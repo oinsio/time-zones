@@ -27,6 +27,7 @@ const config: Config = {
       fontSize: {
         credit: [CREDIT_FONT_SIZE, CREDIT_LINE_HEIGHT],
         "header-title": "27px",
+        "header-title-compact": "20px",
         "header-title-narrow": "23px",
         // Card sizes, spec.md section 5 and 6: the narrow, the 411 px and the 360 px sets.
         "card-city": "24px",

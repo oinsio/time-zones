@@ -37,6 +37,8 @@ export type PreferencesContextValue = {
   setShareLanguage: (shareLanguage: string | null) => void;
   /** Implements FR6 of add-meeting-share-dialog (D4). */
   toggleShareZoneLabelPart: (part: ZoneLabelPart) => void;
+  /** Implements FR2, FR3 of add-unix-time-converter-tool (D1). */
+  setToolEnabled: (toolId: string, isEnabled: boolean) => void;
   /** Clears the stored document and returns to the defaults. */
   resetPreferences: () => void;
 };

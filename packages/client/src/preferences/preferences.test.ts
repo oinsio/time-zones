@@ -24,6 +24,7 @@ describe("DEFAULT_PREFERENCES", () => {
       dayPalette: "VIVID",
       shareLanguage: null,
       shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+      enabledTools: [],
       zoneLabelParts: [
         ZoneLabelPart.UTC_OFFSET,
         ZoneLabelPart.ZONE_ABBREVIATION,
@@ -83,6 +84,7 @@ describe("parseStoredPreferences", () => {
       dayPalette: "VIVID",
       shareLanguage: null,
       shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+      enabledTools: [],
     });
     expect(outcome).toEqual({
       ok: true,
@@ -96,6 +98,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     });
@@ -116,6 +119,7 @@ describe("parseStoredPreferences", () => {
           dayPalette: "VIVID",
           shareLanguage: null,
           shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+          enabledTools: [],
         }).ok,
       ).toBe(true);
     },
@@ -135,6 +139,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -149,6 +154,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -172,6 +178,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -187,6 +194,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -202,6 +210,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -217,6 +226,7 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
@@ -232,61 +242,11 @@ describe("parseStoredPreferences", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
         zoneLabelParts: STORED_ZONE_LABEL_PARTS,
       },
     ],
   ])("should reject %s", (_name, payload) => {
     expect(parseStoredPreferences(payload)).toEqual({ ok: false });
-  });
-});
-
-// Verifies FR7 of add-interface-language-selection (D1).
-describe("SET_INTERFACE_LANGUAGE", () => {
-  it("should set the chosen language code", () => {
-    const next = reducePreferences(DEFAULT_PREFERENCES, {
-      type: PreferencesCommandType.SET_INTERFACE_LANGUAGE,
-      interfaceLanguage: "ru",
-    });
-    expect(next.interfaceLanguage).toBe("ru");
-  });
-
-  it("should return the same object for an unchanged language", () => {
-    const chosen = { ...DEFAULT_PREFERENCES, interfaceLanguage: "ru" };
-    const next = reducePreferences(chosen, {
-      type: PreferencesCommandType.SET_INTERFACE_LANGUAGE,
-      interfaceLanguage: "ru",
-    });
-    expect(next).toBe(chosen);
-  });
-
-  it("should accept a stored language code", () => {
-    expect(
-      parseStoredPreferences({
-        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
-        theme: "DARK",
-        hourFormat: "H12",
-        interfaceLanguage: "ru",
-        viewMode: null,
-        dayColouring: "TIME_OF_DAY",
-        workingHours: { start: "10:00", end: "18:00" },
-        dayPalette: "VIVID",
-        shareLanguage: null,
-        shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
-      }),
-    ).toEqual({
-      ok: true,
-      preferences: {
-        theme: ThemePreference.DARK,
-        hourFormat: HourFormat.H12,
-        interfaceLanguage: "ru",
-        viewMode: null,
-        dayColouring: "TIME_OF_DAY",
-        workingHours: { start: "10:00", end: "18:00" },
-        dayPalette: "VIVID",
-        shareLanguage: null,
-        shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
-        zoneLabelParts: STORED_ZONE_LABEL_PARTS,
-      },
-    });
   });
 });

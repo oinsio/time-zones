@@ -29,6 +29,7 @@ const darkTwelveHour: Preferences = {
   dayPalette: DEFAULT_PREFERENCES.dayPalette,
   shareLanguage: DEFAULT_PREFERENCES.shareLanguage,
   shareZoneLabelParts: DEFAULT_PREFERENCES.shareZoneLabelParts,
+  enabledTools: [],
 };
 
 /**

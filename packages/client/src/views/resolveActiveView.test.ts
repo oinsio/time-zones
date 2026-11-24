@@ -46,3 +46,31 @@ describe("resolveActiveView", () => {
     expect(DEFAULT_VIEW_ID).toBe(ViewId.CARDS);
   });
 });
+
+// Verifies FR17 of add-unix-time-converter-tool: the converter view registry shares the resolver.
+describe("resolveActiveView with another registry", () => {
+  const listView = { id: "list" };
+  const otherView = { id: "other" };
+
+  it("should return the view of the default id given", () => {
+    expect(resolveActiveView([otherView, listView], null, "list")).toBe(
+      listView,
+    );
+  });
+
+  it("should return the first view when the default id is not registered", () => {
+    expect(resolveActiveView([otherView, listView], null, "missing")).toBe(
+      otherView,
+    );
+  });
+
+  it("should return the chosen view", () => {
+    expect(resolveActiveView([otherView, listView], "other", "list")).toBe(
+      otherView,
+    );
+  });
+
+  it("should return nothing for an empty registry", () => {
+    expect(resolveActiveView([], null, "list")).toBeUndefined();
+  });
+});

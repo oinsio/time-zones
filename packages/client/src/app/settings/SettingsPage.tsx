@@ -8,6 +8,7 @@ import {
   usePreferences,
 } from "@/controller";
 import { HourFormat, ThemePreference } from "@/preferences";
+import type { ToolDefinition } from "@/tools";
 import { CityDataAttribution } from "./CityDataAttribution";
 import { DayColouringGroup } from "./DayColouringGroup";
 import { DayPaletteGroup } from "./DayPaletteGroup";
@@ -15,6 +16,7 @@ import { DeployTime } from "./DeployTime";
 import { GnomishFactoryCredit } from "./GnomishFactoryCredit";
 import { InterfaceLanguageGroup } from "./InterfaceLanguageGroup";
 import { SettingsOptionGroup } from "./SettingsOptionGroup";
+import { ToolsGroup } from "./ToolsGroup";
 import { ViewModeGroup } from "./ViewModeGroup";
 import { WorkingHoursGroup } from "./WorkingHoursGroup";
 import { ZoneLabelGroup } from "./ZoneLabelGroup";
@@ -24,6 +26,8 @@ type SettingsPageProps = {
   /** Contents of the polite notices region, as on the main page. */
   notices: ReactNode;
   onBack: () => void;
+  /** The tools the tools group lists; tests pass their own. */
+  tools?: readonly ToolDefinition[];
 };
 
 const THEME_OPTION_ICONS = {
@@ -58,8 +62,9 @@ const HOUR_FORMAT_LABEL_KEYS = {
  * Implements FR1, FR2 of add-view-mode-setting-and-grid-skeleton (D2): the view group after the hour format.
  * Implements FR13, UX4 of add-geonames-city-source (D10): the city data attribution as the last line.
  * Implements FR1, FR4, FR6 of add-day-colouring-setting (D8): the colouring group and the working hours row after the view group.
+ * Implements FR2 of add-unix-time-converter-tool (D3): the tools group after the zone label group.
  */
-export function SettingsPage({ notices, onBack }: SettingsPageProps) {
+export function SettingsPage({ notices, onBack, tools }: SettingsPageProps) {
   const { t } = useTranslation();
   const {
     preferences,
@@ -144,6 +149,7 @@ export function SettingsPage({ notices, onBack }: SettingsPageProps) {
         <DayPaletteGroup />
         <WorkingHoursGroup />
         <ZoneLabelGroup />
+        <ToolsGroup registry={tools} />
         <InterfaceLanguageGroup
           activeCode={activeLanguage.code}
           onChoose={setInterfaceLanguage}

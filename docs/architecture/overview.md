@@ -92,7 +92,10 @@ src/
   styles/                  design tokens (light/dark) and globals (exists)
   model/                   pure TS: state, commands, reducer, selectors, invariants
     index.ts               public API of the model (exists, empty)
-  preferences/             preferences model (theme, hour format; exists)
+  preferences/             preferences model (theme, hour format, enabled tools; exists)
+  tools/                   tool registry, tool page frame and the tool pages (UnixTimeConverterPage), a shell module beside app/
+  model/unixTime/          Unix time units, exact instants, parsing, notations, relative time, converter reducer
+  presenter/unixTime/      converter rows, exact wall-time input, relative time texts, presented converter
   ports/                   repository and search interfaces
   adapters/                localStorage, in-memory implementations
     city-search/           composite adapter + city sources (zone cities, abbreviations, ...)
@@ -104,11 +107,12 @@ src/
     cards/                 CardsView (first release)
     grid/                  GridView (next)
     shared/                row header, time display, day-period colors
+    unixTimeConverter/     converter views (list), converterViewRegistry (views/unixTimeConverter)
   components/ui/           shadcn/ui primitives
   locales/                 locale files and the locale registry (index.ts), dialects
 ```
 
-Each folder is a module with an `index.ts`; imports go only through it.
+Each folder is a module with an `index.ts`; imports go only through it. The tool page is a third kind of shell page, beside the main page and the settings page; the shell loads it on demand through the tool registry.
 
 ## Kinds of state
 

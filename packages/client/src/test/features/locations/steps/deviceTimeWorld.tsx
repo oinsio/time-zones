@@ -10,6 +10,10 @@ import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { createElement } from "react";
 import { expect, vi } from "vitest";
+
+/** The search overlay is a lazy chunk; its first transform can take a while under test. */
+const LAZY_SEARCH_TIMEOUT_MS = 5000;
+
 import {
   createInMemoryLocationBackend,
   createInMemoryLocationRepository,
@@ -27,6 +31,7 @@ import { createSwitchableClock } from "@/test/switchableClock";
 import { createManualTickScheduler } from "@/test/tickSchedulers";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
 import { DateBar, LocationSearch } from "@/views/shared";
+import { OpenLocationSearch } from "@/views/shared/OpenLocationSearch";
 import { createDataLoaderState, DataMode } from "./deviceTimeDataLoader";
 import {
   buildStoredDocument,
@@ -148,7 +153,7 @@ export const createDeviceTimeWorld = (cityData?: GeoNamesCityData) => {
           <MainPage
             notices={null}
             bottomBar={<DateBar />}
-            headerActions={<LocationSearch />}
+            headerActions={<LocationSearch overlay={OpenLocationSearch} />}
           />
         </LocationsProvider>,
       );
@@ -205,7 +210,11 @@ export const createDeviceTimeWorld = (cityData?: GeoNamesCityData) => {
       await userEvent.click(
         screen.getByRole("button", { name: i18n.t("locations.addLocation") }),
       );
-      await screen.findByText(i18n.t("locations.suggestionsHeading"));
+      await screen.findByText(
+        i18n.t("locations.suggestionsHeading"),
+        {},
+        { timeout: LAZY_SEARCH_TIMEOUT_MS },
+      );
     },
     nowButton: () => screen.queryByRole("button", { name: i18n.t("date.now") }),
   };

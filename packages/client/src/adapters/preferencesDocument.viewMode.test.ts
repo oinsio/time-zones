@@ -47,6 +47,7 @@ describe("the view mode in the preferences document", () => {
         dayPalette: DayPalette.VIVID,
         shareLanguage: null,
         shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+        enabledTools: [],
       },
     });
   });
@@ -77,6 +78,7 @@ describe("the view mode in the preferences document", () => {
         dayPalette: DayPalette.VIVID,
         shareLanguage: null,
         shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+        enabledTools: [],
       }),
     );
     expect(written.schemaVersion).toBe(PREFERENCES_SCHEMA_VERSION);

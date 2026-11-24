@@ -6,6 +6,7 @@
  * The day colouring implements FR1, FR2 of add-day-colouring-setting (D1).
  * The day palette implements FR3 of redesign-cards-grid-and-day-palettes (D2).
  * The share language and the share zone label implement FR5, FR6 of add-meeting-share-dialog (D4).
+ * The enabled tools implement FR2, FR3 of add-unix-time-converter-tool (D1).
  */
 import { DEFAULT_WORKING_HOURS, type WorkingHours } from "./workingHours";
 
@@ -67,6 +68,8 @@ export type Preferences = {
   shareLanguage: string | null;
   /** Parts of the share zone label, in enum order; never the country. Implements FR6 of add-meeting-share-dialog (D4). */
   shareZoneLabelParts: readonly ZoneLabelPart[];
+  /** Ids of the tools the user turned on; texts, so a tool this build does not know survives. Implements FR3 of add-unix-time-converter-tool (D1). */
+  enabledTools: readonly string[];
 };
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -80,4 +83,5 @@ export const DEFAULT_PREFERENCES: Preferences = {
   dayPalette: DayPalette.VIVID,
   shareLanguage: null,
   shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+  enabledTools: [],
 };

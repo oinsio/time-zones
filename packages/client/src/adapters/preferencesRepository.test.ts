@@ -99,6 +99,7 @@ describe("localStorage preferences repository", () => {
         dayPalette: DayPalette.VIVID,
         shareLanguage: null,
         shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+        enabledTools: [],
       }),
     ).toBe(SaveOutcome.FAILED);
   });
@@ -125,10 +126,11 @@ describe("localStorage preferences repository", () => {
       dayPalette: DayPalette.VIVID,
       shareLanguage: null,
       shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+      enabledTools: [],
     });
     expect(JSON.parse(storage.getItem(STORAGE_KEYS.PREFERENCES) ?? "")).toEqual(
       {
-        schemaVersion: 8,
+        schemaVersion: 9,
         payload: {
           theme: "DARK",
           hourFormat: "H12",
@@ -140,6 +142,7 @@ describe("localStorage preferences repository", () => {
           dayPalette: DayPalette.VIVID,
           shareLanguage: null,
           shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+          enabledTools: [],
         },
       },
     );
@@ -212,6 +215,7 @@ describe("in-memory preferences repository", () => {
       dayPalette: DayPalette.VIVID,
       shareLanguage: null,
       shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+      enabledTools: [],
     });
     expect(outcome).toBe(SaveOutcome.FAILED);
     expect(repository.load()).toEqual({ status: PreferencesLoadStatus.EMPTY });

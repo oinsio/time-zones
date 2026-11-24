@@ -39,6 +39,7 @@ describe("the zone label in the preferences document", () => {
         dayPalette: DayPalette.VIVID,
         shareLanguage: null,
         shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+        enabledTools: [],
       },
     });
   });
@@ -65,6 +66,7 @@ describe("the zone label in the preferences document", () => {
       dayPalette: DayPalette.VIVID,
       shareLanguage: null,
       shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+      enabledTools: [],
     };
     expect(
       deserializePreferencesDocument(
@@ -84,8 +86,8 @@ describe("the zone label in the preferences document", () => {
     });
   });
 
-  it("should be at schema version 8", () => {
-    expect(PREFERENCES_SCHEMA_VERSION).toBe(8);
+  it("should be at schema version 9", () => {
+    expect(PREFERENCES_SCHEMA_VERSION).toBe(9);
   });
 
   it.each([
@@ -108,6 +110,7 @@ describe("the zone label in the preferences document", () => {
           dayPalette: DayPalette.VIVID,
           shareLanguage: null,
           shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+          enabledTools: [],
         },
       });
       expect(deserializePreferencesDocument(rawDocument, null)).toEqual({
@@ -123,6 +126,7 @@ describe("the zone label in the preferences document", () => {
           dayPalette: DayPalette.VIVID,
           shareLanguage: null,
           shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+          enabledTools: [],
         },
       });
     },
@@ -160,6 +164,7 @@ describe("the zone label in the preferences document", () => {
       dayPalette: DayPalette.VIVID,
       shareLanguage: null,
       shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+      enabledTools: [],
     };
     expect(
       deserializePreferencesDocument(
@@ -189,6 +194,7 @@ describe("the zone label in the preferences document", () => {
         dayPalette: DayPalette.VIVID,
         shareLanguage: null,
         shareZoneLabelParts: SHARE_ZONE_LABEL_PARTS,
+        enabledTools: [],
       },
     });
     expect(deserializePreferencesDocument(rawDocument, null)).toEqual({

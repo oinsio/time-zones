@@ -191,5 +191,10 @@
     "unreadable": "The saved settings could not be read. Defaults are used.",
     "reset": "Reset settings",
     "saveFailed": "Settings will not be saved on this device."
+  },
+  "tools": {
+    "groupLabel": "Tools",
+    "unixTimeConverter": "Unix time converter",
+    "back": "Back"
   }
 }

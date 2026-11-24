@@ -1,5 +1,11 @@
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  HEADER_GAP_CLASS_NAME,
+  HEADER_GAP_WITH_TOOLS_CLASS_NAME,
+  HEADER_TITLE_CLASS_NAME,
+  HEADER_TITLE_WITH_TOOLS_CLASS_NAME,
+} from "@/constants";
 import { ViewHost } from "./ViewHost";
 
 interface MainPageProps {
@@ -11,6 +17,8 @@ interface MainPageProps {
   headerActions?: ReactNode;
   /** The meeting bar; while given it takes the header's place (no title, no header actions). */
   meetingBar?: ReactNode;
+  /** A tool button is shown, so the title takes the smaller size classes. */
+  hasToolButtons?: boolean;
 }
 
 // Physical-property utilities: iOS Safari 12.5 ignores the logical shorthands.
@@ -37,6 +45,7 @@ const MEETING_HEADER_CLASS_NAMES =
  * Implements FR12 of move-meeting-range-and-extend-past-midnight (D9): the meeting bar is sticky
  * at the top of the viewport, `data-meeting-bar` locates it and, as D9 says, the scrolling
  * element's `scroll-padding-top` equals its height (NFR-A3).
+ * Implements FR4, NFR-R1 of add-unix-time-converter-tool (D2): the title shrinks beside tool buttons.
  * Implements FR6, FR12, UX4 of redesign-cards-grid-and-day-palettes (D4): the title at the
  * left, Add location and Settings at the right, no line under the header; the content sits
  * in a centred column of at most 1120 px while the bars span the viewport.
@@ -46,6 +55,7 @@ export function MainPage({
   bottomBar,
   headerActions,
   meetingBar,
+  hasToolButtons = false,
 }: MainPageProps) {
   const { t } = useTranslation();
   const headerRef = useRef<HTMLElement | null>(null);
@@ -75,9 +85,15 @@ export function MainPage({
       >
         {meetingBar ?? (
           <div
-            className={`${COLUMN_CLASS_NAME} flex items-center justify-between gap-2 pt-6 pb-4`}
+            className={`${COLUMN_CLASS_NAME} flex items-center justify-between ${hasToolButtons ? HEADER_GAP_WITH_TOOLS_CLASS_NAME : HEADER_GAP_CLASS_NAME} pt-6 pb-4`}
           >
-            <h1 className="text-header-title-narrow font-bold min-[361px]:text-header-title">
+            <h1
+              className={
+                hasToolButtons
+                  ? HEADER_TITLE_WITH_TOOLS_CLASS_NAME
+                  : HEADER_TITLE_CLASS_NAME
+              }
+            >
               {t("app.title")}
             </h1>
             <div className="flex items-center">{headerActions}</div>

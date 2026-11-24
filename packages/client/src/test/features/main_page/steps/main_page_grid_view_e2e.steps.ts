@@ -37,6 +37,7 @@ Given("the view mode is Grid", async ({ locationsWorld }) => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
       },
     }),
   );

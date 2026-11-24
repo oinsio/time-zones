@@ -8,6 +8,10 @@ import {
   WALL_TIME_SEPARATOR,
 } from "@/constants";
 
+const MINUTE_DIGIT_COUNT = 2;
+/** `9:301`: a typed hour, its separator and the minutes, with seconds digits typed straight after. */
+const MINUTES_THEN_SECOND_DIGITS_PATTERN = /^\d{1,2}:\d{3,}$/;
+
 const getHourLength = (digits: string): number => {
   const firstDigit = Number(digits[0]);
   if (firstDigit >= SINGLE_DIGIT_HOUR_MIN_FIRST_DIGIT) {
@@ -23,12 +27,25 @@ const getHourLength = (digits: string): number => {
 
 /**
  * The text of a time typed digit by digit, with the `:` inserted after the
- * hour. A text that is not digits only stays as typed.
+ * hour, and after the minutes when `hasSeconds` is set (the time of a
+ * converter row). A text that is not digits only stays as typed.
  * Implements FR6 of refine-meeting-range-entry-and-handles (D4).
+ * Implements FR10 of add-unix-time-converter-tool (D6): the second separator.
  */
-export function formatTypedWallTimeText(text: string): string {
+export function formatTypedWallTimeText(
+  text: string,
+  { hasSeconds = false }: { hasSeconds?: boolean } = {},
+): string {
+  if (hasSeconds && MINUTES_THEN_SECOND_DIGITS_PATTERN.test(text)) {
+    return `${text.slice(0, text.indexOf(WALL_TIME_SEPARATOR) + 1 + MINUTE_DIGIT_COUNT)}${WALL_TIME_SEPARATOR}${text.slice(text.indexOf(WALL_TIME_SEPARATOR) + 1 + MINUTE_DIGIT_COUNT)}`;
+  }
   if (!DIGITS_ONLY_PATTERN.test(text)) return text;
   const hourLength = getHourLength(text);
   if (text.length <= hourLength) return text;
-  return `${text.slice(0, hourLength)}${WALL_TIME_SEPARATOR}${text.slice(hourLength)}`;
+  const hour = text.slice(0, hourLength);
+  const rest = text.slice(hourLength);
+  if (!hasSeconds || rest.length <= MINUTE_DIGIT_COUNT) {
+    return `${hour}${WALL_TIME_SEPARATOR}${rest}`;
+  }
+  return `${hour}${WALL_TIME_SEPARATOR}${rest.slice(0, MINUTE_DIGIT_COUNT)}${WALL_TIME_SEPARATOR}${rest.slice(MINUTE_DIGIT_COUNT)}`;
 }

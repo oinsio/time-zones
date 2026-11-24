@@ -2,7 +2,7 @@ export { CalendarMove, TrackMove } from "@/model";
 export { LocationsProvider } from "./LocationsProvider";
 // Implements FR4, FR5, FR7 of add-settings-page-and-device-time-location.
 export { PreferencesProvider } from "./PreferencesProvider";
-export type { TickScheduler } from "./tickScheduler";
+export { type TickScheduler, timeoutTickScheduler } from "./tickScheduler";
 export {
   type ActiveInterfaceLanguage,
   useActiveInterfaceLanguage,
@@ -15,6 +15,7 @@ export { useDayColouring } from "./useDayColouring";
 export { useDayPalettePreference } from "./useDayPalettePreference";
 export { useDeployTime } from "./useDeployTime";
 export { useDocumentLanguage } from "./useDocumentLanguage";
+export { useEnabledTools } from "./useEnabledTools";
 export { useHourFormat } from "./useHourFormat";
 export { useHourGrid } from "./useHourGrid";
 export { useInterfaceLanguage } from "./useInterfaceLanguage";
@@ -41,6 +42,7 @@ export {
 export type { MeetingShareDialogRow } from "./useMeetingShareDialogRows";
 export { PreferencesStatus, usePreferences } from "./usePreferences";
 export { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+export { usePrimaryPointer } from "./usePrimaryPointer";
 export type { PwaUpdateStatus } from "./usePwaUpdateStatus";
 export { usePwaUpdateStatus } from "./usePwaUpdateStatus";
 export { useReferenceMoment } from "./useReferenceMoment";

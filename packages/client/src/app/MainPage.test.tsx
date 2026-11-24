@@ -258,3 +258,41 @@ describe("MainPage with a sticky meeting bar", () => {
     expect(readScrollPaddingTop()).toBe("");
   });
 });
+
+// Verifies FR4, NFR-R1 of add-unix-time-converter-tool.
+describe("MainPage title beside tool buttons", () => {
+  const renderWithTools = (hasToolButtons: boolean) =>
+    render(
+      <LocationsProvider repository={createInMemoryLocationRepository()}>
+        <MainPage
+          notices={null}
+          bottomBar={null}
+          hasToolButtons={hasToolButtons}
+        />
+      </LocationsProvider>,
+    );
+
+  it("should use the compact size up to 337 px when a tool button is shown", () => {
+    renderWithTools(true);
+    expect(screen.getByRole("heading", { level: 1 }).className).toContain(
+      "text-header-title-compact",
+    );
+  });
+
+  it.each([
+    ["narrow", "min-[338px]:text-header-title-narrow"],
+    ["full", "min-[368px]:text-header-title"],
+  ])("should step to the %s size at its breakpoint", (_name, expectedClass) => {
+    renderWithTools(true);
+    expect(screen.getByRole("heading", { level: 1 }).className).toContain(
+      expectedClass,
+    );
+  });
+
+  it("should keep the size classes of before with no tool button", () => {
+    renderWithTools(false);
+    const { className } = screen.getByRole("heading", { level: 1 });
+    expect(className).toContain("text-header-title-narrow");
+    expect(className).not.toContain("compact");
+  });
+});

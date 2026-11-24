@@ -1,7 +1,7 @@
 import { Settings } from "lucide-react";
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
-import { HEADER_ICON_SIZE_PX } from "@/constants";
+import { HeaderIconButton } from "./HeaderIconButton";
 
 type SettingsButtonProps = { onClick: () => void };
 
@@ -11,6 +11,7 @@ type SettingsButtonProps = { onClick: () => void };
  * Implements FR3, FR4, UX2 of fix-location-card-and-header-layout (D3): one
  * header layout on every width.
  * Implements FR6, UX4 of redesign-cards-grid-and-day-palettes (D4): the gear (Lucide `Settings`).
+ * Implements FR4, UX3 of add-unix-time-converter-tool (D2): the body is `HeaderIconButton`.
  */
 export const SettingsButton = forwardRef<
   HTMLButtonElement,
@@ -18,14 +19,11 @@ export const SettingsButton = forwardRef<
 >(function SettingsButton({ onClick }, buttonRef) {
   const { t } = useTranslation();
   return (
-    <button
+    <HeaderIconButton
       ref={buttonRef}
-      type="button"
+      label={t("settings.open")}
+      icon={Settings}
       onClick={onClick}
-      aria-label={t("settings.open")}
-      className="flex h-11 w-11 items-center justify-center rounded-md text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
-    >
-      <Settings aria-hidden="true" size={HEADER_ICON_SIZE_PX} />
-    </button>
+    />
   );
 });

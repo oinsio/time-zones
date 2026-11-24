@@ -6,6 +6,7 @@ import { getTypedTimeFieldText } from "./typedTimeFieldText";
 import { isKeyKeptInField } from "./wallTimeFieldKeys";
 
 const DEFAULT_SIZE_CLASS_NAME = "text-2xl md:text-4xl";
+const DEFAULT_WIDTH_CLASS_NAME = "w-20 md:w-36";
 
 type WallTimeInputProps = {
   /** Accessible name: "Enter time — city, time". */
@@ -16,6 +17,10 @@ type WallTimeInputProps = {
   onClose: (shouldRestoreFocus: boolean) => void;
   /** Font size classes of the row variant, so the open field is as tall as the time it replaces. */
   sizeClassName?: string;
+  /** The field also reads and separates seconds and a fraction: a converter row. Implements FR10 of add-unix-time-converter-tool (D6). */
+  hasSeconds?: boolean;
+  /** Width classes; the converter row needs room for nine fraction digits. */
+  widthClassName?: string;
 };
 
 /**
@@ -32,6 +37,8 @@ export function WallTimeInput({
   onConfirm,
   onClose,
   sizeClassName = DEFAULT_SIZE_CLASS_NAME,
+  hasSeconds = false,
+  widthClassName = DEFAULT_WIDTH_CLASS_NAME,
 }: WallTimeInputProps) {
   const { t } = useTranslation();
   const errorId = useId();
@@ -80,10 +87,12 @@ export function WallTimeInput({
         aria-invalid={hasError}
         aria-describedby={hasError ? errorId : undefined}
         value={text}
-        onChange={(event) => setText(getTypedTimeFieldText(event, text))}
+        onChange={(event) =>
+          setText(getTypedTimeFieldText(event, text, { hasSeconds }))
+        }
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        className={`min-h-11 w-20 rounded-md border border-accent bg-surface font-bold leading-none tabular-nums md:w-36 ${sizeClassName}`}
+        className={`min-h-11 rounded-md border border-accent bg-surface font-bold leading-none tabular-nums ${widthClassName} ${sizeClassName}`}
       />
       {hasError && (
         <span id={errorId} className="text-sm text-danger">

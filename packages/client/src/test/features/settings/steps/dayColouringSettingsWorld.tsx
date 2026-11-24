@@ -60,6 +60,7 @@ export const buildStoredPayload = (fields: Record<string, unknown>) => ({
   dayPalette: DEFAULT_PREFERENCES.dayPalette,
   shareLanguage: DEFAULT_PREFERENCES.shareLanguage,
   shareZoneLabelParts: DEFAULT_PREFERENCES.shareZoneLabelParts,
+  enabledTools: [],
   ...fields,
 });
 

@@ -31,8 +31,8 @@ const version5Payload = {
 };
 
 describe("the day colouring in the preferences document", () => {
-  it("should be written at schema version 8", () => {
-    expect(PREFERENCES_SCHEMA_VERSION).toBe(8);
+  it("should be written at schema version 9", () => {
+    expect(PREFERENCES_SCHEMA_VERSION).toBe(9);
   });
 
   it("should write both fields", () => {
@@ -64,6 +64,7 @@ describe("the day colouring in the preferences document", () => {
           dayPalette: "VIVID",
           shareLanguage: null,
           shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+          enabledTools: [],
         },
       },
     );
@@ -80,6 +81,7 @@ describe("the day colouring in the preferences document", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
       },
     });
   });
@@ -93,6 +95,7 @@ describe("the day colouring in the preferences document", () => {
         dayPalette: "VIVID",
         shareLanguage: null,
         shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+        enabledTools: [],
       },
     ],
     [

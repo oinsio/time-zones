@@ -1,4 +1,5 @@
 export { AddLocationButton } from "./AddLocationButton";
+export { CalendarDialog } from "./CalendarDialog";
 export { DateBar } from "./DateBar";
 // Implements FR9, FR10, NFR-A3 of add-day-colouring-setting (D4).
 export {
@@ -20,6 +21,8 @@ export {
 } from "./locationRowVariant";
 // Implements FR13 of add-grid-meeting-range-and-share (D7).
 export { MeetingBar } from "./MeetingBar";
+export { NowButton } from "./NowButton";
+export { RowSkeleton } from "./RowSkeleton";
 export { SettingsToggleGroup } from "./SettingsToggleGroup";
 // Implements FR5, FR14 of add-day-colouring-setting: the typed time field helpers.
 export { getTypedTimeFieldText } from "./typedTimeFieldText";

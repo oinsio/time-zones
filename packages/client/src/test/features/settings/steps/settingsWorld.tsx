@@ -101,6 +101,7 @@ export const createSettingsWorld = () => {
             dayPalette: "VIVID",
             shareLanguage: null,
             shareZoneLabelParts: ["UTC_OFFSET", "ZONE_ABBREVIATION"],
+            enabledTools: [],
           },
         }),
       ),

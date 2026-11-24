@@ -19,14 +19,16 @@ const isInsertion = (
  * inserted, only when the user inserted text at the end of the field. A
  * deletion, or an edit inside the text, keeps the raw value.
  * Implements FR6, UX1 of refine-meeting-range-entry-and-handles (D4).
+ * Implements FR10 of add-unix-time-converter-tool (D6): `hasSeconds` also separates the seconds.
  */
 export function getTypedTimeFieldText(
   event: ChangeEvent<HTMLInputElement>,
   previousText: string,
+  options: { hasSeconds?: boolean } = {},
 ): string {
   const text = event.target.value;
   const isAtEnd = event.target.selectionEnd === text.length;
   return isInsertion(event, previousText) && isAtEnd
-    ? formatTypedWallTimeText(text)
+    ? formatTypedWallTimeText(text, options)
     : text;
 }

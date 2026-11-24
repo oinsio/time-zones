@@ -8,7 +8,7 @@ import {
 import { KeyboardKey } from "./keyboard";
 
 /** Version of the stored preferences document (ADR-0004 envelope). */
-export const PREFERENCES_SCHEMA_VERSION = 8;
+export const PREFERENCES_SCHEMA_VERSION = 9;
 
 /**
  * The zone of the live example under the zone label group.
