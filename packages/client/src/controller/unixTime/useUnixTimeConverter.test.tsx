@@ -228,6 +228,11 @@ describe("useUnixTimeConverter", () => {
     expect(rendered.result.current.tool.converter.relativeTime).toBe(
       "16 минут назад",
     );
+    clock.moveTo("2026-11-23T11:25:07Z", "Asia/Almaty");
+    act(() => tickScheduler.runPending());
+    expect(rendered.result.current.tool.converter.relativeTime).toBe(
+      "17 минут назад",
+    );
   });
 
   it("should write its state to the session on every change", () => {
