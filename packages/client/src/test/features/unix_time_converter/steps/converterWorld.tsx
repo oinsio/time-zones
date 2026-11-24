@@ -110,7 +110,10 @@ export const createConverterWorld = () => {
         </LocationsProvider>
       </PreferencesProvider>,
     );
-    await screen.findByRole("textbox", { name: INPUT_NAME });
+    /** A custom registry brings its own views, which need not have the converter input. */
+    if (registry === undefined) {
+      await screen.findByRole("textbox", { name: INPUT_NAME });
+    }
   };
 
   const open = () => openWith(SAMPLE_CITIES);

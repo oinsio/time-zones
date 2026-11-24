@@ -2,11 +2,11 @@
 import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import { converterViewRegistry } from "..";
 import {
   createCollectingTickScheduler,
   renderConverterView,
-} from "./renderConverterView";
+} from "@/test/renderConverterView";
+import { converterViewRegistry } from "..";
 
 const [listView] = converterViewRegistry;
 const renderList = (shouldFocusInput = false) =>

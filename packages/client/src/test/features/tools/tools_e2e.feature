@@ -71,3 +71,25 @@ Feature: Tools in a real browser
       | 320   |
       | 360   |
       | 2560  |
+
+  @add-unix-time-converter-tool @FR3
+  Scenario: Another tab turns a tool on
+    Given the app is open in two tabs
+    When the user turns on the tool toggle in the first tab
+    Then the header of the second tab shows the tool button
+
+  @add-unix-time-converter-tool @FR5 @NFR-A2
+  Scenario: The tool is turned off in another tab
+    Given the tool is enabled
+    And the app is open in two tabs
+    And the user chooses the tool button
+    When the user turns the tool toggle off in the second tab
+    Then the first tab shows the main page and no tool button
+
+  @add-unix-time-converter-tool @FR2 @NFR-A1
+  Scenario: Icon options of the tools group
+    Given the user opens the settings
+    Then the tool toggle shows an icon and no visible text and is named by its tool
+    And the tool toggle has a pointer hint equal to its name
+    When the user notes the place of the tool toggle and turns it on
+    Then the tool toggle is pressed and keeps its place and size

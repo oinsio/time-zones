@@ -11,7 +11,7 @@ import { LocationsLoadStatus } from "@/ports";
 import { buildLocation, KNOWN_CITIES } from "@/test/factories/buildLocation";
 import { createSwitchableClock } from "@/test/switchableClock";
 import { immediateWriteScheduler } from "@/test/writeSchedulers";
-import type { ConverterViewDefinition } from "../converterViewDefinition";
+import type { ConverterViewDefinition } from "@/views/unixTimeConverter/converterViewDefinition";
 
 export const SAMPLE_NOW = "2026-11-23T11:23:07Z";
 export const almaty = buildLocation({

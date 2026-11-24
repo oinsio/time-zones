@@ -1,11 +1,12 @@
 import { useTranslation } from "react-i18next";
-import type { UnixTimeUnitChoice } from "@/model/unixTime";
 import type { PresentedUnitOption } from "@/presenter/unixTime";
+
+type UnitChoiceValue = PresentedUnitOption["choice"];
 
 type UnitChoiceProps = {
   options: readonly PresentedUnitOption[];
   unitInForceLabel: string;
-  onChoose: (choice: UnixTimeUnitChoice) => void;
+  onChoose: (choice: UnitChoiceValue) => void;
 };
 
 /**
@@ -25,7 +26,7 @@ export function UnitChoice({
       <select
         aria-label={t("unixTime.unitGroupLabel")}
         value={selected?.choice}
-        onChange={(event) => onChoose(event.target.value as UnixTimeUnitChoice)}
+        onChange={(event) => onChoose(event.target.value as UnitChoiceValue)}
         className="min-h-11 rounded-md border border-control-border bg-surface px-2 text-base font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
       >
         {options.map(({ choice, label }) => (

@@ -249,22 +249,26 @@ Then(
 
 const toggleBoxes = new WeakMap<Page, unknown>();
 
+/** The toggle's box in page coordinates, so a scroll caused by a click does not count as a move. */
+const pageBoxOf = (page: Page) =>
+  toolButton(page).evaluate((node) => {
+    const { x, y, width, height } = node.getBoundingClientRect();
+    return { x, y: y + window.scrollY, width, height };
+  });
+
 When(
   "the user notes the place of the tool toggle and turns it on",
   async ({ locationsWorld }) => {
-    const toggle = toolButton(locationsWorld.page);
-    toggleBoxes.set(locationsWorld.page, await toggle.boundingBox());
-    await toggle.click();
+    toggleBoxes.set(locationsWorld.page, await pageBoxOf(locationsWorld.page));
+    await toolButton(locationsWorld.page).click();
   },
 );
 
 Then(
   "the tool toggle is pressed and keeps its place and size",
   async ({ locationsWorld }) => {
-    const toggle = toolButton(locationsWorld.page);
-    await expect(toggle).toHaveAttribute(PRESSED_ATTRIBUTE, "true");
-    expect(await toggle.boundingBox()).toEqual(
-      toggleBoxes.get(locationsWorld.page),
-    );
+    const { page } = locationsWorld;
+    await expect(toolButton(page)).toHaveAttribute(PRESSED_ATTRIBUTE, "true");
+    expect(await pageBoxOf(page)).toEqual(toggleBoxes.get(page));
   },
 );
