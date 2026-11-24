@@ -96,3 +96,53 @@ describe("ConverterInputField", () => {
     expect(field()).not.toHaveAttribute("aria-describedby");
   });
 });
+
+describe("ConverterInputField selection kept across ticks", () => {
+  const renderLive = (shouldFocusOnMount: boolean) =>
+    render(
+      <ConverterInputField
+        input={buildInput()}
+        onTypeInput={vi.fn()}
+        shouldFocusOnMount={shouldFocusOnMount}
+      />,
+    );
+  const rewriteText = (view: ReturnType<typeof renderLive>, text: string) =>
+    view.rerender(
+      <ConverterInputField
+        input={buildInput({ text })}
+        onTypeInput={vi.fn()}
+        shouldFocusOnMount
+      />,
+    );
+  const selectedText = () => {
+    const element = field() as HTMLInputElement;
+    return element.value.slice(element.selectionStart!, element.selectionEnd!);
+  };
+
+  it("should select a text the app rewrote while the whole text was selected", () => {
+    const view = renderLive(true);
+    expect(selectedText()).toBe("1795432987");
+    rewriteText(view, "1795432988");
+    expect(selectedText()).toBe("1795432988");
+  });
+
+  it("should leave a caret the user placed alone", () => {
+    const view = renderLive(true);
+    (field() as HTMLInputElement).setSelectionRange(3, 3);
+    fireEvent.select(field());
+    rewriteText(view, "1795432988");
+    expect(selectedText()).toBe("");
+  });
+
+  it("should not select a text the user typed", () => {
+    const view = renderLive(true);
+    view.rerender(
+      <ConverterInputField
+        input={buildInput({ text: "17", isTyped: true })}
+        onTypeInput={vi.fn()}
+        shouldFocusOnMount
+      />,
+    );
+    expect(selectedText()).toBe("");
+  });
+});

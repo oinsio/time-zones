@@ -1,4 +1,11 @@
-import { type ClipboardEvent, useEffect, useId, useRef } from "react";
+import {
+  type ClipboardEvent,
+  type SyntheticEvent,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import type { PresentedConverter } from "@/presenter/unixTime";
 
 type ConverterInputFieldProps = {
@@ -21,12 +28,31 @@ export function ConverterInputField({
 }: ConverterInputFieldProps) {
   const messageId = useId();
   const fieldRef = useRef<HTMLInputElement | null>(null);
+  const isWholeTextSelected = useRef(false);
+  const noteSelection = (field: HTMLInputElement | null) => {
+    isWholeTextSelected.current =
+      field !== null &&
+      field.value !== "" &&
+      field.selectionStart === 0 &&
+      field.selectionEnd === field.value.length;
+  };
 
   useEffect(() => {
     if (!shouldFocusOnMount) return;
     fieldRef.current?.focus();
     fieldRef.current?.select();
+    noteSelection(fieldRef.current);
   }, [shouldFocusOnMount]);
+
+  // A rewritten value drops the selection; restore it while the user had all of the text selected.
+  useLayoutEffect(() => {
+    const field = fieldRef.current;
+    if (input.isTyped || !isWholeTextSelected.current || !field) return;
+    if (document.activeElement === field) field.select();
+  }, [input.text, input.isTyped]);
+
+  const handleSelect = (event: SyntheticEvent<HTMLInputElement>) =>
+    noteSelection(event.currentTarget);
 
   const handlePaste = (event: ClipboardEvent<HTMLInputElement>) => {
     if (input.isTyped) return;
@@ -51,6 +77,9 @@ export function ConverterInputField({
         value={input.text}
         onChange={(event) => onTypeInput(event.target.value)}
         onPaste={handlePaste}
+        onSelect={handleSelect}
+        onKeyUp={handleSelect}
+        onMouseUp={handleSelect}
         className="min-h-11 w-full min-w-0 rounded-md border border-control-border bg-surface px-3 text-base font-semibold tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent aria-[invalid=true]:border-danger"
       />
       <p
