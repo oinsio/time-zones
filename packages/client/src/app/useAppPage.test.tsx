@@ -34,6 +34,20 @@ describe("useAppPage", () => {
     expect(result.current.page).toBe(AppPage.MAIN);
   });
 
+  it("should keep the page when a nested layer already handled Esc", () => {
+    const { result } = renderHook(() => useAppPage([TOOL_ID]));
+    act(() => result.current.openTool(TOOL_ID));
+    const handledEscape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      cancelable: true,
+    });
+    handledEscape.preventDefault();
+    act(() => {
+      document.dispatchEvent(handledEscape);
+    });
+    expect(result.current.page).toBe(AppPage.TOOL);
+  });
+
   it("should ignore other keys", async () => {
     const { result } = renderHook(() => useAppPage([TOOL_ID]));
     act(() => result.current.openTool(TOOL_ID));
