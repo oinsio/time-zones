@@ -240,7 +240,8 @@ Not measured (time budget: a run of three files takes 4–9 minutes): `unixTimeU
 - Impact: The user opens the converter, chooses a row's date button, then presses Esc to close the calendar without choosing. The calendar closes and the page also jumps back to the main page, with the focus on the tool button. That breaks the spec sentence above and the usual meaning of Esc in a dialog. No test covers it: `useAppPage.test.tsx:30` only checks that a bare Esc leaves.
 - Fix: In the `onKeyDown` handler of `useAppPage.ts`, ignore an Esc that a nested layer already handled: `if (keyboardEvent.key === KeyboardKey.ESCAPE && !keyboardEvent.defaultPrevented) leave();`. Add a case to `src/app/useAppPage.test.tsx`: an Esc `KeyboardEvent` that was `preventDefault()`-ed keeps the page. Add a case to `src/app/AppShell.tools.test.tsx`: open the converter, open a row's calendar, press Esc, and the calendar is closed while the tool page heading is still shown.
 - Fix risk: Low. `WallTimeInput` and `MeetingRangeInput` already stop propagation for Esc, so they are unaffected. A plain Esc on the page still leaves, so "Open and leave" and "Esc inside a field first restores the field" keep passing. Any future handler that calls `preventDefault()` on Esc on a tool page will also keep the page, which is the intended meaning.
-- Status: open
+- Status: fixed
+- Resolution: useAppPage.ts now leaves only on an Esc that is not defaultPrevented, so Radix's dismiss keeps the page; covered by useAppPage.test.tsx "should keep the page when a nested layer already handled Esc" (red first). The AppShell-level test was not added: the unit test reproduces the same event contract.
 
 ### R2 — WARNING — The live tick removes the selection of the converter input a second after opening
 - Location: `packages/client/src/views/unixTimeConverter/list/ConverterInputField.tsx:25-29`
@@ -249,7 +250,8 @@ Not measured (time budget: a run of three files takes 4–9 minutes): `unixTimeU
 - Impact: On a desktop the user opens the converter, waits a moment, then types `1700000000` instead of pasting. The typed digits are appended to the ticking number, for example `17954329891700000000`. That is 20 digits, read as nanoseconds, so the converter pins a wrong moment in 2026 instead of 2023. The e2e "Focus and names" step checks the selection right after opening, so it does not catch this.
 - Fix: In `ConverterInputField.tsx`, remember whether the field's whole text was selected while it had focus (a ref updated in `onSelect`, true when `selectionStart === 0 && selectionEnd === value.length`). Add a `useLayoutEffect` keyed on `input.text`: when `!input.isTyped`, the field is `document.activeElement` and the ref is true, call `fieldRef.current.select()` again. Add a component test in `ConverterInputField.test.tsx`: focus on mount, rerender with a new app-written text, and the whole new text is selected.
 - Fix risk: Low. The re-selection runs only while the text is app-written and was wholly selected, so a caret the user placed is left alone. Typed text (`isTyped`) is never touched. The paste path is unchanged.
-- Status: open
+- Status: fixed
+- Resolution: ConverterInputField remembers whether the whole text was selected and re-selects it in a layout effect after an app-written text change; covered by three new tests in ConverterInputField.test.tsx (re-select, caret kept, typed text untouched).
 
 ### R3 — WARNING — useUnixTimeConverter.ts is under the 90 % mutation minimum because its minute-refresh test runs a single minute
 - Location: `packages/client/src/controller/unixTime/useUnixTimeConverter.test.tsx:220-230` (production line `packages/client/src/controller/unixTime/useUnixTimeConverter.ts:79`)
@@ -258,7 +260,8 @@ Not measured (time budget: a run of three files takes 4–9 minutes): `unixTimeU
 - Impact: A regression that changes the minute counter only once (the `() => undefined` mutant: a constant written by the updater) leaves a pinned converter's relative time frozen from the second minute on, for example «16 минут назад» forever, and the suite stays green. Task 8.6 is ticked although its stated minimum is not reached.
 - Fix: Extend that test, or add one beside it, to run two consecutive minutes: move the clock to `11:25:07Z`, run the pending ticks again, and expect «17 минут назад». Re-run `npx stryker run --mutate 'src/controller/unixTime/useUnixTimeConverter.ts'`: with that mutant killed the file reaches 26/28 = 92.86 %. The two remaining survivors are equivalent.
 - Fix risk: none. The change is a test only, using the clock and the collecting tick scheduler the file already has.
-- Status: open
+- Status: fixed
+- Resolution: Extended useUnixTimeConverter.test.tsx with a second consecutive minute (17 минут назад); scoped Stryker now 26/28 = 92.86 % (two equivalent survivors).
 
 ### R4 — WARNING — The converter rows recompute the zone-line place text and the city label instead of sharing the main page's rule
 - Location: `packages/client/src/presenter/unixTime/presentConverterRows.ts:110-117,154-158`
@@ -267,7 +270,8 @@ Not measured (time budget: a run of three files takes 4–9 minutes): `unixTimeU
 - Impact: The next change to either rule, such as the Universal Time label for another zone or a new city-label fallback, is made in `presentLocationRows` and silently not in the converter. The same location then reads differently on the main page and in the converter, and no test fails, because each presenter has its own tests.
 - Fix: Extract the two decisions into one presenter owner, for example `presentRowHeader(location, context)` in `src/presenter/` returning `{ cityLabel, placeText }`. Call it from both `presentLocationRows.ts` and `presentConverterRows.ts`, and export it through `src/presenter/index.ts`. Name the new owner in the **Zone line** / **City label** *Code:* parts of `docs/glossary/locations.md`, and give it a unit test with the device-time, Universal-Time and country cases.
 - Fix risk: It touches the main page's row presenter. The existing `presentLocationRows` tests and the main-page BDD suites cover its output and must stay green unchanged. `presentConverterRows.ts` (196 lines) gets shorter, so the file-size limit is not at risk.
-- Status: open
+- Status: fixed
+- Resolution: Extracted presentRowHeader (src/presenter/presentRowHeader.ts, exported via the presenter index) and used it in presentLocationRows and presentConverterRows; unit test presentRowHeader.test.ts; glossary City label and Zone line name it; presenter suite stays green.
 
 ### R5 — WARNING — The converter's Now button is a copy of the date bar's Now button
 - Location: `packages/client/src/views/unixTimeConverter/list/ListConverterView.tsx:9,37-45`
@@ -276,7 +280,8 @@ Not measured (time budget: a run of three files takes 4–9 minutes): `unixTimeU
 - Impact: Any change to the Now button's look or behaviour (size token, inactive colour, outline) has to be made twice. If one copy is missed, the two Now buttons drift apart and no test notices, because the converter's screenshots and the main page's screenshots are separate baselines.
 - Fix: Extract a `NowButton` component into `src/views/shared/` (props: `isActive`, `onReturnToNow`; label `t("date.now")` or the passed label), move `NOW_ICON_SIZE_PX` into `src/constants/`, export it through `views/shared/index.ts`, and use it in both `DateBar.tsx` and `ListConverterView.tsx`. Give it a component test (inactive when not active, calls back when active), and update the **Now button** *Code:* part of the glossary to name it.
 - Fix risk: It touches `DateBar`, which every main-page view renders. Its markup must stay identical so `DateBar.test.tsx`, `DateBar.layout.test.tsx` and the approved main-page screenshots keep passing. `DateBar`'s handler also does more than return to now (`handleReturnToNow`), so the shared button must take the callback rather than dispatch itself.
-- Status: open
+- Status: fixed
+- Resolution: Extracted NowButton into views/shared (exported via index) with its own test, used by DateBar and ListConverterView with identical markup; glossary Now button updated; views suite stays green.
 
 ## Verdict
 
